@@ -1,0 +1,43 @@
+{
+  "Headers": {
+
+      "accept": "application/json",
+
+      "accept-encoding": "gzip, deflate, br, zstd",
+
+      "accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+
+      "Connection": "keep-alive",
+
+      "Content-Type": "application/json",
+
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-origin",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+      "x-o3-app-name": "dweb_client",
+      "x-o3-app-version": "release_12-11-2024_e50d834c",
+      "x-o3-manifest-version": "e50d834cbd00d3f5a18cfc32f4f848c27cca4e72",
+      "x-o3-parent-requestid": "ae0f8c40c4a37c877ef01c18bea18bde"
+    },
+
+    "Cookies": [
+      "__Secure-ab-group",
+      "__Secure-access-token",
+      "__Secure-ETC",
+      "__Secure-ext_xcid",
+      "__Secure-refresh-token",
+      "__Secure-user-id",
+      "abt_data",
+      "ADDRESSBOOKBAR_WEB_CLARIFICATION",
+      "guest",
+      "is_cookies_accepted"
+    ],
+
+    "DefaultCookies": {
+      "guest": "true"
+    },
+
+      "CookieIndex": 5,
+      "CookiePrefixLength": 0    
+}

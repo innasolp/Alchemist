@@ -1,0 +1,32 @@
+{
+  "ShopProducts": [
+    {
+      "Id": "Ozon",
+      "Name": "Ozon",
+      "Url": "https://ozon.ru",
+      "Path": "Import\\Products\\Ozon\\Alchemist.Product.Shop.Ozon.ImportService.dll",
+      "RequestHeadersPath": "Import\\Products\\Ozon\\Ozon.Headers.Firefox.Standart.json",
+      "Perfomance": true,
+      "BrowserDataLoader": {
+        "Name": "Firefox.Standart",
+        "Path": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
+      "WebLoader": {
+        "Name": "Firefox",
+        "Path": "Libs\\webLoader\\Playwright\\Firefox"
+      }
+    },
+
+    {
+      "Id": "GoldApple",
+      "Name": "Золотое яблоко",
+      "Url": "https://goldapple.ru",
+      "Path": "Import\\Products\\GoldApple\\Alchemist.Product.Shop.GoldApple.dll",
+      "Perfomance": true,
+      "WebLoader": {
+        "Name": "HttpClient",
+        "Path": "Libs\\webLoader\\HttpClient"
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "RequestHeaders": {
+    "Headers": {
+
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+
+      "accept-encoding": "gzip, deflate, br, zstd",
+
+      "accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+
+      "Connection": "keep-alive",
+
+      "Host": "goldapple.ru",
+
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "cross-site",
+      "Upgrade-Insecure-Requests": "1",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+    },
+
+    "Cookies": [
+      "__zzatw-goldapple-ru",
+      "_ga",
+      "_ga_QE5MQ8XJJK",
+      "_gcl_au",
+      "_gid",
+      "_ym_d",
+      "_ym_isad",
+      "_ym_uid",
+      "_ym_visorc",
+      "acs_3",
+      "adrcid",
+      "adrdel",
+      "advcake_session_id",
+      "advcake_track_id",
+      "advcake_track_url",
+      "cfidsw-goldapple-ru",
+      "digi-analytics-sessionId",
+      "directCrm-session",
+      "domain_sid",
+      "fgsscw-goldapple-ru",
+      "ga-device-id",
+      "ga-lang",
+      "ga-session-id",      
+      "gsscw-goldapple-ru",
+      "MCS_SESSID",
+      "mindboxDeviceUUID",
+      "tmr_detect",
+      "tmr_lvid",
+      "tmr_lvidTS",
+      "client-store-code",
+      "isAddressConfirmed",
+      "mage-cache-sessid",
+      "ngenix_jscv_2198e54375cc"
+    ],
+
+    "DefaultCookies": {
+      "client-store-code": "default",
+      "isAddressConfirmed": "true",
+      "mage-cache-sessid": "true",
+      "section_data_ids": "{\"cart\":1735828077}",
+      "_spx": "eyJpZCI6ImNkODE2YjhmLTFjNTAtNDA0ZC05ZjFjLWMzZWU2YTcwZWI1YSIsImZpeGVkIjp7InN0YWNrIjpbMF19fQ==",
+      "ga-selected-address-id" :"555e7d61-d9a7-4ba6-9770-6caa8198c483"
+    },
+
+      "CookieIndex": 4,
+      "CookiePrefixLength": 0
+    }
+}

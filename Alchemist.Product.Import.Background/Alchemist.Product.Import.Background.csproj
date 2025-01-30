@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.29.1" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="RabbitMQ.Client.Core.DependencyInjection" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.Product.DataService.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Categories.Data\Alchemist.Import.Categories.Data.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Products.Data\Alchemist.Import.Products.Data.csproj" />
+    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Html\Alchemist.Import.Html.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BrowserDataLoader.Interfaces">
+      <HintPath>..\..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="DependencyInjection.Extensions">
+      <HintPath>..\..\Libs\DependencyInjection\Extensions\DependencyInjection.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="DependencyInjection.ImplementationFactory">
+      <HintPath>..\..\Libs\DependencyInjection\ImplementationFactory\DependencyInjection.ImplementationFactory.dll</HintPath>
+    </Reference>
+    <Reference Include="DependencyInjection.Interception">
+      <HintPath>..\..\Libs\DependencyInjection\Interception\DependencyInjection.Interception.dll</HintPath>
+    </Reference>
+    <Reference Include="DependencyInjection.WorkerBuilder">
+      <HintPath>..\..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
+    </Reference>
+    <Reference Include="GrpscService.Client.Extensions">
+      <HintPath>..\..\Libs\Grpc\Client\Extensions\Grpc.Client.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Http.RequestHandling.Interfaces">
+      <HintPath>..\..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Http.RequestHandling.PerfomanceCounter">
+      <HintPath>..\..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
+    </Reference>
+    <Reference Include="Json.Extensions">
+      <HintPath>..\..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Log.Interceptors">
+      <HintPath>..\..\Libs\Log\Log.Interceptors\Log.Interceptors.dll</HintPath>
+    </Reference>
+    <Reference Include="Log.Interceptors.DependencyInjection">
+      <HintPath>..\..\Libs\Log\Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Message.Interfaces">
+      <HintPath>..\..\Libs\Message\Message.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Message.SignalR">
+      <HintPath>..\..\Libs\Message\SignalR\Message.SignalR.dll</HintPath>
+    </Reference>
+    <Reference Include="Message.SignalR.DependencyInjection">
+      <HintPath>..\..\Libs\Message\SignalR.DependencyInjection\Message.SignalR.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Configuration.Extensions">
+      <HintPath>..\..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Loggers">
+      <HintPath>..\..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.Interfaces">
+      <HintPath>..\..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

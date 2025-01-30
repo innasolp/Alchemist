@@ -1,0 +1,57 @@
+{
+  "ShopCategories": [
+    {
+      "Id": "OzonCategories",
+      "Name": "Ozon",
+      "Url": "https://www.ozon.ru",
+      "Path": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+      "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+      "RequestHeadersPath": "Settings\\Categories\\Ozon\\Ozon.Headers.Firefox.Standart.json",
+      "Perfomance": true,
+      "BrowserDataLoader": {
+        "Name": "Firefox.Standart",
+        "Path": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
+      "WebLoader": {
+        "Name": "Firefox",
+        "Path": "Libs\\webLoader\\Playwright\\Firefox"
+      },
+      "CategoryLoadOptions": {
+        "TypeName": "CategoryLoadOptions",
+        "ValuePath": "Settings\\Categories\\Ozon\\Ozon.CategoryLoadOptions.Firefox.json",
+        "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
+      },
+      "HtmlSearchSettings": {
+        "SearchMatchType": 1,
+        "SearchElementType": 0
+      }
+    },
+
+    {
+      "Id": "GoldAppleCategories",
+      "Name": "Золотое яблоко",
+      "Url": "https://goldapple.ru",
+      "Path": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+      "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+      "RequestHeadersPath": "Settings\\Categories\\GoldApple\\GoldApple.Headers.Firefox.Standart.json",
+      "Perfomance": true,
+      "BrowserDataLoader": {
+        "Name": "Firefox.Standart",
+        "Path": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
+      "WebLoader": {
+        "Name": "Firefox",
+        "Path": "Libs\\webLoader\\Playwright\\Firefox"
+      },
+      "CategoryLoadOptions": {
+        "TypeName": "CategoryLoadOptions",
+        "ValuePath": "Settings\\Categories\\GoldApple\\GoldApple.CategoryLoadOptions.Firefox.json",
+        "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
+      },
+      "HtmlSearchSettings": {
+        "SearchMatchType": 0,
+        "SearchElementType": 1
+      }
+    }
+  ]
+}

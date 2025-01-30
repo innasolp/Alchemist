@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.28.3" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
+    <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.67.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.Product.DataService.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.GrpcService.Extensions\Alchemist.Product.GrpcService.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\Alchemist.Product.GrpcService\Protos\alchemygrpc.proto" GrpcServices="Client">
+      <Link>Protos\Alchemist.proto</Link>
+    </Protobuf>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Grpc.Client.Interceptors">
+      <HintPath>..\..\Libs\Grpc\Client\Interceptors\Grpc.Client.Interceptors.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

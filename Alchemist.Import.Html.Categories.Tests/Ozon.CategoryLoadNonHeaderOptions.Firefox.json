@@ -1,0 +1,26 @@
+{
+
+  "HtmlSearchOptions": {
+    "Tag": "div",
+    "SearchString": "id=state-catalogMenu",
+    "ValueString": "data-state"
+  },
+  "FirstNodePath": [ "data", "columns", "categories" ],
+  "CategoriesApiUrlFormat": "https://www.ozon.ru/api/composer-api.bx/_action/v2/categoryChildV3?menuId=185&categoryId={0}",
+  "SecondsInterval": 1800,
+  "CategoryPropertyPaths": {
+    "Url": {
+      "PropertyName": "Url",
+      "Path": "url"
+    },
+    "Description": {
+      "PropertyName": "Description",
+      "Path": "title"
+    },
+    "Children": {
+      "PropertyName": "Children",
+      "Path": "categories"
+    }
+  },
+  "RequestHeadersPath":  "Ozon.Headers.Firefox.json"
+}

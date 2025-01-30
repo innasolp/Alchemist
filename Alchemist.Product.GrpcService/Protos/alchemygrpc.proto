@@ -1,0 +1,252 @@
+syntax = "proto3";
+
+option csharp_namespace = "Alchemist.Product.GrpcService";
+
+package alchemygrpc;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+// The alchemy service definition.
+service AlchemyGrpcService {
+	rpc CreateProductType(CreateProductTypeRequest) returns (ProductTypeReply);
+	rpc FindProductTypeByName(FindByNameRequest) returns (ProductTypeReply);
+	
+	rpc CreatePurposeType(CreatePurposeTypeRequest) returns (PurposeTypeReply);
+	rpc FindPurposeTypeByName(FindByNameRequest) returns (PurposeTypeReply);
+
+	rpc CreateCountry(CreateCountryRequest) returns (CountryReply);
+	rpc FindCountryByName(FindByNameRequest) returns (CountryReply);
+
+	rpc CreateBrand(CreateBrandRequest) returns (BrandReply);
+	rpc FindBrandByName(FindByNameRequest) returns (BrandReply);		
+	
+	rpc CreateComponent(CreateComponentRequest) returns (ComponentReply);
+	rpc GetComponent(GetByIdInt32Request) returns (ComponentReply);	
+	rpc FindComponentByName(FindByNameRequest) returns (ComponentReply);
+
+	rpc CreateProduct(CreateProductRequest) returns (ProductReply);
+	rpc FindProductByName(FindByNameRequest) returns (ProductReply);
+
+	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply);
+	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply);
+	rpc UpdateShopProduct(UpdateShopProductRequest) returns(google.protobuf.BoolValue);
+	rpc CreateShopProduct(CreateShopProductRequest) returns(ShopProductReply);
+
+	rpc SetProductComponent(SetProductComponentRequest) returns(ProductComponentReply);
+
+	rpc GetCurrencyByName(FindByNameRequest) returns (CurrencyReply);
+	rpc GetCurrencyByCode(GetCurrencyByCodeRequest) returns (CurrencyReply);
+	rpc CreateCurrency(CreateCurrencyRequest) returns(CurrencyReply);
+
+	rpc GetShopProductPrice(GetByIdInt64Request) returns(ShopProductPriceReply);
+	rpc CreateShopProductPrice(CreateShopProductPriceRequest) returns(ShopProductPriceReply);
+	rpc UpdateShopProductPrice(UpdateShopProductPriceRequest) returns(google.protobuf.BoolValue);
+}
+
+message GetByIdInt32Request
+{
+	int32 id = 1;
+}
+
+message GetByIdInt64Request
+{
+	int64 id = 1;
+}
+
+message FindByNameRequest
+{
+	string name = 1;
+}
+
+message CreateProductTypeRequest{
+  string name=1;  
+}
+
+message ProductTypeReply{
+  int32 id = 1;
+  string name=2;
+}
+
+message CreatePurposeTypeRequest{
+  string name=1;  
+}
+
+message PurposeTypeReply{
+  int32 id = 1;
+  string name=2;
+}
+
+message CreateCountryRequest{
+  string name=1;  
+  string transcript = 2;
+}
+
+message CountryReply{
+  int32 id = 1;
+  string name=2;
+  google.protobuf.StringValue transcript=3;
+}
+
+message CreateBrandRequest{
+  string name=1;
+  int32 countryid=2;
+  google.protobuf.StringValue comment = 3;
+}
+
+message BrandReply{
+  int32 id = 1;
+  string name=2;
+  int32 countryid=3;
+  google.protobuf.StringValue comment=4;
+}
+
+message CreateComponentRequest{
+  string name=1;
+  google.protobuf.StringValue description=2;
+  google.protobuf.Int32Value groupid=3;
+  google.protobuf.StringValue transcript=4;
+}
+
+message ComponentReply{
+  int32 id = 1;
+  string name=2;
+  google.protobuf.StringValue description=3;
+  google.protobuf.Int32Value groupid=4;
+  google.protobuf.StringValue transcript = 5;
+}
+
+message CreateProductRequest{
+  string name=1;
+  google.protobuf.StringValue transcript=2;
+  google.protobuf.Int32Value brandid=3;
+  google.protobuf.StringValue articul=4;
+  google.protobuf.Int32Value initshopid=5;
+  google.protobuf.Timestamp addedts=6;
+  int32 producttypeid=7;
+}
+
+message ProductReply{
+  int64 id = 1;
+  string name=2;
+  google.protobuf.StringValue transcript=3;
+  google.protobuf.Int32Value brandid=4;
+  google.protobuf.StringValue articul=5;
+  google.protobuf.Int32Value initshopid=6;
+  google.protobuf.Timestamp addedts=7;
+  int32 producttypeid=8;
+}
+
+message CreateShopProductRequest
+{
+	int64 productid=1;
+	int32 shopid=2;
+	string itemid=3;
+	string apiurl=4;
+	google.protobuf.StringValue itemurl=5;
+	google.protobuf.BoolValue isactual=6; 
+	 google.protobuf.Timestamp lastupdate=7;
+	 google.protobuf.DoubleValue price=8;
+}
+
+message GetShopProductByShopAndApiUrlRequest
+{
+	int32 shopid=1;
+	string apiurl=2;
+}
+
+message GetShopProductByShopAndItemIdRequest
+{
+	int32 shopid=1;
+	string itemid=2;
+}
+
+message UpdateShopProductRequest
+{
+	int64 id=1;
+	int64 productid=2;
+	int32 shopid=3;
+	string itemid=4;
+	string apiurl=5;
+	google.protobuf.StringValue itemurl=6;
+	google.protobuf.BoolValue isactual=7; 
+	google.protobuf.Timestamp lastupdate=8;
+	google.protobuf.DoubleValue price=9;
+}
+
+message ShopProductReply
+{
+	int64 id=1;
+	int64 productid=2;
+	int32 shopid=3;
+	string itemid=4;
+	string apiurl=5;
+	google.protobuf.StringValue itemurl=6;
+	google.protobuf.BoolValue isactual=7; 
+	 google.protobuf.Timestamp lastupdate=8;
+	 google.protobuf.DoubleValue price=9;
+}
+
+message SetProductComponentRequest
+{
+	int64 productid=1;
+	int32 componentid=2;
+	int32 sequalNumber=3;
+}
+
+message ProductComponentReply
+{
+	int64 productid=1;
+	int32 componentid=2;
+	int32 sequalNumber=3;
+}
+
+message GetCurrencyByCodeRequest
+{
+	int32 code=1;
+}
+
+message CurrencyReply
+{
+	int32 id=1;
+	string name=2;
+	google.protobuf.StringValue fullname=3;
+	google.protobuf.Int32Value code=4;
+}
+
+message CreateCurrencyRequest
+{
+	string name=1;
+	google.protobuf.StringValue fullname=2;
+	google.protobuf.Int32Value code=3;
+}
+
+message CreateShopProductPriceRequest
+{
+	int64 shopproductid=1;
+	double price=2;
+	int32 currencyid=3;
+	google.protobuf.Timestamp lastupdate=4;
+}
+
+message UpdateShopProductPriceRequest
+{
+	int64 id=1;
+	int64 shopproductid=2;
+	double price=3;
+	int32 currencyid=4;
+	google.protobuf.Timestamp lastupdate=5;
+}
+
+message ShopProductPriceReply
+{
+	int64 id=1;
+	int64 shopproductid=2;
+	double price=3;
+	int32 currencyid=4;
+	google.protobuf.Timestamp lastupdate=5;
+}
+
+
+

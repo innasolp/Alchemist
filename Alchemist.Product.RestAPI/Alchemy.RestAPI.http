@@ -1,0 +1,12 @@
+@Alchemist.RestAPI_HostAddress = http://localhost:5111
+
+GET {{Alchemist.RestAPI_HostAddress}}/GetShop/
+Accept: application/json
+
+###
+
+GET {{Alchemist.RestAPI_HostAddress}}/GetShopList/
+Accept: application/json
+
+
+###

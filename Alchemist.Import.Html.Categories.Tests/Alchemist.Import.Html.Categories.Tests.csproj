@@ -1,0 +1,94 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="GoldApple.Headers.Firefox.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ozon.Headers.Firefox.Standart.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ozon.CategoryLoadFullOptions.Firefox.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ozon.CategoryLoadNonHeaderOptions.Firefox.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ozon.Headers.Firefox.Devedition.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.49.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Html\Alchemist.Import.Html.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Category.Json\Alchemist.Import.Category.Json.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PlaywrightPlatform>all</PlaywrightPlatform>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BrowserDataLoader.FireFox.DevEdition.Windows">
+      <HintPath>..\..\Libs\BrowserDataLoader\Firefox\DevEdition\BrowserDataLoader.FireFox.DevEdition.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="BrowserDataLoader.Firefox.Standart.Windows">
+      <HintPath>..\..\Libs\BrowserDataLoader\Firefox\Standart\BrowserDataLoader.Firefox.Standart.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="BrowserDataLoader.Firefox.Windows">
+      <HintPath>..\..\Libs\BrowserDataLoader\Firefox\BrowserDataLoader.Firefox.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="BrowserDataLoader.Interfaces">
+      <HintPath>..\..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Http.RequestHandling.Interfaces">
+      <HintPath>..\..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Json.Extensions">
+      <HintPath>..\..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.Common">
+      <HintPath>..\..\Libs\webLoader\WebLoader.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.HttpClient">
+      <HintPath>..\..\Libs\webLoader\HttpClient\WebLoader.HttpClient.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.Interfaces">
+      <HintPath>..\..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.Playwright">
+      <HintPath>..\..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.Playwright.Firefox">
+      <HintPath>..\..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.Firefox.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
