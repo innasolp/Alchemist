@@ -22,9 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.ImportService\Alchemist.Product.Shop.GoldApple.ImportService.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.Model\Alchemist.Product.Shop.GoldApple.Model.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple\Alchemist.Product.Shop.GoldApple.ImportService.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.ImportService\Alchemist.Product.Shop.GoldApple.ImportService.csproj" />
   </ItemGroup>
 
   <ItemGroup>

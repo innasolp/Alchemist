@@ -31,10 +31,7 @@
   <ItemGroup>
     <Reference Include="BrowserDataLoader.Interfaces">
       <HintPath>..\..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="DependencyInjection.Extensions">
-      <HintPath>..\..\Libs\DependencyInjection\Extensions\DependencyInjection.Extensions.dll</HintPath>
-    </Reference>
+    </Reference>   
     <Reference Include="DependencyInjection.ImplementationFactory">
       <HintPath>..\..\Libs\DependencyInjection\ImplementationFactory\DependencyInjection.ImplementationFactory.dll</HintPath>
     </Reference>

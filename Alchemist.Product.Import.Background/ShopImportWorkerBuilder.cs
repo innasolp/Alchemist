@@ -8,7 +8,6 @@ using Alchemist.Import.Products.Data;
 using Alchemist.Product.Interfaces;
 using Alchemist.SignalR.Message.DependencyInjection;
 using BrowserDataLoader.Interfaces;
-using DependencyInjection.Extensions;
 using DependencyInjection.WorkerBuilder;
 using Grpc.Client.Extensions;
 using Http.RequestHandling.Interfaces;
@@ -61,7 +60,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
             AddService(assemblyPath, serviceInterfaceType, null, out Type? serviceType);
         }
 
-        Builder.Services.AddKeyedSingletonIfNotEmpty(createShopUrl(shopSetting), key);
+        Builder.Services.AddKeyedSingleton(key, createShopUrl(shopSetting));
 
         if (!string.IsNullOrEmpty(shopSetting.RequestHeadersPath))
             AddRequestHeaders(appPath, shopSetting.RequestHeadersPath, key);
@@ -92,7 +91,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         var requestHeaders = fullPath.ReadFromJsonFile<RequestHeaders>();
 
         return requestHeaders != null ?
-            Builder.Services.AddKeyedSingletonIfNotEmpty(requestHeaders, key)
+            Builder.Services.AddKeyedSingleton(key, requestHeaders)
             : Builder.Services;
     }
 
@@ -171,12 +170,12 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         });
 
         if (shopCategoriesSetting.CategoryLoadOptions != null)
-            AddServiceValueByTypeName(shopCategoriesSetting.CategoryLoadOptions, appPath, key);
+            AddKeyedServiceValueByTypeName(shopCategoriesSetting.CategoryLoadOptions, appPath, key);
 
         if (shopCategoriesSetting.HtmlSearchFactory != null)
-            AddServiceValueByInterface(shopCategoriesSetting.HtmlSearchFactory, appPath, typeof(IHtmlSearchFactory), key);
+            AddKeyedServiceValueByInterface(shopCategoriesSetting.HtmlSearchFactory, appPath, typeof(IHtmlSearchFactory), key);
         else
-            Builder.Services.AddKeyedSingletonIfNotEmpty(typeof(IHtmlSearchFactory), new HtmlSearchFactory(), key);
+            Builder.Services.AddKeyedSingleton(typeof(IHtmlSearchFactory), key, new HtmlSearchFactory());
 
         if (shopCategoriesSetting.HtmlSearchSettings != null)
         {
@@ -200,23 +199,31 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services;
     }
 
-    private IServiceCollection AddServiceValue(ServiceValueSettings serviceValueSettings, string appPath, Func<Assembly, Type?> getType, object? key)
+    private IServiceCollection AddServiceValueFromAssembly(ServiceValueSettings serviceValueSettings, string appPath, Func<Assembly, Type?> getType)
     {
         var assemblyPath = Utils.CombinePath(appPath, serviceValueSettings.AssemblyPath);
         var valuePath = Utils.CombinePath(appPath, serviceValueSettings.ValuePath);
 
-        return AddServiceValue(assemblyPath, valuePath, getType, key);
+        return AddServiceValue(assemblyPath, valuePath, getType);
+    }
+    
+    private IServiceCollection AddKeyedServiceValueFromAssembly(ServiceValueSettings serviceValueSettings, string appPath, Func<Assembly, Type?> getType, object? key)
+    {
+        var assemblyPath = Utils.CombinePath(appPath, serviceValueSettings.AssemblyPath);
+        var valuePath = Utils.CombinePath(appPath, serviceValueSettings.ValuePath);
+
+        return AddKeyedServiceValue(assemblyPath, valuePath, getType, key);
+    }
+    
+    private IServiceCollection AddKeyedServiceValueByInterface(ServiceValueSettings serviceValueSettings, string appPath, Type interfaceType, object? key)
+    {
+        return AddKeyedServiceValueFromAssembly(serviceValueSettings, appPath, (assembly) => LoadServiceTypeByInterface(assembly, interfaceType), key);
     }
 
-    private IServiceCollection AddServiceValueByInterface(ServiceValueSettings serviceValueSettings, string appPath, Type interfaceType, object? key)
+    private IServiceCollection AddKeyedServiceValueByTypeName(ServiceValueSettings serviceValueSettings, string appPath, object? key)
     {
-        return AddServiceValue(serviceValueSettings, appPath, (assembly) => LoadServiceTypeByInterface(assembly, interfaceType), key);
-    }
-
-    private IServiceCollection AddServiceValueByTypeName(ServiceValueSettings serviceValueSettings, string appPath, object? key)
-    {
-        return AddServiceValue(serviceValueSettings, appPath, (assembly) => LoadServiceTypeByName(assembly, serviceValueSettings.TypeName), key);
-    }
+        return AddKeyedServiceValueFromAssembly(serviceValueSettings, appPath, (assembly) => LoadServiceTypeByName(assembly, serviceValueSettings.TypeName), key);
+    }    
 
     public IServiceCollection AddShopCategories(ShopCategoriesSettings[] shopCategories, string appPath)
     {
