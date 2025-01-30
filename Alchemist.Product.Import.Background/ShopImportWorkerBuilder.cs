@@ -199,14 +199,6 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services;
     }
 
-    private IServiceCollection AddServiceValueFromAssembly(ServiceValueSettings serviceValueSettings, string appPath, Func<Assembly, Type?> getType)
-    {
-        var assemblyPath = Utils.CombinePath(appPath, serviceValueSettings.AssemblyPath);
-        var valuePath = Utils.CombinePath(appPath, serviceValueSettings.ValuePath);
-
-        return AddServiceValue(assemblyPath, valuePath, getType);
-    }
-    
     private IServiceCollection AddKeyedServiceValueFromAssembly(ServiceValueSettings serviceValueSettings, string appPath, Func<Assembly, Type?> getType, object? key)
     {
         var assemblyPath = Utils.CombinePath(appPath, serviceValueSettings.AssemblyPath);
