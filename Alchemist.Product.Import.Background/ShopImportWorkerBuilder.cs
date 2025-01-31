@@ -6,10 +6,8 @@ using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
 using Alchemist.Import.Products.Data;
 using Alchemist.Product.Interfaces;
-using Alchemist.SignalR.Message.DependencyInjection;
 using BrowserDataLoader.Interfaces;
 using DependencyInjection.WorkerBuilder;
-using Grpc.Client.Extensions;
 using Http.RequestHandling.Interfaces;
 using Http.RequestHandling.PerfomanceCounter;
 using Json.Extensions;
@@ -21,6 +19,8 @@ using Serilog.Loggers;
 using System.Reflection;
 using WebLoader.Interfaces;
 using Alchemist.Import.Products.Service;
+using Message.SignalR.DependencyInjection;
+using Grpc.Client.Extensions;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -51,13 +51,13 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         if (!string.IsNullOrEmpty(shopSetting.ServiceProviderPath))
         {
             var serviceProviderPath = Utils.CombinePath(appPath, shopSetting.ServiceProviderPath);
-            AddServiceByImplementationFactory(serviceProviderPath, serviceInterfaceType, key);
+            AddServiceByKeyedImplementationFactory(serviceProviderPath, serviceInterfaceType, key);
         }
         else
         {
             var assemblyPath = Utils.CombinePath(appPath, shopSetting.Path);
 
-            AddService(assemblyPath, serviceInterfaceType, null, out Type? serviceType);
+            AddService(assemblyPath, serviceInterfaceType, out Type? serviceType);
         }
 
         Builder.Services.AddKeyedSingleton(key, createShopUrl(shopSetting));

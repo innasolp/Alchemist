@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog.Loggers;
 using Alchemist.Product.Data;
 using Alchemist.Product.RestAPI.Controllers;
-using Alchemist.SignalR.Message.DependencyInjection;
+using Message.SignalR.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

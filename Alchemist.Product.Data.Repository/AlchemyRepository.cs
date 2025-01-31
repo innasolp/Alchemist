@@ -134,14 +134,14 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     public async Task<List<IShopCategory>> GetShopCategories(int shopId)
     {
         var shopCategories = await Context.ShopCategories.Where(su => su.ShopId == shopId).OfType<IShopCategory>().ToListAsync();
-        return shopCategories;// ?? throw new Exception(string.Format("categories for shop_id={0} not found", shopId));
+        return shopCategories;
     }
 
     public async Task<IShopUrl?> GetShopUrl(int shopId)
     {
         var shopUrls = await Context.ShopUrls.Where(su => su.ShopId == shopId).ToListAsync();
         var shopUrl = shopUrls.FirstOrDefault();
-        return shopUrl;// ?? throw new Exception(string.Format("urls for shop_id={0} not found", shopId));
+        return shopUrl;
     }
 
     public async Task<IShopUrl> AddShopUrl(IShopUrl shopUrl)
@@ -159,8 +159,6 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     public async Task<IShop?> GetShopByName(string name)
     {
         var shops = await Context.Shops.Where(s => s.Name.ToLower() == name.ToLower()).ToListAsync();
-        //if (shops.Count == 0) 
-        //    throw new Exception(string.Format($"shop with name {name} not found"));
         if (shops.Count > 1)
             throw new Exception(string.Format($"multiple shops with name {name}"));
         return await Task.FromResult(shops.FirstOrDefault());
@@ -169,8 +167,6 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     public async Task<IShop?> GetShopByUrl(string url)
     {
         var shops = await Context.Shops.Where(s => s.Url.ToLower() == url.ToLower()).ToListAsync();
-        //if (shops.Count == 0)
-        //    throw new Exception(string.Format($"shop with url {url} not found"));
         if (shops.Count > 1)
             throw new Exception(string.Format($"multiple shops with url {0}"));
         return await Task.FromResult(shops.FirstOrDefault());

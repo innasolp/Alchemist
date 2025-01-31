@@ -25,7 +25,7 @@
       "CategoryUrl": "https://goldapple.ru/front/api/catalog/products?categoryId={0}&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber={1}",
       "PageProductCount": 30,
       "Perfomance": true,
-      "Path": "Import\\Products\\GoldApple\\Alchemist.Product.Shop.GoldApple.dll",
+      "Path": "Import\\Products\\GoldApple\\Alchemist.Product.Shop.GoldApple.ImportService.dll",
       "WebLoader": {
         "Name": "HttpClient",
         "Path": "Libs\\webLoader\\HttpClient"

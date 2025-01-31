@@ -21,7 +21,7 @@
       "Id": "GoldApple",
       "Name": "Золотое яблоко",
       "Url": "https://goldapple.ru",
-      "Path": "Import\\Products\\GoldApple\\Alchemist.Product.Shop.GoldApple.dll",
+      "Path": "Import\\Products\\GoldApple\\Alchemist.Product.Shop.GoldApple.ImportService.dll",
       "Perfomance": true,
       "WebLoader": {
         "Name": "HttpClient",
