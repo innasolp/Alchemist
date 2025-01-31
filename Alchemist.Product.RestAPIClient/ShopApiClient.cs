@@ -81,7 +81,7 @@ public class ShopApiClient : IShopDataService
 
     public async Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId)
     {
-        var response = await _httpClient.GetAsync($"api/Shop/shopCategories/byShopIdAndItemId/shopId={shopId}&itemId={itemId}");
+        var response = await _httpClient.GetAsync($"api/Shop/shopCategories/byShopIdAndItemId/{shopId}/{itemId}");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(default(ShopCategory));
         response.EnsureSuccessStatusCode();
