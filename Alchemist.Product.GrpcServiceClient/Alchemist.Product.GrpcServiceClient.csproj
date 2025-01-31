@@ -31,7 +31,7 @@
 
   <ItemGroup>
     <Reference Include="Grpc.Client.Interceptors">
-      <HintPath>..\..\Libs\Grpc\Client\Interceptors\Grpc.Client.Interceptors.dll</HintPath>
+      <HintPath>..\Libs\Grpc\Client\Interceptors\Grpc.Client.Interceptors.dll</HintPath>
     </Reference>
   </ItemGroup>
 

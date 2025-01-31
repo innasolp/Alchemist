@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
     </Reference>
   </ItemGroup>
 

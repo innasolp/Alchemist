@@ -28,13 +28,13 @@
 
   <ItemGroup>
     <Reference Include="Http.RequestHandling.Interfaces">
-      <HintPath>..\..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
+      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="WebLoader.HttpClient">
-      <HintPath>..\..\Libs\webLoader\HttpClient\WebLoader.HttpClient.dll</HintPath>
+      <HintPath>..\Libs\webLoader\HttpClient\WebLoader.HttpClient.dll</HintPath>
     </Reference>
     <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
     </Reference>
   </ItemGroup>
 

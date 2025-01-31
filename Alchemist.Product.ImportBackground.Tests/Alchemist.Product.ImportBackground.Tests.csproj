@@ -47,13 +47,13 @@
 
   <ItemGroup>
     <Reference Include="DependencyInjection.WorkerBuilder">
-      <HintPath>..\..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
+      <HintPath>..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
     </Reference>
     <Reference Include="Message.Interfaces">
-      <HintPath>..\..\Libs\Message\Message.Interfaces.dll</HintPath>
+      <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
     </Reference>    
   </ItemGroup>
 

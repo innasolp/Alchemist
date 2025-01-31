@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <Reference Include="Serilog.Configuration.Extensions">
-      <HintPath>..\..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
+      <HintPath>..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
     </Reference>
   </ItemGroup>
 

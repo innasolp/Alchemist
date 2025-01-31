@@ -16,13 +16,13 @@
 
   <ItemGroup>
     <Reference Include="BrowserDataLoader.Interfaces">
-      <HintPath>..\..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
+      <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="WebLoader.Common">
-      <HintPath>..\..\Libs\webLoader\WebLoader.Common.dll</HintPath>
+      <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
     </Reference>
     <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
     </Reference>
   </ItemGroup>
 
