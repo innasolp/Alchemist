@@ -1,4 +1,5 @@
 ﻿using Alchemist.Product.Entities;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.DataService.Interfaces;
 
@@ -29,6 +30,12 @@ public interface IProductDataService
     Task<bool> UpdateShopProduct(ShopProduct shopProduct);
 
     Task<ShopProduct> CreateShopProduct(ShopProduct shopProduct);
+
+    Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId);
+
+    Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopCategory);
+
+    Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId);
 
     Task<ProductComponent> SetProductComponent(ProductComponent productComponent);
     Task<Currency> CreateCurrency(Currency currency);

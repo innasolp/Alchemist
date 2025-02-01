@@ -1,4 +1,5 @@
 ﻿using Alchemist.Product.Interfaces;
+using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 
 namespace Alchemist.Product.GrpcService.Extensions;
@@ -63,6 +64,16 @@ public static class GrpcMessagesExtensions
         };
     }
 
+    public static TShopProductCategory FromMessage<TShopProductCategory>(this IShopProductCategoryMessage message)
+    where TShopProductCategory : class, IShopProductCategory, new()
+    {
+        return new TShopProductCategory
+        {
+            ShopProductId = message.Shopproductid,
+            ShopCategoryId = message.Shopcategoryid,
+        };
+    }
+
     public static TComponent FromMessage<TComponent>(this IComponentMessage message)
     where TComponent : class, IComponent, new()
     {
@@ -110,6 +121,16 @@ public static class GrpcMessagesExtensions
         };
     }
 
+    public static TShopProductCategoryMessage ToMessage<TShopProductCategoryMessage>(this IShopProductCategory shopProductCategory)
+    where TShopProductCategoryMessage : class, IShopProductCategoryMessage, new()
+    {
+        return new TShopProductCategoryMessage
+        {
+            Shopproductid = shopProductCategory.ShopProductId,
+            Shopcategoryid = shopProductCategory.ShopCategoryId
+        };
+    }
+
     public static TMessage ToMessage<TMessage>(this IProductComponent entity)
         where TMessage:IProductComponentMessage,new()        
     {
@@ -152,5 +173,27 @@ public static class GrpcMessagesExtensions
             FullName = message.Fullname,
             Code = (short?)message.Code
         };
+    }
+
+    public static Task<TListReply> ToListReply<TListReply, TReply, TEntity>(this
+        List<TEntity> entities,
+        Func<TEntity, TReply> createReplyItem)
+        where TListReply : class, IListReply<TReply>, IMessage, new()
+        where TReply : class, IMessage, new()
+    {
+        var list = entities.Select(item => createReplyItem(item)).ToList();
+        var listReply = new TListReply();
+        listReply.Repeated.AddRange(list);
+        return Task.FromResult(listReply);
+    }
+
+    public static Task<List<TEntity>> FromListReply<TListReply, TReply, TEntity>(this
+        TListReply listReply,
+        Func<TReply, TEntity> createEntity)
+        where TListReply : class, IListReply<TReply>, IMessage, new()
+        where TReply : class, IMessage, new()
+    {
+        var list = listReply.Repeated.Select(item => createEntity(item)).ToList();        
+        return Task.FromResult(list);
     }
 }

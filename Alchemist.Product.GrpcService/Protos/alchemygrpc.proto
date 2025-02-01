@@ -43,6 +43,8 @@ service AlchemyGrpcService {
 	rpc GetShopProductPrice(GetByIdInt64Request) returns(ShopProductPriceReply);
 	rpc CreateShopProductPrice(CreateShopProductPriceRequest) returns(ShopProductPriceReply);
 	rpc UpdateShopProductPrice(UpdateShopProductPriceRequest) returns(google.protobuf.BoolValue);
+	rpc GetShopProductCategories(GetByIdInt64Request) returns(ShopProductCategoryListReply);
+	rpc AddShopProductCategory(CreateShopProductCategoryRequest) returns(ShopProductCategoryReply);
 }
 
 message GetByIdInt32Request
@@ -246,6 +248,25 @@ message ShopProductPriceReply
 	double price=3;
 	int32 currencyid=4;
 	google.protobuf.Timestamp lastupdate=5;
+}
+
+message CreateShopProductCategoryRequest
+{
+	int64 id=1;
+	int64 shopproductid=2;
+	int32 shopcategoryid=3;
+}
+
+message ShopProductCategoryReply
+{
+	int64 id=1;
+	int64 shopproductid=2;
+	int32 shopcategoryid=3;
+}
+
+message ShopProductCategoryListReply
+{
+	repeated ShopProductCategoryReply ShopProductCategories = 1;
 }
 
 
