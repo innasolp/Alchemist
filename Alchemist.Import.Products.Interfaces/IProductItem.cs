@@ -29,4 +29,6 @@ public interface IProductItem
     string ItemUrl { get; set; }
 
     string ApiUrl { get; set; }
+
+    int CategoryId { get; set; }
 }

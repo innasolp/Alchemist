@@ -1,5 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using WebLoader.Interfaces;
 using Microsoft.VisualStudio.Threading;
@@ -7,13 +6,14 @@ using Alchemist.Import.Service;
 using System.Collections.ObjectModel;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
+using Alchemist.Import.Shop.Interfaces;
 
 namespace Alchemist.Import.Category.Json;
 
 public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
     IHtmlSearcher htmlSearcher,
     IWebLoader webLoader,
-    IShopUrlModel shopUrlModel,
+    IShopModel shopUrlModel,
     RequestHeaders? requestHeaders,
     CategoryLoadOptions categoryLoadOptions)
     : ShopImportService(logger, webLoader, requestHeaders), IShopCategoryImportService
@@ -24,7 +24,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     public override string Name { get; } = categoryLoadOptions.Name;
 
-    public IShopUrlModel ShopUrlModel { get; } = shopUrlModel;
+    public IShopModel ShopModel { get; } = shopUrlModel;
 
     private readonly int _defaultInterval = 3600;
 
@@ -35,7 +35,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         if (!WebLoader.IsStarted)
             await StartWebLoaderAsync(stoppingToken);
 
-        var values = await ProcessUrlTaskAsync(LoadFromUrlAsync, ShopUrlModel.Url);
+        var values = await ProcessUrlTaskAsync(LoadFromUrlAsync, ShopModel.ShopUrl);
         if (values == null) return;
 
         var document = JsonDocument.Parse(values[0]);
@@ -68,7 +68,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     private async Task<List<string>?> LoadFromUrlAsync(string url)
     {
-        using var stream = await WebLoader.LoadFromUrl(ShopUrlModel.Url);
+        using var stream = await WebLoader.LoadFromUrl(ShopModel.ShopUrl);
         var values = await htmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions);
         stream.Close();
         return await Task.FromResult(values);
@@ -101,7 +101,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
                     await NewCategoryLoad.InvokeAsync(this, new NewCategoryEventArgs(category));
                 });
 
-                Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopUrlModel.Name} loaded");
+                Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopModel.ShopName} loaded");
             }
         }
     }

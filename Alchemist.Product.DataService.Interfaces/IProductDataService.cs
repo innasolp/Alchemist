@@ -38,6 +38,8 @@ public interface IProductDataService
 
     Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId);
 
+    Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId);
+
     Task<ProductComponent> SetProductComponent(ProductComponent productComponent);
     Task<Currency> CreateCurrency(Currency currency);
     Task<Currency?> GetCurrencyByName(string name);

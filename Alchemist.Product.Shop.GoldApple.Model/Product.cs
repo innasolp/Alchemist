@@ -108,6 +108,7 @@ public class ProductData : IProductItem
     double IProductItem.Price { get; set; }
     string IProductItem.ItemUrl { get; set; }
     string IProductItem.ApiUrl { get; set; }
+    int IProductItem.CategoryId { get; set; }
 }
 
 public class Product : ProductBase, IJsonOnDeserialized

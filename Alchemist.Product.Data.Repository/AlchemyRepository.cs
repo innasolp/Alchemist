@@ -162,6 +162,11 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         return await Context.Create(shopProductCategoryEntity);
     }
     
+    public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId)
+    {
+        return await Context.ShopProductCategories.AnyAsync(s => s.ShopProductId == shopProductId && s.ShopCategoryId == s.ShopCategoryId);
+    }
+    
     public async Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId)
     {
         return await Context.ShopProductCategories.Where(s=>s.ShopProductId == shopProductId).OfType<IShopProductCategory>().ToListAsync();

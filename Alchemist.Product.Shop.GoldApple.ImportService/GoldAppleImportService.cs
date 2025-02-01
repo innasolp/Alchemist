@@ -2,14 +2,13 @@
 using Microsoft.Extensions.Logging;
 using Alchemist.Product.Shop.GoldApple.Model;
 using WebLoader.Interfaces;
-using Alchemist.Product.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
 
 namespace Alchemist.Product.Shop.GoldApple.ImportService;
 
 public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IShopUrlModel shopUrlModel,
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductShopModel shopUrlModel,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IWebLoader shopImporter)
     : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger, shopUrlModel, shopImporter, null)
 {
@@ -22,6 +21,6 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
 
     protected override string GetApiUrl(ICategoryProductItem productItem)
     {
-        return string.Format(ShopUrlModel.ProductUrl, productItem.Id);
+        return string.Format(ProductShopModel.ProductUrl, productItem.Id);
     }
 }
