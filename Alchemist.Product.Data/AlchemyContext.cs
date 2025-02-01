@@ -41,6 +41,8 @@ public partial class AlchemyContext : DbContext
 
     public virtual DbSet<ShopProduct> ShopProducts { get; set; }
 
+    public virtual DbSet<ShopProductCategory> ShopProductCategories { get; set; }
+
     public virtual DbSet<ShopUrl> ShopUrls { get; set; }
 
     public virtual DbSet<Currency> Currencies { get; set; }
@@ -245,6 +247,18 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.LastUpdate).HasColumnName("last_update");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ShopId).HasColumnName("shop_id");
+        });
+
+        modelBuilder.Entity<ShopProductCategory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("shop_product_category_pk");
+            entity.HasIndex("shop_product_id", "shop_category_id").HasDatabaseName("shop_product_category_unique").IsUnique();
+
+            entity.ToTable("shop_product_category");
+
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
+            entity.Property(e => e.ShopCategoryId).HasColumnName("shop_category_id");
         });
 
         modelBuilder.Entity<ShopUrl>(entity =>

@@ -48,6 +48,12 @@ public interface IAlchemyRepository
 
     Task<bool> UpdateShopProduct(IShopProduct shopProduct);
 
+    Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId);
+
+    Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopCategory);
+
+    Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId);
+
     Task<IProductComponent> SetProductComponent(IProductComponent productComponent);
 
     Task<ICurrency?> GetCurrencyByName(string name);
