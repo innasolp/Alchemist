@@ -1,4 +1,5 @@
 ﻿using Alchemist.Product.GrpcService.Extensions;
+using Google.Protobuf.Collections;
 
 namespace Alchemist.Product.GrpcService;
 
@@ -22,6 +23,15 @@ public partial class UpdateShopProductPriceRequest : IShopProductPriceMessage { 
 
 public partial class ShopProductPriceReply: IShopProductPriceMessage { }
 
+public partial class CreateShopProductCategoryRequest : IShopProductCategoryMessage { }
+
+public partial class ShopProductCategoryReply : IShopProductCategoryMessage { }
+
+public partial class ShopProductCategoryListReply : IListReply<ShopProductCategoryReply>
+{
+    RepeatedField<ShopProductCategoryReply> IListReply<ShopProductCategoryReply>.Repeated => ShopProductCategories;
+}
+
 public partial class SetProductComponentRequest : IProductComponentMessage { }
 
 public partial class ProductComponentReply : IProductComponentMessage { }
@@ -30,6 +40,3 @@ public partial class CreateCurrencyRequest : ICurrencyMessage { }
 
 public partial class CurrencyReply : ICurrencyMessage { }
 
-public static class ServiceExtensions
-{
-}

@@ -130,6 +130,17 @@ public static class IntefaceExtensions
             ParentId = @in.ParentId
         };
     }
+    
+    public static T To<T>(this IShopProductCategory @in)
+        where T : class, IShopProductCategory, new()
+    {
+        return new T
+        {
+            Id = @in.Id,
+            ShopCategoryId = @in.ShopCategoryId,
+            ShopProductId = @in.ShopProductId
+        };
+    }
 
     public static T To<T>(this IShopUrl @in)
         where T : class, IShopUrl, new()
