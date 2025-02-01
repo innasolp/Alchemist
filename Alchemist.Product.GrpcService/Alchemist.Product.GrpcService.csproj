@@ -36,11 +36,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="GrpcService.Server.Interceptors">
-      <HintPath>..\Libs\Grpc\Server\Interceptors\GrpcService.Server.Interceptors.dll</HintPath>
+    <Reference Include="Grpc.Server.Interceptors">
+      <HintPath>..\Libs\Grpc\Server\Interceptors\Grpc.Server.Interceptors.dll</HintPath>
     </Reference>
-    <Reference Include="GrpcService.Server.RequestInterceptor">
-      <HintPath>..\Libs\Grpc\Server\RequesInterceptor\GrpcService.Server.RequestInterceptor.dll</HintPath>
+    <Reference Include="Grpc.Server.RequestInterceptor">
+      <HintPath>..\Libs\Grpc\Server\RequesInterceptor\Grpc.Server.RequestInterceptor.dll</HintPath>
     </Reference>
     <Reference Include="Http.RequestHandling.Interfaces">
       <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>

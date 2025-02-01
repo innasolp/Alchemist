@@ -1,10 +1,10 @@
 using Alchemist.Product.GrpcService.Services;
 using Microsoft.EntityFrameworkCore;
 using Alchemist.Common;
-using GrpcService.Server.Interceptors;
+using Grpc.Server.Interceptors;
 using Alchemist.Product.Data.Repository;
 using Alchemist.Log.Serilog;
-using GrpcService.Server.RequestInterceptor;
+using Grpc.Server.RequestInterceptor;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
 using Alchemist.Product.DataService.Interfaces;
