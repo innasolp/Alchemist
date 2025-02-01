@@ -7,6 +7,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <Configurations>Debug;Release;debug libs</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
