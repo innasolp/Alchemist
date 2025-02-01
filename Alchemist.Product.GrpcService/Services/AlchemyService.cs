@@ -1,6 +1,7 @@
 ﻿using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.GrpcService.Extensions;
+using Alchemist.Product.Interfaces;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
@@ -73,6 +74,29 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         var reply = entity.ToMessage<ShopProductReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
+    }
+
+    public override async Task<ShopProductCategoryReply> AddShopProductCategory(CreateShopProductCategoryRequest request, ServerCallContext context)
+    {
+        var shopProductCategory = request.FromMessage<ShopProductCategory>();
+        var entity = await _repository.AddShopProductCategory(shopProductCategory);
+        var reply = entity.ToMessage<ShopProductCategoryReply>();
+        reply.Id = entity.Id;
+        return await Task.FromResult(reply);
+    }
+
+    public override async Task<ShopProductCategoryListReply> GetShopProductCategories(GetByIdInt64Request request, ServerCallContext context)
+    {
+        var shopProductCategories = await _repository.GetShopProductCategories(request.Id)
+             ?? throw new RpcException(new Status(StatusCode.NotFound, $"categories for shop product with id '{request.Id}' not found"));
+        var replyList = await shopProductCategories.ToListReply< ShopProductCategoryListReply, ShopProductCategoryReply,IShopProductCategory>((s) =>
+        {
+            var reply = s.ToMessage<ShopProductCategoryReply>();
+            reply.Id = s.Id;
+            return reply;
+        });
+        
+        return await Task.FromResult(replyList);
     }
 
     public override async Task<BrandReply> FindBrandByName(FindByNameRequest request, ServerCallContext context)
