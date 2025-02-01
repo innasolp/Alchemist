@@ -133,7 +133,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
 
     public async Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopProductCategory)
     {
-        var request = shopProductCategory.ToMessage<CreateShopProductCategoryRequest>();
+        var request = shopProductCategory.ToMessage<ShopProductCategoryRequest>();
         var reply = await _serviceClient.AddShopProductCategoryAsync(request);
         shopProductCategory = reply.FromMessage<ShopProductCategory>();
         shopProductCategory.Id = reply.Id;
@@ -142,11 +142,18 @@ public class AlchemyGrpcServiceClient : IProductDataService
 
     public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId)
     {
-        var request = new CreateShopProductCategoryRequest { Shopcategoryid = shopCategoryId, Shopproductid = shopProductId };
+        var request = new ShopProductCategoryRequest { Shopcategoryid = shopCategoryId, Shopproductid = shopProductId };
         var reply = await _serviceClient.AddShopProductCategoryAsync(request);
         var shopProductCategory = reply.FromMessage<ShopProductCategory>();
         shopProductCategory.Id = reply.Id;
         return await Task.FromResult(shopProductCategory);
+    }
+
+    public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId)
+    {
+        var request = new ShopProductCategoryRequest { Shopcategoryid = shopCategoryId, Shopproductid = shopProductId };
+        var reply = await _serviceClient.CheckShopProductCategoryAsync(request);        
+        return await Task.FromResult(reply.Value);
     }
 
     public async Task<Brand?> FindBrandByName(string name)

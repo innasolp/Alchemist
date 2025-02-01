@@ -23,7 +23,7 @@ public partial class UpdateShopProductPriceRequest : IShopProductPriceMessage { 
 
 public partial class ShopProductPriceReply: IShopProductPriceMessage { }
 
-public partial class CreateShopProductCategoryRequest : IShopProductCategoryMessage { }
+public partial class ShopProductCategoryRequest : IShopProductCategoryMessage { }
 
 public partial class ShopProductCategoryReply : IShopProductCategoryMessage { }
 

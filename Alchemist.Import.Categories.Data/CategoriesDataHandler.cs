@@ -12,7 +12,7 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
 {
     private readonly IShopDataService _shopDataService = shopDataService;
 
-    public async Task<ItemProcessStatus> HandleItem(ICategory category, IShopUrlModel shopUrlModel)
+    public async Task<ItemProcessStatus> HandleItem(ICategory category, IShopModel shopUrlModel)
     {
         var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(shopUrlModel.ShopId, category.Id);
 
@@ -39,7 +39,7 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
         return await _shopDataService.AddShopCategory(shopCatergory);
     }
 
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, IShopUrlModel shopUrlModel)
+    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, IShopModel shopUrlModel)
     {
         if (item is not ICategory category)
             return await Task.FromResult(ItemProcessStatus.Error);

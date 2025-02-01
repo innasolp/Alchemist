@@ -76,13 +76,19 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         return await Task.FromResult(reply);
     }
 
-    public override async Task<ShopProductCategoryReply> AddShopProductCategory(CreateShopProductCategoryRequest request, ServerCallContext context)
+    public override async Task<ShopProductCategoryReply> AddShopProductCategory(ShopProductCategoryRequest request, ServerCallContext context)
     {
         var shopProductCategory = request.FromMessage<ShopProductCategory>();
         var entity = await _repository.AddShopProductCategory(shopProductCategory);
         var reply = entity.ToMessage<ShopProductCategoryReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
+    }
+
+    public override async Task<BoolValue> CheckShopProductCategory(ShopProductCategoryRequest request, ServerCallContext context)
+    {
+        var result = await _repository.CheckShopProductCategory(request.Shopproductid, request.Shopcategoryid);
+        return await Task.FromResult(new BoolValue { Value = result });
     }
 
     public override async Task<ShopProductCategoryListReply> GetShopProductCategories(GetByIdInt64Request request, ServerCallContext context)

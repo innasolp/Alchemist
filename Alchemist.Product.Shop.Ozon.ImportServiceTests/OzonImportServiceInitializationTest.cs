@@ -5,13 +5,14 @@ using WebLoader.Interfaces;
 using Alchemist.Product.Interfaces;
 using System.Reflection;
 using System.Text.Json;
+using Alchemist.Import.Products.Interfaces;
 
 namespace Alchemist.Product.Shop.Ozon.ImportServiceTests;
 
 public class OzonImportServiceInitializationTest
 {
     private readonly ILogger<OzonImportService> _logger = Moq.Mock.Of<ILogger<OzonImportService>>();
-    private readonly Moq.Mock<IShopUrlModel> _shopUrlModelMock = new();
+    private readonly Moq.Mock<IProductShopModel> _shopUrlModelMock = new();
     private readonly IWebLoader _webLoader = Moq.Mock.Of<IWebLoader>();
     private readonly ITestOutputHelper _testOutputHelper;
 

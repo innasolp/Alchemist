@@ -45,6 +45,8 @@ public class Product : IJsonOnDeserialized, IProductItem
     string IProductItem.ItemUrl { get; set; }
     string IProductItem.ApiUrl { get ; set; }
 
+    int IProductItem.CategoryId { get; set; }
+
     public void OnDeserialized()
     {
         var webCharacteristicsValue = WidgetStates?.FirstOrDefault(p => p.Key.Contains("webCharacteristics"));

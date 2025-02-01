@@ -12,7 +12,7 @@ namespace Alchemist.Product.Shop.Ozon.ImportService.Firefox.Tests;
 public class OzonImportServiceFirefoxLoaderTest
 {
     private readonly ILogger<OzonImportService> _logger = Moq.Mock.Of<ILogger<OzonImportService>>();
-    private readonly Moq.Mock<IShopUrlModel> _shopUrlModelMock = new();
+    private readonly Moq.Mock<IProductShopModel> _shopUrlModelMock = new();
     private readonly IBrowserDataLoader _dataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
     private readonly IWebLoader _webLoader;
     private readonly ITestOutputHelper _testOutputHelper;

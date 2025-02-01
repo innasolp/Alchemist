@@ -73,9 +73,9 @@ public class ShopImportWorker : BackgroundService
         if (sender is not IShopCategoryImportService service || e.NewCategory == null)
             return;
 
-        var result = await _categoryDataHandler.HandleItem(e.NewCategory,service.ShopUrlModel);
+        var result = await _categoryDataHandler.HandleItem(e.NewCategory, service.ShopModel);
 
-        var categoryModel = new ImportCategory { Category = e.NewCategory.Name, ItemId = e.NewCategory.Id, ShopId = service.ShopUrlModel.ShopId, Status = result };
+        var categoryModel = new ImportCategory { Category = e.NewCategory.Name, ItemId = e.NewCategory.Id, ShopId = service.ShopModel.ShopId, Status = result };
 
         await _itemMessageSender.Send(categoryModel, Messages.SendCategoryItem);
     }
@@ -85,7 +85,7 @@ public class ShopImportWorker : BackgroundService
         if (sender is not IShopImportService service)
             return;
 
-        var result = await _productDataHandler.HandleItem(e.Item, service.ShopUrlModel);
+        var result = await _productDataHandler.HandleItem(e.Item, service.ShopModel);
 
         var productItemModel = new ImportProduct { Name = e.Item.Name, ShopName = service.Name, Url = e.Item.ItemUrl, Status = result };
         await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
@@ -93,25 +93,25 @@ public class ShopImportWorker : BackgroundService
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
     {
-        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopUrlModel.ShopId == shopCategory.ShopId);
-        service?.ShopUrlModel.Categories.Add(shopCategory);
+        var service = _shopProductImportServices.OfType<IShopProductImportService>().FirstOrDefault(s => s.ShopModel.ShopId == shopCategory.ShopId);
+        service?.ProductShopModel.Categories.Add(shopCategory);
     }
 
     private void OnShopUrlSet(ShopUrl shopUrl)
     {
-        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopUrlModel.ShopId == shopUrl.ShopId);
+        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.ShopId == shopUrl.ShopId);
         if (service != null)
         {
-            service.ShopUrlModel.ProductUrl = shopUrl.ProductUrl;
-            service.ShopUrlModel.CategoryUrl = shopUrl.CategoryUrl;
+            service.ProductShopModel.ProductUrl = shopUrl.ProductUrl;
+            service.ProductShopModel.CategoryUrl = shopUrl.CategoryUrl;
         }
     }
 
     private void OnShopCreated(Shop shop)
     {
-        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopUrlModel.Name.ToUpper() == shop.Name.ToUpper());
+        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.ShopName.ToUpper() == shop.Name.ToUpper());
         if (service != null)
-            service.ShopUrlModel.ShopId = shop.Id;
+            service.ShopModel.ShopId = shop.Id;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -128,12 +128,10 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            foreach (var service in allServices)
-            {
-                await service.ShopUrlModel.InitShopUrlModelAsync(_shopDataService);
-            }
+            await Task.WhenAll(_shopCategoryImportServices.Select(s => s.ShopModel.InitShopModelAsync(_shopDataService)));
+            await Task.WhenAll(_shopProductImportServices.Select(s => s.ProductShopModel.InitProductShopModelAsync(_shopDataService)));
 
-            await Parallel.ForEachAsync(allServices, (s, t) => new ValueTask(s.Start(stoppingToken)));            
+            await Parallel.ForEachAsync(allServices, (s, t) => new ValueTask(s.Start(stoppingToken)));
         }
         catch (Exception e)
         {

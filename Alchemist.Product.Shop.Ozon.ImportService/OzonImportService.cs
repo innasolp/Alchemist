@@ -2,14 +2,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WebLoader.Interfaces;
-using Alchemist.Product.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
 
 namespace Alchemist.Product.Shop.Ozon.ImportService;
 
 public class OzonImportService(ILogger<OzonImportService> logger,
-    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IShopUrlModel shopUrlModel,
+    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductShopModel shopUrlModel,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IWebLoader shopImporter,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] RequestHeaders requestHeaders
         ) : ShopImportCategoryProductsService<Category, Model.Product>(logger, shopUrlModel, shopImporter, requestHeaders)
@@ -20,7 +19,7 @@ public class OzonImportService(ILogger<OzonImportService> logger,
     {
         var ozonCategoryItem = productItem as ProductItem;
         return ozonCategoryItem != null
-            ? string.Format(ShopUrlModel.ProductUrl, ozonCategoryItem.Name)
+            ? string.Format(ProductShopModel.ProductUrl, ozonCategoryItem.Name)
             : throw new InvalidCastException("Item is not Ozon");
     }
     

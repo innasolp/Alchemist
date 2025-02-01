@@ -44,7 +44,8 @@ service AlchemyGrpcService {
 	rpc CreateShopProductPrice(CreateShopProductPriceRequest) returns(ShopProductPriceReply);
 	rpc UpdateShopProductPrice(UpdateShopProductPriceRequest) returns(google.protobuf.BoolValue);
 	rpc GetShopProductCategories(GetByIdInt64Request) returns(ShopProductCategoryListReply);
-	rpc AddShopProductCategory(CreateShopProductCategoryRequest) returns(ShopProductCategoryReply);
+	rpc AddShopProductCategory(ShopProductCategoryRequest) returns(ShopProductCategoryReply);
+	rpc CheckShopProductCategory(ShopProductCategoryRequest) returns(google.protobuf.BoolValue);
 }
 
 message GetByIdInt32Request
@@ -250,7 +251,7 @@ message ShopProductPriceReply
 	google.protobuf.Timestamp lastupdate=5;
 }
 
-message CreateShopProductCategoryRequest
+message ShopProductCategoryRequest
 {
 	int64 id=1;
 	int64 shopproductid=2;
