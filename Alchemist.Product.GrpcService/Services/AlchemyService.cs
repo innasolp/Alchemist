@@ -108,6 +108,15 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         return  await Task.FromResult(reply);
     }
 
+    public override async Task<ProductReply> FindProductByNameAndBrand(FindProductByNameAndBrandRequest request, ServerCallContext context)
+    {
+        var product = await _repository.FindProductByNameAndBrand(request.Name, request.Brand)
+            ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product with name '{request.Name}' and brand {request.Brand} not found"));
+        var reply = product.ToMessage<ProductReply>();
+        reply.Id = product.Id;
+        return await Task.FromResult(reply);
+    }
+
     public override async Task<ProductTypeReply> FindProductTypeByName(FindByNameRequest request, ServerCallContext context)
     {
         var productType = await _repository.FindProductTypeByName(request.Name)

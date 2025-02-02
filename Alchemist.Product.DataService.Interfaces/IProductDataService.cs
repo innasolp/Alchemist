@@ -22,6 +22,7 @@ public interface IProductDataService
     
     Task<Entities.Product> CreateProduct(Entities.Product product);
     Task<Entities.Product?> FindProductByName(string name);
+    Task<Entities.Product?> FindProductByNameAndBrand(string name, string brand);
 
     Task<ShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl);
     Task<ShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId);

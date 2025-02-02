@@ -37,10 +37,11 @@ namespace Alchemist.Product.Data.Repository
             where TEntity : class, IEntity<TId>, new()
         {
             var allEntities = await dbContext.Set<TEntity>().ToListAsync();
-
+            
             var entities = allEntities.Where(
                 e => e.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase) ||
-            nameProperties(e).Any(n => n != null && n.Equals(name, StringComparison.CurrentCultureIgnoreCase))).ToList();
+            nameProperties(e).Any(n => !string.IsNullOrEmpty(n) && n.Equals(name, StringComparison.CurrentCultureIgnoreCase))).ToList();
+
             if (entities.Count > 1)
             {
                 throw new Exception($"multiple entities with name {name}");

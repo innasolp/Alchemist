@@ -153,6 +153,16 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(product);
     }
 
+    public async Task<Entities.Product?> FindProductByNameAndBrand(string name, string brand)
+    {
+        var request = new FindProductByNameAndBrandRequest { Name = name, Brand = brand };
+        var reply = await _serviceClient.FindProductByNameAndBrandAsync(request);
+        if (reply == null) return await Task.FromResult(default(Entities.Product));
+        var product = reply.FromMessage<Entities.Product>();
+        product.Id = reply.Id;
+        return await Task.FromResult(product);
+    }
+
     public async Task<ProductType?> FindProductTypeByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
