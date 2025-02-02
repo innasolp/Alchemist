@@ -4,6 +4,8 @@
       "Id": "Ozon",
       "Name": "Ozon",
       "Url": "https://www.ozon.ru",
+      "ProductUrl": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fproduct%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
+      "CategoryUrl": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2F{0}%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D{1}%26page%3D2",
       "Path": "Import\\Products\\Ozon\\Alchemist.Product.Shop.Ozon.ImportService.dll",
       "RequestHeadersPath": "Settings\\Products\\Ozon\\Ozon.Headers.Firefox.Standart.json",
       "Perfomance": true,

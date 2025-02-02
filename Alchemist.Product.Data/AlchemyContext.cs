@@ -214,6 +214,8 @@ public partial class AlchemyContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("shop_category_pk");
 
+            entity.HasIndex(e => new { e.ShopId, e.ItemId }).HasDatabaseName("shop_category_itemid_unique").IsUnique();
+
             entity.ToTable("shop_category");
 
             entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
@@ -228,6 +230,9 @@ public partial class AlchemyContext : DbContext
         modelBuilder.Entity<ShopProduct>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("shop_product_pk");
+
+            entity.HasIndex(e => new { e.ShopId, e.ProductId }).HasDatabaseName("shop_product_unique").IsUnique();
+            entity.HasIndex(e => new { e.ShopId, e.ItemId }).HasDatabaseName("shop_product_item_unique").IsUnique();
 
             entity.ToTable("shop_product");
 
@@ -244,7 +249,7 @@ public partial class AlchemyContext : DbContext
                 .HasColumnName("item_url");
             entity.Property(e => e.LastUpdate).HasColumnName("last_update");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.ShopId).HasColumnName("shop_id");
+            entity.Property(e => e.ShopId).HasColumnName("shop_id");            
         });
 
         modelBuilder.Entity<ShopUrl>(entity =>

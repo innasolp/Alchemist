@@ -32,7 +32,8 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient) : IP
             return !result ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
         }
 
-        var product = await _alchemyServiceClient.FindProductByName(productItem?.Name)
+        var product = (await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand)
+                            ?? await _alchemyServiceClient.FindProductByName(productItem?.Name))
             ?? await CreateProductFromModelAsync(productItem, shopUrlModel.ShopId);
 
         shopProduct.ProductId = product.Id;

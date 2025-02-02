@@ -208,6 +208,20 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         return await Context.FindByName<Product, long>(name, (p) => [p.Transcript ?? ""]);
     }
 
+    public async Task<IProduct?> FindProductByNameAndBrand(string name, string brand)
+    {
+        var brands = await Context.Brands.Where(b=> b.Name.ToLower() == brand.ToLower()).ToListAsync();
+        if (brands.Count == 0) return default;
+        var products = await Context.Products.Where(p => p.Name.ToLower() == name.ToLower()).ToListAsync();
+        products = products.Where(p=> brands.Any(b => b.Id == p.Id)).ToList();
+        if (products.Count > 1)
+        {
+            throw new Exception($"multiple products with name {name} and brand {brand}");
+        }
+
+        return await Task.FromResult(products.FirstOrDefault());
+    }
+
     public async Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl)
     {
         return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ApiUrl.Trim() == apiUrl.Trim()).FirstOrDefaultAsync();

@@ -28,6 +28,7 @@ service AlchemyGrpcService {
 
 	rpc CreateProduct(CreateProductRequest) returns (ProductReply);
 	rpc FindProductByName(FindByNameRequest) returns (ProductReply);
+	rpc FindProductByNameAndBrand(FindProductByNameAndBrandRequest) returns (ProductReply);
 
 	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply);
 	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply);
@@ -125,6 +126,12 @@ message CreateProductRequest{
   google.protobuf.Int32Value initshopid=5;
   google.protobuf.Timestamp addedts=6;
   int32 producttypeid=7;
+}
+
+message FindProductByNameAndBrandRequest
+{
+	string name=1;
+	string brand=2;
 }
 
 message ProductReply{
