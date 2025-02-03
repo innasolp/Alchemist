@@ -5,6 +5,8 @@ using Alchemist.Product.GrpcService.Extensions;
 using Alchemist.Product.GrpcService;
 using Grpc.Core.Interceptors;
 using Grpc.Client.Interceptors;
+using Alchemist.Product.Interfaces;
+using System.Xml.Linq;
 
 namespace Alchemist.Product.GrpcServiceClient;
 
@@ -114,6 +116,44 @@ public class AlchemyGrpcServiceClient : IProductDataService
         shopProductPrice = reply.FromMessage<ShopProductPrice>();
         shopProductPrice.Id = reply.Id;
         return await Task.FromResult(shopProductPrice);
+    }
+
+    public async Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId)
+    {
+        var request = new GetByIdInt64Request { Id = shopProductId};
+        var reply = await _serviceClient.GetShopProductCategoriesAsync(request);
+        if (reply == null) return await Task.FromResult(default(List<IShopProductCategory>));
+        return await reply.FromListReply<ShopProductCategoryListReply, ShopProductCategoryReply, IShopProductCategory>((s) =>
+            {
+                var entity = s.FromMessage<ShopProductCategory>();
+                entity.Id = s.Id;
+                return entity;
+            });
+    }
+
+    public async Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopProductCategory)
+    {
+        var request = shopProductCategory.ToMessage<ShopProductCategoryRequest>();
+        var reply = await _serviceClient.AddShopProductCategoryAsync(request);
+        shopProductCategory = reply.FromMessage<ShopProductCategory>();
+        shopProductCategory.Id = reply.Id;
+        return await Task.FromResult(shopProductCategory);
+    }
+
+    public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId)
+    {
+        var request = new ShopProductCategoryRequest { Shopcategoryid = shopCategoryId, Shopproductid = shopProductId };
+        var reply = await _serviceClient.AddShopProductCategoryAsync(request);
+        var shopProductCategory = reply.FromMessage<ShopProductCategory>();
+        shopProductCategory.Id = reply.Id;
+        return await Task.FromResult(shopProductCategory);
+    }
+
+    public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId)
+    {
+        var request = new ShopProductCategoryRequest { Shopcategoryid = shopCategoryId, Shopproductid = shopProductId };
+        var reply = await _serviceClient.CheckShopProductCategoryAsync(request);        
+        return await Task.FromResult(reply.Value);
     }
 
     public async Task<Brand?> FindBrandByName(string name)

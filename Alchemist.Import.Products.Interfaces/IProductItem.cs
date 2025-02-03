@@ -8,7 +8,7 @@ public interface IProductItem
 
     string Shop { get; }
 
-    string[] Components { get; }
+    string[]? Components { get; }
 
     string Brand { get; }
 
@@ -29,4 +29,6 @@ public interface IProductItem
     string ItemUrl { get; set; }
 
     string ApiUrl { get; set; }
+
+    int CategoryId { get; set; }
 }

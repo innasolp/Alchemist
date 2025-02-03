@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.Threading;
 using System.Text.Json;
 using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Shop.Interfaces;
+using System.ComponentModel;
 
 namespace Alchemist.Import.Products.Service;
 
@@ -20,40 +22,23 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected Queue<IShopCategory> Categories { get; }
 
-    public IShopUrlModel ShopUrlModel { get; }
+    public IProductShopModel ProductShopModel { get; }
 
-    public ShopImportCategoryProductsService(ILogger logger, IShopUrlModel shopUrlModel, IWebLoader webLoader, RequestHeaders requestHeaders)
+    IShopModel IShopImportService.ShopModel => ProductShopModel;
+
+    public ShopImportCategoryProductsService(ILogger logger, IProductShopModel shopUrlModel, IWebLoader webLoader, RequestHeaders requestHeaders)
         : base(logger, webLoader, requestHeaders)
     {
-        ShopUrlModel = shopUrlModel;
+        ProductShopModel = shopUrlModel;
         Categories = new();
 
-        ShopUrlModel.Categories.ToList().ForEach(c => Categories.Enqueue(c));
-        ShopUrlModel.Categories.CollectionChanged += OnCategoriesAdd;
-
-        ShopUrlModel.PropertyChanged += ShopUrlModelPropertyChanged;
-    }
-
-    private void ShopUrlModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (IsShopUrlInintialized() && Categories.Count == 0)
-        {
-            var newItems = ShopUrlModel.Categories.OfType<IShopCategory>().ToList();
-            newItems.ForEach(Categories.Enqueue);
-        }
-    }
-
-    private bool IsShopUrlInintialized()
-    {
-        return ShopUrlModel.ShopId != 0
-            && ShopUrlModel.CategoryUrl != null
-            && ShopUrlModel.ProductUrl != null;
+        ProductShopModel.Categories.ToList().ForEach(c => Categories.Enqueue(c));
+        ProductShopModel.Categories.CollectionChanged += OnCategoriesAdd;
     }
 
     private void OnCategoriesAdd(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems?.Count > 0
-            && IsShopUrlInintialized())
+        if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems?.Count > 0)
         {
             var newItems = e.NewItems.OfType<IShopCategory>().ToList();
             newItems.ForEach(Categories.Enqueue);
@@ -77,20 +62,19 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 {
                     await StartWebLoaderAsync(stoppingToken);
 
-                    var currentCategoryUrl = string.Format(ShopUrlModel.CategoryUrl, category.GetCategoryForUrl(), page);
+                    var categoryUrl = category.GetCategoryForUrl();
+                    var categoryResult = await ProcessUrlTaskAsync((i) => ProcessCategoryProductsAsync(i, page + 1), i => categoryUrl, category);
 
-                    var categoryResult = await ProcessUrlTaskAsync((url) => ProcessCategoryProductsAsync(url, page + 1), currentCategoryUrl);
-                    if (categoryResult?.Result == false)
+                    if (categoryResult == null || categoryResult?.Result == false)
                     {
                         _unhandledCategoryPages.Enqueue(new Tuple<string, int>(category.Category, page));
-                        Logger.LogWarning($"Category {currentCategoryUrl} page {page} failed.");
                         page++;
                         continue;
                     }
 
                     if (categoryResult?.Result == true && categoryResult?.ProductCount == 0)
                     {
-                        Logger.LogInformation($"Category {currentCategoryUrl} completed. {productCount} products handled.");
+                        Logger.LogInformation($"Category {categoryUrl} completed. {productCount} products handled.");
                         break;
                     }
 
@@ -107,11 +91,13 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected virtual async Task<CategoryResult<TCategory>?> ProcessCategoryProductsAsync(string currentCategoryUrl, int page)
+    protected virtual async Task<CategoryResult<TCategory>?> ProcessCategoryProductsAsync(IShopCategory category, int page)
     {
+        var currentCategoryUrl = string.Format(ProductShopModel.CategoryUrl, category.GetCategoryForUrl(), page);
+
         var currentCategoryProducts = await LoadCategoryProductsAsync(currentCategoryUrl, page + 1);
         if (currentCategoryProducts == null)
-            return await Task.FromResult(new CategoryResult<TCategory>(currentCategoryProducts, 0, false));
+            throw new WarningException($"Category {currentCategoryUrl} page {page} failed.");
 
 
         if (IsEndOfCategory(currentCategoryProducts))
@@ -120,30 +106,24 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         int productCount = 0;
         foreach (var item in currentCategoryProducts.CategoryProductItems)
         {
-            //await ProcessCategoryItem(item);
             var apiUrl = GetApiUrl(item);
-            
-            if (!await ProcessCategoryItemAsync(item, apiUrl))
+
+            var productItem = await ProcessUrlTaskAsync((url) => ProcessCategoryItemAsync(item, url), apiUrl);
+            if (productItem == null)
+            {
                 _unhandledProductItemUrls.Enqueue(item);
+                continue;
+            }
+
+            productItem.CategoryId = category.ItemId;
+
+            await OnItemHandleAsync(productItem, apiUrl, true);
 
             productCount++;
         }
 
-        //todo
-        //var unhandledItemUrlsCount = _unhandledProductItemUrls.Count;
-        //for (int i = 0; i < unhandledItemUrlsCount; i++)
-        //{
-        //    var unhandledItem = _unhandledProductItemUrls.Dequeue();
-        //    var apiUrl = GetApiUrl(unhandledItem);
-        //    var result = await ProcessCategoryItemAsync(unhandledItem, apiUrl);
-        //    if (result == ItemProcessStatus.Error)
-        //        _unhandledProductItemUrls.Enqueue(unhandledItem);
-        //}
-
         return await Task.FromResult(new CategoryResult<TCategory>(currentCategoryProducts, productCount, true));
     }
-
-    //protected abstract Task<ItemProcessStatus> HandleCategoryItemAsync(ICategoryProductItem item, string apiUrl);
 
     protected virtual async Task<TProductItem?> GetShopProductItemFromApiUrlAsync(string apiUrl)
     {
@@ -153,34 +133,24 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return await Task.FromResult(product);
     }
 
-    protected async Task<bool> ProcessCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl)
+    protected async Task<TProductItem?> ProcessCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl)
     {
-        try
-        {
-            var productItem = await GetShopProductItemFromApiUrlAsync(apiUrl);
+        var productItem = await GetShopProductItemFromApiUrlAsync(apiUrl);
 
-            if (productItem == null)
-                throw new Exception($"Product item from {apiUrl} is null");
+        if (productItem == null)
+            throw new Exception($"Product item from {apiUrl} is null");
 
-            productItem.ItemUrl = categoryProductItem.ItemUrl;
-            productItem.Price = categoryProductItem.Price;
-            productItem.Currency = categoryProductItem.Currency;
-            productItem.ApiUrl = apiUrl;
+        productItem.ItemUrl = categoryProductItem.ItemUrl;
+        productItem.Price = categoryProductItem.Price;
+        productItem.Currency = categoryProductItem.Currency;
+        productItem.ApiUrl = apiUrl;        
 
-            await OnItemHandleAsync(productItem, apiUrl, true);
-            Logger.LogInformation($"{apiUrl} processed succsessfully");
-            return await Task.FromResult(true);
-        }
-        catch(Exception ex)
-        {
-            Logger.LogError(ex, $"{apiUrl} processed with error");
-            return await Task.FromResult(false);
-        }       
+        return await Task.FromResult(productItem);
     }
 
-    protected virtual async Task OnItemHandleAsync(IProductItem item,string apiUrl, bool status)
+    protected virtual async Task OnItemHandleAsync(IProductItem item, string apiUrl, bool status)
     {
-        await ItemHandled.InvokeAsync(this, new ItemHandledEventArgs(item, apiUrl,status));
+        await ItemHandled.InvokeAsync(this, new ItemHandledEventArgs(item, apiUrl, status));
     }
 
     protected virtual async Task<TCategory?> LoadCategoryProductsAsync(string categoryUrl, int page)
@@ -210,22 +180,3 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     protected abstract string GetApiUrl(ICategoryProductItem productItem);
 }
 
-//public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>(ILogger logger,
-//    IShopUrlModel shopUrlModel,
-//    IWebLoader webLoader,
-//    RequestHeaders requestHeaders): ShopImportCategoryProductsService<TCategory>(logger,shopUrlModel,webLoader,requestHeaders)
-//    where TCategory : class, ICategoryProducts, new()
-//    where TProductItem : class, IProductItem, new()
-//{
-//    protected virtual async Task<TProductItem?> GetShopProductItemFromApiUrlAsync(string apiUrl)
-//    {
-//        using var stream = await LoadFromUrlAsync(apiUrl);
-//        var product = await JsonSerializer.DeserializeAsync<TProductItem>(stream);
-//        stream.Close();
-//        return await Task.FromResult(product);
-//    }
-//    protected override Task<ItemProcessStatus> HandleCategoryItemAsync(ICategoryProductItem item, string apiUrl)
-//    {
-//        var shopProductModel = await GetShopProductItemFromApiUrlAsync(apiUrl);
-//    }
-//}

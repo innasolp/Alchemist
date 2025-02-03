@@ -5,7 +5,6 @@ using Alchemist.Import.Categories.Data;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
 using Alchemist.Import.Products.Data;
-using Alchemist.Product.Interfaces;
 using BrowserDataLoader.Interfaces;
 using DependencyInjection.WorkerBuilder;
 using Http.RequestHandling.Interfaces;
@@ -21,6 +20,8 @@ using WebLoader.Interfaces;
 using Alchemist.Import.Products.Service;
 using Message.SignalR.DependencyInjection;
 using Grpc.Client.Extensions;
+using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Shop.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -46,7 +47,8 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
             : Builder.Services;
     }
 
-    private IServiceCollection AddServiceForShopSettings(ShopSettings shopSetting, string appPath, Type serviceInterfaceType, object? key, Func<ShopSettings, IShopUrlModel> createShopUrl)
+    private IServiceCollection AddServiceForShopSettings<TShopModelService>(ShopSettings shopSetting, string appPath, Type serviceInterfaceType, object? key, Func<ShopSettings, object> createShopModel)
+        where TShopModelService:IShopModel
     {
         if (!string.IsNullOrEmpty(shopSetting.ServiceProviderPath))
         {
@@ -60,7 +62,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
             AddService(assemblyPath, serviceInterfaceType, out Type? serviceType);
         }
 
-        Builder.Services.AddKeyedSingleton(key, createShopUrl(shopSetting));
+        Builder.Services.AddKeyedSingleton(typeof(TShopModelService), key, createShopModel(shopSetting));
 
         if (!string.IsNullOrEmpty(shopSetting.RequestHeadersPath))
             AddRequestHeaders(appPath, shopSetting.RequestHeadersPath, key);
@@ -70,13 +72,13 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
 
     public IServiceCollection AddProductServiceForShopSettings(ShopProductsSettings shopSetting, string appPath, Type serviceInterfaceType, object? key)
     {
-        return AddServiceForShopSettings(shopSetting, appPath, serviceInterfaceType, key,
+        return AddServiceForShopSettings<IProductShopModel>(shopSetting, appPath, serviceInterfaceType, key,
              (shopSetting) =>
              {
-                 return new ShopUrlModel
+                 return new ProductShopModel
                  {
-                     Name = shopSetting.Name,
-                     Url = shopSetting.Url,
+                     ShopName = shopSetting.Name,
+                     ShopUrl = shopSetting.Url,
                      ProductUrl = (shopSetting as ShopProductsSettings)?.ProductUrl,
                      CategoryUrl = (shopSetting as ShopProductsSettings)?.CategoryUrl,
                      PageProductCount = (shopSetting as ShopProductsSettings)?.PageProductCount
@@ -160,12 +162,12 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         Type serviceInterfaceType,
         object? key)
     {
-        var services = AddServiceForShopSettings(shopCategoriesSetting, appPath, serviceInterfaceType, key, (shopSetting) =>
+        var services = AddServiceForShopSettings<IShopModel>(shopCategoriesSetting, appPath, serviceInterfaceType, key, (shopSetting) =>
         {
-            return new ShopUrlModel
+            return new ShopModel
             {
-                Name = shopSetting.Name,
-                Url = shopSetting.Url
+                ShopName = shopSetting.Name,
+                ShopUrl = shopSetting.Url
             };
         });
 

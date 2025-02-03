@@ -1,5 +1,6 @@
 ﻿using Alchemist.Import.Interfaces;
 using Microsoft.Extensions.Logging;
+using System;
 using System.ComponentModel;
 using WebLoader.Common;
 using WebLoader.Interfaces;
@@ -102,6 +103,35 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             return await Task.FromResult(default(T));
         }
     }
+
+    protected async Task<T?> ProcessUrlTaskAsync<TUrl,T>(Func<TUrl, Task<T?>> task, Func<TUrl,string> getUrl, TUrl itemUrl)
+    {
+        try
+        {
+            return await task(itemUrl);
+        }
+        catch (HttpRequestException e)
+        {
+            await HandleHttpExceptionAsync(e, getUrl(itemUrl));
+            return await Task.FromResult(default(T));
+        }
+        catch (WebLoaderException wle)
+        {
+            await HandleWebLoaderExceptionAsync(wle);
+            return await Task.FromResult(default(T));
+        }
+        catch (WarningException warning)
+        {
+            Logger.LogWarning(warning, $"process not complete. Warning : {warning.Message}. ");
+            return await Task.FromResult(default(T));
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, $"process {getUrl(itemUrl)} failed");
+            return await Task.FromResult(default(T));
+        }
+    }
+    
 
     public virtual async ValueTask DisposeAsync()
     {

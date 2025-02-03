@@ -1,20 +1,7 @@
-﻿using Google.Protobuf;
-using Google.Protobuf.Collections;
+﻿using Google.Protobuf.Collections;
 using Alchemist.Product.GrpcService.Extensions;
 
 namespace Alchemist.Product.GrpcService;
-
-public interface IListReply<T>
-    where T : class, IMessage
-{
-    RepeatedField<T> Repeated { get; }
-}
-
-//todo example
-//public sealed partial class ProductTypeListReply : IListReply<ProductTypeReply>
-//{
-//    RepeatedField<ProductTypeReply> IListReply<ProductTypeReply>.Repeated => ProductTypes;
-//}
 
 public partial class ProductTypeReply : IBaseReply<int> { }
 
@@ -47,6 +34,15 @@ public partial class CreateShopProductPriceRequest : IShopProductPriceMessage { 
 
 public partial class UpdateShopProductPriceRequest : IShopProductPriceMessage { }
 
+public partial class ShopProductCategoryRequest : IShopProductCategoryMessage { }
+
+public partial class ShopProductCategoryReply : IShopProductCategoryMessage { }
+
+public partial class ShopProductCategoryListReply: IListReply<ShopProductCategoryReply>
+{
+    RepeatedField<ShopProductCategoryReply> IListReply<ShopProductCategoryReply>.Repeated => ShopProductCategories;
+}
+
 public partial class CreateComponentRequest: IComponentMessage { }
 
 public partial class SetProductComponentRequest : IProductComponentMessage { }
@@ -57,17 +53,3 @@ public partial class CreateCurrencyRequest : ICurrencyMessage { }
 
 public partial class CurrencyReply : ICurrencyMessage { }
 
-    public static class ServiceExtensions
-{
-    public static Task<TListReply> GetListReply<TListReply, TReply, TEntity>(this
-        List<TEntity> entities,
-        Func<TEntity, TReply> createReplyItem)
-        where TListReply : class, IListReply<TReply>, IMessage, new()
-        where TReply : class, IMessage, new()
-    {
-        var list = entities.Select(item => createReplyItem(item)).ToList();
-        var listReply = new TListReply();
-        listReply.Repeated.AddRange(list);
-        return Task.FromResult(listReply);
-    }
-}

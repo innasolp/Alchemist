@@ -7,4 +7,6 @@ namespace Alchemist.Import.Products.Service;
 public interface IShopProductImportService : IShopImportService
 {
     event AsyncEventHandler<ItemHandledEventArgs>? ItemHandled;
+
+    IProductShopModel ProductShopModel { get; }
 }

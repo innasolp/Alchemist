@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Product.Interfaces;
 using Alchemist.Product.Shop.GoldApple.ImportService;
+using Alchemist.Import.Products.Interfaces;
 
 namespace Alchemist.Shop.GoldenApple.ImportService.HttpClient.Tests;
 
@@ -17,7 +18,7 @@ public class GoldAppleImportServiceHttpclientLoaderTest
     private readonly string _productUrl = "https://goldapple.ru/front/api/catalog/product-card/base?itemId=99730300001&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0";
 
     private readonly ILogger<GoldAppleImportService> _logger = Moq.Mock.Of<ILogger<GoldAppleImportService>>();
-    private readonly Moq.Mock<IShopUrlModel> _shopUrlModelMock = new();
+    private readonly Moq.Mock<IProductShopModel> _shopUrlModelMock = new();
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IWebLoader _webLoader;
     private readonly ITestOutputHelper _testOutputHelper;

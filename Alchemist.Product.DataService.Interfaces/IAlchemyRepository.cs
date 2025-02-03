@@ -25,7 +25,6 @@ public interface IAlchemyRepository
     Task<IShop?> GetShopByName(string name);
 
     Task<IShop?> GetShopByUrl(string url);
-
     Task<IProduct> CreateProduct(IProduct product);
     Task<IProduct?> GetProduct(long id);
     List<IProduct> GetProductsByShop(int shopId);
@@ -48,6 +47,14 @@ public interface IAlchemyRepository
     Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId);
 
     Task<bool> UpdateShopProduct(IShopProduct shopProduct);
+
+    Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId);
+
+    Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopCategory);
+
+    Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId);
+
+    Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId);
 
     Task<IProductComponent> SetProductComponent(IProductComponent productComponent);
 

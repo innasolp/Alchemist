@@ -155,6 +155,28 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         var shopCategoryEntity = shopCategory.To<ShopCategory>();
         return await Context.Create(shopCategoryEntity);
     }
+    
+    public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId)
+    {
+        var shopProductCategoryEntity = new ShopProductCategory { ShopProductId = shopProductId, ShopCategoryId = shopCategoryId };
+        return await Context.Create(shopProductCategoryEntity);
+    }
+    
+    public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId)
+    {
+        return await Context.ShopProductCategories.AnyAsync(s => s.ShopProductId == shopProductId && s.ShopCategoryId == s.ShopCategoryId);
+    }
+    
+    public async Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId)
+    {
+        return await Context.ShopProductCategories.Where(s=>s.ShopProductId == shopProductId).OfType<IShopProductCategory>().ToListAsync();
+    }
+    
+    public async Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopProductCategory)
+    {
+        var shopProductCategoryEntity = shopProductCategory.To<ShopProductCategory>();
+        return await Context.Create(shopProductCategoryEntity);
+    }
 
     public async Task<IShop?> GetShopByName(string name)
     {
