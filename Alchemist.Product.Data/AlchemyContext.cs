@@ -257,43 +257,7 @@ public partial class AlchemyContext : DbContext
         modelBuilder.Entity<ShopProductCategory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("shop_product_category_pk");
-            entity.HasIndex("shop_product_id", "shop_category_id").HasDatabaseName("shop_product_category_unique").IsUnique();
-
-            entity.ToTable("shop_product_category");
-
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
-            entity.Property(e => e.ShopCategoryId).HasColumnName("shop_category_id");
-        });
-
-        modelBuilder.Entity<ShopProductCategory>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("shop_product_category_pk");
-            entity.HasIndex("shop_product_id", "shop_category_id").HasDatabaseName("shop_product_category_unique").IsUnique();
-
-            entity.ToTable("shop_product_category");
-
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
-            entity.Property(e => e.ShopCategoryId).HasColumnName("shop_category_id");
-        });
-
-        modelBuilder.Entity<ShopProductCategory>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("shop_product_category_pk");
-            entity.HasIndex("shop_product_id", "shop_category_id").HasDatabaseName("shop_product_category_unique").IsUnique();
-
-            entity.ToTable("shop_product_category");
-
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
-            entity.Property(e => e.ShopCategoryId).HasColumnName("shop_category_id");
-        });
-
-        modelBuilder.Entity<ShopProductCategory>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("shop_product_category_pk");
-            entity.HasIndex("shop_product_id", "shop_category_id").HasDatabaseName("shop_product_category_unique").IsUnique();
+            entity.HasIndex(e => new { e.ShopProductId, e.ShopCategoryId }).HasDatabaseName("shop_product_category_unique").IsUnique();
 
             entity.ToTable("shop_product_category");
 

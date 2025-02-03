@@ -96,15 +96,15 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         }
     }
 
-    private async Task<Product.Entities.Product> CreateProductFromModelAsync(IProductItem shopProductModel, int shopId)
+    private async Task<Product.Entities.Product> CreateProductFromModelAsync(IProductItem productItem, int shopId)
     {
-        Brand? brand = !string.IsNullOrWhiteSpace(shopProductModel.Brand) ? await GetBrandAsync(shopProductModel) : null;       
+        Brand? brand = !string.IsNullOrWhiteSpace(productItem.Brand) ? await GetBrandAsync(productItem) : null;       
 
-        var productType = await _alchemyServiceClient.FindProductTypeByName(shopProductModel.ProductType) ??
-            await _alchemyServiceClient.CreateProductType(new ProductType { Name = shopProductModel.ProductType });
+        var productType = await _alchemyServiceClient.FindProductTypeByName(productItem.ProductType) ??
+            await _alchemyServiceClient.CreateProductType(new ProductType { Name = productItem.ProductType });
 
         var purposeTypes = new List<PurposeType>();
-        foreach (var purpose in shopProductModel.Purposes)
+        foreach (var purpose in productItem.Purposes)
         {
             var purposeType = await _alchemyServiceClient.FindPurposeTypeByName(purpose) ??
                 await _alchemyServiceClient.CreatePurposeType(new PurposeType { Name = purpose });
@@ -113,16 +113,16 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
 
         var product = await _alchemyServiceClient.CreateProduct(new Product.Entities.Product
         {
-            Name = shopProductModel.Name,
+            Name = productItem.Name,
             BrandId = brand?.Id,
             ProductTypeId = productType.Id,
             InitShopId = shopId,
             AddedTime = DateTime.UtcNow,
-            Articul = shopProductModel.Articul
+            Articul = productItem.Articul
         });
 
-        if (shopProductModel.Components != null)        
-            await SetProductComponentsAsync(shopProductModel.Components, product.Id);        
+        if (productItem.Components != null)        
+            await SetProductComponentsAsync(productItem.Components, product.Id);        
 
         return await Task.FromResult(product);
     }

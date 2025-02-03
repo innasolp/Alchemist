@@ -8,7 +8,7 @@ public interface IProductItem
 
     string Shop { get; }
 
-    string[] Components { get; }
+    string[]? Components { get; }
 
     string Brand { get; }
 

@@ -93,7 +93,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task<CategoryResult<TCategory>?> ProcessCategoryProductsAsync(IShopCategory category, int page)
     {
-        var currentCategoryUrl = string.Format(ProductShopModel.ShopUrl, category.GetCategoryForUrl(), page);
+        var currentCategoryUrl = string.Format(ProductShopModel.CategoryUrl, category.GetCategoryForUrl(), page);
 
         var currentCategoryProducts = await LoadCategoryProductsAsync(currentCategoryUrl, page + 1);
         if (currentCategoryProducts == null)
@@ -115,7 +115,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 continue;
             }
 
-            productItem.CategoryId = category.Id;
+            productItem.CategoryId = category.ItemId;
 
             await OnItemHandleAsync(productItem, apiUrl, true);
 

@@ -22,19 +22,22 @@ public class Product : IJsonOnDeserialized, IProductItem
     [JsonIgnore]
     public WebRichDescription? WebRichDescription { get; set; }
 
+    [JsonIgnore]
+    public WebSeller? WebSeller { get; set; }
+
     string IProductItem.ItemId => WebCharacteristics.Sku;   
 
     string IProductItem.Shop => "ozon.ru";
 
-    string[] IProductItem.Components => WebDescription.Components ?? WebCharacteristics.Components;
+    string[]? IProductItem.Components => WebDescription?.Components ?? WebCharacteristics?.Components;
 
-    string IProductItem.Brand => WebCharacteristics.Brand;
+    string IProductItem.Brand => WebCharacteristics.Brand ?? WebSeller?.Name;
 
     string IProductItem.Country => WebCharacteristics.Country;
 
     string IProductItem.Comment => WebRichDescription.RichDescription;
 
-    string IProductItem.ProductType => WebCharacteristics.Type;
+    string IProductItem.ProductType => WebCharacteristics.Type ?? WebRichDescription?.RichAnnotationJson?.ProductTypeTitle;
 
     string[] IProductItem.Purposes => WebCharacteristics.PurposeTypes;
 
@@ -57,8 +60,7 @@ public class Product : IJsonOnDeserialized, IProductItem
             if (!string.IsNullOrWhiteSpace(WebCharacteristics?.ProductTitle))
             {
                 var splitByCharacteristic = WebCharacteristics.ProductTitle.Split(":");
-                var productString = splitByCharacteristic.Length > 1 ? splitByCharacteristic[1] : splitByCharacteristic[0];
-                Name = productString.Split(",")[0].Trim();
+                Name = splitByCharacteristic.Length > 1 ? splitByCharacteristic[1] : splitByCharacteristic[0];
             }
         }
 
@@ -74,6 +76,13 @@ public class Product : IJsonOnDeserialized, IProductItem
         if (webRichDescriptionValue?.Value != null)
         {
             WebRichDescription = JsonSerializer.Deserialize<WebRichDescription>(webRichDescriptionValue.Value.Value.ToString());
+        }
+
+        var webSellerValue = WidgetStates?.FirstOrDefault(p => p.Key.Contains("webCurrentSeller") && p.Value != null
+                                    && p.Value.ToString().Contains("lexemes"));
+        if (webSellerValue?.Value != null)
+        {
+            WebSeller = JsonSerializer.Deserialize<WebSeller>(webSellerValue.Value.Value.ToString());
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Alchemist.Product.Shop.Ozon.Model;
 
@@ -28,10 +29,20 @@ public class WebRichDescription : IJsonOnDeserialized
     }
 }
 
-public class RichAnnotationJson
+public class RichAnnotationJson : IJsonOnDeserialized
 {
     [JsonPropertyName("content")]
     public RichAnnotationContent[] Contents { get; set; }
+
+    [JsonIgnore]
+    public string? ProductTypeTitle { get; set; }
+
+    public void OnDeserialized()
+    {
+        ProductTypeTitle = Contents.Where(c=>c.Blocks != null).SelectMany(c=>c.Blocks)
+                                   .FirstOrDefault(b => b?.RichAnnotationContentBlockType == RichAnnotationContentBlockType.Chess
+                                                      && b.Title?.Content?.Length > 0)?.Title?.Content?.FirstOrDefault(c => !string.IsNullOrEmpty(c));
+    }
 }
 
 public class RichAnnotationContent : IJsonOnDeserialized
@@ -40,7 +51,7 @@ public class RichAnnotationContent : IJsonOnDeserialized
     public string Type { get; set; }
 
     [JsonPropertyName("blocks")]
-    public RichAnnotationContentBlock[] Blocks { get; set; }
+    public RichAnnotationContentBlock[]? Blocks { get; set; }
 
     [JsonPropertyName("text")]
     public RichAnnotationContentBlockText Text { get; set; }
@@ -53,14 +64,41 @@ public class RichAnnotationContent : IJsonOnDeserialized
         FullText = string.Concat(
             Blocks != null ? string.Join(" ", Blocks.Where(b => b.Text != null).SelectMany(b => b.Text.Rows)) : "",
             Text != null ? string.Join(" ", Text.Rows) : ""
-            );
+            );       
     }
 }
 
-public class RichAnnotationContentBlock
+public enum RichAnnotationContentBlockType
 {
+    Chess
+}
+
+public class RichAnnotationContentBlock : IJsonOnDeserialized
+{
+    private static readonly Dictionary<string, RichAnnotationContentBlockType> RichAnnotationContentBlockTypes;
+    static RichAnnotationContentBlock()
+    {
+        RichAnnotationContentBlockTypes = Enum.GetValues(typeof(RichAnnotationContentBlockType)).Cast<RichAnnotationContentBlockType>().
+            ToDictionary(k => k.ToString(), v => v);
+    }
+
     [JsonPropertyName("text")]
     public RichAnnotationContentBlockText Text { get; set; }
+
+    [JsonPropertyName("title")]
+    public RichAnnotationContentBlockTitle? Title { get; set; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    [JsonIgnore]
+    public RichAnnotationContentBlockType? RichAnnotationContentBlockType { get; set; }
+
+    public void OnDeserialized()
+    {
+        var contentBlockType = RichAnnotationContentBlockTypes.FirstOrDefault(wct => wct.Key.ToLower() == Type?.Replace("_", ""));
+        RichAnnotationContentBlockType = !string.IsNullOrEmpty(contentBlockType.Key) ?  contentBlockType.Value : null;
+    }
 }
 
 public class RichAnnotationContentBlockText : IJsonOnDeserialized
@@ -78,4 +116,10 @@ public class RichAnnotationContentBlockText : IJsonOnDeserialized
     {
         Rows = TextRows ?? ContentRows;
     }
+}
+
+public class RichAnnotationContentBlockTitle
+{
+    [JsonPropertyName("content")]
+    public string[]? Content { get; set; }
 }
