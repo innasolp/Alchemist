@@ -45,6 +45,8 @@ public partial class AlchemyContext : DbContext
 
     public virtual DbSet<ShopUrl> ShopUrls { get; set; }
 
+    public virtual DbSet<ShopSettings> ShopSettings { get; set; }
+
     public virtual DbSet<Currency> Currencies { get; set; }
 
     public virtual DbSet<ShopProductPrice> ShopProductPrices { get; set; }
@@ -282,6 +284,22 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.ProductUrl)
                 .HasMaxLength(1023)
                 .HasColumnName("product_url");
+        });
+        
+        modelBuilder.Entity<ShopSettings>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("shop_settings_pk");
+
+            entity.ToTable("shop_settings");
+
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.ShopId)
+                .ValueGeneratedNever()
+                .HasColumnName("shop_id");
+            entity.Property(e => e.JsonValue)                
+                .HasColumnName("json_value");
+            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.IsActual).HasColumnName("is_actual");
         });
 
         modelBuilder.Entity<Currency>(entity =>

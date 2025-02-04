@@ -34,10 +34,16 @@ public interface IAlchemyRepository
 
     Task<IShopUrl?> GetShopUrl(int shopId);
 
+    Task<IShopUrl> AddShopUrl(IShopUrl shopUrl);
+
+    Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType);
+
+    Task<IShopSettings> AddShopSettings(IShopSettings shopSettings);
+
     Task<List<IShopCategory>> GetShopCategories(int shopId);
     Task<IShopCategory?> GetShopCategory(int shopId, int itemId);
 
-    Task<IShopUrl> AddShopUrl(IShopUrl shopUrl);
+    
 
     Task<IShopCategory> AddShopCategory(IShopCategory shopCategory);
 

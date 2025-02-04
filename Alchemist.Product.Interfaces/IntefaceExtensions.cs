@@ -153,6 +153,19 @@ public static class IntefaceExtensions
             PageProductCount = @in.PageProductCount
         };
     }
+    
+    public static T To<T>(this IShopSettings @in)
+        where T : class, IShopSettings, new()
+    {
+        return new T
+        {
+            Id = @in.Id,
+            ShopId = @in.ShopId,
+            JsonValue = @in.JsonValue,
+            Type = @in.Type,
+            IsActual = @in.IsActual
+        };
+    }
 
     public static T To<T>(this IShopProduct @in)
         where T : class, IShopProduct, new()
