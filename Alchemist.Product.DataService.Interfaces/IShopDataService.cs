@@ -11,6 +11,10 @@ public interface IShopDataService
 
     Task<IShopUrl?> CreateShopUrl(IShopUrl shopUrl);
 
+    Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType);
+
+    Task<IShopSettings?> AddShopSettings(IShopSettings shopSettings);
+
     Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory);
 
     Task<List<IShopCategory>> GetShopCategories(int shopId);

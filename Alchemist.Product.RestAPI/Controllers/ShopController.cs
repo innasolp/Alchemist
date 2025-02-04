@@ -121,4 +121,25 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
         var shopCategories = await _alchemyRepository.GetShopCategories(shopId);
         return shopCategories != null && shopCategories.Count != 0 ? TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) : TypedResults.NotFound();
     }
+    
+    [HttpGet("shopSettings/{shopId:int}/{shopSettingType:short}", Name = nameof(GetShopSettings))]
+    public async Task<Results<NotFound, Ok<ShopSettings>>> GetShopSettings(int shopId, ShopSettingType shopSettingType)
+    {
+        var shopSettings = await _alchemyRepository.GetShopSettings(shopId, shopSettingType);
+        return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound();
+    }
+
+    [HttpPost("shopSettings", Name = nameof(AddShopSettings))]
+    public async Task<Results<BadRequest<ShopSettings>, Created<ShopSettings>>> AddShopSettings(ShopSettings shopSettings)
+    {
+        if (shopSettings == null || shopSettings.ShopId == 0 || string.IsNullOrEmpty(shopSettings.JsonValue))
+            return TypedResults.BadRequest(shopSettings);
+
+        var newShopSettings = (await _alchemyRepository.AddShopSettings(shopSettings)).To<ShopSettings>();
+
+        await SendMessage(newShopSettings, Messages.SendCategoryAdded);
+
+        var location = Url.Action(nameof(AddShopSettings), new { id = newShopSettings.Id }) ?? $"/{newShopSettings.Id}";
+        return TypedResults.Created(location, newShopSettings);
+    }
 }
