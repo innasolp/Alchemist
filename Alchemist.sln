@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.RestAPI",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.RestAPIClient", "Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj", "{EA542EC3-0632-4681-9C73-390F75ABB083}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.DataService.Interfaces", "Alchemist.Product.DataService.Interfaces\Alchemist.Product.DataService.Interfaces.csproj", "{44BF50F1-6750-42D0-B7DA-D185B1CEA034}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.DataService.Interfaces", "Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj", "{44BF50F1-6750-42D0-B7DA-D185B1CEA034}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.Interfaces", "Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj", "{D081B675-F964-40A6-BF17-8DDE7CD7E7D0}"
 EndProject
@@ -217,6 +217,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GoldApple", "GoldApple", "{
 		Settings\Categories\GoldApple\GoldApple.CategoryLoadOptions.Firefox.json = Settings\Categories\GoldApple\GoldApple.CategoryLoadOptions.Firefox.json
 		Settings\Categories\GoldApple\GoldApple.Headers.Firefox.Standart.json = Settings\Categories\GoldApple\GoldApple.Headers.Firefox.Standart.json
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Settings.RestAPI", "Alchemist.Settings.RestAPI\Alchemist.Settings.RestAPI.csproj", "{DD1C86A8-18BE-4F9C-8B33-8310367D4B11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Settings.RestAPIClient", "Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj", "{C3FBCB93-01EF-4AC6-966D-CD50F68758B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Settings.Data.Repository", "Alchemist.Settings.Data.Repository\Alchemist.Settings.Data.Repository.csproj", "{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -570,6 +576,24 @@ Global
 		{C99957FB-814E-4412-B7BC-23EE2AEA245E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C99957FB-814E-4412-B7BC-23EE2AEA245E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C99957FB-814E-4412-B7BC-23EE2AEA245E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD1C86A8-18BE-4F9C-8B33-8310367D4B11}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD1C86A8-18BE-4F9C-8B33-8310367D4B11}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{DD1C86A8-18BE-4F9C-8B33-8310367D4B11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD1C86A8-18BE-4F9C-8B33-8310367D4B11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD1C86A8-18BE-4F9C-8B33-8310367D4B11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD1C86A8-18BE-4F9C-8B33-8310367D4B11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3FBCB93-01EF-4AC6-966D-CD50F68758B0}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3FBCB93-01EF-4AC6-966D-CD50F68758B0}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{C3FBCB93-01EF-4AC6-966D-CD50F68758B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3FBCB93-01EF-4AC6-966D-CD50F68758B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3FBCB93-01EF-4AC6-966D-CD50F68758B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3FBCB93-01EF-4AC6-966D-CD50F68758B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -645,6 +669,7 @@ Global
 		{E96AECD7-759E-4300-985A-6EF74F9FAC37} = {DE96781B-D445-4EF4-B2B2-720A34CF1C35}
 		{13C19249-631F-433B-B858-EFCA7786AEFB} = {D1F54309-D9C5-47BE-BCE8-9F9A73E67F63}
 		{4A998193-844A-4743-9EC4-D083D7D6AC61} = {D1F54309-D9C5-47BE-BCE8-9F9A73E67F63}
+		{9300E5DB-0F46-41B0-9CF2-6F35BEDFF8D6} = {17215807-0093-44F2-9884-0C13DC9E711F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

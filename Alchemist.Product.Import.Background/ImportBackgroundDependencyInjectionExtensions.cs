@@ -3,9 +3,9 @@ using Alchemist.Log.Serilog;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Alchemist.Product.Entities;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Shop.Interfaces;
+using Alchemist.DataService.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 

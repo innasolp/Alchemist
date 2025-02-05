@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.DataService.Interfaces;
+﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -105,21 +105,5 @@ public class ShopApiClient : IShopDataService
             return await Task.FromResult(default(ShopUrl));
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ShopUrl?>();
-    }
-
-    public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
-    {
-        var response = await _httpClient.GetAsync($"api/Shop/shopSettings/{shopId}/{settingType}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(ShopSettings));
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopSettings?>();
-    }
-
-    public async Task<IShopSettings?> AddShopSettings(IShopSettings shopSettings)
-    {
-        var response = await _httpClient.PostAsJsonAsync($"api/Shop/shopSettings", shopSettings.To<ShopSettings>());
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopSettings>();
     }
 }

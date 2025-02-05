@@ -9,8 +9,8 @@ using Alchemist.Import.Categories.Data;
 using Message.Interfaces;
 using Alchemist.Import.Products.Service;
 using Alchemist.Import.Shop.Interfaces;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Common;
+using Alchemist.DataService.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 

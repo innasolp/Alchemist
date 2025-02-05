@@ -4,7 +4,7 @@ using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.Interfaces;
 using System.ComponentModel;
 using Alchemist.Import.Shop.Interfaces;
-using Alchemist.Product.DataService.Interfaces;
+using Alchemist.DataService.Interfaces;
 
 namespace Alchemist.Import.Categories.Data;
 
