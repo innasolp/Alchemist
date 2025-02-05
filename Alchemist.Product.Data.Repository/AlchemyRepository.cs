@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.DataService.Interfaces;
+﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -148,24 +148,7 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     {
         var shopUrlEntity = shopUrl.To<ShopUrl>();
         return await Context.Create(shopUrlEntity);
-    }
-    public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
-    {
-        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.ShopId == shopId && s.Type == settingType && s.IsActual != false);        
-    }
-
-    public async Task<IShopSettings> AddShopSettings(IShopSettings shopSettings)
-    {
-        await Context.ShopSettings.Where(s=>s.ShopId == shopSettings.ShopId && s.Type == shopSettings.Type && s.IsActual != false)
-            .ExecuteUpdateAsync(settings=> settings.SetProperty(s => s.IsActual, s=> false));
-       
-        var entity = shopSettings.To<ShopSettings>();
-        var added = await Context.ShopSettings.AddAsync(entity);
-        
-        await Context.SaveChangesAsync();
-
-        return await Task.FromResult(added.Entity);
-    }
+    }    
 
     public async Task<IShopCategory> AddShopCategory(IShopCategory shopCategory)
     {

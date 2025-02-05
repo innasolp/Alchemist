@@ -1,0 +1,6 @@
+@Alchemist.Settings.RestAPI_HostAddress = http://localhost:5133
+
+GET {{Alchemist.Settings.RestAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

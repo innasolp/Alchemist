@@ -7,8 +7,8 @@ using Alchemist.Log.Serilog;
 using Grpc.Server.RequestInterceptor;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.Data;
+using Alchemist.DataService.Interfaces;
 
 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
