@@ -1,7 +1,7 @@
 ﻿using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.DataService.Interfaces;
+namespace Alchemist.DataService.Interfaces;
 
 public interface IProductDataService
 {
@@ -15,15 +15,15 @@ public interface IProductDataService
     Task<Country?> FindCountryByName(string name);
 
     Task<Brand> CreateBrand(Brand brand);
-    Task<Brand?> FindBrandByName(string name);   
+    Task<Brand?> FindBrandByName(string name);
 
     Task<Component> CreateComponent(Component component);
     Task<Component?> FindComponentByName(string name);
 
-    
-    Task<Entities.Product> CreateProduct(Entities.Product product);
-    Task<Entities.Product?> FindProductByName(string name);
-    Task<Entities.Product?> FindProductByNameAndBrand(string name, string brand);
+
+    Task<Product.Entities.Product> CreateProduct(Product.Entities.Product product);
+    Task<Product.Entities.Product?> FindProductByName(string name);
+    Task<Product.Entities.Product?> FindProductByNameAndBrand(string name, string brand);
 
     Task<ShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl);
     Task<ShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId);
