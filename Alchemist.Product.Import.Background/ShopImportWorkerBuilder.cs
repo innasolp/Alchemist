@@ -1,5 +1,4 @@
 ﻿using Alchemist.Common;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Import.Categories.Data;
 using Alchemist.Import.Category.Interfaces;
@@ -22,6 +21,7 @@ using Message.SignalR.DependencyInjection;
 using Grpc.Client.Extensions;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Shop.Interfaces;
+using Alchemist.DataService.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 

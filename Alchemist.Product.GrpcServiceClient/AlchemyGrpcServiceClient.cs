@@ -1,12 +1,12 @@
 ﻿using Alchemist.Product.Entities;
 using Grpc.Net.Client;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.GrpcService.Extensions;
 using Alchemist.Product.GrpcService;
 using Grpc.Core.Interceptors;
 using Grpc.Client.Interceptors;
 using Alchemist.Product.Interfaces;
 using System.Xml.Linq;
+using Alchemist.DataService.Interfaces;
 
 namespace Alchemist.Product.GrpcServiceClient;
 

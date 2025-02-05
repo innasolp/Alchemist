@@ -1,7 +1,7 @@
 using Alchemist.Common;
+using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Service;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.Interfaces;
 using Message.Interfaces;
