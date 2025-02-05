@@ -145,3 +145,4 @@
 /Alchemist.Import.Settings.Model/obj
 /Alchemist.Import.Settings.Interfaces/bin/Debug/net8.0
 /Alchemist.Import.Settings.Interfaces/obj
+*.tmp
