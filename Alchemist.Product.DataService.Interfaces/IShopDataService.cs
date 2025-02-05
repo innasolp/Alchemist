@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.DataService.Interfaces;
+namespace Alchemist.DataService.Interfaces;
 
 public interface IShopDataService
 {
@@ -10,10 +10,6 @@ public interface IShopDataService
     Task<IShopUrl?> GetShopUrl(int shopId);
 
     Task<IShopUrl?> CreateShopUrl(IShopUrl shopUrl);
-
-    Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType);
-
-    Task<IShopSettings?> AddShopSettings(IShopSettings shopSettings);
 
     Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory);
 

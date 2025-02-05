@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.DataService.Interfaces;
+﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.GrpcService.Extensions;
 using Alchemist.Product.Interfaces;
