@@ -104,4 +104,16 @@
 /Libs
 /Logs
 /Alchemist.slnLaunch.user
-*.user
+/Alchemist.Settings.Data.Repository/bin/Debug/net8.0
+/Alchemist.Settings.Data.Repository/obj
+/Alchemist.Settings.RestAPI/bin/Debug/net8.0
+/Alchemist.Settings.RestAPI/obj
+/Alchemist.Settings.RestAPI/Alchemist.Settings.RestAPI.csproj.user
+/Alchemist.Settings.RestAPI/appsettings.Development.json
+/Alchemist.Settings.RestAPIClient/bin/Debug/net8.0
+/Alchemist.Settings.RestAPIClient/obj
+/Alchemist.Shop.ImportSettings.Model/obj/Debug/net8.0
+/Alchemist.Shop.ImportSettings.Model/obj
+/Alchemist.Shop.Settings.Interfaces/bin/Debug/net8.0
+/Alchemist.Shop.Settings.Interfaces/obj/Debug/net8.0
+/Alchemist.Shop.Settings.Interfaces/obj

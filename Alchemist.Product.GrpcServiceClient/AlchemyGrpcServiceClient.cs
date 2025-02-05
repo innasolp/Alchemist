@@ -1,6 +1,5 @@
 ﻿using Alchemist.Product.Entities;
 using Grpc.Net.Client;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.GrpcService.Extensions;
 using Alchemist.Product.GrpcService;
 using Grpc.Core.Interceptors;

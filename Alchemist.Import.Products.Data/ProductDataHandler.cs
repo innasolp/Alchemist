@@ -4,6 +4,7 @@ using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Shop.Interfaces;
+using Alchemist.DataService.Interfaces;
 
 namespace Alchemist.Import.Products.Data;
 

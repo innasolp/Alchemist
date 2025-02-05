@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.Product.DataService.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
   </ItemGroup>
 
