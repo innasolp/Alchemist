@@ -26,6 +26,8 @@
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
   </ItemGroup>
 
   <ItemGroup>    

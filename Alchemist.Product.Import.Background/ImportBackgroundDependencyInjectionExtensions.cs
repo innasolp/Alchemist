@@ -6,6 +6,8 @@ using Alchemist.Product.Entities;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Shop.Interfaces;
 using Alchemist.DataService.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
+using DependencyInjection.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -45,30 +47,51 @@ public static class ImportBackgroundDependencyInjectionExtensions
         return await Task.FromResult(true);
     }
 
-    public static LoggerConfiguration AddShopsSerilogSourceContextConfigs(this AppSerilogBuilder appSerilogBuilder, ShopSettings[] shops, string logPath)
+    public static LoggerConfiguration AddShopsSerilogSourceContextConfigs(this AppSerilogBuilder appSerilogBuilder, IShopImportSettings[] shops, string logPath)
     {
         foreach (var shopSetting in shops)
         {
-            appSerilogBuilder.AddSourceContextLogConfig(Utils.CombinePath(logPath, shopSetting.Id), shopSetting.Id);
+            appSerilogBuilder.AddSourceContextLogConfig(Utils.CombinePath(logPath, shopSetting.Name), shopSetting.Name);
         }
         return appSerilogBuilder.LoggerConfiguration;
     }
 
-    public static LoggerConfiguration AddShopsSerilogPropertyConfigs(this AppSerilogBuilder appSerilogBuilder, ShopSettings[] shops, string logPath)
+    public static LoggerConfiguration AddShopsSerilogPropertyConfigs(this AppSerilogBuilder appSerilogBuilder, IShopImportSettings[] shops, string logPath)
     {
         foreach (var shopSetting in shops)
         {
-            appSerilogBuilder.AddClassNameLogConfig(Utils.CombinePath(logPath, shopSetting.Id), shopSetting.Id);
+            appSerilogBuilder.AddClassNameLogConfig(Utils.CombinePath(logPath, shopSetting.Name), shopSetting.Name);
         }
         return appSerilogBuilder.LoggerConfiguration;
     }
 
-    public static LoggerConfiguration AddShopsWebPerfomanceConfigs(this AppSerilogBuilder appSerilogBuilder, ShopSettings[] shops, string logPath)
+    public static LoggerConfiguration AddShopsWebPerfomanceConfigs(this AppSerilogBuilder appSerilogBuilder, IShopImportSettings[] shops, string logPath)
     {
         foreach (var shopSetting in shops.Where(s => s.Perfomance == true))
         {
-            appSerilogBuilder.AddPerfomanceCounter(shopSetting.Url, Http.RequestHandling.PerfomanceCounter.EventIds.Perfomance.Id, logPath, shopSetting.Id);
+            appSerilogBuilder.AddPerfomanceCounter(shopSetting.Url, Http.RequestHandling.PerfomanceCounter.EventIds.Perfomance.Id, logPath, shopSetting.Name);
         }
         return appSerilogBuilder.LoggerConfiguration;
+    }
+
+    public static void SetAppPath(this IShopImportSettings shopImportSettings, string appPath)
+    {
+        shopImportSettings.BrowserDataLoader?.SetAppPath(appPath);
+        shopImportSettings.WebLoader?.SetAppPath(appPath);
+        shopImportSettings.ImportService.SetAppPath(appPath);
+        shopImportSettings.RequestHeadersSettings?.SetAppPath(appPath);
+
+        foreach(var serviceSettings in shopImportSettings.Services)
+            serviceSettings.SetAppPath(appPath);
+    }
+
+    private static void SetAppPath(this IServiceSettings serviceSettings, string appPath)
+    {
+        if(!string.IsNullOrEmpty(serviceSettings.ServiceProviderPath))
+            serviceSettings.ServiceProviderPath = Utils.CombinePath(appPath, serviceSettings.ServiceProviderPath);
+        
+        if(!string.IsNullOrEmpty(serviceSettings.AssemblyPath))
+            serviceSettings.AssemblyPath = Utils.CombinePath(appPath, serviceSettings.AssemblyPath);        
+        
     }
 }

@@ -1,4 +1,5 @@
 using Alchemist.Common;
+using Alchemist.Import.Settings.Model;
 using Alchemist.Log.Serilog;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.RestAPIClient;
@@ -6,6 +7,7 @@ using Grpc.Client.RequestInterceptor;
 using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
+using Json.Extensions;
 using Serilog.Loggers;
 
 var shopProductsJsonFile = "shopProducts.json";
@@ -22,22 +24,28 @@ shopImportWorkerBuilder.AddHttpMessageDelegatingHandler<RequestDelegatingHandler
 builder.Services.AddPerfomanceCounter(typeof(RequestDelegatingHandler), (logger) => new SerilogUrlLogger(logger));
 
 shopImportWorkerBuilder.AddGrpcServiceClient<Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>("GrpcAPIHost");
-shopImportWorkerBuilder.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
+builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
 builder.Services.AddPerfomanceCounter(typeof(Interceptor), typeof(GrpcClientRequestInterceptor), (logger) => new SerilogUrlLogger(logger));
 
 var appPath = Utils.GetAppPath();
 
-var shopProductsSettings = shopProductsJsonFile.GetSettings<ShopProductsSettings[]>("ShopProducts");
+var shopProductsSettings = await shopProductsJsonFile.ReadFromJsonFileAsync<ProductShopImportSettings[]>();
 if (shopProductsSettings != null)
 {
-    shopImportWorkerBuilder.AddShopProducts(shopProductsSettings, appPath);
+    foreach (var item in shopProductsSettings)
+        item.SetAppPath(appPath);
+
+    shopImportWorkerBuilder.AddShopProducts(shopProductsSettings);
     shopImportWorkerBuilder.AddProductsHandler();
 }
 
-var shopCategoriesSettings = shopCategoriesJsonFile.GetSettings<ShopCategoriesSettings[]>("ShopCategories");
+var shopCategoriesSettings = await shopCategoriesJsonFile.ReadFromJsonFileAsync<ShopImportSettings[]>();
 if (shopCategoriesSettings != null)
 {
-    shopImportWorkerBuilder.AddShopCategories(shopCategoriesSettings, appPath);
+    foreach (var item in shopCategoriesSettings)
+        item.SetAppPath(appPath);
+
+    shopImportWorkerBuilder.AddShopCategories(shopCategoriesSettings);
     shopImportWorkerBuilder.AddPropertyValueInterceptorsLogging(shopCategoriesSettings, "ClassName", (shopSetting) => shopSetting.Id);
     shopImportWorkerBuilder.AddCategoriesHandler();
 }
