@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
+using WebLoader.Common;
 
 namespace Alchemist.Product.Shop.Ozon.ImportService;
 

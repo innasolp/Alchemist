@@ -50,6 +50,9 @@
     <Reference Include="DependencyInjection.WorkerBuilder">
       <HintPath>..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
     </Reference>
+    <Reference Include="Json.Extensions">
+      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="Message.Interfaces">
       <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
     </Reference>

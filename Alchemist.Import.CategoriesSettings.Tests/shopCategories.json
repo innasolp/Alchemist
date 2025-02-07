@@ -53,8 +53,8 @@
     },
     "Perfomance": true,
     "ImportService": {
-      "AssemblyPath": "Import\\Categories\\Json",
-      "ServiceProviderPath": "Import\\Categories\\Json"
+      "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+      "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
     },
     "BrowserDataLoader": {
       "ImplementationTypeName": "Firefox.Standart",
@@ -62,13 +62,12 @@
     },
     "WebLoader": {
       "ImplementationTypeName": "Firefox",
-      "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
-      "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
+      "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
     },
     "Services": [
       {
         "ServiceTypeName": "CategoryLoadOptions",
-        "AssemblyPath": "Import\\Categories\\Json",
+        "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
         "Value": {
           "HtmlSearchOptions": {
             "Tag": "div",
@@ -96,7 +95,7 @@
       },
       {
         "ServiceTypeName": "HtmlSearchFactoryOptions",
-        "AssemblyPath": "Import\\Html",
+        "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll",
         "Value": {
           "SearchMatchType": 1,
           "SearchElementType": 0
@@ -104,10 +103,10 @@
       },
       {
         "ServiceTypeName": "IHtmlSearcher",
-        "AssemblyPath": "Import\\Html",
-        "ServiceProviderPath": "Import\\Html"
-      }
-    ]
+        "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.dll",
+        "ServiceProviderPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll"        
+      }  
+    ]  
   },
 
   {
@@ -187,8 +186,8 @@
     },
     "Perfomance": true,
     "ImportService": {
-      "AssemblyPath": "Import\\Categories\\Json",
-      "ServiceProviderPath": "Import\\Categories"
+      "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+      "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
 
     },
     "BrowserDataLoader": {
@@ -196,48 +195,47 @@
       "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
     },
     "WebLoader": {
-      "ImplementationTypeName": "Firefox",
-      "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
-      "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
+      "Name": "Firefox",
+      "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
     },
     "Services": [
       {
-        "ServiceTypeName": "CategoryLoadOptions",
-        "AssemblyPath": "Import\\Categories\\Json",
-        "Value": {
-          "HtmlSearchOptions": {
-            "Tag": "script",
-            "ValueString": "window.serverCache['navigation']"
-          },
-          "FirstNodePath": [ "data" ],
-          "SecondsInterval": 1800,
-          "CategoryPropertyPaths": {
-            "Url": {
-              "PropertyName": "Url",
-              "Path": "link"
+          "ServiceTypeName": "CategoryLoadOptions",
+          "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+          "Value": {
+            "HtmlSearchOptions": {
+              "Tag": "script",
+              "ValueString": "window.serverCache['navigation']"
             },
-            "Description": {
-              "PropertyName": "Description",
-              "Path": "name"
-            },
-            "Children": {
-              "PropertyName": "Children",
-              "Path": "children"
-            },
-            "Id": {
-              "PropertyName": "Id",
-              "Path": "id"
-            },
-            "IsParented": {
-              "PropertyName": "IsParented",
-              "Path": "parent"
+            "FirstNodePath": [ "data" ],
+            "SecondsInterval": 1800,
+            "CategoryPropertyPaths": {
+              "Url": {
+                "PropertyName": "Url",
+                "Path": "link"
+              },
+              "Description": {
+                "PropertyName": "Description",
+                "Path": "name"
+              },
+              "Children": {
+                "PropertyName": "Children",
+                "Path": "children"
+              },
+              "Id": {
+                "PropertyName": "Id",
+                "Path": "id"
+              },
+              "IsParented": {
+                "PropertyName": "IsParented",
+                "Path": "parent"
+              }
             }
-          }
-        }
+          }        
       },
       {
         "ServiceTypeName": "HtmlSearchFactoryOptions",
-        "AssemblyPath": "Import\\Html",
+        "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll",
         "Value": {
           "SearchMatchType": 0,
           "SearchElementType": 1
@@ -245,9 +243,9 @@
       },
       {
         "ServiceTypeName": "IHtmlSearcher",
-        "AssemblyPath": "Import\\Html",
-        "ServiceProviderPath": "Import\\Html"
-      }
+        "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.dll",
+        "ServiceProviderPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll"
+      }  
     ]
   }
   ]

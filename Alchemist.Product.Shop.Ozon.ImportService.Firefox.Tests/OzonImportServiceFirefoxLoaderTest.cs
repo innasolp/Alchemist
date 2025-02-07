@@ -4,6 +4,7 @@ using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text.Json;
+using WebLoader.Common;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
 
