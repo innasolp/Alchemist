@@ -2,8 +2,10 @@ using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Service;
+using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.Interfaces;
+using Json.Extensions;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,8 +18,8 @@ public class ShopImportServiceTests
     private readonly string _shopProductsJsonFile = "shopProducts.json";
     private readonly string _shopCategoriesJsonFile = "shopCategories.json";
 
-    private readonly ShopCategoriesSettings[] _shopCategoriesSettings;
-    private readonly ShopProductsSettings[] _shopProductsSettings;
+    private ShopImportSettings[] _shopCategoriesSettings;
+    private ProductShopImportSettings[] _shopProductsSettings;
 
     private readonly HostApplicationBuilder _builder;
 
@@ -33,13 +35,13 @@ public class ShopImportServiceTests
     {
         _builder = new HostApplicationBuilder();
         _shopImportWorkerBuilder = new ShopImportWorkerBuilder(_builder);
-
-        _shopCategoriesSettings = _shopCategoriesJsonFile.GetSettings<ShopCategoriesSettings[]>("ShopCategories");
-        _shopProductsSettings = _shopProductsJsonFile.GetSettings<ShopProductsSettings[]>("ShopProducts");
     }
 
-    private void AddBaseServices()
+    private async Task AddBaseServicesAsync()
     {
+        _shopCategoriesSettings = await _shopCategoriesJsonFile.ReadFromJsonFileAsync<ShopImportSettings[]>();// "ShopCategories");
+        _shopProductsSettings = await _shopProductsJsonFile.ReadFromJsonFileAsync<ProductShopImportSettings[]>();// "ShopProducts");
+
         _builder.Services.AddSingleton(_shopApiClientMock.Object);
         _builder.Services.AddSingleton(_alchemyDataServiceMock.Object);
         _builder.Services.AddKeyedSingleton(ShopImportWorkerKeys.DataMessageReceiverKey, _messageReceiver.Object);
@@ -48,22 +50,29 @@ public class ShopImportServiceTests
 
 
     [Fact]
-    public void BuildShopImportServiceWithProductsAndCategoriesTest()
+    public async Task BuildShopImportServiceWithProductsAndCategoriesTestAsync()
     {
-        AddBaseServices();
+        await AddBaseServicesAsync();
 
-        _shopImportWorkerBuilder.AddShopProducts(_shopProductsSettings, Utils.GetAppPath());
-        _shopImportWorkerBuilder.AddShopCategories(_shopCategoriesSettings, Utils.GetAppPath());
+        foreach (var shop in _shopProductsSettings)
+            shop.SetAppPath(Utils.GetAppPath());
+        
+        foreach (var shop in _shopCategoriesSettings)
+            shop.SetAppPath(Utils.GetAppPath());
+
+        _shopImportWorkerBuilder.AddShopProducts(_shopProductsSettings);
+        _shopImportWorkerBuilder.AddShopCategories(_shopCategoriesSettings);
 
         _shopImportWorkerBuilder.AddProductsHandler();
         _shopImportWorkerBuilder.AddCategoriesHandler();
 
         _shopImportWorkerBuilder.AddPropertyValueInterceptorsLogging(_shopCategoriesSettings, "ClassName", (shopSetting) => shopSetting.Id);
 
-        _shopImportWorkerBuilder.AddScoped<ShopImportWorker>();
-
         _builder.Services.AddHttpClient();
 
+        _builder.Services.AddScoped<ShopImportWorker>();
+
+        
         var host = _builder.Build();
 
         var shopImportService = host.Services.GetService<ShopImportWorker>();
@@ -75,15 +84,18 @@ public class ShopImportServiceTests
     }
 
     [Fact]
-    public void BuildShopImportServiceWithProductsOnlyTest()
+    public async Task BuildShopImportServiceWithProductsOnlyTestAsync()
     {
-        AddBaseServices();
+        await AddBaseServicesAsync();
 
-        _shopImportWorkerBuilder.AddShopProducts(_shopProductsSettings, Utils.GetAppPath());
+        foreach (var shop in _shopProductsSettings)
+            shop.SetAppPath(Utils.GetAppPath());
+
+        _shopImportWorkerBuilder.AddShopProducts(_shopProductsSettings);
 
         _shopImportWorkerBuilder.AddProductsHandler();
 
-        _shopImportWorkerBuilder.AddScoped<ShopImportWorker>();
+        _builder.Services.AddScoped<ShopImportWorker>();
 
         _builder.Services.AddHttpClient();
 

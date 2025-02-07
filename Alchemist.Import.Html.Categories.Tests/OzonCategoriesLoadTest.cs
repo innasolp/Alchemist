@@ -1,7 +1,9 @@
 using Alchemist.Import.Category.Json;
+using Alchemist.Import.Html.Factory;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
+using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Html.Categories.Tests;
@@ -49,7 +51,7 @@ public class OzonCategoriesLoadTest
 
     private async Task<JsonDocument?> GetJsonDocumentAsync(IWebLoader webLoader)
     {
-        var htmlSearcher = _htmlSearchFactory.CreateSearcher(SearchMatchType.Like);
+        var htmlSearcher = HtmlSearchFactory.CreateSearcher(SearchMatchType.Like);
 
         using var stream = await webLoader.LoadFromUrl(_shopUrl);
         var values = await htmlSearcher.GetValues(stream, new HtmlSearchOptions

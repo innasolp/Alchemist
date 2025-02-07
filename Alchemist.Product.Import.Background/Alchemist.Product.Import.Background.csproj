@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\WebLoaders\WebLoader.Common\WebLoader.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Categories.Data\Alchemist.Import.Categories.Data.csproj" />
@@ -27,6 +28,8 @@
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Html\Alchemist.Import.Html.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,6 +41,9 @@
     </Reference>
     <Reference Include="DependencyInjection.Interception">
       <HintPath>..\Libs\DependencyInjection\Interception\DependencyInjection.Interception.dll</HintPath>
+    </Reference>
+    <Reference Include="DependencyInjection.Interfaces">
+      <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="DependencyInjection.WorkerBuilder">
       <HintPath>..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>

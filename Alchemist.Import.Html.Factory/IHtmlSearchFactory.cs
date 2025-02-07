@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Html;
+﻿namespace Alchemist.Import.Html.Factory;
 
 public interface IHtmlSearchFactory
 {

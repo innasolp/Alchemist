@@ -7,6 +7,7 @@ using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Shop.Interfaces;
 using System.ComponentModel;
+using WebLoader.Common;
 
 namespace Alchemist.Import.Products.Service;
 

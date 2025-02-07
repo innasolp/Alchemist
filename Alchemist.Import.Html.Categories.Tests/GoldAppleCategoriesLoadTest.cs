@@ -1,9 +1,11 @@
 using Alchemist.Import.Category.Json;
+using Alchemist.Import.Html.Factory;
 using BrowserDataLoader.Interfaces;
 using Json.Extensions;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
+using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Html.Categories.Tests;
@@ -14,9 +16,7 @@ public class GoldAppleCategoriesLoadTest
 
     private readonly IWebLoader _webLoader;
     
-    private readonly string _shopUrl = "https://goldapple.ru";
-
-    private readonly HtmlSearchFactory _htmlSearchFactory = new();
+    private readonly string _shopUrl = "https://goldapple.ru";    
 
     private readonly string requestHeadersFileName = "GoldApple.Headers.Firefox.json";
 
@@ -62,7 +62,7 @@ public class GoldAppleCategoriesLoadTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var htmlSearcher = _htmlSearchFactory.CreateSearcher(SearchMatchType.Equals, SearchElementType.Value);
+        var htmlSearcher = HtmlSearchFactory.CreateSearcher(SearchMatchType.Equals, SearchElementType.Value);
 
         using var stream = await _webLoader.LoadFromUrl(_shopUrl);
         var values = await htmlSearcher.GetValues(stream, new HtmlSearchOptions
