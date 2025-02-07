@@ -1,6 +1,6 @@
 ﻿using AngleSharp.Html.Dom;
 
-namespace Alchemist.Import.Html;
+namespace Alchemist.Import.Html.Factory;
 
 internal class EqualsAttributeHtmlSearcher : HtmlSearcher
 {
