@@ -6,6 +6,7 @@ using Alchemist.Product.Interfaces;
 using System.Reflection;
 using System.Text.Json;
 using Alchemist.Import.Products.Interfaces;
+using WebLoader.Common;
 
 namespace Alchemist.Product.Shop.Ozon.ImportServiceTests;
 

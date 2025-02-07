@@ -1,6 +1,6 @@
 ﻿using AngleSharp.Html.Dom;
 
-namespace Alchemist.Import.Html;
+namespace Alchemist.Import.Html.Factory;
 
 internal class LikeAttributeHtmlSearcher : HtmlSearcher
 {
@@ -9,7 +9,7 @@ internal class LikeAttributeHtmlSearcher : HtmlSearcher
         var values = new List<string?>();
 
         var split = htmlSearchOptions.SearchString?.Split("=");
-        if (split == null || (split.Length < 2 && split.Any(string.IsNullOrWhiteSpace)))
+        if (split == null || split.Length < 2 && split.Any(string.IsNullOrWhiteSpace))
             throw new InvalidOperationException($"Search html pattern {htmlSearchOptions.SearchString} is invalid");
         var searchAttr = split[0];
         var searchVal = split[1];
