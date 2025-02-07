@@ -2,6 +2,7 @@
 
 public enum ShopSettingType
 {
+    Service = 0,
     Product = 1,
     Category = 2
 }

@@ -1,12 +1,12 @@
-[
+
+   [
     {
       "Name": "Ozon",
-      "Caption": "Ozon",
       "Url": "https://www.ozon.ru",
       "ProductUrl": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fproduct%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
       "CategoryUrl": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2F{0}%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D{1}%26page%3D2",
       "ImportService": {
-        "AssemblyPath": "Import\\Products\\Ozon"
+        "AssemblyPath":  "Import\\Products\\Ozon\\Alchemist.Product.Shop.Ozon.ImportService.dll"
       },
       "RequestHeaders": {
 
@@ -64,21 +64,19 @@
       },
       "WebLoader": {
         "ImplementationTypeName": "Firefox",
-        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
-        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
       }
     },
 
     {
       "Name": "GoldApple",
-      "Caption": "Золотое яблоко",
       "Url": "https://goldapple.ru",
       "ProductUrl": "https://goldapple.ru/front/api/catalog/product-card/base?itemId={0}&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0",
       "CategoryUrl": "https://goldapple.ru/front/api/catalog/products?categoryId={0}&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber={1}",
       "PageProductCount": 30,
       "Perfomance": true,
       "ImportService": {
-        "AssemblyPath": "Import\\Products\\GoldApple"
+        "AssemblyPath": "Import\\Products\\GoldApple\\Alchemist.Product.Shop.GoldApple.ImportService.dll"
       },
       "WebLoader": {
         "ImplementationTypeName": "HttpClient",
