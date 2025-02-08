@@ -63,7 +63,7 @@
                 "Args": {
                   "path": "$[LoggerPath]/Error/error_.log",
                   "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
-                  "rollingInterval": "Day",
+                  "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
               },
@@ -72,7 +72,7 @@
                 "Args": {
                   "path": "$[LoggerPath]/Error/error_.json",
                   "formatter": "Serilog.Formatting.Json.JsonFormatter",
-                  "rollingInterval": "Day",
+                  "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
               }
@@ -98,7 +98,7 @@
                 "Args": {
                   "path": "$[LoggerPath]/Warning/warning_.log",
                   "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
-                  "rollingInterval": "Day",
+                  "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
               },
@@ -106,7 +106,7 @@
                 "Name": "File",
                 "Args": {
                   "path": "$[LoggerPath]/Warning/warning_.json",
-                  "rollingInterval": "Day",
+                  "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7,
                   "formatter": "Serilog.Formatting.Json.JsonFormatter"
                 }
@@ -133,7 +133,7 @@
                 "Args": {
                   "path": "$[LoggerPath]/Info/info_.log",
                   "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
-                  "rollingInterval": "Day",
+                  "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
               },
@@ -142,7 +142,7 @@
                 "Args": {
                   "path": "$[LoggerPath]/Info/info_.json",
                   "formatter": "Serilog.Formatting.Json.JsonFormatter",
-                  "rollingInterval": "Day",
+                  "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
               }
