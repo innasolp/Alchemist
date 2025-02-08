@@ -76,6 +76,30 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
     }
 
+    protected async Task ProcessUrlTaskAsync(Func<string, Task> task, string url)
+    {
+        try
+        {
+            await task(url);
+        }
+        catch (HttpRequestException e)
+        {
+            await HandleHttpExceptionAsync(e, url);
+        }
+        catch (WebLoaderException wle)
+        {
+            await HandleWebLoaderExceptionAsync(wle);
+        }
+        catch (WarningException warning)
+        {
+            Logger.LogWarning(warning, $"process not complete. Warning : {warning.Message}. ");
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, $"process {url} failed");
+        }
+    }
+
     protected async Task<T?> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
     {
         try

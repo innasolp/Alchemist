@@ -117,7 +117,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             productItem.CategoryId = category.ItemId;
 
-            await OnItemHandleAsync(productItem, apiUrl, true);
+            await ProcessUrlTaskAsync((url) => OnItemHandleAsync(productItem, url, true), apiUrl);
 
             productCount++;
         }
