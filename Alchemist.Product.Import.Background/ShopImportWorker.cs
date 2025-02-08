@@ -73,7 +73,7 @@ public class ShopImportWorker : BackgroundService
         if (sender is not IShopCategoryImportService service || e.NewCategory == null)
             return;
 
-        var result = await _categoryDataHandler.HandleItem(e.NewCategory, service.ShopModel);
+        var result = await _categoryDataHandler.HandleItem(e.NewCategory, service.ShopModel.ShopId);
 
         var categoryModel = new ImportCategory { Category = e.NewCategory.Name, ItemId = e.NewCategory.Id, ShopId = service.ShopModel.ShopId, Status = result };
 
@@ -85,7 +85,7 @@ public class ShopImportWorker : BackgroundService
         if (sender is not IShopImportService service)
             return;
 
-        var result = await _productDataHandler.HandleItem(e.Item, service.ShopModel);
+        var result = await _productDataHandler.HandleItem(e.Item, service.ShopModel.ShopId);
 
         var productItemModel = new ImportProduct { Name = e.Item.Name, ShopName = service.Name, Url = e.Item.ItemUrl, Status = result };
         await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);

@@ -12,9 +12,9 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
 {
     private readonly IShopDataService _shopDataService = shopDataService;
 
-    public async Task<ItemProcessStatus> HandleItem(ICategory category, IShopModel shopUrlModel)
+    public async Task<ItemProcessStatus> HandleItem(ICategory category, int shopId)
     {
-        var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(shopUrlModel.ShopId, category.Id);
+        var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(shopId, category.Id);
 
         if (shopCategory != null)
             return ItemProcessStatus.AlreadyExists;
@@ -22,7 +22,7 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
         {
             try
             {
-                shopCategory = await AddShopCategoryAsync(shopUrlModel.ShopId, category);
+                shopCategory = await AddShopCategoryAsync(shopId, category);
                 return ItemProcessStatus.New;
             }
             catch (Exception ex)
@@ -39,11 +39,11 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
         return await _shopDataService.AddShopCategory(shopCatergory);
     }
 
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, IShopModel shopUrlModel)
+    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, int shopId)
     {
         if (item is not ICategory category)
             return await Task.FromResult(ItemProcessStatus.Error);
 
-        return await HandleItem(category, shopUrlModel);
+        return await HandleItem(category, shopId);
     }
 }
