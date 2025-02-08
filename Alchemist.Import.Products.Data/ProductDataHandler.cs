@@ -147,9 +147,11 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         if (brand == null)
         {
             var country = await _alchemyServiceClient.FindCountryByName(shopProductModel.Country)
-                ?? await _alchemyServiceClient.CreateCountry(new Country { Name = shopProductModel.Country, Transcript = shopProductModel.Country });
+                ?? (!string.IsNullOrEmpty(shopProductModel.Country) 
+                 ? await _alchemyServiceClient.CreateCountry(new Country { Name = shopProductModel.Country, Transcript = shopProductModel.Country })
+                 : null);
 
-            brand = await _alchemyServiceClient.CreateBrand(new Brand() { CountryId = country.Id, Name = shopProductModel.Brand });
+            brand = await _alchemyServiceClient.CreateBrand(new Brand() { CountryId = country?.Id, Name = shopProductModel.Brand });
         }
 
         return brand;

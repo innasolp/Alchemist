@@ -6,7 +6,7 @@ public interface IBrand
 
     public string Name { get; set; }
 
-    public short CountryId { get; set; }
+    public short? CountryId { get; set; }
 
     public string? Comment { get; set; }
 }
