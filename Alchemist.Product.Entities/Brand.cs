@@ -8,7 +8,7 @@ public class Brand : IBrand
 
     public required string Name { get; set; }
 
-    public short CountryId { get; set; }
+    public short? CountryId { get; set; }
 
     public string? Comment { get; set; }
 }
