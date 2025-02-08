@@ -30,6 +30,9 @@
     <Reference Include="Log.Interceptors.DependencyInjection">
       <HintPath>..\Libs\Log\Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.dll</HintPath>
     </Reference>
+    <Reference Include="WebLoader.Common">
+      <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
+    </Reference>
     <Reference Include="WebLoader.Interfaces">
       <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
     </Reference>

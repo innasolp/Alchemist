@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Html.Categories.Tests;

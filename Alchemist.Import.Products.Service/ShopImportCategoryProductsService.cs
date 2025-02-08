@@ -7,6 +7,7 @@ using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Shop.Interfaces;
 using System.ComponentModel;
+using WebLoader.Common;
 
 namespace Alchemist.Import.Products.Service;
 
@@ -72,16 +73,13 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                         continue;
                     }
 
+                    currentCategoryProducts = categoryResult.Category;
+                    productCount += categoryResult.ProductCount;
+
                     if (categoryResult?.Result == true && categoryResult?.ProductCount == 0)
                     {
                         Logger.LogInformation($"Category {categoryUrl} completed. {productCount} products handled.");
                         break;
-                    }
-
-                    if (categoryResult != null)
-                    {
-                        currentCategoryProducts = categoryResult.Category;
-                        productCount += categoryResult.ProductCount;
                     }
 
                     page++;
