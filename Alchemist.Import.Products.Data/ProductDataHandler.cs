@@ -132,8 +132,9 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         int componentNumber = 0;
         foreach (var itemComponent in components)
         {
-            var component = await _alchemyServiceClient.FindComponentByName(itemComponent) ??
-                await _alchemyServiceClient.CreateComponent(new Product.Entities.Component { Name = itemComponent });
+            var componentName = itemComponent.RemoveSpecialCharacters();
+            var component = await _alchemyServiceClient.FindComponentByName(componentName) ??
+                await _alchemyServiceClient.CreateComponent(new Component { Name = componentName });
 
             componentNumber++;
 
@@ -148,7 +149,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         {
             var country = await _alchemyServiceClient.FindCountryByName(shopProductModel.Country)
                 ?? (!string.IsNullOrEmpty(shopProductModel.Country)
-                 ? await _alchemyServiceClient.CreateCountry(new Country { Name = shopProductModel.Country, Transcript = shopProductModel.Country })
+                 ? await _alchemyServiceClient.CreateCountry(new Country { Name = shopProductModel.Country.RemoveSpecialCharacters() })
                  : null);
 
             brand = await _alchemyServiceClient.CreateBrand(new Brand() { CountryId = country?.Id, Name = shopProductModel.Brand });
