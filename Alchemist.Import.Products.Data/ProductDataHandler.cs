@@ -11,13 +11,13 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
     private readonly IProductDataService _alchemyServiceClient = alchemyServiceClient;
 
     private readonly IShopDataService _shopDataService = shopDataService;
-    public async Task<ItemProcessStatus> HandleItem(IProductItem productItem,IShopModel shopUrlModel)
+    public async Task<ItemProcessStatus> HandleItem(IProductItem productItem, int shopId)
     {
-        var shopProduct = await _alchemyServiceClient.GetShopProductByShopAndItemId(shopUrlModel.ShopId, productItem.ItemId)
+        var shopProduct = await _alchemyServiceClient.GetShopProductByShopAndItemId(shopId, productItem.ItemId)
             ??
             new ShopProduct
             {
-                ShopId = shopUrlModel.ShopId,
+                ShopId = shopId,
                 ItemId = productItem.ItemId,
                 ApiUrl = productItem.ApiUrl,
                 ItemUrl = productItem.ItemUrl,
@@ -26,7 +26,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
 
         if (shopProduct.ProductId != 0)
         {
-            var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shopUrlModel.ShopId, shopProduct.Id, productItem.CategoryId);
+            var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shopId, shopProduct.Id, productItem.CategoryId);
             //todo
             //if(!categoryResult)
             //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
@@ -35,13 +35,13 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
             //todo
             //if (!result)
             //    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");            
-            
+
             return !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
         }
 
         var product = (await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand)
                             ?? await _alchemyServiceClient.FindProductByName(productItem?.Name))
-            ?? await CreateProductFromModelAsync(productItem, shopUrlModel.ShopId);
+            ?? await CreateProductFromModelAsync(productItem, shopId);
 
         shopProduct.ProductId = product.Id;
         shopProduct.IsActual = true;
@@ -49,9 +49,9 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         var newShopProduct = await _alchemyServiceClient.CreateShopProduct(shopProduct);
 
         if (!await SetShopProductPriceForItemAsync(productItem, newShopProduct.Id) ||
-                !await SetShopProductCategoryIfNeedAsync(shopUrlModel.ShopId, newShopProduct.Id, productItem.CategoryId))
+                !await SetShopProductCategoryIfNeedAsync(shopId, newShopProduct.Id, productItem.CategoryId))
             return await Task.FromResult(ItemProcessStatus.Error);
-        
+
         //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
 
         return ItemProcessStatus.New;
@@ -98,7 +98,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
 
     private async Task<Product.Entities.Product> CreateProductFromModelAsync(IProductItem productItem, int shopId)
     {
-        Brand? brand = !string.IsNullOrWhiteSpace(productItem.Brand) ? await GetBrandAsync(productItem) : null;       
+        Brand? brand = !string.IsNullOrWhiteSpace(productItem.Brand) ? await GetBrandAsync(productItem) : null;
 
         var productType = await _alchemyServiceClient.FindProductTypeByName(productItem.ProductType) ??
             await _alchemyServiceClient.CreateProductType(new ProductType { Name = productItem.ProductType });
@@ -121,8 +121,8 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
             Articul = productItem.Articul
         });
 
-        if (productItem.Components != null)        
-            await SetProductComponentsAsync(productItem.Components, product.Id);        
+        if (productItem.Components != null)
+            await SetProductComponentsAsync(productItem.Components, product.Id);
 
         return await Task.FromResult(product);
     }
@@ -147,7 +147,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         if (brand == null)
         {
             var country = await _alchemyServiceClient.FindCountryByName(shopProductModel.Country)
-                ?? (!string.IsNullOrEmpty(shopProductModel.Country) 
+                ?? (!string.IsNullOrEmpty(shopProductModel.Country)
                  ? await _alchemyServiceClient.CreateCountry(new Country { Name = shopProductModel.Country, Transcript = shopProductModel.Country })
                  : null);
 
@@ -157,11 +157,11 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         return brand;
     }
 
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item,IShopModel shopUrlModel)
+    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, int shopId)
     {
         if (item is not IProductItem productItem)
             return await Task.FromResult(ItemProcessStatus.Error);
 
-        return await HandleItem(productItem, shopUrlModel);
+        return await HandleItem(productItem, shopId);
     }
 }
