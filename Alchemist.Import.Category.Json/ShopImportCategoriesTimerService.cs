@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
 using Alchemist.Import.Shop.Interfaces;
+using WebLoader.Common;
 
 namespace Alchemist.Import.Category.Json;
 

@@ -95,14 +95,14 @@ message CountryReply{
 
 message CreateBrandRequest{
   string name=1;
-  int32 countryid=2;
+  google.protobuf.Int32Value countryid=2;
   google.protobuf.StringValue comment = 3;
 }
 
 message BrandReply{
   int32 id = 1;
   string name=2;
-  int32 countryid=3;
+  google.protobuf.Int32Value countryid=3;
   google.protobuf.StringValue comment=4;
 }
 

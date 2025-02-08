@@ -2,6 +2,7 @@ using Alchemist.Import.Category.Json;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
+using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Html.Categories.Tests;
