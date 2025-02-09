@@ -174,3 +174,114 @@
 /Alchemist.Import.Settings.Interfaces/bin/Debug/net8.0
 /Alchemist.Import.Settings.Interfaces/obj
 *.tmp
+/Alchemist.Settings.Data.Repository/bin/Debug/net8.0
+/Alchemist.Settings.Data.Repository/obj
+/Alchemist.Settings.RestAPI/bin/Debug/net8.0
+/Alchemist.Settings.RestAPI/obj
+/Alchemist.Settings.RestAPI/Alchemist.Settings.RestAPI.csproj.user
+/Alchemist.Settings.RestAPI/appsettings.Development.json
+/Alchemist.Settings.RestAPIClient/bin/Debug/net8.0
+/Alchemist.Settings.RestAPIClient/obj
+/Alchemist.Shop.ImportSettings.Model/obj/Debug/net8.0
+/Alchemist.Shop.ImportSettings.Model/obj
+/Alchemist.Shop.Settings.Interfaces/bin/Debug/net8.0
+/Alchemist.Shop.Settings.Interfaces/obj/Debug/net8.0
+/Alchemist.Shop.Settings.Interfaces/obj
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Interfaces.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/WebLoader.Interfaces.pdb
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/WebLoader.Interfaces.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.deps.json
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Interfaces.pdb
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.pdb
+/Alchemist.Import.Settings.Tests/bin/Debug/net8.0
+/Alchemist.Import.Settings.Tests/obj
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0
+/Alchemist.Import.CategoriesSettings.Tests/bin/Debug/net8.0
+/Alchemist.Import.CategoriesSettings.Tests/obj
+/Alchemist.Import.Html.DependencyInjection/bin/Debug/net8.0
+/Alchemist.Import.Html.DependencyInjection/obj
+/Alchemist.Product.ImportBackground.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.GoldApple.ImportService.HttpClient.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.GoldApple.Model.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.ImportService.Firefox.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.ImportServiceTests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.Model.Tests/bin/debug libs/net8.0
+/Alchemist.Import.Html.Factory/bin/Debug/net8.0
+/Alchemist.Import.Html.Factory/obj
+/Alchemist.Import.ProductSettings.Tests/bin/Debug/net8.0
+/Alchemist.Import.ProductSettings.Tests/obj
+/Alchemist.Import.Settings.Model/bin/Debug/net8.0
+/Alchemist.Import.Settings.Model/obj
+/Alchemist.Import.Settings.Interfaces/bin/Debug/net8.0
+/Alchemist.Import.Settings.Interfaces/obj
+/Alchemist.Settings.Data.Repository/bin/Debug/net8.0
+/Alchemist.Settings.Data.Repository/obj
+/Alchemist.Settings.RestAPI/bin/Debug/net8.0
+/Alchemist.Settings.RestAPI/obj
+/Alchemist.Settings.RestAPI/Alchemist.Settings.RestAPI.csproj.user
+/Alchemist.Settings.RestAPI/appsettings.Development.json
+/Alchemist.Settings.RestAPIClient/bin/Debug/net8.0
+/Alchemist.Settings.RestAPIClient/obj
+/Alchemist.Shop.ImportSettings.Model/obj/Debug/net8.0
+/Alchemist.Shop.ImportSettings.Model/obj
+/Alchemist.Shop.Settings.Interfaces/bin/Debug/net8.0
+/Alchemist.Shop.Settings.Interfaces/obj/Debug/net8.0
+/Alchemist.Shop.Settings.Interfaces/obj
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Interfaces.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/WebLoader.Interfaces.pdb
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/WebLoader.Interfaces.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.deps.json
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Interfaces.pdb
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.pdb
+/Alchemist.Import.Settings.Tests/bin/Debug/net8.0
+/Alchemist.Import.Settings.Tests/obj
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0
+/Alchemist.Import.CategoriesSettings.Tests/bin/Debug/net8.0
+/Alchemist.Import.CategoriesSettings.Tests/obj
+/Alchemist.Import.Html.DependencyInjection/bin/Debug/net8.0
+/Alchemist.Import.Html.DependencyInjection/obj
+/Alchemist.Product.ImportBackground.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.GoldApple.ImportService.HttpClient.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.GoldApple.Model.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.ImportService.Firefox.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.ImportServiceTests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.Model.Tests/bin/debug libs/net8.0
+/Alchemist.Import.Html.Factory/bin/Debug/net8.0
+/Alchemist.Import.Html.Factory/obj
+/Alchemist.Import.ProductSettings.Tests/bin/Debug/net8.0
+/Alchemist.Import.ProductSettings.Tests/obj
+/Alchemist.Import.Settings.Model/bin/Debug/net8.0
+/Alchemist.Import.Settings.Model/obj
+/Alchemist.Import.Settings.Interfaces/bin/Debug/net8.0
+/Alchemist.Import.Settings.Interfaces/obj
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Interfaces.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/WebLoader.Interfaces.pdb
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/WebLoader.Interfaces.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.deps.json
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Interfaces.pdb
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.dll
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0/Alchemist.Import.Settings.Model.pdb
+/Alchemist.Import.Settings.Tests/bin/Debug/net8.0
+/Alchemist.Import.Settings.Tests/obj
+/Alchemist.Shop.ImportSettings.Model/bin/Debug/net8.0
+/Alchemist.Import.CategoriesSettings.Tests/bin/Debug/net8.0
+/Alchemist.Import.CategoriesSettings.Tests/obj
+/Alchemist.Import.Html.DependencyInjection/bin/Debug/net8.0
+/Alchemist.Import.Html.DependencyInjection/obj
+/Alchemist.Product.ImportBackground.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.GoldApple.ImportService.HttpClient.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.GoldApple.Model.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.ImportService.Firefox.Tests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.ImportServiceTests/bin/debug libs/net8.0
+/Alchemist.Product.Shop.Ozon.Model.Tests/bin/debug libs/net8.0
+/Alchemist.Import.Html.Factory/bin/Debug/net8.0
+/Alchemist.Import.Html.Factory/obj
+/Alchemist.Import.ProductSettings.Tests/bin/Debug/net8.0
+/Alchemist.Import.ProductSettings.Tests/obj
+/Alchemist.Import.Settings.Model/bin/Debug/net8.0
+/Alchemist.Import.Settings.Model/obj
+/Alchemist.Import.Settings.Interfaces/bin/Debug/net8.0
+/Alchemist.Import.Settings.Interfaces/obj
+*.tmp
