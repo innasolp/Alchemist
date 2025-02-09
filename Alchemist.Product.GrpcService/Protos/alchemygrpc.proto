@@ -32,6 +32,7 @@ service AlchemyGrpcService {
 
 	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply);
 	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply);
+	rpc GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest) returns (ShopProductReply);
 	rpc UpdateShopProduct(UpdateShopProductRequest) returns(google.protobuf.BoolValue);
 	rpc CreateShopProduct(CreateShopProductRequest) returns(ShopProductReply);
 
@@ -170,6 +171,12 @@ message GetShopProductByShopAndItemIdRequest
 {
 	int32 shopid=1;
 	string itemid=2;
+}
+
+message GetShopProductByShopAndProductIdRequest
+{
+	int32 shopid=1;
+	int64 productid=2;
 }
 
 message UpdateShopProductRequest

@@ -1,36 +1,36 @@
-﻿using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.DataService.Interfaces;
 
 public interface IProductDataService
 {
-    Task<ProductType> CreateProductType(ProductType productType);
-    Task<ProductType?> FindProductTypeByName(string name);
+    Task<IProductType> CreateProductType(IProductType productType);
+    Task<IProductType?> FindProductTypeByName(string name);
 
-    Task<PurposeType> CreatePurposeType(PurposeType purposeType);
-    Task<PurposeType?> FindPurposeTypeByName(string name);
+    Task<IPurposeType> CreatePurposeType(IPurposeType purposeType);
+    Task<IPurposeType?> FindPurposeTypeByName(string name);
 
-    Task<Country> CreateCountry(Country country);
-    Task<Country?> FindCountryByName(string name);
+    Task<ICountry> CreateCountry(ICountry country);
+    Task<ICountry?> FindCountryByName(string name);
 
-    Task<Brand> CreateBrand(Brand brand);
-    Task<Brand?> FindBrandByName(string name);   
+    Task<IBrand> CreateBrand(IBrand brand);
+    Task<IBrand?> FindBrandByName(string name);
 
-    Task<Component> CreateComponent(Component component);
-    Task<Component?> FindComponentByName(string name);
+    Task<IComponent> CreateComponent(IComponent component);
+    Task<IComponent?> FindComponentByName(string name);
 
-    
-    Task<Entities.Product> CreateProduct(Entities.Product product);
-    Task<Entities.Product?> FindProductByName(string name);
-    Task<Entities.Product?> FindProductByNameAndBrand(string name, string brand);
 
-    Task<ShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl);
-    Task<ShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId);
+    Task<IProduct> CreateProduct(IProduct product);
+    Task<IProduct?> FindProductByName(string name);
+    Task<IProduct?> FindProductByNameAndBrand(string name, string brand);
 
-    Task<bool> UpdateShopProduct(ShopProduct shopProduct);
+    Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl);
+    Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId);
+    Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId);
 
-    Task<ShopProduct> CreateShopProduct(ShopProduct shopProduct);
+    Task<bool> UpdateShopProduct(IShopProduct shopProduct);
+
+    Task<IShopProduct> CreateShopProduct(IShopProduct shopProduct);
 
     Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId);
 
@@ -40,13 +40,13 @@ public interface IProductDataService
 
     Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId);
 
-    Task<ProductComponent> SetProductComponent(ProductComponent productComponent);
-    Task<Currency> CreateCurrency(Currency currency);
-    Task<Currency?> GetCurrencyByName(string name);
-    Task<Currency?> GetCurrencyByCode(short code);
+    Task<IProductComponent> SetProductComponent(IProductComponent productComponent);
+    Task<ICurrency> CreateCurrency(ICurrency currency);
+    Task<ICurrency?> GetCurrencyByName(string name);
+    Task<ICurrency?> GetCurrencyByCode(short code);
 
-    Task<bool> UpdateShopProductPrice(ShopProductPrice shopProductPrice);
+    Task<bool> UpdateShopProductPrice(IShopProductPrice shopProductPrice);
 
-    Task<ShopProductPrice> CreateShopProductPrice(ShopProductPrice shopProductPrice);
-    Task<ShopProductPrice?> GetShopProductPrice(long shopProductId);
+    Task<IShopProductPrice> CreateShopProductPrice(IShopProductPrice shopProductPrice);
+    Task<IShopProductPrice?> GetShopProductPrice(long shopProductId);
 }

@@ -1,4 +1,5 @@
 ﻿using Alchemist.Common;
+using Alchemist.Product.Interfaces;
 using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Import.Products.Interfaces;
@@ -39,9 +40,16 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
             return !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
         }
 
-        var product = (await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand)
-                            ?? await _alchemyServiceClient.FindProductByName(productItem?.Name))
-            ?? await CreateProductFromModelAsync(productItem, shopId);
+        var product = await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand)
+                            ?? await _alchemyServiceClient.FindProductByName(productItem?.Name);
+
+        if (product != null)
+        {
+            if (await _alchemyServiceClient.GetShopProductByShopAndProductId(shopId, product.Id) != null)
+                return ItemProcessStatus.AlreadyExists;
+        }
+        else
+            product = await CreateProductFromModelAsync(productItem, shopId);
 
         shopProduct.ProductId = product.Id;
         shopProduct.IsActual = true;
@@ -96,14 +104,14 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         }
     }
 
-    private async Task<Product.Entities.Product> CreateProductFromModelAsync(IProductItem productItem, int shopId)
+    private async Task<IProduct> CreateProductFromModelAsync(IProductItem productItem, int shopId)
     {
-        Brand? brand = !string.IsNullOrWhiteSpace(productItem.Brand) ? await GetBrandAsync(productItem) : null;
+        var brand = !string.IsNullOrWhiteSpace(productItem.Brand) ? await GetBrandAsync(productItem) : null;
 
         var productType = await _alchemyServiceClient.FindProductTypeByName(productItem.ProductType) ??
             await _alchemyServiceClient.CreateProductType(new ProductType { Name = productItem.ProductType });
 
-        var purposeTypes = new List<PurposeType>();
+        var purposeTypes = new List<IPurposeType>();
         foreach (var purpose in productItem.Purposes)
         {
             var purposeType = await _alchemyServiceClient.FindPurposeTypeByName(purpose) ??
@@ -142,7 +150,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         }
     }
 
-    private async Task<Brand?> GetBrandAsync(IProductItem shopProductModel)
+    private async Task<IBrand?> GetBrandAsync(IProductItem shopProductModel)
     {
         var brand = await _alchemyServiceClient.FindBrandByName(shopProductModel.Brand);
         if (brand == null)

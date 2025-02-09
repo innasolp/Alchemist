@@ -271,6 +271,11 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ItemId.Trim() == itemId.Trim()).FirstOrDefaultAsync();
     }
 
+    public async Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId)
+    {
+        return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ProductId == productId).FirstOrDefaultAsync();
+    }
+
     public async Task<bool> UpdateShopProduct(IShopProduct shopProduct)
     {
         var shopProductEntity = shopProduct.To<ShopProduct>();

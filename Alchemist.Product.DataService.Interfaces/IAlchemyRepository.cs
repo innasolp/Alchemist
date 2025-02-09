@@ -41,6 +41,7 @@ public interface IAlchemyRepository
     Task<IShopSettings> AddShopSettings(IShopSettings shopSettings);
 
     Task<List<IShopCategory>> GetShopCategories(int shopId);
+
     Task<IShopCategory?> GetShopCategory(int shopId, int itemId);
 
     
@@ -48,9 +49,12 @@ public interface IAlchemyRepository
     Task<IShopCategory> AddShopCategory(IShopCategory shopCategory);
 
     Task<IShopProduct> CreateShopProduct(IShopProduct shopProduct);
+
     Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string itemUrl);
 
     Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId);
+
+    Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId);
 
     Task<bool> UpdateShopProduct(IShopProduct shopProduct);
 
