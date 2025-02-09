@@ -179,6 +179,15 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         return await Task.FromResult(reply);
     }
 
+    public override async Task<ShopProductReply> GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest request, ServerCallContext context)
+    {
+        var shopProduct = await _repository.GetShopProductByShopAndProductId(request.Shopid, request.Productid)
+            ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
+        var reply = shopProduct.ToMessage<ShopProductReply>();
+        reply.Id = shopProduct.Id;
+        return await Task.FromResult(reply);
+    }
+
     public override async Task<ProductComponentReply> SetProductComponent(SetProductComponentRequest request, ServerCallContext context)
     {
         var productComponent =request.FromMessage<ProductComponent>();

@@ -6,7 +6,6 @@ using Alchemist.Product.GrpcService;
 using Grpc.Core.Interceptors;
 using Grpc.Client.Interceptors;
 using Alchemist.Product.Interfaces;
-using System.Xml.Linq;
 
 namespace Alchemist.Product.GrpcServiceClient;
 
@@ -32,7 +31,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         _serviceClient = new AlchemyGrpcService.AlchemyGrpcServiceClient(invoker);        
     }
 
-    public async Task<Brand> CreateBrand(Brand brand)
+    public async Task<IBrand> CreateBrand(IBrand brand)
     {
         var brandReply = await _serviceClient.CreateBrandAsync(new CreateBrandRequest { Name = brand.Name, Comment = brand.Comment, Countryid = brand.CountryId });
         return await Task.FromResult(new Brand
@@ -44,7 +43,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         });
     }
 
-    public async Task<Component> CreateComponent(Component component)
+    public async Task<IComponent> CreateComponent(IComponent component)
     {
         var componentReply = await _serviceClient.CreateComponentAsync(component.ToMessage<CreateComponentRequest>());
         var newComponent = componentReply.FromMessage<Component>();
@@ -52,7 +51,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(newComponent);
     }
 
-    public async Task<Country> CreateCountry(Country country)
+    public async Task<ICountry> CreateCountry(ICountry country)
     {
         var countryReply = await _serviceClient.CreateCountryAsync(new CreateCountryRequest { Name = country.Name, Transcript = country.Transcript });
         return await Task.FromResult(new Country
@@ -63,7 +62,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         });
     }
 
-    public async Task<Currency> CreateCurrency(Currency currency)
+    public async Task<ICurrency> CreateCurrency(ICurrency currency)
     {
         var currencyReply = await _serviceClient.CreateCurrencyAsync(currency.ToMessage<CreateCurrencyRequest>());
         var newCurrency = currencyReply.FromMessage<Currency>();
@@ -71,7 +70,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(newCurrency);
     }
 
-    public async Task<Entities.Product> CreateProduct(Entities.Product product)
+    public async Task<IProduct> CreateProduct(IProduct product)
     {
         var request = product.ToMessage<CreateProductRequest>();
         var productReply = await _serviceClient.CreateProductAsync(request);
@@ -80,7 +79,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(product);
     }
 
-    public async Task<ProductType> CreateProductType(ProductType productType)
+    public async Task<IProductType> CreateProductType(IProductType productType)
     {
         var productTypeReply = await _serviceClient.CreateProductTypeAsync(new CreateProductTypeRequest { Name = productType.Name });
         return await Task.FromResult(new ProductType
@@ -90,7 +89,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         });
     }
 
-    public async Task<PurposeType> CreatePurposeType(PurposeType purposeType)
+    public async Task<IPurposeType> CreatePurposeType(IPurposeType purposeType)
     {
         var productTypeReply = await _serviceClient.CreatePurposeTypeAsync(new CreatePurposeTypeRequest { Name = purposeType.Name });
         return await Task.FromResult(new PurposeType
@@ -100,7 +99,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         });
     }
 
-    public async Task<ShopProduct> CreateShopProduct(ShopProduct shopProduct)
+    public async Task<IShopProduct> CreateShopProduct(IShopProduct shopProduct)
     {
         var request = shopProduct.ToMessage<CreateShopProductRequest>();
         var shopProductReply = await _serviceClient.CreateShopProductAsync(request);
@@ -109,7 +108,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(shopProduct);
     }
 
-    public async Task<ShopProductPrice> CreateShopProductPrice(ShopProductPrice shopProductPrice)
+    public async Task<IShopProductPrice> CreateShopProductPrice(IShopProductPrice shopProductPrice)
     {
         var request = shopProductPrice.ToMessage<CreateShopProductPriceRequest>();
         var reply = await _serviceClient.CreateShopProductPriceAsync(request);
@@ -156,16 +155,16 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(reply.Value);
     }
 
-    public async Task<Brand?> FindBrandByName(string name)
+    public async Task<IBrand?> FindBrandByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
         var reply = await _serviceClient.FindBrandByNameAsync(request);
         if (reply == null) return await Task.FromResult(default(Brand));
-        var brand = new Brand { Id = reply.Id, Name = reply.Name, CountryId = (short)reply.Countryid, Comment = reply.Comment };
+        var brand = new Brand { Id = reply.Id, Name = reply.Name, CountryId = (short?)reply.Countryid, Comment = reply.Comment };
         return await Task.FromResult(brand);
     }
 
-    public async Task<Component?> FindComponentByName(string name)
+    public async Task<IComponent?> FindComponentByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
         var reply = await _serviceClient.FindComponentByNameAsync(request);
@@ -175,7 +174,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(component);
     }
 
-    public async Task<Country?> FindCountryByName(string name)
+    public async Task<ICountry?> FindCountryByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
         var reply = await _serviceClient.FindCountryByNameAsync(request);
@@ -183,7 +182,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(new Country { Id = (short)reply.Id, Name = reply.Name });
     }
 
-    public async Task<Entities.Product?> FindProductByName(string name)
+    public async Task<IProduct?> FindProductByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
         var reply = await _serviceClient.FindProductByNameAsync(request);
@@ -193,7 +192,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(product);
     }
 
-    public async Task<Entities.Product?> FindProductByNameAndBrand(string name, string brand)
+    public async Task<IProduct?> FindProductByNameAndBrand(string name, string brand)
     {
         var request = new FindProductByNameAndBrandRequest { Name = name, Brand = brand };
         var reply = await _serviceClient.FindProductByNameAndBrandAsync(request);
@@ -203,7 +202,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(product);
     }
 
-    public async Task<ProductType?> FindProductTypeByName(string name)
+    public async Task<IProductType?> FindProductTypeByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
         var reply = await _serviceClient.FindProductTypeByNameAsync(request);
@@ -211,7 +210,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(new ProductType { Id = (short)reply.Id, Name = reply.Name });
     }
 
-    public async Task<PurposeType?> FindPurposeTypeByName(string name)
+    public async Task<IPurposeType?> FindPurposeTypeByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
         var reply = await _serviceClient.FindPurposeTypeByNameAsync(request);
@@ -219,7 +218,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(new PurposeType { Id = (short)reply.Id, Name = reply.Name });
     }
 
-    public async Task<Currency?> GetCurrencyByCode(short code)
+    public async Task<ICurrency?> GetCurrencyByCode(short code)
     {
         var request = new GetCurrencyByCodeRequest { Code = code };
         var reply = await _serviceClient.GetCurrencyByCodeAsync(request);
@@ -229,7 +228,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(currency);
     }
 
-    public async Task<Currency?> GetCurrencyByName(string name)
+    public async Task<ICurrency?> GetCurrencyByName(string name)
     {
         var request = new FindByNameRequest { Name = name };
         var reply = await _serviceClient.GetCurrencyByNameAsync(request);
@@ -239,7 +238,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(currency);
     }    
 
-    public async Task<ShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl)
+    public async Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl)
     {
         var request = new GetShopProductByShopAndApiUrlRequest { Apiurl = apiUrl, Shopid = shopId };
 
@@ -250,7 +249,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(shopProduct);
     }
     
-    public async Task<ShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId)
+    public async Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId)
     {
         var request = new GetShopProductByShopAndItemIdRequest { Itemid = itemId, Shopid = shopId };
 
@@ -261,7 +260,18 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(shopProduct);
     }
 
-    public async Task<ShopProductPrice?> GetShopProductPrice(long shopProductId)
+    public async Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId)
+    {
+        var request = new GetShopProductByShopAndProductIdRequest { Productid = productId, Shopid = shopId };
+
+        var reply = await _serviceClient.GetShopProductByShopAndProductIdAsync(request);
+        if (reply == null) return await Task.FromResult(default(ShopProduct));
+        var shopProduct = reply.FromMessage<ShopProduct>();
+        shopProduct.Id = reply.Id;
+        return await Task.FromResult(shopProduct);
+    }
+
+    public async Task<IShopProductPrice?> GetShopProductPrice(long shopProductId)
     {
         var request = new GetByIdInt64Request { Id = shopProductId };
 
@@ -272,7 +282,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(shopProduct);
     }
 
-    public async Task<ProductComponent> SetProductComponent(ProductComponent productComponent)
+    public async Task<IProductComponent> SetProductComponent(IProductComponent productComponent)
     {
         var request = productComponent.ToMessage<SetProductComponentRequest>();
         var reply = await _serviceClient.SetProductComponentAsync(request);
@@ -280,7 +290,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(newProductComponent);
     }
 
-    public async Task<bool> UpdateShopProduct(ShopProduct shopProduct)
+    public async Task<bool> UpdateShopProduct(IShopProduct shopProduct)
     {
         var request = shopProduct.ToMessage<UpdateShopProductRequest>();
         request.Id = shopProduct.Id;
@@ -288,7 +298,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(result.Value);
     }
 
-    public async Task<bool> UpdateShopProductPrice(ShopProductPrice shopProductPrice)
+    public async Task<bool> UpdateShopProductPrice(IShopProductPrice shopProductPrice)
     {
         var request = shopProductPrice.ToMessage<UpdateShopProductPriceRequest>();
         request.Id = shopProductPrice.Id;
