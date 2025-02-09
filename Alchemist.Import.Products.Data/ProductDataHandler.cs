@@ -1,6 +1,5 @@
 ﻿using Alchemist.Common;
 using Alchemist.Product.Interfaces;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Shop.Interfaces;
