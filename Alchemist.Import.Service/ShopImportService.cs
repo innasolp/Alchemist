@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Interfaces;
 using Microsoft.Extensions.Logging;
-using System;
 using System.ComponentModel;
 using WebLoader.Common;
 using WebLoader.Interfaces;
@@ -20,7 +19,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
 
     public abstract Task Start(CancellationToken stoppingToken);
 
-    protected virtual async Task StartWebLoaderAsync(CancellationToken stoppingToken)
+    protected virtual async Task StartWebLoaderIfNeedAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested && !WebLoader.IsStarted)
         {
@@ -29,7 +28,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
                 if (!WebLoader.IsStarted)
                     await WebLoader.Start(RequestHeaders);
             }
-            catch(WarningException warning)
+            catch (WarningException warning)
             {
                 Logger.LogWarning(warning, $"importer {WebLoader.GetType()} not started.Warning : {warning.Message}. ");
             }
@@ -70,10 +69,21 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             Logger.LogWarning("Too many request. Thread would be sleeped 10 sec");
             await Task.Delay(10000);
         }
+        else if (RequestHeaders != null &&
+            (e.StatusCode == System.Net.HttpStatusCode.Forbidden || e.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable))
+        {
+            Logger.LogWarning($"Response status {e.StatusCode} for url {url}. Web loader {WebLoader.GetType().Name} will be restarted.");
+            await WebLoader.Start(RequestHeaders);
+        }
         else
         {
             Logger.LogError(e, $"request url {url} failed with error {e.HttpRequestError} status {e.StatusCode}");
         }
+    }
+
+    protected virtual void HandleWarningException(WarningException warning, string url)
+    {
+        Logger.LogWarning(warning, $"process url {url} not complete. Warning : {warning.Message}.");
     }
 
     protected async Task ProcessUrlTaskAsync(Func<string, Task> task, string url)
@@ -92,7 +102,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (WarningException warning)
         {
-            Logger.LogWarning(warning, $"process not complete. Warning : {warning.Message}. ");
+            HandleWarningException(warning, url);    
         }
         catch (Exception e)
         {
@@ -118,7 +128,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (WarningException warning)
         {
-            Logger.LogWarning(warning, $"process not complete. Warning : {warning.Message}. ");
+            HandleWarningException(warning, url);
             return await Task.FromResult(default(T));
         }
         catch (Exception e)
@@ -128,7 +138,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
     }
 
-    protected async Task<T?> ProcessUrlTaskAsync<TUrl,T>(Func<TUrl, Task<T?>> task, Func<TUrl,string> getUrl, TUrl itemUrl)
+    protected async Task<T?> ProcessUrlTaskAsync<TUrl, T>(Func<TUrl, Task<T?>> task, Func<TUrl, string> getUrl, TUrl itemUrl)
     {
         try
         {
@@ -146,7 +156,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (WarningException warning)
         {
-            Logger.LogWarning(warning, $"process not complete. Warning : {warning.Message}. ");
+            HandleWarningException(warning, getUrl(itemUrl));
             return await Task.FromResult(default(T));
         }
         catch (Exception e)
@@ -155,13 +165,13 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             return await Task.FromResult(default(T));
         }
     }
-    
+
 
     public virtual async ValueTask DisposeAsync()
     {
-        if (WebLoader == null)       
+        if (WebLoader == null)
             return;
-        
+
         if (WebLoader.IsStarted)
             await WebLoader.Close();
 

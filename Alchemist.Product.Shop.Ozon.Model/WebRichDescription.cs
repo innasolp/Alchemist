@@ -32,14 +32,14 @@ public class WebRichDescription : IJsonOnDeserialized
 public class RichAnnotationJson : IJsonOnDeserialized
 {
     [JsonPropertyName("content")]
-    public RichAnnotationContent[] Contents { get; set; }
+    public RichAnnotationContent[]? Contents { get; set; }
 
     [JsonIgnore]
     public string? ProductTypeTitle { get; set; }
 
     public void OnDeserialized()
     {
-        ProductTypeTitle = Contents.Where(c=>c.Blocks != null).SelectMany(c=>c.Blocks)
+        ProductTypeTitle = Contents?.Where(c=>c.Blocks != null).SelectMany(c=>c.Blocks)
                                    .FirstOrDefault(b => b?.RichAnnotationContentBlockType == RichAnnotationContentBlockType.Chess
                                                       && b.Title?.Content?.Length > 0)?.Title?.Content?.FirstOrDefault(c => !string.IsNullOrEmpty(c));
     }
