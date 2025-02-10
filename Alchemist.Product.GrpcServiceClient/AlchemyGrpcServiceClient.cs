@@ -39,7 +39,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
             Id = brandReply.Id,
             Name = brandReply.Name,
             Comment = brandReply.Comment,
-            CountryId = (short)brandReply.Countryid
+            CountryId = (short?)brandReply.Countryid
         });
     }
 

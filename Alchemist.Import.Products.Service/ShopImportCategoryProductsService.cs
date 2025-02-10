@@ -50,6 +50,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            await StartWebLoaderIfNeedAsync(stoppingToken);
+
             while (Categories.Count > 0)
             {
                 var category = Categories.Dequeue();
@@ -59,11 +61,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
                 TCategory? currentCategoryProducts = null;
 
+                var categoryUrl = category.GetCategoryForUrl();
+
                 do
                 {
-                    await StartWebLoaderAsync(stoppingToken);
-
-                    var categoryUrl = category.GetCategoryForUrl();
                     var categoryResult = await ProcessUrlTaskAsync((i) => ProcessCategoryProductsAsync(i, page + 1), i => categoryUrl, category);
 
                     if (categoryResult == null || categoryResult?.Result == false)
@@ -141,7 +142,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         productItem.ItemUrl = categoryProductItem.ItemUrl;
         productItem.Price = categoryProductItem.Price;
         productItem.Currency = categoryProductItem.Currency;
-        productItem.ApiUrl = apiUrl;        
+        productItem.ApiUrl = apiUrl;
 
         return await Task.FromResult(productItem);
     }

@@ -34,7 +34,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
     protected virtual async Task LoadCategoriesAsync(CancellationToken stoppingToken)
     {
         if (!WebLoader.IsStarted)
-            await StartWebLoaderAsync(stoppingToken);
+            await StartWebLoaderIfNeedAsync(stoppingToken);
 
         var values = await ProcessUrlTaskAsync(LoadFromUrlAsync, ShopModel.ShopUrl);
         if (values == null) return;
