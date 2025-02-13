@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script>
+    function selectItem(element, ulId, itemTag)
+    {
+        var classAttr = element.getAttribute("class") ?? "";
+        if(!classAttr.includes("selected"))
+            element.setAttribute("class",classAttr + " selected");
+
+        var ul = document.getElementById(ulId);
+        if(ul == null)
+            return;
+
+        var items = ul.getElementsByTagName(itemTag);
+        for (const li of items)
+        {
+            if(li == element) continue;
+
+            var liClassAttr = li.getAttribute("class") ?? "";
+            if(liClassAttr.includes("selected"))
+            li.setAttribute("class",liClassAttr.replace(" selected",""));
+        }
+    }
+</script>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <div class="flex">
+
+        <div>
+            <div class="left_menu">
+                <h1 class="display-7 menu_item">Shops</h1>
+            </div>
+            <ul class="left-menu-ul" id="shopsList">
+                <li class="left-menu-ul"><a href="javascript:void(0)" onclick="selectItem(this.parentElement, 'shopsList', 'li')">Ozon</a></li>
+                <li class="left-menu-ul"><a href="javascript:void(0)" onclick="selectItem(this.parentElement, 'shopsList', 'li')">Goldapple</a></li>
+                <li class="left-menu-ul"><a href="javascript:void(0)" onclick="selectItem(this.parentElement, 'shopsList', 'li')">Test</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="menu" id="menuDiv">
+                <div class="menu_item" onclick="selectItem(this, 'menuDiv', 'div')">
+                    <label class="display-7  menu_header">Settings</label>
+                </div>
+                <div class="menu_item" onclick="selectItem(this, 'menuDiv', 'div')">
+                    <label class="display-7  menu_header">Import products</label>
+                </div>
+                <div class="menu_item" onclick="selectItem(this, 'menuDiv', 'div')">
+                    <label class="display-7  menu_header">Import categories</label>
+                </div>
+            </div>
+            <div>
+                @await Html.PartialAsync("Settings");
+            </div>
+        </div>
+    </div>
+
+</div>

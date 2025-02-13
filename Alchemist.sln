@@ -246,6 +246,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.Playwright.Firefo
 		{7A962010-E8F0-48FF-A2DE-341E7C9277FF} = {7A962010-E8F0-48FF-A2DE-341E7C9277FF}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.WebApp", "Alchemist.Product.Import.WebApp\Alchemist.Product.Import.WebApp.csproj", "{1146083D-7463-4ED2-960C-B38F80938086}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -648,6 +650,12 @@ Global
 		{DF7E87E7-770D-4CCC-B9C1-769A2A477B04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF7E87E7-770D-4CCC-B9C1-769A2A477B04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF7E87E7-770D-4CCC-B9C1-769A2A477B04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1146083D-7463-4ED2-960C-B38F80938086}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{1146083D-7463-4ED2-960C-B38F80938086}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{1146083D-7463-4ED2-960C-B38F80938086}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1146083D-7463-4ED2-960C-B38F80938086}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1146083D-7463-4ED2-960C-B38F80938086}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1146083D-7463-4ED2-960C-B38F80938086}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
