@@ -1,5 +1,14 @@
-﻿namespace Alchemist.Product.Import.WebApp.Models;
+﻿using Alchemist.Product.Import.WebApp.Infrastructure;
+using System.ComponentModel.DataAnnotations;
 
-public class ImportProductsViewModel
+namespace Alchemist.Product.Import.WebApp.Models;
+
+public class ImportProductsViewModel(ShopModel shop) : ITabViewModel
 {
+    [Required]
+    public ShopModel Shop { get; set; } = shop;
+
+    public bool IsActive { get; set; }
+
+    public string PartialViewName => "ImportCategories";
 }
