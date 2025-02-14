@@ -1,7 +1,20 @@
-﻿@model IEnumerable<Alchemist.Product.Import.WebApp.Models.SettingsViewModel>
+﻿@using Alchemist.Product.Import.WebApp.Infrastructure;
+
+@model Alchemist.Product.Import.WebApp.Models.SettingsViewModel
+
+@{
+    var name = Model?.Shop.Name ?? "";
+}
 
 @*
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
 
 <h2>Hello Settings</h2>
+<h1> @name</h1>
+
+<div>
+    <input type="hidden" name="shopId" value="@Model?.Shop.Id"/>
+    <input type="hidden" name="settingsType" value="@SettingsType.Shop" />
+    <input type="text" name="name" value="settings" />
+</div>

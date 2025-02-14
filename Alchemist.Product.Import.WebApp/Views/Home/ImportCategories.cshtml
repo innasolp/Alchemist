@@ -1,8 +1,10 @@
-﻿@model IEnumerable<Alchemist.Product.Import.WebApp.Models.ImportCategoriesViewModel>
+﻿@model Alchemist.Product.Import.WebApp.Models.ImportCategoriesViewModel
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+<h2>Hello Categories</h2>
+<h1> @Model.Shop.Name</h1>
 <table class="table">
     <thead>
         <tr>
@@ -10,14 +12,5 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
     </tbody>
 </table>

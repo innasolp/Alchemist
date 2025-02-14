@@ -1,29 +1,38 @@
-﻿@{
+﻿@using Alchemist.Product.Import.WebApp.Infrastructure;
+
+@inject List<ShopModel> shops;
+@inject IReadOnlyCollection<string> tabs;
+@inject IDictionary<int, ShopImportModel> shopImports;
+
+@{
     ViewData["Title"] = "Home Page";
+    var selectedShop = ViewData["Shop"] as ShopModel ?? shops.FirstOrDefault();
+    var selectedTab = ViewData["Tab"] as string ?? tabs.FirstOrDefault();
+    var selectedShopImport = selectedShop != null && shopImports.ContainsKey(selectedShop.Id) ? shopImports[selectedShop.Id] : null;
+    var tabVm = TabFactory.CreateTabViewModel(selectedTab, selectedShop);
+    var tabModel = new TabModel { TabVm = tabVm };
+}
+
+@functions
+{   
+    public string GetLiStyle(string item, string selectedItem) => "left-menu-ul" + (selectedItem == item ? " selected" : "");
+    public string GetMenuItemStyle(string item, string selectedItem) => "menu_item" + (selectedItem == item ? " selected" : "");
 }
 
 <script>
-    function selectItem(element, ulId, itemTag)
-    {
-        var classAttr = element.getAttribute("class") ?? "";
-        if(!classAttr.includes("selected"))
-            element.setAttribute("class",classAttr + " selected");
 
-        var ul = document.getElementById(ulId);
-        if(ul == null)
-            return;
+function sendShopSelection(form)
+   { 
+       var settingsForm = document.getElementById('settingsForm');
+       var settingsFormData = new FormData(settingsForm);
+       addFormDataJson(settingsFormData);
+       var newFormData = getFormDataPrefix(settingsFormData, 'prevSettings');
+       appendFormData(form,newFormData);
+       form.submit();
+   }
 
-        var items = ul.getElementsByTagName(itemTag);
-        for (const li of items)
-        {
-            if(li == element) continue;
-
-            var liClassAttr = li.getAttribute("class") ?? "";
-            if(liClassAttr.includes("selected"))
-            li.setAttribute("class",liClassAttr.replace(" selected",""));
-        }
-    }
 </script>
+
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
@@ -36,27 +45,41 @@
                 <h1 class="display-7 menu_item">Shops</h1>
             </div>
             <ul class="left-menu-ul" id="shopsList">
-                <li class="left-menu-ul"><a href="javascript:void(0)" onclick="selectItem(this.parentElement, 'shopsList', 'li')">Ozon</a></li>
-                <li class="left-menu-ul"><a href="javascript:void(0)" onclick="selectItem(this.parentElement, 'shopsList', 'li')">Goldapple</a></li>
-                <li class="left-menu-ul"><a href="javascript:void(0)" onclick="selectItem(this.parentElement, 'shopsList', 'li')">Test</a></li>
+                @foreach (var shop in shops)
+                {
+                    <form id="shopForm" method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
+                          asp-route-shop.Name="@shop.Name"
+                          asp-route-shop.Id="@shop.Id"
+                          asp-route-tab="@selectedTab">
+                        <li class="@GetLiStyle(shop.Name,selectedShop.Name)">
+                        <a onclick="sendShopSelection(this.parentElement.parentElement);">@shop.Name</a>
+                        </li>
+                    </form>
+                }
             </ul>
         </div>
 
         <div>
-            <div class="menu" id="menuDiv">
-                <div class="menu_item" onclick="selectItem(this, 'menuDiv', 'div')">
-                    <label class="display-7  menu_header">Settings</label>
-                </div>
-                <div class="menu_item" onclick="selectItem(this, 'menuDiv', 'div')">
-                    <label class="display-7  menu_header">Import products</label>
-                </div>
-                <div class="menu_item" onclick="selectItem(this, 'menuDiv', 'div')">
-                    <label class="display-7  menu_header">Import categories</label>
-                </div>
+            <div class="menu" id="menuDiv">                
+                @foreach (var tab in tabs)
+                {
+                    <div class="@GetMenuItemStyle(tab,selectedTab)">
+                        <form method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
+                              asp-route-shop.Name="@selectedShop.Name"
+                              asp-route-shop.Id="@selectedShop.Id"
+                              asp-route-tab="@tab"
+                              asp-route-prevTab="@tabModel">
+                            <label class="display-7  menu_header" onclick="this.parentElement.submit();">@tab</label>
+                        </form>
+                    </div>
+                }
             </div>
-            <div>
-                @await Html.PartialAsync("Settings");
-            </div>
+            <div id="settingsDiv">
+                <form id="settingsForm" method="post" asp-action="@selectedTab" asp-controller="Home" asp-antiforgery="true">
+                    @await Html.PartialAsync(selectedTab, tabVm));
+                </form>
+                           
+            </div>           
         </div>
     </div>
 
