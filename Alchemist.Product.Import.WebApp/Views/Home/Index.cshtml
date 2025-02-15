@@ -6,7 +6,8 @@
 
 @{
     ViewData["Title"] = "Home Page";
-    var selectedShop = ViewData["Shop"] as ShopModel ?? shops.FirstOrDefault();
+    var shopId = ViewData["ShopId"] != null ? (int?)ViewData["ShopId"] : null;
+    var selectedShop = shops.FirstOrDefault(s => s.Id == shopId) ?? shops.FirstOrDefault();
     var selectedTab = ViewData["Tab"] as string ?? tabs.FirstOrDefault();
     var selectedShopImport = selectedShop != null && shopImports.ContainsKey(selectedShop.Id) ? shopImports[selectedShop.Id] : null;
     var currentTab = TabFactory.GetSettings(selectedShopImport, selectedTab);
@@ -19,16 +20,15 @@
 }
 
 <script>
+       async function saveSettings(form)
+       {
+           var settingsForm = document.getElementById('settingsForm');
+           var settingsFormData = new FormData(settingsForm);
+           addFormDataJson(settingsFormData);
+           var newFormData = getFormDataWithPrefix(settingsFormData, 'prevSettings');
 
-function sendShopSelection(form)
-   { 
-       var settingsForm = document.getElementById('settingsForm');
-       var settingsFormData = new FormData(settingsForm);
-       addFormDataJson(settingsFormData);
-       var newFormData = getFormDataPrefix(settingsFormData, 'prevSettings');
-       appendFormData(form,newFormData);
-       form.submit();
-   }
+           await  sendFormData(newFormData,'Index', 'post', ()=>form.submit());
+       }
 
 </script>
 
@@ -46,12 +46,11 @@ function sendShopSelection(form)
             <ul class="left-menu-ul" id="shopsList">
                 @foreach (var shop in shops)
                 {
-                    <form id="shopForm" method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
-                          asp-route-shop.Name="@shop.Name"
-                          asp-route-shop.Id="@shop.Id"
+                    <form name="shopForm" method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
+                          asp-route-shopId="@shop.Id"
                           asp-route-tab="@selectedTab">
                         <li class="@GetLiStyle(shop.Name,selectedShop.Name)">
-                        <a onclick="sendShopSelection(this.parentElement.parentElement);">@shop.Name</a>
+                        <a onclick=" saveSettings(this.parentElement.parentElement);">@shop.Name</a>
                         </li>
                     </form>
                 }
