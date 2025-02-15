@@ -1,4 +1,4 @@
-using Alchemist.Product.Import.WebApp.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
 using System.Collections.ObjectModel;
 
 var builder = WebApplication.CreateBuilder(args);

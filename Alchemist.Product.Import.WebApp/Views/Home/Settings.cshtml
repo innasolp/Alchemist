@@ -1,9 +1,9 @@
 ﻿@using Alchemist.Product.Import.WebApp.Infrastructure;
 
-@model Alchemist.Product.Import.WebApp.Models.SettingsViewModel
+@model ShopSettingsModel
 
 @{
-    var name = Model?.Shop.Name ?? "";
+    var name = Model?.Name ?? "SettingsS";
 }
 
 @*
@@ -14,7 +14,5 @@
 <h1> @name</h1>
 
 <div>
-    <input type="hidden" name="shopId" value="@Model?.Shop.Id"/>
-    <input type="hidden" name="settingsType" value="@SettingsType.Shop" />
-    <input type="text" name="name" value="settings" />
+    <input type="text" name="Name" value="@name" />
 </div>

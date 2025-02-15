@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
-public record class SettingsData(int shopId, SettingsType settingsType, string json);
+public record class SettingsData(int ShopId, SettingsType SettingsType, string Json);
 
 public class HomeController(ILogger<HomeController> logger,
     List<ShopModel> shops,
@@ -30,6 +30,14 @@ public class HomeController(ILogger<HomeController> logger,
     {
         ViewData["Shop"] = shop;
         ViewData["Tab"] = tab;
+
+        var shopImport = _shopImports.FirstOrDefault(s => s.Key == prevSettings.ShopId).Value;
+        if(shopImport != null)
+        {
+            var settings = TabFactory.GetSettingsByTypeFromJson(prevSettings.SettingsType, prevSettings.Json);
+            TabFactory.UpdateSettings(shopImport, settings);
+        }
+
         return View();
     }
 

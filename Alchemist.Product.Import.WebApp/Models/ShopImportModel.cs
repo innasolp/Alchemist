@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Product.Import.WebApp.Infrastructure;
+﻿namespace Alchemist.Product.Import.WebApp.Models;
 
 public class ShopImportModel
 {
