@@ -30,7 +30,7 @@ function formDataToJson(formData) {
     return json;
 }
 
-function getFormDataPrefix(formData, prefix) {
+function getFormDataWithPrefix(formData, prefix) {
 
     var newFormData = new FormData();
     for (const key of formData.keys()) {
@@ -72,6 +72,21 @@ async function sendFormData(form, formData)
             body: formData,
         });
         console.log(await response.json());
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function sendFormData(formData, action, method='post', callback=null) {
+    try {
+
+        const request = new Request(action, {
+            method: method,
+            body: formData,
+        });
+
+        await fetch(request).then(r => { callback(); console.log(r); }); 
+
     } catch (e) {
         console.error(e);
     }

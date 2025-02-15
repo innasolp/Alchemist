@@ -25,19 +25,24 @@ public class HomeController(ILogger<HomeController> logger,
         return View();
     }
 
-    [HttpPost]
-    public IActionResult Index(ShopModel? shop, string? tab, SettingsData? prevSettings)
+    [HttpPost("Home/Index/shopId={shopId}&tab={tab}")]
+    public IActionResult Index(int shopId, string tab)//, SettingsData? prevSettings)
     {
-        ViewData["Shop"] = shop;
+        ViewData["ShopId"] = shopId;
         ViewData["Tab"] = tab;
 
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult Index(SettingsData prevSettings)
+    {
         var shopImport = _shopImports.FirstOrDefault(s => s.Key == prevSettings.ShopId).Value;
         if(shopImport != null)
         {
             var settings = TabFactory.GetSettingsByTypeFromJson(prevSettings.SettingsType, prevSettings.Json);
             TabFactory.UpdateSettings(shopImport, settings);
         }
-
         return View();
     }
 
