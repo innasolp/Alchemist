@@ -9,8 +9,7 @@
     var selectedShop = ViewData["Shop"] as ShopModel ?? shops.FirstOrDefault();
     var selectedTab = ViewData["Tab"] as string ?? tabs.FirstOrDefault();
     var selectedShopImport = selectedShop != null && shopImports.ContainsKey(selectedShop.Id) ? shopImports[selectedShop.Id] : null;
-    var tabVm = TabFactory.CreateTabViewModel(selectedTab, selectedShop);
-    var tabModel = new TabModel { TabVm = tabVm };
+    var currentTab = TabFactory.GetSettings(selectedShopImport, selectedTab);
 }
 
 @functions
@@ -67,8 +66,7 @@ function sendShopSelection(form)
                         <form method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                               asp-route-shop.Name="@selectedShop.Name"
                               asp-route-shop.Id="@selectedShop.Id"
-                              asp-route-tab="@tab"
-                              asp-route-prevTab="@tabModel">
+                              asp-route-tab="@tab">
                             <label class="display-7  menu_header" onclick="this.parentElement.submit();">@tab</label>
                         </form>
                     </div>
@@ -76,7 +74,9 @@ function sendShopSelection(form)
             </div>
             <div id="settingsDiv">
                 <form id="settingsForm" method="post" asp-action="@selectedTab" asp-controller="Home" asp-antiforgery="true">
-                    @await Html.PartialAsync(selectedTab, tabVm));
+                    <input type="hidden" name="ShopId" value="@selectedShop.Id"/>
+                    <input type="hidden" name="SettingsType" value="@currentTab.Type" />
+                    @await Html.PartialAsync(selectedTab, currentTab));
                 </form>
                            
             </div>           

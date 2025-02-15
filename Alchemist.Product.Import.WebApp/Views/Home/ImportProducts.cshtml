@@ -1,14 +1,20 @@
-﻿@model Alchemist.Product.Import.WebApp.Models.ImportProductsViewModel
+﻿@using Alchemist.Product.Import.WebApp.Infrastructure;
+
+@model ProductsImportSettingsModel
+@{
+    var name = Model?.Name ?? "SettingsP";
+}
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
 <h2>Hello Products</h2>
-<h1> @Model.Shop.Name</h1>
+<h1> @Model.Name</h1>
+<input type="text" name="Name" value="@name"  />
 <table class="table">
     <thead>
         <tr>
-            <th></th>
+            <th></th>            
         </tr>
     </thead>
     <tbody>

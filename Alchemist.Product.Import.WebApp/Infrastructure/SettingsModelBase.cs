@@ -1,4 +1,6 @@
-﻿namespace Alchemist.Product.Import.WebApp.Infrastructure;
+﻿using System.Data;
+
+namespace Alchemist.Product.Import.WebApp.Infrastructure;
 
 public enum SettingsType
 {
@@ -8,7 +10,7 @@ public enum SettingsType
 }
 
 public abstract class SettingsModelBase
-{
+{    
     public abstract SettingsType Type { get; }
 
     public int ShopId { get; set; } 
@@ -16,4 +18,9 @@ public abstract class SettingsModelBase
     public int Id { get; set; }
 
     public string Name { get; set; }
+
+    public virtual void Update(SettingsModelBase source)
+    {
+        Name = source.Name;
+    }
 }
