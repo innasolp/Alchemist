@@ -1,4 +1,10 @@
-﻿@model Alchemist.Product.Import.WebApp.Models.ShopSettingsModel
+﻿@using System.Text.Json
+@model Alchemist.Product.Import.WebApp.Models.ShopSettingsModel
+
+@functions {
+
+    public object GetServiceData(int? id) => JsonSerializer.Serialize(new { shopId = Model.ShopId, id = id ?? 0, shopSettingsId = Model.Id });
+}
 
 <h4>ShopSettingsModel</h4>
 <hr />
@@ -35,7 +41,10 @@
         </form>
         <div class="form-group">
             <label asp-for="ImportService" class="control-label"></label>
-            <button onclick="ShowItemModal()" class="btn btn-primary btn-sm">Add New Vender</button>
+            <button onclick="ShowItemModal('Home/ImportServiceSettings', @GetServiceData(Model.ImportService?.Id))"
+                    class="btn btn-primary btn-sm">
+                Add New Vender
+            </button>
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
     </div>

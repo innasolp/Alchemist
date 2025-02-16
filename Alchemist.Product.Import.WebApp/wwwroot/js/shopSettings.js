@@ -1,6 +1,11 @@
-﻿function ShowItemModal() {
-    var url = "/Home/ServiceSettings";
+﻿function ShowItemModal(url) {
     $("#modalBodyDiv").load(url, function (data) {
+        $("#divModal").modal("show");
+    })
+}
+
+function ShowItemModal(url, data) {
+    $("#modalBodyDiv").load(url, data, function (obj) {
         $("#divModal").modal("show");
     })
 }
