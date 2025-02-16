@@ -67,7 +67,7 @@
                         <form method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                               asp-route-shopId="@selectedShop.Id"
                               asp-route-tab="@tab">
-                            <label class="display-7  menu_header" onclick="this.parentElement.submit();">@tab</label>
+                            <label class="display-7  menu_header" onclick="saveSettings(this.parentElement);">@tab</label>
                         </form>
                     </div>
                 }
