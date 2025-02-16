@@ -9,4 +9,18 @@ public class ShopSettingsModel: SettingsModelBase
 
     [JsonIgnore]
     public override SettingsType Type => SettingsType.Shop;
+    
+    string? Caption { get; set; }
+
+    string? Url { get; set; }
+
+    string? RequestHeaders { get; set; }
+
+    public ServiceSettingsModel ImportService { get; set; }
+
+    public ServiceSettingsModel BrowserDataLoader { get; set; }
+
+    public ServiceSettingsModel WebLoader { get; set; }
+
+    public bool? Perfomance { get; set; }
 }

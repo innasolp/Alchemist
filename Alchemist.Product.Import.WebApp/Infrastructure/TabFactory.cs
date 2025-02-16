@@ -11,25 +11,25 @@ public static class TabFactory
         {
             case "Settings":
                 {
-                    shopImport.ShopSettings ??= new ShopSettingsModel();
+                    shopImport.ShopSettings ??= new ShopSettingsModel() { ShopId = shopImport.ShopId };
                     return shopImport.ShopSettings;
                 }
 
             case "ImportProducts":
                 {
-                    shopImport.ImportProducts ??= new ProductsImportSettingsModel();
+                    shopImport.ImportProducts ??= new ProductsImportSettingsModel() { ShopId = shopImport.ShopId };
                     return shopImport.ImportProducts;
                 }
 
             case "ImportCategories":
                 {
-                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel();
+                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel() { ShopId = shopImport.ShopId };
                     return shopImport.ImportCategories;
                 }
 
             default:
                 {
-                    shopImport.ShopSettings ??= new ShopSettingsModel();
+                    shopImport.ShopSettings ??= new ShopSettingsModel() { ShopId = shopImport.ShopId };
                     return shopImport.ShopSettings;
                 }
         }
