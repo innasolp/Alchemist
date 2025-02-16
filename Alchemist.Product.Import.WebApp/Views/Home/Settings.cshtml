@@ -1,18 +1,42 @@
-﻿@using Alchemist.Product.Import.WebApp.Infrastructure;
+﻿@model Alchemist.Product.Import.WebApp.Models.ShopSettingsModel
 
-@model ShopSettingsModel
+<h4>ShopSettingsModel</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <div class="modal fade" id="divModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <a href="#" class="close" data-bs-dismiss="modal">&times;</a>
+                        <h3 class="modal-title text-bg-success" id="heading">Insert record</h3>
+                    </div>
+                    <div class="modal-body" id="modalBodyDiv">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form id="settingsForm">
+            <input type="hidden" name="ShopId" value="@Model.ShopId" />
+            <input type="hidden" name="SettingsType" value="@Model.Type" />
 
-@{
-    var name = Model?.Name ?? "SettingsS";
-}
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
-
-<h2>Hello Settings</h2>
-<h1> @name</h1>
-
-<div>
-    <input type="text" name="Name" value="@name" />
+            <div class="form-group">
+                <label asp-for="Id" class="control-label"></label>
+                <input asp-for="Id" class="form-control" />
+                <span asp-validation-for="Id" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </form>
+        <div class="form-group">
+            <label asp-for="ImportService" class="control-label"></label>
+            <button onclick="ShowItemModal()" class="btn btn-primary btn-sm">Add New Vender</button>
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
 </div>

@@ -10,7 +10,7 @@
     var selectedShop = shops.FirstOrDefault(s => s.Id == shopId) ?? shops.FirstOrDefault();
     var selectedTab = ViewData["Tab"] as string ?? tabs.FirstOrDefault();
     var selectedShopImport = selectedShop != null && shopImports.ContainsKey(selectedShop.Id) ? shopImports[selectedShop.Id] : null;
-    var currentTab = TabFactory.GetSettings(selectedShopImport, selectedTab);
+    var currentTabModel = TabFactory.GetSettings(selectedShopImport, selectedTab);
 }
 
 @functions
@@ -18,6 +18,8 @@
     public string GetLiStyle(string item, string selectedItem) => "left-menu-ul" + (selectedItem == item ? " selected" : "");
     public string GetMenuItemStyle(string item, string selectedItem) => "menu_item" + (selectedItem == item ? " selected" : "");
 }
+
+<script src="~/js/shopSettings.js"></script>
 
 <script>
        async function saveSettings(form)
@@ -27,7 +29,7 @@
            addFormDataJson(settingsFormData);
            var newFormData = getFormDataWithPrefix(settingsFormData, 'prevSettings');
 
-           await  sendFormData(newFormData,'Index', 'post', ()=>form.submit());
+           await  sendFormData(newFormData,'/', 'post', ()=>form.submit());
        }
 
 </script>
@@ -63,21 +65,15 @@
                 {
                     <div class="@GetMenuItemStyle(tab,selectedTab)">
                         <form method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
-                              asp-route-shop.Name="@selectedShop.Name"
-                              asp-route-shop.Id="@selectedShop.Id"
+                              asp-route-shopId="@selectedShop.Id"
                               asp-route-tab="@tab">
                             <label class="display-7  menu_header" onclick="this.parentElement.submit();">@tab</label>
                         </form>
                     </div>
                 }
             </div>
-            <div id="settingsDiv">
-                <form id="settingsForm" method="post" asp-action="@selectedTab" asp-controller="Home" asp-antiforgery="true">
-                    <input type="hidden" name="ShopId" value="@selectedShop.Id"/>
-                    <input type="hidden" name="SettingsType" value="@currentTab.Type" />
-                    @await Html.PartialAsync(selectedTab, currentTab));
-                </form>
-                           
+             <div id="settingsDiv">                
+                @await Html.PartialAsync(selectedTab, currentTabModel));
             </div>           
         </div>
     </div>

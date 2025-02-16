@@ -63,20 +63,6 @@ function addFormDataJson(formData) {
     formData.append('json', json);
 }
 
-async function sendFormData(form, formData)
-{
- try {
-        const response = await fetch(form.action, {
-            method: form.method,
-            // Set the FormData instance as the request body
-            body: formData,
-        });
-        console.log(await response.json());
-    } catch (e) {
-        console.error(e);
-    }
-}
-
 async function sendFormData(formData, action, method='post', callback=null) {
     try {
 

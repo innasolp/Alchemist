@@ -26,7 +26,7 @@ public class HomeController(ILogger<HomeController> logger,
     }
 
     [HttpPost("Home/Index/shopId={shopId}&tab={tab}")]
-    public IActionResult Index(int shopId, string tab)//, SettingsData? prevSettings)
+    public IActionResult Index(int shopId, string tab)
     {
         ViewData["ShopId"] = shopId;
         ViewData["Tab"] = tab;
@@ -59,6 +59,11 @@ public class HomeController(ILogger<HomeController> logger,
     }
     
     public IActionResult Settings()
+    {
+        return PartialView();
+    }
+
+    public IActionResult ServiceSettings()
     {
         return PartialView();
     }
