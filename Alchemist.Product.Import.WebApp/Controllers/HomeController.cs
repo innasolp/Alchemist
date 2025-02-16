@@ -63,9 +63,30 @@ public class HomeController(ILogger<HomeController> logger,
         return PartialView();
     }
 
-    public IActionResult ServiceSettings()
+    public IActionResult ImportServiceSettings(int shopId, int id, int shopSettingsId)
     {
-        return PartialView();
+        ViewData["ShopId"] = shopId;
+        ViewData["Id"] = id;
+        ViewData["ShopSettingsId"] = shopSettingsId;
+
+        var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
+            ? (shopImportModel.ShopSettings?.ImportService ?? new ServiceSettingsModel { ShopId = shopId})
+            : null;
+
+        return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
+    }
+
+    public IActionResult ServiceSettings(int shopId, int id, int shopSettingsId)
+    {
+        ViewData["ShopId"] = shopId;
+        ViewData["Id"] = id;
+        ViewData["ShopSettingsId"] = shopSettingsId;
+
+        var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
+            ? (shopImportModel.ShopSettings?.ServiceSettings.First(s=>s.Id == id) ?? new ServiceSettingsModel { ShopId = shopId })
+            : null;
+
+        return PartialView(serviceSettingsModel);
     }
 
     public IActionResult ImportProducts()
