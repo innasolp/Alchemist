@@ -70,7 +70,7 @@ public class HomeController(ILogger<HomeController> logger,
         ViewData["ShopSettingsId"] = shopSettingsId;
 
         var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
-            ? (shopImportModel.ShopSettings?.ImportService ?? new ServiceSettingsModel { ShopId = shopId})
+            ? (shopImportModel.ShopSettings?.ImportService ?? new ServiceSettingsModel(shopId))
             : null;
 
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
@@ -83,10 +83,27 @@ public class HomeController(ILogger<HomeController> logger,
         ViewData["ShopSettingsId"] = shopSettingsId;
 
         var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
-            ? (shopImportModel.ShopSettings?.ServiceSettings.First(s=>s.Id == id) ?? new ServiceSettingsModel { ShopId = shopId })
+            ? (shopImportModel.ShopSettings?.ServiceSettings.First(s=>s.Id == id) ?? new ServiceSettingsModel(shopId ))
             : null;
 
         return PartialView(serviceSettingsModel);
+    }    
+
+    [HttpPost]
+    public IActionResult SaveImportServiceSettings(ServiceSettingsModel data)
+    {
+        if (data != null && data.ShopId != 0 && data.ShopSettingsId != 0
+            && _shopImports.TryGetValue(data.ShopId, out var shopImportModel))
+        {
+            if (shopImportModel.ShopSettings.ImportService == null)
+                shopImportModel.ShopSettings.ImportService = new ServiceSettingsModel(data.ShopId);
+
+            
+
+            shopImportModel.ShopSettings.ImportService.Update(data);
+        }
+
+        return View("~/Views/Home/Index.cshtml");
     }
 
     public IActionResult ImportProducts()

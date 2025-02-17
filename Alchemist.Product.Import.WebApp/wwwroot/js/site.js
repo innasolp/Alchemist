@@ -30,6 +30,27 @@ function formDataToJson(formData) {
     return json;
 }
 
+function getFormAsJson(form) {
+    let obj = {};
+    let formData = form.serialize();
+    let formArray = formData.split("&");
+
+    for (inputData of formArray) {
+        let dataTmp = inputData.split('=');
+        obj[dataTmp[0]] = dataTmp[1];
+    }
+    return JSON.stringify(obj);
+}
+
+function getFormData(form) {
+    var formData = new FormData(form);
+    var object = {};
+    formData.forEach(function (value, key) {
+        object[key] = value;
+    });
+    return object;
+}
+
 function getFormDataWithPrefix(formData, prefix) {
 
     var newFormData = new FormData();
@@ -108,4 +129,53 @@ function postXmlHttpFormData(form, formData) {
     }
 
     xhr.send(body);
+}
+function ShowItemModal(url) {
+    $("#modalBodyDiv").load(url, function (data) {
+        $("#divModal").modal("show");
+    })
+}
+
+function ShowItemModal(url, data) {
+    $("#modalBodyDiv").load(url, data, function (obj) {
+        $("#divModal").modal("show");
+    })
+}
+
+function closeItemModal() {
+    $("#divModal").modal("hide");
+}
+
+function postData(url, jsonData, onSuccess = null) {
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: jsonData,
+        success: function () {
+            console.log('saved');
+            onSuccess();
+        },
+        error: function (err) {
+            console.error("Not Saved");
+            console.trace(err);
+        }
+    });
+}
+
+function save(url, jsonData, onSuccess=null) {
+
+    $.validator.unobtrusive.parse($("#modalForm"));
+
+    if(!$("#modalForm").valid()) return;
+
+    var pendingRequest = $("#modalForm").data('validator').pendingRequest;
+    if (pendingRequest == 0)
+        postData(url, jsonData, onSuccess);
+    else
+        setTimeout(() =>
+        {
+            if ($("#modalForm").valid())
+                postData(url, jsonData, onSuccess);
+        }
+        ,500);
 }
