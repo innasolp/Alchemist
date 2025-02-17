@@ -19,7 +19,12 @@
     public string GetMenuItemStyle(string item, string selectedItem) => "menu_item" + (selectedItem == item ? " selected" : "");
 }
 
-<script src="~/js/shopSettings.js"></script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
 
 <script>
        async function saveSettings(form)
@@ -33,6 +38,7 @@
        }
 
 </script>
+}
 
 
 <div class="text-center">
