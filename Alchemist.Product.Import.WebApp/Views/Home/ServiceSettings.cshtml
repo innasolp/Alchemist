@@ -9,15 +9,16 @@
     <input type="hidden" name="Guid" value="@Model.Guid" />
     <div class="row">
         <div class="col-md-4">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div> 
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
                 <label asp-for="JsonValue" class="control-label"></label>
-                <input asp-for="JsonValue" class="form-control" />
+                <input type="hidden" asp-for="JsonValue" id="jsonValueHidden" />
                 <span asp-validation-for="JsonValue" class="text-danger"></span>
-                <button type="button" class="btn btn-primary" onclick="save()">Load data in json</button>
+                <input type="file" class="btn btn-primary" id="jsonFile" name="jsonFile" 
+                onchange="postFormInputFile('/FileUpload/UploadJson', document.getElementById('modalForm'), this.name, (data)=>{setJson(data,'jsonValueHidden');})" />
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label asp-for="ServiceTypeName" class="control-label"></label>
                 <input asp-for="ServiceTypeName" class="form-control" />
                 <span asp-validation-for="ServiceTypeName" class="text-danger"></span>
@@ -28,15 +29,18 @@
                 <span asp-validation-for="ImplementationTypeName" class="text-danger"></span>
             </div><div class="form-group">
                 <label asp-for="AssemblyPath" class="control-label"></label>
-                <input asp-for="AssemblyPath" class="form-control" name="AssemblyPath" />
-                <span  asp-validation-for="AssemblyPath" class="text-danger"></span>
+                <input asp-for="AssemblyPath" id="assemblyPathDisplay" class="form-control" name="AssemblyPath" />
+                <span asp-validation-for="AssemblyPath" class="text-danger"></span>
+                <input type="file" onlo class="btn btn-primary" onchange="display(this,'assemblyPathDisplay')" />
             </div><div class="form-group">
                 <label asp-for="ServiceProviderPath" class="control-label"></label>
                 <input asp-for="ServiceProviderPath" class="form-control" />
                 <span asp-validation-for="ServiceProviderPath" class="text-danger"></span>
+                <input type="file" onlo class="btn btn-primary" onchange="display(this,'assemblyPathDisplay')" />
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="save('Home/SaveImportServiceSettings', getFormData(document.getElementById('modalForm')), ()=>{closeItemModal();} )">Save</button>
+                <button type="button" class="btn btn-primary" 
+                onclick="save('Home/SaveServiceSettings', getFormData(document.getElementById('modalForm')), (data)=>{ if(data) closeItemModal();} )">Save</button>
             </div>
         </div>
     </div>

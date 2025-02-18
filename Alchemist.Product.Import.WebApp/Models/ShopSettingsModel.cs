@@ -5,16 +5,16 @@ namespace Alchemist.Product.Import.WebApp.Models;
 
 public class ShopSettingsModel: SettingsModelBase
 {
-    public List<ServiceSettingsModel> ServiceSettings { get; set; }
+    public List<ServiceSettingsModel> ServiceSettings { get;  } = [];
 
     [JsonIgnore]
     public override SettingsType Type => SettingsType.Shop;
-    
-    string? Caption { get; set; }
 
-    string? Url { get; set; }
+    public string? Caption { get; set; }
 
-    string? RequestHeaders { get; set; }
+    public string? Url { get; set; }
+
+    public string? RequestHeaders { get; set; }
 
     public ServiceSettingsModel ImportService { get; set; }
 

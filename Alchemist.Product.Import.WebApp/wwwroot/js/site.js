@@ -46,7 +46,8 @@ function getFormData(form) {
     var formData = new FormData(form);
     var object = {};
     formData.forEach(function (value, key) {
-        object[key] = value;
+        if (!(value instanceof File))
+         object[key] = value;
     });
     return object;
 }
@@ -151,9 +152,9 @@ function postData(url, jsonData, onSuccess = null) {
         type: 'POST',
         url: url,
         data: jsonData,
-        success: function () {
+        success: function (data) {
             console.log('saved');
-            onSuccess();
+            onSuccess(data);
         },
         error: function (err) {
             console.error("Not Saved");
@@ -178,4 +179,12 @@ function save(url, jsonData, onSuccess=null) {
                 postData(url, jsonData, onSuccess);
         }
         ,500);
+}
+
+function display(source, displayId) {
+    document.getElementById(displayId).value = source.value;
+}
+
+function setJson(data, hiddenId) {
+    document.getElementById(hiddenId).value = data;
 }
