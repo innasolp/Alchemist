@@ -63,48 +63,68 @@ public class HomeController(ILogger<HomeController> logger,
         return PartialView();
     }
 
-    public IActionResult ImportServiceSettings(int shopId, int id, int shopSettingsId)
+    private IActionResult ServiceSettings(int shopId, int shopSettingsId, 
+        Func<ShopSettingsModel?,ServiceSettingsModel?> getServiceSettings,
+        Action<ShopSettingsModel, ServiceSettingsModel> setSettingsIfNeed)
     {
         ViewData["ShopId"] = shopId;
-        ViewData["Id"] = id;
         ViewData["ShopSettingsId"] = shopSettingsId;
 
         var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
-            ? (shopImportModel.ShopSettings?.ImportService ?? new ServiceSettingsModel(shopId))
+                && shopImportModel != null && shopImportModel.ShopSettings != null
+            ? (getServiceSettings(shopImportModel.ShopSettings) ?? new ServiceSettingsModel(shopId))
             : null;
+
+        if (serviceSettingsModel == null)
+            throw new InvalidDataException($"No data for shop {shopId} and settings {shopSettingsId}");
+
+        if (getServiceSettings(shopImportModel.ShopSettings) == null)
+            setSettingsIfNeed(shopImportModel.ShopSettings, serviceSettingsModel);
+
+        if (shopImportModel?.ShopSettings?.ServiceSettings.Any(s => s.Guid == serviceSettingsModel?.Guid) != true)
+            shopImportModel?.ShopSettings?.ServiceSettings.Add(serviceSettingsModel);
 
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
     }
 
-    public IActionResult ServiceSettings(int shopId, int id, int shopSettingsId)
+    public IActionResult ImportServiceSettings(int shopId, int shopSettingsId)
     {
-        ViewData["ShopId"] = shopId;
-        ViewData["Id"] = id;
-        ViewData["ShopSettingsId"] = shopSettingsId;
+        return ServiceSettings(shopId, shopSettingsId, 
+            (shopSettings) => shopSettings?.ImportService,
+            (shopSettings, serviceSettings) => shopSettings.ImportService = serviceSettings);
+    }
 
-        var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
-            ? (shopImportModel.ShopSettings?.ServiceSettings.First(s=>s.Id == id) ?? new ServiceSettingsModel(shopId ))
-            : null;
 
-        return PartialView(serviceSettingsModel);
-    }    
+    public IActionResult BrowserDataLoaderSettings(int shopId, int shopSettingsId)
+    {
+        return ServiceSettings(shopId, shopSettingsId,
+            (shopSettings) => shopSettings?.BrowserDataLoader,
+            (shopSettings, serviceSettings) => shopSettings.BrowserDataLoader = serviceSettings);
+    }
+    
+    public IActionResult WebLoaderSettings(int shopId, int shopSettingsId)
+    {
+        return ServiceSettings(shopId, shopSettingsId,
+            (shopSettings) => shopSettings?.WebLoader,
+            (shopSettings, serviceSettings) => shopSettings.WebLoader = serviceSettings);
+    }
 
     [HttpPost]
-    public IActionResult SaveImportServiceSettings(ServiceSettingsModel data)
+    public bool SaveServiceSettings(ServiceSettingsModel data)//, Func<ShopSettingsModel?, ServiceSettingsModel?> getServiceSettings)
     {
-        if (data != null && data.ShopId != 0 && data.ShopSettingsId != 0
-            && _shopImports.TryGetValue(data.ShopId, out var shopImportModel))
+        if (data != null && data.ShopId != 0 && _shopImports.TryGetValue(data.ShopId, out var shopImportModel) && shopImportModel != null)
         {
-            if (shopImportModel.ShopSettings.ImportService == null)
-                shopImportModel.ShopSettings.ImportService = new ServiceSettingsModel(data.ShopId);
-
+            var serviceSettingsModel = shopImportModel.ShopSettings?.ServiceSettings.FirstOrDefault(s=>s.Guid == data.Guid);// getServiceSettings(shopImportModel?.ShopSettings);
+            if (serviceSettingsModel == null)
+                return false;
             
+            serviceSettingsModel.Update(data);
 
-            shopImportModel.ShopSettings.ImportService.Update(data);
+            return true;
         }
 
-        return View("~/Views/Home/Index.cshtml");
-    }
+        return false;
+    }    
 
     public IActionResult ImportProducts()
     {
