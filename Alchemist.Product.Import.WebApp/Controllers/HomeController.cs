@@ -2,6 +2,7 @@ using Alchemist.Product.Import.WebApp.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
@@ -41,7 +42,7 @@ public class HomeController(ILogger<HomeController> logger,
         if(shopImport != null)
         {
             var settings = TabFactory.GetSettingsByTypeFromJson(prevSettings.SettingsType, prevSettings.Json);
-            TabFactory.UpdateSettings(shopImport, settings);
+            shopImport.UpdateSettings(settings);
         }
         return View();
     }
@@ -63,50 +64,36 @@ public class HomeController(ILogger<HomeController> logger,
         return PartialView();
     }
 
-    private IActionResult ServiceSettings(int shopId, int shopSettingsId, 
-        Func<ShopSettingsModel?,ServiceSettingsModel?> getServiceSettings,
-        Action<ShopSettingsModel, ServiceSettingsModel> setSettingsIfNeed)
+    private IActionResult ServiceSettings(int shopId, int shopSettingsId, string serviceSettingsName)
     {
         ViewData["ShopId"] = shopId;
         ViewData["ShopSettingsId"] = shopSettingsId;
 
         var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
                 && shopImportModel != null && shopImportModel.ShopSettings != null
-            ? (getServiceSettings(shopImportModel.ShopSettings) ?? new ServiceSettingsModel(shopId))
+            ? (shopImportModel.ShopSettings.GetServiceSettings(serviceSettingsName) ?? new ServiceSettingsModel { ShopId = shopId, ServiceName = serviceSettingsName })
             : null;
 
         if (serviceSettingsModel == null)
             throw new InvalidDataException($"No data for shop {shopId} and settings {shopSettingsId}");
-
-        if (getServiceSettings(shopImportModel.ShopSettings) == null)
-            setSettingsIfNeed(shopImportModel.ShopSettings, serviceSettingsModel);
-
-        if (shopImportModel?.ShopSettings?.ServiceSettings.Any(s => s.Guid == serviceSettingsModel?.Guid) != true)
-            shopImportModel?.ShopSettings?.ServiceSettings.Add(serviceSettingsModel);
 
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
     }
 
     public IActionResult ImportServiceSettings(int shopId, int shopSettingsId)
     {
-        return ServiceSettings(shopId, shopSettingsId, 
-            (shopSettings) => shopSettings?.ImportService,
-            (shopSettings, serviceSettings) => shopSettings.ImportService = serviceSettings);
+        return ServiceSettings(shopId, shopSettingsId, nameof(ShopSettingsModel.ImportService));
     }
 
 
     public IActionResult BrowserDataLoaderSettings(int shopId, int shopSettingsId)
     {
-        return ServiceSettings(shopId, shopSettingsId,
-            (shopSettings) => shopSettings?.BrowserDataLoader,
-            (shopSettings, serviceSettings) => shopSettings.BrowserDataLoader = serviceSettings);
+        return ServiceSettings(shopId, shopSettingsId, nameof(ShopSettingsModel.BrowserDataLoader));
     }
     
     public IActionResult WebLoaderSettings(int shopId, int shopSettingsId)
     {
-        return ServiceSettings(shopId, shopSettingsId,
-            (shopSettings) => shopSettings?.WebLoader,
-            (shopSettings, serviceSettings) => shopSettings.WebLoader = serviceSettings);
+        return ServiceSettings(shopId, shopSettingsId, nameof(ShopSettingsModel.WebLoader));
     }
 
     [HttpPost]
@@ -114,17 +101,43 @@ public class HomeController(ILogger<HomeController> logger,
     {
         if (data != null && data.ShopId != 0 && _shopImports.TryGetValue(data.ShopId, out var shopImportModel) && shopImportModel != null)
         {
-            var serviceSettingsModel = shopImportModel.ShopSettings?.ServiceSettings.FirstOrDefault(s=>s.Guid == data.Guid);// getServiceSettings(shopImportModel?.ShopSettings);
-            if (serviceSettingsModel == null)
-                return false;
-            
-            serviceSettingsModel.Update(data);
-
-            return true;
+            return shopImportModel.ShopSettings.UpdateServiceSettings(data);
         }
 
         return false;
-    }    
+    }
+
+    [HttpPost]
+    public ServiceSettingsModel? SetServiceSettings(int shopId, string serviceSettingsName, string json)
+    {
+        //todo for net.9
+        //JsonSerializerOptions options = new()
+        //{
+        //    RespectRequiredConstructorParameters = true
+        //};
+
+        var serviceSettings = JsonSerializer.Deserialize<ServiceSettingsModel>(json);
+
+        if (serviceSettings == null) return null;
+
+        if (_shopImports.TryGetValue(shopId, out var shopImportModel)
+            && shopImportModel != null && shopImportModel.ShopSettings != null)
+        {
+            serviceSettings.ServiceName = serviceSettingsName;
+            shopImportModel.ShopSettings.UpdateServiceSettings(serviceSettings);
+
+            return serviceSettings;
+        }
+
+        return null;
+    }
+
+    [HttpPost]
+    public bool SaveShopSettings(int shopId)
+    {
+        //todo
+        return true;
+    }
 
     public IActionResult ImportProducts()
     {

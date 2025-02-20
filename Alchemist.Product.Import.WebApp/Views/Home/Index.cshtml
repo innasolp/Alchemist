@@ -14,7 +14,7 @@
 }
 
 @functions
-{   
+{
     public string GetLiStyle(string item, string selectedItem) => "left-menu-ul" + (selectedItem == item ? " selected" : "");
     public string GetMenuItemStyle(string item, string selectedItem) => "menu_item" + (selectedItem == item ? " selected" : "");
 }
@@ -23,23 +23,13 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    }    
 
-<script src="~/js/fileUpload.js"/>
+    <script src="~/js/fileUpload.js"></script>
+
+    <script src="~/js/settings.js"></script>
 
 
-<script>
-       async function saveSettings(form)
-       {
-           var settingsForm = document.getElementById('settingsForm');
-           var settingsFormData = new FormData(settingsForm);
-           addFormDataJson(settingsFormData);
-           var newFormData = getFormDataWithPrefix(settingsFormData, 'prevSettings');
-
-           await  sendFormData(newFormData,'/', 'post', ()=>form.submit());
-       }
-
-</script>
 }
 
 
@@ -59,30 +49,30 @@
                     <form name="shopForm" method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                           asp-route-shopId="@shop.Id"
                           asp-route-tab="@selectedTab">
-                        <li class="@GetLiStyle(shop.Name,selectedShop.Name)">
-                        <a onclick=" saveSettings(this.parentElement.parentElement);">@shop.Name</a>
-                        </li>
+                    <li class="@GetLiStyle(shop.Name,selectedShop.Name)">
+                        <a onclick="saveSettings($('#settingsForm'), this.parentElement.parentElement);">@shop.Name</a>
+                    </li>
                     </form>
                 }
             </ul>
         </div>
 
         <div>
-            <div class="menu" id="menuDiv">                
+            <div class="menu" id="menuDiv">
                 @foreach (var tab in tabs)
                 {
                     <div class="@GetMenuItemStyle(tab,selectedTab)">
                         <form method="post" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                               asp-route-shopId="@selectedShop.Id"
                               asp-route-tab="@tab">
-                            <label class="display-7  menu_header" onclick="saveSettings(this.parentElement);">@tab</label>
+                            <label class="display-7  menu_header" onclick="saveSettings($('#settingsForm'), this.parentElement);">@tab</label>
                         </form>
                     </div>
                 }
             </div>
-             <div id="settingsDiv">                
-                @await Html.PartialAsync(selectedTab, currentTabModel));
-            </div>           
+            <div id="settingsDiv">
+                @await Html.PartialAsync(selectedTab, currentTabModel);
+            </div>
         </div>
     </div>
 

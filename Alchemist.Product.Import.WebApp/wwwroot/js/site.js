@@ -24,7 +24,8 @@ function selectItem(element, ulId, itemTag) {
 function formDataToJson(formData) {
     var object = {};
     formData.forEach(function (value, key) {
-        object[key] = value;
+        if (!(value instanceof File))
+            object[key] = value;
     });
     var json = JSON.stringify(object);
     return json;
@@ -42,8 +43,8 @@ function getFormAsJson(form) {
     return JSON.stringify(obj);
 }
 
-function getFormData(form) {
-    var formData = new FormData(form);
+function getFormData(formSelector) {
+    var formData = new FormData(formSelector[0]);
     var object = {};
     formData.forEach(function (value, key) {
         if (!(value instanceof File))
@@ -57,6 +58,8 @@ function getFormDataWithPrefix(formData, prefix) {
     var newFormData = new FormData();
     for (const key of formData.keys()) {
         var value = formData.get(key);
+        if (value instanceof File)
+            continue;
         var keyWithPrefix = prefix != null ? prefix + '.' + key : key;
         newFormData.append(keyWithPrefix, value);
     }   
@@ -85,66 +88,52 @@ function addFormDataJson(formData) {
     formData.append('json', json);
 }
 
-async function sendFormData(formData, action, method='post', callback=null) {
-    try {
-
-        const request = new Request(action, {
+async function fetchFormData(formData, action, method = 'post', callback = null)
+{
+    const request = new Request(action, {
             method: method,
             body: formData,
         });
 
-        await fetch(request).then(r => { callback(); console.log(r); }); 
-
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-function postXmlHttpFormData(form, formData) {
-    //var verificationToken = getRequestVerificationToken();
-
-    var body = JSON.stringify(formData);
-    //console.trace(body);
-
-    var xhr = new XMLHttpRequest();
-    xhr.open(form.method, form.action, true);
-    xhr.setRequestHeader("Content-Type", "application/json");//; charset=UTF-8");
-    xhr.setRequestHeader("Accept", "application/json");//; charset=UTF-8");
-   // xhr.setRequestHeader("RequestVerificationToken", verificationToken);//; charset=UTF-8");
-
-    xhr.onload = () => {
-        if (xhr.readyState == 4 && xhr.status == 201) {
-            console.log(JSON.parse(xhr.responseText));
-            if (onSuccess != null)
-                onSuccess(xhr);
+    await fetch(request).then((r) => {
+        if (r.ok) { 
+            callback();
+            console.log(r);
         }
-        else {
-            console.trace(xhr);
-            if (onFail != null)
-                onFail(xhr);
+        else 
+            console.error(r);
+    });    
+}
+
+function sendFormData(url, data, onSuccess = null) {
+    $.ajax({
+        method:'POST',
+        url: url,
+        data: data,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+            console.log('sucsess');
+            onSuccess(data);
+        },
+        error: function (err) {
+            console.error("Failed");
+            console.trace(err);
         }
-    };
-
-    xhr.onerror = (e) => {
-        console.error(`Error: ${e}`);
-    }
-
-    xhr.send(body);
+    });
 }
-function ShowItemModal(url) {
-    $("#modalBodyDiv").load(url, function (data) {
-        $("#divModal").modal("show");
+
+function ShowItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide = null)
+{
+
+    if (onHide != null)
+        divModelSelector.on('hide.bs.modal', function () {
+            onHide();
+        });
+
+    modalBodyDivSelector.load(url, data, function (obj) {
+        divModelSelector.modal("show");
     })
-}
-
-function ShowItemModal(url, data) {
-    $("#modalBodyDiv").load(url, data, function (obj) {
-        $("#divModal").modal("show");
-    })
-}
-
-function closeItemModal() {
-    $("#divModal").modal("hide");
 }
 
 function postData(url, jsonData, onSuccess = null) {
@@ -154,7 +143,8 @@ function postData(url, jsonData, onSuccess = null) {
         data: jsonData,
         success: function (data) {
             console.log('saved');
-            onSuccess(data);
+            if (onSuccess != null)
+                onSuccess(data);
         },
         error: function (err) {
             console.error("Not Saved");
@@ -163,19 +153,19 @@ function postData(url, jsonData, onSuccess = null) {
     });
 }
 
-function save(url, jsonData, onSuccess=null) {
+function save(selectorId, url, jsonData, onSuccess=null) {
 
-    $.validator.unobtrusive.parse($("#modalForm"));
+    $.validator.unobtrusive.parse($(selectorId));
 
-    if(!$("#modalForm").valid()) return;
+    if (!$(selectorId).valid()) return;
 
-    var pendingRequest = $("#modalForm").data('validator').pendingRequest;
+    var pendingRequest = $(selectorId).data('validator').pendingRequest;
     if (pendingRequest == 0)
         postData(url, jsonData, onSuccess);
     else
         setTimeout(() =>
         {
-            if ($("#modalForm").valid())
+            if ($(selectorId).valid())
                 postData(url, jsonData, onSuccess);
         }
         ,500);
@@ -185,6 +175,12 @@ function display(source, displayId) {
     document.getElementById(displayId).value = source.value;
 }
 
-function setJson(data, hiddenId) {
-    document.getElementById(hiddenId).value = data;
+
+function setVal(selectorId, value) {
+    $(selectorId).val(value);
+
+    var form = $(selectorId).closest("form");
+    $.validator.unobtrusive.parse(form);
+
+    return form.valid();
 }

@@ -16,14 +16,10 @@ public class FileUploadController : Controller
     {
         if (file != null && file.Length > 0)
         {
-
             using var stream = file.OpenReadStream();
             var jsonObj = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
             return jsonObj?.ToString();
         }
-        else
-        {
-            return "";
-        }
+        return "";
     }
 }

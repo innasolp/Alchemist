@@ -5,13 +5,6 @@ namespace Alchemist.Product.Import.WebApp.Models;
 
 public class ServiceSettingsModel
 {
-    public ServiceSettingsModel()
-    { }
-    public ServiceSettingsModel(int shopId)
-    {
-        ShopId = shopId;
-    }
-
     public Guid Guid { get; set; } = Guid.NewGuid();
 
     public int Id { get; set; }
@@ -19,6 +12,9 @@ public class ServiceSettingsModel
     public int ShopId { get; set; }
 
     public int ShopSettingsId { get; set; }
+
+    //todo must be required, but is optional for deserializing
+    public string ServiceName { get; set; }
 
     [Required]
     [Display(Name = "Service type")]
