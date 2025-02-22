@@ -26,7 +26,7 @@ public class HomeController(ILogger<HomeController> logger,
         return View();
     }
 
-    [HttpPost("Home/Index/shopId={shopId}&tab={tab}")]
+    [Route("Home/Index/shopId={shopId}&tab={tab}")]
     public IActionResult Index(int shopId, string tab)
     {
         ViewData["ShopId"] = shopId;
@@ -35,7 +35,7 @@ public class HomeController(ILogger<HomeController> logger,
         return View();
     }
 
-    [HttpPost]
+    [HttpPost]    
     public IActionResult Index(SettingsData prevSettings)
     {
         var shopImport = _shopImports.FirstOrDefault(s => s.Key == prevSettings.ShopId).Value;
@@ -80,24 +80,27 @@ public class HomeController(ILogger<HomeController> logger,
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
     }
 
+    [HttpPost]
     public IActionResult ImportServiceSettings(int shopId, int shopSettingsId)
     {
         return ServiceSettings(shopId, shopSettingsId, nameof(ShopSettingsModel.ImportService));
     }
 
 
+    [HttpPost]
     public IActionResult BrowserDataLoaderSettings(int shopId, int shopSettingsId)
     {
         return ServiceSettings(shopId, shopSettingsId, nameof(ShopSettingsModel.BrowserDataLoader));
     }
-    
+
+    [HttpPost]
     public IActionResult WebLoaderSettings(int shopId, int shopSettingsId)
     {
         return ServiceSettings(shopId, shopSettingsId, nameof(ShopSettingsModel.WebLoader));
     }
 
     [HttpPost]
-    public bool SaveServiceSettings(ServiceSettingsModel data)//, Func<ShopSettingsModel?, ServiceSettingsModel?> getServiceSettings)
+    public bool SaveServiceSettings(ServiceSettingsModel data)
     {
         if (data != null && data.ShopId != 0 && _shopImports.TryGetValue(data.ShopId, out var shopImportModel) && shopImportModel != null)
         {
@@ -127,6 +130,22 @@ public class HomeController(ILogger<HomeController> logger,
             shopImportModel.ShopSettings.UpdateServiceSettings(serviceSettings);
 
             return serviceSettings;
+        }
+
+        return null;
+    }
+
+    [HttpPost]
+    public ShopSettingsModel? SetShopSettings(int shopId, string json)
+    {
+        var shopSettings = JsonSerializer.Deserialize<ShopSettingsModel>(json);
+        
+        if (shopSettings != null && _shopImports.TryGetValue(shopId, out var shopImportModel)
+           && shopImportModel != null && shopImportModel.ShopSettings != null)
+        {
+            shopImportModel.ShopSettings.Update(shopSettings);
+            
+            return shopImportModel.ShopSettings;           
         }
 
         return null;

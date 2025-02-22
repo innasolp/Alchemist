@@ -46,10 +46,6 @@ public class ServiceSettingsModel
 
     public virtual void Update(ServiceSettingsModel source)
     {
-        Guid = source.Guid;
-        Id = source.Id;
-        ShopId = source.ShopId;
-        ShopSettingsId = source.ShopSettingsId;
         ServiceTypeName = source.ServiceTypeName;
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;

@@ -12,12 +12,9 @@ builder.Services.AddSingleton(shops);
 
 builder.Services.AddSingleton<IReadOnlyCollection<string>>(new ReadOnlyCollection<string> ( ["Settings", "ImportProducts", "ImportCategories"] ));
 
-builder.Services.AddSingleton<List<ShopSettingsModel>>([]);
-builder.Services.AddSingleton<List<ProductsImportSettingsModel>>([]);
-builder.Services.AddSingleton<List<CategoriesImportSettingsModel>>([]);
-
 var shopImports = new Dictionary<int,ShopImportModel>();
-shops.ForEach(s => shopImports.Add(s.Id, new ShopImportModel { ShopId = s.Id }));
+shops.ForEach(s => shopImports.Add(s.Id, new ShopImportModel { ShopId = s.Id, 
+    ShopSettings = new ShopSettingsModel { ShopId = s.Id, Name = $"{s.Name}_settings" } }));
 builder.Services.AddSingleton<IDictionary<int, ShopImportModel>>(shopImports);
 
 

@@ -40,8 +40,22 @@ public class ShopSettingsModel: SettingsModelBase
         RequestHeaders = sourceShopSettings.RequestHeaders;
         Perfomance = sourceShopSettings.Perfomance;
 
-        sourceShopSettings.UpdateServiceSettings(sourceShopSettings.ImportService);
-        sourceShopSettings.UpdateServiceSettings(sourceShopSettings.WebLoader);
-        sourceShopSettings.UpdateServiceSettings(sourceShopSettings.BrowserDataLoader);
+        if (sourceShopSettings.ImportService != null)
+        {
+            ImportService ??= new ServiceSettingsModel { ShopId = ShopId, ServiceName = nameof(ImportService) };
+            ImportService.Update(sourceShopSettings.ImportService);
+        }
+
+        if (sourceShopSettings.BrowserDataLoader != null)
+        {
+            BrowserDataLoader ??= new ServiceSettingsModel { ShopId = ShopId, ServiceName = nameof(BrowserDataLoader) };
+            BrowserDataLoader.Update(sourceShopSettings.BrowserDataLoader);
+        }
+        
+        if (sourceShopSettings.WebLoader != null)
+        {
+            WebLoader ??= new ServiceSettingsModel { ShopId = ShopId, ServiceName = nameof(WebLoader) };
+            WebLoader.Update(sourceShopSettings.WebLoader);
+        }
     }
 }

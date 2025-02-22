@@ -23,3 +23,18 @@ async function saveSettings(settingsFormSelector, formForSubmit) {
 
     await fetchFormData(newFormData, '/', 'post', () => formForSubmit.submit());
 }
+
+function setShopSettingsFromJson(formSelector, fileInputName, shopId) {
+    uploadFromJson(formSelector,
+        fileInputName,
+        '/FileUpload/UploadJson',
+        { 'shopId': shopId },
+        '/Home/SetShopSettings',       
+        (data) => {
+            if (data == null) return;
+            formSelector[0].reset();
+            //fetchForm(formSelector, '/Home/Index/shopId=' + shopId + '&tab=Settings', 'POST', (data) => { location.reload(); });
+            formSelector.submit();
+        }        
+    );
+}

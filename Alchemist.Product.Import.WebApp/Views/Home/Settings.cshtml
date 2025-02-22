@@ -3,7 +3,7 @@
 
 @functions {
 
-    public object GetServiceData(string serviceSettingsName) => JsonSerializer.Serialize(new { shopId = Model.ShopId, shopSettingsId = Model.Id, serviceSettingsName = serviceSettingsName });
+    public object GetServiceData() => JsonSerializer.Serialize(new { shopId = Model.ShopId, shopSettingsId = Model.Id});
 }
 
 <h4>ShopSettingsModel</h4>
@@ -22,73 +22,87 @@
                 </div>
             </div>
         </div>
+        <form id="loadSettingsFromJsonForm"
+            method="post"
+              asp-action="Index" asp-controller="Home" asp-antiforgery="true"
+              asp-route-shopId="@Model.ShopId"
+              asp-route-tab="Settings">
+            <div class="form-group">
+                <label class="control-label">From json</label>
+                <input type="file" class="btn btn-primary" id="loadShopSettingsFromJson"
+                       name="loadShopSettingsFromJson"
+                       onchange="setShopSettingsFromJson($('#loadSettingsFromJsonForm'), this.name, @Model.ShopId )" />
+            </div>
+        </form>
         <form id="settingsForm">
             <input type="hidden" name="ShopId" value="@Model.ShopId" />
             <input type="hidden" name="SettingsType" value="@Model.Type" />
             <input type="hidden" name="Id" value="@Model.Id" />
 
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Caption" class="control-label"></label>
-                <input asp-for="Caption" class="form-control" />
-                <span asp-validation-for="Caption" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Url" class="control-label"></label>
-                <input asp-for="Url" class="form-control" />
-                <span asp-validation-for="Url" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImportService" class="control-label"></label>
-                <input class="form-control" id="ImportService" readonly="readonly" value="@Model.ImportService?.ServiceTypeName" />
-                <span asp-validation-for="ImportService" class="text-danger"></span>
-                <button onclick="showServiceSettingsModel('/Home/ImportServiceSettings', @GetServiceData("ImportService"))"
-                        class="btn btn-primary btn-sm">
-                    Set
-                </button>
-                <input type="file" class="btn btn-primary" id="importServiceJson" name="importServiceJson"
-                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, 'ImportService', (data)=>{setVal('#ImportService', data.serviceTypeName);})" />
-            </div>
-            <div class="form-group">
-                <label asp-for="BrowserDataLoader" class="control-label"></label>
-                <input class="form-control" id="BrowserDataLoader" readonly="readonly" value="@Model.BrowserDataLoader?.ServiceTypeName" />
-                <span asp-validation-for="BrowserDataLoader" class="text-danger"></span>
-                <button onclick="showServiceSettingsModel('/Home/BrowserDataLoaderSettings', @GetServiceData("BrowserDataLoader") )"
-                        class="btn btn-primary btn-sm">
-                    Set
-                </button>
-                <input type="file" class="btn btn-primary" id="browserDataLoaderJson" name="browserDataLoaderJson"
-                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, 'BrowserDataLoader', (data)=>{setVal('#BrowserDataLoader', data.serviceTypeName);})" />
-            </div>
-            <div class="form-group">
-                <label asp-for="RequestHeaders" class="control-label"></label>
-                <input type="hidden" asp-for="RequestHeaders" id="requestHeadersHidden" />
-                <span asp-validation-for="RequestHeaders" class="text-danger"></span>
-                <input type="file" class="btn btn-primary" id="jsonFile" name="jsonFile"
-                       onchange="postFormInputFile('/FileUpload/UploadJson', $('#settingsForm'), this.name, null, (data)=>{ setVal('#requestHeadersHidden',data); })" />
-            </div>
-            <div class="form-group">
-                <label asp-for="WebLoader" class="control-label"></label>
-                <input class="form-control" id="WebLoader" readonly="readonly" value="@Model.WebLoader?.ServiceTypeName" />
-                <span asp-validation-for="WebLoader" class="text-danger"></span>
-                <button onclick="showServiceSettingsModel('/Home/WebLoaderSettings', @GetServiceData("WebLoader") )"
-                        class="btn btn-primary btn-sm">
-                    Set
-                </button>
-                <input type="file" class="btn btn-primary" id="webLoaderJson" name="webLoaderJson"
-                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, 'WebLoader', (data)=>{setVal('#WebLoader', data.serviceTypeName);})" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary"
-                        onclick="save('#settingsForm','/Home/SaveShopSettings', { 'shopId': '@Model.ShopId'} )">
-                    Save
-                </button>
-            </div>
+                
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" value="@Model.Name" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Caption" class="control-label"></label>
+                <input asp-for="Caption" class="form-control" value="@Model.Caption" />
+                    <span asp-validation-for="Caption" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Url" class="control-label"></label>
+                    <input asp-for="Url" class="form-control" />
+                    <span asp-validation-for="Url" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ImportService" class="control-label"></label>
+                    <input class="form-control" id="ImportService" readonly="readonly" value="@Model.ImportService?.ServiceTypeName" />
+                    <span asp-validation-for="ImportService" class="text-danger"></span>
+                    <button onclick="showServiceSettingsModel('/Home/ImportServiceSettings', @GetServiceData())"
+                            class="btn btn-primary btn-sm">
+                        Set
+                    </button>
+                    <input type="file" class="btn btn-primary" id="importServiceJson" name="importServiceJson"
+                           onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, 'ImportService', (data)=>{setVal('#ImportService', data.serviceTypeName);})" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="BrowserDataLoader" class="control-label"></label>
+                    <input class="form-control" id="BrowserDataLoader" readonly="readonly" value="@Model.BrowserDataLoader?.ServiceTypeName" />
+                    <span asp-validation-for="BrowserDataLoader" class="text-danger"></span>
+                    <button onclick="showServiceSettingsModel('/Home/BrowserDataLoaderSettings', @GetServiceData() )"
+                            class="btn btn-primary btn-sm">
+                        Set
+                    </button>
+                    <input type="file" class="btn btn-primary" id="browserDataLoaderJson" name="browserDataLoaderJson"
+                           onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, 'BrowserDataLoader', (data)=>{setVal('#BrowserDataLoader', data.serviceTypeName);})" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="RequestHeaders" class="control-label"></label>
+                    <input type="hidden" asp-for="RequestHeaders" id="requestHeadersHidden" />
+                    <span asp-validation-for="RequestHeaders" class="text-danger"></span>
+                    <input type="file" class="btn btn-primary" id="jsonFile" name="jsonFile"
+                           onchange="postFormInputFile('/FileUpload/UploadJson', $('#settingsForm'), this.name, null, (data)=>{ setVal('#requestHeadersHidden',data); })" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="WebLoader" class="control-label"></label>
+                    <input class="form-control" id="WebLoader" readonly="readonly" value="@Model.WebLoader?.ServiceTypeName" />
+                    <span asp-validation-for="WebLoader" class="text-danger"></span>
+                    <button onclick="showServiceSettingsModel('/Home/WebLoaderSettings', @GetServiceData() )"
+                            class="btn btn-primary btn-sm">
+                        Set
+                    </button>
+                    <input type="file" class="btn btn-primary" id="webLoaderJson" name="webLoaderJson"
+                           onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, 'WebLoader', (data)=>{setVal('#WebLoader', data.serviceTypeName);})" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary"
+                            onclick="save('#settingsForm','/Home/SaveShopSettings', { 'shopId': '@Model.ShopId'} )">
+                        Save
+                    </button>
+                </div>
+            
         </form>
     </div>
 </div>
