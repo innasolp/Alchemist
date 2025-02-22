@@ -105,6 +105,26 @@ async function fetchFormData(formData, action, method = 'post', callback = null)
     });    
 }
 
+async function fetchForm(formSelector, action, method = 'post', callback = null) {
+    var formData = getFormData(formSelector);
+    await fetchFormData(formData, action, method, callback);
+}
+
+async function fetchRedirect(action, callback = null) {
+    const request = new Request(action, {
+        method: 'GET'
+    });
+
+    await fetch(request).then((r) => {
+        if (r.ok) {
+            callback();
+            console.log(r);
+        }
+        else
+            console.error(r);
+    });
+}
+
 function sendFormData(url, data, onSuccess = null) {
     $.ajax({
         method:'POST',
@@ -113,8 +133,8 @@ function sendFormData(url, data, onSuccess = null) {
         processData: false,
         contentType: false,
         success: function (data) {
-            console.log('sucsess');
-            onSuccess(data);
+            console.log('success');
+            if (onSuccess != null) onSuccess(data);
         },
         error: function (err) {
             console.error("Failed");
