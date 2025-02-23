@@ -30,21 +30,14 @@ function postFormInputFile(url, formSelector, fileInputName, data=null, onSucces
     postFile(url, postData, onSuccess);
 }
 
-function uploadFromJson(formSelector, fileInputName, uploadUrl, data, setUrl, onSuccess = null) {
+function uploadFromJson(uploadUrl,formSelector, fileInputName,  data, onSuccess = null) {
     postFormInputFile(uploadUrl,
         formSelector,
         fileInputName,
-        null,
+        data,
         (result) => {
-            var uploadData = new FormData();
-            uploadData.append('json', result);
-
-            if (data != null) {
-                for (var key in data) {
-                    uploadData.append(key, data[key]);
-                }
-            }
-            sendFormData(setUrl, uploadData, onSuccess);
+            if (result == null) return;
+            onSuccess(result);
         });
 }
 

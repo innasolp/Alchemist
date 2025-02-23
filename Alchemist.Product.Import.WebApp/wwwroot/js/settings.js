@@ -1,19 +1,31 @@
 ﻿function setServiceSettingsFromJson(form, fileInputName, shopId, serviceSettingsName, onSuccess = null) {
-    uploadFromJson(form,
+    uploadFromJson('/FileUpload/UploadServiceSettings',
+        form,
         fileInputName,
-        '/FileUpload/UploadJson',
         { 'shopId': shopId, 'serviceSettingsName': serviceSettingsName },
-        '/Home/SetServiceSettings',
         onSuccess
     );
 }
 
+function submitPreventDefault(event) {
+event.preventDefault();
+}
+
 function showServiceSettingsModel(url, data, onHide = null) {
+    
+    $('#settingsForm').on('submit', submitPreventDefault);
+
+    $("#modalBodyDiv").on('load', function (event) {
+        console.log(event);
+        console.trace(event);
+    });
+
     ShowItemModal($("#divModal"), $("#modalBodyDiv"), url, data, onHide)
 }
 
 function closeServiceSettingsModal() {
     $("#divModal").modal("hide");
+    $('#settingsForm').off('submit', submitPreventDefault);
 }
 
 async function saveSettings(settingsFormSelector, formForSubmit) {
@@ -24,17 +36,18 @@ async function saveSettings(settingsFormSelector, formForSubmit) {
     await fetchFormData(newFormData, '/', 'post', () => formForSubmit.submit());
 }
 
-function setShopSettingsFromJson(formSelector, fileInputName, shopId) {
-    uploadFromJson(formSelector,
+async function setShopSettingsFromJson(formSelector, fileInputName, shopId) {
+
+    uploadFromJson('/FileUpload/UploadShopSettings',
+        formSelector,
         fileInputName,
-        '/FileUpload/UploadJson',
         { 'shopId': shopId },
-        '/Home/SetShopSettings',       
         (data) => {
             if (data == null) return;
-            formSelector[0].reset();
-            //fetchForm(formSelector, '/Home/Index/shopId=' + shopId + '&tab=Settings', 'POST', (data) => { location.reload(); });
-            formSelector.submit();
+            console.trace(data);
+            console.log('shop settings upload successfully');
+
+            location.reload();           
         }        
     );
 }
