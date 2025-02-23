@@ -1,7 +1,25 @@
+using Alchemist.Product.Import.WebApp.Models;
+using System.Collections.ObjectModel;
+
 var builder = WebApplication.CreateBuilder(args);
 
+var shops = new List<ShopModel> {
+    new() {Name = "Ozon", Id=1 },
+    new() {Name = "Goldapple",Id=2 },
+    new() {Name = "Test", Id=3 }};
+
+builder.Services.AddSingleton(shops);
+
+builder.Services.AddSingleton<IReadOnlyCollection<string>>(new ReadOnlyCollection<string> ( ["Settings", "ImportProducts", "ImportCategories"] ));
+
+var shopImports = new Dictionary<int,ShopImportModel>();
+shops.ForEach(s => shopImports.Add(s.Id, new ShopImportModel { ShopId = s.Id, 
+    ShopSettings = new ShopSettingsModel { ShopId = s.Id, Name = $"{s.Name}_settings" } }));
+builder.Services.AddSingleton<IDictionary<int, ShopImportModel>>(shopImports);
+
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(); 
 
 var app = builder.Build();
 
