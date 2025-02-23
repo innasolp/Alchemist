@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
-public record class SettingsData(int ShopId, SettingsType SettingsType, string Json);
+public record class SettingsData(int ShopId, TabType SettingsType, string Json);
 
 public class HomeController(ILogger<HomeController> logger,
     List<ShopModel> shops,
@@ -34,20 +34,19 @@ public class HomeController(ILogger<HomeController> logger,
         return View();
     }
 
-    [HttpPost]    
-    public IActionResult Index(SettingsData prevSettings)
+    [HttpPost]
+    public bool SaveTabSettings(int shopId, int tab, string json)
     {
-        if (prevSettings == null) return View();
+        if (string.IsNullOrEmpty(json)) return false;
 
-        var shopImport = _shopImports.FirstOrDefault(s => s.Key == prevSettings.ShopId).Value;
-        if(shopImport != null)
+        var shopImport = _shopImports.FirstOrDefault(s => s.Key == shopId).Value;
+        if (shopImport != null)
         {
-            var settings = TabFactory.GetSettingsByTypeFromJson(prevSettings.SettingsType, prevSettings.Json);
+            var settings = ((TabType)tab).GetSettingsByTypeFromJson(json);
             shopImport.UpdateSettings(settings);
         }
-        return View();
+        return true;
     }
-
 
     public IActionResult Privacy()
     {
@@ -99,7 +98,7 @@ public class HomeController(ILogger<HomeController> logger,
     [HttpPost]
     public bool SaveServiceSettings(ServiceSettingsModel data)
     {
-        if (data != null && data.ShopId != 0 && _shopImports.TryGetValue(data.ShopId, out var shopImportModel) && shopImportModel != null)
+        if (data != null && _shopImports.TryGetValue(data.ShopId, out var shopImportModel) && shopImportModel != null)
         {
             return shopImportModel.ShopSettings.UpdateServiceSettings(data);
         }

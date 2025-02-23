@@ -2,24 +2,6 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
-function selectItem(element, ulId, itemTag) {
-    var classAttr = element.getAttribute("class") ?? "";
-    if (!classAttr.includes("selected"))
-        element.setAttribute("class", classAttr + " selected");
-
-    var ul = document.getElementById(ulId);
-    if (ul == null)
-        return;
-
-    var items = ul.getElementsByTagName(itemTag);
-    for (const li of items) {
-        if (li == element) continue;
-
-        var liClassAttr = li.getAttribute("class") ?? "";
-        if (liClassAttr.includes("selected"))
-            li.setAttribute("class", liClassAttr.replace(" selected", ""));
-    }
-}
 
 function formDataToJson(formData) {
     var object = {};
@@ -31,18 +13,6 @@ function formDataToJson(formData) {
     return json;
 }
 
-function getFormAsJson(form) {
-    let obj = {};
-    let formData = form.serialize();
-    let formArray = formData.split("&");
-
-    for (inputData of formArray) {
-        let dataTmp = inputData.split('=');
-        obj[dataTmp[0]] = dataTmp[1];
-    }
-    return JSON.stringify(obj);
-}
-
 function getFormData(formSelector) {
     var formData = new FormData(formSelector[0]);
     var object = {};
@@ -51,41 +21,6 @@ function getFormData(formSelector) {
          object[key] = value;
     });
     return object;
-}
-
-function getFormDataWithPrefix(formData, prefix) {
-
-    var newFormData = new FormData();
-    for (const key of formData.keys()) {
-        var value = formData.get(key);
-        if (value instanceof File)
-            continue;
-        var keyWithPrefix = prefix != null ? prefix + '.' + key : key;
-        newFormData.append(keyWithPrefix, value);
-    }   
-    return newFormData;
-}
-
-function createInput(name, value) {
-    var i = document.createElement("input");
-    i.setAttribute('type', "hidden");
-    i.setAttribute('name', name);
-    i.setAttribute('value', value);
-    return i;
-}
-
-function appendFormData(form, formData) {
-
-    for (const key of formData.keys())
-    {
-        var input = createInput(key, formData.get(key));
-        form.appendChild(input);     
-    }
-}
-
-function addFormDataJson(formData) {
-    var json = formDataToJson(formData);
-    formData.append('json', json);
 }
 
 async function fetchFormData(formData, action, method = 'post', callback = null)
@@ -106,26 +41,6 @@ async function fetchFormData(formData, action, method = 'post', callback = null)
         else 
             console.error(r);
     });    
-}
-
-async function fetchForm(formSelector, action, method = 'post', callback = null) {
-    var formData = getFormData(formSelector);
-    await fetchFormData(formData, action, method, callback);
-}
-
-async function fetchRedirect(action, callback = null) {
-    const request = new Request(action, {
-        method: 'GET'
-    });
-
-    await fetch(request).then((r) => {
-        if (r.ok) {
-            callback();
-            console.log(r);
-        }
-        else
-            console.error(r);
-    });
 }
 
 function sendFormData(url, data, onSuccess = null) {
@@ -195,12 +110,7 @@ function save(selectorId, url, jsonData, onSuccess=null) {
         ,500);
 }
 
-function display(source, displayId) {
-    document.getElementById(displayId).value = source.value;
-}
-
-
-function setVal(selectorId, value) {
+function setValIfValid(selectorId, value) {
     $(selectorId).val(value);
 
     var form = $(selectorId).closest("form");

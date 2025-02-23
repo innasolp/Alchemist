@@ -10,7 +10,7 @@
     var selectedShop = shops.FirstOrDefault(s => s.Id == shopId) ?? shops.FirstOrDefault();
     var selectedTab = ViewData["Tab"] as string ?? tabs.FirstOrDefault();
     var selectedShopImport = selectedShop != null && shopImports.ContainsKey(selectedShop.Id) ? shopImports[selectedShop.Id] : null;
-    var currentTabModel = TabFactory.GetSettings(selectedShopImport, selectedTab);
+    var currentTabModel = selectedShopImport.GetSettings(selectedTab);
 }
 
 @functions
@@ -50,8 +50,7 @@
                           asp-route-shopId="@shop.Id"
                           asp-route-tab="@selectedTab">
                     <li class="@GetLiStyle(shop.Name,selectedShop.Name)">
-                        <a onclick="saveSettings($('#settingsForm'), this.parentElement.parentElement);"
-                        >@shop.Name</a>
+                        <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.submit();}); ">@shop.Name</a>
                     </li>
                     </form>
                 }
@@ -66,7 +65,7 @@
                         <form method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                               asp-route-shopId="@selectedShop.Id"
                               asp-route-tab="@tab">
-                            <label class="display-7  menu_header" onclick="saveSettings($('#settingsForm'), this.parentElement);">@tab</label>
+                            <label class="display-7  menu_header" onclick="saveTab($('#settingsForm'), ()=>{ this.parentElement.submit();})">@tab</label>
                         </form>
                     </div>
                 }

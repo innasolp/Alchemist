@@ -1,9 +1,40 @@
 ﻿using Alchemist.Product.Import.WebApp.Models;
+using System.Text.Json;
 
 namespace Alchemist.Product.Import.WebApp.Infrastructure;
 
 public static class Extensions
 {
+    public static SettingsModelBase GetSettings(this ShopImportModel shopImport, string tabName)
+    {
+        switch (tabName)
+        {
+            case "Settings":
+                {
+                    shopImport.ShopSettings ??= new ShopSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ShopSettings;
+                }
+
+            case "ImportProducts":
+                {
+                    shopImport.ImportProducts ??= new ProductsImportSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ImportProducts;
+                }
+
+            case "ImportCategories":
+                {
+                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ImportCategories;
+                }
+
+            default:
+                {
+                    shopImport.ShopSettings ??= new ShopSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ShopSettings;
+                }
+        }
+    }
+
     public static ServiceSettingsModel? GetServiceSettings(this ShopSettingsModel shopSettings, string serviceName)
     {
         switch (serviceName)
@@ -67,17 +98,17 @@ public static class Extensions
 
     public static void UpdateSettings(this ShopImportModel shopImport, SettingsModelBase settings)
     {
-        switch (settings.Type)
+        switch (settings.Tab)
         {
-            case SettingsType.Shop:
+            case TabType.Shop:
                 shopImport.ShopSettings.Update(settings);
                 break;
 
-            case SettingsType.Products:
+            case TabType.Products:
                 shopImport.ImportProducts.Update(settings);
                 break;
 
-            case SettingsType.Categories:
+            case TabType.Categories:
                 shopImport.ImportCategories.Update(settings);
                 break;
 
@@ -86,5 +117,62 @@ public static class Extensions
                 break;
 
         }
+    }
+
+    public static SettingsModelBase GetSettings(this ShopImportModel shopImport, TabType type)
+    {
+        switch (type)
+        {
+            case TabType.Shop:
+                {
+                    shopImport.ShopSettings ??= new ShopSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ShopSettings;
+                }
+
+            case TabType.Products:
+                {
+                    shopImport.ImportProducts ??= new ProductsImportSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ImportProducts;
+                }
+
+            case TabType.Categories:
+                {
+                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ImportCategories;
+                }
+
+            default:
+                {
+                    shopImport.ShopSettings ??= new ShopSettingsModel() { ShopId = shopImport.ShopId };
+                    return shopImport.ShopSettings;
+                }
+        }
+    }
+
+    public static SettingsModelBase? GetSettingsByTypeFromJson(this TabType settingsType, string json)
+    {
+        Type settingsModelType;
+        switch (settingsType)
+        {
+            case TabType.Shop:
+                settingsModelType = typeof(ShopSettingsModel);
+                break;
+
+            case TabType.Products:
+                settingsModelType = typeof(ProductsImportSettingsModel);
+                break;
+
+            case TabType.Categories:
+                settingsModelType = typeof(CategoriesImportSettingsModel);
+                break;
+
+            default:
+                settingsModelType = typeof(ShopSettingsModel);
+                break;
+        }
+
+        var option = new JsonSerializerOptions { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString };
+        var settingsModel = JsonSerializer.Deserialize(json, settingsModelType, option) as SettingsModelBase;
+        return settingsModel;
     }
 }

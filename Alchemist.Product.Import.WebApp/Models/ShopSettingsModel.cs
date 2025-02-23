@@ -9,7 +9,7 @@ public class ShopSettingsModel: SettingsModelBase
     public List<ServiceSettingsModel> ServiceSettings { get;  } = [];
 
     [JsonIgnore]
-    public override SettingsType Type => SettingsType.Shop;
+    public override TabType Tab => TabType.Shop;
 
     [Required]
     public string? Caption { get; set; }
