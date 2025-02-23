@@ -6,5 +6,5 @@ namespace Alchemist.Product.Import.WebApp.Models;
 public class CategoriesImportSettingsModel : SettingsModelBase
 {
     [JsonIgnore]
-    public override SettingsType Type => SettingsType.Categories;
+    public override TabType Tab => TabType.Categories;
 }

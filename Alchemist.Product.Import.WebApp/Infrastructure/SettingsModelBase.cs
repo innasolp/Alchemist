@@ -1,8 +1,6 @@
-﻿using System.Data;
+﻿namespace Alchemist.Product.Import.WebApp.Infrastructure;
 
-namespace Alchemist.Product.Import.WebApp.Infrastructure;
-
-public enum SettingsType
+public enum TabType
 {
     Products=0,
     Categories=1,
@@ -11,7 +9,7 @@ public enum SettingsType
 
 public abstract class SettingsModelBase
 {    
-    public abstract SettingsType Type { get; }
+    public abstract TabType Tab { get; }
 
     public int ShopId { get; set; } 
 
