@@ -22,23 +22,22 @@
                 </div>
             </div>
         </div>
-        <form id="loadSettingsFromJsonForm"
-            method="post"
-              asp-action="Index" asp-controller="Home" asp-antiforgery="true"
-              asp-route-shopId="@Model.ShopId"
-              asp-route-tab="Settings">
-            <div class="form-group">
+        <form id="loadSettingsFromJsonForm">
+            <div class="form-group">               
                 <label class="control-label">From json</label>
-                <input type="file" class="btn btn-primary" id="loadShopSettingsFromJson"
+                <input type="file" class="btn btn-primary" id="loadShopSettingsFromJson" style="display:none"
                        name="loadShopSettingsFromJson"
                        onchange="setShopSettingsFromJson($('#loadSettingsFromJsonForm'), this.name, @Model.ShopId )" />
+                <button type="button" class="btn btn-primary"
+                        onclick="$('#loadShopSettingsFromJson')[0].click();">
+                    Upload
+                </button>
             </div>
         </form>
         <form id="settingsForm">
             <input type="hidden" name="ShopId" value="@Model.ShopId" />
             <input type="hidden" name="SettingsType" value="@Model.Type" />
             <input type="hidden" name="Id" value="@Model.Id" />
-
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 
                 <div class="form-group">
@@ -61,7 +60,7 @@
                     <input class="form-control" id="ImportService" readonly="readonly" value="@Model.ImportService?.ServiceTypeName" />
                     <span asp-validation-for="ImportService" class="text-danger"></span>
                     <button onclick="showServiceSettingsModel('/Home/ImportServiceSettings', @GetServiceData())"
-                            class="btn btn-primary btn-sm">
+                        class="btn btn-primary btn-sm">
                         Set
                     </button>
                     <input type="file" class="btn btn-primary" id="importServiceJson" name="importServiceJson"

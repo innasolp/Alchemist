@@ -96,8 +96,11 @@ async function fetchFormData(formData, action, method = 'post', callback = null)
         });
 
     await fetch(request).then((r) => {
-        if (r.ok) { 
-            callback();
+        if (r.ok) {
+
+            if (callback != null)
+                callback();
+
             console.log(r);
         }
         else 
@@ -152,6 +155,7 @@ function ShowItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide
         });
 
     modalBodyDivSelector.load(url, data, function (obj) {
+        console.log('url ' + url + ' load');
         divModelSelector.modal("show");
     })
 }

@@ -2,7 +2,6 @@ using Alchemist.Product.Import.WebApp.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
@@ -38,6 +37,8 @@ public class HomeController(ILogger<HomeController> logger,
     [HttpPost]    
     public IActionResult Index(SettingsData prevSettings)
     {
+        if (prevSettings == null) return View();
+
         var shopImport = _shopImports.FirstOrDefault(s => s.Key == prevSettings.ShopId).Value;
         if(shopImport != null)
         {
@@ -66,18 +67,14 @@ public class HomeController(ILogger<HomeController> logger,
 
     private IActionResult ServiceSettings(int shopId, int shopSettingsId, string serviceSettingsName)
     {
-        ViewData["ShopId"] = shopId;
-        ViewData["ShopSettingsId"] = shopSettingsId;
-
         var serviceSettingsModel = _shopImports.TryGetValue(shopId, out var shopImportModel)
                 && shopImportModel != null && shopImportModel.ShopSettings != null
             ? (shopImportModel.ShopSettings.GetServiceSettings(serviceSettingsName) ?? new ServiceSettingsModel { ShopId = shopId, ServiceName = serviceSettingsName })
             : null;
 
-        if (serviceSettingsModel == null)
-            throw new InvalidDataException($"No data for shop {shopId} and settings {shopSettingsId}");
-
-        return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
+        return serviceSettingsModel == null
+            ? throw new InvalidDataException($"No data for shop {shopId} and settings {shopSettingsId}")
+            : (IActionResult)PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
     }
 
     [HttpPost]
@@ -108,48 +105,7 @@ public class HomeController(ILogger<HomeController> logger,
         }
 
         return false;
-    }
-
-    [HttpPost]
-    public ServiceSettingsModel? SetServiceSettings(int shopId, string serviceSettingsName, string json)
-    {
-        //todo for net.9
-        //JsonSerializerOptions options = new()
-        //{
-        //    RespectRequiredConstructorParameters = true
-        //};
-
-        var serviceSettings = JsonSerializer.Deserialize<ServiceSettingsModel>(json);
-
-        if (serviceSettings == null) return null;
-
-        if (_shopImports.TryGetValue(shopId, out var shopImportModel)
-            && shopImportModel != null && shopImportModel.ShopSettings != null)
-        {
-            serviceSettings.ServiceName = serviceSettingsName;
-            shopImportModel.ShopSettings.UpdateServiceSettings(serviceSettings);
-
-            return serviceSettings;
-        }
-
-        return null;
-    }
-
-    [HttpPost]
-    public ShopSettingsModel? SetShopSettings(int shopId, string json)
-    {
-        var shopSettings = JsonSerializer.Deserialize<ShopSettingsModel>(json);
-        
-        if (shopSettings != null && _shopImports.TryGetValue(shopId, out var shopImportModel)
-           && shopImportModel != null && shopImportModel.ShopSettings != null)
-        {
-            shopImportModel.ShopSettings.Update(shopSettings);
-            
-            return shopImportModel.ShopSettings;           
-        }
-
-        return null;
-    }
+    }    
 
     [HttpPost]
     public bool SaveShopSettings(int shopId)
