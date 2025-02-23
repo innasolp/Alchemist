@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace Alchemist.Product.Import.WebApp.Models;
 
 public class ShopSettingsModel: SettingsModelBase
-{
+{        
     public List<ServiceSettingsModel> ServiceSettings { get;  } = [];
 
     [JsonIgnore]
