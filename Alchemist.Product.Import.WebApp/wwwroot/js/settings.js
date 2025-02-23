@@ -28,12 +28,13 @@ function closeServiceSettingsModal() {
     $('#settingsForm').off('submit', submitPreventDefault);
 }
 
-async function saveSettings(settingsFormSelector, formForSubmit) {
-    var settingsFormData = new FormData(settingsFormSelector[0]);
-    addFormDataJson(settingsFormData);
-    var newFormData = getFormDataWithPrefix(settingsFormData, 'prevSettings');
+async function saveTab(formSelector, callback = null) {
+    var formData = new FormData(formSelector[0]);
 
-    await fetchFormData(newFormData, '/', 'post', () => formForSubmit.submit());
+    var json = formDataToJson(formData);
+    formData.append('json', json);
+
+    await fetchFormData(formData, '/Home/SaveTabSettings', 'post', callback);    
 }
 
 async function setShopSettingsFromJson(formSelector, fileInputName, shopId) {

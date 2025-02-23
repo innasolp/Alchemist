@@ -17,7 +17,7 @@
                 <input type="hidden" asp-for="JsonValue" id="jsonValueHidden" />
                 <span asp-validation-for="JsonValue" class="text-danger"></span>
                 <input type="file" class="btn btn-primary" id="jsonFile" name="jsonFile"
-                       onchange="postFormInputFile('/FileUpload/UploadJson', $('#modalForm'), this.name, null, (data)=>{ setVal('#jsonValueHidden',data); })" />
+                       onchange="postFormInputFile('/FileUpload/UploadJson', $('#modalForm'), this.name, null, (data)=>{ setValIfValid('#jsonValueHidden',data); })" />
             </div>
             <div class="form-group">
                 <label asp-for="ServiceTypeName" class="control-label"></label>
@@ -32,16 +32,16 @@
                 <label asp-for="AssemblyPath" class="control-label"></label>
                 <input asp-for="AssemblyPath" id="assemblyPathDisplay" class="form-control" name="AssemblyPath" />
                 <span asp-validation-for="AssemblyPath" class="text-danger"></span>
-                <input type="file" onlo class="btn btn-primary" onchange="display(this,'assemblyPathDisplay')" />
+                <input type="file" onlo class="btn btn-primary" onchange="$('#assemblyPathDisplay).val(this.value)" />
             </div><div class="form-group">
                 <label asp-for="ServiceProviderPath" class="control-label"></label>
-                <input asp-for="ServiceProviderPath" class="form-control" />
+                <input asp-for="ServiceProviderPath" class="form-control" id="serviceProviderPathDisplay" />
                 <span asp-validation-for="ServiceProviderPath" class="text-danger"></span>
-                <input type="file" onlo class="btn btn-primary" onchange="display(this,'assemblyPathDisplay')" />
+                <input type="file" onlo class="btn btn-primary" onchange="$('#serviceProviderPathDisplay).val(this.value)" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                        onclick="save('#modalForm','/Home/SaveServiceSettings', getFormData($('#modalForm')), (data)=>{ if(!data) return; setVal('#@Model.ServiceName',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
+                        onclick="save('#modalForm','/Home/SaveServiceSettings', getFormData($('#modalForm')), (data)=>{ if(!data) return; setValIfValid('#@Model.ServiceName',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
                     Save
                 </button>
             </div>
