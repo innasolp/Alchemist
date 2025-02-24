@@ -15,15 +15,21 @@ namespace Alchemist.Settings.RestAPI.Controllers
         private readonly ILogger<SettingsController> _logger = logger;
 
         [HttpGet("shopSettings/byShopId/{shopId:int}/{shopSettingType:short}", Name = nameof(GetShopSettingsByShopId))]
-        public async Task<Results<NotFound, Ok<ShopSettings>>> GetShopSettingsByShopId(int shopId, ShopSettingType shopSettingType)
+        public async Task<Results<BadRequest, NotFound, Ok<ShopSettings>>> GetShopSettingsByShopId(int shopId, ShopSettingType shopSettingType)
         {
+            if (shopId <= 0)
+                return TypedResults.BadRequest();
+
             var shopSettings = await _settingsRepository.GetShopSettings(shopId, shopSettingType);
             return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound();
         }
         
         [HttpGet("shopSettings/byId/{id:int}", Name = nameof(GetShopSettingsById))]
-        public async Task<Results<NotFound, Ok<ShopSettings>>> GetShopSettingsById(int id)
+        public async Task<Results<BadRequest, NotFound, Ok<ShopSettings>>> GetShopSettingsById(int id)
         {
+            if (id <= 0)
+                return TypedResults.BadRequest();
+
             var shopSettings = await _settingsRepository.GetShopSettings(id);
             return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound();
         }
@@ -50,6 +56,16 @@ namespace Alchemist.Settings.RestAPI.Controllers
 
             var location = Url.Action(nameof(UpdateShopSettings), new { id = shopSettings.Id }) ?? $"/{shopSettings.Id}";
             return result ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.StatusCode(500);
+        }
+
+        [HttpGet("shopSettings/childSettings/{parentSettingsId:int}", Name = nameof(GetChildSettings))]
+        public async Task<Results<BadRequest, Ok<List<ShopSettings>>>> GetChildSettings(int parentSettingsId)
+        {
+            if (parentSettingsId <= 0)
+                return TypedResults.BadRequest();
+
+            var childSettings = await _settingsRepository.GetChildSettings(parentSettingsId);
+            return TypedResults.Ok(childSettings.OfType<ShopSettings>().ToList());
         }
     }
 }

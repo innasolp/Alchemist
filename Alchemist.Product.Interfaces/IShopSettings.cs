@@ -11,6 +11,8 @@ public interface IShopSettings
 {
     int Id { get; set; }
 
+    int? ParentSettingsId { get; set; }
+
     int ShopId { get; set; }
 
     bool? IsActual { get; set; }

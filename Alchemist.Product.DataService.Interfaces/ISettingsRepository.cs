@@ -11,4 +11,6 @@ public interface ISettingsRepository
     Task<IShopSettings> AddShopSettings(IShopSettings shopSettings);
 
     Task<bool> UpdateShopSettings(IShopSettings shopSettings);
+
+    Task<List<IShopSettings>> GetChildSettings(int parentSettingsId);
 }
