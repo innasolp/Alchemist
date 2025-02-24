@@ -43,4 +43,9 @@ public class SettingsRepository(AlchemyContext context) : ISettingsRepository
 
         return await Task.FromResult(result > 0);
     }
+
+    public async Task<List<IShopSettings>> GetChildSettings(int parentSettingsId)
+    {
+        return await Context.ShopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToListAsync<IShopSettings>();
+    }
 }

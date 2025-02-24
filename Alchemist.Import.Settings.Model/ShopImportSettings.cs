@@ -32,7 +32,7 @@ public class ShopImportSettings : IShopImportSettings
 
     public RequestHeaders? RequestHeaders { get; set; }
 
-    public ImportServiceSettings[] Services { get; set; } = [];
+    public List<ImportServiceSettings> Services { get; set; } = [];
 
     IImportServiceSettings IShopImportSettings.WebLoader => WebLoader;
 

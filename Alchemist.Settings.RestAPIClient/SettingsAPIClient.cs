@@ -6,7 +6,7 @@ using System.Net.Http.Json;
 
 namespace Alchemist.Settings.RestAPIClient;
 
-public class SettingsAPIClient:IShopSettingsDataService
+public class SettingsAPIClient : IShopSettingsDataService
 {
     private readonly HttpClient _httpClient;
 
@@ -28,7 +28,7 @@ public class SettingsAPIClient:IShopSettingsDataService
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ShopSettings?>();
     }
-    
+
     public async Task<IShopSettings?> GetShopSettings(int id)
     {
         var response = await _httpClient.GetAsync($"api/Shop/shopSettings/byId/{id}");
@@ -50,5 +50,12 @@ public class SettingsAPIClient:IShopSettingsDataService
         var response = await _httpClient.PutAsJsonAsync($"api/Shop/shopSettings/update", shopSettings.To<ShopSettings>());
         response.EnsureSuccessStatusCode();
         return true;
+    }
+
+    public async Task<List<IShopSettings>> GetChildSettings(int parentSettingsId)
+    {
+        var response = await _httpClient.GetAsync($"api/Shop/shopSettings/childSettings/{parentSettingsId}");        
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<List<ShopSettings>>())?.OfType<IShopSettings>().ToList() ?? [];
     }
 }
