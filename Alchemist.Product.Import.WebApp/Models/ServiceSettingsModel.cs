@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Alchemist.Product.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace Alchemist.Product.Import.WebApp.Models;
@@ -12,6 +13,8 @@ public class ServiceSettingsModel
     public int ShopId { get; set; }
 
     public int ShopSettingsId { get; set; }
+    
+    public ShopSettingType ShopSettingType { get; set; }    
 
     //todo must be required, but is optional for deserializing
     public string ServiceName { get; set; }
@@ -46,6 +49,7 @@ public class ServiceSettingsModel
 
     public virtual void Update(ServiceSettingsModel source)
     {
+        ShopSettingType = source.ShopSettingType;
         ServiceTypeName = source.ServiceTypeName;
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;

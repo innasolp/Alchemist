@@ -1,9 +1,18 @@
-﻿namespace Alchemist.Product.Interfaces;
+﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 
+namespace Alchemist.Product.Interfaces;
+
+[JsonConverter(typeof(JsonStringEnumConverter<ShopSettingType>))]
 public enum ShopSettingType
 {
+    [Description("Service")]
     Service = 0,
+
+    [Description("Products")]
     Product = 1,
+
+    [Description("Categories")]
     Category = 2
 }
 

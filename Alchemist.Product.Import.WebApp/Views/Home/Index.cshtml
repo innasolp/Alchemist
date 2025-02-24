@@ -1,24 +1,17 @@
 ﻿@using Alchemist.Product.Import.WebApp.Infrastructure;
 
 @inject List<ShopModel> shops;
-@inject IReadOnlyCollection<string> tabs;
 @inject IDictionary<int, ShopImportModel> shopImports;
 
 @{
     ViewData["Title"] = "Home Page";
     var shopId = ViewData["ShopId"] != null ? (int?)ViewData["ShopId"] : null;
     var selectedShop = shops.FirstOrDefault(s => s.Id == shopId) ?? shops.FirstOrDefault();
-    var selectedTab = ViewData["Tab"] as string ?? tabs.FirstOrDefault();
+    var selectedTabView = (ViewData["Tab"] is TabType tabType) ? ModelHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ModelHelper.TabViewNames.FirstOrDefault();
+    var selectedTabName = (ViewData["Tab"] is TabType tabType2) ? ModelHelper.TabNames.FirstOrDefault(d => d.Key == tabType2) : ModelHelper.TabViewNames.FirstOrDefault();
     var selectedShopImport = selectedShop != null && shopImports.ContainsKey(selectedShop.Id) ? shopImports[selectedShop.Id] : null;
-    var currentTabModel = selectedShopImport.GetSettings(selectedTab);
+    var currentTabModel = selectedShopImport.GetSettings(selectedTabView.Key);
 }
-
-@functions
-{
-    public string GetLiStyle(string item, string selectedItem) => "left-menu-ul" + (selectedItem == item ? " selected" : "");
-    public string GetMenuItemStyle(string item, string selectedItem) => "menu_item" + (selectedItem == item ? " selected" : "");
-}
-
 
 @section Scripts {
     @{
@@ -48,8 +41,8 @@
                 {
                     <form name="shopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                           asp-route-shopId="@shop.Id"
-                          asp-route-tab="@selectedTab">
-                    <li class="@GetLiStyle(shop.Name,selectedShop.Name)">
+                          asp-route-tab="@((int)selectedTabView.Key)">
+                    <li class="@ViewHelper.GetLiStyle(shop.Name,selectedShop.Name)">
                         <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.submit();}); ">@shop.Name</a>
                     </li>
                     </form>
@@ -59,19 +52,19 @@
 
         <div>
             <div class="menu" id="menuDiv">
-                @foreach (var tab in tabs)
+                @foreach (var tab in ModelHelper.TabNames)
                 {
-                    <div class="@GetMenuItemStyle(tab,selectedTab)">
+                    <div class="@ViewHelper.GetMenuItemStyle(tab.Key,selectedTabName.Key)">
                         <form method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                               asp-route-shopId="@selectedShop.Id"
-                              asp-route-tab="@tab">
-                            <label class="display-7  menu_header" onclick="saveTab($('#settingsForm'), ()=>{ this.parentElement.submit();})">@tab</label>
+                              asp-route-tab="@((int)tab.Key)">
+                            <label class="display-7  menu_header" onclick="saveTab($('#settingsForm'), ()=>{ this.parentElement.submit();})">@tab.Value</label>
                         </form>
                     </div>
                 }
             </div>
             <div id="settingsDiv">
-                @await Html.PartialAsync($"~/Views/Home/{selectedTab}.cshtml", currentTabModel);
+                @await Html.PartialAsync($"~/Views/Home/{selectedTabView.Value}.cshtml", currentTabModel);
             </div>
         </div>
     </div>

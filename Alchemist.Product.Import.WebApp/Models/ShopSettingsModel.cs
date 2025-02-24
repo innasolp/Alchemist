@@ -1,4 +1,5 @@
 ﻿using Alchemist.Product.Import.WebApp.Infrastructure;
+using Alchemist.Product.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -10,6 +11,8 @@ public class ShopSettingsModel: SettingsModelBase
 
     [JsonIgnore]
     public override TabType Tab => TabType.Shop;
+
+    public ShopSettingType ShopSettingType { get; set; }
 
     [Required]
     public string? Caption { get; set; }

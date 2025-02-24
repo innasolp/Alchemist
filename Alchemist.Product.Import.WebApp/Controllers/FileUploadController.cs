@@ -1,5 +1,6 @@
 ﻿using Alchemist.Product.Import.WebApp.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -40,24 +41,26 @@ public class FileUploadController(IDictionary<int, ShopImportModel> shopImports)
     }
 
     [HttpPost]
-    public async Task<ShopSettingsModel?> UploadShopSettings(int shopId, IFormFile file)
+    public async Task<ShopSettingsModel?> UploadShopSettings(int shopId, int shopSettingsType, IFormFile file)
     {
-        var shopSettings = await GetFromJsonAsync<ShopSettingsModel>(file);
+        var uploadedShopSettings = await GetFromJsonAsync<ShopSettingsModel>(file);
 
-        if (shopSettings != null && _shopImports.TryGetValue(shopId, out var shopImportModel)
-           && shopImportModel != null && shopImportModel.ShopSettings != null)
+        if (uploadedShopSettings != null && _shopImports.TryGetValue(shopId, out var shopImportModel)
+           && shopImportModel != null && shopImportModel.ShopSettingTabs != null)
         {
-            shopImportModel.ShopSettings.Update(shopSettings);
+            var shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType((ShopSettingType)shopSettingsType);
 
-            return shopImportModel.ShopSettings;
+            shopSettings?.Update(uploadedShopSettings);
+
+            return shopSettings;
         }
 
         return null;
-    }  
+    }
 
 
     [HttpPost]
-    public async Task<ServiceSettingsModel?> UploadServiceSettings(int shopId, string serviceSettingsName, IFormFile file)
+    public async Task<ServiceSettingsModel?> UploadServiceSettings(int shopId, int shopSettingsType, string serviceSettingsName, IFormFile file)
     {
         //todo for net.9
         //JsonSerializerOptions options = new()
@@ -65,17 +68,20 @@ public class FileUploadController(IDictionary<int, ShopImportModel> shopImports)
         //    RespectRequiredConstructorParameters = true
         //};
 
-        var serviceSettings = await GetFromJsonAsync<ServiceSettingsModel>(file);
+        var uplodedServiceSettings = await GetFromJsonAsync<ServiceSettingsModel>(file);
 
-        if (serviceSettings == null) return null;
+        if (uplodedServiceSettings == null) return null;
 
         if (_shopImports.TryGetValue(shopId, out var shopImportModel)
-            && shopImportModel != null && shopImportModel.ShopSettings != null)
+            && shopImportModel != null && shopImportModel.ShopSettingTabs != null)
         {
-            serviceSettings.ServiceName = serviceSettingsName;
-            shopImportModel.ShopSettings.UpdateServiceSettings(serviceSettings);
+            uplodedServiceSettings.ServiceName = serviceSettingsName;
 
-            return serviceSettings;
+            var shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType((ShopSettingType)shopSettingsType);
+
+            shopSettings.UpdateServiceSettings(uplodedServiceSettings);
+
+            return uplodedServiceSettings;
         }
 
         return null;

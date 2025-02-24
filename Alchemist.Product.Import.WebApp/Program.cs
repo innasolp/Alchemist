@@ -1,5 +1,4 @@
 using Alchemist.Product.Import.WebApp.Models;
-using System.Collections.ObjectModel;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +9,13 @@ var shops = new List<ShopModel> {
 
 builder.Services.AddSingleton(shops);
 
-builder.Services.AddSingleton<IReadOnlyCollection<string>>(new ReadOnlyCollection<string> ( ["Settings", "ImportProducts", "ImportCategories"] ));
 
-var shopImports = new Dictionary<int,ShopImportModel>();
-shops.ForEach(s => shopImports.Add(s.Id, new ShopImportModel { ShopId = s.Id, 
-    ShopSettings = new ShopSettingsModel { ShopId = s.Id, Name = $"{s.Name}_settings" } }));
+var shopImports = new Dictionary<int, ShopImportModel>();
+shops.ForEach(s => shopImports.Add(s.Id, new ShopImportModel
+{
+    ShopId = s.Id,
+    ShopSettingTabs = new ShopSettingTabsModel { ShopId = s.Id, Name = $"{s.Name}_settings" }
+}));
 builder.Services.AddSingleton<IDictionary<int, ShopImportModel>>(shopImports);
 
 

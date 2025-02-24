@@ -1,17 +1,27 @@
-﻿namespace Alchemist.Product.Import.WebApp.Infrastructure;
+﻿using System.ComponentModel;
+
+namespace Alchemist.Product.Import.WebApp.Infrastructure;
 
 public enum TabType
 {
-    Products=0,
-    Categories=1,
-    Shop=2
+    [Description("Products")]
+    [Category("ImportProducts")]
+    Products = 0,
+
+    [Description("Categories")]
+    [Category("ImportCategories")]
+    Categories = 1,
+
+    [Description("Shop")]
+    [Category("ShopSettingTabs")]
+    Shop = 2
 }
 
 public abstract class SettingsModelBase
-{    
+{
     public abstract TabType Tab { get; }
 
-    public int ShopId { get; set; } 
+    public int ShopId { get; set; }
 
     public int Id { get; set; }
 

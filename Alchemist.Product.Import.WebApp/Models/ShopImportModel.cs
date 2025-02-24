@@ -4,7 +4,7 @@ public class ShopImportModel
 {
     public int ShopId { get; set; }
 
-    public ShopSettingsModel? ShopSettings { get; set; }
+    public ShopSettingTabsModel? ShopSettingTabs { get; set; }
 
     public CategoriesImportSettingsModel? ImportCategories { get; set; }
 
