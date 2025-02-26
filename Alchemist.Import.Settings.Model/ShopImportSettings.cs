@@ -27,7 +27,7 @@ public class ShopImportSettings : IShopImportSettings
     [JsonIgnore]
     public int ShopId { get; set; }
     
-    public List<IImportServiceSettings> Services { get; } = [];
+    public List<ImportServiceSettings> Services { get; set; } = [];
 
     IImportServiceSettings IShopImportSettings.WebLoader
     {
@@ -49,5 +49,5 @@ public class ShopImportSettings : IShopImportSettings
         get => RequestHeaders; set => RequestHeaders = (ImportServiceSettings?)value;
     }
 
-    IList<IImportServiceSettings> IShopImportSettings.Services => Services;
+    IList<IImportServiceSettings> IShopImportSettings.Services => Services.OfType<IImportServiceSettings>().ToList();
 }
