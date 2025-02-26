@@ -1,10 +1,10 @@
-﻿@using Alchemist.Product.Import.WebApp.Infrastructure
+﻿@using Alchemist.Product.Import.Model.Infrastructure
 @using Alchemist.Product.Interfaces
 @using System.Text.Json
-@model Alchemist.Product.Import.WebApp.Models.ShopSettingTabsModel
+@model Alchemist.Product.Import.Model.ShopSettingTabsModel
 
 @functions {
-    public object GetServiceData(ShopSettingType shopSettingType) => JsonSerializer.Serialize(new { shopId = Model.ShopId, shopSettingType = (int)shopSettingType });
+    public object GetServiceData(ShopSettingType shopSettingType) => JsonSerializer.Serialize(new { shopGuid = Model.ShopGuid, shopSettingType = (int)shopSettingType });
 }
 
 @{

@@ -14,13 +14,13 @@ namespace Alchemist.Settings.RestAPI.Controllers
 
         private readonly ILogger<SettingsController> _logger = logger;
 
-        [HttpGet("shopSettings/byShopId/{shopId:int}/{shopSettingType:short}", Name = nameof(GetShopSettingsByShopId))]
-        public async Task<Results<BadRequest, NotFound, Ok<ShopSettings>>> GetShopSettingsByShopId(int shopId, ShopSettingType shopSettingType)
+        [HttpGet("shopSettings/byShopId/{shopId:int}/{shopSettingType:int}", Name = nameof(GetShopSettingsByShopId))]
+        public async Task<Results<BadRequest, NotFound, Ok<ShopSettings>>> GetShopSettingsByShopId(int shopId, int shopSettingType)
         {
             if (shopId <= 0)
                 return TypedResults.BadRequest();
 
-            var shopSettings = await _settingsRepository.GetShopSettings(shopId, shopSettingType);
+            var shopSettings = await _settingsRepository.GetShopSettings(shopId,(ShopSettingType)shopSettingType);
             return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound();
         }
         

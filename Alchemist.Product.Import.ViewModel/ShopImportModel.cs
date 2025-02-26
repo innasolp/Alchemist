@@ -1,8 +1,10 @@
-﻿namespace Alchemist.Product.Import.WebApp.Models;
+﻿namespace Alchemist.Product.Import.Model;
 
 public class ShopImportModel
 {
-    public int ShopId { get; set; }
+    public Guid ShopGuid { get; set; }
+
+    public required ShopModel Shop { get; set; }
 
     public ShopSettingTabsModel? ShopSettingTabs { get; set; }
 

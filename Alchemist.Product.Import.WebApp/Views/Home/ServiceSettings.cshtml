@@ -1,10 +1,10 @@
-﻿@model Alchemist.Product.Import.WebApp.Models.ServiceSettingsModel
+﻿@model Alchemist.Product.Import.Model.ServiceSettingsModel
 
 <h4>ServiceSettingsModel</h4>
 <hr />
 <form id="modalForm">
-    <input type="hidden" name="ShopId" value="@Model.ShopId" />
-    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ShopGuid" value="@Model.ShopGuid" />
+    <input type="hidden" name="Id" value="@Model.Guid" />
     <input type="hidden" name="ShopSettingsId" value="@Model.ShopSettingsId" />
     <input type="hidden" name="ShopSettingType" value="@Model.ShopSettingType" />
     <input type="hidden" name="Guid" value="@Model.Guid" />
@@ -14,9 +14,9 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
-                <label asp-for="JsonValue" class="control-label"></label>
-                <input type="hidden" asp-for="JsonValue" id="jsonValueHidden" />
-                <span asp-validation-for="JsonValue" class="text-danger"></span>
+                <label asp-for="Value" class="control-label"></label>
+                <input type="hidden" asp-for="Value" id="jsonValueHidden" />
+                <span asp-validation-for="Value" class="text-danger"></span>
                 <input type="file" class="btn btn-primary" id="jsonFile" name="jsonFile"
                        onchange="postFormInputFile('/FileUpload/UploadJson', $('#modalForm'), this.name, null, (data)=>{ setValIfValid('#jsonValueHidden',data); })" />
             </div>

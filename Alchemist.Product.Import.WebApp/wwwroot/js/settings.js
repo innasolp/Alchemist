@@ -1,8 +1,8 @@
-﻿function setServiceSettingsFromJson(form, fileInputName, shopId, shopSettingsType, serviceSettingsName, onSuccess = null) {
+﻿function setServiceSettingsFromJson(form, fileInputName, shopGuid, shopSettingsType, serviceSettingsName, onSuccess = null) {
     uploadFromJson('/FileUpload/UploadServiceSettings',
         form,
         fileInputName,
-        { 'shopId': shopId, 'serviceSettingsName': serviceSettingsName, 'shopSettingsType': shopSettingsType },
+        { 'shopGuid': shopGuid, 'serviceSettingsName': serviceSettingsName, 'shopSettingsType': shopSettingsType },
         onSuccess
     );
 }
@@ -46,12 +46,12 @@ async function saveShopSettings(formSelector, callback = null) {
     await fetchFormData(formData, '/Home/SaveShopSettings', 'post', callback);
 }
 
-async function setShopSettingsFromJson(formSelector, fileInputName, shopId, shopSettingsType) {
+async function setShopSettingsFromJson(formSelector, fileInputName, shopGuid, shopSettingsType) {
 
     uploadFromJson('/FileUpload/UploadShopSettings',
         formSelector,
         fileInputName,
-        { 'shopId': shopId, 'shopSettingsType': shopSettingsType },
+        { 'shopGuid': shopGuid, 'shopSettingsType': shopSettingsType },
         (data) => {
             if (data == null) return;
             console.trace(data);

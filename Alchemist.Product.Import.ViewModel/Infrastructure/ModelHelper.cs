@@ -1,7 +1,7 @@
 ﻿using Alchemist.Product.Interfaces;
 using System.ComponentModel;
 
-namespace Alchemist.Product.Import.WebApp.Infrastructure;
+namespace Alchemist.Product.Import.Model.Infrastructure;
 
 public static class ModelHelper
 {

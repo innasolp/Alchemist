@@ -1,5 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
+using DependencyInjection.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -14,11 +14,6 @@ public class ImportServiceSettings : IImportServiceSettings
     public string? ImplementationTypeName { get; set; }
     public int? Id { get; set; }
     public JsonObject? Value { get; set; }
-
-    public static ImportServiceSettings Create(IShopSettings shopSettings)
-    {
-        var serviceSettings = JsonSerializer.Deserialize<ImportServiceSettings>(shopSettings.JsonValue);
-        serviceSettings.Id = shopSettings.Id;
-        return serviceSettings;
-    }
+    public int? ParentSettingsId { get; set; }
+    string? IServiceSettings.Value { get => Value?.ToString(); set => JsonSerializer.Deserialize<JsonObject>(value); }
 }

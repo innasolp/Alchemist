@@ -160,6 +160,7 @@ public static class IntefaceExtensions
         return new T
         {
             Id = @in.Id,
+            Name = @in.Name,
             ShopId = @in.ShopId,
             JsonValue = @in.JsonValue,
             Type = @in.Type,

@@ -79,7 +79,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
         shopImportSettings.BrowserDataLoader?.SetAppPath(appPath);
         shopImportSettings.WebLoader?.SetAppPath(appPath);
         shopImportSettings.ImportService.SetAppPath(appPath);
-        shopImportSettings.RequestHeadersSettings?.SetAppPath(appPath);
+        shopImportSettings.RequestHeaders?.SetAppPath(appPath);
 
         foreach(var serviceSettings in shopImportSettings.Services)
             serviceSettings.SetAppPath(appPath);

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Alchemist.Product.Import.WebApp.Infrastructure;
+namespace Alchemist.Product.Import.Model.Infrastructure;
 
 public enum TabType
 {
@@ -21,9 +21,11 @@ public abstract class SettingsModelBase
 {
     public abstract TabType Tab { get; }
 
-    public int ShopId { get; set; }
+    public Guid ShopGuid { get; set; }
 
     public int Id { get; set; }
+
+    public int ShopId { get; set; }
 
     public string Name { get; set; }
 

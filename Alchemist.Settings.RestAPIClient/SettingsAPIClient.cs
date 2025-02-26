@@ -1,6 +1,7 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -10,7 +11,7 @@ public class SettingsAPIClient : IShopSettingsDataService
 {
     private readonly HttpClient _httpClient;
 
-    public SettingsAPIClient(IHttpClientFactory httpClientFactory, string apiHost)
+    public SettingsAPIClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(SettingsAPIClient))] string apiHost)
     {
         // _httpClient = httpClientFactory.CreateClient();
         _httpClient = httpClientFactory.CreateClient(apiHost);

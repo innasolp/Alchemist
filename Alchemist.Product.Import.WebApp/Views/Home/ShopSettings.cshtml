@@ -1,9 +1,10 @@
 ﻿@using System.Text.Json
-@model Alchemist.Product.Import.WebApp.Models.ShopSettingsModel
+@using Alchemist.Product.Import.Model
+@model ShopSettingsModel
 
 @functions {
 
-    public object GetServiceData() => JsonSerializer.Serialize(new { shopId = Model.ShopId, shopSettingsId = Model.Id});
+    public object GetServiceData() => JsonSerializer.Serialize(new { shopGuid = Model.ShopGuid, shopSettingsId = Model.Id});
 }
 
 <div class="row">
@@ -25,7 +26,7 @@
                 <label class="control-label">From json</label>
                 <input type="file" class="btn btn-primary" id="loadShopSettingsFromJson" style="display:none"
                        name="loadShopSettingsFromJson"
-                       onchange="setShopSettingsFromJson($('#loadSettingsFromJsonForm'), this.name, @Model.ShopId, @((int)Model.ShopSettingType))" />
+                       onchange="setShopSettingsFromJson($('#loadSettingsFromJsonForm'), this.name, @Model.ShopGuid, @((int)Model.ShopSettingType))" />
                 <button type="button" class="btn btn-primary"
                         onclick="$('#loadShopSettingsFromJson')[0].click();">
                     Upload
@@ -33,7 +34,7 @@
             </div>
         </form>
         <form id="settingsForm">
-            <input type="hidden" name="ShopId" value="@Model.ShopId" />
+            <input type="hidden" name="ShopGuid" value="@Model.ShopGuid" />
             <input type="hidden" name="Tab" value="@((int)Model.Tab)" />
             <input type="hidden" name="Id" value="@Model.Id" />
             <input type="hidden" name="ShopSettingType" value="@((int)Model.ShopSettingType)" />
@@ -64,7 +65,7 @@
                         Set
                     </button>
                     <input type="file" class="btn btn-primary" id="importServiceJson" name="importServiceJson"
-                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, @((int)Model.ShopSettingType), 'ImportService', (data)=>{setValIfValid('#ImportService', data.serviceTypeName);})" />
+                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopGuid, @((int)Model.ShopSettingType), 'ImportService', (data)=>{setValIfValid('#ImportService', data.serviceTypeName);})" />
                 </div>
                 <div class="form-group">
                     <label asp-for="BrowserDataLoader" class="control-label"></label>
@@ -75,11 +76,11 @@
                         Set
                     </button>
                     <input type="file" class="btn btn-primary" id="browserDataLoaderJson" name="browserDataLoaderJson"
-                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, @((int)Model.ShopSettingType), 'BrowserDataLoader', (data)=>{setValIfValid('#BrowserDataLoader', data.serviceTypeName);})" />
+                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopGuid, @((int)Model.ShopSettingType), 'BrowserDataLoader', (data)=>{setValIfValid('#BrowserDataLoader', data.serviceTypeName);})" />
                 </div>
                 <div class="form-group">
                     <label asp-for="RequestHeaders" class="control-label"></label>
-                    <input type="hidden" asp-for="RequestHeaders" id="requestHeadersHidden" />
+                    @* <input type="hidden" asp-for="RequestHeaders" id="requestHeadersHidden" /> *@
                     <span asp-validation-for="RequestHeaders" class="text-danger"></span>
                     <input type="file" class="btn btn-primary" id="jsonFile" name="jsonFile"
                        onchange="postFormInputFile('/FileUpload/UploadJson', $('#settingsForm'), this.name, null, (data)=>{ setValIfValid('#requestHeadersHidden',data); })" />
@@ -93,11 +94,11 @@
                         Set
                     </button>
                     <input type="file" class="btn btn-primary" id="webLoaderJson" name="webLoaderJson"
-                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopId, @((int)Model.ShopSettingType), 'WebLoader', (data)=>{setValIfValid('#WebLoader', data.serviceTypeName);})" />
+                       onchange="setServiceSettingsFromJson($('#settingsForm'), this.name, @Model.ShopGuid, @((int)Model.ShopSettingType), 'WebLoader', (data)=>{setValIfValid('#WebLoader', data.serviceTypeName);})" />
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary"
-                            onclick="save('#settingsForm','/Home/SaveShopSettings', { 'shopId': '@Model.ShopId'} )">
+                        onclick="save('#settingsForm','/Home/SaveShopSettings', { 'shopGuid': '@Model.ShopGuid'} )">
                         Save
                     </button>
                 </div>

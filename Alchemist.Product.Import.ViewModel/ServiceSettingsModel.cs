@@ -1,16 +1,19 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace Alchemist.Product.Import.WebApp.Models;
+namespace Alchemist.Product.Import.Model;
 
-public class ServiceSettingsModel
-{
-    public Guid Guid { get; set; } = Guid.NewGuid();
+public class ServiceSettingsModel: IImportServiceSettings
+{   
+    public Guid Guid { get; set; }
 
-    public int Id { get; set; }
+    public int? Id { get; set; }
 
-    public int ShopId { get; set; }
+    public Guid ShopGuid { get; set; }
+
+    public string Name { get; set; }
 
     public int ShopSettingsId { get; set; }
     
@@ -45,7 +48,9 @@ public class ServiceSettingsModel
         HttpMethod = "POST",
         AdditionalFields = $"{nameof(AssemblyPath)}",
         ErrorMessage = "Assembly path for is required for loading value from json.")]
-    public string? JsonValue { get; set; }
+    public string? Value { get; set; }
+
+    public int? ParentSettingsId { get; set; }
 
     public virtual void Update(ServiceSettingsModel source)
     {
@@ -54,6 +59,6 @@ public class ServiceSettingsModel
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;
         ServiceProviderPath = source.ServiceProviderPath;
-        JsonValue = source.JsonValue;
+        Value = source.Value;
     }
 }

@@ -1,36 +1,47 @@
-﻿using Alchemist.Product.Import.WebApp.Models;
-using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.Interfaces;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.WebApp.Infrastructure;
+namespace Alchemist.Product.Import.Model.Infrastructure;
 
-public static class Extensions
+public static class ModelExtensions
 {
-    public static SettingsModelBase GetSettings(this ShopImportModel shopImport, TabType tab)
+    public static SettingsModelBase GetSettings(this ShopImportModel shopImport, TabType tab, bool last = false)
     {
         switch (tab)
         {
             case TabType.Shop:
                 {
-                    shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopId = shopImport.ShopId };
-                    return shopImport.ShopSettingTabs;
+                    shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopGuid = shopImport.ShopGuid };
+                    if(!last) return shopImport.ShopSettingTabs;
+
+                    if (shopImport.ShopSettingTabs.SelectedSettingsTab == ShopSettingType.Product)
+                    {
+                        shopImport.ShopSettingTabs.ShopProductsSettings ??= new ProductShopSettingsModel();
+                        return shopImport.ShopSettingTabs.ShopProductsSettings;
+                    }
+                    else
+                    {
+                        shopImport.ShopSettingTabs.ShopCategoriesSettings ??= new CategoryShopSettingsModel();
+                        return shopImport.ShopSettingTabs.ShopCategoriesSettings;
+                    }
                 }
 
             case TabType.Products:
                 {
-                    shopImport.ImportProducts ??= new ProductsImportSettingsModel() { ShopId = shopImport.ShopId };
+                    shopImport.ImportProducts ??= new ProductsImportSettingsModel() { ShopGuid = shopImport.ShopGuid };
                     return shopImport.ImportProducts;
                 }
 
             case TabType.Categories:
                 {
-                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel() { ShopId = shopImport.ShopId };
+                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel() { ShopGuid = shopImport.ShopGuid };
                     return shopImport.ImportCategories;
                 }
 
             default:
                 {
-                    shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopId = shopImport.ShopId };
+                    shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopGuid = shopImport.ShopGuid };
                     return shopImport.ShopSettingTabs;
                 }
         }
@@ -63,20 +74,18 @@ public static class Extensions
         {
             case ShopSettingType.Product:
                 {
-                    shopSettingTabs.ShopProductsSettings ??= new ShopSettingsModel()
+                    shopSettingTabs.ShopProductsSettings ??= new ProductShopSettingsModel()
                     {
-                        ShopId = shopSettingTabs.ShopId,
-                        ShopSettingType = ShopSettingType.Product
+                        ShopGuid = shopSettingTabs.ShopGuid
                     };
                     return shopSettingTabs.ShopProductsSettings;
                 }
 
             case ShopSettingType.Category:
                 {
-                    shopSettingTabs.ShopCategoriesSettings ??= new ShopSettingsModel()
+                    shopSettingTabs.ShopCategoriesSettings ??= new CategoryShopSettingsModel()
                     {
-                        ShopId = shopSettingTabs.ShopId,
-                        ShopSettingType = ShopSettingType.Category
+                        ShopGuid = shopSettingTabs.ShopGuid
                     };
                     return shopSettingTabs.ShopCategoriesSettings;
                 }
@@ -95,32 +104,32 @@ public static class Extensions
         {
             case nameof(ShopSettingsModel.ImportService):
                 {
-                    shopSettings.ImportService ??= new ServiceSettingsModel { ShopId = shopSettings.ShopId, ShopSettingsId = shopSettings.Id };
+                    shopSettings.ImportService ??= new ServiceSettingsModel { ShopGuid = shopSettings.ShopGuid, ShopSettingsId = shopSettings.Id };
                     shopSettings.ImportService.Update(serviceSettings);
 
-                    if (!shopSettings.ServiceSettings.Any(s => s.Guid == serviceSettings?.Guid))
-                        shopSettings.ServiceSettings.Add(shopSettings.ImportService);
+                    if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
+                        shopSettings.Services.Add(shopSettings.ImportService);
 
                     return true;
                 }
 
             case nameof(ShopSettingsModel.WebLoader):
                 {
-                    shopSettings.WebLoader ??= new ServiceSettingsModel { ShopId = shopSettings.ShopId, ShopSettingsId = shopSettings.Id };
+                    shopSettings.WebLoader ??= new ServiceSettingsModel { ShopGuid = shopSettings.ShopGuid, ShopSettingsId = shopSettings.Id };
                     shopSettings.WebLoader.Update(serviceSettings);
 
-                    if (!shopSettings.ServiceSettings.Any(s => s.Guid == serviceSettings?.Guid))
-                        shopSettings.ServiceSettings.Add(shopSettings.WebLoader);
+                    if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
+                        shopSettings.Services.Add(shopSettings.WebLoader);
                     return true;
                 }
 
             case nameof(ShopSettingsModel.BrowserDataLoader):
                 {
-                    shopSettings.BrowserDataLoader ??= new ServiceSettingsModel { ShopId = shopSettings.ShopId, ShopSettingsId = shopSettings.Id };
+                    shopSettings.BrowserDataLoader ??= new ServiceSettingsModel { ShopGuid = shopSettings.ShopGuid, ShopSettingsId = shopSettings.Id };
                     shopSettings.BrowserDataLoader.Update(serviceSettings);
 
-                    if (!shopSettings.ServiceSettings.Any(s => s.Guid == serviceSettings?.Guid))
-                        shopSettings.ServiceSettings.Add(shopSettings.BrowserDataLoader);
+                    if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
+                        shopSettings.Services.Add(shopSettings.BrowserDataLoader);
 
                     return true;
                 }
@@ -151,39 +160,19 @@ public static class Extensions
                 break;
 
         }
-    }
+    }    
 
-    public static SettingsModelBase? GetSettingsByTypeFromJson(this TabType settingsType, string json)
+    public static void UpdateFromJson(this SettingsModelBase settingsModel, string json)
     {
-        Type settingsModelType;
-        switch (settingsType)
-        {
-            case TabType.Shop:
-                settingsModelType = typeof(ShopSettingTabsModel);
-                break;
-
-            case TabType.Products:
-                settingsModelType = typeof(ProductsImportSettingsModel);
-                break;
-
-            case TabType.Categories:
-                settingsModelType = typeof(CategoriesImportSettingsModel);
-                break;
-
-            default:
-                settingsModelType = typeof(ShopSettingsModel);
-                break;
-        }
-
-        var option = new JsonSerializerOptions { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString, };
-        var settingsModel = JsonSerializer.Deserialize(json, settingsModelType, option) as SettingsModelBase;
-        return settingsModel;
+        var option = new JsonSerializerOptions { NumberHandling = JsonNumberHandling.AllowReadingFromString, };
+        var model = JsonSerializer.Deserialize(json, settingsModel.GetType(), option) as SettingsModelBase;
+        settingsModel.Update(model);
     }
 
     public static T? DeserializeWithNumberHandling<T>(this string json)
         where T : class
     {
-        var option = new JsonSerializerOptions { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString, };
+        var option = new JsonSerializerOptions { NumberHandling = JsonNumberHandling.AllowReadingFromString, };
         return JsonSerializer.Deserialize<T>(json, option);
     }
 }

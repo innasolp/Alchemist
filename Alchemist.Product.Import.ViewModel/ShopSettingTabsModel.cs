@@ -1,17 +1,17 @@
-﻿using Alchemist.Product.Import.WebApp.Infrastructure;
+﻿using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.WebApp.Models;
+namespace Alchemist.Product.Import.Model;
 
 public class ShopSettingTabsModel : SettingsModelBase
 {
     [JsonIgnore]
     public override TabType Tab => TabType.Shop;
 
-    public ShopSettingsModel? ShopProductsSettings { get; set; }
+    public ProductShopSettingsModel? ShopProductsSettings { get; set; }
 
-    public ShopSettingsModel? ShopCategoriesSettings { get; set; }
+    public CategoryShopSettingsModel? ShopCategoriesSettings { get; set; }
     
     public ShopSettingType SelectedSettingsTab { get; set; } = ShopSettingType.Product;
 
@@ -26,13 +26,13 @@ public class ShopSettingTabsModel : SettingsModelBase
 
         if (shopSettingTabsModel.ShopProductsSettings != null)
         {
-            ShopProductsSettings ??= new ShopSettingsModel { ShopId = ShopId, ShopSettingType = ShopSettingType.Product };
+            ShopProductsSettings ??= new ProductShopSettingsModel { ShopGuid = ShopGuid };
             ShopProductsSettings.Update(shopSettingTabsModel.ShopProductsSettings);
         }
         
         if (shopSettingTabsModel.ShopCategoriesSettings != null)
         {
-            ShopCategoriesSettings ??= new ShopSettingsModel { ShopId = ShopId, ShopSettingType = ShopSettingType.Category };
+            ShopCategoriesSettings ??= new CategoryShopSettingsModel { ShopGuid = ShopGuid };
             ShopCategoriesSettings.Update(shopSettingTabsModel.ShopCategoriesSettings);
         }
     }

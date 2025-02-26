@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
   </ItemGroup>
 
   <ItemGroup>

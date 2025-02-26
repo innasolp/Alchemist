@@ -1,7 +1,7 @@
-﻿using Alchemist.Product.Import.WebApp.Infrastructure;
+﻿using Alchemist.Product.Import.Model.Infrastructure;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.WebApp.Models;
+namespace Alchemist.Product.Import.Model;
 
 public class CategoriesImportSettingsModel : SettingsModelBase
 {

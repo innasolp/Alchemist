@@ -22,6 +22,7 @@ public interface IAlchemyRepository
 
     Task<IShop> CreateShop(IShop shop);
     Task<IShop?> GetShop(int id);
+    Task<List<IShop>> GetShops();
     Task<IShop?> GetShopByName(string name);
 
     Task<IShop?> GetShopByUrl(string url);

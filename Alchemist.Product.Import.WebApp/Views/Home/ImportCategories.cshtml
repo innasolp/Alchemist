@@ -1,4 +1,4 @@
-﻿@using Alchemist.Product.Import.WebApp.Infrastructure;;
+﻿@using Alchemist.Product.Import.Model;
 
 @model CategoriesImportSettingsModel
 
@@ -12,7 +12,7 @@
 <h2>Hello Categories</h2>
 <h1> @Model.Name</h1>
 <form id="settingsForm">
-    <input type="hidden" name="ShopId" value="@Model.ShopId" />
+    <input type="hidden" name="ShopGuid" value="@Model.ShopGuid" />
     <input type="hidden" name="Tab" value="@((int)Model.Tab)" />
     <input type="text" name="Name" value="@name" />
     <table class="table">
