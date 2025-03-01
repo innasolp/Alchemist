@@ -19,6 +19,8 @@ public enum TabType
 
 public abstract class SettingsModelBase
 {
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     public abstract TabType Tab { get; }
 
     public Guid ShopGuid { get; set; }

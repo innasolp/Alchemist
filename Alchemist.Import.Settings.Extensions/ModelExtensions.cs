@@ -50,28 +50,29 @@ public static class ModelExtensions
         shopImportSettings.ShopId = shopSettings.ShopId;
 
         var services = await getServiceSettings(shopSettings.Id);
+        var excludedServices = new List<IImportServiceSettings>();
 
         shopImportSettings.SetServiceSettingsIfAvailable<TImportServiceSettings>(s => s.ImportService,
             nameof(IShopImportSettings.ImportService),
             services,
-            s => shopImportSettings.ImportService = s);
+            s => { shopImportSettings.ImportService = s; excludedServices.Add(s); } );
 
         shopImportSettings.SetServiceSettingsIfAvailable<TImportServiceSettings>(s => s.RequestHeaders,
             nameof(IShopImportSettings.RequestHeaders),
             services,
-            s => shopImportSettings.RequestHeaders = s);
+            s => {shopImportSettings.RequestHeaders = s; excludedServices.Add(s); });
 
         shopImportSettings.SetServiceSettingsIfAvailable<TImportServiceSettings>(s => s.BrowserDataLoader,
             nameof(IShopImportSettings.BrowserDataLoader),
             services,
-            s => shopImportSettings.BrowserDataLoader = s);
+            s => {shopImportSettings.BrowserDataLoader = s; excludedServices.Add(s); });
 
         shopImportSettings.SetServiceSettingsIfAvailable<TImportServiceSettings>(s => s.WebLoader,
             nameof(IShopImportSettings.WebLoader),
             services,
-            s => shopImportSettings.WebLoader = s);
+            s => {shopImportSettings.WebLoader = s; excludedServices.Add(s); });
 
-        services.Where(s => !shopImportSettings.Services.Any(i => i.Id == s.Id)).ToList().ForEach(s =>
+        services.Where(s => !excludedServices.Any(i => i.Id == s.Id)).ToList().ForEach(s =>
         {
             shopImportSettings.Services.Add(s.GetImportServiceSettings<TImportServiceSettings>());
         });
@@ -98,8 +99,7 @@ public static class ModelExtensions
                 serviceSettings.Update(serviceModel);
             else
             {
-                setNew(serviceModel);
-                shopImportSettings.Services.Add(serviceModel);
+                setNew(serviceModel);                
             }
         }
         else

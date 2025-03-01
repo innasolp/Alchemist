@@ -1,7 +1,11 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.Model;
 
@@ -36,16 +40,25 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
     {
         return _shopImports.TryGetValue(shopGuid, out var shopImportModel)
                && shopImportModel != null && shopImportModel.ShopSettingTabs != null
-           ? shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType)
-              ?? CreateShopImportSettings(shopSettingType, shopGuid)
+           ? shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType)            
            : null;
+    }    
+
+    public ServiceSettingsModel CreateServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
+    {
+        return new ServiceSettingsModel
+        {
+            ShopGuid = shopGuid,
+            ShopSettingsGuid = shopSettingsGuid,
+            ServiceName = serviceSettingsName
+        };
     }
 
-    public ServiceSettingsModel? GetServiceSettingsModel(Guid shopGuid, int shopSettingType, string serviceSettingsName)
+    public ServiceSettingsModel? GetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
     {
         return _shopImports.TryGetValue(shopGuid, out var shopImportModel)
                 && shopImportModel != null && shopImportModel.ShopSettingTabs != null
-            ? shopImportModel.ShopSettingTabs.GetShopSettingsByType((ShopSettingType)shopSettingType)?.GetServiceSettings(serviceSettingsName) ?? new ServiceSettingsModel { ShopGuid = shopGuid, ServiceName = serviceSettingsName }
+            ? shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid)?.GetServiceSettings(serviceSettingsName) 
             : null;
     }
 
@@ -105,6 +118,43 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
         shopSettingsModel.Services.ForEach(s => s.ShopGuid = shop.Guid);
 
         return shopSettingsModel;
+    }
+
+    public async Task Save(ShopSettingsModel shopSettingsModel)
+    {
+        var option = new JsonSerializerOptions
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ShopSettingsModel),
+                    nameof(ShopSettingsModel.BrowserDataLoader),
+                    nameof(ShopSettingsModel.WebLoader),
+                    nameof(ShopSettingsModel.ImportService),
+                    nameof(ShopSettingsModel.RequestHeaders),
+                    nameof(ShopSettingsModel.Services)) }
+            }
+        };
+
+        var json = JsonSerializer.Serialize(shopSettingsModel, option);
+        var shopSettings = new ShopSettings {
+            Id = shopSettingsModel.Id,
+            JsonValue = json, 
+            ShopId = shopSettingsModel.ShopId,
+            Type = shopSettingsModel.ShopSettingType
+        };
+
+        var services = (from serviceModel in shopSettingsModel.Services
+                        let service = new ShopSettings
+                        {
+                            Type = ShopSettingType.Service,
+                            ShopId = shopSettingsModel.ShopId,
+                            Name = shopSettingsModel.Name,
+                            ParentSettingsId = shopSettings.Id,
+                            Id = shopSettingsModel.Id
+                        }
+                        select service).ToList();
+        await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
     }
 
 }

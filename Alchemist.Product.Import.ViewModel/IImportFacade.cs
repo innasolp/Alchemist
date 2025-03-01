@@ -12,11 +12,15 @@ public interface IImportFacade
 
     ShopSettingsModel? GetShopSettings(Guid shopGuid, ShopSettingType shopSettingType);
 
-    ServiceSettingsModel? GetServiceSettingsModel(Guid shopGuid, int shopSettingType, string serviceSettingsName);
+    ServiceSettingsModel CreateServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName);
+    
+    ServiceSettingsModel? GetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName);
 
     ShopImportModel AddNewShop(IShop shop);
 
     ShopSettingsModel CreateShopImportSettings(ShopSettingType shopSettingType, Guid shopGuid);
 
     Task<ShopSettingsModel?> GetShopImportSettings(ShopModel shop, ShopSettingType shopSettingType);
+
+    Task Save(ShopSettingsModel shopSettingsModel);
 }

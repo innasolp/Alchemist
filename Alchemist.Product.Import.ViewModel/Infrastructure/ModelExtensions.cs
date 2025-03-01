@@ -1,6 +1,8 @@
 ﻿using Alchemist.Product.Interfaces;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 
@@ -12,38 +14,42 @@ public static class ModelExtensions
         {
             case TabType.Shop:
                 {
-                    shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopGuid = shopImport.ShopGuid };
-                    if(!last) return shopImport.ShopSettingTabs;
-
-                    if (shopImport.ShopSettingTabs.SelectedSettingsTab == ShopSettingType.Product)
-                    {
-                        shopImport.ShopSettingTabs.ShopProductsSettings ??= new ProductShopSettingsModel();
-                        return shopImport.ShopSettingTabs.ShopProductsSettings;
-                    }
-                    else
-                    {
-                        shopImport.ShopSettingTabs.ShopCategoriesSettings ??= new CategoryShopSettingsModel();
-                        return shopImport.ShopSettingTabs.ShopCategoriesSettings;
-                    }
+                    return shopImport.GetShopSettingsModel(last);
                 }
 
             case TabType.Products:
                 {
-                    shopImport.ImportProducts ??= new ProductsImportSettingsModel() { ShopGuid = shopImport.ShopGuid };
+                    shopImport.ImportProducts ??= new ProductsImportSettingsModel() { ShopGuid = shopImport.ShopGuid, ShopId = shopImport.Shop.Id };
                     return shopImport.ImportProducts;
                 }
 
             case TabType.Categories:
                 {
-                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel() { ShopGuid = shopImport.ShopGuid };
+                    shopImport.ImportCategories ??= new CategoriesImportSettingsModel() { ShopGuid = shopImport.ShopGuid, ShopId = shopImport.Shop.Id };
                     return shopImport.ImportCategories;
                 }
 
             default:
                 {
-                    shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopGuid = shopImport.ShopGuid };
-                    return shopImport.ShopSettingTabs;
+                    return shopImport.GetShopSettingsModel(last);
                 }
+        }
+    }
+
+    private static SettingsModelBase GetShopSettingsModel(this ShopImportModel shopImport, bool last = false )
+    {
+        shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopGuid = shopImport.ShopGuid, ShopId = shopImport.Shop.Id };
+        if (!last) return shopImport.ShopSettingTabs;
+
+        if (shopImport.ShopSettingTabs.SelectedSettingsTab == ShopSettingType.Product)
+        {
+            shopImport.ShopSettingTabs.ShopProductsSettings ??= new ProductShopSettingsModel();
+            return shopImport.ShopSettingTabs.ShopProductsSettings;
+        }
+        else
+        {
+            shopImport.ShopSettingTabs.ShopCategoriesSettings ??= new CategoryShopSettingsModel();
+            return shopImport.ShopSettingTabs.ShopCategoriesSettings;
         }
     }
 
@@ -76,7 +82,8 @@ public static class ModelExtensions
                 {
                     shopSettingTabs.ShopProductsSettings ??= new ProductShopSettingsModel()
                     {
-                        ShopGuid = shopSettingTabs.ShopGuid
+                        ShopGuid = shopSettingTabs.ShopGuid,
+                        ShopId = shopSettingTabs.ShopId
                     };
                     return shopSettingTabs.ShopProductsSettings;
                 }
@@ -85,7 +92,8 @@ public static class ModelExtensions
                 {
                     shopSettingTabs.ShopCategoriesSettings ??= new CategoryShopSettingsModel()
                     {
-                        ShopGuid = shopSettingTabs.ShopGuid
+                        ShopGuid = shopSettingTabs.ShopGuid,
+                        ShopId = shopSettingTabs.ShopId
                     };
                     return shopSettingTabs.ShopCategoriesSettings;
                 }
@@ -95,8 +103,13 @@ public static class ModelExtensions
         }
     }
 
-
-    [Obsolete("Update with serviceName parameter")]
+    public static ShopSettingsModel? GetShopSettingsByGuid(this ShopSettingTabsModel shopSettingTabs, Guid shopSettingsGuid)
+    {
+        return shopSettingTabs?.ShopProductsSettings?.Guid == shopSettingsGuid
+            ? shopSettingTabs.ShopProductsSettings
+            : (shopSettingTabs?.ShopCategoriesSettings?.Guid == shopSettingsGuid ? shopSettingTabs.ShopCategoriesSettings : null);
+    }
+   
     public static bool UpdateServiceSettings(this ShopSettingsModel shopSettings, ServiceSettingsModel? serviceSettings)
     {
         if (serviceSettings == null) return false;
@@ -104,32 +117,20 @@ public static class ModelExtensions
         {
             case nameof(ShopSettingsModel.ImportService):
                 {
-                    shopSettings.ImportService ??= new ServiceSettingsModel { ShopGuid = shopSettings.ShopGuid, ShopSettingsId = shopSettings.Id };
-                    shopSettings.ImportService.Update(serviceSettings);
-
-                    if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
-                        shopSettings.Services.Add(shopSettings.ImportService);
+                    shopSettings.UpdateShopServiceSettings(serviceSettings, s => s.ImportService, (s, sm) => s.ImportService = sm);
 
                     return true;
                 }
 
             case nameof(ShopSettingsModel.WebLoader):
                 {
-                    shopSettings.WebLoader ??= new ServiceSettingsModel { ShopGuid = shopSettings.ShopGuid, ShopSettingsId = shopSettings.Id };
-                    shopSettings.WebLoader.Update(serviceSettings);
-
-                    if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
-                        shopSettings.Services.Add(shopSettings.WebLoader);
+                    shopSettings.UpdateShopServiceSettings(serviceSettings, s => s.WebLoader, (s, sm) => s.WebLoader = sm);
                     return true;
                 }
 
             case nameof(ShopSettingsModel.BrowserDataLoader):
                 {
-                    shopSettings.BrowserDataLoader ??= new ServiceSettingsModel { ShopGuid = shopSettings.ShopGuid, ShopSettingsId = shopSettings.Id };
-                    shopSettings.BrowserDataLoader.Update(serviceSettings);
-
-                    if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
-                        shopSettings.Services.Add(shopSettings.BrowserDataLoader);
+                    shopSettings.UpdateShopServiceSettings(serviceSettings, s => s.BrowserDataLoader, (s, sm) => s.BrowserDataLoader = sm);
 
                     return true;
                 }
@@ -137,6 +138,23 @@ public static class ModelExtensions
             default:
                 return false;
         }
+    }
+
+    private static void UpdateShopServiceSettings(this ShopSettingsModel shopSettings, ServiceSettingsModel? serviceSettings,
+        Func<ShopSettingsModel, ServiceSettingsModel> get,
+        Action<ShopSettingsModel,ServiceSettingsModel> set)
+    {
+        if (get(shopSettings) == null)
+            set(shopSettings, new ServiceSettingsModel
+            {
+                ShopGuid = shopSettings.ShopGuid,
+                ShopSettingsGuid = shopSettings.Guid,
+                ParentSettingsId = shopSettings.Id
+            });
+        get(shopSettings).Update(serviceSettings);
+
+        if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
+            shopSettings.Services.Add(get(shopSettings));
     }
 
     public static void UpdateSettings(this ShopImportModel shopImport, SettingsModelBase settings)

@@ -56,18 +56,24 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
         {
             ImportService ??= new ServiceSettingsModel { ShopGuid = ShopGuid, ServiceName = nameof(ImportService) };
             ImportService.Update(sourceShopSettings.ImportService);
+            if (!Services.Any(s => s.Guid == ImportService.Guid))
+                Services.Add(ImportService);
         }
 
         if (sourceShopSettings.BrowserDataLoader != null)
         {
             BrowserDataLoader ??= new ServiceSettingsModel { ShopGuid = ShopGuid, ServiceName = nameof(BrowserDataLoader) };
             BrowserDataLoader.Update(sourceShopSettings.BrowserDataLoader);
+            if (!Services.Any(s => s.Guid == BrowserDataLoader.Guid))
+                Services.Add(BrowserDataLoader);
         }
 
         if (sourceShopSettings.WebLoader != null)
         {
             WebLoader ??= new ServiceSettingsModel { ShopGuid = ShopGuid, ServiceName = nameof(WebLoader) };
             WebLoader.Update(sourceShopSettings.WebLoader);
+            if (!Services.Any(s => s.Guid == WebLoader.Guid))
+                Services.Add(WebLoader);
         }
     }
 }

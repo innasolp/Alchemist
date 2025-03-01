@@ -1,8 +1,8 @@
-﻿function setServiceSettingsFromJson(form, fileInputName, shopGuid, shopSettingsType, serviceSettingsName, onSuccess = null) {
+﻿function setServiceSettingsFromJson(form, fileInputName, shopGuid, shopSettingsGuid, serviceSettingsName, onSuccess = null) {
     uploadFromJson('/FileUpload/UploadServiceSettings',
         form,
         fileInputName,
-        { 'shopGuid': shopGuid, 'serviceSettingsName': serviceSettingsName, 'shopSettingsType': shopSettingsType },
+        { 'shopGuid': shopGuid, 'serviceSettingsName': serviceSettingsName, 'shopSettingsGuid': shopSettingsGuid },
         onSuccess
     );
 }

@@ -11,9 +11,9 @@ using System.Diagnostics;
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
 public class HomeController : Controller
-{    
+{
     private readonly ILogger<HomeController> _logger;
-    
+
     private readonly IImportFacade _importFacade;
 
     private readonly IMessageReceiver _shopEventReceiver;
@@ -41,7 +41,7 @@ public class HomeController : Controller
 
     private void SetCurrentShopGuid(Guid? guid)
     {
-        if(guid != null) ViewData["ShopGuid"] = guid;
+        if (guid != null) ViewData["ShopGuid"] = guid;
     }
 
     private Guid? GetCurrentShopGuidOrDefault(List<ShopImportModel> shopImports)
@@ -55,7 +55,7 @@ public class HomeController : Controller
 
         return shopGuid;
     }
-    
+
     private TabType? GetCurrentTab()
     {
         return ViewData["Tab"] is TabType tab ? tab : (TabType?)null;
@@ -77,7 +77,7 @@ public class HomeController : Controller
         return (TabType)tab;
     }
 
-    private async Task<IndexViewModel> GetIndexViewModel(Guid shopGuid, TabType tabType)
+    private async Task<IndexViewModel> GetIndexViewModelAsync(Guid shopGuid, TabType tabType)
     {
         var shopImports = await _importFacade.LoadShops();
 
@@ -90,7 +90,7 @@ public class HomeController : Controller
         };
     }
 
-    private async Task<IndexViewModel> GetDefaultIndexViewModel()
+    private async Task<IndexViewModel> GetDefaultIndexViewModelAsync()
     {
         var shopImports = await _importFacade.LoadShops();
         var shopGuid = GetCurrentShopGuidOrDefault(shopImports);
@@ -110,8 +110,8 @@ public class HomeController : Controller
         var tab = GetCurrentTabOrDefault();
 
         var viewModel = shopGuid != null
-            ? await GetIndexViewModel((Guid)shopGuid, (TabType)tab)
-            : await GetDefaultIndexViewModel();
+            ? await GetIndexViewModelAsync((Guid)shopGuid, (TabType)tab)
+            : await GetDefaultIndexViewModelAsync();
 
         return View("~/Views/Home/Index.cshtml", viewModel);
     }
@@ -122,7 +122,7 @@ public class HomeController : Controller
         SetCurrentShopGuid(shopGuid);
         SetCurrentTab((TabType)tab);
 
-        var viewModel = await GetIndexViewModel(shopGuid, (TabType)tab);
+        var viewModel = await GetIndexViewModelAsync(shopGuid, (TabType)tab);
 
         return View(viewModel);
     }
@@ -136,7 +136,7 @@ public class HomeController : Controller
             return false;
 
         var settings = shopImport.GetSettings((TabType)tab, true);
-        settings.UpdateFromJson(json);       
+        settings.UpdateFromJson(json);
 
         return true;
     }
@@ -156,20 +156,21 @@ public class HomeController : Controller
     {
         return PartialView();
     }
-    
+
 
     [HttpPost]
     public bool SaveShopSettings(Guid shopGuid, int shopSettingType, string json)
     {
         if (string.IsNullOrEmpty(json)) return false;
 
-        ShopSettingsModel? shopSettings = (ShopSettingType)shopSettingType == ShopSettingType.Product 
+        ShopSettingsModel? shopSettings = (ShopSettingType)shopSettingType == ShopSettingType.Product
             ?  json.DeserializeWithNumberHandling<ProductShopSettingsModel>()
             : json.DeserializeWithNumberHandling<CategoryShopSettingsModel>();
         if (shopSettings == null)
             throw new InvalidOperationException("Invalid json for shop settings");
 
         var shopSettingsModel =_importFacade.GetShopSettings(shopGuid, shopSettings.ShopSettingType);
+            ?? _importFacade.CreateShopImportSettings(shopSettings.ShopSettingType, shopGuid);
 
         shopSettingsModel?.Update(shopSettings);
 
@@ -185,37 +186,38 @@ public class HomeController : Controller
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
             return false;
 
-        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;        
+        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
 
         return shopImport != null;
     }
-    
-    private IActionResult ServiceSettings(Guid shopGuid, int shopSettingType, string serviceSettingsName)
+
+    private IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
     {
-        var serviceSettingsModel = _importFacade.GetServiceSettingsModel(shopGuid, shopSettingType, serviceSettingsName);
+        var serviceSettingsModel = _importFacade.GetServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName)
+            ?? _importFacade.CreateServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName);
 
         return serviceSettingsModel == null
-            ? throw new InvalidDataException($"No data for shop {shopGuid} and settings {(ShopSettingType)shopSettingType}")
+            ? throw new InvalidDataException($"No data for shop {shopGuid} and settings {shopSettingsGuid}")
             : (IActionResult)PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
     }
 
     [HttpPost]
-    public IActionResult ImportServiceSettings(Guid shopGuid, int shopSettingType)
+    public IActionResult ImportServiceSettings(Guid shopGuid, Guid shopSettingsGuid)
     {
-        return ServiceSettings(shopGuid, shopSettingType, nameof(ShopSettingsModel.ImportService));
+        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.ImportService));
     }
 
 
     [HttpPost]
-    public IActionResult BrowserDataLoaderSettings(Guid shopGuid, int shopSettingType)
+    public IActionResult BrowserDataLoaderSettings(Guid shopGuid, Guid shopSettingsGuid)
     {
-        return ServiceSettings(shopGuid, shopSettingType, nameof(ShopSettingsModel.BrowserDataLoader));
+        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.BrowserDataLoader));
     }
 
     [HttpPost]
-    public IActionResult WebLoaderSettings(Guid shopGuid, int shopSettingsId)
+    public IActionResult WebLoaderSettings(Guid shopGuid, Guid shopSettingsGuid)
     {
-        return ServiceSettings(shopGuid, shopSettingsId, nameof(ShopSettingsModel.WebLoader));
+        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.WebLoader));
     }
 
     [HttpPost]
@@ -224,17 +226,41 @@ public class HomeController : Controller
         if (data == null || !_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
             return false;
 
-        return shopImport.ShopSettingTabs.GetShopSettingsByType(data.ShopSettingType)
+        var result = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid)?
                 .UpdateServiceSettings(data);
+
+        return result == true;
     }
 
-    //todo
-    //[HttpPost]
-    //public bool SaveShopSettings(int shopId)
-    //{
-    //    //todo
-    //    return true;
-    //}
+    [HttpPost]
+    public async Task<bool> SaveProductShopSettingsToDb(ProductShopSettingsModel productShopSettings)
+    {
+        if (productShopSettings == null) return false;
+
+        if (!_importFacade.TryGetShopImport(productShopSettings.ShopGuid, out var shopImport) && shopImport != null)
+            return false;
+
+        shopImport.ShopSettingTabs.ShopProductsSettings.Update(productShopSettings);
+
+        await _importFacade.Save(shopImport.ShopSettingTabs.ShopProductsSettings);
+
+        return true;
+    }
+
+    [HttpPost]
+    public async Task<bool> SaveCategoryShopSettingsToDb(CategoryShopSettingsModel categoryShopSettings)
+    {
+        if (categoryShopSettings == null) return false;
+
+        if (!_importFacade.TryGetShopImport(categoryShopSettings.ShopGuid, out var shopImport) && shopImport != null)
+            return false;
+
+        shopImport.ShopSettingTabs.ShopCategoriesSettings.Update(categoryShopSettings);
+
+        await _importFacade.Save(shopImport.ShopSettingTabs.ShopCategoriesSettings);
+
+        return true;
+    }
 
     public IActionResult ImportProducts()
     {
