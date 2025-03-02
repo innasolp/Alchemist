@@ -2,8 +2,10 @@
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace Alchemist.Settings.RestAPIClient;
 
@@ -48,16 +50,28 @@ public class SettingsAPIClient : IShopSettingsDataService
 
     public async Task<List<IShopSettings>> SaveShopSettings(IShopSettings parentShopSettings, IEnumerable<IShopSettings> childrenSettings)
     {
-        var shopSettingsWithServices = new
-        {
-            ShopSettings = parentShopSettings.To<ShopSettings>(),
-            Services = childrenSettings.Select(s => s.To<ShopSettings>()).ToArray()
-        };
-
+        var shopSettingsWithServices = new ArrayList() { 
+            parentShopSettings.To<ShopSettings>(), 
+            childrenSettings.Select(s => s.To<ShopSettings>()).ToArray() };
+        
         var response = await _httpClient.PostAsJsonAsync($"api/Settings/shopSettings/save", shopSettingsWithServices);
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<List<ShopSettings>>();
-        return await Task.FromResult(result?.OfType<IShopSettings>().ToList());
+        
+        var result = await response.Content.ReadFromJsonAsync<ArrayList>();
+        if (result != null && result.Count >= 2)
+        {
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+            var resultShopSettings = JsonSerializer.Deserialize<ShopSettings>(result[0].ToString(), options);
+            var data = new List<IShopSettings> { resultShopSettings };
+
+            var resultServices = JsonSerializer.Deserialize<ShopSettings[]>(result[1].ToString(), options);
+            data.AddRange(resultServices);
+
+            return await Task.FromResult(data);
+        }
+
+        return await Task.FromResult(default(List<IShopSettings>));
     }
 
     public async Task<bool> UpdateShopSettings(IShopSettings shopSettings)

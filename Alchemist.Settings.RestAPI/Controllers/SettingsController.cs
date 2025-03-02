@@ -3,11 +3,11 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections;
 using System.Net;
+using System.Text.Json;
 
 namespace Alchemist.Settings.RestAPI.Controllers;
-
-public record ShopSettingsWithServices (ShopSettings ShopSettings, ShopSettings[] Services);
 
 [ApiController]
 [Route("api/Settings")]
@@ -23,10 +23,10 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         if (shopId <= 0)
             return TypedResults.BadRequest();
 
-        var shopSettings = await _settingsRepository.GetShopSettings(shopId,(ShopSettingType)shopSettingType);
+        var shopSettings = await _settingsRepository.GetShopSettings(shopId, (ShopSettingType)shopSettingType);
         return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound();
     }
-    
+
     [HttpGet("shopSettings/byId/{id:int}", Name = nameof(GetShopSettingsById))]
     public async Task<Results<BadRequest, NotFound, Ok<ShopSettings>>> GetShopSettingsById(int id)
     {
@@ -40,7 +40,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
     [HttpPost("shopSettings", Name = nameof(SaveShopSettings))]
     public async Task<Results<BadRequest<ShopSettings>, Created<ShopSettings>>> SaveShopSettings(ShopSettings shopSettings)
     {
-        if (shopSettings == null || shopSettings.ShopId == 0 || string.IsNullOrEmpty(shopSettings.JsonValue))
+        if (shopSettings == null || shopSettings.ShopId == 0 || shopSettings.JsonValue == null)
             return TypedResults.BadRequest(shopSettings);
 
         var newShopSettings = (await _settingsRepository.SaveShopSettings(shopSettings)).To<ShopSettings>();
@@ -48,31 +48,39 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         var location = Url.Action(nameof(SaveShopSettings), new { id = newShopSettings.Id }) ?? $"/{newShopSettings.Id}";
         return TypedResults.Created(location, newShopSettings);
     }
-    
+
     [HttpPost("shopSettings/save", Name = nameof(SaveShopSettingsWithServices))]
-    public async Task<Results<BadRequest<List<ShopSettings>>, StatusCodeHttpResult, Created <List<ShopSettings>>, Accepted<List<ShopSettings>>>> 
-        SaveShopSettingsWithServices(ShopSettingsWithServices shopSettingsWithServices)
+    public async Task<Results<BadRequest<ArrayList>, StatusCodeHttpResult, Created<ArrayList>, Accepted<ArrayList>>>
+        SaveShopSettingsWithServices(ArrayList shopSettingsWithServices)
     {
-        var initId = shopSettingsWithServices.ShopSettings.Id;
+        if (shopSettingsWithServices == null || shopSettingsWithServices.Count < 2 || shopSettingsWithServices.Contains(null))
+            return TypedResults.BadRequest(shopSettingsWithServices);
 
-        if (shopSettingsWithServices.ShopSettings == null || shopSettingsWithServices.ShopSettings.ShopId == 0
-            || string.IsNullOrEmpty(shopSettingsWithServices.ShopSettings.JsonValue)
-            || shopSettingsWithServices.Services.Any(s=>string.IsNullOrEmpty(s.JsonValue)))
-            return TypedResults.BadRequest(new List<ShopSettings> { shopSettingsWithServices .ShopSettings});
+        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        var allData = (await _settingsRepository.SaveShopSettings(shopSettingsWithServices.ShopSettings, shopSettingsWithServices.Services)).OfType<ShopSettings>().ToList();
+        var shopSettings = JsonSerializer.Deserialize<ShopSettings>(shopSettingsWithServices[0].ToString(), options);
+        var services = JsonSerializer.Deserialize<ShopSettings[]>(shopSettingsWithServices[1].ToString(), options);
+
+        if (shopSettings == null || shopSettings.ShopId == 0 || shopSettings.JsonValue == null
+            || services == null || services.Any(s => s.JsonValue == null))
+            return TypedResults.BadRequest(shopSettingsWithServices);
+
+        var initId = shopSettings.Id;
+
+        var allData = (await _settingsRepository.SaveShopSettings(shopSettings, services)).Select(s=>s.To<ShopSettings>()).ToList();
         var shopSettingResult = allData.FirstOrDefault(s => s.Type != ShopSettingType.Service);
         if (shopSettingResult == null)
             return TypedResults.StatusCode((int)HttpStatusCode.InternalServerError);
 
         var location = Url.Action(nameof(SaveShopSettingsWithServices), new { id = shopSettingResult.Id }) ?? $"/{shopSettingResult.Id}";
-        return initId == 0 ? TypedResults.Created(location, allData) : TypedResults.Accepted(location, allData);
+        var result = new ArrayList { shopSettingResult, allData.Where(d => d.Type == ShopSettingType.Service).ToArray() };
+        return initId == 0 ? TypedResults.Created(location, result) : TypedResults.Accepted(location, result);
     }
-    
+
     [HttpPut("shopSettings/update", Name = nameof(UpdateShopSettings))]
     public async Task<Results<BadRequest<ShopSettings>, Ok<ShopSettings>, StatusCodeHttpResult>> UpdateShopSettings(ShopSettings shopSettings)
     {
-        if (shopSettings == null || shopSettings.ShopId == 0 || string.IsNullOrEmpty(shopSettings.JsonValue))
+        if (shopSettings == null || shopSettings.ShopId == 0 || shopSettings.JsonValue == null)
             return TypedResults.BadRequest(shopSettings);
 
         var result = await _settingsRepository.UpdateShopSettings(shopSettings);
