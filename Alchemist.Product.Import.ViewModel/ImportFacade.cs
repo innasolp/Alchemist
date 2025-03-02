@@ -4,6 +4,7 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
@@ -139,7 +140,7 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
         var json = JsonSerializer.Serialize(shopSettingsModel, option);
         var shopSettings = new ShopSettings {
             Id = shopSettingsModel.Id,
-            JsonValue = json, 
+            JsonValue = JsonSerializer.Deserialize<JsonObject>(json), 
             ShopId = shopSettingsModel.ShopId,
             Type = shopSettingsModel.ShopSettingType
         };
@@ -151,7 +152,8 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
                             ShopId = shopSettingsModel.ShopId,
                             Name = shopSettingsModel.Name,
                             ParentSettingsId = shopSettings.Id,
-                            Id = shopSettingsModel.Id
+                            Id = shopSettingsModel.Id,
+                            JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(serviceModel))
                         }
                         select service).ToList();
         await _shopSettingsDataService.SaveShopSettings(shopSettings, services);

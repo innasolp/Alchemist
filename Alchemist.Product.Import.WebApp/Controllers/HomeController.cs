@@ -169,7 +169,7 @@ public class HomeController : Controller
         if (shopSettings == null)
             throw new InvalidOperationException("Invalid json for shop settings");
 
-        var shopSettingsModel =_importFacade.GetShopSettings(shopGuid, shopSettings.ShopSettingType);
+        var shopSettingsModel =_importFacade.GetShopSettings(shopGuid, shopSettings.ShopSettingType)
             ?? _importFacade.CreateShopImportSettings(shopSettings.ShopSettingType, shopGuid);
 
         shopSettingsModel?.Update(shopSettings);

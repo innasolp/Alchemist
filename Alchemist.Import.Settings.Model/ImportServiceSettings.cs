@@ -15,5 +15,5 @@ public class ImportServiceSettings : IImportServiceSettings
     public int? Id { get; set; }
     public JsonObject? Value { get; set; }
     public int? ParentSettingsId { get; set; }
-    string? IServiceSettings.Value { get => Value?.ToString(); set => JsonSerializer.Deserialize<JsonObject>(value); }
+    string? IServiceSettings.Value { get => Value?.ToString(); set => Value = JsonSerializer.Deserialize<JsonObject>(value); }
 }
