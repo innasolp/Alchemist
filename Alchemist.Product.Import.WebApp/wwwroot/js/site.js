@@ -75,15 +75,15 @@ function ShowItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide
     })
 }
 
-function postData(url, jsonData, onSuccess = null) {
+function postData(url, data, onSuccess = null) {
     $.ajax({
         type: 'POST',
         url: url,
-        data: jsonData,
-        success: function (data) {
+        data: data,
+        success: function (result) {
             console.log('saved');
             if (onSuccess != null)
-                onSuccess(data);
+                onSuccess(result);
         },
         error: function (err) {
             console.error("Not Saved");
@@ -92,7 +92,7 @@ function postData(url, jsonData, onSuccess = null) {
     });
 }
 
-function save(selectorId, url, jsonData, onSuccess=null) {
+function save(selectorId, url, data, onSuccess=null) {
 
     $.validator.unobtrusive.parse($(selectorId));
 
@@ -100,12 +100,12 @@ function save(selectorId, url, jsonData, onSuccess=null) {
 
     var pendingRequest = $(selectorId).data('validator').pendingRequest;
     if (pendingRequest == 0)
-        postData(url, jsonData, onSuccess);
+        postData(url, data, onSuccess);
     else
         setTimeout(() =>
         {
             if ($(selectorId).valid())
-                postData(url, jsonData, onSuccess);
+                postData(url, data, onSuccess);
         }
         ,500);
 }

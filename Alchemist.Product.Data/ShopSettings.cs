@@ -11,4 +11,6 @@ public class ShopSettings : IShopSettings
     public bool? IsActual { get; set; }
     public string JsonValue { get; set; }
     public ShopSettingType Type { get; set; }
+
+    public string? Name { get; set; }
 }

@@ -1,22 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.WebApp.Models;
+namespace Alchemist.Product.Import.Model;
 
-public class ServiceSettingsModel
+public class ServiceSettingsModel: IImportServiceSettings
 {
     public Guid Guid { get; set; } = Guid.NewGuid();
 
-    public int Id { get; set; }
+    public int? Id { get; set; }
 
-    public int ShopId { get; set; }
+    public Guid ShopGuid { get; set; }
 
-    public int ShopSettingsId { get; set; }
+    public Guid ShopSettingsGuid { get; set; }
 
-    //todo must be required, but is optional for deserializing
-    public string ServiceName { get; set; }
+    public string Name { get; set; }
 
-    [Required]
+    public ShopSettingType ShopSettingType { get; set; }
+    
+    [Required(AllowEmptyStrings = true)]
     [Display(Name = "Service type")]
     [Remote(action: "AssemblyPathOrProviderPathNotEmpty",
         controller: "Validation",
@@ -42,14 +46,18 @@ public class ServiceSettingsModel
         HttpMethod = "POST",
         AdditionalFields = $"{nameof(AssemblyPath)}",
         ErrorMessage = "Assembly path for is required for loading value from json.")]
-    public string? JsonValue { get; set; }
+    [JsonIgnore]
+    public string? Value { get; set; }
 
-    public virtual void Update(ServiceSettingsModel source)
+    public int? ParentSettingsId { get; set; }
+
+    public void Update(ServiceSettingsModel source)
     {
+        ShopSettingType = source.ShopSettingType;
         ServiceTypeName = source.ServiceTypeName;
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;
         ServiceProviderPath = source.ServiceProviderPath;
-        JsonValue = source.JsonValue;
+        Value = source.Value;
     }
 }

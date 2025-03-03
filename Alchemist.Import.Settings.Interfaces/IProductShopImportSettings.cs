@@ -2,9 +2,9 @@
 
 public interface IProductShopImportSettings : IShopImportSettings
 {
-    public string? ProductUrl { get; }
+    public string? ProductUrl { get; set; }
 
-    public string? CategoryUrl { get; }
+    public string? CategoryUrl { get; set; }
 
-    public int? PageProductCount { get; }
+    public int? PageProductCount { get; set; }
 }

@@ -14,5 +14,7 @@ public class CategoriesSerializationTests
 
         Assert.NotNull(settings);
         Assert.Equal(2, settings.Length);
+        Assert.NotEmpty(settings[0].Services);
+        Assert.NotEmpty(settings[1].Services);
     }
 }

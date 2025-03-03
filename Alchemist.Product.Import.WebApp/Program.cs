@@ -1,22 +1,18 @@
-using Alchemist.Product.Import.WebApp.Models;
-using System.Collections.ObjectModel;
+using Alchemist.DataService.Interfaces;
+using Alchemist.DependencyInjection.Common;
+using Alchemist.Product.Import.Model;
+using Alchemist.Product.RestAPIClient;
+using Alchemist.Settings.RestAPIClient;
+using Message.SignalR.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var shops = new List<ShopModel> {
-    new() {Name = "Ozon", Id=1 },
-    new() {Name = "Goldapple",Id=2 },
-    new() {Name = "Test", Id=3 }};
+builder.AddKeyedRestApiClient<IShopDataService, ShopApiClient>("ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
+builder.AddKeyedRestApiClient<IShopSettingsDataService, SettingsAPIClient>("SettingsAPIHost", nameof(SettingsAPIClient), out IHttpClientBuilder settingsHttpClientBuilder);
+builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 
-builder.Services.AddSingleton(shops);
-
-builder.Services.AddSingleton<IReadOnlyCollection<string>>(new ReadOnlyCollection<string> ( ["Settings", "ImportProducts", "ImportCategories"] ));
-
-var shopImports = new Dictionary<int,ShopImportModel>();
-shops.ForEach(s => shopImports.Add(s.Id, new ShopImportModel { ShopId = s.Id, 
-    ShopSettings = new ShopSettingsModel { ShopId = s.Id, Name = $"{s.Name}_settings" } }));
-builder.Services.AddSingleton<IDictionary<int, ShopImportModel>>(shopImports);
-
+var signalRUrl = builder.GetHostSectionValue("ShopMessageReceiver");
+builder.Services.AddSignalRMessageReceiver(signalRUrl);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(); 

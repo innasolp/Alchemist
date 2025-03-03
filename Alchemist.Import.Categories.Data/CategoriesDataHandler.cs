@@ -1,10 +1,10 @@
 ﻿using Alchemist.Common;
-using Alchemist.Product.Entities;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.Interfaces;
 using System.ComponentModel;
 using Alchemist.Import.Shop.Interfaces;
 using Alchemist.DataService.Interfaces;
+using Alchemist.Product.Entities;
 
 namespace Alchemist.Import.Categories.Data;
 

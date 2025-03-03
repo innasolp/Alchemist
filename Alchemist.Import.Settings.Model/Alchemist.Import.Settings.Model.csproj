@@ -14,10 +14,7 @@
   <ItemGroup>
     <Reference Include="DependencyInjection.Interfaces">
       <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Common">
-      <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
-    </Reference>
+    </Reference>   
   </ItemGroup>
 
 </Project>

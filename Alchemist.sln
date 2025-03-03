@@ -248,6 +248,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.Playwright.Firefo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.WebApp", "Alchemist.Product.Import.WebApp\Alchemist.Product.Import.WebApp.csproj", "{1146083D-7463-4ED2-960C-B38F80938086}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.DependencyInjection.Common", "Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj", "{5F22D425-4E16-4340-BAEC-F8B6CA3A4BA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.Model", "Alchemist.Product.Import.ViewModel\Alchemist.Product.Import.Model.csproj", "{8C7E496D-317A-4A29-ADC1-58B00BAC3FE8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Settings.Extensions", "Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj", "{2CCE4464-4498-4AAC-811F-E8B0CB8561B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -656,6 +662,24 @@ Global
 		{1146083D-7463-4ED2-960C-B38F80938086}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1146083D-7463-4ED2-960C-B38F80938086}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1146083D-7463-4ED2-960C-B38F80938086}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F22D425-4E16-4340-BAEC-F8B6CA3A4BA1}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F22D425-4E16-4340-BAEC-F8B6CA3A4BA1}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{5F22D425-4E16-4340-BAEC-F8B6CA3A4BA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F22D425-4E16-4340-BAEC-F8B6CA3A4BA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F22D425-4E16-4340-BAEC-F8B6CA3A4BA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F22D425-4E16-4340-BAEC-F8B6CA3A4BA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C7E496D-317A-4A29-ADC1-58B00BAC3FE8}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C7E496D-317A-4A29-ADC1-58B00BAC3FE8}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{8C7E496D-317A-4A29-ADC1-58B00BAC3FE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C7E496D-317A-4A29-ADC1-58B00BAC3FE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C7E496D-317A-4A29-ADC1-58B00BAC3FE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C7E496D-317A-4A29-ADC1-58B00BAC3FE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CCE4464-4498-4AAC-811F-E8B0CB8561B0}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CCE4464-4498-4AAC-811F-E8B0CB8561B0}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{2CCE4464-4498-4AAC-811F-E8B0CB8561B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CCE4464-4498-4AAC-811F-E8B0CB8561B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CCE4464-4498-4AAC-811F-E8B0CB8561B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CCE4464-4498-4AAC-811F-E8B0CB8561B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -741,6 +765,7 @@ Global
 		{0012FB6B-546F-4935-9671-F163764614A0} = {68DA1BD4-3836-4FD2-843F-2311E1675EAB}
 		{93E7B887-ED88-4539-9127-B56D2BEF5AEE} = {4A75A9ED-5D0D-4230-A04C-957AFE79D9FC}
 		{DF7E87E7-770D-4CCC-B9C1-769A2A477B04} = {D57540CD-C3BF-4BF4-BBAD-C7D537FB5726}
+		{2CCE4464-4498-4AAC-811F-E8B0CB8561B0} = {28543099-9E94-4C23-9CFD-E56B0F68695E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
