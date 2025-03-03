@@ -12,6 +12,7 @@ public static class ModelExtensions
         var serviceSettings = JsonSerializer.Deserialize<T>(shopSettings.JsonValue);
         serviceSettings.Id = shopSettings.Id;
         serviceSettings.ParentSettingsId = shopSettings.ParentSettingsId;
+        serviceSettings.Name = shopSettings.Name;
         return serviceSettings;
     }
 
@@ -97,10 +98,8 @@ public static class ModelExtensions
 
             if (serviceSettings != null)
                 serviceSettings.Update(serviceModel);
-            else
-            {
-                setNew(serviceModel);                
-            }
+            else            
+                setNew(serviceModel);             
         }
         else
         {

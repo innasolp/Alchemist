@@ -163,6 +163,7 @@ public static class IntefaceExtensions
             Name = @in.Name,
             ShopId = @in.ShopId,
             JsonValue = @in.JsonValue,
+            ParentSettingsId = @in.ParentSettingsId,
             Type = @in.Type,
             IsActual = @in.IsActual
         };

@@ -10,4 +10,6 @@ public class IndexViewModel
     public ShopImportModel SelectedShopImport { get; set; }
 
     public TabType SelectedTab { get; set; }
+
+    public SettingsModelBase SelectedTabModel { get; set; }
 }

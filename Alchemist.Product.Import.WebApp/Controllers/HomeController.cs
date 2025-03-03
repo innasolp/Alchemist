@@ -77,29 +77,52 @@ public class HomeController : Controller
         return (TabType)tab;
     }
 
-    private async Task<IndexViewModel> GetIndexViewModelAsync(Guid shopGuid, TabType tabType)
+    private async Task<IndexViewModel> GetIndexViewModelAsync(Guid shopGuid, TabType tab)
     {
         var shopImports = await _importFacade.LoadShops();
 
-        var shops = shopImports.Select(s => s.Shop).ToList();
-        return new IndexViewModel
-        {
-            SelectedShopImport = _importFacade.GetShopImport(shopGuid),
-            SelectedTab = tabType,
-            Shops = shops
-        };
+        return await GetIndexViewModelAsync(shopImports, shopGuid, tab);
     }
 
     private async Task<IndexViewModel> GetDefaultIndexViewModelAsync()
     {
         var shopImports = await _importFacade.LoadShops();
         var shopGuid = GetCurrentShopGuidOrDefault(shopImports);
+        var tab = GetCurrentTabOrDefault();
 
+        return await GetIndexViewModelAsync(shopImports, (Guid)shopGuid, tab);        
+    }
+
+    private async Task<IndexViewModel> GetIndexViewModelAsync(IEnumerable<ShopImportModel> shopImports, Guid shopGuid, TabType tab)
+    {
         var shops = shopImports.Select(s => s.Shop).ToList();
+        var shopImport = _importFacade.GetShopImport(shopGuid);
+
+        var currentSettings = shopImport.GetSettings(tab);
+        if (currentSettings == null)
+        {
+            currentSettings = shopImport.CreateSettings(tab);
+            shopImport.SetSettings(tab, currentSettings);
+        }
+
+        if (tab == TabType.Shop && 
+            shopImport.ShopSettingTabs.GetShopSettingsByType(shopImport.ShopSettingTabs.SelectedSettingsTab) == null)
+        {
+            var settings = await _importFacade.LoadShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab);
+            if (settings != null)
+                shopImport.SetSettings(tab, settings);
+            else
+            {
+                var currentShopSettings = shopImport.ShopSettingTabs.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
+                shopImport.SetSettings(tab, currentShopSettings);
+            }
+        }
+
         return new IndexViewModel
         {
-            SelectedShopImport = _importFacade.GetShopImport((Guid)shopGuid),
-            SelectedTab = GetCurrentTabOrDefault(),
+            SelectedShopImport = shopImport,
+            SelectedTab = tab,
+            SelectedTabModel = currentSettings,
             Shops = shops
         };
     }
@@ -136,7 +159,8 @@ public class HomeController : Controller
             return false;
 
         var settings = shopImport.GetSettings((TabType)tab, true);
-        settings.UpdateFromJson(json);
+        var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
+        settings.Update(modelFromJson);       
 
         return true;
     }
@@ -163,11 +187,8 @@ public class HomeController : Controller
     {
         if (string.IsNullOrEmpty(json)) return false;
 
-        ShopSettingsModel? shopSettings = (ShopSettingType)shopSettingType == ShopSettingType.Product
-            ?  json.DeserializeWithNumberHandling<ProductShopSettingsModel>()
-            : json.DeserializeWithNumberHandling<CategoryShopSettingsModel>();
-        if (shopSettings == null)
-            throw new InvalidOperationException("Invalid json for shop settings");
+        ShopSettingsModel? shopSettings = json.GetShopSettingsFromJson((ShopSettingType)shopSettingType)
+            ?? throw new InvalidOperationException("Invalid json for shop settings");
 
         var shopSettingsModel =_importFacade.GetShopSettings(shopGuid, shopSettings.ShopSettingType)
             ?? _importFacade.CreateShopImportSettings(shopSettings.ShopSettingType, shopGuid);
@@ -237,7 +258,7 @@ public class HomeController : Controller
     {
         if (productShopSettings == null) return false;
 
-        if (!_importFacade.TryGetShopImport(productShopSettings.ShopGuid, out var shopImport) && shopImport != null)
+        if (!_importFacade.TryGetShopImport(productShopSettings.ShopGuid, out var shopImport) || shopImport == null)
             return false;
 
         shopImport.ShopSettingTabs.ShopProductsSettings.Update(productShopSettings);
@@ -252,7 +273,7 @@ public class HomeController : Controller
     {
         if (categoryShopSettings == null) return false;
 
-        if (!_importFacade.TryGetShopImport(categoryShopSettings.ShopGuid, out var shopImport) && shopImport != null)
+        if (!_importFacade.TryGetShopImport(categoryShopSettings.ShopGuid, out var shopImport) || shopImport == null)
             return false;
 
         shopImport.ShopSettingTabs.ShopCategoriesSettings.Update(categoryShopSettings);

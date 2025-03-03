@@ -60,7 +60,6 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         return null;
     }
 
-
     [HttpPost]
     public async Task<ServiceSettingsModel?> UploadServiceSettings(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
     {
@@ -75,7 +74,7 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         if (uplodedServiceSettings != null && _importFacade.TryGetShopImport(shopGuid, out var shopImportModel)
             && shopImportModel != null && shopImportModel.ShopSettingTabs != null)
         {
-            uplodedServiceSettings.ServiceName = serviceSettingsName;
+            uplodedServiceSettings.Name = serviceSettingsName;
 
             var shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid);
 

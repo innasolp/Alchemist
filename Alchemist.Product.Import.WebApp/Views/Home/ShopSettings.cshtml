@@ -6,6 +6,7 @@
 @functions {
 
     public object GetServiceData() => JsonSerializer.Serialize(new { shopGuid = Model.ShopGuid, shopSettingsId = Model.Id, shopSettingsGuid = Model.Guid });
+    public string GetSubmitUrl() => Model.ShopSettingType == ShopSettingType.Product ? "/Home/SaveProductShopSettingsToDb" :  "/Home/SaveCategoryShopSettingsToDb";
 }
 
 <div class="row">
@@ -101,7 +102,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary"
-                        onclick="save('#settingsForm',@(Model.ShopSettingType == ShopSettingType.Product ? "'/Home/SaveProductShopSettingsToDb'" :  "'/Home/SaveCategoryShopSettingsToDb'"), getFormData($('#settingsForm')) )">
+                        onclick="this.disabled=true;save('#settingsForm','@GetSubmitUrl()', getFormData($('#settingsForm')), (result)=> { this.disabled = false;});">
                         Save
                     </button>
                 </div>

@@ -5,9 +5,8 @@
 @{
     ViewData["Title"] = "Home Page";
     var shopGuid = Model.SelectedShopImport.ShopGuid;
-    var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? ModelHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ModelHelper.TabViewNames.FirstOrDefault();
-    var selectedTabName = (ViewData["Tab"] is TabType tabType2) ? ModelHelper.TabNames.FirstOrDefault(d => d.Key == tabType2) : ModelHelper.TabViewNames.FirstOrDefault();
-    var currentTabModel = Model.SelectedShopImport.GetSettings(selectedTabViewName.Key);
+    var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
+    var selectedTabName = (ViewData["Tab"] is TabType tabType2) ? ViewHelper.TabNames.FirstOrDefault(d => d.Key == tabType2) : ViewHelper.TabViewNames.FirstOrDefault();    
 }
 
 @section Scripts {
@@ -39,7 +38,7 @@
                     <form name="shopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                           asp-route-shopGuid="@shop.Guid"
                           asp-route-tab="@((int)selectedTabViewName.Key)">
-                    <li class="@ViewHelper.GetLiStyle(shop.Name,Model.SelectedShopImport.Shop.Name)">
+                    <li class="@CssHelper.GetLiStyle(shop.Name,Model.SelectedShopImport.Shop.Name)">
                         <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.submit();}); ">@shop.Name</a>
                     </li>
                     </form>
@@ -49,9 +48,9 @@
 
         <div>
             <div class="menu" id="menuDiv">
-                @foreach (var tab in ModelHelper.TabNames)
+                @foreach (var tab in ViewHelper.TabNames)
                 {
-                    <div class="@ViewHelper.GetMenuItemStyle(tab.Key,selectedTabName.Key)">
+                    <div class="@CssHelper.GetMenuItemStyle(tab.Key,selectedTabName.Key)">
                         <form method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                               asp-route-shopGuid="@Model.SelectedShopImport.ShopGuid"
                               asp-route-tab="@((int)tab.Key)">
@@ -61,7 +60,7 @@
                 }
             </div>
             <div id="settingsDiv">
-                @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", currentTabModel);
+                @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel);
             </div>
         </div>
     </div>

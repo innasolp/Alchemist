@@ -3,10 +3,6 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.Model;
 
@@ -51,7 +47,7 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
         {
             ShopGuid = shopGuid,
             ShopSettingsGuid = shopSettingsGuid,
-            ServiceName = serviceSettingsName
+            Name = serviceSettingsName
         };
     }
 
@@ -123,40 +119,29 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
 
     public async Task Save(ShopSettingsModel shopSettingsModel)
     {
-        var option = new JsonSerializerOptions
-        {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ShopSettingsModel),
-                    nameof(ShopSettingsModel.BrowserDataLoader),
-                    nameof(ShopSettingsModel.WebLoader),
-                    nameof(ShopSettingsModel.ImportService),
-                    nameof(ShopSettingsModel.RequestHeaders),
-                    nameof(ShopSettingsModel.Services)) }
-            }
-        };
-
-        var json = JsonSerializer.Serialize(shopSettingsModel, option);
-        var shopSettings = new ShopSettings {
-            Id = shopSettingsModel.Id,
-            JsonValue = JsonSerializer.Deserialize<JsonObject>(json), 
-            ShopId = shopSettingsModel.ShopId,
-            Type = shopSettingsModel.ShopSettingType
-        };
+        var shopSettings = shopSettingsModel.ToEntity();
 
         var services = (from serviceModel in shopSettingsModel.Services
-                        let service = new ShopSettings
-                        {
-                            Type = ShopSettingType.Service,
-                            ShopId = shopSettingsModel.ShopId,
-                            Name = shopSettingsModel.Name,
-                            ParentSettingsId = shopSettings.Id,
-                            Id = shopSettingsModel.Id,
-                            JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(serviceModel))
-                        }
+                        let service = serviceModel.ToEntity(shopSettings.ShopId)                        
                         select service).ToList();
         await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
     }
 
+    public async Task<ShopSettingsModel?> LoadShopSettings(int shopId, ShopSettingType shopSettingType)
+    {
+        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, shopSettingType);
+        if (shopSettings == null) return null;
+        
+        ShopSettingsModel shopSettingsModel = shopSettingType == ShopSettingType.Product 
+            ? shopSettings.ToShopSettingsModel<ProductShopSettingsModel>()
+            : shopSettings.ToShopSettingsModel<CategoryShopSettingsModel>();
+
+        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
+        var serviceModels = services.Select(s => s.ToServiceSettingsModel()).ToList();
+
+        foreach (var serviceModel in serviceModels)
+            shopSettingsModel.UpdateServiceSettings(serviceModel);
+
+        return shopSettingsModel;
+    }
 }

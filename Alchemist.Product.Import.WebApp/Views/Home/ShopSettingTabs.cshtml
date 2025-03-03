@@ -8,7 +8,6 @@
 }
 
 @{
-    //todo load from db
     var selectedShopSettings = Model.GetShopSettingsByType(Model.SelectedSettingsTab);
 }
 <hr />
@@ -16,16 +15,16 @@
     <div class="flex">
         <div>
             <div class="menu" id="menuDiv">
-                <div class="@ViewHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
+                <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
                     <a class="display-8  menu_header"
                            onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/Home/SetShopSettings', @GetServiceData(ShopSettingType.Product), (r)=> {if(r) location.reload(); }))">
-                        @ModelHelper.ShopSettingTypeNames[ShopSettingType.Product]
+                        @ViewHelper.ShopSettingTypeNames[ShopSettingType.Product]
                     </a>
                 </div>
-                <div class="@ViewHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Category)">
+                <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Category)">
                     <a class="display-8  menu_header"
                            onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/Home/SetShopSettings',  @GetServiceData(ShopSettingType.Category), (r)=> {if(r) location.reload(); }))">
-                        @ModelHelper.ShopSettingTypeNames[ShopSettingType.Category]
+                        @ViewHelper.ShopSettingTypeNames[ShopSettingType.Category]
                     </a>
                 </div>
             </div>

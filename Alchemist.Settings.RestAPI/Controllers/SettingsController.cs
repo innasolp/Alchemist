@@ -96,6 +96,6 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
             return TypedResults.BadRequest();
 
         var childSettings = await _settingsRepository.GetChildSettings(parentSettingsId);
-        return TypedResults.Ok(childSettings.OfType<ShopSettings>().ToList());
+        return TypedResults.Ok(childSettings.Select(c=>c.To<ShopSettings>()).ToList());
     }
 }

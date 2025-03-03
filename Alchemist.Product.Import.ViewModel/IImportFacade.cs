@@ -10,6 +10,8 @@ public interface IImportFacade
 
     Task<List<ShopImportModel>> LoadShops();
 
+    Task<ShopSettingsModel?> LoadShopSettings(int shopId, ShopSettingType shopSettingType);
+
     ShopSettingsModel? GetShopSettings(Guid shopGuid, ShopSettingType shopSettingType);
 
     ServiceSettingsModel CreateServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName);

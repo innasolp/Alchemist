@@ -54,26 +54,34 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 
         if (sourceShopSettings.ImportService != null)
         {
-            ImportService ??= new ServiceSettingsModel { ShopGuid = ShopGuid, ServiceName = nameof(ImportService) };
-            ImportService.Update(sourceShopSettings.ImportService);
-            if (!Services.Any(s => s.Guid == ImportService.Guid))
-                Services.Add(ImportService);
+            SetServiceSettings(sourceShopSettings.ImportService, nameof(ImportService), () => ImportService, value => ImportService = value);
         }
 
         if (sourceShopSettings.BrowserDataLoader != null)
         {
-            BrowserDataLoader ??= new ServiceSettingsModel { ShopGuid = ShopGuid, ServiceName = nameof(BrowserDataLoader) };
-            BrowserDataLoader.Update(sourceShopSettings.BrowserDataLoader);
-            if (!Services.Any(s => s.Guid == BrowserDataLoader.Guid))
-                Services.Add(BrowserDataLoader);
+            SetServiceSettings(sourceShopSettings.BrowserDataLoader, nameof(BrowserDataLoader), () => BrowserDataLoader, value => BrowserDataLoader = value);
         }
 
         if (sourceShopSettings.WebLoader != null)
         {
-            WebLoader ??= new ServiceSettingsModel { ShopGuid = ShopGuid, ServiceName = nameof(WebLoader) };
-            WebLoader.Update(sourceShopSettings.WebLoader);
-            if (!Services.Any(s => s.Guid == WebLoader.Guid))
-                Services.Add(WebLoader);
+            SetServiceSettings(sourceShopSettings.WebLoader, nameof(WebLoader), () => WebLoader, value => WebLoader = value);
         }
+    }
+
+    private void SetServiceSettings(ServiceSettingsModel service, string name, Func<ServiceSettingsModel> get, Action<ServiceSettingsModel> set)
+    {
+        if (get() == null)
+            set(new ServiceSettingsModel
+            {
+                ShopGuid = ShopGuid,
+                Name = name,
+                ShopSettingsGuid = Guid,
+                ParentSettingsId = Id
+            });
+
+        get().Update(service);
+
+        if (!Services.Any(s => s.Guid == get().Guid))
+            Services.Add(get());
     }
 }

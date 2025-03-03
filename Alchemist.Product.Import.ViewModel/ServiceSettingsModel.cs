@@ -16,13 +16,10 @@ public class ServiceSettingsModel: IImportServiceSettings
 
     public Guid ShopSettingsGuid { get; set; }
 
-    public string Name { get; set; }   
+    public string Name { get; set; }
+
+    public ShopSettingType ShopSettingType { get; set; }
     
-    public ShopSettingType ShopSettingType { get; set; }    
-
-    //todo must be required, but is optional for deserializing
-    public string ServiceName { get; set; }
-
     [Required(AllowEmptyStrings = true)]
     [Display(Name = "Service type")]
     [Remote(action: "AssemblyPathOrProviderPathNotEmpty",
@@ -54,9 +51,8 @@ public class ServiceSettingsModel: IImportServiceSettings
 
     public int? ParentSettingsId { get; set; }
 
-    public virtual void Update(ServiceSettingsModel source)
+    public void Update(ServiceSettingsModel source)
     {
-        ServiceName = source.ServiceName;
         ShopSettingType = source.ShopSettingType;
         ServiceTypeName = source.ServiceTypeName;
         ImplementationTypeName = source.ImplementationTypeName;

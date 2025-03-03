@@ -25,7 +25,7 @@ public class SettingsAPIClient : IShopSettingsDataService
 
     public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/shopSettings/byShopId/{shopId}/{settingType}");
+        var response = await _httpClient.GetAsync($"api/Settings/shopSettings/byShopId/{shopId}/{(int)settingType}");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(default(ShopSettings));
         response.EnsureSuccessStatusCode();

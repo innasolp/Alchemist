@@ -9,7 +9,7 @@
     <input type="hidden" name="ShopSettingType" value="@Model.ShopSettingType" />
     <input type="hidden" name="Guid" value="@Model.Guid" />
     <input type="hidden" name="ShopSettingsGuid" value="@Model.ShopSettingsGuid" />
-    <input type="hidden" name="ServiceName" value="@Model.ServiceName" id="ServiceName" />
+    <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -43,7 +43,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                        onclick="save('#modalForm','/Home/SaveServiceSettings', getFormData($('#modalForm')), (data)=>{ if(!data) return; setValIfValid('#@Model.ServiceName',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
+                        onclick="save('#modalForm','/Home/SaveServiceSettings', getFormData($('#modalForm')), (data)=>{ if(!data) return; setValIfValid('#@Model.Name',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
                     Save
                 </button>
             </div>
