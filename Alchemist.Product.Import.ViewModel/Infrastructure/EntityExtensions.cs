@@ -52,6 +52,7 @@ public static class EntityExtensions
                 nameof(ShopSettingsModel.Id),
                 nameof(ShopSettingsModel.ShopId),
                 nameof(ShopSettingsModel.ShopSettingType),
+                nameof(ShopSettingsModel.FileName),
                 nameof(ShopSettingsModel.BrowserDataLoader),
                 nameof(ShopSettingsModel.WebLoader),
                 nameof(ShopSettingsModel.ImportService),
@@ -85,7 +86,8 @@ public static class EntityExtensions
                 nameof(ServiceSettingsModel.ShopSettingsGuid),
                 nameof(ServiceSettingsModel.ParentSettingsId),
                 nameof(ServiceSettingsModel.ShopSettingType),
-                nameof(ServiceSettingsModel.Value),
+                nameof(ServiceSettingsModel.JsonValue),
+                nameof(ServiceSettingsModel.FileName),
                 nameof(ServiceSettingsModel.Id)) }
             }
         };
@@ -97,7 +99,7 @@ public static class EntityExtensions
             Name = serviceModel.Name,
             ParentSettingsId = serviceModel.ParentSettingsId,
             Id = serviceModel.Id ?? 0,
-            JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(serviceModel, option))
+            JsonValue = serviceModel.JsonValue ?? JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(serviceModel, option))
         };
     }
 

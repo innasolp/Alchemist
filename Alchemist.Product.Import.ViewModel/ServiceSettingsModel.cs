@@ -1,7 +1,9 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Interfaces;
+using DependencyInjection.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.Model;
@@ -39,17 +41,16 @@ public class ServiceSettingsModel: IImportServiceSettings
     [Display(Name = "Service assembly path with implementation factory")]
     public string? ServiceProviderPath { get; set; }
 
-    [Display(Name = "All data in json")]
-    [Required(AllowEmptyStrings = true)]
-    [Remote(action: "AssemblyPathForJsonValueNotEmpty",
-        controller: "Validation",
-        HttpMethod = "POST",
-        AdditionalFields = $"{nameof(AssemblyPath)}",
-        ErrorMessage = "Assembly path for is required for loading value from json.")]
-    [JsonIgnore]
-    public string? Value { get; set; }
+    [JsonPropertyName("Value")]
+    public JsonObject? JsonValue { get; set; }
 
     public int? ParentSettingsId { get; set; }
+
+    public string? FileName { get; set; }
+   
+    public string? StringValue { get; set; }
+
+    string? IServiceSettings.Value { get => StringValue; set => StringValue = value; }
 
     public void Update(ServiceSettingsModel source)
     {
@@ -58,6 +59,8 @@ public class ServiceSettingsModel: IImportServiceSettings
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;
         ServiceProviderPath = source.ServiceProviderPath;
-        Value = source.Value;
+        JsonValue = source.JsonValue;
+        StringValue = source.StringValue;
+        FileName = source.FileName;
     }
 }

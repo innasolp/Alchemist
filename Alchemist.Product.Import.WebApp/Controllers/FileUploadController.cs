@@ -43,9 +43,12 @@ public class FileUploadController(IImportFacade importFacade) : Controller
     [HttpPost]
     public async Task<ShopSettingsModel?> UploadShopSettings(Guid shopGuid, int shopSettingsType, IFormFile file)
     {
-        ShopSettingsModel? uploadedShopSettings = (ShopSettingType)shopSettingsType == ShopSettingType.Product
-            ? await GetFromJsonAsync<ProductShopSettingsModel>(file)
-            : await GetFromJsonAsync<CategoryShopSettingsModel>(file);
+        if (file == null || file.Length == 0)
+            return null;
+
+        using var stream = file.OpenReadStream();
+
+        var uploadedShopSettings = await stream.GetShopSettingsFromJsonAsync((ShopSettingType)shopSettingsType);
 
         if (uploadedShopSettings != null && _importFacade.TryGetShopImport(shopGuid, out var shopImportModel)
            && shopImportModel != null && shopImportModel.ShopSettingTabs != null)
@@ -53,6 +56,7 @@ public class FileUploadController(IImportFacade importFacade) : Controller
             var shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType((ShopSettingType)shopSettingsType);
 
             shopSettings?.Update(uploadedShopSettings);
+            shopSettings.FileName = file.FileName;
 
             return shopSettings;
         }
@@ -75,6 +79,7 @@ public class FileUploadController(IImportFacade importFacade) : Controller
             && shopImportModel != null && shopImportModel.ShopSettingTabs != null)
         {
             uplodedServiceSettings.Name = serviceSettingsName;
+            uplodedServiceSettings.FileName = file.FileName;
 
             var shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid);
 

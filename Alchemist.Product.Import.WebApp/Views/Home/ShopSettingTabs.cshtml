@@ -11,27 +11,23 @@
     var selectedShopSettings = Model.GetShopSettingsByType(Model.SelectedSettingsTab);
 }
 <hr />
-<div class="text-center">
-    <div class="flex">
-        <div>
-            <div class="menu" id="menuDiv">
-                <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
-                    <a class="display-8  menu_header"
-                           onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/Home/SetShopSettings', @GetServiceData(ShopSettingType.Product), (r)=> {if(r) location.reload(); }))">
-                        @ViewHelper.ShopSettingTypeNames[ShopSettingType.Product]
-                    </a>
-                </div>
-                <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Category)">
-                    <a class="display-8  menu_header"
-                           onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/Home/SetShopSettings',  @GetServiceData(ShopSettingType.Category), (r)=> {if(r) location.reload(); }))">
-                        @ViewHelper.ShopSettingTypeNames[ShopSettingType.Category]
-                    </a>
-                </div>
-            </div>
-            <div>
-                @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings);
-            </div>
+<div>
+    <div class="menu" id="menuDiv">
+        <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
+            <a class="display-8  menu_header"
+               onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/Home/SetShopSettings', @GetServiceData(ShopSettingType.Product), (r)=> {if(r) location.reload(); }))">
+                @ViewHelper.ShopSettingTypeNames[ShopSettingType.Product]
+            </a>
         </div>
+        <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Category)">
+            <a class="display-8  menu_header"
+               onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/Home/SetShopSettings',  @GetServiceData(ShopSettingType.Category), (r)=> {if(r) location.reload(); }))">
+                @ViewHelper.ShopSettingTypeNames[ShopSettingType.Category]
+            </a>
+        </div>
+    </div>
+    <div>
+        @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings)
     </div>
 </div>
 

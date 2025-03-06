@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+﻿using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 
@@ -17,12 +15,4 @@ public static class JsonExtensions
                         property.ShouldSerialize = (param1,param2)=>false ;
                 }
         };
-
-    public static T? DeserializeWithNumberHandling<T>(this string json)
-        where T : class
-    {
-        var option = new JsonSerializerOptions { NumberHandling = JsonNumberHandling.AllowReadingFromString, };
-        return JsonSerializer.Deserialize<T>(json, option);
-    }
-
 }

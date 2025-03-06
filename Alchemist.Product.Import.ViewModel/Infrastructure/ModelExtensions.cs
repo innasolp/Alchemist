@@ -1,6 +1,7 @@
 ﻿using Alchemist.Product.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 
@@ -101,7 +102,7 @@ public static class ModelExtensions
                             if (settings is not ProductShopSettingsModel productShopSettings)
                                 return false;
                             shopImport.ShopSettingTabs.ShopProductsSettings = productShopSettings;
-                            shopImport.ShopSettingTabs.ShopProductsSettings.ShopGuid = shopImport.ShopGuid;
+                            shopImport.ShopSettingTabs.ShopProductsSettings.Init(shopImport.ShopGuid);           
                             return true;
                         }
                         else
@@ -109,7 +110,7 @@ public static class ModelExtensions
                             if (settings is not CategoryShopSettingsModel categoryShopSettings)
                                 return false;
                             shopImport.ShopSettingTabs.ShopCategoriesSettings = categoryShopSettings;
-                            shopImport.ShopSettingTabs.ShopCategoriesSettings.ShopGuid = shopImport.ShopGuid;
+                            shopImport.ShopSettingTabs.ShopCategoriesSettings.Init(shopImport.ShopGuid);
                             return true;
                         }
                     }
@@ -139,7 +140,13 @@ public static class ModelExtensions
                 }
         }
     }
-  
+
+    private static void Init(this ShopSettingsModel shopSettings, Guid shopGuid)
+    {
+        shopSettings.ShopGuid = shopGuid;
+        shopSettings.Services.ForEach(s => { s.ShopGuid = shopGuid; s.ShopSettingsGuid = shopSettings.Guid; });
+    }
+
     public static ServiceSettingsModel? GetServiceSettings(this ShopSettingsModel shopSettings, string serviceName)
     {
         switch (serviceName)
@@ -152,6 +159,9 @@ public static class ModelExtensions
 
             case nameof(ShopSettingsModel.BrowserDataLoader):
                 return shopSettings.BrowserDataLoader;
+            
+            case nameof(ShopSettingsModel.RequestHeaders):
+                return shopSettings.RequestHeaders;
 
             default:
                 return null;
@@ -211,6 +221,13 @@ public static class ModelExtensions
 
                     return true;
                 }
+            
+            case nameof(ShopSettingsModel.RequestHeaders):
+                {
+                    shopSettings.UpdateShopServiceSettings(nameof(ShopSettingsModel.RequestHeaders), serviceSettings, s => s.RequestHeaders, (s, sm) => s.RequestHeaders = sm);
+
+                    return true;
+                }
 
             default:
                 {
@@ -247,8 +264,34 @@ public static class ModelExtensions
 
     public static ShopSettingsModel? GetShopSettingsFromJson(this string json, ShopSettingType shopSettingType)
     {
+        var option = new JsonSerializerOptions {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
+                nameof(ServiceSettingsModel.JsonValue)) }
+            }
+        };
+
         return shopSettingType == ShopSettingType.Product
-            ? json.DeserializeWithNumberHandling<ProductShopSettingsModel>()
-            : json.DeserializeWithNumberHandling<CategoryShopSettingsModel>();
+            ? JsonSerializer.Deserialize<ProductShopSettingsModel>(json, option)
+            : JsonSerializer.Deserialize<CategoryShopSettingsModel>(json, option);
+    }
+
+    public static async Task<ShopSettingsModel?> GetShopSettingsFromJsonAsync(this Stream jsonStream, ShopSettingType shopSettingType)
+    {
+        var option = new JsonSerializerOptions
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
+                nameof(ServiceSettingsModel.JsonValue)) }
+            }
+        };
+
+        return shopSettingType == ShopSettingType.Product
+            ? await JsonSerializer.DeserializeAsync<ProductShopSettingsModel>(jsonStream, option)
+            : await JsonSerializer.DeserializeAsync<CategoryShopSettingsModel>(jsonStream, option);
     }
 }
