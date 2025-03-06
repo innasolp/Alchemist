@@ -56,6 +56,13 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
         var shop = await _alchemyRepository.GetShop(id);
         return shop != null ? TypedResults.Ok(shop.To<Shop>()) : TypedResults.NotFound();
     }
+    
+    [HttpGet("Shops", Name = nameof(GetShops))]
+    public async Task<Results<NotFound, Ok<List<Shop>>>> GetShops()
+    {
+        var shops = await _alchemyRepository.GetShops();
+        return shops != null && shops.Count > 0 ? TypedResults.Ok(shops.Select(s=>s.To<Shop>()).ToList()) : TypedResults.NotFound();
+    }
 
 
     [HttpPost(Name = nameof(CreateShop))]

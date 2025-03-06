@@ -202,6 +202,13 @@
 /Alchemist.Import.Settings.Interfaces/bin/Debug/net8.0
 /Alchemist.Import.Settings.Interfaces/obj
 *.tmp
-*.user
 /Alchemist.Product.Import.WebApp/bin/Debug/net8.0
 /Alchemist.Product.Import.WebApp/obj
+*.user
+/Alchemist.DependencyInjection.Common/bin/Debug/net8.0
+/Alchemist.DependencyInjection.Common/obj
+/Alchemist.Import.Settings.Extensions/bin/Debug/net8.0
+/Alchemist.Import.Settings.Extensions/obj
+/Alchemist.Import.Shop.Settings.ModelExtensions/obj
+/Alchemist.Product.Import.ViewModel/bin/Debug/net8.0
+/Alchemist.Product.Import.ViewModel/obj

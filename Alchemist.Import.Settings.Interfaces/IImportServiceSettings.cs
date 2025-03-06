@@ -7,4 +7,6 @@ public interface IImportServiceSettings : IServiceSettings
     int? Id { get; set; }
 
     string? Name { get; set; }
+
+    int? ParentSettingsId { get; set; }
 }

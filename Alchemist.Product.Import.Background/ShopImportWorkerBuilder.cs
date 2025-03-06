@@ -41,10 +41,8 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
                 Builder.Services.AddPerfomanceCounter(typeof(IWebLoader), (logger) => new SerilogUrlLogger(logger), shopSetting.Name);
         }
 
-        if (shopSetting.RequestHeadersSettings != null)
-            AddKeyedServiceBySettings(typeof(RequestHeaders), shopSetting.RequestHeadersSettings, shopSetting.Name);
-        else if (shopSetting.RequestHeaders != null)
-            Builder.Services.AddKeyedSingleton(shopSetting.Name, shopSetting.RequestHeaders);
+        if (shopSetting.RequestHeaders != null)
+            AddKeyedServiceBySettings(typeof(RequestHeaders), shopSetting.RequestHeaders, shopSetting.Name);        
 
         foreach (var serviceSettings in shopSetting.Services)
             AddKeyedServiceBySettings(serviceSettings, shopSetting.Name);

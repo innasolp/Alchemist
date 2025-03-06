@@ -1,0 +1,27 @@
+﻿@using Alchemist.Product.Import.Model;
+
+@model CategoriesImportSettingsModel
+
+@{
+    var name = Model?.Name ?? "SettingsC";
+}
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<h2>Hello Categories</h2>
+<h1> @Model.Name</h1>
+<form id="settingsForm">
+    <input type="hidden" name="ShopGuid" value="@Model.ShopGuid" />
+    <input type="hidden" name="Tab" value="@((int)Model.Tab)" />
+    <input type="text" name="Name" value="@name" />
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</form>

@@ -294,6 +294,7 @@ public partial class AlchemyContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
             entity.Property(e => e.ParentSettingsId).HasColumnName("parent_settings_id");
+            entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.ShopId)
                 .ValueGeneratedNever()
                 .HasColumnName("shop_id");

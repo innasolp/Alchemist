@@ -8,7 +8,9 @@ public interface IShopSettingsDataService
 
     Task<IShopSettings?> GetShopSettings(int id);
 
-    Task<IShopSettings?> AddShopSettings(IShopSettings shopSettings);
+    Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings);
+
+    Task<List<IShopSettings>> SaveShopSettings(IShopSettings shopSettings, IEnumerable<IShopSettings> services);
 
     Task<bool> UpdateShopSettings(IShopSettings shopSettings);
 

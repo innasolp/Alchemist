@@ -3,52 +3,53 @@
     "Name": "OzonCategories",
     "Url": "https://www.ozon.ru",
     "RequestHeaders": {
+      "Value": {
+        "Headers": {
 
-      "Headers": {
+          "Accept": "application/json",
 
-        "Accept": "application/json",
+          "Accept-encoding": "gzip, deflate, br, zstd",
 
-        "Accept-encoding": "gzip, deflate, br, zstd",
+          "Accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
 
-        "Accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+          "Connection": "keep-alive",
 
-        "Connection": "keep-alive",
+          "Content-Type": "application/json",
 
-        "Content-Type": "application/json",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Sec-Fetch-User": "?1",
+          "Upgrade-Insecure-Requests": "1",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
 
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+        },
 
-      },
+        "Cookies": [
+          "__Secure-ab-group",
+          "__Secure-access-token",
+          "__Secure-ETC",
+          "__Secure-ext_xcid",
+          "__Secure-refresh-token",
+          "__Secure-user-id",
+          "abt_data",
+          "ADDRESSBOOKBAR_WEB_CLARIFICATION",
+          "rfuid"
+        ],
 
-      "Cookies": [
-        "__Secure-ab-group",
-        "__Secure-access-token",
-        "__Secure-ETC",
-        "__Secure-ext_xcid",
-        "__Secure-refresh-token",
-        "__Secure-user-id",
-        "abt_data",
-        "ADDRESSBOOKBAR_WEB_CLARIFICATION",
-        "rfuid"
-      ],
+        "DefaultCookies": {
+          "guest": "true",
+          "__Secure-ab-group": "20",
+          "is_cookies_accepted": "true",
+          "x-o3-app-name": "dweb_client",
+          "x-o3-app-version": "release_12-11-2024_e50d834c",
+          "x-o3-manifest-version": "e50d834cbd00d3f5a18cfc32f4f848c27cca4e72",
+          "x-o3-parent-requestid": "ae0f8c40c4a37c877ef01c18bea18bde"
+        },
 
-      "DefaultCookies": {
-        "guest": "true",
-        "__Secure-ab-group": "20",
-        "is_cookies_accepted": "true",
-        "x-o3-app-name": "dweb_client",
-        "x-o3-app-version": "release_12-11-2024_e50d834c",
-        "x-o3-manifest-version": "e50d834cbd00d3f5a18cfc32f4f848c27cca4e72",
-        "x-o3-parent-requestid": "ae0f8c40c4a37c877ef01c18bea18bde"
-      },
-
-      "CookieIndex": 5,
-      "CookiePrefixLength": 0
+        "CookieIndex": 5,
+        "CookiePrefixLength": 0
+      }
 
     },
     "Perfomance": true,
@@ -113,77 +114,79 @@
     "Name": "GoldAppleCategories",
     "Url": "https://goldapple.ru",
     "RequestHeaders": {
-      "Headers": {
+      "Value": {
+        "Headers": {
 
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 
-        "Accept-encoding": "gzip, deflate, br, zstd",
+          "Accept-encoding": "gzip, deflate, br, zstd",
 
-        "Accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+          "Accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
 
-        "Connection": "keep-alive",
-        "Host": "goldapple.ru",
-        "Priority": "u=0,i",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "TE": "trailers",
-        "Upgrade-Insecure-Requests": "1",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+          "Connection": "keep-alive",
+          "Host": "goldapple.ru",
+          "Priority": "u=0,i",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Sec-Fetch-User": "?1",
+          "TE": "trailers",
+          "Upgrade-Insecure-Requests": "1",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+        },
+
+        "Cookies": [
+          "__zzatw-goldapple-ru",
+          "_ga",
+          "_ga_QE5MQ8XJJK",
+          "_gcl_au",
+          "_gid",
+          "_spx",
+          "_ym_d",
+          "_ym_isad",
+          "_ym_uid",
+          "_ym_visorc",
+          "acs_3",
+          "adrcid",
+          "adrdel",
+          "advcake_session_id",
+          "advcake_track_id",
+          "advcake_track_url",
+          "cfidsw-goldapple-ru",
+          "client-store-code",
+          "digi-analytics-sessionId",
+          "directCrm-session",
+          "domain_sid",
+          "fgsscw-goldapple-ru",
+          "ga-device-id",
+          "ga-lang",
+          "ga-selected-address-id",
+          "ga-session-id",
+          "gsscw-goldapple-ru",
+          "mage-cache-sessid",
+          "MCS_SESSID",
+          "mindboxDeviceUUID",
+          "ngenix_jscv_2198e54375cc",
+          "tmr_detect",
+          "tmr_lvid",
+          "tmr_lvidTS"
+        ],
+
+        "DefaultCookies": {
+          "client-store-code": "default",
+          "isAddressConfirmed": "true",
+          "mage-cache-sessid": "true",
+          "ga-lang": "ru",
+          "_ym_isad": "2",
+          "_ym_visorc": "b",
+          "ga-selected-address-id": "555e7d61-d9a7-4ba6-9770-6caa8198c483",
+          "section_data_ids": "{cart:1736630062}"
+        },
+
+        "CookieIndex": 4,
+        "CookiePrefixLength": 0
+      }
       },
-
-      "Cookies": [
-        "__zzatw-goldapple-ru",
-        "_ga",
-        "_ga_QE5MQ8XJJK",
-        "_gcl_au",
-        "_gid",
-        "_spx",
-        "_ym_d",
-        "_ym_isad",
-        "_ym_uid",
-        "_ym_visorc",
-        "acs_3",
-        "adrcid",
-        "adrdel",
-        "advcake_session_id",
-        "advcake_track_id",
-        "advcake_track_url",
-        "cfidsw-goldapple-ru",
-        "client-store-code",
-        "digi-analytics-sessionId",
-        "directCrm-session",
-        "domain_sid",
-        "fgsscw-goldapple-ru",
-        "ga-device-id",
-        "ga-lang",
-        "ga-selected-address-id",
-        "ga-session-id",
-        "gsscw-goldapple-ru",
-        "mage-cache-sessid",
-        "MCS_SESSID",
-        "mindboxDeviceUUID",
-        "ngenix_jscv_2198e54375cc",
-        "tmr_detect",
-        "tmr_lvid",
-        "tmr_lvidTS"
-      ],
-
-      "DefaultCookies": {
-        "client-store-code": "default",
-        "isAddressConfirmed": "true",
-        "mage-cache-sessid": "true",
-        "ga-lang": "ru",
-        "_ym_isad": "2",
-        "_ym_visorc": "b",
-        "ga-selected-address-id": "555e7d61-d9a7-4ba6-9770-6caa8198c483",
-        "section_data_ids": "{cart:1736630062}"
-      },
-
-      "CookieIndex": 4,
-      "CookiePrefixLength": 0
-    },
     "Perfomance": true,
     "ImportService": {
       "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",

@@ -1,6 +1,4 @@
-﻿using WebLoader.Common;
-
-namespace Alchemist.Import.Settings.Interfaces;
+﻿namespace Alchemist.Import.Settings.Interfaces;
 
 public interface IShopImportSettings
 {
@@ -12,19 +10,17 @@ public interface IShopImportSettings
 
     int ShopId { get; set; }
 
-    IImportServiceSettings ImportService { get; }
+    IImportServiceSettings ImportService { get; set; }
 
-    string? Url { get; }
+    string? Url { get; set; }
 
-    IImportServiceSettings? RequestHeadersSettings { get; }
+    IImportServiceSettings? RequestHeaders { get; set; }
 
-    RequestHeaders? RequestHeaders { get; }
+    IImportServiceSettings WebLoader { get; set; }
 
-    IImportServiceSettings WebLoader { get; }
+    IImportServiceSettings? BrowserDataLoader { get; set; }
 
-    IImportServiceSettings? BrowserDataLoader { get; }
+    public bool? Perfomance { get; set; }
 
-    public bool? Perfomance { get; }
-
-    IEnumerable<IImportServiceSettings> Services { get; }
+    IList<IImportServiceSettings> Services { get; }
 }
