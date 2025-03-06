@@ -1,0 +1,18 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@model UploadFromFileModel
+
+<div>
+    <input type="file" id="@Model.Id" style="display:none"
+           name="@Model.Id"
+           onchange="@Model.OnChangeWithFileNameLabel" />
+    <button type="button" class="btn btn-primary form-button"
+            onclick="$('#@Model.Id')[0].click();">
+        @Model.ButtonLabel
+    </button>
+    <div id="@Model.LabelId" style="height:10px">
+        <i>@(Model.FileName ?? "")</i>
+    </div>
+</div>

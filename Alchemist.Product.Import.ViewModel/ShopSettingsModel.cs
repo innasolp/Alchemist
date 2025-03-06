@@ -21,17 +21,23 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     [Required]
     public string? Url { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
     public ServiceSettingsModel? RequestHeaders { get; set; }
 
     [Required]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
     public ServiceSettingsModel ImportService { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
     public ServiceSettingsModel? BrowserDataLoader { get; set; }
 
     [Required]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
     public ServiceSettingsModel WebLoader { get; set; }
 
     public bool? Perfomance { get; set; }
+
+    public string? FileName { get; set; }
    
     IImportServiceSettings IShopImportSettings.ImportService { get => ImportService; set => ImportService = (ServiceSettingsModel)value; }
     IImportServiceSettings? IShopImportSettings.RequestHeaders { get => RequestHeaders; set => RequestHeaders = (ServiceSettingsModel)value; }
@@ -51,6 +57,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
         Url = sourceShopSettings.Url;
         RequestHeaders = sourceShopSettings.RequestHeaders;
         Perfomance = sourceShopSettings.Perfomance;
+        FileName = sourceShopSettings.FileName;
 
         if (sourceShopSettings.ImportService != null)
         {
@@ -65,6 +72,11 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
         if (sourceShopSettings.WebLoader != null)
         {
             SetServiceSettings(sourceShopSettings.WebLoader, nameof(WebLoader), () => WebLoader, value => WebLoader = value);
+        }
+        
+        if (sourceShopSettings.RequestHeaders != null)
+        {
+            SetServiceSettings(sourceShopSettings.RequestHeaders, nameof(RequestHeaders), () => RequestHeaders, value => RequestHeaders = value);
         }
     }
 

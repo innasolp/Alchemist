@@ -19,7 +19,7 @@
 function postFormInputFile(url, formSelector, fileInputName, data=null, onSuccess = null) {
     var formData = new FormData(formSelector[0]);
     var postData = new FormData();
-    postData.append('file', formData.get(fileInputName), formData.get(fileInputName));
+    postData.append('file', formData.get(fileInputName), formData.get(fileInputName).name);
 
     if (data != null) {
         for (var key in data) {

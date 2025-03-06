@@ -26,36 +26,41 @@ body {
     width: 100%;
     height: 40px;
     text-wrap: nowrap;
+    border-radius: .25rem;
 }
 
 a.menu_header {
     margin-top: 0px;
     width: 100%;
     text-wrap: nowrap;
-    color:black
+    color: black;
+    border-radius: .25rem;
 }
 
 .menu_item {
     padding-left: 10px;
     padding-right: 10px;
     background: lightgray;
-    width: 100%;
+    width: 200px;
     height: 40px;
     text-wrap: nowrap;
     margin-right: 10px;
+    border-radius: .25rem;
 }
 
 .menu_item-a {
     padding-left: 10px;
     padding-right: 10px;
     background: white;
-    width: 100%;
+    width: 200px;
     text-wrap: nowrap;
     margin-right: 10px;
+    border-radius: .25rem;
 }
 
 .flex {
     display: flex;
+    width: 100%;
 }
 
 .left_menu {
@@ -115,6 +120,7 @@ li.left-menu-ul {
     padding-bottom: 10px;
     padding-left: 5px;
     margin-block: 1px;
+    border-radius: .25rem;
 }
 
 .selected {

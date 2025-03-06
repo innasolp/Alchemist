@@ -20,10 +20,20 @@ function showServiceSettingsModel(url, data, onHide = null) {
         console.trace(event);
     });
 
-    ShowItemModal($("#divModal"), $("#modalBodyDiv"), url, data, onHide)
+    ShowItemModal($("#divModal"), $("#modalBodyDiv"), url, data, () => { onSaveServiceSettings(onHide); })
+}
+
+function onSaveServiceSettings(onHide = null) {
+    if ($('#modalResult').val() == 'success' || $('#modalResult').val() == 1 || $('#modalResult').val() == true) {
+        $('#modalResult').remove();
+        onHide(true);
+    }
+    else
+        onHide(false);
 }
 
 function closeServiceSettingsModal() {
+    $("#divModal").append("<input type='hidden' id='modalResult' value='success'/>");
     $("#divModal").modal("hide");
     $('#settingsForm').off('submit', submitPreventDefault);
 }
