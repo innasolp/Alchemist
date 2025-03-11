@@ -1,4 +1,5 @@
 using Alchemist.Common;
+using Alchemist.Import.Settings.Adapter;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
@@ -18,13 +19,17 @@ public class HomeController : Controller
 
     private readonly IMessageReceiver _shopEventReceiver;
 
+    private readonly ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel> _settingsDataAdapter;
+
     public HomeController(ILogger<HomeController> logger,
+    ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel> settingsDataAdapter,
         IImportFacade importFacade,
         IMessageReceiver shopEventReceiver)
     {
         _logger = logger;
         _importFacade = importFacade;
         _shopEventReceiver = shopEventReceiver;
+        _settingsDataAdapter = settingsDataAdapter;
 
         _shopEventReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);
     }
@@ -108,7 +113,7 @@ public class HomeController : Controller
         if (tab == TabType.Shop && 
             shopImport.ShopSettingTabs.GetShopSettingsByType(shopImport.ShopSettingTabs.SelectedSettingsTab) == null)
         {
-            var settings = await _importFacade.LoadShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab);
+            var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
             if (settings != null)
                 shopImport.SetSettings(tab, settings);
             else
@@ -263,7 +268,7 @@ public class HomeController : Controller
 
         shopImport.ShopSettingTabs.ShopProductsSettings.Update(productShopSettings);
 
-        await _importFacade.Save(shopImport.ShopSettingTabs.ShopProductsSettings);
+        await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopProductsSettings);
 
         return true;
     }
@@ -278,7 +283,7 @@ public class HomeController : Controller
 
         shopImport.ShopSettingTabs.ShopCategoriesSettings.Update(categoryShopSettings);
 
-        await _importFacade.Save(shopImport.ShopSettingTabs.ShopCategoriesSettings);
+        await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopCategoriesSettings);
 
         return true;
     }

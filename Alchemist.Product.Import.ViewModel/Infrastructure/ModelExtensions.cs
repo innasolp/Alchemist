@@ -144,28 +144,19 @@ public static class ModelExtensions
     private static void Init(this ShopSettingsModel shopSettings, Guid shopGuid)
     {
         shopSettings.ShopGuid = shopGuid;
-        shopSettings.Services.ForEach(s => { s.ShopGuid = shopGuid; s.ShopSettingsGuid = shopSettings.Guid; });
+        shopSettings.Services.ForEach(s => { s.ShopGuid = shopGuid; s.ShopSettingsGuid = shopSettings.Guid; s.ShopId = shopSettings.ShopId; });
     }
 
     public static ServiceSettingsModel? GetServiceSettings(this ShopSettingsModel shopSettings, string serviceName)
     {
-        switch (serviceName)
+        return serviceName switch
         {
-            case nameof(ShopSettingsModel.ImportService):
-                return shopSettings.ImportService;
-
-            case nameof(ShopSettingsModel.WebLoader):
-                return shopSettings.WebLoader;
-
-            case nameof(ShopSettingsModel.BrowserDataLoader):
-                return shopSettings.BrowserDataLoader;
-            
-            case nameof(ShopSettingsModel.RequestHeaders):
-                return shopSettings.RequestHeaders;
-
-            default:
-                return null;
-        }
+            nameof(ShopSettingsModel.ImportService) => shopSettings.ImportService,
+            nameof(ShopSettingsModel.WebLoader) => shopSettings.WebLoader,
+            nameof(ShopSettingsModel.BrowserDataLoader) => shopSettings.BrowserDataLoader,
+            nameof(ShopSettingsModel.RequestHeaders) => shopSettings.RequestHeaders,
+            _ => null,
+        };
     }
 
     public static ShopSettingsModel? GetShopSettingsByType(this ShopSettingTabsModel shopSettingTabs, ShopSettingType shopSettingType)
@@ -237,7 +228,7 @@ public static class ModelExtensions
         }
     }
 
-    private static void UpdateShopServiceSettings(this ShopSettingsModel shopSettings, string serviceName, ServiceSettingsModel? serviceSettings,
+    private static void UpdateShopServiceSettings(this ShopSettingsModel shopSettings, string serviceName, ServiceSettingsModel? source,
         Func<ShopSettingsModel, ServiceSettingsModel> get,
         Action<ShopSettingsModel,ServiceSettingsModel> set)
     {
@@ -247,12 +238,13 @@ public static class ModelExtensions
                 ShopGuid = shopSettings.ShopGuid,
                 ShopSettingsGuid = shopSettings.Guid,
                 ParentSettingsId = shopSettings.Id,
-                Id = serviceSettings.Id,
+                Id = source.Id,
+                ShopId = source.ShopId,
                 Name = serviceName
             });
-        get(shopSettings).Update(serviceSettings);
+        get(shopSettings).Update(source);
 
-        if (!shopSettings.Services.Any(s => s.Guid == serviceSettings?.Guid))
+        if (!shopSettings.Services.Any(s => s.Guid == get(shopSettings)?.Guid))
             shopSettings.Services.Add(get(shopSettings));
     }       
     
@@ -269,7 +261,7 @@ public static class ModelExtensions
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
                 Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
-                nameof(ServiceSettingsModel.JsonValue)) }
+                nameof(ServiceSettingsModel.Value)) }
             }
         };
 
@@ -286,7 +278,7 @@ public static class ModelExtensions
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
                 Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
-                nameof(ServiceSettingsModel.JsonValue)) }
+                nameof(ServiceSettingsModel.Value)) }
             }
         };
 

@@ -33,6 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.Adapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.ViewModel\Alchemist.Product.Import.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />

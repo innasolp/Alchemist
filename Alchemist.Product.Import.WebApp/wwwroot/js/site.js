@@ -75,7 +75,7 @@ function ShowItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide
     })
 }
 
-function postData(url, data, onSuccess = null) {
+function postData(url, data, onSuccess = null, onError = null) {
     $.ajax({
         type: 'POST',
         url: url,
@@ -86,13 +86,15 @@ function postData(url, data, onSuccess = null) {
                 onSuccess(result);
         },
         error: function (err) {
+            if (onError != null)
+                onError(err);
             console.error("Not Saved");
             console.trace(err);
         }
     });
 }
 
-function save(selectorId, url, data, onSuccess=null) {
+function save(selectorId, url, data, onSuccess=null, onError=null) {
 
     $.validator.unobtrusive.parse($(selectorId));
 
@@ -105,7 +107,7 @@ function save(selectorId, url, data, onSuccess=null) {
         setTimeout(() =>
         {
             if ($(selectorId).valid())
-                postData(url, data, onSuccess);
+                postData(url, data, onSuccess, onError);
         }
         ,500);
 }

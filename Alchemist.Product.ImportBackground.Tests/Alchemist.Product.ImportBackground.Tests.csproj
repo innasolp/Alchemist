@@ -43,6 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.Builders.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
   </ItemGroup>
 
@@ -58,6 +59,9 @@
     </Reference>
     <Reference Include="WebLoader.Interfaces">
       <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="DependencyInjection.Interfaces">
+        <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
     </Reference>    
   </ItemGroup>
 
