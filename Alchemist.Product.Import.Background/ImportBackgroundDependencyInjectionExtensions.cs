@@ -25,6 +25,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
 
         return await Task.FromResult(true);
     }
+
     public static async Task<bool> InitProductShopModelAsync(this IProductShopModel productShopModel, IShopDataService shopApiClient)
     {
         var result = await productShopModel.InitShopModelAsync(shopApiClient);
@@ -47,7 +48,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
         return await Task.FromResult(true);
     }
 
-    public static LoggerConfiguration AddShopsSerilogSourceContextConfigs(this AppSerilogBuilder appSerilogBuilder, IShopImportSettings[] shops, string logPath)
+    public static LoggerConfiguration AddShopsSerilogSourceContextConfigs(this AppSerilogBuilder appSerilogBuilder, IEnumerable<IShopImportSettings> shops, string logPath)
     {
         foreach (var shopSetting in shops)
         {
@@ -56,7 +57,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
         return appSerilogBuilder.LoggerConfiguration;
     }
 
-    public static LoggerConfiguration AddShopsSerilogPropertyConfigs(this AppSerilogBuilder appSerilogBuilder, IShopImportSettings[] shops, string logPath)
+    public static LoggerConfiguration AddShopsSerilogPropertyConfigs(this AppSerilogBuilder appSerilogBuilder, IEnumerable<IShopImportSettings> shops, string logPath)
     {
         foreach (var shopSetting in shops)
         {
@@ -65,7 +66,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
         return appSerilogBuilder.LoggerConfiguration;
     }
 
-    public static LoggerConfiguration AddShopsWebPerfomanceConfigs(this AppSerilogBuilder appSerilogBuilder, IShopImportSettings[] shops, string logPath)
+    public static LoggerConfiguration AddShopsWebPerfomanceConfigs(this AppSerilogBuilder appSerilogBuilder, IEnumerable<IShopImportSettings> shops, string logPath)
     {
         foreach (var shopSetting in shops.Where(s => s.Perfomance == true))
         {
@@ -73,7 +74,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
         }
         return appSerilogBuilder.LoggerConfiguration;
     }
-
+    
     public static void SetAppPath(this IShopImportSettings shopImportSettings, string appPath)
     {
         shopImportSettings.BrowserDataLoader?.SetAppPath(appPath);
@@ -81,7 +82,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
         shopImportSettings.ImportService.SetAppPath(appPath);
         shopImportSettings.RequestHeaders?.SetAppPath(appPath);
 
-        foreach(var serviceSettings in shopImportSettings.Services)
+        foreach(var serviceSettings in shopImportSettings.Services.OfType<IImportServiceSettings>().Where(s=>!Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name)))
             serviceSettings.SetAppPath(appPath);
     }
 

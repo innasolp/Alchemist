@@ -20,11 +20,11 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.Model\Alchemist.Product.Shop.GoldApple.Model.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.ImportService\Alchemist.Product.Shop.GoldApple.ImportService.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,12 +33,27 @@
     </Reference>
     <Reference Include="WebLoader.Common">
       <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.HttpClient">
-      <HintPath>..\Libs\webLoader\HttpClient\WebLoader.HttpClient.dll</HintPath>
-    </Reference>
+    </Reference>   
     <Reference Include="WebLoader.Interfaces">
       <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Json.Extensions">
+      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="BrowserDataLoader.Firefox.Standart.Windows">
+      <HintPath>..\Libs\BrowserDataLoader\Firefox\Standart\BrowserDataLoader.Firefox.Standart.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="BrowserDataLoader.Firefox.Windows">
+      <HintPath>..\Libs\BrowserDataLoader\Firefox\BrowserDataLoader.Firefox.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="BrowserDataLoader.Interfaces">
+      <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.Playwright">
+      <HintPath>..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.dll</HintPath>
+    </Reference>
+    <Reference Include="WebLoader.Playwright.Firefox">
+      <HintPath>..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.Firefox.dll</HintPath>
     </Reference>
   </ItemGroup>
 

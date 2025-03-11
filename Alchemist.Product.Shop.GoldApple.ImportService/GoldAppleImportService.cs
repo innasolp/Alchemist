@@ -4,13 +4,15 @@ using Alchemist.Product.Shop.GoldApple.Model;
 using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
+using WebLoader.Common;
 
 namespace Alchemist.Product.Shop.GoldApple.ImportService;
 
 public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductShopModel shopUrlModel,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IWebLoader shopImporter)
-    : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger, shopUrlModel, shopImporter, null)
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IWebLoader shopImporter,
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] RequestHeaders requestHeaders)
+    : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger, shopUrlModel, shopImporter, requestHeaders)
 {
     public override string Name => "GoldAppleImport";
 

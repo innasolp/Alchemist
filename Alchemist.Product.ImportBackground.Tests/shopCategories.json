@@ -21,7 +21,7 @@
           "Sec-Fetch-Site": "none",
           "Sec-Fetch-User": "?1",
           "Upgrade-Insecure-Requests": "1",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
 
         },
 
@@ -112,7 +112,7 @@
 
   {
     "Name": "GoldAppleCategories",
-    "Url": "https://goldapple.ru",
+    "Url": "https://goldapple.ru/front/api/catalog/navigation",
     "RequestHeaders": {
       "Value": {
         "Headers": {
@@ -132,44 +132,21 @@
           "Sec-Fetch-User": "?1",
           "TE": "trailers",
           "Upgrade-Insecure-Requests": "1",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
         },
 
         "Cookies": [
-          "__zzatw-goldapple-ru",
-          "_ga",
-          "_ga_QE5MQ8XJJK",
-          "_gcl_au",
-          "_gid",
           "_spx",
-          "_ym_d",
-          "_ym_isad",
-          "_ym_uid",
           "_ym_visorc",
-          "acs_3",
-          "adrcid",
-          "adrdel",
-          "advcake_session_id",
-          "advcake_track_id",
-          "advcake_track_url",
           "cfidsw-goldapple-ru",
-          "client-store-code",
           "digi-analytics-sessionId",
-          "directCrm-session",
           "domain_sid",
-          "fgsscw-goldapple-ru",
           "ga-device-id",
           "ga-lang",
           "ga-selected-address-id",
+          "isAddressConfirmed",
           "ga-session-id",
-          "gsscw-goldapple-ru",
-          "mage-cache-sessid",
-          "MCS_SESSID",
-          "mindboxDeviceUUID",
-          "ngenix_jscv_2198e54375cc",
-          "tmr_detect",
-          "tmr_lvid",
-          "tmr_lvidTS"
+          "ngenix_jscv_2198e54375cc"
         ],
 
         "DefaultCookies": {
@@ -186,7 +163,7 @@
         "CookieIndex": 4,
         "CookiePrefixLength": 0
       }
-      },
+    },
     "Perfomance": true,
     "ImportService": {
       "AssemblyPath": "Import\\Categories\\Json",
@@ -244,11 +221,6 @@
           "SearchMatchType": 0,
           "SearchElementType": 1
         }
-      },
-      {
-        "ServiceTypeName": "IHtmlSearcher",
-        "AssemblyPath": "Import\\Html",
-        "ServiceProviderPath": "Import\\Html"
       }
     ]
   }

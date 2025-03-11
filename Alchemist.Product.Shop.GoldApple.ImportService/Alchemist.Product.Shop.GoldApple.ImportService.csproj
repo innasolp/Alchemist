@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\WebLoaders\WebLoader.Common\WebLoader.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.Model\Alchemist.Product.Shop.GoldApple.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
   </ItemGroup>
