@@ -1,11 +1,10 @@
-using Alchemist.Common;
+﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Service;
+using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Import.Background;
-using Alchemist.Product.Interfaces;
-using Json.Extensions;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,17 +12,14 @@ using Moq;
 
 namespace Alchemist.Product.ImportBackground.Tests;
 
-public class ShopImportServiceTests
+public abstract class BuildImportServiceTest
 {
-    private readonly string _shopProductsJsonFile = "shopProducts.json";
-    private readonly string _shopCategoriesJsonFile = "shopCategories.json";
+    protected ICategoryShopImportSettings[] _shopCategoriesSettings;
+    protected IProductShopImportSettings[] _shopProductsSettings;
 
-    private ShopImportSettings[] _shopCategoriesSettings;
-    private ProductShopImportSettings[] _shopProductsSettings;
+    protected readonly HostApplicationBuilder _builder;
 
-    private readonly HostApplicationBuilder _builder;
-
-    private readonly ShopImportWorkerBuilder _shopImportWorkerBuilder;
+    protected readonly ShopImportWorkerBuilder _shopImportWorkerBuilder;
 
     private readonly IMock<IShopDataService> _shopApiClientMock = new Mock<IShopDataService>();
 
@@ -31,32 +27,26 @@ public class ShopImportServiceTests
     private readonly IMock<IMessageReceiver> _messageReceiver = new Mock<IMessageReceiver>();
     private readonly IMock<IMessageSender> _messageSender = new Mock<IMessageSender>();
 
-    public ShopImportServiceTests()
+    public BuildImportServiceTest()
     {
         _builder = new HostApplicationBuilder();
         _shopImportWorkerBuilder = new ShopImportWorkerBuilder(_builder);
-    }
-
-    private async Task AddBaseServicesAsync()
-    {
-        _shopCategoriesSettings = await _shopCategoriesJsonFile.ReadFromJsonFileAsync<ShopImportSettings[]>();// "ShopCategories");
-        _shopProductsSettings = await _shopProductsJsonFile.ReadFromJsonFileAsync<ProductShopImportSettings[]>();// "ShopProducts");
-
         _builder.Services.AddSingleton(_shopApiClientMock.Object);
         _builder.Services.AddSingleton(_alchemyDataServiceMock.Object);
         _builder.Services.AddKeyedSingleton(ShopImportWorkerKeys.DataMessageReceiverKey, _messageReceiver.Object);
         _builder.Services.AddKeyedSingleton(ShopImportWorkerKeys.ShopsMessageSenderKey, _messageSender.Object);
     }
 
+    protected abstract Task SetShopSettings();
 
     [Fact]
     public async Task BuildShopImportServiceWithProductsAndCategoriesTestAsync()
     {
-        await AddBaseServicesAsync();
+        await SetShopSettings();
 
         foreach (var shop in _shopProductsSettings)
             shop.SetAppPath(Utils.GetAppPath());
-        
+
         foreach (var shop in _shopCategoriesSettings)
             shop.SetAppPath(Utils.GetAppPath());
 
@@ -72,7 +62,7 @@ public class ShopImportServiceTests
 
         _builder.Services.AddScoped<ShopImportWorker>();
 
-        
+
         var host = _builder.Build();
 
         var shopImportService = host.Services.GetService<ShopImportWorker>();
@@ -86,7 +76,7 @@ public class ShopImportServiceTests
     [Fact]
     public async Task BuildShopImportServiceWithProductsOnlyTestAsync()
     {
-        await AddBaseServicesAsync();
+        await SetShopSettings();
 
         foreach (var shop in _shopProductsSettings)
             shop.SetAppPath(Utils.GetAppPath());

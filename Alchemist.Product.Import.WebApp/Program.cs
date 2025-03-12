@@ -1,5 +1,6 @@
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
+using Alchemist.Import.Settings.Adapter;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddKeyedRestApiClient<IShopDataService, ShopApiClient>("ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
 builder.AddKeyedRestApiClient<IShopSettingsDataService, SettingsAPIClient>("SettingsAPIHost", nameof(SettingsAPIClient), out IHttpClientBuilder settingsHttpClientBuilder);
+builder.Services.AddSettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>();
 builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 
 var signalRUrl = builder.GetHostSectionValue("ShopMessageReceiver");

@@ -44,7 +44,8 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         if (shopSetting.RequestHeaders != null)
             AddKeyedServiceBySettings(typeof(RequestHeaders), shopSetting.RequestHeaders, shopSetting.Name);        
 
-        foreach (var serviceSettings in shopSetting.Services)
+        foreach (var serviceSettings in shopSetting.Services.OfType<IImportServiceSettings>().Where(s => string.IsNullOrEmpty(s.Name)
+        || !Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name)))
             AddKeyedServiceBySettings(serviceSettings, shopSetting.Name);
 
         return Builder.Services;
@@ -67,7 +68,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
             });
     }
 
-    public IServiceCollection AddShopProducts(IProductShopImportSettings[] productShopImportSettings)
+    public IServiceCollection AddShopProducts(IEnumerable<IProductShopImportSettings> productShopImportSettings)
     {
         foreach (var settings in productShopImportSettings)
         {
@@ -76,7 +77,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services;
     }
 
-    public IServiceCollection AddShopCategories(IShopImportSettings[] categoryShopImportSettings)
+    public IServiceCollection AddShopCategories(IEnumerable<ICategoryShopImportSettings> categoryShopImportSettings)
     {
         foreach (var settings in categoryShopImportSettings)
         {
@@ -85,7 +86,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services;
     }
 
-    public IServiceCollection AddCategoryShopBySettings(IShopImportSettings categoryShopImportSettings)
+    public IServiceCollection AddCategoryShopBySettings(ICategoryShopImportSettings categoryShopImportSettings)
     {
         AddShopDependenciesBySettings(categoryShopImportSettings);
 

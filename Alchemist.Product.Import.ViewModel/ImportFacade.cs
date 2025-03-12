@@ -1,19 +1,17 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.Extensions;
-using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Model;
 
-public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataService shopSettingsDataService) : IImportFacade
+public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 {
     private readonly IShopDataService _shopDataService = shopDataService;
-
-    private readonly IShopSettingsDataService _shopSettingsDataService = shopSettingsDataService;
-
-    private readonly Dictionary<Guid, ShopImportModel> _shopImports = [];  
     
+
+    private readonly Dictionary<Guid, ShopImportModel> _shopImports = [];
+
     public ShopImportModel? GetShopImport(Guid guid)
     {
         if (_shopImports.TryGetValue(guid, out var shopImport) && shopImport != null)
@@ -37,9 +35,33 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
     {
         return _shopImports.TryGetValue(shopGuid, out var shopImportModel)
                && shopImportModel != null && shopImportModel.ShopSettingTabs != null
-           ? shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType)            
+           ? shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType)
            : null;
-    }    
+    }
+
+    public bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out ShopSettingsModel shopSettings)
+    {
+        shopSettings = default;
+
+        if (!_shopImports.TryGetValue(shopGuid, out var shopImportModel)
+              || shopImportModel == null || shopImportModel.ShopSettingTabs == null)
+            return false;
+
+        shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType);
+        return shopSettings != null;
+    }
+
+    public bool TryGetShopSettings(Guid shopGuid, Guid shopSettingsGuid, out ShopSettingsModel shopSettings)
+    {
+        shopSettings = default;
+
+        if (!_shopImports.TryGetValue(shopGuid, out var shopImportModel)
+              || shopImportModel == null || shopImportModel.ShopSettingTabs == null)
+            return false;
+
+        shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid);
+        return shopSettings != null;
+    }
 
     public ServiceSettingsModel CreateServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
     {
@@ -55,7 +77,7 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
     {
         return _shopImports.TryGetValue(shopGuid, out var shopImportModel)
                 && shopImportModel != null && shopImportModel.ShopSettingTabs != null
-            ? shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid)?.GetServiceSettings(serviceSettingsName) 
+            ? shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid)?.GetServiceSettings(serviceSettingsName)
             : null;
     }
 
@@ -83,65 +105,9 @@ public class ImportFacade(IShopDataService shopDataService, IShopSettingsDataSer
             var newShops = shops.Where(s => !_shopImports.Any(i => i.Value.Shop.Id == s.Id)).ToList();
             newShops.ForEach(s => AddNewShop(s));
         }
-        else        
-            shops.ForEach(s =>AddNewShop(s));
+        else
+            shops.ForEach(s => AddNewShop(s));
 
         return await Task.FromResult(_shopImports.Values.ToList());
-    }
-
-    private async Task<ProductShopSettingsModel> GetProductShopImportSettings(IShopSettings shopSettings)
-    {
-        return await shopSettings.GetShopImportSettings<ProductShopSettingsModel, ServiceSettingsModel>
-            (_shopSettingsDataService.GetChildSettings);
-    }
-    
-    private async Task<CategoryShopSettingsModel> GetCategoryShopImportSettings(IShopSettings shopSettings)
-    {
-        return await shopSettings.GetShopImportSettings<CategoryShopSettingsModel, ServiceSettingsModel>
-            (_shopSettingsDataService.GetChildSettings);
-    }
-
-    public async Task<ShopSettingsModel?> GetShopImportSettings(ShopModel shop, ShopSettingType shopSettingType)
-    {
-        var shopSettings = await _shopSettingsDataService.GetShopSettings(shop.Id, shopSettingType);
-
-        if (shopSettings == null) return null;
-
-        ShopSettingsModel? shopSettingsModel = shopSettingType == ShopSettingType.Category
-            ? (await GetCategoryShopImportSettings(shopSettings))
-            : (await GetProductShopImportSettings(shopSettings));            
-
-        shopSettingsModel.ShopGuid = shop.Guid;
-        shopSettingsModel.Services.ForEach(s => s.ShopGuid = shop.Guid);
-
-        return shopSettingsModel;
-    }
-
-    public async Task Save(ShopSettingsModel shopSettingsModel)
-    {
-        var shopSettings = shopSettingsModel.ToEntity();
-
-        var services = (from serviceModel in shopSettingsModel.Services
-                        let service = serviceModel.ToEntity(shopSettings.ShopId)                        
-                        select service).ToList();
-        await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
-    }
-
-    public async Task<ShopSettingsModel?> LoadShopSettings(int shopId, ShopSettingType shopSettingType)
-    {
-        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, shopSettingType);
-        if (shopSettings == null) return null;
-        
-        ShopSettingsModel shopSettingsModel = shopSettingType == ShopSettingType.Product 
-            ? shopSettings.ToShopSettingsModel<ProductShopSettingsModel>()
-            : shopSettings.ToShopSettingsModel<CategoryShopSettingsModel>();
-
-        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
-        var serviceModels = services.Select(s => s.ToServiceSettingsModel()).ToList();
-
-        foreach (var serviceModel in serviceModels)
-            shopSettingsModel.UpdateServiceSettings(serviceModel);
-
-        return shopSettingsModel;
     }
 }

@@ -15,7 +15,7 @@ public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFact
     private static ShopImportCategoriesTimerService GetCategoriesService(IServiceProvider serviceProvider, object? key)
     {
         var logger = serviceProvider.GetLogger<ShopImportCategoriesTimerService>(key);
-        var htmlSearcher = serviceProvider.GetRequiredKeyedService<IHtmlSearcher>(key);
+        var htmlSearcher = serviceProvider.GetKeyedService<IHtmlSearcher>(key);
         var shopUrl = serviceProvider.GetRequiredKeyedService<IShopModel>(key);
         var requestHeaders = serviceProvider.GetKeyedService<RequestHeaders>(key);
         var loadOptions = serviceProvider.GetRequiredKeyedService<CategoryLoadOptions>(key);
@@ -27,7 +27,7 @@ public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFact
     private static ShopImportCategoriesTimerService GetCategoriesService(IServiceProvider serviceProvider)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<ShopImportCategoriesTimerService>>();
-        var htmlSearcher = serviceProvider.GetRequiredService<IHtmlSearcher>();
+        var htmlSearcher = serviceProvider.GetService<IHtmlSearcher>();
         var shopUrl = serviceProvider.GetRequiredService<IShopModel>();
         var requestHeaders = serviceProvider.GetService<RequestHeaders>();
         var loadOptions = serviceProvider.GetRequiredService<CategoryLoadOptions>();

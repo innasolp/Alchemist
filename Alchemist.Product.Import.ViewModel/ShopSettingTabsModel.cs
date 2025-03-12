@@ -17,7 +17,7 @@ public class ShopSettingTabsModel : SettingsModelBase
 
     public override void Update(SettingsModelBase source)
     {
-        base.Update(source);
+        base.Update(source);        
 
         if (source is not ShopSettingTabsModel shopSettingTabsModel)
             throw new InvalidCastException($"invalid source {source.GetType().Name} for {GetType().Name}");

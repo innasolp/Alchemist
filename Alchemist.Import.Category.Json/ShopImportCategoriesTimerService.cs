@@ -12,14 +12,14 @@ using WebLoader.Common;
 namespace Alchemist.Import.Category.Json;
 
 public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
-    IHtmlSearcher htmlSearcher,
+    IHtmlSearcher? htmlSearcher,
     IWebLoader webLoader,
     IShopModel shopUrlModel,
     RequestHeaders? requestHeaders,
     CategoryLoadOptions categoryLoadOptions)
     : ShopImportService(logger, webLoader, requestHeaders), IShopCategoryImportService
 {
-    protected IHtmlSearcher HtmlSearcher { get; } = htmlSearcher;
+    protected IHtmlSearcher? HtmlSearcher { get; } = htmlSearcher;
 
     protected CategoryLoadOptions CategoryLoadOptions { get; } = categoryLoadOptions;
 
@@ -31,15 +31,31 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     public event Microsoft.VisualStudio.Threading.AsyncEventHandler<NewCategoryEventArgs>? NewCategoryLoad;
 
+   public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+   IWebLoader webLoader,
+   IShopModel shopUrlModel,
+   RequestHeaders? requestHeaders,
+   CategoryLoadOptions categoryLoadOptions)
+        :this(logger, null, webLoader, shopUrlModel, requestHeaders, categoryLoadOptions)
+    {
+    }
+
     protected virtual async Task LoadCategoriesAsync(CancellationToken stoppingToken)
     {
         if (!WebLoader.IsStarted)
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
-        var values = await ProcessUrlTaskAsync(LoadFromUrlAsync, ShopModel.ShopUrl);
-        if (values == null) return;
+        JsonDocument? document;
 
-        var document = JsonDocument.Parse(values[0]);
+        if (HtmlSearcher != null)
+        {
+            var values = await ProcessUrlTaskAsync(LoadHtmlFromUrlAsync, ShopModel.ShopUrl);
+            if (values == null) return;
+
+            document = JsonDocument.Parse(values[0]);
+        }
+        else
+            document = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(ShopModel.ShopUrl, stoppingToken), ShopModel.ShopUrl);
 
         var categories = new ObservableCollection<JsonCategory>();
         categories.CollectionChanged += CategoryCollectionChanged;
@@ -47,7 +63,6 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         JsonCategory.LoadAllChildren(null, categories, document.RootElement,
                CategoryLoadOptions.FirstNodePath,
                CategoryLoadOptions.CategoryPropertyPaths);
-
 
         if (CategoryLoadOptions.CategoriesApiUrlFormat == null)
             return;
@@ -67,10 +82,10 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         }
     }
 
-    private async Task<List<string>?> LoadFromUrlAsync(string url)
+    private async Task<List<string>?> LoadHtmlFromUrlAsync(string url)
     {
         using var stream = await WebLoader.LoadFromUrl(ShopModel.ShopUrl);
-        var values = await htmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions);
+        var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions);
         stream.Close();
         return await Task.FromResult(values);
     }

@@ -108,4 +108,76 @@ public static class ModelExtensions
                 serviceSettings.Update(service.GetImportServiceSettings<TImportServiceSettings>());
         }
     }
+
+    public static bool UpdateServiceSettings<TImportServiceSettings>(this IShopImportSettings shopSettings, IImportServiceSettings? serviceSettings)
+         where TImportServiceSettings : class, IImportServiceSettings, new()
+    {
+        if (serviceSettings == null) return false;
+        switch (serviceSettings?.Name)
+        {
+            case nameof(IShopImportSettings.ImportService):
+                {
+                    shopSettings.UpdateShopServiceSettings<TImportServiceSettings>(nameof(IShopImportSettings.ImportService),
+                        serviceSettings,
+                        s => s.ImportService,
+                        (s, sm) => s.ImportService = sm);
+
+                    return true;
+                }
+
+            case nameof(IShopImportSettings.WebLoader):
+                {
+                    shopSettings.UpdateShopServiceSettings<TImportServiceSettings>(nameof(IShopImportSettings.WebLoader), 
+                        serviceSettings,
+                        s => s.WebLoader,
+                        (s, sm) => s.WebLoader = sm);
+                    return true;
+                }
+
+            case nameof(IShopImportSettings.BrowserDataLoader):
+                {
+                    shopSettings.UpdateShopServiceSettings<TImportServiceSettings>(nameof(IShopImportSettings.BrowserDataLoader), 
+                        serviceSettings,
+                        s => s.BrowserDataLoader,
+                        (s, sm) => s.BrowserDataLoader = sm);
+
+                    return true;
+                }
+
+            case nameof(IShopImportSettings.RequestHeaders):
+                {
+                    shopSettings.UpdateShopServiceSettings<TImportServiceSettings>(nameof(IShopImportSettings.RequestHeaders),
+                        serviceSettings,
+                        s => s.RequestHeaders,
+                        (s, sm) => s.RequestHeaders = sm);
+
+                    return true;
+                }
+
+            default:
+                {
+                    shopSettings.Services.Add(serviceSettings);
+                    return true;
+                }
+        }
+    }
+
+    private static void UpdateShopServiceSettings<TImportServiceSettings>(this IShopImportSettings shopSettings, string serviceName, IImportServiceSettings? serviceSettings,
+        Func<IShopImportSettings, IImportServiceSettings> get,
+        Action<IShopImportSettings, TImportServiceSettings> set)
+        where TImportServiceSettings: class, IImportServiceSettings, new()
+    {
+        if (get(shopSettings) == null)
+            set(shopSettings, new TImportServiceSettings
+            {
+                ParentSettingsId = shopSettings.Id,
+                Id = serviceSettings.Id,
+                ShopId = serviceSettings.ShopId,
+                Name = serviceName
+            });
+        get(shopSettings).Update(serviceSettings);
+
+        if (!shopSettings.Services.OfType<IImportServiceSettings>().Any(s => s.Guid == serviceSettings?.Guid))
+            shopSettings.Services.Add(get(shopSettings));
+    }
 }

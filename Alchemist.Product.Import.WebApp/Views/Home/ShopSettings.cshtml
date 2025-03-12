@@ -112,7 +112,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary form-button"
-                        onclick="this.disabled=true;save('#settingsForm','@GetSubmitUrl()', getFormData($('#settingsForm')), (result)=> { this.disabled = false;});">
+                        onclick="this.disabled=true;save('#settingsForm','@GetSubmitUrl()', getFormData($('#settingsForm')), (result)=> { this.disabled = false;}, (error)=>{this.disabled = false;});">
                     Save
                 </button>
             </div>

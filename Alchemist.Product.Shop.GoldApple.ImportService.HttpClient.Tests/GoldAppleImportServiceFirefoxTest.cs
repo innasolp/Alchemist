@@ -1,54 +1,58 @@
 using Microsoft.Extensions.Logging;
-using WebLoader.HttpClient;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
 using System.Text.Json;
 using Alchemist.Product.Shop.GoldApple.Model;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Alchemist.Product.Interfaces;
-using Alchemist.Product.Shop.GoldApple.ImportService;
-using Alchemist.Import.Products.Interfaces;
+using WebLoader.Common;
+using System.Reflection;
+using Json.Extensions;
+using BrowserDataLoader.Interfaces;
+using BrowserDataLoader.Firefox.Standart.Windows;
+using WebLoader.Playwright.Firefox;
 
 namespace Alchemist.Shop.GoldenApple.ImportService.HttpClient.Tests;
 
-public class GoldAppleImportServiceHttpclientLoaderTest
+public class GoldAppleImportServiceFirefoxTest
 {
     private readonly string _categoryUrl = "https://goldapple.ru/front/api/catalog/products?categoryId=1000000252&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber=3";
     private readonly string _productUrl = "https://goldapple.ru/front/api/catalog/product-card/base?itemId=99730300001&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0";
 
-    private readonly ILogger<GoldAppleImportService> _logger = Moq.Mock.Of<ILogger<GoldAppleImportService>>();
-    private readonly Moq.Mock<IProductShopModel> _shopUrlModelMock = new();
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IWebLoader _webLoader;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly GoldAppleImportService _importService;
+    
+    private readonly string requestHeadersFileName = "GoldApple.Headers.Firefox.json";
 
-    public GoldAppleImportServiceHttpclientLoaderTest(ITestOutputHelper testOutputHelper)
+    private readonly string _requestHeadersPath;
+
+    private readonly IBrowserDataLoader _browserDataLoader;
+
+    public GoldAppleImportServiceFirefoxTest(ITestOutputHelper testOutputHelper)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddHttpClient();
-        var host = builder.Build();
-        _httpClientFactory = host.Services.GetService<IHttpClientFactory>();
-
-        _shopUrlModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IShopCategory>());
+        var host = builder.Build();        
 
         _testOutputHelper = testOutputHelper;
-        _webLoader = new HttpClientWebLoader(_httpClientFactory);
-        _importService = new GoldAppleImportService(_logger, _shopUrlModelMock.Object, _webLoader);
-    }
-
-    private async Task InitializeAsync()
+        _browserDataLoader = new FirefoxStandartDataLoader();
+        _webLoader = new PlaywrightFirefoxLoader(_browserDataLoader);  
+        _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}";       
+    } 
+    
+    private async Task InitWebLoaderIfNeed()
     {
-        var result = await _webLoader.Start(_importService.RequestHeaders);
+        if (_webLoader.IsStarted) return;
+
+        var requestHeaders = await _requestHeadersPath.ReadFromJsonFileAsync<RequestHeaders>();
+        var result = await _webLoader.Start(requestHeaders);
         Assert.True(result);
     }
 
     [Fact]
     public async Task LoadGoldAppleCategoryPageTestAsync()
     {
-        if (!_webLoader.IsStarted)
-            await InitializeAsync();
+        await InitWebLoaderIfNeed();
 
         var stream = await _webLoader.LoadFromUrl(_categoryUrl);
         var category = await JsonSerializer.DeserializeAsync<CategoryProducts>(stream);
@@ -63,8 +67,7 @@ public class GoldAppleImportServiceHttpclientLoaderTest
     [Fact]
     public async Task LoadGoldAppleProductPageTestAsync()
     {
-        if (!_webLoader.IsStarted)
-            await InitializeAsync();
+        await InitWebLoaderIfNeed();
 
         var stream = await _webLoader.LoadFromUrl(_productUrl);
         var productData = await JsonSerializer.DeserializeAsync<ProductData>(stream);

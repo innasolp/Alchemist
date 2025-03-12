@@ -1,9 +1,11 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
+using System.Collections;
 using System.Text.Json.Serialization;
 
 namespace Alchemist.Import.Settings.Model;
 
-public class ShopImportSettings : IShopImportSettings
+public abstract class ShopImportSettings : IShopImportSettings
 {
     public ImportServiceSettings ImportService { get; set; }
 
@@ -49,5 +51,15 @@ public class ShopImportSettings : IShopImportSettings
         get => RequestHeaders; set => RequestHeaders = (ImportServiceSettings?)value;
     }
 
-    IList<IImportServiceSettings> IShopImportSettings.Services => Services.OfType<IImportServiceSettings>().ToList();
+    IList IShopImportSettings.Services => Services;
+
+    int? ISettings.ParentSettingsId 
+    { 
+        get { return null; }
+        set {; }
+    }
+
+    protected abstract ShopSettingType ShopSettingType { get; }
+
+    ShopSettingType ISettings.ShopSettingType => ShopSettingType;
 }

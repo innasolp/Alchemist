@@ -3,7 +3,7 @@ using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Model;
 
-public class CategoryShopSettingsModel : ShopSettingsModel, IShopImportSettings
+public class CategoryShopSettingsModel : ShopSettingsModel, ICategoryShopImportSettings
 {
     public override ShopSettingType ShopSettingType => ShopSettingType.Category;
 }

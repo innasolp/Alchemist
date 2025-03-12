@@ -1,25 +1,25 @@
 {
 
-    "Headers": {
+  "Headers": {
 
-      "Accept": "application/json",
+    "Accept": "application/json",
 
-      "Accept-encoding": "gzip, deflate, br, zstd",
+    "Accept-encoding": "gzip, deflate, br, zstd",
 
-      "Accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+    "Accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
 
-      "Connection": "keep-alive",
+    "Connection": "keep-alive",
 
-      "Content-Type": "application/json",
+    "Content-Type": "application/json",
 
-      "Sec-Fetch-Dest": "document",
-      "Sec-Fetch-Mode": "navigate",
-      "Sec-Fetch-Site": "none",
-      "Sec-Fetch-User": "?1",
-      "Upgrade-Insecure-Requests": "1",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
 
-    },
+  },
 
     "Cookies": [
       "__Secure-ab-group",

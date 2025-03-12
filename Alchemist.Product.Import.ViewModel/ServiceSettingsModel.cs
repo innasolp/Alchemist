@@ -3,16 +3,18 @@ using Alchemist.Product.Interfaces;
 using DependencyInjection.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Alchemist.Import.Settings.Extensions;
 
 namespace Alchemist.Product.Import.Model;
 
-public class ServiceSettingsModel: IImportServiceSettings
+public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDeserialized
 {
     public Guid Guid { get; set; } = Guid.NewGuid();
 
-    public int? Id { get; set; }
+    public int Id { get; set; }
 
     public Guid ShopGuid { get; set; }
 
@@ -41,8 +43,8 @@ public class ServiceSettingsModel: IImportServiceSettings
     [Display(Name = "Service assembly path with implementation factory")]
     public string? ServiceProviderPath { get; set; }
 
-    [JsonPropertyName("Value")]
-    public JsonObject? JsonValue { get; set; }
+    [JsonIgnore]
+    public JsonObject? Value { get; set; }
 
     public int? ParentSettingsId { get; set; }
 
@@ -50,7 +52,16 @@ public class ServiceSettingsModel: IImportServiceSettings
    
     public string? StringValue { get; set; }
 
-    string? IServiceSettings.Value { get => StringValue; set => StringValue = value; }
+    public int ShopId { get; set; }
+
+    [JsonPropertyName("Value")]
+    public JsonElement? ValueObj { get; set; }
+
+    string? IServiceSettings.Value { get => Value?.ToString(); set
+        {
+            Value = value != null ? JsonSerializer.Deserialize<JsonObject>(value) : null;
+        }
+    }
 
     public void Update(ServiceSettingsModel source)
     {
@@ -59,8 +70,13 @@ public class ServiceSettingsModel: IImportServiceSettings
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;
         ServiceProviderPath = source.ServiceProviderPath;
-        JsonValue = source.JsonValue;
+        Value = source.Value;
         StringValue = source.StringValue;
         FileName = source.FileName;
+    }
+
+    void IJsonOnDeserialized.OnDeserialized()
+    {
+        this.DeserializeValueIfNeed();
     }
 }

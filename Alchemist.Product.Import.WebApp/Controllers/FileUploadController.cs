@@ -50,12 +50,9 @@ public class FileUploadController(IImportFacade importFacade) : Controller
 
         var uploadedShopSettings = await stream.GetShopSettingsFromJsonAsync((ShopSettingType)shopSettingsType);
 
-        if (uploadedShopSettings != null && _importFacade.TryGetShopImport(shopGuid, out var shopImportModel)
-           && shopImportModel != null && shopImportModel.ShopSettingTabs != null)
+        if (uploadedShopSettings != null && _importFacade.TryGetShopSettings(shopGuid, (ShopSettingType)shopSettingsType, out var shopSettings))         
         {
-            var shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType((ShopSettingType)shopSettingsType);
-
-            shopSettings?.Update(uploadedShopSettings);
+            shopSettings?.Update(uploadedShopSettings, true);
             shopSettings.FileName = file.FileName;
 
             return shopSettings;
@@ -75,13 +72,10 @@ public class FileUploadController(IImportFacade importFacade) : Controller
 
         var uplodedServiceSettings = await GetFromJsonAsync<ServiceSettingsModel>(file);
         
-        if (uplodedServiceSettings != null && _importFacade.TryGetShopImport(shopGuid, out var shopImportModel)
-            && shopImportModel != null && shopImportModel.ShopSettingTabs != null)
+        if (uplodedServiceSettings != null && _importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
         {
             uplodedServiceSettings.Name = serviceSettingsName;
-            uplodedServiceSettings.FileName = file.FileName;
-
-            var shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid);
+            uplodedServiceSettings.FileName = file.FileName;            
 
             shopSettings?.UpdateServiceSettings(uplodedServiceSettings);
 

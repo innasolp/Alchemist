@@ -1,9 +1,9 @@
-﻿namespace Alchemist.Import.Settings.Interfaces;
+﻿using System.Collections;
 
-public interface IShopImportSettings
-{
-    int Id { get; set; }
+namespace Alchemist.Import.Settings.Interfaces;
 
+public interface IShopImportSettings: ISettings
+{    
     string Name { get; set; }
 
     string? Caption { get; set; }
@@ -22,5 +22,5 @@ public interface IShopImportSettings
 
     public bool? Perfomance { get; set; }
 
-    IList<IImportServiceSettings> Services { get; }
+    IList Services { get; }
 }
