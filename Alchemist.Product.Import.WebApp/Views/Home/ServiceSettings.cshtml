@@ -1,0 +1,56 @@
+﻿@model Alchemist.Product.Import.Model.ServiceSettingsModel
+
+@functions{
+    public string GetUploadOnChange(string id) => "postFormInputFile('/FileUpload/UploadJson', $('#modalForm'), '" + id + "', null, (data)=>{ $('#jsonValueHidden').val(data);" + UploadFromFileModel.onSuccess + " })";
+}
+
+
+<h4>ServiceSettingsModel</h4>
+<hr />
+<form id="modalForm">
+    <input type="hidden" name="ShopGuid" value="@Model.ShopGuid" />
+    <input type="hidden" name="Id" value="@Model.Guid" />
+    <input type="hidden" name="ParentSettingsId" value="@Model.ParentSettingsId" />
+    <input type="hidden" name="ShopSettingType" value="@((int)Model.ShopSettingType)" />
+    <input type="hidden" name="ShopId" value="@Model.ShopId" />
+    <input type="hidden" name="Guid" value="@Model.Guid" />
+    <input type="hidden" name="ShopSettingsGuid" value="@Model.ShopSettingsGuid" />
+    <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
+    <div class="row">
+        <div class="col-md-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
+            <div class="form-group">                
+                <input type="hidden" asp-for="StringValue" id="jsonValueHidden" />
+                <span asp-validation-for="StringValue" class="text-danger"></span>
+                @await Html.PartialAsync($"~/Views/UploadFromFile.cshtml", new UploadFromFileModel { Id = "uploadValueFromJson", OnChange = GetUploadOnChange("uploadValueFromJson"), FileName = Model.FileName })
+            </div>
+            <div class="form-group">
+                <label asp-for="ServiceTypeName" class="control-label"></label>
+                <input asp-for="ServiceTypeName" class="form-control form-input" id="ServiceTypeName" />
+                <span asp-validation-for="ServiceTypeName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ImplementationTypeName" class="control-label"></label>
+                <input asp-for="ImplementationTypeName" class="form-control form-input" />
+                <span asp-validation-for="ImplementationTypeName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AssemblyPath" class="control-label"></label>
+                <input asp-for="AssemblyPath" id="assemblyPathDisplay" class="form-control form-input" name="AssemblyPath" />
+                <span asp-validation-for="AssemblyPath" class="text-danger"></span>
+            </div><div class="form-group">
+                <label asp-for="ServiceProviderPath" class="control-label"></label>
+                <input asp-for="ServiceProviderPath" class="form-control form-input" id="serviceProviderPathDisplay" />
+                <span asp-validation-for="ServiceProviderPath" class="text-danger"></span>                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary"
+                        onclick="save('#modalForm','/Home/SaveServiceSettings', getFormData($('#modalForm')), (data)=>{ if(!data) return; setValIfValid('#@Model.Name',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+

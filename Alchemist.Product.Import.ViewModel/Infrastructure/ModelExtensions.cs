@@ -1,0 +1,289 @@
+﻿using Alchemist.Product.Interfaces;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+namespace Alchemist.Product.Import.Model.Infrastructure;
+
+public static class ModelExtensions
+{
+    public static SettingsModelBase? GetSettings(this ShopImportModel shopImport, TabType tab, bool last = false)
+    {
+        switch (tab)
+        {
+            case TabType.Shop:
+                {
+                    return !last ? shopImport.ShopSettingTabs
+                        : (shopImport.ShopSettingTabs?.SelectedSettingsTab == ShopSettingType.Product 
+                            ? shopImport.ShopSettingTabs.ShopProductsSettings
+                            : shopImport.ShopSettingTabs?.ShopCategoriesSettings);
+                }
+
+            case TabType.Products:
+                {
+                    return shopImport.ImportProducts;
+                }
+
+            case TabType.Categories:
+                {
+                    return shopImport.ImportCategories;
+                }
+
+            default:
+                {
+                    return null;
+                }
+        }
+    }
+
+    public static SettingsModelBase CreateSettings(this ShopImportModel shopImport, TabType tab)
+    {
+        switch (tab)
+        {
+            case TabType.Shop:
+                {
+                    return new ShopSettingTabsModel()
+                    { 
+                        ShopGuid = shopImport.ShopGuid,
+                        ShopId = shopImport.Shop.Id 
+                    };                    
+                }
+
+            case TabType.Products:
+                {
+                    return new ProductsImportSettingsModel() { ShopGuid = shopImport.ShopGuid, ShopId = shopImport.Shop.Id };
+                }
+
+            case TabType.Categories:
+                {
+                    return new CategoriesImportSettingsModel() { ShopGuid = shopImport.ShopGuid, ShopId = shopImport.Shop.Id };
+                }
+
+            default:
+                {
+                    return null;
+                }
+        }
+    }
+
+    public static ShopSettingsModel CreateShopSettings(this ShopSettingTabsModel shopSettingTabs, ShopSettingType settingType)
+    {
+        return settingType == ShopSettingType.Product
+            ? new ProductShopSettingsModel
+            {
+                ShopGuid = shopSettingTabs.ShopGuid,
+                ShopId = shopSettingTabs.ShopId
+            }
+            : (settingType == ShopSettingType.Category ? new CategoryShopSettingsModel
+            {
+                ShopGuid = shopSettingTabs.ShopGuid,
+                ShopId = shopSettingTabs.ShopId
+            } : 
+            throw new InvalidOperationException($"{settingType}"));
+    }
+
+    public static bool SetSettings(this ShopImportModel shopImport, TabType tab, SettingsModelBase settings)
+    {
+        switch (tab)
+        {
+            case TabType.Shop:
+                {
+                    if (settings is ShopSettingTabsModel shopSettingsTabModel)
+                    {
+                        shopImport.ShopSettingTabs = shopSettingsTabModel;
+                        shopImport.ShopSettingTabs.ShopGuid = shopImport.ShopGuid;
+                        return true;
+                    }
+                    else
+                    {
+                        shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopGuid = shopImport.ShopGuid, ShopId = shopImport.Shop.Id };
+                        if (shopImport.ShopSettingTabs.SelectedSettingsTab == ShopSettingType.Product)
+                        {
+                            if (settings is not ProductShopSettingsModel productShopSettings)
+                                return false;
+                            shopImport.ShopSettingTabs.ShopProductsSettings = productShopSettings;
+                            shopImport.ShopSettingTabs.ShopProductsSettings.Init(shopImport.ShopGuid);           
+                            return true;
+                        }
+                        else
+                        {
+                            if (settings is not CategoryShopSettingsModel categoryShopSettings)
+                                return false;
+                            shopImport.ShopSettingTabs.ShopCategoriesSettings = categoryShopSettings;
+                            shopImport.ShopSettingTabs.ShopCategoriesSettings.Init(shopImport.ShopGuid);
+                            return true;
+                        }
+                    }
+                }
+
+            case TabType.Products:
+                {
+                    if (settings is not ProductsImportSettingsModel productsImportSettings)
+                        return false;
+                    shopImport.ImportProducts = productsImportSettings;
+                    shopImport.ImportProducts.ShopGuid = shopImport.ShopGuid;
+                    return true;
+                }
+
+            case TabType.Categories:
+                {
+                    if (settings is not CategoriesImportSettingsModel categoriesImportSettings)
+                        return false;
+                    shopImport.ImportCategories = categoriesImportSettings;
+                    shopImport.ImportCategories.ShopGuid = shopImport.ShopGuid;
+                    return true;
+                }
+
+            default:
+                {
+                    return false;
+                }
+        }
+    }
+
+    private static void Init(this ShopSettingsModel shopSettings, Guid shopGuid)
+    {
+        shopSettings.ShopGuid = shopGuid;
+        shopSettings.Services.ForEach(s => { s.ShopGuid = shopGuid; s.ShopSettingsGuid = shopSettings.Guid; s.ShopId = shopSettings.ShopId; });
+    }
+
+    public static ServiceSettingsModel? GetServiceSettings(this ShopSettingsModel shopSettings, string serviceName)
+    {
+        return serviceName switch
+        {
+            nameof(ShopSettingsModel.ImportService) => shopSettings.ImportService,
+            nameof(ShopSettingsModel.WebLoader) => shopSettings.WebLoader,
+            nameof(ShopSettingsModel.BrowserDataLoader) => shopSettings.BrowserDataLoader,
+            nameof(ShopSettingsModel.RequestHeaders) => shopSettings.RequestHeaders,
+            _ => null,
+        };
+    }
+
+    public static ShopSettingsModel? GetShopSettingsByType(this ShopSettingTabsModel shopSettingTabs, ShopSettingType shopSettingType)
+    {
+        if (shopSettingType == ShopSettingType.Service)
+            throw new InvalidOperationException("Service tab not available for shop settings.");
+
+        switch (shopSettingType)
+        {
+            case ShopSettingType.Product:
+                {
+                    return shopSettingTabs.ShopProductsSettings;
+                }
+
+            case ShopSettingType.Category:
+                {
+                    return shopSettingTabs.ShopCategoriesSettings;
+                }
+
+            default:
+                return null;
+        }
+    }
+
+    public static ShopSettingsModel? GetShopSettingsByGuid(this ShopSettingTabsModel shopSettingTabs, Guid shopSettingsGuid)
+    {
+        return shopSettingTabs?.ShopProductsSettings?.Guid == shopSettingsGuid
+            ? shopSettingTabs.ShopProductsSettings
+            : (shopSettingTabs?.ShopCategoriesSettings?.Guid == shopSettingsGuid ? shopSettingTabs.ShopCategoriesSettings : null);
+    }
+   
+    public static bool UpdateServiceSettings(this ShopSettingsModel shopSettings, ServiceSettingsModel? serviceSettings)
+    {
+        if (serviceSettings == null) return false;
+        switch (serviceSettings?.Name)
+        {
+            case nameof(ShopSettingsModel.ImportService):
+                {
+                    shopSettings.UpdateShopServiceSettings(nameof(ShopSettingsModel.ImportService),serviceSettings,  s => s.ImportService, (s, sm) => s.ImportService = sm);
+
+                    return true;
+                }
+
+            case nameof(ShopSettingsModel.WebLoader):
+                {
+                    shopSettings.UpdateShopServiceSettings(nameof(ShopSettingsModel.WebLoader), serviceSettings, s => s.WebLoader, (s, sm) => s.WebLoader = sm);
+                    return true;
+                }
+
+            case nameof(ShopSettingsModel.BrowserDataLoader):
+                {
+                    shopSettings.UpdateShopServiceSettings(nameof(ShopSettingsModel.BrowserDataLoader), serviceSettings, s => s.BrowserDataLoader, (s, sm) => s.BrowserDataLoader = sm);
+
+                    return true;
+                }
+            
+            case nameof(ShopSettingsModel.RequestHeaders):
+                {
+                    shopSettings.UpdateShopServiceSettings(nameof(ShopSettingsModel.RequestHeaders), serviceSettings, s => s.RequestHeaders, (s, sm) => s.RequestHeaders = sm);
+
+                    return true;
+                }
+
+            default:
+                {
+                    shopSettings.Services.Add(serviceSettings);
+                    return true;
+                }
+        }
+    }
+
+    private static void UpdateShopServiceSettings(this ShopSettingsModel shopSettings, string serviceName, ServiceSettingsModel? source,
+        Func<ShopSettingsModel, ServiceSettingsModel> get,
+        Action<ShopSettingsModel,ServiceSettingsModel> set)
+    {
+        if (get(shopSettings) == null)
+            set(shopSettings, new ServiceSettingsModel
+            {
+                ShopGuid = shopSettings.ShopGuid,
+                ShopSettingsGuid = shopSettings.Guid,
+                ParentSettingsId = shopSettings.Id,
+                Id = source.Id,
+                ShopId = source.ShopId,
+                Name = serviceName
+            });
+        get(shopSettings).Update(source);
+
+        if (!shopSettings.Services.Any(s => s.Guid == get(shopSettings)?.Guid))
+            shopSettings.Services.Add(get(shopSettings));
+    }       
+    
+    public static SettingsModelBase? DeserializeWithNumberHandling(this string json, Type type)       
+    {
+        var option = new JsonSerializerOptions { NumberHandling = JsonNumberHandling.AllowReadingFromString, };
+        return JsonSerializer.Deserialize(json, type, option) as SettingsModelBase;
+    }
+
+    public static ShopSettingsModel? GetShopSettingsFromJson(this string json, ShopSettingType shopSettingType)
+    {
+        var option = new JsonSerializerOptions {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
+                nameof(ServiceSettingsModel.Value)) }
+            }
+        };
+
+        return shopSettingType == ShopSettingType.Product
+            ? JsonSerializer.Deserialize<ProductShopSettingsModel>(json, option)
+            : JsonSerializer.Deserialize<CategoryShopSettingsModel>(json, option);
+    }
+
+    public static async Task<ShopSettingsModel?> GetShopSettingsFromJsonAsync(this Stream jsonStream, ShopSettingType shopSettingType)
+    {
+        var option = new JsonSerializerOptions
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
+                nameof(ServiceSettingsModel.Value)) }
+            }
+        };
+
+        return shopSettingType == ShopSettingType.Product
+            ? await JsonSerializer.DeserializeAsync<ProductShopSettingsModel>(jsonStream, option)
+            : await JsonSerializer.DeserializeAsync<CategoryShopSettingsModel>(jsonStream, option);
+    }
+}

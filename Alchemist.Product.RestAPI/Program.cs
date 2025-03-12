@@ -1,6 +1,5 @@
 using Alchemist.Common;
 using Alchemist.Product.Data.Repository;
-using Alchemist.Product.DataService.Interfaces;
 using Alchemist.Log.Serilog;
 using Http.ErrorHandling;
 using Http.Info;
@@ -10,6 +9,7 @@ using Serilog.Loggers;
 using Alchemist.Product.Data;
 using Alchemist.Product.RestAPI.Controllers;
 using Message.SignalR.DependencyInjection;
+using Alchemist.DataService.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +39,7 @@ builder.Services.AddPerfomanceCounter(typeof(InfoLogMiddleware<ShopController>),
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
 var appSerilogBuilder = new AppSerilogBuilder(builder);
-var serviceName = "Alchemist.RestAPI";
+var serviceName = "Alchemist.Shop.RestAPI";
 appSerilogBuilder.AddServiceBaseConfigs(serviceName);
 appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8051", EventIds.Perfomance.Id, logPath, serviceName);
 appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());

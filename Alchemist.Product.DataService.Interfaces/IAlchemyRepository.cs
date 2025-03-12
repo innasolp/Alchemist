@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.DataService.Interfaces;
+namespace Alchemist.DataService.Interfaces;
 
 public interface IAlchemyRepository
 {
@@ -22,6 +22,7 @@ public interface IAlchemyRepository
 
     Task<IShop> CreateShop(IShop shop);
     Task<IShop?> GetShop(int id);
+    Task<List<IShop>> GetShops();
     Task<IShop?> GetShopByName(string name);
 
     Task<IShop?> GetShopByUrl(string url);
@@ -36,15 +37,9 @@ public interface IAlchemyRepository
 
     Task<IShopUrl> AddShopUrl(IShopUrl shopUrl);
 
-    Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType);
-
-    Task<IShopSettings> AddShopSettings(IShopSettings shopSettings);
-
     Task<List<IShopCategory>> GetShopCategories(int shopId);
 
     Task<IShopCategory?> GetShopCategory(int shopId, int itemId);
-
-    
 
     Task<IShopCategory> AddShopCategory(IShopCategory shopCategory);
 

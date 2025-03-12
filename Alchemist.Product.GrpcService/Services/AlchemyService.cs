@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.DataService.Interfaces;
+﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.GrpcService.Extensions;
 using Alchemist.Product.Interfaces;
@@ -36,7 +36,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
 
     public override async Task<BrandReply> CreateBrand(CreateBrandRequest request, ServerCallContext context)
     {
-        var brand = new Brand { Name = request.Name, CountryId = (short)request.Countryid, Comment = request.Comment };
+        var brand = new Brand { Name = request.Name, CountryId = (short?)request.Countryid, Comment = request.Comment };
         var entity = await _repository.CreateBrand(brand);
         var reply = new BrandReply() { Id = entity.Id, Name = entity.Name, Countryid = entity.CountryId, Comment = entity.Comment };
         return await Task.FromResult(reply);

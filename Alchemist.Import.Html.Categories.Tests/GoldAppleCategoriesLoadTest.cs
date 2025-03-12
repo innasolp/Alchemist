@@ -15,9 +15,7 @@ public class GoldAppleCategoriesLoadTest
 
     private readonly IWebLoader _webLoader;
     
-    private readonly string _shopUrl = "https://goldapple.ru";
-
-    private readonly HtmlSearchFactory _htmlSearchFactory = new();
+    private readonly string _shopCategoriesUrl = "https://goldapple.ru/front/api/catalog/navigation";    
 
     private readonly string requestHeadersFileName = "GoldApple.Headers.Firefox.json";
 
@@ -63,19 +61,9 @@ public class GoldAppleCategoriesLoadTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var htmlSearcher = _htmlSearchFactory.CreateSearcher(SearchMatchType.Equals, SearchElementType.Value);
-
-        using var stream = await _webLoader.LoadFromUrl(_shopUrl);
-        var values = await htmlSearcher.GetValues(stream, new HtmlSearchOptions
-        {
-            Tag = "script",
-            ValueString = "window.serverCache['navigation']",
-        });
-        stream.Close();
-
-        Assert.True(values.Count > 0);
-
-        var jsonDocument = JsonDocument.Parse(values[0]);
+        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl);
+        var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
+        stream.Close();       
 
         Assert.NotNull(jsonDocument);
 

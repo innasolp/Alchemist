@@ -15,7 +15,7 @@
       "Sec-Fetch-Dest": "empty",
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Site": "same-origin",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0",
       "x-o3-app-name": "dweb_client",
       "x-o3-app-version": "release_12-11-2024_e50d834c",
       "x-o3-manifest-version": "e50d834cbd00d3f5a18cfc32f4f848c27cca4e72",

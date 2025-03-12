@@ -1,0 +1,71 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <UserSecretsId>c505fae3-9a44-416f-97f7-8e94b8a18492</UserSecretsId>
+    <Configurations>Debug;Release;debug libs</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.29.2" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
+    <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.Builders.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />
+    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>    
+    <Reference Include="DependencyInjection.WorkerBuilder">
+      <HintPath>..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
+    </Reference>
+    <Reference Include="Grpc.Client.RequestInterceptor">
+      <HintPath>..\Libs\Grpc\Client\RequestInterceptor\Grpc.Client.RequestInterceptor.dll</HintPath>
+    </Reference>
+    <Reference Include="Http.DelegatingRequestSender">
+      <HintPath>..\Libs\Http\RequestDelgatingHandling\Http.DelegatingRequestSender.dll</HintPath>
+    </Reference>
+    <Reference Include="Http.RequestHandling.Interfaces">
+      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Http.RequestHandling.PerfomanceCounter">
+      <HintPath>..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
+    </Reference>
+    <Reference Include="Json.Extensions">
+      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Log.Interceptors">
+      <HintPath>..\Libs\Log\Log.Interceptors\Log.Interceptors.dll</HintPath>
+    </Reference>
+    <Reference Include="Log.Interceptors.DependencyInjection">
+      <HintPath>..\Libs\Log\Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Configuration.Extensions">
+      <HintPath>..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Loggers">
+      <HintPath>..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
+    </Reference>
+    <Reference Include="DependencyInjection.Interfaces">
+      <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
