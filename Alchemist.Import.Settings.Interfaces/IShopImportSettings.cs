@@ -6,9 +6,7 @@ public interface IShopImportSettings: ISettings
 {    
     string Name { get; set; }
 
-    string? Caption { get; set; }
-
-    int ShopId { get; set; }
+    string? Caption { get; set; }   
 
     IImportServiceSettings ImportService { get; set; }
 

@@ -12,39 +12,21 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 
     private readonly Dictionary<Guid, ShopImportModel> _shopImports = [];
 
-    public ShopImportModel? GetShopImport(Guid guid)
-    {
-        if (_shopImports.TryGetValue(guid, out var shopImport) && shopImport != null)
-            return shopImport;
 
-        return null;
-    }
     public bool TryGetShopImport(Guid guid, out ShopImportModel shopImport)
     {
         return _shopImports.TryGetValue(guid, out shopImport) && shopImport != null;
-    }
-
-    public ShopSettingsModel CreateShopImportSettings(ShopSettingType shopSettingType, Guid shopGuid)
-    {
-        return shopSettingType == ShopSettingType.Product
-            ? new ProductShopSettingsModel { ShopGuid = shopGuid }
-            : new CategoryShopSettingsModel { ShopGuid = shopGuid };
-    }
-
-    public ShopSettingsModel? GetShopSettings(Guid shopGuid, ShopSettingType shopSettingType)
-    {
-        return _shopImports.TryGetValue(shopGuid, out var shopImportModel)
-               && shopImportModel != null && shopImportModel.ShopSettingTabs != null
-           ? shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType)
-           : null;
-    }
+    }    
 
     public bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out ShopSettingsModel shopSettings)
     {
         shopSettings = default;
 
         if (!_shopImports.TryGetValue(shopGuid, out var shopImportModel)
-              || shopImportModel == null || shopImportModel.ShopSettingTabs == null)
+              || shopImportModel == null)
+            return false;
+
+        if (shopImportModel.ShopSettingTabs == null)
             return false;
 
         shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType);
@@ -56,30 +38,26 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         shopSettings = default;
 
         if (!_shopImports.TryGetValue(shopGuid, out var shopImportModel)
-              || shopImportModel == null || shopImportModel.ShopSettingTabs == null)
+              || shopImportModel == null)
+            return false;
+
+        if (shopImportModel.ShopSettingTabs == null)
             return false;
 
         shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid);
         return shopSettings != null;
     }
 
-    public ServiceSettingsModel CreateServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
+    public bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName, out ServiceSettingsModel serviceSettings)
     {
-        return new ServiceSettingsModel
-        {
-            ShopGuid = shopGuid,
-            ShopSettingsGuid = shopSettingsGuid,
-            Name = serviceSettingsName
-        };
-    }
+        serviceSettings = null;
 
-    public ServiceSettingsModel? GetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
-    {
-        return _shopImports.TryGetValue(shopGuid, out var shopImportModel)
-                && shopImportModel != null && shopImportModel.ShopSettingTabs != null
-            ? shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid)?.GetServiceSettings(serviceSettingsName)
-            : null;
-    }
+        if (!TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
+            return false;
+
+        serviceSettings = shopSettings.GetServiceSettings(serviceSettingsName);
+        return serviceSettings != null;
+    }    
 
     public ShopImportModel AddNewShop(IShop shop)
     {
@@ -95,15 +73,17 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 
         if (_shopImports.Count != 0)
         {
-            var shopsDict = shops.ToDictionary(s => s.Id, s => s);
-            foreach (var sd in shopsDict)
+            shops.ForEach(s =>
             {
-                var shopImport = _shopImports.FirstOrDefault(s => s.Value.Shop.Id == sd.Key).Value;
-                shopImport?.Shop.Update(sd.Value);
-            }
+                var shopImport = _shopImports.FirstOrDefault(si => si.Value.Shop.Id == s.Id);
+                if (shopImport.Value != null)
+                    shopImport.Value.Shop.Update(s);
+                else
+                    AddNewShop(s);
+            });
 
-            var newShops = shops.Where(s => !_shopImports.Any(i => i.Value.Shop.Id == s.Id)).ToList();
-            newShops.ForEach(s => AddNewShop(s));
+            foreach (var deprecatedShop in _shopImports.Where(si => !shops.Any(s => s.Id == si.Value.Shop.Id)))
+                deprecatedShop.Value.Shop.IsDeprecated = true;
         }
         else
             shops.ForEach(s => AddNewShop(s));

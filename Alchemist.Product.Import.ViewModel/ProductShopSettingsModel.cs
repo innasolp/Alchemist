@@ -10,4 +10,10 @@ public class ProductShopSettingsModel : ShopSettingsModel, IProductShopImportSet
     public int? PageProductCount { get; set; }
 
     public override ShopSettingType ShopSettingType => ShopSettingType.Product;
+
+    public override string ToString()
+    {
+        return @$"{nameof(ProductShopSettingsModel)}:{base.ToString()};
+                {nameof(ProductUrl)}:{ProductUrl};{nameof(CategoryUrl)}:{CategoryUrl};{nameof(PageProductCount)}:{PageProductCount}";
+    }
 }

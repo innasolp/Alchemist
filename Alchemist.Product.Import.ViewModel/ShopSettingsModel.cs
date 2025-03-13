@@ -7,8 +7,22 @@ using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.Model;
 
-public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings{
-    
+public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
+{
+    public override string ToString()
+    {
+        return  @$"{base.ToString()};{nameof(Caption)}:{Caption};{nameof(Url)}:{Url};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
+                  {nameof(ImportService)}:{GetServiceValueString(ImportService)};
+                  {nameof(BrowserDataLoader)}:{GetServiceValueString(BrowserDataLoader)};
+                  {nameof(RequestHeaders)}:{GetServiceValueString(RequestHeaders)};
+                  {nameof(WebLoader)}:{GetServiceValueString(WebLoader)}";
+    }
+
+    private string GetServiceValueString(ServiceSettingsModel? service)
+    {
+        return $"{service?.ServiceTypeName ?? service?.AssemblyPath}";
+    }
+
     public List<ServiceSettingsModel> Services { get; set; } = [];
 
     [JsonIgnore]
@@ -49,6 +63,8 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     
     int? ISettings.ParentSettingsId { get =>null; set {; } }
 
+    int ISettings.ShopId { get; set; }
+
     public override void Update(SettingsModelBase source)
     {
         base.Update(source);
@@ -67,7 +83,13 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 
         if (sourceShopSettings.ImportService != null)
         {
-            SetServiceSettings(sourceShopSettings.ImportService, nameof(ImportService), () => ImportService, value => ImportService = value);
+            if (ImportService != null)
+            {
+                ImportService.Update(sourceShopSettings.ImportService);
+                this.AddOrUpdateServices(ImportService);
+            }
+            else
+                this.SetServiceSettings(sourceShopSettings.ImportService);            
         }
         else if (setNullServices)
         {
@@ -77,7 +99,13 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 
         if (sourceShopSettings.BrowserDataLoader != null)
         {
-            SetServiceSettings(sourceShopSettings.BrowserDataLoader, nameof(BrowserDataLoader), () => BrowserDataLoader, value => BrowserDataLoader = value);
+            if (BrowserDataLoader != null)
+            {
+                BrowserDataLoader.Update(sourceShopSettings.BrowserDataLoader);
+                this.AddOrUpdateServices(BrowserDataLoader);
+            }
+            else
+                this.SetServiceSettings(sourceShopSettings.BrowserDataLoader);
         }
         else if (setNullServices)
         {
@@ -87,7 +115,13 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 
         if (sourceShopSettings.WebLoader != null)
         {
-            SetServiceSettings(sourceShopSettings.WebLoader, nameof(WebLoader), () => WebLoader, value => WebLoader = value);
+            if (WebLoader != null)
+            {
+                WebLoader.Update(sourceShopSettings.WebLoader);
+                this.AddOrUpdateServices(WebLoader);
+            }
+            else
+                this.SetServiceSettings(sourceShopSettings.WebLoader);
         }
         else if (setNullServices)
         {
@@ -97,63 +131,26 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 
         if (sourceShopSettings.RequestHeaders != null)
         {
-            SetServiceSettings(sourceShopSettings.RequestHeaders, nameof(RequestHeaders), () => RequestHeaders, value => RequestHeaders = value);
+            if (RequestHeaders != null)
+            {
+                RequestHeaders.Update(sourceShopSettings.RequestHeaders);
+                this.AddOrUpdateServices(RequestHeaders);
+            }
+            else
+                this.SetServiceSettings(sourceShopSettings.RequestHeaders);
         }
         else if (setNullServices)
         {
             Services.Remove(RequestHeaders);
             RequestHeaders = null;
         }
-
         
-        sourceShopSettings.Services.Where(s=> !Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name)).ToList().ForEach(SetServiceSettings);
+        sourceShopSettings.Services.Where(s=> !Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name)).ToList()
+            .ForEach(this.AddOrUpdateServices);
         if (setNullServices)
         {
             Services.RemoveAll(s => !Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name) && 
-            !sourceShopSettings.Services.Any(source => IsEqualService(source, s)));
+            !sourceShopSettings.Services.Any(source => source.IsEqual(s)));
         }
-    }
-
-    private void SetServiceSettings(ServiceSettingsModel source, string name, Func<ServiceSettingsModel> get, Action<ServiceSettingsModel> set)
-    {
-        if (get() == null)
-            set(new ServiceSettingsModel
-            {
-                ShopGuid = ShopGuid,
-                Name = name,
-                ShopSettingsGuid = Guid,
-                ParentSettingsId = Id,
-                ShopId = ShopId
-            });
-
-        get().Update(source);
-
-        if (!Services.Any(s => s.Guid == get().Guid))
-            Services.Add(get());
-    }
-
-    private bool IsEqualService(ServiceSettingsModel source, ServiceSettingsModel target)
-    {
-        return target.Guid == source.Guid
-        || (!string.IsNullOrEmpty(target.Name) && target.Name == source.Name)
-        || target.ServiceTypeName == source.ServiceTypeName;
-    }
-
-    private void SetServiceSettings(ServiceSettingsModel service)
-    {
-        var serviceSettings = Services.FirstOrDefault(s => IsEqualService(service,s))
-            ?? new ServiceSettingsModel
-            {
-                ShopGuid = ShopGuid,
-                ShopSettingsGuid = Guid,
-                ParentSettingsId = Id,
-                ShopId = ShopId,
-                Name = service.Name
-            };
-
-        serviceSettings.Update(service);
-
-        if (!Services.Any(s => s.Guid == serviceSettings.Guid))
-            Services.Add(serviceSettings);
     }
 }

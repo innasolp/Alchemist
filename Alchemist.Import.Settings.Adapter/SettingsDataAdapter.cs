@@ -2,11 +2,10 @@
 using Alchemist.Product.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
-using System.Collections;
 
 namespace Alchemist.Import.Settings.Adapter;
 
-internal class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>(IShopSettingsDataService shopSettingsDataService)
+public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>(IShopSettingsDataService shopSettingsDataService)
     : ISettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>
     where TProductShopImportSettings : class, IProductShopImportSettings
     where TCategoryShopImportSettings : class, ICategoryShopImportSettings

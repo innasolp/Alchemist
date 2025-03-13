@@ -4,7 +4,6 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
-using Alchemist.Product.Interfaces;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -101,7 +100,8 @@ public class HomeController : Controller
     private async Task<IndexViewModel> GetIndexViewModelAsync(IEnumerable<ShopImportModel> shopImports, Guid shopGuid, TabType tab)
     {
         var shops = shopImports.Select(s => s.Shop).ToList();
-        var shopImport = _importFacade.GetShopImport(shopGuid);
+        if(!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
+            return await Task.FromResult(default(IndexViewModel));
 
         var currentSettings = shopImport.GetSettings(tab);
         if (currentSettings == null)
@@ -111,14 +111,14 @@ public class HomeController : Controller
         }
 
         if (tab == TabType.Shop && 
-            shopImport.ShopSettingTabs.GetShopSettingsByType(shopImport.ShopSettingTabs.SelectedSettingsTab) == null)
+            shopImport.GetSettings(tab,true) == null)
         {
             var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
             if (settings != null)
                 shopImport.SetSettings(tab, settings);
             else
             {
-                var currentShopSettings = shopImport.ShopSettingTabs.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
+                var currentShopSettings = shopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
                 shopImport.SetSettings(tab, currentShopSettings);
             }
         }
@@ -132,42 +132,58 @@ public class HomeController : Controller
         };
     }
 
+    [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Index()
     {
         var shopGuid = GetCurrentShopGuid();
         var tab = GetCurrentTabOrDefault();
 
         var viewModel = shopGuid != null
-            ? await GetIndexViewModelAsync((Guid)shopGuid, (TabType)tab)
+            ? await GetIndexViewModelAsync((Guid)shopGuid, tab)
             : await GetDefaultIndexViewModelAsync();
 
         return View("~/Views/Home/Index.cshtml", viewModel);
     }
 
     [Route("Home/Index/shopGuid={shopGuid}&tab={tab}")]
+    [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Index(Guid shopGuid, int tab)
     {
         SetCurrentShopGuid(shopGuid);
         SetCurrentTab((TabType)tab);
 
-        var viewModel = await GetIndexViewModelAsync(shopGuid, (TabType)tab);
+        try
+        {
+            var viewModel = await GetIndexViewModelAsync(shopGuid, (TabType)tab);
 
-        return View(viewModel);
+            return viewModel != null ? View(viewModel) : BadRequest();
+        }
+        catch(InvalidOperationException e)
+        {
+            _logger.LogError(e, $"Index({shopGuid},{tab})");
+            return await Task.FromResult(BadRequest());
+        }
     }
 
     [HttpPost]
-    public bool SaveTabSettings(Guid shopGuid, int tab, string json)
+    [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult SaveTabSettings(Guid shopGuid, int tab, string json)
     {
-        if (string.IsNullOrEmpty(json)) return false;
+        if (string.IsNullOrEmpty(json)) return BadRequest(json);
 
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return false;
+            return NotFound(shopGuid);
 
         var settings = shopImport.GetSettings((TabType)tab, true);
         var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
         settings.Update(modelFromJson);       
 
-        return true;
+        return Ok();
     }
 
     public IActionResult Privacy()
@@ -185,109 +201,7 @@ public class HomeController : Controller
     {
         return PartialView();
     }
-
-
-    [HttpPost]
-    public bool SaveShopSettings(Guid shopGuid, int shopSettingType, string json)
-    {
-        if (string.IsNullOrEmpty(json)) return false;
-
-        ShopSettingsModel? shopSettings = json.GetShopSettingsFromJson((ShopSettingType)shopSettingType)
-            ?? throw new InvalidOperationException("Invalid json for shop settings");
-
-        var shopSettingsModel =_importFacade.GetShopSettings(shopGuid, shopSettings.ShopSettingType)
-            ?? _importFacade.CreateShopImportSettings(shopSettings.ShopSettingType, shopGuid);
-
-        shopSettingsModel?.Update(shopSettings);
-
-        return true;
-    }
-
-    [HttpPost]
-    public bool SetShopSettings(Guid shopGuid, int shopSettingType)
-    {
-        if ((ShopSettingType)shopSettingType == ShopSettingType.Service)
-            throw new InvalidOperationException("Invalid json for shop settings");
-
-        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return false;
-
-        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
-
-        return shopImport != null;
-    }
-
-    private IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
-    {
-        var serviceSettingsModel = _importFacade.GetServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName)
-            ?? _importFacade.CreateServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName);
-
-        return serviceSettingsModel == null
-            ? throw new InvalidDataException($"No data for shop {shopGuid} and settings {shopSettingsGuid}")
-            : (IActionResult)PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
-    }
-
-    [HttpPost]
-    public IActionResult ImportServiceSettings(Guid shopGuid, Guid shopSettingsGuid)
-    {
-        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.ImportService));
-    }
-
-
-    [HttpPost]
-    public IActionResult BrowserDataLoaderSettings(Guid shopGuid, Guid shopSettingsGuid)
-    {
-        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.BrowserDataLoader));
-    }
-
-    [HttpPost]
-    public IActionResult WebLoaderSettings(Guid shopGuid, Guid shopSettingsGuid)
-    {
-        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.WebLoader));
-    }
-
-    [HttpPost]
-    public bool SaveServiceSettings(ServiceSettingsModel data)
-    {
-        if (data == null || !_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
-            return false;
-
-        var result = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid)?
-                .UpdateServiceSettings(data);
-
-        return result == true;
-    }
-
-    [HttpPost]
-    public async Task<bool> SaveProductShopSettingsToDb(ProductShopSettingsModel productShopSettings)
-    {
-        if (productShopSettings == null) return false;
-
-        if (!_importFacade.TryGetShopImport(productShopSettings.ShopGuid, out var shopImport) || shopImport == null)
-            return false;
-
-        shopImport.ShopSettingTabs.ShopProductsSettings.Update(productShopSettings);
-
-        await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopProductsSettings);
-
-        return true;
-    }
-
-    [HttpPost]
-    public async Task<bool> SaveCategoryShopSettingsToDb(CategoryShopSettingsModel categoryShopSettings)
-    {
-        if (categoryShopSettings == null) return false;
-
-        if (!_importFacade.TryGetShopImport(categoryShopSettings.ShopGuid, out var shopImport) || shopImport == null)
-            return false;
-
-        shopImport.ShopSettingTabs.ShopCategoriesSettings.Update(categoryShopSettings);
-
-        await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopCategoriesSettings);
-
-        return true;
-    }
-
+   
     public IActionResult ImportProducts()
     {
         return PartialView();
