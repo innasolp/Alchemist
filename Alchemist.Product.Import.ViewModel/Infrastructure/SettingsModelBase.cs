@@ -27,12 +27,15 @@ public abstract class SettingsModelBase
 
     public int Id { get; set; }
 
-    public int ShopId { get; set; }
-
     public string Name { get; set; }
 
     public virtual void Update(SettingsModelBase source)
     {
         Name = source.Name;
+    }
+
+    public override string ToString()
+    {
+        return $"{nameof(Id)}:{Id};{nameof(Name)}:{Name};{nameof(Guid)}:{Guid};{nameof(ShopGuid)}:{ShopGuid};{nameof(Tab)}:{Tab}";
     }
 }

@@ -46,7 +46,9 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         if (file == null || file.Length == 0)
             return null;
 
-        using var stream = file.OpenReadStream();
+        using var stream = new MemoryStream();
+        await file.CopyToAsync(stream);
+        stream.Position = 0;
 
         var uploadedShopSettings = await stream.GetShopSettingsFromJsonAsync((ShopSettingType)shopSettingsType);
 

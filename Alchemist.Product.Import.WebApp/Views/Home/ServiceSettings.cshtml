@@ -10,9 +10,7 @@
 <form id="modalForm">
     <input type="hidden" name="ShopGuid" value="@Model.ShopGuid" />
     <input type="hidden" name="Id" value="@Model.Guid" />
-    <input type="hidden" name="ParentSettingsId" value="@Model.ParentSettingsId" />
     <input type="hidden" name="ShopSettingType" value="@((int)Model.ShopSettingType)" />
-    <input type="hidden" name="ShopId" value="@Model.ShopId" />
     <input type="hidden" name="Guid" value="@Model.Guid" />
     <input type="hidden" name="ShopSettingsGuid" value="@Model.ShopSettingsGuid" />
     <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
@@ -45,7 +43,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                        onclick="save('#modalForm','/Home/SaveServiceSettings', getFormData($('#modalForm')), (data)=>{ if(!data) return; setValIfValid('#@Model.Name',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
+                        onclick="save('#modalForm','/ShopSettings/SaveServiceSettings', getFormData($('#modalForm')), (data)=>{ if(!data) return; setValIfValid('#@Model.Name',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
                     Save
                 </button>
             </div>

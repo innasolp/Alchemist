@@ -53,7 +53,7 @@ async function saveShopSettings(formSelector, callback = null) {
     var json = formDataToJson(formData);
     formData.append('json', json);
 
-    await fetchFormData(formData, '/Home/SaveShopSettings', 'post', callback);
+    await fetchFormData(formData, '/ShopSettings/SaveShopSettings', 'post', callback);
 }
 
 async function setShopSettingsFromJson(formSelector, fileInputName, shopGuid, shopSettingsType) {

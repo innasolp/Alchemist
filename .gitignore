@@ -222,3 +222,7 @@
 /Alchemist.Import.Settings.Builder/bin/Debug/net8.0
 /Alchemist.Import.Settings.Builders.Tests/bin/Debug/net8.0
 /Alchemist.Import.Settings.Builders.Tests/obj
+/Alchemist.Product.Import.Model.Test/bin/Debug/net8.0
+/Alchemist.Product.Import.Model.Test/obj
+/Alchemist.Product.Import.WebApp.Test/bin/Debug/net8.0
+/Alchemist.Product.Import.WebApp.Test/obj

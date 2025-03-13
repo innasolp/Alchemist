@@ -12,6 +12,15 @@ namespace Alchemist.Product.Import.Model;
 
 public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDeserialized
 {
+    public override string ToString()
+    {
+        return @$"{nameof(ServiceSettingsModel)}:{nameof(Id)}:{Id};{nameof(Name)}:{Name};{nameof(Guid)}:{Guid};{nameof(ShopGuid)}:{ShopGuid};{nameof(ShopSettingsGuid)}:{ShopSettingsGuid};
+            {nameof(ServiceTypeName)}:{ServiceTypeName};
+            {nameof(ServiceProviderPath)}:{ServiceProviderPath};
+            {nameof(AssemblyPath)}:{AssemblyPath};
+            {nameof(ImplementationTypeName)}:{ImplementationTypeName}";
+    }
+
     public Guid Guid { get; set; } = Guid.NewGuid();
 
     public int Id { get; set; }
@@ -46,13 +55,9 @@ public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDe
     [JsonIgnore]
     public JsonObject? Value { get; set; }
 
-    public int? ParentSettingsId { get; set; }
-
     public string? FileName { get; set; }
    
     public string? StringValue { get; set; }
-
-    public int ShopId { get; set; }
 
     [JsonPropertyName("Value")]
     public JsonElement? ValueObj { get; set; }
@@ -62,6 +67,8 @@ public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDe
             Value = value != null ? JsonSerializer.Deserialize<JsonObject>(value) : null;
         }
     }
+    int ISettings.ShopId { get ; set; }
+    int? ISettings.ParentSettingsId { get; set; }
 
     public void Update(ServiceSettingsModel source)
     {
