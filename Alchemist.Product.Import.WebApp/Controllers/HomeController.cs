@@ -132,6 +132,8 @@ public class HomeController : Controller
         };
     }
 
+    [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Index()
     {
         var shopGuid = GetCurrentShopGuid();
@@ -145,6 +147,9 @@ public class HomeController : Controller
     }
 
     [Route("Home/Index/shopGuid={shopGuid}&tab={tab}")]
+    [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Index(Guid shopGuid, int tab)
     {
         SetCurrentShopGuid(shopGuid);
@@ -164,18 +169,21 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    public bool SaveTabSettings(Guid shopGuid, int tab, string json)
+    [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult SaveTabSettings(Guid shopGuid, int tab, string json)
     {
-        if (string.IsNullOrEmpty(json)) return false;
+        if (string.IsNullOrEmpty(json)) return BadRequest(json);
 
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return false;
+            return NotFound(shopGuid);
 
         var settings = shopImport.GetSettings((TabType)tab, true);
         var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
         settings.Update(modelFromJson);       
 
-        return true;
+        return Ok();
     }
 
     public IActionResult Privacy()

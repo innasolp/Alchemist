@@ -24,10 +24,10 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 
         if (!_shopImports.TryGetValue(shopGuid, out var shopImportModel)
               || shopImportModel == null)
-            throw new InvalidOperationException($"Shop with guid {shopGuid} not found.");
+            return false;
 
         if (shopImportModel.ShopSettingTabs == null)
-            throw new InvalidDataException($"ShopSettingTabs for shop {shopGuid} is null.");
+            return false;
 
         shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType);
         return shopSettings != null;
@@ -39,10 +39,10 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 
         if (!_shopImports.TryGetValue(shopGuid, out var shopImportModel)
               || shopImportModel == null)
-            throw new InvalidOperationException($"Shop with guid {shopGuid} not found.");
+            return false;
 
         if (shopImportModel.ShopSettingTabs == null)
-            throw new InvalidDataException($"ShopSettingTabs for shop {shopGuid} is null.");
+            return false;
 
         shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByGuid(shopSettingsGuid);
         return shopSettings != null;
@@ -53,7 +53,7 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         serviceSettings = null;
 
         if (!TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
-            throw new InvalidOperationException($"Settings with guid {shopSettingsGuid} not found.");
+            return false;
 
         serviceSettings = shopSettings.GetServiceSettings(serviceSettingsName);
         return serviceSettings != null;

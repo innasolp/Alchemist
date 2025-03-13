@@ -41,49 +41,62 @@ public class FileUploadController(IImportFacade importFacade) : Controller
     }
 
     [HttpPost]
-    public async Task<ShopSettingsModel?> UploadShopSettings(Guid shopGuid, int shopSettingsType, IFormFile file)
+    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadShopSettings(Guid shopGuid, int shopSettingsType, IFormFile file)
     {
         if (file == null || file.Length == 0)
-            return null;
+            return BadRequest();
 
+        //using var stream = file.OpenReadStream();
         using var stream = new MemoryStream();
         await file.CopyToAsync(stream);
         stream.Position = 0;
 
         var uploadedShopSettings = await stream.GetShopSettingsFromJsonAsync((ShopSettingType)shopSettingsType);
+        if (uploadedShopSettings == null)
+            return BadRequest(shopSettingsType);
 
-        if (uploadedShopSettings != null && _importFacade.TryGetShopSettings(shopGuid, (ShopSettingType)shopSettingsType, out var shopSettings))         
+        if (_importFacade.TryGetShopSettings(shopGuid, (ShopSettingType)shopSettingsType, out var shopSettings))         
         {
             shopSettings?.Update(uploadedShopSettings, true);
             shopSettings.FileName = file.FileName;
 
-            return shopSettings;
+            return Ok(shopSettings);
         }
 
-        return null;
+        return NotFound(shopGuid);
     }
 
     [HttpPost]
-    public async Task<ServiceSettingsModel?> UploadServiceSettings(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
+    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadServiceSettings(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
     {
         //todo for net.9
         //JsonSerializerOptions options = new()
         //{
         //    RespectRequiredConstructorParameters = true
         //};
+        if (file == null || file.Length == 0)
+            return BadRequest();
 
         var uplodedServiceSettings = await GetFromJsonAsync<ServiceSettingsModel>(file);
-        
-        if (uplodedServiceSettings != null && _importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
+        if (uplodedServiceSettings == null)
+            return BadRequest();
+
+        if (_importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
         {
             uplodedServiceSettings.Name = serviceSettingsName;
             uplodedServiceSettings.FileName = file.FileName;            
 
             shopSettings?.UpdateServiceSettings(uplodedServiceSettings);
 
-            return uplodedServiceSettings;
+            return Ok(uplodedServiceSettings);
         }
 
-        return null;
+        return NotFound(shopGuid);
     }
 }
