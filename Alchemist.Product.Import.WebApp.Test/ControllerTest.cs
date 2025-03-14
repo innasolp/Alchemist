@@ -62,6 +62,15 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test
             return await CommonActions.GetIndexActionViewModelAsync(homeController);
         }
 
+        protected async Task<IndexViewModel> GetIndexActionViewModelAfterUpdateShopsAsync()
+        {
+            var homeController = CreateHomeController();
+            var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+            Assert.True(Assert.IsType<bool>(actionResult.Value));
+
+            return await CommonActions.GetIndexActionViewModelAsync(homeController);
+        }
+
         protected ControllerTest()
         {
             _importFacade = new ImportFacade(_shopDataServiceMock.Object);

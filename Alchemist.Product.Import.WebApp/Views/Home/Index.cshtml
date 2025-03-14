@@ -4,7 +4,6 @@
 
 @{
     ViewData["Title"] = "Home Page";
-    var shopGuid = Model.SelectedShopImport.ShopGuid;
     var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
     var selectedTabName = (ViewData["Tab"] is TabType tabType2) ? ViewHelper.TabNames.FirstOrDefault(d => d.Key == tabType2) : ViewHelper.TabViewNames.FirstOrDefault();
 }
@@ -19,25 +18,15 @@
     <script src="~/js/settings.js"></script>
 
     <script src="~/js/utils.js"></script>
+
+    <script>
+        updateShops();
+    </script>
 }
 
 <div class="flex">
-    <div>
-        <div class="left_menu">
-            <h1 class="display-7 menu_item">Shops</h1>
-        </div>
-        <ul class="left-menu-ul" id="shopsList">
-            @foreach (var shop in Model.Shops)
-            {
-                <form name="shopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
-                      asp-route-shopGuid="@shop.Guid"
-                      asp-route-tab="@((int)selectedTabViewName.Key)">
-                <li class="@CssHelper.GetLiStyle(shop.Name,Model.SelectedShopImport.Shop.Name)">
-                    <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.submit();}); ">@shop.Name</a>
-                </li>
-                </form>
-            }
-        </ul>
+    <div>        
+        @await Html.PartialAsync($"~/Views/Home/ShopList.cshtml", Model.Shops)
     </div>
     <div style="width:100%">
         <div class="menu" id="menuDiv">
@@ -45,7 +34,7 @@
             {
                 <div class="@CssHelper.GetMenuItemStyle(tab.Key,selectedTabName.Key)">
                     <form method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
-                          asp-route-shopGuid="@Model.SelectedShopImport.ShopGuid"
+                          asp-route-shopGuid="@Model.SelectedShopImport?.ShopGuid"
                           asp-route-tab="@((int)tab.Key)">
                         <label class="display-7  menu_header" onclick="saveTab($('#settingsForm'), ()=>{ this.parentElement.submit();})">@tab.Value</label>
                     </form>
@@ -53,7 +42,7 @@
             }
         </div>
         <div id="settingsDiv">
-            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel)
+            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel ?? selectedTabName.Key.CreateDefaultTabModel() )
         </div>
     </div>
 </div>

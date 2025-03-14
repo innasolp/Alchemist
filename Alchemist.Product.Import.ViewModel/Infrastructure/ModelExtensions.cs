@@ -45,6 +45,17 @@ public static class ModelExtensions
         };
     }
 
+    public static SettingsModelBase? CreateDefaultTabModel(this TabType tab)
+    {
+        return tab switch
+        {
+            TabType.Shop => new ShopSettingTabsModel(),
+            TabType.Products => new ProductsImportSettingsModel(),
+            TabType.Categories => new CategoriesImportSettingsModel(),
+            _ => throw new InvalidOperationException($"No tab type with value {tab}"),
+        };
+    }
+
     public static ShopSettingsModel CreateShopSettings(this Guid shopGuid, ShopSettingType settingType)
     {
         return settingType == ShopSettingType.Product

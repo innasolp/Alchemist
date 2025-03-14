@@ -90,4 +90,9 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 
         return await Task.FromResult(_shopImports.Values.ToList());
     }
+
+    public List<ShopImportModel> GetShops()
+    {
+        return _shopImports.Select(s => s.Value).ToList();
+    }
 }

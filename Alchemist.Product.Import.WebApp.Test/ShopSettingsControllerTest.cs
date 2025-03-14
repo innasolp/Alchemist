@@ -29,7 +29,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     [Fact]
     public async Task SaveProductShopSettingsFieldsOnSaveShopSettingsActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var shopSettingController = CreateShopSettingsController();
 
@@ -100,7 +100,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 
     private async Task SetServiceSettingsActionAsync(Func<ShopSettingsController, Guid, Guid, IActionResult> getServiceAction, string serviceName)
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true);
 
@@ -116,7 +116,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     [Fact]
     public async Task SaveServiceFieldsOnSaveServiceSettingsActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var shopSettingController = CreateShopSettingsController();
 
@@ -138,7 +138,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     [Fact]
     public async Task SaveProductShopSettingsToDbActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         await SaveShopSettingsToDbActionAsync<ProductShopSettingsModel>(indexViewModel.SelectedShopImport.ShopGuid,
             ShopSettingType.Product,
@@ -150,7 +150,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     public async Task SaveCategoryShopSettingsToDbActionAsync()
     {
         var homeController = CreateHomeController();
-        var indexViewModel = await CommonActions.GetIndexActionViewModelAsync(homeController);
+        var indexViewModel = await CommonActions.GetIndexActionViewModelAfterUpdateShopsAsync(homeController);
 
         var shopSettingController = CreateShopSettingsController();
         shopSettingController.SetShopSettings(indexViewModel.SelectedShopImport.ShopGuid, (int)ShopSettingType.Category);
@@ -197,7 +197,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 
     private async Task IsServiceActionWithRandomShopGuidNotFoundAsync(Func<ShopSettingsController, Guid, Guid,IActionResult > getServiceSettingsAction)
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true);
 
@@ -213,7 +213,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 
     private async Task IsServiceActionWithRandomShopSettingsGuidNotFoundAsync(Func<ShopSettingsController, Guid, Guid, IActionResult> getServiceSettingsAction)
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true);
 

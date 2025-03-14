@@ -7,9 +7,9 @@ public class IndexViewModel
 {
     public List<ShopModel> Shops { get; set; }
 
-    public ShopImportModel SelectedShopImport { get; set; }
+    public ShopImportModel? SelectedShopImport { get; set; }
 
     public TabType SelectedTab { get; set; }
 
-    public SettingsModelBase SelectedTabModel { get; set; }
+    public SettingsModelBase? SelectedTabModel { get; set; }
 }

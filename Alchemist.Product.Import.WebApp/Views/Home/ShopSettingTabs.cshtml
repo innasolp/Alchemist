@@ -1,5 +1,6 @@
 ﻿@using Alchemist.Product.Import.Model.Infrastructure
 @using Alchemist.Product.Interfaces
+@using Alchemist.Product.Import.Model
 @using System.Text.Json
 @model Alchemist.Product.Import.Model.ShopSettingTabsModel
 
@@ -27,7 +28,7 @@
         </div>
     </div>
     <div>
-        @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings)
+        @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings ?? new ProductShopSettingsModel())
     </div>
 </div>
 
