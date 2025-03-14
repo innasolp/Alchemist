@@ -48,18 +48,6 @@ public class HomeController : Controller
         if (guid != null) ViewData["ShopGuid"] = guid;
     }
 
-    private Guid? GetCurrentShopGuidOrDefault(List<ShopImportModel> shopImports)
-    {
-        var shopGuid = GetCurrentShopGuid();
-        if (shopGuid == null)
-        {
-            shopGuid = shopImports.FirstOrDefault()?.ShopGuid;
-            SetCurrentShopGuid(shopGuid);
-        }
-
-        return shopGuid;
-    }
-
     private TabType? GetCurrentTab()
     {
         return ViewData["Tab"] is TabType tab ? tab : (TabType?)null;
@@ -67,7 +55,7 @@ public class HomeController : Controller
 
     private void SetCurrentTab(TabType? tab)
     {
-        if(tab != null) ViewData["Tab"] = tab;
+        if (tab != null) ViewData["Tab"] = tab;
     }
 
     private TabType GetCurrentTabOrDefault()
@@ -81,26 +69,30 @@ public class HomeController : Controller
         return (TabType)tab;
     }
 
-    private async Task<IndexViewModel> GetIndexViewModelAsync(Guid shopGuid, TabType tab)
+    private async Task<IndexViewModel?> GetDefaultIndexViewModelAsync()
     {
-        var shopImports = await _importFacade.LoadShops();
-
-        return await GetIndexViewModelAsync(shopImports, shopGuid, tab);
-    }
-
-    private async Task<IndexViewModel> GetDefaultIndexViewModelAsync()
-    {
-        var shopImports = await _importFacade.LoadShops();
-        var shopGuid = GetCurrentShopGuidOrDefault(shopImports);
+        var shopGuid = GetCurrentShopGuid();
         var tab = GetCurrentTabOrDefault();
 
-        return await GetIndexViewModelAsync(shopImports, (Guid)shopGuid, tab);        
+        return await GetIndexViewModelAsync(shopGuid, tab);
     }
 
-    private async Task<IndexViewModel> GetIndexViewModelAsync(IEnumerable<ShopImportModel> shopImports, Guid shopGuid, TabType tab)
+    private async Task<IndexViewModel?> GetIndexViewModelAsync(Guid? shopGuid, TabType tab)
     {
-        var shops = shopImports.Select(s => s.Shop).ToList();
-        if(!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
+        var shopImports = _importFacade.GetShops();
+
+        if (shopImports.Count == 0)
+            return new IndexViewModel
+            {
+                Shops = [],
+                SelectedTab = tab
+            };
+
+        ShopImportModel shopImport;
+
+        if (shopGuid == null)
+            shopImport = shopImports.First();
+        else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
             return await Task.FromResult(default(IndexViewModel));
 
         var currentSettings = shopImport.GetSettings(tab);
@@ -110,18 +102,20 @@ public class HomeController : Controller
             shopImport.SetSettings(tab, currentSettings);
         }
 
-        if (tab == TabType.Shop && 
-            shopImport.GetSettings(tab,true) == null)
+        if (tab == TabType.Shop &&
+            shopImport.GetSettings(tab, true) == null)
         {
             var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
             if (settings != null)
                 shopImport.SetSettings(tab, settings);
             else
             {
-                var currentShopSettings = shopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
+                var currentShopSettings = shopImport.ShopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
                 shopImport.SetSettings(tab, currentShopSettings);
             }
         }
+
+        var shops = shopImports.Select(s => s.Shop).ToList();
 
         return new IndexViewModel
         {
@@ -143,6 +137,9 @@ public class HomeController : Controller
             ? await GetIndexViewModelAsync((Guid)shopGuid, tab)
             : await GetDefaultIndexViewModelAsync();
 
+        if (viewModel.SelectedShopImport != null)
+            SetCurrentShopGuid(viewModel.SelectedShopImport.ShopGuid);
+
         return View("~/Views/Home/Index.cshtml", viewModel);
     }
 
@@ -152,12 +149,12 @@ public class HomeController : Controller
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Index(Guid shopGuid, int tab)
     {
-        SetCurrentShopGuid(shopGuid);
-        SetCurrentTab((TabType)tab);
-
         try
         {
             var viewModel = await GetIndexViewModelAsync(shopGuid, (TabType)tab);
+
+            SetCurrentShopGuid(shopGuid);
+            SetCurrentTab((TabType)tab);
 
             return viewModel != null ? View(viewModel) : BadRequest();
         }
@@ -181,9 +178,26 @@ public class HomeController : Controller
 
         var settings = shopImport.GetSettings((TabType)tab, true);
         var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
-        settings.Update(modelFromJson);       
+        settings.Update(modelFromJson);
 
         return Ok();
+    }
+
+    [HttpPost]
+    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateShops()
+    {
+        try
+        {
+            return _importFacade.GetShops().Count == 0 && (await _importFacade.LoadShops()).Count != 0 ?
+                Ok(true) :
+                Ok(false);
+        }
+        catch (Exception e)
+        {
+            return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
+        }
     }
 
     public IActionResult Privacy()
@@ -201,7 +215,7 @@ public class HomeController : Controller
     {
         return PartialView();
     }
-   
+
     public IActionResult ImportProducts()
     {
         return PartialView();

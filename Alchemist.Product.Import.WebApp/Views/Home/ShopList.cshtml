@@ -1,0 +1,26 @@
+﻿@using Alchemist.Product.Import.Model.Infrastructure;
+
+@model IEnumerable<Alchemist.Product.Import.Model.ShopModel>
+
+@{
+    var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
+    Guid? shopGuid = (ViewData["ShopGuid"] is Guid guid) ? guid : null;
+}
+
+<div>
+    <div class="left_menu">
+        <h1 class="display-7 menu_item">Shops</h1>
+    </div>
+    <ul class="left-menu-ul" id="shopsList">
+        @foreach (var shop in Model)
+        {
+            <form name="shopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
+                  asp-route-shopGuid="@shop.Guid"
+                  asp-route-tab="@((int)selectedTabViewName.Key)">
+            <li class="@CssHelper.GetLiStyle(shop.Guid.ToString(), shopGuid?.ToString() ?? "")">
+                <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.submit();}); ">@shop.Name</a>
+            </li>
+            </form>
+        }
+    </ul>
+</div>

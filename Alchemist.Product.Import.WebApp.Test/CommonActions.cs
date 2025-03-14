@@ -24,12 +24,20 @@ public static class CommonActions
         return Assert.IsType<ViewResult>(actionResult);
     }
 
+    public static async Task<IndexViewModel> GetIndexActionViewModelAfterUpdateShopsAsync(HomeController homeController)
+    {
+        var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        Assert.True(Assert.IsType<bool>(actionResult.Value));
+
+        return await GetIndexActionViewModelAsync(homeController);
+    }
+
     public static async Task<TShopSettings> ChangeShopSettingsAsync<TShopSettings>(HomeController homeController,
         ShopSettingsController shopSettingController, 
         ShopSettingType shopSettingType)
         where TShopSettings : ShopSettingsModel, new()
     {
-        var indexViewModel = await GetIndexActionViewModelAsync(homeController);
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync(homeController);
 
         var productSettings = Assert.IsType<ProductShopSettingsModel>(indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true));
 

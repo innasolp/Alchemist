@@ -42,7 +42,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     [Fact]
     public async Task UploadProductShopSettingsActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var shopSettings = Assert.IsType<ProductShopSettingsModel>(indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true));
 
@@ -113,7 +113,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
 
     private async Task UploadServiceOnUploadServiceSettingsActionAsync(string serviceName, Func<ShopSettingsModel, ServiceSettingsModel> getSetvice, string fileName)
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
+        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true) as ShopSettingsModel;
 
