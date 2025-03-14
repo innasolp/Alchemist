@@ -6,12 +6,17 @@ public interface IShopDataService
 {
     Task<List<IShop>> GetShops();
     Task<IShop> CreateShop(IShop shop);
+
+    Task<IShop> UpdateShop(IShop shop);
+
     Task<IShop?> GetShop(int id);
     Task<IShopUrl?> GetShopUrl(int shopId);
 
-    Task<IShopUrl?> CreateShopUrl(IShopUrl shopUrl);
+    Task<IShopUrl> CreateShopUrl(IShopUrl shopUrl);
 
-    Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory);
+    Task<IShopUrl> UpdatehopUrl(IShopUrl shopUrl);
+
+    Task<IShopCategory> AddShopCategory(IShopCategory shopCategory);
 
     Task<List<IShopCategory>> GetShopCategories(int shopId);
 

@@ -65,7 +65,7 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
     }
 
 
-    [HttpPost(Name = nameof(CreateShop))]
+    [HttpPut(Name = nameof(CreateShop))]
     public async Task<Results<BadRequest<Shop>, Created<Shop>>> CreateShop(Shop shop)
     {
         if (shop == null || string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Url))
@@ -77,6 +77,18 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
 
         var location = Url.Action(nameof(CreateShop), new { id = newShop.Id }) ?? $"/{newShop.Id}";
         return TypedResults.Created(location, newShop);
+    }
+
+    [HttpPost("Update", Name = nameof(UpdateShop))]
+    public async Task<Results<BadRequest<Shop>, Accepted<Shop>, StatusCodeHttpResult>> UpdateShop(Shop shop)
+    {
+        if (shop == null || string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Url))
+            return TypedResults.BadRequest(shop);
+
+        var updatedShop = (await _alchemyRepository.UpdateShop(shop)).To<Shop>();        
+
+        var location = Url.Action(nameof(UpdateShop), new { id = updatedShop.Id }) ?? $"/{updatedShop.Id}";
+        return TypedResults.Accepted(location, updatedShop);
     }
 
     [HttpPost("shopUrl", Name = nameof(AddShopUrl))]
@@ -91,6 +103,19 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
 
         var location = Url.Action(nameof(AddShopUrl), new { id = newShopUrl.ShopId }) ?? $"/{newShopUrl.ShopId}";
         return TypedResults.Created(location, newShopUrl);
+    }
+
+    [HttpPost("shopUrl/Update", Name = nameof(UpdateShopUrl))]
+    public async Task<Results<BadRequest<ShopUrl>, Accepted<ShopUrl>, StatusCodeHttpResult>> UpdateShopUrl(ShopUrl shopUrl)
+    {
+        if (shopUrl == null || shopUrl.ShopId == 0 ||
+            string.IsNullOrEmpty(shopUrl.ProductUrl) || string.IsNullOrEmpty(shopUrl.CategoryUrl))
+            return TypedResults.BadRequest(shopUrl);
+
+        var updatedShopUrl = (await _alchemyRepository.UpdateShopUrl(shopUrl)).To<ShopUrl>();
+
+        var location = Url.Action(nameof(UpdateShopUrl), new { id = updatedShopUrl.ShopId }) ?? $"/{updatedShopUrl.ShopId}";
+        return TypedResults.Accepted(location, updatedShopUrl);
     }
 
     [HttpPost("shopCategory", Name = nameof(AddShopCategory))]

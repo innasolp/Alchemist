@@ -28,7 +28,7 @@ public class ShopApiClient : IShopDataService
         return await response.Content.ReadFromJsonAsync<ShopCategory>();
     }
 
-    public async Task<IShop?> CreateShop(IShop shop)
+    public async Task<IShop> CreateShop(IShop shop)
     {
         var response = await _httpClient.PostAsJsonAsync($"api/Shop", shop.To<Shop>());
         response.EnsureSuccessStatusCode();
@@ -105,5 +105,19 @@ public class ShopApiClient : IShopDataService
             return await Task.FromResult(default(ShopUrl));
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ShopUrl?>();
+    }
+
+    public async Task<IShopUrl> UpdatehopUrl(IShopUrl shopUrl)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/Shop/shopUrl/Update", shopUrl.To<ShopUrl>());
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ShopUrl>();
+    }
+
+    public async Task<IShop> UpdateShop(IShop shop)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/Shop/Update", shop.To<Shop>());
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<Shop>();
     }
 }
