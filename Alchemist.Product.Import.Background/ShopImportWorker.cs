@@ -40,7 +40,7 @@ public class ShopImportWorker : BackgroundService
         _itemMessageSender = itemMessageSender;
         _productDataHandler = productDataHandler;
 
-        _shopProductImportServices = new List<IShopProductImportService>(shopProductImportServices);
+        _shopProductImportServices = [.. shopProductImportServices];
         _shopProductImportServices.ForEach(s => s.ItemHandled += ServiceItemHandledAsync);
 
         _messageReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);
@@ -64,7 +64,7 @@ public class ShopImportWorker : BackgroundService
     {
         _categoryDataHandler = categoryDataHandler;
 
-        _shopCategoryImportServices = new List<IShopCategoryImportService>(shopCategoryImportServices);
+        _shopCategoryImportServices = [.. shopCategoryImportServices];
         _shopCategoryImportServices.ForEach(s => s.NewCategoryLoad += NewCategoryLoadAsync);
     }
 
@@ -109,7 +109,7 @@ public class ShopImportWorker : BackgroundService
 
     private void OnShopCreated(Shop shop)
     {
-        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.ShopName.ToUpper() == shop.Name.ToUpper());
+        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.ShopName.Equals(shop.Name, StringComparison.CurrentCultureIgnoreCase));
         if (service != null)
             service.ShopModel.ShopId = shop.Id;
     }

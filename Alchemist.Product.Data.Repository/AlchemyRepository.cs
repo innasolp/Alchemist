@@ -344,4 +344,20 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     {
         await Context.DisposeAsync();
     }
+
+    public async Task<IShop> UpdateShop(IShop shop)
+    {
+        var shopEntity = shop.To<Shop>();
+        var updated = Context.Shops.Update(shopEntity);
+        var savedCount = await Context.SaveChangesAsync();
+        return updated.Entity;
+    }
+
+    public async Task<IShopUrl> UpdateShopUrl(IShopUrl shopUrl)
+    {
+        var shopUrlEntity = shopUrl.To<ShopUrl>();
+        var updated = Context.ShopUrls.Update(shopUrlEntity);
+        await Context.SaveChangesAsync();
+        return updated.Entity;
+    }
 }
