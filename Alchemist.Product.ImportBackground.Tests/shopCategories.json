@@ -1,6 +1,7 @@
  [
   {
     "Name": "OzonCategories",
+    "ShopName": "Ozon",
     "Url": "https://www.ozon.ru",
     "RequestHeaders": {
       "Value": {
@@ -112,6 +113,7 @@
 
   {
     "Name": "GoldAppleCategories",
+    "ShopName": "GoldApple",
     "Url": "https://goldapple.ru/front/api/catalog/navigation",
     "RequestHeaders": {
       "Value": {

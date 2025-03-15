@@ -1,5 +1,5 @@
-using Alchemist.Import.Settings.Model;
-using Json.Extensions;
+using Alchemist.Import.Settings.Builders;
+using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Product.ImportBackground.Tests;
 
@@ -10,7 +10,9 @@ public class BuildImportServicesFromJsonTest:BuildImportServiceTest
 
     protected override async Task SetShopSettings()
     {
-        _shopCategoriesSettings = await _shopCategoriesJsonFile.ReadFromJsonFileAsync<CategoryShopImportSettings[]>();// "ShopCategories");
-        _shopProductsSettings = await _shopProductsJsonFile.ReadFromJsonFileAsync<ProductShopImportSettings[]>();// "ShopProducts");        
+        var shopSettingsJsonBuilder = new ShopSettingsJsonBuilder(_shopProductsJsonFile, _shopCategoriesJsonFile);
+        var builder = new HostApplicationBuilder();
+        var host = builder.Build();
+        _shopImportData = await shopSettingsJsonBuilder.Build(host);
     }
 }

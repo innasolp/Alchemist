@@ -4,9 +4,7 @@ namespace Alchemist.Import.Settings.Interfaces;
 
 public interface IShopImportSettings: ISettings
 {    
-    string Name { get; set; }
-
-    string? Caption { get; set; }   
+    string Name { get; set; }   
 
     IImportServiceSettings ImportService { get; set; }
 

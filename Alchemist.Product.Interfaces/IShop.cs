@@ -7,4 +7,6 @@ public interface IShop
     public string Name { get; set; }
 
     public string Url { get; set; }
+
+    public string? Caption { get; set; }
 }
