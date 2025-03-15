@@ -114,7 +114,8 @@ public static class IntefaceExtensions
         {
             Id = @in.Id,
             Name = @in.Name,
-            Url = @in.Url
+            Url = @in.Url,
+            Caption = @in.Caption
         };
     }
 

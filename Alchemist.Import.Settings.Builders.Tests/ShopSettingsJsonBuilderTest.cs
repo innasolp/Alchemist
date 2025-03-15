@@ -1,5 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Import.Settings.Builders.Tests;
 
@@ -12,7 +11,7 @@ public class ShopSettingsJsonBuilderTest
         var shopSettingsJsonBuilder = new ShopSettingsJsonBuilder("shopProducts.json", "shopCategories.json");
         var host = builder.Build();
         var shopSettings = await shopSettingsJsonBuilder.Build(host);
-        Assert.NotNull(shopSettings);
+        Assert.NotEmpty(shopSettings);
         Assert.Equal(2, shopSettings.Count);
         Assert.Contains(shopSettings, s => s.ProductShopImportSettings != null);
         Assert.Contains(shopSettings, s => s.CategoryShopImportSettings != null);

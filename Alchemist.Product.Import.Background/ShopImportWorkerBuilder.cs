@@ -20,6 +20,7 @@ using Alchemist.Import.Settings.Interfaces;
 using Alchemist.DataService.Interfaces;
 using WebLoader.Common;
 using Alchemist.Import.Category.Interfaces;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -51,7 +52,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services;
     }
 
-    public IServiceCollection AddProductShopBySettings(IProductShopImportSettings productShopImportSettings)
+    public IServiceCollection AddProductShopBySettings(IShop shop, IShopUrl shopUrl, IProductShopImportSettings productShopImportSettings)
     {
         AddShopDependenciesBySettings(productShopImportSettings);
 
@@ -60,33 +61,33 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services.AddKeyedSingleton(typeof(IProductShopModel), productShopImportSettings.Name,
             new ProductShopModel
             {
-                ShopName = productShopImportSettings.Caption,
+                ShopName = shop.Caption,
                 ShopUrl = productShopImportSettings.Url,
-                ProductUrl = productShopImportSettings?.ProductUrl,
-                CategoryUrl = productShopImportSettings?.CategoryUrl,
-                PageProductCount = productShopImportSettings?.PageProductCount
+                ProductUrl = shopUrl.ProductUrl,
+                CategoryUrl = shopUrl.CategoryUrl,
+                PageProductCount = shopUrl.PageProductCount
             });
     }
 
-    public IServiceCollection AddShopProducts(IEnumerable<IProductShopImportSettings> productShopImportSettings)
+    public IServiceCollection AddShopProducts(IEnumerable<IShopImportData> shopImportData)
     {
-        foreach (var settings in productShopImportSettings)
+        foreach (var settings in shopImportData)
         {
-            AddProductShopBySettings(settings);
+            AddProductShopBySettings(settings.Shop, settings.ShopUrl, settings.ProductShopImportSettings);
         }
         return Builder.Services;
     }
 
-    public IServiceCollection AddShopCategories(IEnumerable<ICategoryShopImportSettings> categoryShopImportSettings)
+    public IServiceCollection AddShopCategories(IEnumerable<IShopImportData> shopImportData)
     {
-        foreach (var settings in categoryShopImportSettings)
+        foreach (var settings in shopImportData)
         {
-            AddCategoryShopBySettings(settings);
+            AddCategoryShopBySettings(settings.Shop, settings.CategoryShopImportSettings);
         }
         return Builder.Services;
     }
 
-    public IServiceCollection AddCategoryShopBySettings(ICategoryShopImportSettings categoryShopImportSettings)
+    public IServiceCollection AddCategoryShopBySettings(IShop shop, ICategoryShopImportSettings categoryShopImportSettings)
     {
         AddShopDependenciesBySettings(categoryShopImportSettings);
 
@@ -95,7 +96,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services.AddKeyedSingleton(typeof(IShopModel), categoryShopImportSettings.Name,
             new ShopModel
             {
-                ShopName = categoryShopImportSettings.Caption,
+                ShopName = shop.Caption,
                 ShopUrl = categoryShopImportSettings.Url
             });
     }
@@ -142,7 +143,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services.AddCategoriesDataHandler();
     }
 
-    public IServiceCollection AddPropertyValueInterceptorsLogging(IShopImportSettings[] shopSettings, string propertyName, Func<IShopImportSettings, object> getValue)
+    public IServiceCollection AddPropertyValueInterceptorsLogging(IEnumerable<IShopImportSettings> shopSettings, string propertyName, Func<IShopImportSettings, object> getValue)
     {
         foreach (var shop in shopSettings)
         {

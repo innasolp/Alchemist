@@ -6,7 +6,7 @@ using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Service;
 
-public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, RequestHeaders? requestHeaders)
+public abstract class ImportService(ILogger logger, IWebLoader webLoader, RequestHeaders? requestHeaders)
     : IImportService, IAsyncDisposable
 {
     public abstract string Name { get; }

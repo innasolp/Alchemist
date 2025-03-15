@@ -11,7 +11,6 @@ public class ShopSettingsAppBuilderTest
         var shopSettingsAppBuilder = new ShopSettingsAppBuilder(builder, "SettingsAPIHost", "RestAPIHost");
         var host = builder.Build();
         var shopSettings = await shopSettingsAppBuilder.Build(host);
-        Assert.NotNull(shopSettings);
         Assert.NotEmpty(shopSettings);
         Assert.True(shopSettings.Count(s=>s.ProductShopImportSettings != null) >= 2);
 

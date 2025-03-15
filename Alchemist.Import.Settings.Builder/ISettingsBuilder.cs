@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Alchemist.Import.Settings.Interfaces;
+using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Import.Settings.Builders;
 
 public interface ISettingsBuilder
 {
-    Task<List<ShopSettingsContainer>> Build(IHost host);
+    Task<List<IShopImportData>> Build(IHost host);
 }

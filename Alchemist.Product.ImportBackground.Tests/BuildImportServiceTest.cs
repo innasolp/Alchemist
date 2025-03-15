@@ -3,7 +3,6 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Service;
 using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Import.Background;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +13,7 @@ namespace Alchemist.Product.ImportBackground.Tests;
 
 public abstract class BuildImportServiceTest
 {
-    protected ICategoryShopImportSettings[] _shopCategoriesSettings;
-    protected IProductShopImportSettings[] _shopProductsSettings;
+    protected List<IShopImportData> _shopImportData;
 
     protected readonly HostApplicationBuilder _builder;
 
@@ -44,19 +42,22 @@ public abstract class BuildImportServiceTest
     {
         await SetShopSettings();
 
-        foreach (var shop in _shopProductsSettings)
+        var shopProductImportSettings = _shopImportData.Select(s => s.ProductShopImportSettings).ToList();
+        var shopCategoryImportSettings = _shopImportData.Select(s => s.CategoryShopImportSettings).ToList();
+
+        foreach (var shop in shopProductImportSettings)
             shop.SetAppPath(Utils.GetAppPath());
 
-        foreach (var shop in _shopCategoriesSettings)
+        foreach (var shop in shopCategoryImportSettings)
             shop.SetAppPath(Utils.GetAppPath());
 
-        _shopImportWorkerBuilder.AddShopProducts(_shopProductsSettings);
-        _shopImportWorkerBuilder.AddShopCategories(_shopCategoriesSettings);
+        _shopImportWorkerBuilder.AddShopProducts(_shopImportData);
+        _shopImportWorkerBuilder.AddShopCategories(_shopImportData);
 
         _shopImportWorkerBuilder.AddProductsHandler();
         _shopImportWorkerBuilder.AddCategoriesHandler();
 
-        _shopImportWorkerBuilder.AddPropertyValueInterceptorsLogging(_shopCategoriesSettings, "ClassName", (shopSetting) => shopSetting.Id);
+        _shopImportWorkerBuilder.AddPropertyValueInterceptorsLogging(shopCategoryImportSettings, "ClassName", (shopSetting) => shopSetting.Id);
 
         _builder.Services.AddHttpClient();
 
@@ -78,10 +79,12 @@ public abstract class BuildImportServiceTest
     {
         await SetShopSettings();
 
-        foreach (var shop in _shopProductsSettings)
+        var shopProductImportSettings = _shopImportData.Select(s => s.ProductShopImportSettings).ToList();
+
+        foreach (var shop in shopProductImportSettings)
             shop.SetAppPath(Utils.GetAppPath());
 
-        _shopImportWorkerBuilder.AddShopProducts(_shopProductsSettings);
+        _shopImportWorkerBuilder.AddShopProducts(_shopImportData);
 
         _shopImportWorkerBuilder.AddProductsHandler();
 
