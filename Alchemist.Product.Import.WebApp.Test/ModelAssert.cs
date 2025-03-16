@@ -8,7 +8,6 @@ public static class ModelAssert
     internal static void EqualFields(ShopSettingsModel expected, ShopSettingsModel result)
     {
         Assert.Equal(expected.Name, result.Name);
-        Assert.Equal(expected.Caption, result.Caption);
         Assert.Equal(expected.Url, result.Url);
         Assert.Equal(expected.Perfomance, result.Perfomance);
     }
@@ -16,7 +15,6 @@ public static class ModelAssert
     internal static void NotEqualFields(ShopSettingsModel expected, ShopSettingsModel result)
     {
         Assert.NotEqual(expected.Name, result.Name);
-        Assert.NotEqual(expected.Caption, result.Caption);
         Assert.NotEqual(expected.Url, result.Url);
         Assert.NotEqual(expected.Perfomance, result.Perfomance);
     }

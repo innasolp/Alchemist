@@ -11,7 +11,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 {
     public override string ToString()
     {
-        return  @$"{base.ToString()};{nameof(Caption)}:{Caption};{nameof(Url)}:{Url};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
+        return  @$"{base.ToString()};{nameof(Url)}:{Url};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
                   {nameof(ImportService)}:{GetServiceValueString(ImportService)};
                   {nameof(BrowserDataLoader)}:{GetServiceValueString(BrowserDataLoader)};
                   {nameof(RequestHeaders)}:{GetServiceValueString(RequestHeaders)};
@@ -28,10 +28,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     [JsonIgnore]
     public override TabType Tab => TabType.Shop;
 
-    public abstract ShopSettingType ShopSettingType { get; }
-
-    [Required]
-    public string? Caption { get; set; }
+    public abstract ShopSettingType ShopSettingType { get; }    
 
     [Required]
     public string? Url { get; set; }
@@ -76,7 +73,6 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     public virtual void Update(ShopSettingsModel sourceShopSettings, bool setNullServices = false)
     {        
         Name = sourceShopSettings.Name;
-        Caption = sourceShopSettings.Caption;
         Url = sourceShopSettings.Url;
         Perfomance = sourceShopSettings.Perfomance;
         FileName = sourceShopSettings.FileName;

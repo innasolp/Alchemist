@@ -43,9 +43,7 @@ public class ShopImportWorker : BackgroundService
         _shopProductImportServices = [.. shopProductImportServices];
         _shopProductImportServices.ForEach(s => s.ItemHandled += ServiceItemHandledAsync);
 
-        _messageReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);
-
-        _messageReceiver.On<ShopUrl>(Messages.ReceiveShopUrlSet, OnShopUrlSet);
+        _messageReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);       
 
         _messageReceiver.On<ShopCategory>(Messages.ReceiveCategoryAdded, OnShopCategoryAdded);
     }
@@ -73,9 +71,9 @@ public class ShopImportWorker : BackgroundService
         if (sender is not IShopCategoryImportService service || e.NewCategory == null)
             return;
 
-        var result = await _categoryDataHandler.HandleItem(e.NewCategory, service.ShopModel.ShopId);
+        var result = await _categoryDataHandler.HandleItem(e.NewCategory, service.ShopModel.Id);
 
-        var categoryModel = new ImportCategory { Category = e.NewCategory.Name, ItemId = e.NewCategory.Id, ShopId = service.ShopModel.ShopId, Status = result };
+        var categoryModel = new ImportCategory { Category = e.NewCategory.Name, ItemId = e.NewCategory.Id, ShopId = service.ShopModel.Id, Status = result };
 
         await _itemMessageSender.Send(categoryModel, Messages.SendCategoryItem);
     }
@@ -85,7 +83,7 @@ public class ShopImportWorker : BackgroundService
         if (sender is not IShopImportService service)
             return;
 
-        var result = await _productDataHandler.HandleItem(e.Item, service.ShopModel.ShopId);
+        var result = await _productDataHandler.HandleItem(e.Item, service.ShopModel.Id);
 
         var productItemModel = new ImportProduct { Name = e.Item.Name, ShopName = service.Name, Url = e.Item.ItemUrl, Status = result };
         await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
@@ -93,25 +91,15 @@ public class ShopImportWorker : BackgroundService
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
     {
-        var service = _shopProductImportServices.OfType<IShopProductImportService>().FirstOrDefault(s => s.ShopModel.ShopId == shopCategory.ShopId);
+        var service = _shopProductImportServices.OfType<IShopProductImportService>().FirstOrDefault(s => s.ShopModel.Id == shopCategory.ShopId);
         service?.ProductShopModel.Categories.Add(shopCategory);
-    }
-
-    private void OnShopUrlSet(ShopUrl shopUrl)
-    {
-        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.ShopId == shopUrl.ShopId);
-        if (service != null)
-        {
-            service.ProductShopModel.ProductUrl = shopUrl.ProductUrl;
-            service.ProductShopModel.CategoryUrl = shopUrl.CategoryUrl;
-        }
-    }
+    }    
 
     private void OnShopCreated(Shop shop)
     {
-        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.ShopName.Equals(shop.Name, StringComparison.CurrentCultureIgnoreCase));
+        var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.Name.Equals(shop.Name, StringComparison.CurrentCultureIgnoreCase));
         if (service != null)
-            service.ShopModel.ShopId = shop.Id;
+            service.ShopModel.Id = shop.Id;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -129,7 +117,8 @@ public class ShopImportWorker : BackgroundService
         try
         {
             await Task.WhenAll(_shopCategoryImportServices.Select(s => s.ShopModel.InitShopModelAsync(_shopDataService)));
-            await Task.WhenAll(_shopProductImportServices.Select(s => s.ProductShopModel.InitProductShopModelAsync(_shopDataService)));
+            await Task.WhenAll(_shopProductImportServices.Select(s => s.ShopModel.InitShopModelAsync(_shopDataService)));
+            await Task.WhenAll(_shopProductImportServices.Select(s => s.ProductShopModel.SetShopProductCategoriesAsync(_shopDataService)));
 
             await Parallel.ForEachAsync(allServices, (s, t) => new ValueTask(s.Start(stoppingToken)));
         }

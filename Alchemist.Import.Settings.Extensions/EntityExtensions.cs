@@ -40,7 +40,6 @@ public static class EntityExtensions
         return
         [
             nameof(IProductShopImportSettings.Url),
-            nameof(IProductShopImportSettings.Caption),
             nameof(IProductShopImportSettings.Name),
             nameof(IProductShopImportSettings.Perfomance)
         ];

@@ -43,8 +43,6 @@ public partial class AlchemyContext : DbContext
 
     public virtual DbSet<ShopProductCategory> ShopProductCategories { get; set; }
 
-    public virtual DbSet<ShopUrl> ShopUrls { get; set; }
-
     public virtual DbSet<ShopSettings> ShopSettings { get; set; }
 
     public virtual DbSet<Currency> Currencies { get; set; }
@@ -212,6 +210,9 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Url)
                 .HasMaxLength(1023)
                 .HasColumnName("url");
+            entity.Property(e => e.Caption)
+                .HasMaxLength(255)
+                .HasColumnName("caption");
         });
 
         modelBuilder.Entity<ShopCategory>(entity =>
@@ -266,25 +267,7 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
             entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
             entity.Property(e => e.ShopCategoryId).HasColumnName("shop_category_id");
-        });
-
-        modelBuilder.Entity<ShopUrl>(entity =>
-        {
-            entity.HasKey(e => e.ShopId).HasName("shop_url_pk");
-
-            entity.ToTable("shop_url");
-
-            entity.Property(e => e.ShopId)
-                .ValueGeneratedNever()
-                .HasColumnName("shop_id");
-            entity.Property(e => e.CategoryUrl)
-                .HasMaxLength(1023)
-                .HasColumnName("category_url");
-            entity.Property(e => e.PageProductCount).HasColumnName("page_product_count");
-            entity.Property(e => e.ProductUrl)
-                .HasMaxLength(1023)
-                .HasColumnName("product_url");
-        });
+        });        
         
         modelBuilder.Entity<ShopSettings>(entity =>
         {

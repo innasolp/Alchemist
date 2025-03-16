@@ -14,7 +14,6 @@ public partial class ProductType : IProductType, IEntity<short> { }
 public partial class PurposeType : IPurposeType, IEntity<short> { }
 public partial class Shop : IShop, IEntity<int> { }
 public partial class ShopCategory : IShopCategory { }
-public partial class ShopUrl : IShopUrl { }
 public partial class ShopProduct : IShopProduct { }
 public partial class PurposeComponentGroup : IPurposeComponentGroup { }
 

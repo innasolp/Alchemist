@@ -15,11 +15,11 @@ using Alchemist.Import.Products.Service;
 using Message.SignalR.DependencyInjection;
 using Grpc.Client.Extensions;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Shop.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.DataService.Interfaces;
 using WebLoader.Common;
 using Alchemist.Import.Category.Interfaces;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -60,8 +60,8 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         return Builder.Services.AddKeyedSingleton(typeof(IProductShopModel), productShopImportSettings.Name,
             new ProductShopModel
             {
-                ShopName = productShopImportSettings.Caption,
-                ShopUrl = productShopImportSettings.Url,
+                Name = productShopImportSettings.Name,
+                Url = productShopImportSettings.Url,
                 ProductUrl = productShopImportSettings?.ProductUrl,
                 CategoryUrl = productShopImportSettings?.CategoryUrl,
                 PageProductCount = productShopImportSettings?.PageProductCount
@@ -92,11 +92,11 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
 
         AddServiceBySettings(typeof(IShopCategoryImportService), categoryShopImportSettings.ImportService, categoryShopImportSettings.Name);
 
-        return Builder.Services.AddKeyedSingleton(typeof(IShopModel), categoryShopImportSettings.Name,
+        return Builder.Services.AddKeyedSingleton(typeof(IShop), categoryShopImportSettings.Name,
             new ShopModel
             {
-                ShopName = categoryShopImportSettings.Caption,
-                ShopUrl = categoryShopImportSettings.Url
+                Name = categoryShopImportSettings.Name,
+                Url = categoryShopImportSettings.Url
             });
     }
 
