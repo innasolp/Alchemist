@@ -23,7 +23,7 @@ public class ShopSettingsAppBuilder : ISettingsBuilder
         builder.AddRestApiClient<IShopDataService, ShopApiClient>(shopApiHostSection, nameof(ShopApiClient));
     }
 
-    public async Task<List<IShopImportData>> Build(IHost host)
+    public async Task<List<ShopSettingsContainer>> Build(IHost host)
     {
         var logger = host.Services.GetRequiredService<ILogger<ShopSettingsAppBuilder>>();
         try
@@ -38,21 +38,20 @@ public class ShopSettingsAppBuilder : ISettingsBuilder
         catch (Exception e)
         {
             logger.LogError(e, e.Message);
-            return await Task.FromResult(new List<IShopImportData>());
+            return await Task.FromResult(new List<ShopSettingsContainer>());
         }
     }
 
-    private static async Task<List<IShopImportData>> GetResult(ISettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings> settingsAdapter,
+    private static async Task<List<ShopSettingsContainer>> GetResult(ISettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings> settingsAdapter,
         IShopDataService shopApiClient)
     {
-        var result = new List<IShopImportData>();
+        var result = new List<ShopSettingsContainer>();
         var shops = await shopApiClient.GetShops();
         foreach (var shop in shops)
         {
             var productShopSettings = await settingsAdapter.GetShopSettings(shop.Id, Product.Interfaces.ShopSettingType.Product);
             var categoryShopSettings = await settingsAdapter.GetShopSettings(shop.Id, Product.Interfaces.ShopSettingType.Category);
-            var shopUrl = await shopApiClient.GetShopUrl(shop.Id);
-            result.Add(new ShopImportData(shop, shopUrl,
+            result.Add(new ShopSettingsContainer(shop,
                 productShopSettings as IProductShopImportSettings,
                 categoryShopSettings as ICategoryShopImportSettings));
         }

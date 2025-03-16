@@ -10,6 +10,9 @@ public class BuildImportServicesFromAppTest : BuildImportServiceTest
         var builder = new HostApplicationBuilder();
         var shopSettingsAppBuilder = new ShopSettingsAppBuilder(builder, "SettingsAPIHost", "RestAPIHost");
         var host = builder.Build();
-        _shopImportData = await shopSettingsAppBuilder.Build(host);
+        var shopSettings = await shopSettingsAppBuilder.Build(host);
+
+        _shopProductsSettings = shopSettings.Select(s => s.ProductShopImportSettings).ToArray();
+        _shopCategoriesSettings = shopSettings.Select(s => s.CategoryShopImportSettings).ToArray();
     }
 }

@@ -212,9 +212,6 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Url)
                 .HasMaxLength(1023)
                 .HasColumnName("url");
-            entity.Property(e => e.Caption)
-                .HasMaxLength(255)
-                .HasColumnName("caption");
         });
 
         modelBuilder.Entity<ShopCategory>(entity =>

@@ -7,8 +7,6 @@ public class CategoryShopSettingsModel : ShopSettingsModel, ICategoryShopImportS
 {
     public override ShopSettingType ShopSettingType => ShopSettingType.Category;
 
-    public string ShopName { get; set; }
-
     public override string ToString()
     {
         return @$"{nameof(CategoryShopSettingsModel)}:{base.ToString()}";

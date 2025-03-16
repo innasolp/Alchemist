@@ -27,11 +27,11 @@ settingsSerilogBuilder.AddSourceContextLogConfig($"{logPath}/ImportBackgroundSer
 
 settingsSerilogBuilder.SetSerilog();
 using var settingsHost = settingsHostBuilder.Build();
-var shopImportData = await settingsBuilders[0].Build(settingsHost);
-if (shopImportData.Count == 0 || shopImportData.All(s => s.ProductShopImportSettings == null && s.CategoryShopImportSettings == null))
-    shopImportData = await settingsBuilders[1].Build(settingsHost);
+var allShopSettings = await settingsBuilders[0].Build(settingsHost);
+if (allShopSettings.Count == 0 || allShopSettings.All(s => s.ProductShopImportSettings == null && s.CategoryShopImportSettings == null))
+    allShopSettings = await settingsBuilders[1].Build(settingsHost);
 
-foreach (var shop in shopImportData)
+foreach (var shop in allShopSettings)
 {
     shop.ProductShopImportSettings?.SetAppPath(appPath);
     shop.CategoryShopImportSettings?.SetAppPath(appPath);
@@ -52,14 +52,15 @@ shopImportWorkerBuilder.AddGrpcServiceClient<Alchemist.Product.GrpcServiceClient
 builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
 builder.Services.AddPerfomanceCounter(typeof(Interceptor), typeof(GrpcClientRequestInterceptor), (logger) => new SerilogUrlLogger(logger));
 
-shopImportWorkerBuilder.AddShopProducts(shopImportData);
+var shopProductsSettings = allShopSettings.Select(s => s.ProductShopImportSettings).ToList();
+shopImportWorkerBuilder.AddShopProducts(shopProductsSettings);
 shopImportWorkerBuilder.AddProductsHandler();
 
-var shopCategoriesSettings = shopImportData.Select(s => s.CategoryShopImportSettings).ToList();
+var shopCategoriesSettings = allShopSettings.Select(s => s.CategoryShopImportSettings).ToList();
 
 if (shopCategoriesSettings.Count > 0)
 {
-    shopImportWorkerBuilder.AddShopCategories(shopImportData);
+    shopImportWorkerBuilder.AddShopCategories(shopCategoriesSettings);
     shopImportWorkerBuilder.AddPropertyValueInterceptorsLogging(shopCategoriesSettings.OfType<IShopImportSettings>().ToArray(), "ClassName", (shopSetting) => shopSetting.Id);
     shopImportWorkerBuilder.AddCategoriesHandler();
 }
@@ -74,9 +75,8 @@ appSerilogBuilder.AddServiceBaseConfigs(typeof(ShopImportWorker).Name);
 appSerilogBuilder.AddPerfomanceCounter(url:"alchemygrpcservice", EventIds.Perfomance.Id, logPath, serviceName:"AlchemyGrpcClient");
 appSerilogBuilder.AddPerfomanceCounter(url: restApiHost, EventIds.Perfomance.Id, logPath, serviceName:"AlchemyRestAPIClient");
 
-if (shopImportData.Count != 0)
+if (shopProductsSettings.Count != 0)
 {
-    var shopProductsSettings = shopImportData.Select(s => s.ProductShopImportSettings).ToList();
     appSerilogBuilder.AddShopsSerilogSourceContextConfigs(shopProductsSettings, $"{logPath}/Shops");
     appSerilogBuilder.AddShopsWebPerfomanceConfigs(shopProductsSettings, logPath);
 }

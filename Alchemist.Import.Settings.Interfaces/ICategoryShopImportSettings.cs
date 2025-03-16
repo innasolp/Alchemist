@@ -2,5 +2,4 @@
 
 public interface ICategoryShopImportSettings: IShopImportSettings
 {
-    string ShopName { get; set; }
 }

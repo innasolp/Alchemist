@@ -17,7 +17,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
     IShopModel shopUrlModel,
     RequestHeaders? requestHeaders,
     CategoryLoadOptions categoryLoadOptions)
-    : ImportService(logger, webLoader, requestHeaders), IShopCategoryImportService
+    : ShopImportService(logger, webLoader, requestHeaders), IShopCategoryImportService
 {
     protected IHtmlSearcher? HtmlSearcher { get; } = htmlSearcher;
 

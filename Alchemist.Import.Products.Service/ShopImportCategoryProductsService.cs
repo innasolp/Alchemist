@@ -11,7 +11,7 @@ using WebLoader.Common;
 
 namespace Alchemist.Import.Products.Service;
 
-public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ImportService, IShopProductImportService
+public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ShopImportService, IShopProductImportService
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {

@@ -40,6 +40,7 @@ public static class EntityExtensions
         return
         [
             nameof(IProductShopImportSettings.Url),
+            nameof(IProductShopImportSettings.Caption),
             nameof(IProductShopImportSettings.Name),
             nameof(IProductShopImportSettings.Perfomance)
         ];
@@ -64,7 +65,10 @@ public static class EntityExtensions
     private static ShopSettings ProductSettingsToEntity<T>(this T shopSettings)
         where T : class, IProductShopImportSettings
     {
-        var props = GetShopImportSettingsSerializeProperties();        
+        var props = GetShopImportSettingsSerializeProperties();
+        props.AddRange([nameof(IProductShopImportSettings.PageProductCount),
+                nameof(IProductShopImportSettings.CategoryUrl),
+                nameof(IProductShopImportSettings.ProductUrl) ]);
 
         var option = new JsonSerializerOptions
         {
