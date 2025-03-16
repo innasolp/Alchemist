@@ -15,12 +15,7 @@ public class EventHub : Hub
     public async Task SendCategoryAdded(ShopCategory shopCategory)
     {
         await Clients.All.SendAsync(Messages.ReceiveCategoryAdded, shopCategory);
-    }
-
-    public async Task SendShopUrlSet(ShopUrl shopUrl)
-    {
-        await Clients.All.SendAsync(Messages.ReceiveShopUrlSet, shopUrl);
-    }
+    }    
 
     public async Task SendProductItem(IImportProduct importProduct)
     {

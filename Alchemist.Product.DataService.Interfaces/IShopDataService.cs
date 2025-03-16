@@ -9,12 +9,7 @@ public interface IShopDataService
 
     Task<IShop> UpdateShop(IShop shop);
 
-    Task<IShop?> GetShop(int id);
-    Task<IShopUrl?> GetShopUrl(int shopId);
-
-    Task<IShopUrl> CreateShopUrl(IShopUrl shopUrl);
-
-    Task<IShopUrl> UpdatehopUrl(IShopUrl shopUrl);
+    Task<IShop?> GetShop(int id);    
 
     Task<IShopCategory> AddShopCategory(IShopCategory shopCategory);
 

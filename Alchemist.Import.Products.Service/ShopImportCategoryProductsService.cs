@@ -25,7 +25,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     public IProductShopModel ProductShopModel { get; }
 
-    IShopModel IShopImportService.ShopModel => ProductShopModel;
+    IShop IShopImportService.ShopModel => ProductShopModel;
 
     public ShopImportCategoryProductsService(ILogger logger, IProductShopModel shopUrlModel, IWebLoader webLoader, RequestHeaders requestHeaders)
         : base(logger, webLoader, requestHeaders)

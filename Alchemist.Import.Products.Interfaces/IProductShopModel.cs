@@ -1,10 +1,9 @@
-﻿using Alchemist.Import.Shop.Interfaces;
-using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.Interfaces;
 using System.Collections.ObjectModel;
 
 namespace Alchemist.Import.Products.Interfaces;
 
-public interface IProductShopModel : IShopModel
+public interface IProductShopModel : IShop
 {
     string ProductUrl { get; set; }
 

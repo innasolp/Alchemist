@@ -89,34 +89,7 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
 
         var location = Url.Action(nameof(UpdateShop), new { id = updatedShop.Id }) ?? $"/{updatedShop.Id}";
         return TypedResults.Accepted(location, updatedShop);
-    }
-
-    [HttpPost("shopUrl", Name = nameof(AddShopUrl))]
-    public async Task<Results<BadRequest<ShopUrl>, Created<ShopUrl>>> AddShopUrl(ShopUrl shopUrl)
-    {
-        if (shopUrl == null || shopUrl.ShopId == 0 || string.IsNullOrEmpty(shopUrl.ProductUrl) || string.IsNullOrEmpty(shopUrl.CategoryUrl))
-            return TypedResults.BadRequest(shopUrl);
-
-        var newShopUrl = (await _alchemyRepository.AddShopUrl(shopUrl)).To<ShopUrl>();
-
-        await SendMessage(newShopUrl, Messages.SendShopUrlSet);
-
-        var location = Url.Action(nameof(AddShopUrl), new { id = newShopUrl.ShopId }) ?? $"/{newShopUrl.ShopId}";
-        return TypedResults.Created(location, newShopUrl);
-    }
-
-    [HttpPost("shopUrl/Update", Name = nameof(UpdateShopUrl))]
-    public async Task<Results<BadRequest<ShopUrl>, Accepted<ShopUrl>, StatusCodeHttpResult>> UpdateShopUrl(ShopUrl shopUrl)
-    {
-        if (shopUrl == null || shopUrl.ShopId == 0 ||
-            string.IsNullOrEmpty(shopUrl.ProductUrl) || string.IsNullOrEmpty(shopUrl.CategoryUrl))
-            return TypedResults.BadRequest(shopUrl);
-
-        var updatedShopUrl = (await _alchemyRepository.UpdateShopUrl(shopUrl)).To<ShopUrl>();
-
-        var location = Url.Action(nameof(UpdateShopUrl), new { id = updatedShopUrl.ShopId }) ?? $"/{updatedShopUrl.ShopId}";
-        return TypedResults.Accepted(location, updatedShopUrl);
-    }
+    }    
 
     [HttpPost("shopCategory", Name = nameof(AddShopCategory))]
     public async Task<Results<BadRequest<ShopCategory>, Created<ShopCategory>>> AddShopCategory(ShopCategory shopCategory)
@@ -130,15 +103,7 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
 
         var location = Url.Action(nameof(AddShopCategory), new { id = newShopCategory.Id }) ?? $"/{newShopCategory.Id}";
         return TypedResults.Created(location, newShopCategory);
-    }
-
-
-    [HttpGet("shopUrl/{shopId:int}", Name = nameof(GetShopUrl))]
-    public async Task<Results<NotFound, Ok<ShopUrl>>> GetShopUrl(int shopId)
-    {
-        var shopUrl = await _alchemyRepository.GetShopUrl(shopId);
-        return shopUrl != null ? TypedResults.Ok(shopUrl.To<ShopUrl>()) : TypedResults.NotFound();
-    }
+    }    
 
     [HttpGet("shopCategories/byShopIdAndItemId/{shopId:int}/{itemId:int}", Name = nameof(GetShopCategoryByShopIdAndItemId))]
     public async Task<Results<NotFound, Ok<ShopCategory>>> GetShopCategoryByShopIdAndItemId(int shopId, int itemId)

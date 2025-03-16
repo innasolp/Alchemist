@@ -34,13 +34,7 @@ public interface IAlchemyRepository
     List<IProduct> GetProductsByShop(int shopId);
     Task<IProduct?> FindProductByName(string name);
 
-    Task<IProduct?> FindProductByNameAndBrand(string name, string brand);
-
-    Task<IShopUrl?> GetShopUrl(int shopId);
-
-    Task<IShopUrl> AddShopUrl(IShopUrl shopUrl);
-
-    Task<IShopUrl> UpdateShopUrl(IShopUrl shopUrl);
+    Task<IProduct?> FindProductByNameAndBrand(string name, string brand);    
 
     Task<List<IShopCategory>> GetShopCategories(int shopId);
 

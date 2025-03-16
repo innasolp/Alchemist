@@ -1,26 +1,27 @@
-﻿using Alchemist.Import.Shop.Interfaces;
+﻿using Alchemist.Product.Interfaces;
 using System.ComponentModel;
 
 namespace Alchemist.Product.Import.Background;
 
-internal class ShopModel : IShopModel
+internal class ShopModel : IShop
 {
-    private int _shopId;
-    public int ShopId
+    private int _Id;
+    public int Id
     {
-        get => _shopId;
+        get => _Id;
         set
         {
-            if (_shopId != value)
+            if (_Id != value)
             {
-                _shopId = value;
-                OnPropertyChanged("ShopId");
+                _Id = value;
+                OnPropertyChanged("Id");
             }
         }
     }
 
-    public string ShopName { get; set; }
-    public string ShopUrl { get; set; }
+    public string Name { get; set; }
+    public string Url { get; set; }
+    public string? Caption { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string prop = "")

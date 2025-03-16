@@ -135,19 +135,6 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     {
         var shopCategories = await Context.ShopCategories.Where(su => su.ShopId == shopId).OfType<IShopCategory>().ToListAsync();
         return shopCategories;
-    }
-
-    public async Task<IShopUrl?> GetShopUrl(int shopId)
-    {
-        var shopUrls = await Context.ShopUrls.Where(su => su.ShopId == shopId).ToListAsync();
-        var shopUrl = shopUrls.FirstOrDefault();
-        return shopUrl;
-    }
-
-    public async Task<IShopUrl> AddShopUrl(IShopUrl shopUrl)
-    {
-        var shopUrlEntity = shopUrl.To<ShopUrl>();
-        return await Context.Create(shopUrlEntity);
     }    
 
     public async Task<IShopCategory> AddShopCategory(IShopCategory shopCategory)
@@ -350,14 +337,6 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         var shopEntity = shop.To<Shop>();
         var updated = Context.Shops.Update(shopEntity);
         var savedCount = await Context.SaveChangesAsync();
-        return updated.Entity;
-    }
-
-    public async Task<IShopUrl> UpdateShopUrl(IShopUrl shopUrl)
-    {
-        var shopUrlEntity = shopUrl.To<ShopUrl>();
-        var updated = Context.ShopUrls.Update(shopUrlEntity);
-        await Context.SaveChangesAsync();
         return updated.Entity;
     }
 }

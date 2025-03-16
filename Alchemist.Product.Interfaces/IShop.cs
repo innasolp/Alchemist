@@ -2,9 +2,11 @@
 
 public interface IShop
 {
-    public int Id { get; set; }
+    int Id { get; set; }
 
-    public string Name { get; set; }
+    string Name { get; set; }
 
-    public string Url { get; set; }
+    string Url { get; set; }
+
+    string? Caption { get; set; }
 }

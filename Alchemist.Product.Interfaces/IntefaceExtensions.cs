@@ -114,7 +114,8 @@ public static class IntefaceExtensions
         {
             Id = @in.Id,
             Name = @in.Name,
-            Url = @in.Url
+            Url = @in.Url,
+            Caption = @in.Caption
         };
     }
 
@@ -140,19 +141,7 @@ public static class IntefaceExtensions
             ShopCategoryId = @in.ShopCategoryId,
             ShopProductId = @in.ShopProductId
         };
-    }
-
-    public static T To<T>(this IShopUrl @in)
-        where T : class, IShopUrl, new()
-    {
-        return new T
-        {           
-            ShopId = @in.ShopId,
-            CategoryUrl = @in.CategoryUrl,
-            ProductUrl = @in.ProductUrl,
-            PageProductCount = @in.PageProductCount
-        };
-    }
+    }    
     
     public static T To<T>(this IShopSettings @in)
         where T : class, IShopSettings, new()
