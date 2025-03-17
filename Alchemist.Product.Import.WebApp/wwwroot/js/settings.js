@@ -7,11 +7,7 @@
     );
 }
 
-function submitPreventDefault(event) {
-event.preventDefault();
-}
-
-function showServiceSettingsModel(url, data, onHide = null) {
+function showServiceSettingsModal(url, data, onHide = null) {
     
     $('#settingsForm').on('submit', submitPreventDefault);
 
@@ -20,7 +16,7 @@ function showServiceSettingsModel(url, data, onHide = null) {
         console.trace(event);
     });
 
-    ShowItemModal($("#divModal"), $("#modalBodyDiv"), url, data, () => { onSaveServiceSettings(onHide); })
+    showItemModal($("#divModal"), $("#modalBodyDiv"), url, data, () => { onSaveServiceSettings(onHide); })
 }
 
 function onSaveServiceSettings(onHide = null) {

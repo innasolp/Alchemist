@@ -11,10 +11,33 @@
     <div class="left_menu">
         <h1 class="display-7 menu_item">Shops</h1>
     </div>
+    <div class="left-menu-ul">
+        <form id="newShopForm" name="newShopForm" method="get" action="/Home/Index/" asp-antiforgery="true">
+            <input type="hidden" name="shopGuid" id="newShopGuid"  />
+            <input type="hidden" name="tab" value="@((int)selectedTabViewName.Key)" />
+        </form>
+        <div class="modal fade" id="divModalShop">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <a href="#" class="close" data-bs-dismiss="modal">&times;</a>
+                    </div>
+                    <div class="modal-body" id="modalBodyDivShop">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <ul class="left-menu-ul" id="shopsList">
+        <li class="left-menu-ul">
+
+            <a onclick="showShopModal('/Shop/New', null, (result)=>{ if(!result) return; saveTab($('#settingsForm'), ()=>{$('#newShopForm')[0].submit(); });})">Новый</a>
+            
+        </li>
+        
         @foreach (var shop in Model)
         {
-            <form name="shopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
+            <form name="itemShopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                   asp-route-shopGuid="@shop.Guid"
                   asp-route-tab="@((int)selectedTabViewName.Key)">
             <li class="@CssHelper.GetLiStyle(shop.Guid.ToString(), shopGuid?.ToString() ?? "")">

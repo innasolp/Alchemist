@@ -1,12 +1,28 @@
-﻿namespace Alchemist.Product.Import.Model;
+﻿using Alchemist.Product.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
-public class ShopModel
+namespace Alchemist.Product.Import.Model;
+
+public class ShopModel : IShop
 {
     public Guid Guid { get; } = Guid.NewGuid();
 
-    public required string Name { get; set; }
+    [Required]
+    public string Name { get; set; }
 
     public int Id { get; set; }
 
     public bool IsDeprecated { get; set; } = false;
+
+    [Required]
+    public string Url { get; set; }
+
+    public string? Caption { get; set; }
+
+    public void Update(IShop shop)
+    {
+        Name = shop.Name;
+        Url = shop.Url;
+        Caption = shop.Caption;
+    }
 }
