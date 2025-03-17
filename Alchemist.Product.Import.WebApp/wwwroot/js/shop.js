@@ -5,7 +5,7 @@
         console.trace(event);
     });    
 
-    showItemModal($("#divModalShop"), $("#modalBodyDivShop"), url, data, () => { onSaveShop(onHide); })
+    showItemModal($("#divModalShop"), $("#modalBodyDivShop"), url, data, () => { if (onHide != null) onSaveShop(onHide); })
 }
 
 function onSaveShop(onHide = null) {
@@ -28,6 +28,7 @@ function saveShop(newShopGuidSelector) {
         getFormData($('#shopForm')), (data) =>    {
         if ($('#Id').val() == 0) {
             newShopGuidSelector.val(data);
-        }; closeShopModal();
+            };
+            closeShopModal();
     })
 }

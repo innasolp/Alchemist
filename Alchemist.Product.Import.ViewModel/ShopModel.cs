@@ -5,7 +5,7 @@ namespace Alchemist.Product.Import.Model;
 
 public class ShopModel : IShop
 {
-    public Guid Guid { get; } = Guid.NewGuid();
+    public Guid Guid { get; set; } = Guid.NewGuid();
 
     [Required]
     public string Name { get; set; }

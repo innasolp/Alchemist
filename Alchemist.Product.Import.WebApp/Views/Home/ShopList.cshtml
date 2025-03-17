@@ -30,9 +30,7 @@
     </div>
     <ul class="left-menu-ul" id="shopsList">
         <li class="left-menu-ul">
-
-            <a onclick="showShopModal('/Shop/New', null, (result)=>{ if(!result) return; saveTab($('#settingsForm'), ()=>{$('#newShopForm')[0].submit(); });})">Новый</a>
-            
+            <a onclick="showShopModal('/Shop/New', null, (result)=>{ if(!result) return; saveTab($('#settingsForm'), ()=>{$('#newShopForm')[0].submit(); });})">Новый</a>            
         </li>
         
         @foreach (var shop in Model)
@@ -41,7 +39,15 @@
                   asp-route-shopGuid="@shop.Guid"
                   asp-route-tab="@((int)selectedTabViewName.Key)">
             <li class="@CssHelper.GetLiStyle(shop.Guid.ToString(), shopGuid?.ToString() ?? "")">
-                <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.submit();}); ">@shop.Name</a>
+                <div class="flex">
+                    <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.parentElement.submit();});"
+                        style="width:250px">@shop.Name</a>
+                        @if (shop.Guid == shopGuid)
+                        {
+                            <i class="fa fa-edit" style="font-size:24px"
+                           onclick="showShopModal('/Shop/Edit', { 'shopGuid': '@shop.Guid'})"></i>
+                        }
+                </div>
             </li>
             </form>
         }
