@@ -30,7 +30,7 @@ public class ShopApiClient : IShopDataService
 
     public async Task<IShop> CreateShop(IShop shop)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/Shop", shop.To<Shop>());
+        var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop.To<Shop>());
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Shop>();
     }

@@ -61,7 +61,7 @@ function sendFormData(url, data, onSuccess = null) {
     });
 }
 
-function ShowItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide = null)
+function showItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide = null)
 {
 
     if (onHide != null)
@@ -69,10 +69,30 @@ function ShowItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide
             onHide();
         });
 
-    modalBodyDivSelector.load(url, data, function (obj) {
+    if (data != null)
+        modalBodyDivSelector.load(url, data, function (response, status, xhr) {
+            onLoadCallback(url, response, status, xhr, () => { divModelSelector.modal("show"); })
+        });
+    else
+        modalBodyDivSelector.load(url, function (response, status, xhr) {
+            onLoadCallback(url, response, status, xhr, () => { divModelSelector.modal("show"); })
+        }); 
+}
+
+function onLoadCallback(url, response, status, xhr, onSuccess) {
+    if (status == "error") {
+        console.error(xhr);
+        if (response)
+            console.trace(response);
+    }
+    else {
         console.log('url ' + url + ' load');
-        divModelSelector.modal("show");
-    })
+        onSuccess();
+    }
+}
+
+function submitPreventDefault(event) {
+    event.preventDefault();
 }
 
 function postData(url, data, onSuccess = null, onError = null) {

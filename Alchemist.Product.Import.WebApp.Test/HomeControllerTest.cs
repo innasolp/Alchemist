@@ -80,7 +80,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         Assert.NotEqual(Guid.Empty, nextShopGuid);
 
         var homeController = CreateHomeController();
-        var nextIndexView = Assert.IsType<ViewResult>(await homeController.Index((Guid)nextShopGuid, (int)indexViewModel.SelectedTab));
+        var nextIndexView = Assert.IsType<ViewResult>(await homeController.IndexFromQueryAsync((Guid)nextShopGuid, (int)indexViewModel.SelectedTab));
         var nextIndexViewModel = Assert.IsType<IndexViewModel>(nextIndexView.Model);
         Assert.Equal(indexViewModel.SelectedTab, nextIndexViewModel.SelectedTab);
         Assert.NotEqual(indexViewModel.SelectedTabModel.ShopGuid, nextIndexViewModel.SelectedTabModel.ShopGuid);
@@ -97,7 +97,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var shopGuid = indexViewModel.SelectedTabModel.ShopGuid;
 
         var homeController = CreateHomeController();
-        var nextIndexView = await homeController.Index(shopGuid, (int)nextTab) as ViewResult;
+        var nextIndexView = await homeController.IndexFromQueryAsync(shopGuid, (int)nextTab) as ViewResult;
 
         Assert.NotNull(nextIndexView);
         var nextIndexViewModel = nextIndexView.Model as IndexViewModel;
@@ -116,7 +116,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
         var tab = indexViewModel.SelectedTab;
         var nextShopGuid = Guid.NewGuid();
-        Assert.IsType<BadRequestResult>(await homeController.Index(nextShopGuid, (int)tab));
+        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(nextShopGuid, (int)tab));
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
         var shopGuid = indexViewModel.SelectedTabModel.ShopGuid;
         var nextTab = ViewHelper.Tabs.Max() + 1;
-        Assert.IsType<BadRequestResult>(await homeController.Index(shopGuid, (int)nextTab));
+        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(shopGuid, (int)nextTab));
     }
 
     [Fact]
