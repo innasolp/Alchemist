@@ -24,8 +24,6 @@ public abstract class ShopImportSettings : IShopImportSettings
 
     public string Name { get; set; }
 
-    public string? Caption { get; set; }
-
     [JsonIgnore]
     public int ShopId { get; set; }
     

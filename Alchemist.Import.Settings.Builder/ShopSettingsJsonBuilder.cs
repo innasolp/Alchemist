@@ -28,7 +28,7 @@ public class ShopSettingsJsonBuilder(string shopProductsJsonFile, string shopCat
                     (
                         new Shop
                         {
-                            Name = product.Caption ?? product.Name,
+                            Name = product.Name,
                             Url = product.Url
                         },
                         product,

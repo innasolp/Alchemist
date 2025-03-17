@@ -21,6 +21,9 @@ public interface IAlchemyRepository
     Task<IComponent?> FindComponentByName(string name);
 
     Task<IShop> CreateShop(IShop shop);
+
+    Task<IShop> UpdateShop(IShop shop);
+
     Task<IShop?> GetShop(int id);
     Task<List<IShop>> GetShops();
     Task<IShop?> GetShopByName(string name);
@@ -31,11 +34,7 @@ public interface IAlchemyRepository
     List<IProduct> GetProductsByShop(int shopId);
     Task<IProduct?> FindProductByName(string name);
 
-    Task<IProduct?> FindProductByNameAndBrand(string name, string brand);
-
-    Task<IShopUrl?> GetShopUrl(int shopId);
-
-    Task<IShopUrl> AddShopUrl(IShopUrl shopUrl);
+    Task<IProduct?> FindProductByNameAndBrand(string name, string brand);    
 
     Task<List<IShopCategory>> GetShopCategories(int shopId);
 

@@ -147,7 +147,23 @@ public class HomeController : Controller
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Index(Guid shopGuid, int tab)
+    [ActionName("Index")]
+    public async Task<IActionResult> IndexRouteAsync(Guid shopGuid, int tab)
+    {
+        return await IndexAsync(shopGuid, tab);
+    }
+
+    [Route("Home/Index")]
+    [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ActionName("Index")]
+    public async Task<IActionResult> IndexFromQueryAsync([FromQuery]Guid shopGuid, [FromQuery] int tab)
+    {
+        return await IndexAsync(shopGuid, tab);
+    }
+
+    private async Task<IActionResult> IndexAsync(Guid shopGuid, int tab)
     {
         try
         {
@@ -158,7 +174,7 @@ public class HomeController : Controller
 
             return viewModel != null ? View(viewModel) : BadRequest();
         }
-        catch(InvalidOperationException e)
+        catch (InvalidOperationException e)
         {
             _logger.LogError(e, $"Index({shopGuid},{tab})");
             return await Task.FromResult(BadRequest());

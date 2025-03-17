@@ -12,7 +12,7 @@ public class SerializationTests
     [Fact]
     public async Task TestLoadProductSettings()
     {
-        var shopProductsSettings = await _productsJsonFileName.ReadFromJsonFileAsync<ShopImportSettings[]>();
+        var shopProductsSettings = await _productsJsonFileName.ReadFromJsonFileAsync<ProductShopImportSettings[]>();
 
         Assert.NotNull(shopProductsSettings);
         Assert.Equal(2, shopProductsSettings.Length);

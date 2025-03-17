@@ -46,7 +46,7 @@ public static class CommonActions
 
         Assert.Equal(ShopSettingType.Category, indexViewModel.SelectedShopImport.ShopSettingTabs.SelectedSettingsTab);
 
-        await homeController.Index(productSettings.ShopGuid, (int)indexViewModel.SelectedTab);
+        await homeController.IndexFromQueryAsync(productSettings.ShopGuid, (int)indexViewModel.SelectedTab);
         return Assert.IsType<TShopSettings>(indexViewModel.SelectedShopImport.ShopSettingTabs.GetShopSettingsByType(shopSettingType));
     }
 }

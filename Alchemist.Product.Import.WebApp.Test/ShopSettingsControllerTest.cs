@@ -154,7 +154,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 
         var shopSettingController = CreateShopSettingsController();
         shopSettingController.SetShopSettings(indexViewModel.SelectedShopImport.ShopGuid, (int)ShopSettingType.Category);
-        await homeController.Index(indexViewModel.SelectedShopImport.ShopGuid, (int)indexViewModel.SelectedTab);
+        await homeController.IndexFromQueryAsync(indexViewModel.SelectedShopImport.ShopGuid, (int)indexViewModel.SelectedTab);
 
         await SaveShopSettingsToDbActionAsync<CategoryShopSettingsModel>(indexViewModel.SelectedShopImport.ShopGuid,
             ShopSettingType.Category,
