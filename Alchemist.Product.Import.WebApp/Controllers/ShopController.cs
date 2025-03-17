@@ -20,12 +20,12 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult Edit(Guid? shopGuid)
+    public IActionResult Edit(Guid shopGuid)
     {
-        if (shopGuid == null || shopGuid == Guid.Empty)
+        if (shopGuid == Guid.Empty)
             return BadRequest(shopGuid);
 
-        if (!_importFacade.TryGetShopImport((Guid)shopGuid, out var shopImport))
+        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
             return NotFound(shopGuid);
 
         return PartialView("~/Views/Home/Shop.cshtml", shopImport.Shop);

@@ -1,5 +1,4 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Import.Model;
+﻿using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -28,6 +27,51 @@ public class ShopControllerTest : ControllerTest<ShopController>
         var shopController = CreateShopController();
         var viewResult = Assert.IsType<PartialViewResult>(shopController.New());
         Assert.IsType<ShopModel>(viewResult.Model);
+    }
+    
+    [Fact]
+    public async Task EditActionIsBadRequestWhenEmptyShopGuidAsync()
+    {
+        var homeController = CreateHomeController();
+        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+
+        var shopController = CreateShopController();
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(shopController.Edit(Guid.Empty));
+        Assert.IsType<Guid>(badRequestResult.Value);
+    }
+    
+    [Fact]
+    public async Task EditActionIsNotFoundWhenInvalidShopGuidAsync()
+    {
+        var homeController = CreateHomeController();
+        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+
+        var shopController = CreateShopController();
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(shopController.Edit(Guid.NewGuid()));
+        Assert.IsType<Guid>(notFoundResult.Value);
+    }
+
+    [Fact]
+    public async Task EditActionIsPartialViewAsync()
+    {
+        var homeController = CreateHomeController();
+        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+
+        var shopController = CreateShopController();
+        Assert.IsType<PartialViewResult>(shopController.Edit(_importFacade.GetShops().First().ShopGuid));
+    }
+
+    [Fact]
+    public async Task EditActionModelIsShopModelAsync()
+    {
+        var homeController = CreateHomeController();
+        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+
+        var shopController = CreateShopController();
+        var shopGuid = _importFacade.GetShops().First().ShopGuid;
+        var viewResult = Assert.IsType<PartialViewResult>(shopController.Edit(shopGuid));
+        var model = Assert.IsType<ShopModel>(viewResult.Model);
+        Assert.Equal(shopGuid, model.Guid);
     }
 
     [Fact]

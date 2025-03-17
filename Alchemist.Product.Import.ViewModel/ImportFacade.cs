@@ -62,7 +62,7 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
     public ShopImportModel AddNewShop(IShop shop)
     {
         var newShop = shop.To<ShopModel>();
-        var newShopImport = new ShopImportModel { ShopGuid = newShop.Guid, Shop = newShop };
+        var newShopImport = new ShopImportModel(newShop);
         _shopImports.Add(newShop.Guid, newShopImport);
         return newShopImport;
     }
