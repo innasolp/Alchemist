@@ -14,5 +14,12 @@ public class ShopSettings : IShopSettings
     public JsonObject? JsonValue { get; set; }
     public ShopSettingType Type { get; set; }
     public string? Name { get; set; }
-    string IShopSettings.JsonValue { get => JsonValue?.ToString(); set => JsonValue = JsonSerializer.Deserialize<JsonObject>(value); }
+    string IShopSettings.JsonValue
+    {
+        get => JsonValue?.ToString();
+        set
+        {
+            if (value != null) JsonValue = JsonSerializer.Deserialize<JsonObject>(value);
+        }
+    }
 }

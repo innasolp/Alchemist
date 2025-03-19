@@ -125,6 +125,7 @@ public class ShopControllerPostTest: ControllerTest<ShopController, Shop>
         var badRequest = Assert.IsType<BadRequest<Shop>>(result.Result);
         Assert.Equal(shop.Id, badRequest.Value.Id);
     }
+
     [Fact]
     public async Task UpdateShopReturnsAcceptedWhenShopIsValidAsync()
     {
