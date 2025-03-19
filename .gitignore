@@ -226,3 +226,5 @@
 /Alchemist.Product.Import.Model.Test/obj
 /Alchemist.Product.Import.WebApp.Test/bin/Debug/net8.0
 /Alchemist.Product.Import.WebApp.Test/obj
+/Alchemist.Product.RestAPI.UnitTest/bin/Debug/net8.0
+/Alchemist.Product.RestAPI.UnitTest/obj

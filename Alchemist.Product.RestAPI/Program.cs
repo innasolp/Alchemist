@@ -32,9 +32,14 @@ builder.Services.AddAuthentication("https");
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopController>>();
 builder.Services.AddSingleton<InfoLogMiddleware<ShopController>>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopCategoryController>>();
+builder.Services.AddSingleton<InfoLogMiddleware<ShopCategoryController>>();
+
 builder.Services.AddProblemDetails();
 
 builder.Services.AddPerfomanceCounter(typeof(InfoLogMiddleware<ShopController>), (logger) => new SerilogUrlLogger(logger));
+builder.Services.AddPerfomanceCounter(typeof(InfoLogMiddleware<ShopCategoryController>), (logger) => new SerilogUrlLogger(logger));
 
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
@@ -52,6 +57,7 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseMiddleware<InfoLogMiddleware<ShopController>>();
+app.UseMiddleware<InfoLogMiddleware<ShopCategoryController>>();
 
 app.UsePerfomanceCounters();
 

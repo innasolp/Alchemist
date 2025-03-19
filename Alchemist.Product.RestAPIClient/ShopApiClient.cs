@@ -23,7 +23,7 @@ public class ShopApiClient : IShopDataService
 
     public async Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/Shop/shopCategory", shopCategory.To<ShopCategory>());
+        var response = await _httpClient.PutAsJsonAsync($"api/ShopCategory", shopCategory.To<ShopCategory>());
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ShopCategory>();
     }
@@ -64,7 +64,7 @@ public class ShopApiClient : IShopDataService
 
     public async Task<List<IShopCategory>> GetShopCategories(int shopId)
     {
-        var response = await _httpClient.GetAsync($"api/Shop/shopCategories/{shopId}");
+        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/{shopId}");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(new List<IShopCategory>());
         response.EnsureSuccessStatusCode();
@@ -74,7 +74,7 @@ public class ShopApiClient : IShopDataService
 
     public async Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId)
     {
-        var response = await _httpClient.GetAsync($"api/Shop/shopCategories/byShopIdAndItemId/{shopId}/{itemId}");
+        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/byShopIdAndItemId/{shopId}/{itemId}");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(default(ShopCategory));
         response.EnsureSuccessStatusCode();
