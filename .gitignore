@@ -230,3 +230,5 @@
 /Alchemist.Product.RestAPI.UnitTest/obj
 /Alchemist.Settings.RestAPI.UnitTest/bin/Debug/net8.0
 /Alchemist.Settings.RestAPI.UnitTest/obj
+/Alchemist.Test.Server.Fixtures/bin/Debug/net8.0
+/Alchemist.Test.Server.Fixtures/obj
