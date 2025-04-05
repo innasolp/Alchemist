@@ -232,3 +232,7 @@
 /Alchemist.Settings.RestAPI.UnitTest/obj
 /Alchemist.Test.Server.Fixtures/bin/Debug/net8.0
 /Alchemist.Test.Server.Fixtures/obj
+/Alchemist.Product.GrpcService.Tests/bin/Debug/net8.0
+/Alchemist.Product.GrpcService.Tests/obj
+/Alchemist.Test.Server.Fixtures.Grpc/obj
+/Alchemist.Test.Server.Fixtures.Grpc/bin/Debug/net8.0

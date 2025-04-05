@@ -68,6 +68,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
     }
+
     public override async Task<ComponentReply> GetComponent(GetByIdInt32Request request, ServerCallContext context)
     {
         if (request.Id <= 0)
