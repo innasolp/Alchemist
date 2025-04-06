@@ -1,6 +1,4 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Data;
-using Alchemist.Product.GrpcServiceClient;
+﻿using Alchemist.Product.Data;
 using Alchemist.Test.Server.Fixtures.Grpc;
 
 namespace Alchemist.Product.GrpcService.Tests;
@@ -8,8 +6,8 @@ namespace Alchemist.Product.GrpcService.Tests;
 public class AlchemistGrpcTestFixture(AlchemistGrpcWebAppFactory webAppFactory) 
     : GrpcTestFixture<AlchemistGrpcWebAppFactory, Program, AlchemyContext>(webAppFactory)
 {
-    public IProductDataService CreateAlchemistGrpcClient()
+    public AlchemyGrpcService.AlchemyGrpcServiceClient CreateAlchemistGrpcClient()
     {
-       return new AlchemyGrpcServiceClient(GrpcChannel);
+       return new AlchemyGrpcService.AlchemyGrpcServiceClient(GrpcChannel);
     }
 }

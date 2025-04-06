@@ -19,6 +19,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.29.3" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
     <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.67.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />
     <ProjectReference Include="..\Alchemist.Product.GrpcService\Alchemist.Product.GrpcService.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures.Grpc\Alchemist.Test.Server.Fixtures.Grpc.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
@@ -38,6 +38,12 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\Alchemist.Product.GrpcService\Protos\alchemygrpc.proto" GrpcServices="Client">
+      <Link>Protos\alchemygrpc.proto</Link>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

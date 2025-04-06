@@ -9,7 +9,7 @@ public class AlchemyGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webApp
         var client = CreateAlchemistGrpcClient();
 
         var brandName = "Elizavecca";        
-        var response = await client.FindBrandByName(brandName);
+        var response = await client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName});
 
         Assert.NotNull(response);
         Assert.Equal(brandName, response.Name);
