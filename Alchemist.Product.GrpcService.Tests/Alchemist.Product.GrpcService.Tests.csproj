@@ -22,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Alchemist.Product.GrpcService" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />
     <ProjectReference Include="..\Alchemist.Product.GrpcService\Alchemist.Product.GrpcService.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures.Grpc\Alchemist.Test.Server.Fixtures.Grpc.csproj" />

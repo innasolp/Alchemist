@@ -4,7 +4,7 @@ public class AlchemyGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webApp
     : AlchemistGrpcTestFixture(webAppFactory)
 {
     [Fact]
-    public async Task GetComponentUnaryCallTest()
+    public async Task GetBrandTest()
     {
         var client = CreateAlchemistGrpcClient();
 

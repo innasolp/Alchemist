@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace Alchemist.Test.Server.Fixtures;
 
 public abstract class AlchemistWebAppFactory<TEntryPoint, TDbContext> : WebApplicationFactory<TEntryPoint>
-    where TEntryPoint : Program
+    where TEntryPoint : class
     where TDbContext : DbContext
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -19,11 +18,8 @@ public abstract class AlchemistWebAppFactory<TEntryPoint, TDbContext> : WebAppli
             if (descriptor != null)
                 services.Remove(descriptor);
 
-            services.AddDbContext<TDbContext>(options =>
-                {
-                    options.UseInMemoryDatabase("InMemoryAlchemistTest");
-                });
-
+            services.AddDbContextPool<TDbContext>(optionsBuilder =>SetDbContext(optionsBuilder));
+           
             RegisterServices(services);
 
             var sp = services.BuildServiceProvider();
@@ -41,7 +37,9 @@ public abstract class AlchemistWebAppFactory<TEntryPoint, TDbContext> : WebAppli
                 throw ex;
             }
         });
-    }
+    }    
+
+    protected abstract DbContextOptionsBuilder SetDbContext(DbContextOptionsBuilder optionsBuilder);
 
     protected abstract void FillTestData(TDbContext dbContext);
 
