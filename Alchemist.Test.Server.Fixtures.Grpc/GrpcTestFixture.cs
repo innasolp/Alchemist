@@ -11,11 +11,15 @@ public abstract class GrpcTestFixture<TGrpcWebAppFactory, TEntryPoint, TDbContex
 {
     protected GrpcChannel GrpcChannel { get; private set; }
 
+    protected HttpMessageHandler HttpMessageHandler { get; private set; }
+
     public GrpcTestFixture(TGrpcWebAppFactory webAppFactory) : base(webAppFactory)
     {
+        HttpMessageHandler = WebAppFactory.Server.CreateHandler();
+        
         GrpcChannel = GrpcChannel.ForAddress("http://localhost", new GrpcChannelOptions
         {
-            HttpClient = HttpClient
-        });
+             HttpHandler = HttpMessageHandler
+         });
     }
 }
