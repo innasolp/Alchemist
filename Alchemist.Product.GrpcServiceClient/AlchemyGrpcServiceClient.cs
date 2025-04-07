@@ -17,7 +17,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
 
     private readonly IEnumerable<Interceptor> _interceptors;
 
-    public AlchemyGrpcServiceClient(GrpcChannel channel):this(channel, [])
+    public AlchemyGrpcServiceClient(GrpcChannel channel) : this(channel, [])
     {
     }
 
@@ -25,15 +25,19 @@ public class AlchemyGrpcServiceClient : IProductDataService
     {
         _channel = channel;
         _interceptors = interceptors;
-        var invoker = _channel.Intercept(_interceptors.ToArray())
+        var invoker = _channel.Intercept([.. _interceptors])
             .Intercept(new ClientExceptionErrorInfoInterceptor())
             .Intercept(new ClientNotFoundInterceptor());
-        _serviceClient = new AlchemyGrpcService.AlchemyGrpcServiceClient(invoker);        
+        _serviceClient = new AlchemyGrpcService.AlchemyGrpcServiceClient(invoker);
     }
 
     public async Task<IBrand> CreateBrand(IBrand brand)
     {
-        var brandReply = await _serviceClient.CreateBrandAsync(new CreateBrandRequest { Name = brand.Name, Comment = brand.Comment, Countryid = brand.CountryId });
+        using var call = _serviceClient.CreateBrandAsync(
+            new CreateBrandRequest { Name = brand.Name, Comment = brand.Comment, Countryid = brand.CountryId });
+        var headers = await call.ResponseHeadersAsync;
+
+        var brandReply = await call.ResponseAsync;
         return await Task.FromResult(new Brand
         {
             Id = brandReply.Id,
@@ -119,7 +123,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
 
     public async Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId)
     {
-        var request = new GetByIdInt64Request { Id = shopProductId};
+        var request = new GetByIdInt64Request { Id = shopProductId };
         var reply = await _serviceClient.GetShopProductCategoriesAsync(request);
         if (reply == null) return await Task.FromResult(default(List<IShopProductCategory>));
         return await reply.FromListReply<ShopProductCategoryListReply, ShopProductCategoryReply, IShopProductCategory>((s) =>
@@ -151,7 +155,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
     public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId)
     {
         var request = new ShopProductCategoryRequest { Shopcategoryid = shopCategoryId, Shopproductid = shopProductId };
-        var reply = await _serviceClient.CheckShopProductCategoryAsync(request);        
+        var reply = await _serviceClient.CheckShopProductCategoryAsync(request);
         return await Task.FromResult(reply.Value);
     }
 
@@ -236,7 +240,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         var currency = reply.FromMessage<Currency>();
         currency.Id = (short)reply.Id;
         return await Task.FromResult(currency);
-    }    
+    }
 
     public async Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl)
     {
@@ -248,7 +252,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
         shopProduct.Id = reply.Id;
         return await Task.FromResult(shopProduct);
     }
-    
+
     public async Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId)
     {
         var request = new GetShopProductByShopAndItemIdRequest { Itemid = itemId, Shopid = shopId };

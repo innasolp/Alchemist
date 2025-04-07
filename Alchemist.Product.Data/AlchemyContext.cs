@@ -1,6 +1,4 @@
-﻿using Alchemist.Product.Data;
-using Alchemist.Product.Interfaces;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Alchemist.Product.Data;
 
@@ -67,7 +65,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("brand");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Comment)
                 .HasMaxLength(1024)
                 .HasColumnName("comment");
@@ -83,7 +81,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("component");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.GroupId).HasColumnName("group_id");
             entity.Property(e => e.Name)
@@ -100,7 +98,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("component_group");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
@@ -113,7 +111,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("country");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
@@ -128,7 +126,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("product");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AddedTime).HasColumnName("added_time");
             entity.Property(e => e.Articul)
                 .HasMaxLength(63)
@@ -165,8 +163,7 @@ public partial class AlchemyContext : DbContext
 
             entity.Property(e => e.Id)
                 // .HasDefaultValueSql("nextval('product_type_id_seq'::regclass)")
-                .HasColumnName("id")
-                .UseIdentityAlwaysColumn();
+                .HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(63)
                 .HasColumnName("name");
@@ -191,7 +188,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("purpose_type");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
@@ -203,7 +200,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("shop");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
@@ -223,7 +220,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("shop_category");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Category)
                 .HasMaxLength(255)
                 .HasColumnName("category");
@@ -241,7 +238,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("shop_product");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.IsActual).HasColumnName("is_actual");
             entity.Property(e => e.ItemId)
                 .HasMaxLength(255)
@@ -264,7 +261,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("shop_product_category");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
             entity.Property(e => e.ShopCategoryId).HasColumnName("shop_category_id");
         });        
@@ -275,7 +272,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("shop_settings");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ParentSettingsId).HasColumnName("parent_settings_id");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.ShopId)
@@ -293,7 +290,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("currency");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.FullName)
                 .HasMaxLength(128)
                 .HasColumnName("full_name");
@@ -309,7 +306,7 @@ public partial class AlchemyContext : DbContext
 
             entity.ToTable("shop_product_price");
 
-            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
             entity.Property(e => e.Price).HasColumnName("price");
             entity.Property(e => e.LastUpdate).HasColumnName("last_update");

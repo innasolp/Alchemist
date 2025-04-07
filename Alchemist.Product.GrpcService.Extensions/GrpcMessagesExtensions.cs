@@ -44,7 +44,7 @@ public static class GrpcMessagesExtensions
             ProductTypeId = (short)message.Producttypeid,
             BrandId = message.Brandid,
             InitShopId = message.Initshopid,
-            AddedTime = message.Addedts.ToDateTime(),
+            AddedTime = message.Addedts?.ToDateTime() ?? DateTime.Now.ToUniversalTime(),
             Articul = message.Articul
         };
     }
@@ -59,7 +59,7 @@ public static class GrpcMessagesExtensions
             ItemId = message.Itemid,
             ApiUrl = message.Apiurl,
             ItemUrl = message.Itemurl,
-            LastUpdate = message.Lastupdate.ToDateTime(),
+            LastUpdate = message.Lastupdate?.ToDateTime() ?? DateTime.Now.ToUniversalTime(),
             IsActual = message.Isactual
         };
     }
@@ -105,7 +105,7 @@ public static class GrpcMessagesExtensions
             ShopProductId = message.Shopproductid,
             Price = message.Price,
             CurrencyId = message.Currencyid,
-            LastUpdate = message.Lastupdate.ToDateTime()
+            LastUpdate = message.Lastupdate?.ToDateTime() ?? DateTime.Now.ToUniversalTime(),
         };
     }
 

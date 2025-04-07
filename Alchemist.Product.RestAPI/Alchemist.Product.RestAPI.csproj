@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
