@@ -14,34 +14,40 @@ public abstract class AlchemistWebAppFactory<TEntryPoint, TDbContext> : WebAppli
     {
         builder.ConfigureTestServices(services =>
         {
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<TDbContext>));
-            if (descriptor != null)
-                services.Remove(descriptor);
-
-            services.AddDbContextPool<TDbContext>(optionsBuilder =>SetDbContext(optionsBuilder));
-           
-            RegisterServices(services);
+            ConfigureServices(services);
 
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
-            using var appContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
-            try
-            {
-                appContext.Database.EnsureDeleted();
-                appContext.Database.EnsureCreated();
-
-                FillTestData(appContext);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            ConfigureServiceProvider(scope.ServiceProvider);
         });
-    }    
+    }
 
     protected abstract DbContextOptionsBuilder SetDbContext(DbContextOptionsBuilder optionsBuilder);
 
     protected abstract void FillTestData(TDbContext dbContext);
 
-    protected abstract void RegisterServices(IServiceCollection services);
+    protected virtual void ConfigureServices(IServiceCollection services)
+    {
+        var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<TDbContext>));
+        if (descriptor != null)
+            services.Remove(descriptor);
+
+        services.AddDbContextPool<TDbContext>(optionsBuilder => SetDbContext(optionsBuilder));
+    }
+
+    protected virtual void ConfigureServiceProvider(IServiceProvider serviceProvider)
+    {
+        using var appContext = serviceProvider.GetRequiredService<TDbContext>();
+        try
+        {
+            appContext.Database.EnsureDeleted();
+            appContext.Database.EnsureCreated();
+
+            FillTestData(appContext);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
 }

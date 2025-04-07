@@ -7,8 +7,8 @@ using Alchemist.Log.Serilog;
 using Grpc.Server.RequestInterceptor;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
-using Alchemist.Product.Data;
 using Alchemist.DataService.Interfaces;
+using Alchemist.Product.Data.Postgresql;
 
 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -24,22 +24,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddPerfomanceCounter(typeof(ServerRequestSenderInterceptor<AlchemyService>), (logger) => new SerilogUrlLogger(logger));
 
-builder.Services.AddDbContextFactory<AlchemyContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?.SetEnvironmentLocalHostIfNeed()));
+builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?.SetEnvironmentLocalHostIfNeed()));
 builder.Services.AddScoped<IAlchemyRepository,AlchemyRepository>();
 
-builder.Services.AddSingleton<ServerExceptionInterceptor<AlchemyService>>();
+builder.Services.AddSingleton<ServerLoggingInterceptor<AlchemyService>>();
 builder.Services.AddSingleton<ServerRequestSenderInterceptor<AlchemyService>>();
 builder.Services.AddGrpc(options =>
 {
-    options.Interceptors.Add<ServerExceptionInterceptor<AlchemyService>>();
     options.Interceptors.Add<ServerRequestSenderInterceptor<AlchemyService>>();
+    options.Interceptors.Add<ServerLoggingInterceptor<AlchemyService>>();    
 });
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
 var appSerilogBuilder = new AppSerilogBuilder(builder);
 appSerilogBuilder.AddServiceBaseConfigs(typeof(AlchemyService).Name);
 appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerExceptionInterceptor<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
 
 appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8071", EventIds.Perfomance.Id, logPath, typeof(AlchemyService).Name);
 

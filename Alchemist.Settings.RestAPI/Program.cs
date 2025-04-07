@@ -1,7 +1,7 @@
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Log.Serilog;
-using Alchemist.Product.Data;
+using Alchemist.Product.Data.Postgresql;
 using Alchemist.Settings.Data.Repository;
 using Alchemist.Settings.RestAPI.Controllers;
 using Http.ErrorHandling;
@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?
+builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?
     .SetEnvironmentLocalHostIfNeed()));
 
 builder.Services.AddScoped<ISettingsRepository,SettingsRepository>();

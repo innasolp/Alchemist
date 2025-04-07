@@ -236,3 +236,5 @@
 /Alchemist.Product.GrpcService.Tests/obj
 /Alchemist.Test.Server.Fixtures.Grpc/obj
 /Alchemist.Test.Server.Fixtures.Grpc/bin/Debug/net8.0
+/Alchemist.Product.Data.Postgresql/bin/Debug/net8.0
+/Alchemist.Product.Data.Postgresql/obj

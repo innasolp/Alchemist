@@ -11,7 +11,7 @@
   </PropertyGroup>  
 
   <ItemGroup>
-    <Protobuf Include="Protos\alchemygrpc.proto"  GrpcServices="Server"  />
+    <Protobuf Include="Protos\alchemygrpc.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Repository\Alchemist.Product.Data.Repository.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />

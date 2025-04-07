@@ -1,5 +1,6 @@
 ﻿using Grpc.Net.Client;
 using Microsoft.EntityFrameworkCore;
+using Xunit.Abstractions;
 
 namespace Alchemist.Test.Server.Fixtures.Grpc;
 
@@ -13,7 +14,7 @@ public abstract class GrpcTestFixture<TGrpcWebAppFactory, TEntryPoint, TDbContex
 
     protected HttpMessageHandler HttpMessageHandler { get; private set; }
 
-    public GrpcTestFixture(TGrpcWebAppFactory webAppFactory) : base(webAppFactory)
+    public GrpcTestFixture(TGrpcWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : base(webAppFactory, outputHelper)
     {
         HttpMessageHandler = WebAppFactory.Server.CreateHandler();
         
@@ -21,5 +22,12 @@ public abstract class GrpcTestFixture<TGrpcWebAppFactory, TEntryPoint, TDbContex
         {
              HttpHandler = HttpMessageHandler
          });
+    }
+
+    public override void Dispose()
+    {
+        GrpcChannel.Dispose();
+        HttpMessageHandler.Dispose();
+        base.Dispose();
     }
 }
