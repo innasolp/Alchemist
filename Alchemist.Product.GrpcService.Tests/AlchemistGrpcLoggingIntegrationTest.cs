@@ -1,12 +1,11 @@
-﻿using Alchemist.Product.Data;
-using Alchemist.Test.Server.Fixtures.Grpc;
+﻿using Alchemist.Test.Server.Fixtures.Grpc;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpcLoggingWebAppFactory, Program, AlchemyContext>
+public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpcLoggingWebAppFactory, Program>
 {
     record TestLogMessage (LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 

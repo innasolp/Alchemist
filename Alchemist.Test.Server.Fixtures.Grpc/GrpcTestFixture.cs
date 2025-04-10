@@ -1,14 +1,13 @@
 ﻿using Grpc.Net.Client;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit.Abstractions;
 
 namespace Alchemist.Test.Server.Fixtures.Grpc;
 
-public abstract class GrpcTestFixture<TGrpcWebAppFactory, TEntryPoint, TDbContext> :
-    TestFixture<TGrpcWebAppFactory, TEntryPoint, TDbContext>
-    where TEntryPoint : class
-    where TDbContext : DbContext
-    where TGrpcWebAppFactory : AlchemistWebAppFactory<TEntryPoint, TDbContext>
+public abstract class GrpcTestFixture<TGrpcWebAppFactory, TEntryPoint> :
+    TestFixture<TGrpcWebAppFactory, TEntryPoint>
+    where TEntryPoint : class   
+    where TGrpcWebAppFactory : WebApplicationFactory<TEntryPoint>
 {
     protected GrpcChannel GrpcChannel { get; private set; }
 

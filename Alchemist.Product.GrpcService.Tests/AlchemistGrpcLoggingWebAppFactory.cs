@@ -1,12 +1,11 @@
-﻿
-using Alchemist.Test.Server.Fixtures;
+﻿using Alchemist.Test.Server.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
 public class AlchemistGrpcLoggingWebAppFactory: AlchemistGrpcWebAppFactory
 {
-    public FixtureLoggingContext FixtureLoggingContext { get; } = new FixtureLoggingContext();
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
     protected override void ConfigureServices(IServiceCollection services)
     {

@@ -238,3 +238,7 @@
 /Alchemist.Test.Server.Fixtures.Grpc/bin/Debug/net8.0
 /Alchemist.Product.Data.Postgresql/bin/Debug/net8.0
 /Alchemist.Product.Data.Postgresql/obj
+/Alchemist.Product.RestAPI.Test/bin/Debug/net8.0
+/Alchemist.Product.RestAPI.Test/obj
+/Alchemist.Test.SignalRWebAppFactory/bin/Debug/net8.0
+/Alchemist.Test.SignalRWebAppFactory/obj

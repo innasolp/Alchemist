@@ -2,7 +2,7 @@
 
 namespace Alchemist.Product.Data.Postgresql;
 
-public class AlchemyContextPostgres: AlchemyContext
+internal class AlchemyContextPostgres: AlchemyContext
 {
     public AlchemyContextPostgres()
     {

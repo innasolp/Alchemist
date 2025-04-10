@@ -1,6 +1,7 @@
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Log.Serilog;
+using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Settings.Data.Repository;
 using Alchemist.Settings.RestAPI.Controllers;
@@ -12,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?
     .SetEnvironmentLocalHostIfNeed()));
 
 builder.Services.AddScoped<ISettingsRepository,SettingsRepository>();
@@ -35,7 +36,7 @@ appSerilogBuilder.AddServiceBaseConfigs(serviceName);
 appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
 appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
 
-appSerilogBuilder.SetSerilog();
+appSerilogBuilder.SetSerilog(builder.Logging);
 
 
 var app = builder.Build();

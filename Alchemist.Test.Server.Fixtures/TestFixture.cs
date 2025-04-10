@@ -1,12 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit.Abstractions;
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public abstract class TestFixture<TWebAppFactory, TEntryPoint, TDbContext>(TWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : IClassFixture<TWebAppFactory>, IDisposable
-     where TEntryPoint : class
-    where TDbContext : DbContext
-    where TWebAppFactory : AlchemistWebAppFactory<TEntryPoint, TDbContext>
+public abstract class TestFixture<TWebAppFactory, TEntryPoint>(TWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : IClassFixture<TWebAppFactory>, IDisposable
+     where TEntryPoint : class    
+    where TWebAppFactory : WebApplicationFactory<TEntryPoint>
 {
     protected TWebAppFactory WebAppFactory { get; private set; } = webAppFactory;
 
