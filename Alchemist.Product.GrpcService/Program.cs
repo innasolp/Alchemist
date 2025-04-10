@@ -9,6 +9,7 @@ using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Data.Postgresql;
+using Alchemist.Product.Data;
 
 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -22,9 +23,9 @@ void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddPerfomanceCounter(typeof(ServerRequestSenderInterceptor<AlchemyService>), (logger) => new SerilogUrlLogger(logger));
+builder.Services.AddPerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>((logger) => new SerilogUrlLogger<PerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>>(logger));
 
-builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?.SetEnvironmentLocalHostIfNeed()));
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?.SetEnvironmentLocalHostIfNeed()));
 builder.Services.AddScoped<IAlchemyRepository,AlchemyRepository>();
 
 builder.Services.AddSingleton<ServerLoggingInterceptor<AlchemyService>>();
@@ -43,7 +44,7 @@ appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{typeof(AlchemyService).
 
 appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8071", EventIds.Perfomance.Id, logPath, typeof(AlchemyService).Name);
 
-appSerilogBuilder.SetSerilog();
+appSerilogBuilder.SetSerilog(builder.Logging);
 
 builder.Services.AddAuthentication("https");
 

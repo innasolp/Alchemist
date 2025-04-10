@@ -24,15 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Http.ErrorHandling">
-      <HintPath>..\Libs\Http\ErrorHandling\Http.ErrorHandling.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.Info">
-      <HintPath>..\Libs\Http\Info\Http.Info.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.Interfaces">
-      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
-    </Reference>
     <Reference Include="Serilog.Configuration.Extensions">
       <HintPath>..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
     </Reference>

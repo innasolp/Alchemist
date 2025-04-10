@@ -1,12 +1,11 @@
-﻿using Alchemist.Product.Data;
-using Alchemist.Test.Server.Fixtures.Grpc;
+﻿using Alchemist.Test.Server.Fixtures.Grpc;
 using Grpc.Core;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
 public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
-    : GrpcTestFixture<AlchemistGrpcWebAppFactory, Program, AlchemyContext>(webAppFactory, outputHelper)
+    : GrpcTestFixture<AlchemistGrpcWebAppFactory, Program>(webAppFactory, outputHelper)
 {
     [Fact]
     public async Task FindBrandByExistingNameSuccess()
