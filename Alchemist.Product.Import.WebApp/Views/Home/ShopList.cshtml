@@ -4,8 +4,7 @@
 
 @{
     var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
-    Guid? shopGuid = (ViewData["ShopGuid"] is Guid guid) ? guid : null;
-}
+ }
 
 <div>
     <div class="left_menu">
@@ -28,28 +27,7 @@
             </div>
         </div>
     </div>
-    <ul class="left-menu-ul" id="shopsList">
-        <li class="left-menu-ul">
-            <a onclick="showShopModal('/Shop/New', null, (result)=>{ if(!result) return; saveTab($('#settingsForm'), ()=>{$('#newShopForm')[0].submit(); });})">Новый</a>            
-        </li>
-        
-        @foreach (var shop in Model)
-        {
-            <form name="itemShopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
-                  asp-route-shopGuid="@shop.Guid"
-                  asp-route-tab="@((int)selectedTabViewName.Key)">
-            <li class="@CssHelper.GetLiStyle(shop.Guid.ToString(), shopGuid?.ToString() ?? "")">
-                <div class="flex">
-                    <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.parentElement.submit();});"
-                        style="width:250px">@shop.Name</a>
-                        @if (shop.Guid == shopGuid)
-                        {
-                            <i class="fa fa-edit" style="font-size:24px"
-                           onclick="showShopModal('/Shop/Edit', { 'shopGuid': '@shop.Guid'})"></i>
-                        }
-                </div>
-            </li>
-            </form>
-        }
-    </ul>
+    <div id="shopListPartialDiv">        
+        @await Html.PartialAsync($"~/Views/Home/_ShopListPartial.cshtml", Model)
+    </div>
 </div>

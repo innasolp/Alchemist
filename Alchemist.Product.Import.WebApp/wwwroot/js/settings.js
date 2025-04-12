@@ -67,10 +67,3 @@ async function setShopSettingsFromJson(formSelector, fileInputName, shopGuid, sh
         }        
     );
 }
-
-async function updateShops() {
-    postData('/Home/UpdateShops', null,
-        (result) => {
-            if (result) location.reload();
-        });
-}

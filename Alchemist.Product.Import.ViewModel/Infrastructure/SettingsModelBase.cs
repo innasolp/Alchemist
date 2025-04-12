@@ -6,15 +6,15 @@ public enum TabType
 {
     [Description("Products")]
     [Category("ImportProducts")]
-    Products = 0,
+    Products = 1,
 
     [Description("Categories")]
     [Category("ImportCategories")]
-    Categories = 1,
+    Categories = 2,
 
     [Description("Shop")]
     [Category("ShopSettingTabs")]
-    Shop = 2
+    Shop = 0
 }
 
 public abstract class SettingsModelBase

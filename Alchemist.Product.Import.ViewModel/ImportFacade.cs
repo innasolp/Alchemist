@@ -1,5 +1,4 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
 
