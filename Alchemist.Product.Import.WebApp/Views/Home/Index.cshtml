@@ -4,8 +4,10 @@
 
 @{
     ViewData["Title"] = "Home Page";
-    var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
-    var selectedTabName = (ViewData["Tab"] is TabType tabType2) ? ViewHelper.TabNames.FirstOrDefault(d => d.Key == tabType2) : ViewHelper.TabViewNames.FirstOrDefault();
+    TabType? tabType = (ViewData["Tab"] is TabType tab2) ? tab2 : null;
+    var selectedTabViewName = tabType != null ? ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
+    var selectedTabName = tabType != null ? ViewHelper.TabNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
+    Guid? shopGuid = (ViewData["ShopGuid"] is Guid guid) ? guid : null;
 }
 
 @section Scripts {
@@ -22,7 +24,7 @@
     <script src="~/js/utils.js"></script>
 
     <script>
-        updateShops();
+        updateShops($('#shopListPartialDiv'), {'shopGuid': '@(shopGuid?.ToString() ?? "")', 'tab': @((int?)tabType ?? 0), 'tabView' : '@selectedTabViewName.Value'  }, $('#settingsPartialDiv') );
     </script>
 }
 
@@ -43,7 +45,7 @@
                 </div>
             }
         </div>
-        <div id="settingsDiv">
+        <div id="settingsPartialDiv">
             @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel ?? selectedTabName.Key.CreateDefaultTabModel() )
         </div>
     </div>

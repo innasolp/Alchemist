@@ -13,7 +13,7 @@
 }
 <hr />
 <div>
-    <div class="menu" id="menuDiv">
+    <div class="menu" id="tabsMenuDiv">
         <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
             <a class="display-8  menu_header"
                onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/ShopSettings/SetShopSettings', @GetServiceData(ShopSettingType.Product), (r)=> {if(r) location.reload(); }))">
@@ -27,7 +27,7 @@
             </a>
         </div>
     </div>
-    <div>
+    <div id="shopSettingsPartialDiv">
         @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings ?? new ProductShopSettingsModel())
     </div>
 </div>
