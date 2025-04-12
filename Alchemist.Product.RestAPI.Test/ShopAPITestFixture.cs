@@ -6,6 +6,6 @@ namespace Alchemist.Product.RestAPI.Test;
 
 public class ShopAPITestFixture<TWebAppFactory>(TWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
     : TestFixture<TWebAppFactory, Startup>(webAppFactory, outputHelper)
-    where TWebAppFactory: AlchemistWebAppFactory<Startup, AlchemyContext>
+    where TWebAppFactory: AlchemistDbContextWebAppFactory<Startup, AlchemyContext>
 {
 }

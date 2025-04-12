@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public abstract class AlchemistWebAppFactory<TEntryPoint, TDbContext> : WebApplicationFactory<TEntryPoint>
+public abstract class AlchemistDbContextWebAppFactory<TEntryPoint, TDbContext> : WebApplicationFactory<TEntryPoint>
     where TEntryPoint : class
     where TDbContext : DbContext
 {
@@ -20,9 +21,9 @@ public abstract class AlchemistWebAppFactory<TEntryPoint, TDbContext> : WebAppli
             using var scope = sp.CreateScope();
             ConfigureServiceProvider(scope.ServiceProvider);
         });
-    }
+    }    
 
-    protected abstract DbContextOptionsBuilder SetDbContext(DbContextOptionsBuilder optionsBuilder);
+    protected abstract IServiceCollection AddDbContext(IServiceCollection services);
 
     protected abstract void FillTestData(TDbContext dbContext);
 
@@ -32,7 +33,7 @@ public abstract class AlchemistWebAppFactory<TEntryPoint, TDbContext> : WebAppli
         if (descriptor != null)
             services.Remove(descriptor);
 
-        services.AddDbContextPool<TDbContext>(optionsBuilder => SetDbContext(optionsBuilder));
+        AddDbContext(services);
     }
 
     protected virtual void ConfigureServiceProvider(IServiceProvider serviceProvider)
