@@ -1,58 +1,88 @@
 using Alchemist.Common;
+using Alchemist.Product.Data.Repository;
 using Alchemist.Log.Serilog;
 using Http.ErrorHandling;
 using Http.Info;
 using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.EntityFrameworkCore;
-using Message.SignalR.DependencyInjection;
-using Alchemist.Product.Data.Postgresql;
-using Alchemist.Product.RestAPI;
+using Serilog.Loggers;
 using Alchemist.Product.Data;
+using Alchemist.Product.RestAPI.Controllers;
+using Message.SignalR.DependencyInjection;
+using Alchemist.DataService.Interfaces;
+using Alchemist.Product.Data.Postgresql;
 
-public partial class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?
+    .SetEnvironmentLocalHostIfNeed()));
+
+builder.Services.AddScoped<IAlchemyRepository, AlchemyRepository>();
+
+var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>()?.SetEnvironmentLocalHostIfNeed();
+builder.Services.AddSignalRMessageSender(signalRUrl);
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication("https");
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopController>>();
+builder.Services.AddSingleton<InfoLogMiddleware<ShopController>>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopCategoryController>>();
+builder.Services.AddSingleton<InfoLogMiddleware<ShopCategoryController>>();
+
+builder.Services.AddProblemDetails();
+
+builder.Services.AddPerfomanceCounter<InfoLogMiddleware<ShopController>>((logger) => new SerilogUrlLogger<PerfomanceCounter<InfoLogMiddleware<ShopController>>>(logger));
+
+
+
+var logPath = $"{Utils.GetAppPath()}/Logs";
+var appSerilogBuilder = new AppSerilogBuilder(builder);
+var serviceName = "Alchemist.Shop.RestAPI";
+appSerilogBuilder.AddServiceBaseConfigs(serviceName);
+appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8051", EventIds.Perfomance.Id, logPath, serviceName);
+appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+
+appSerilogBuilder.SetSerilog(builder.Logging);
+
+
+var app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseMiddleware<InfoLogMiddleware<ShopController>>();
+
+app.UsePerfomanceCounters();
+
+app.UseAuthentication();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    public static void Main(string[] args)
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    app.UseSwagger(options =>
     {
-        CreateHostBuilder(args).Build().Run();
-    }
-
-    public static IHostBuilder CreateHostBuilder(string[] args)
-    {
-        var builder = Host.CreateDefaultBuilder(args);
-        
-        builder.ConfigureWebHostDefaults(webBuilder =>
-        {
-            webBuilder.UseStartup<Startup>();
-        });
-
-        builder.ConfigureServices((context, services) =>
-            {
-                services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(context.Configuration.GetConnectionString("DbContext")?
-                     .SetEnvironmentLocalHostIfNeed()));
-
-                var signalRUrl = context.Configuration.GetSection("SignalRUrl").Get<string>()?.SetEnvironmentLocalHostIfNeed();
-                services.AddSignalRMessageSender(signalRUrl);
-            });        
-
-        builder.ConfigureLogging((hostContext, logging) =>
-        {
-            var appSerilogBuilder = SetLog(hostContext.Configuration, hostContext.HostingEnvironment);
-            appSerilogBuilder.SetSerilog(logging);
-        });
-        
-       
-        return builder;
-    }
-
-    private static AppSerilogBuilder SetLog(IConfiguration configuration, IHostEnvironment env)
-    {
-        var logPath = $"{Utils.GetAppPath()}/Logs";
-        var appSerilogBuilder = new AppSerilogBuilder(configuration, env);
-        var serviceName = "Alchemist.Shop.RestAPI";
-        appSerilogBuilder.AddServiceBaseConfigs(serviceName);
-        appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8051", EventIds.Perfomance.Id, logPath, serviceName);
-        appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-        appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
-        return appSerilogBuilder;
-    }
+        options.SerializeAsV2 = true;
+    });
 }
+
+app.UseHsts();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+public class ShopAPIProgram { }

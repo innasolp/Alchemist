@@ -6,18 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.RestAPI.Test;
 
-public abstract class ShopAPIWebAppFactory : AlchemistDbContextWebAppFactory<Startup, AlchemyContext>
+public abstract class ShopAPIWebAppFactory : DbContextWebAppFactory<ShopAPIProgram, AlchemyContext>
 {
     protected override void FillTestData(AlchemyContext dbContext)
     {
         dbContext.Shops.Add(new Shop { Name = "TestShop", Url = "https://testshop1" });
         dbContext.SaveChanges();
     }
-
-    //protected override DbContextOptionsBuilder SetDbContext(DbContextOptionsBuilder optionsBuilder)
-    //{
-    //    return optionsBuilder.UseNpgsql("Host=localhost;Database=test_ci_db;Username=postgres;Password=P@ssw0rd;");
-    //}
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {

@@ -23,9 +23,9 @@ public static class EntityExtensions
     }
 
     public static T ToImportServiceSettings<T>(this IShopSettings shopSettings)
-        where T : IImportServiceSettings
+        where T : IImportServiceSettings, new()
     {
-        var model = JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString());
+        var model = shopSettings.JsonValue != null ? JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString()) : new T();
 
         model.Id = shopSettings.Id;
         model.Name = shopSettings.Name;

@@ -204,40 +204,48 @@ public class HomeController : Controller
 
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> LoadTab(Guid? shopGuid, int tab, string tabView)
     {
-        SetCurrentShopGuid(shopGuid);
-
-        ShopImportModel shopImport;
-        var shopImports = _importFacade.GetShops();
-
-        if (shopGuid == null)
-            shopImport = shopImports.First();
-        else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))        
-            return PartialView($"~/Views/Home/{tabView}.cshtml", ((TabType)tab).CreateDefaultTabModel());
-        
-
-        var currentSettings = shopImport.GetSettings((TabType)tab);
-        if (currentSettings == null)
+        try
         {
-            currentSettings = shopImport.CreateSettings((TabType)tab);
-            shopImport.SetSettings((TabType)tab, currentSettings);
-        }
+            SetCurrentShopGuid(shopGuid);
 
-        if ((TabType)tab == TabType.Shop &&
-            shopImport.GetSettings((TabType)tab, true) == null)
-        {
-            var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
-            if (settings != null)
-                shopImport.SetSettings((TabType)tab, settings);
-            else
+            ShopImportModel shopImport;
+            var shopImports = _importFacade.GetShops();
+
+            if (shopGuid == null)
+                shopImport = shopImports.First();
+            else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
+                return PartialView($"~/Views/Home/{tabView}.cshtml", ((TabType)tab).CreateDefaultTabModel());
+
+
+            var currentSettings = shopImport.GetSettings((TabType)tab);
+            if (currentSettings == null)
             {
-                var currentShopSettings = shopImport.ShopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
-                shopImport.SetSettings((TabType)tab, currentShopSettings);
+                currentSettings = shopImport.CreateSettings((TabType)tab);
+                shopImport.SetSettings((TabType)tab, currentSettings);
             }
-        }        
 
-        return PartialView($"~/Views/Home/{tabView}.cshtml", currentSettings);
+            if ((TabType)tab == TabType.Shop &&
+                shopImport.GetSettings((TabType)tab, true) == null)
+            {
+                var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
+                if (settings != null)
+                    shopImport.SetSettings((TabType)tab, settings);
+                else
+                {
+                    var currentShopSettings = shopImport.ShopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
+                    shopImport.SetSettings((TabType)tab, currentShopSettings);
+                }
+            }
+
+            return PartialView($"~/Views/Home/{tabView}.cshtml", currentSettings);
+        }
+        catch(Exception e)
+        {
+            return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
+        }
     }
 
     public IActionResult Privacy()
