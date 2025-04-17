@@ -26,9 +26,12 @@ function saveShop(newShopGuidSelector) {
     save('#shopForm',
         '/Shop/Save',
         getFormData($('#shopForm')), (data) =>    {
-        if ($('#Id').val() == 0) {
-            newShopGuidSelector.val(data);
-            };
+            if ($('#Id').val() == 0) {
+                newShopGuidSelector.val(data.guid);
+            }
+            else {
+                $('#shop_li_' + data.guid.toString()).find("a").text(data.name);
+            }
             closeShopModal();
     })
 }
@@ -45,15 +48,21 @@ async function updateShops(divPartialShops, tabData = null, settingsPartialDiv =
                         tabData.shopGuid = result[0].guid.toString();
 
                     if (tabData.shopGuid != null) {
-                        $('#shop_li_' + tabData.shopGuid).addClass('selected');                        
 
-                        var editData = `{ &#39;shopGuid&#39;: &#39;${tabData.shopGuid.toString()}&#39; }`;
-                        var editHtml = `<i class='fa fa-edit' style='font-size:24px'  onclick='showShopModal(&#39;\/Shop\/Edit&#39;, ${editData} )' ><\/i>`;
-                        
-                        $('#shop_li_' + tabData.shopGuid).children('div').children('form').children('div').append(editHtml);
-                    }                  
+                        var shopLi = $('#shop_li_' + tabData.shopGuid);
+                        shopLi.addClass('selected');            
 
-                    settingsPartialDiv.load('/Home/LoadTab', tabData);
+                        var editButton = $("<i class='fa fa-edit' style='font-size:24px'></i>");
+                        var editData = { "shopGuid": tabData.shopGuid.toString() };
+                        editButton.on("click", function () { showShopModal('/Shop/Edit', editData); });
+
+                        shopLi.children('div').children('form').append(editButton);
+                    } 
+
+                    $('#menuDiv').load('/Home/TabsMenu', tabData,
+                        function (response, status, xhr) {
+                            settingsPartialDiv.load('/Home/LoadTab', tabData);
+                    });                   
                 }
             );
         });

@@ -12,7 +12,8 @@
 
 <ul class="left-menu-ul" id="shopsList">
     <li class="left-menu-ul">
-        <a onclick="showShopModal('/Shop/New', null, (result)=>{ if(!result) return; saveTab($('#settingsForm'), ()=>{$('#newShopForm')[0].submit(); });})">Новый</a>
+        <a id="createNewShop" 
+            onclick="showShopModal('/Shop/New', null, (result)=>{ if(!result) return; saveTab($('#settingsForm'), ()=>{$('#newShopForm')[0].submit(); });})">Новый</a>
     </li>
 
     @foreach (var shop in Model)
@@ -21,11 +22,9 @@
             <div class="flex">
                 <form name="itemShopForm" method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                       asp-route-shopGuid="@shop.Guid"
-                      asp-route-tab="@((int)selectedTabViewName.Key)">
-                      <div>
-                       <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.parentElement.submit();});"
-                       style="width:250px">@shop.Name</a>
-                    </div>
+                      asp-route-tab="@((int)selectedTabViewName.Key)">                   
+                       <a onclick="saveTab($('#settingsForm'), ()=>{this.parentElement.submit();});"
+                       style="width:250px">@shop.Name</a>                   
                     </form>
             </div>
         </li>        

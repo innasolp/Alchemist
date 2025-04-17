@@ -59,7 +59,7 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
                 shopImport.Shop.Id = savedShop.Id;
             }
 
-            return Ok(shopImport.Shop.Guid);
+            return Ok(shopImport.Shop);
         }
         catch (Exception e)
         {

@@ -1,12 +1,12 @@
 ﻿@using Alchemist.Product.Import.Model.Infrastructure;
+@using Alchemist.Product.Import.Model;
 
 @model Alchemist.Product.Import.WebApp.Models.IndexViewModel
 
 @{
     ViewData["Title"] = "Home Page";
-    TabType? tabType = (ViewData["Tab"] is TabType tab2) ? tab2 : null;
-    var selectedTabViewName = tabType != null ? ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
-    var selectedTabName = tabType != null ? ViewHelper.TabNames.FirstOrDefault(d => d.Key == tabType) : ViewHelper.TabViewNames.FirstOrDefault();
+    TabType tabType = Model.SelectedTabModel?.Tab ?? default(TabType);
+    var selectedTabViewName = ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType);    
     Guid? shopGuid = (ViewData["ShopGuid"] is Guid guid) ? guid : null;
 }
 
@@ -24,7 +24,7 @@
     <script src="~/js/utils.js"></script>
 
     <script>
-        updateShops($('#shopListPartialDiv'), {'shopGuid': '@(shopGuid?.ToString() ?? "")', 'tab': @((int?)tabType ?? 0), 'tabView' : '@selectedTabViewName.Value'  }, $('#settingsPartialDiv') );
+        updateShops($('#shopListPartialDiv'), {'shopGuid': '@(shopGuid?.ToString() ?? "")', 'tab': @((int?)Model.SelectedTabModel?.Tab ?? 0), 'tabView' : '@selectedTabViewName.Value'  }, $('#settingsPartialDiv') );
     </script>
 }
 
@@ -34,19 +34,10 @@
     </div>
     <div style="width:100%">
         <div class="menu" id="menuDiv">
-            @foreach (var tab in ViewHelper.TabNames)
-            {
-                <div class="@CssHelper.GetMenuItemStyle(tab.Key,selectedTabName.Key)">
-                    <form method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
-                          asp-route-shopGuid="@Model.SelectedShopImport?.ShopGuid"
-                          asp-route-tab="@((int)tab.Key)">
-                        <label class="display-7  menu_header" onclick="saveTab($('#settingsForm'), ()=>{ this.parentElement.submit();})">@tab.Value</label>
-                    </form>
-                </div>
-            }
+           @await Html.PartialAsync($"~/Views/Home/_TabsMenuPartial.cshtml", Model?.SelectedTabModel ?? new ShopSettingTabsModel())
         </div>
         <div id="settingsPartialDiv">
-            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel ?? selectedTabName.Key.CreateDefaultTabModel() )
+            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel ?? tabType.CreateDefaultTabModel())
         </div>
     </div>
 </div>

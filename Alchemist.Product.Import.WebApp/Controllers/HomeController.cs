@@ -101,7 +101,7 @@ public class HomeController : Controller
         {
             SelectedShopImport = shopImport,
             SelectedTab = tab,
-            SelectedTabModel = shopImport.GetSettings(tab),
+            SelectedTabModel = shopImport.GetSettings(tab) ?? tab.CreateDefaultTabModel(),
             Shops = shops
         };
     }
@@ -200,6 +200,25 @@ public class HomeController : Controller
     public IActionResult ShopList(IEnumerable<ShopModel> shops)
     {
         return PartialView("~/Views/Home/_ShopListPartial.cshtml", shops);
+    }
+
+    [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    public IActionResult TabsMenu(Guid shopGuid, int tab)
+    {
+        var shopImports = _importFacade.GetShops();
+
+        if (shopImports.Count == 0)
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel()); 
+
+        ShopImportModel shopImport;
+
+        if (shopGuid == Guid.Empty)
+            shopImport = shopImports.First();
+        else if (!_importFacade.TryGetShopImport(shopGuid, out shopImport))
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel());        
+
+        return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", shopImport.GetSettings((TabType)tab) ?? shopImport.CreateSettings((TabType)tab));
     }
 
     [HttpPost]
