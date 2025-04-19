@@ -111,6 +111,11 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         if(!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
             return NotFound(data.ShopGuid);
 
+        var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
+
+        if (shopSettings.GetServiceSettings(data.Name) == null)
+            shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(data.Name));
+
         shopImport.ShopSettingTabs?.GetShopSettingsByGuid(data.ShopSettingsGuid)?
                  .UpdateServiceSettings(data);
 

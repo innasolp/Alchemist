@@ -24,8 +24,10 @@ function closeShopModal() {
 
 function saveShop(newShopGuidSelector) {
     save('#shopForm',
-        '/Shop/Save',
-        getFormData($('#shopForm')), (data) =>    {
+        '/Shop/Save',       
+        getFormData($('#shopForm')),
+        null,
+        (data) => {
             if ($('#Id').val() == 0) {
                 newShopGuidSelector.val(data.guid);
             }
@@ -33,7 +35,7 @@ function saveShop(newShopGuidSelector) {
                 $('#shop_li_' + data.guid.toString()).find("a").text(data.name);
             }
             closeShopModal();
-    })
+    }, null)
 }
 
 async function updateShops(divPartialShops, tabData = null, settingsPartialDiv = null) {

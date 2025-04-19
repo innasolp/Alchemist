@@ -114,11 +114,15 @@ function postData(url, data, onSuccess = null, onError = null) {
     });
 }
 
-function save(selectorId, url, data, onSuccess=null, onError=null) {
+function save(selectorId, url, data, onValidationError = null, onSuccess=null, onError=null) {
 
     $.validator.unobtrusive.parse($(selectorId));
 
-    if (!$(selectorId).valid()) return;
+    if (!$(selectorId).valid()) {
+        if (onValidationError != null)
+            onValidationError();
+        return;
+    }
 
     var pendingRequest = $(selectorId).data('validator').pendingRequest;
     if (pendingRequest == 0)

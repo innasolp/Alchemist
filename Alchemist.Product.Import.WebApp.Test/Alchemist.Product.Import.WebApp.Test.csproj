@@ -10,6 +10,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Content\browserloader.firefox.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\importservice.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Ozon.Headers.Firefox.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\webloader.firefox.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Microsoft.Playwright.Xunit" Version="1.51.0" />
@@ -32,6 +47,9 @@
   <ItemGroup>
     <Reference Include="DependencyInjection.Interfaces">
       <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Json.Extensions">
+      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
     </Reference>
   </ItemGroup>
   
