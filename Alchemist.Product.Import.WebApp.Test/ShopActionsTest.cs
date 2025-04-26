@@ -31,7 +31,7 @@ public class ShopActionsTest : ImportWebAppTest
     [Fact]
     public async Task CreateNewShop()
     {
-        var startShopImportSettings = await ExpectLoadIndexPageAsync();
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
 
         var shopFormLocator = Page.Locator("#shopForm");
         await Expect(shopFormLocator).ToBeHiddenAsync();
@@ -61,7 +61,7 @@ public class ShopActionsTest : ImportWebAppTest
     [Fact]
     public async Task EditShop()
     {
-        var startShopImportSettings = await ExpectLoadIndexPageAsync();
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
 
         var editShopLocator = Page.Locator("i[class='fa fa-edit']");
         await Expect(editShopLocator).ToHaveCountAsync(1);

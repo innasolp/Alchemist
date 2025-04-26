@@ -7,6 +7,8 @@ using System.Text.Json;
 using Alchemist.Import.Settings.Extensions;
 using Xunit.Abstractions;
 using Alchemist.Product.Import.Model.Infrastructure;
+using Microsoft.Playwright;
+using Alchemist.Import.Settings.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -29,14 +31,14 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             new ShopSettings { Id = 2, ShopId = 2, Type = ShopSettingType.Product },
             new ShopSettings { Id = 3, ShopId = 1, Type = ShopSettingType.Category },
             new ShopSettings { Id = 4, ShopId = 2, Type = ShopSettingType.Category },
-            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service },
-            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service },
-            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service },
-            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service },
-            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service },
-            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service },
-            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service },
-            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service },
+            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.WebLoader) },
+            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.BrowserDataLoader) },
+            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.RequestHeaders) },
+            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.WebLoader) },
             new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product },
         ];
 
@@ -73,53 +75,56 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
             shopSetting.JsonValue = JsonSerializer.Serialize(serviceSettings);
         }
-    }
+    }    
 
-    protected ShopImportSettings? GetShopImportSettings(int shopId, ShopSettingType shopSettingType)
+    protected async Task<ShopImportSettings?> GetShopImportSettingsAsync(int shopId, ShopSettingType shopSettingType)
     {
-        var shopSetting = _shopSettings.First(s => s.ShopId == shopId && s.Type == shopSettingType);
-        ShopImportSettings? shopImportSettings = shopSettingType == ShopSettingType.Product ?
-            shopSetting.ToShopImportSettings<ProductShopImportSettings>()
-            : shopSettingType == ShopSettingType.Category ? shopSetting.ToShopImportSettings<CategoryShopImportSettings>()
-            : throw new InvalidOperationException();
+        var shopSetting = _shopSettings.First(s => s.ShopId == shopId && s.Type == shopSettingType);        
+
+        ShopImportSettings shopImportSettings = shopSetting.Type == ShopSettingType.Product 
+            ? await shopSetting.GetShopImportSettings<ProductShopImportSettings, ImportServiceSettings>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()))
+            : await shopSetting.GetShopImportSettings<CategoryShopImportSettings, ImportServiceSettings>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()));
+
         return shopImportSettings;
     }
 
-    protected async Task<ShopImportSettings> ExpectLoadIndexPageAsync()
+    protected async Task<ShopImportSettings> ExpectLoadIndexPageAsync(IPage page)
     {
-        var response = await Page.GotoAsync(_webAppFactory.ServerAddress);
+        await Context.ClearCookiesAsync();
+
+        var response = await page.GotoAsync(_webAppFactory.ServerAddress);
         Assert.True(response?.Ok);
 
-        var urlLocator = Page.Locator("#Url");
+        var urlLocator = page.Locator("#Url");
         await Expect(urlLocator).ToHaveCountAsync(1);
 
         var shop = _shops.First();
-        var productShopSettings = GetShopImportSettings(shop.Id, ShopSettingType.Product);
+        var productShopSettings = await GetShopImportSettingsAsync(shop.Id, ShopSettingType.Product);
 
         await Expect(urlLocator).ToHaveValueAsync(productShopSettings.Url);
 
         return await Task.FromResult(productShopSettings);
     }
 
-    protected async Task<ShopImportSettings> ExpectForSelectShopAsync(IShop shop)
+    protected async Task<ShopImportSettings> ExpectForSelectShopAsync(IPage page, IShop shop)
     { 
-        var locator = Page.Locator("form[name='itemShopForm']").GetByText(shop.Name);
+        var locator = page.Locator("form[name='itemShopForm']").GetByText(shop.Name);
         await Expect(locator).ToHaveCountAsync(1);
 
         await locator.ClickAsync();
 
-        var currentSelectedLocator = Page.Locator("li[class='left-menu-ul selected']");
+        var currentSelectedLocator = page.Locator("li[class='left-menu-ul selected']");
         await Expect(currentSelectedLocator).ToHaveTextAsync(shop.Name);
 
-        var shopSettings = GetShopImportSettings(shop.Id, ShopSettingType.Product);
-        await Expect(Page.Locator("#Url")).ToHaveValueAsync(shopSettings.Url);
+        var shopSettings = await GetShopImportSettingsAsync(shop.Id, ShopSettingType.Product);
+        await Expect(page.Locator("#Url")).ToHaveValueAsync(shopSettings.Url);
         
         return shopSettings;
     }
 
-    protected async Task SelectTabAsync(TabType tabType, string tabText, TabType prevTabType)
+    protected async Task SelectTabAsync(IPage page, TabType tabType, string tabText, TabType prevTabType)
     {
-        var menu = Page.Locator("#menuDiv");
+        var menu = page.Locator("#menuDiv");
         var tab = menu.GetByText(ViewHelper.TabNames[tabType]);
         await Expect(tab).ToHaveCountAsync(1);
 
@@ -130,7 +135,17 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         await Expect(menu.Locator("div[class = 'menu_item selected']").GetByText(ViewHelper.TabNames[tabType]))
           .ToHaveCountAsync(1);
 
-        await Expect(Page.GetByText(tabText)).ToHaveCountAsync(1);
-        await Expect(Page.Locator("#tabsMenuDiv")).ToHaveCountAsync(0);
+        await Expect(page.GetByText(tabText)).ToHaveCountAsync(1);
+        await Expect(page.Locator("#tabsMenuDiv")).ToHaveCountAsync(0);
+    }
+
+    protected async Task ExpectWithNullValueAsync(ILocator locator, string? value)
+    {
+        await Expect(locator).ToBeVisibleAsync();
+
+        if (!string.IsNullOrEmpty(value))
+            await Expect(locator).ToHaveValueAsync(value);
+        else
+            await Expect(locator).ToHaveValueAsync("");
     }
 }

@@ -54,11 +54,11 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     [Fact]
     public async Task SelectShop()
     {
-        var startShopSettings =  await ExpectLoadIndexPageAsync();
+        var startShopSettings =  await ExpectLoadIndexPageAsync(Page);
 
         var nextShop = _shops.FirstOrDefault(s => s.Id != startShopSettings.ShopId);
 
-        await ExpectForSelectShopAsync(nextShop);
+        await ExpectForSelectShopAsync(Page, nextShop);
 
         await Expect(Page.Locator("#Url")).Not.ToHaveValueAsync(startShopSettings.Url);
     }
@@ -66,23 +66,23 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     [Fact]
     public async Task SelectProductImportTab()
     {
-        var startShopSettings = await ExpectLoadIndexPageAsync();
+        var startShopSettings = await ExpectLoadIndexPageAsync(Page);
 
-        await SelectTabAsync(TabType.Products, "Hello Products", TabType.Shop);
+        await SelectTabAsync(Page, TabType.Products, "Hello Products", TabType.Shop);
     }
 
     [Fact]
     public async Task SelectCategoryImportTab()
     {
-        await ExpectLoadIndexPageAsync();
+        await ExpectLoadIndexPageAsync(Page);
 
-        await SelectTabAsync(TabType.Categories, "Hello Categories", TabType.Shop);
+        await SelectTabAsync(Page, TabType.Categories, "Hello Categories", TabType.Shop);
     }
 
     [Fact]
     public async Task SaveInputShopSettingsDataToSession()
     {
-        var startShopImportSettings = await ExpectLoadIndexPageAsync();       
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);       
 
         startShopImportSettings.Url = Guid.NewGuid().ToString();
         await Page.Locator("#Url").FillAsync(startShopImportSettings.Url);
@@ -95,9 +95,9 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         var nextShop = _shops.FirstOrDefault(s => s.Id != startShopImportSettings.ShopId);
 
-        await ExpectForSelectShopAsync(nextShop);
+        await ExpectForSelectShopAsync(Page, nextShop);
 
         var startShop = _shops.SingleOrDefault(s => s.Id == startShopImportSettings.ShopId);
-        await ExpectForSelectShopAsync(startShop);
+        await ExpectForSelectShopAsync(Page, startShop);
     }
 }

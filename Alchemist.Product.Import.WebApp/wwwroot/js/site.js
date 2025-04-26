@@ -126,7 +126,7 @@ function save(selectorId, url, data, onValidationError = null, onSuccess=null, o
 
     var pendingRequest = $(selectorId).data('validator').pendingRequest;
     if (pendingRequest == 0)
-        postData(url, data, onSuccess);
+        postData(url, data, onSuccess, onError);
     else
         setTimeout(() =>
         {
