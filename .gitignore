@@ -242,3 +242,14 @@
 /Alchemist.Product.RestAPI.Test/obj
 /Alchemist.Test.SignalRWebAppFactory/bin/Debug/net8.0
 /Alchemist.Test.SignalRWebAppFactory/obj
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/Alchemist.Product.Import.WebApp.Controller.Test/bin/Debug/net8.0
+/Alchemist.Product.Import.WebApp.Controller.Test/obj
+/.github/workflows
+/Alchemist.TestWebApp/bin/Debug/net8.0

@@ -90,7 +90,11 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         if (_importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
         {
             uplodedServiceSettings.Name = serviceSettingsName;
-            uplodedServiceSettings.FileName = file.FileName;            
+            uplodedServiceSettings.FileName = file.FileName;
+
+            if (shopSettings.GetServiceSettings(uplodedServiceSettings.Name) == null)
+                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(uplodedServiceSettings.Name));
+
 
             shopSettings?.UpdateServiceSettings(uplodedServiceSettings);
 

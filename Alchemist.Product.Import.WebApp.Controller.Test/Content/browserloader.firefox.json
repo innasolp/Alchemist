@@ -1,0 +1,5 @@
+{
+		  "ServiceTypeName":"IBrowserDataLoader",
+        "ImplementationTypeName": "Firefox.Standart",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      }

@@ -244,7 +244,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Settings.B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Settings.Adapter.Tests", "Alchemist.Import.Settings.Adapter.Tests\Alchemist.Import.Settings.Adapter.Tests.csproj", "{84CD4EF2-D6A3-4B46-B171-DD53664B6550}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.WebApp.Controller.Test", "Alchemist.Product.Import.WebApp.Test\Alchemist.Product.Import.WebApp.Controller.Test.csproj", "{91841166-F812-425E-88A9-68F280CB19E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.WebApp.Controller.Test", "Alchemist.Product.Import.WebApp.Controller.Test\Alchemist.Product.Import.WebApp.Controller.Test.csproj", "{91841166-F812-425E-88A9-68F280CB19E6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.Model.Test", "Alchemist.Product.Import.Model.Test\Alchemist.Product.Import.Model.Test.csproj", "{156A96FC-C47A-442C-AE40-9FF0C4E79BCD}"
 EndProject
@@ -269,6 +269,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.RestAPI.Test", "Alchemist.Product.RestAPI.Test\Alchemist.Product.RestAPI.Test.csproj", "{7A728EEE-2A05-4B84-BE56-6395D81A666C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.SignalRWebAppFactory", "Alchemist.Test.SignalRWebAppFactory\Alchemist.Test.SignalRWebAppFactory.csproj", "{C689B882-E46C-425A-B564-83173325940C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.WebApp.Test", "Alchemist.Product.Import.WebApp.Test\Alchemist.Product.Import.WebApp.Test.csproj", "{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -788,6 +790,12 @@ Global
 		{C689B882-E46C-425A-B564-83173325940C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C689B882-E46C-425A-B564-83173325940C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C689B882-E46C-425A-B564-83173325940C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -886,6 +894,7 @@ Global
 		{AF20D98E-7B74-4EA8-8A0F-8B58D1B038F4} = {17215807-0093-44F2-9884-0C13DC9E711F}
 		{7A728EEE-2A05-4B84-BE56-6395D81A666C} = {29F409A8-DE7C-43BE-916A-920352B78953}
 		{C689B882-E46C-425A-B564-83173325940C} = {29F409A8-DE7C-43BE-916A-920352B78953}
+		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0} = {29F409A8-DE7C-43BE-916A-920352B78953}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

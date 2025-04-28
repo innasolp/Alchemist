@@ -1,10 +1,12 @@
 ﻿using Alchemist.Product.Data;
+using Alchemist.Product.Data.Postgresql;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.RestAPI.Test;
 
-public abstract class ShopAPIWebAppFactory : AlchemistWebAppFactory<Startup, AlchemyContext>
+public abstract class ShopAPIWebAppFactory : DbContextWebAppFactory<ShopAPIProgram, AlchemyContext>
 {
     protected override void FillTestData(AlchemyContext dbContext)
     {
@@ -12,9 +14,10 @@ public abstract class ShopAPIWebAppFactory : AlchemistWebAppFactory<Startup, Alc
         dbContext.SaveChanges();
     }
 
-    protected override DbContextOptionsBuilder SetDbContext(DbContextOptionsBuilder optionsBuilder)
+    protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
-        return optionsBuilder.UseNpgsql("Host=localhost;Database=test_ci_db;Username=postgres;Password=P@ssw0rd;");
+        return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder =>
+        optionsBuilder.UseNpgsql("Host=localhost;Database=test_ci_db;Username=postgres;Password=P@ssw0rd;"));
     }
 }
 

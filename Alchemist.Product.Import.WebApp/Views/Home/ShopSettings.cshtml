@@ -74,7 +74,7 @@
                         <input class="form-control form-input" id="BrowserDataLoader" readonly="readonly" value="@Model.BrowserDataLoader?.ServiceTypeName" />
                         <span asp-validation-for="BrowserDataLoader" class="text-danger"></span>
                     </div>
-                    <div class="flex control-group">
+                    <div class="flex control-group" >
                         <button onclick="showServiceSettingsModal('/ShopSettings/BrowserDataLoaderSettings', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('browserDataLoaderJson'); }  )"
                                 class="btn btn-primary btn-sm form-button">
                             Set
@@ -106,7 +106,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary form-button"
-                        onclick="this.disabled=true;save('#settingsForm','@GetSubmitUrl()', getFormData($('#settingsForm')), (result)=> { this.disabled = false;}, (error)=>{this.disabled = false;});">
+                        onclick="this.disabled=true;save('#settingsForm','@GetSubmitUrl()', getFormData($('#settingsForm')), ()=> { this.disabled = false;}, (result)=> { this.disabled = false;}, (error)=>{this.disabled = false;});">
                     Save
                 </button>
             </div>

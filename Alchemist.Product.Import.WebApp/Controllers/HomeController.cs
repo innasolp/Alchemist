@@ -101,7 +101,7 @@ public class HomeController : Controller
         {
             SelectedShopImport = shopImport,
             SelectedTab = tab,
-            SelectedTabModel = shopImport.GetSettings(tab),
+            SelectedTabModel = shopImport.GetSettings(tab) ?? tab.CreateDefaultTabModel(),
             Shops = shops
         };
     }
@@ -204,40 +204,67 @@ public class HomeController : Controller
 
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> LoadTab(Guid? shopGuid, int tab, string tabView)
+    public IActionResult TabsMenu(Guid shopGuid, int tab)
     {
-        SetCurrentShopGuid(shopGuid);
-
-        ShopImportModel shopImport;
         var shopImports = _importFacade.GetShops();
 
-        if (shopGuid == null)
+        if (shopImports.Count == 0)
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel()); 
+
+        ShopImportModel shopImport;
+
+        if (shopGuid == Guid.Empty)
             shopImport = shopImports.First();
-        else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))        
-            return PartialView($"~/Views/Home/{tabView}.cshtml", ((TabType)tab).CreateDefaultTabModel());
-        
+        else if (!_importFacade.TryGetShopImport(shopGuid, out shopImport))
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel());        
 
-        var currentSettings = shopImport.GetSettings((TabType)tab);
-        if (currentSettings == null)
-        {
-            currentSettings = shopImport.CreateSettings((TabType)tab);
-            shopImport.SetSettings((TabType)tab, currentSettings);
-        }
+        return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", shopImport.GetSettings((TabType)tab) ?? shopImport.CreateSettings((TabType)tab));
+    }
 
-        if ((TabType)tab == TabType.Shop &&
-            shopImport.GetSettings((TabType)tab, true) == null)
+    [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> LoadTab(Guid? shopGuid, int tab, string tabView)
+    {
+        try
         {
-            var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
-            if (settings != null)
-                shopImport.SetSettings((TabType)tab, settings);
-            else
+            SetCurrentShopGuid(shopGuid);
+
+            ShopImportModel shopImport;
+            var shopImports = _importFacade.GetShops();
+
+            if (shopGuid == null)
+                shopImport = shopImports.First();
+            else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
+                return PartialView($"~/Views/Home/{tabView}.cshtml", ((TabType)tab).CreateDefaultTabModel());
+
+
+            var currentSettings = shopImport.GetSettings((TabType)tab);
+            if (currentSettings == null)
             {
-                var currentShopSettings = shopImport.ShopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
-                shopImport.SetSettings((TabType)tab, currentShopSettings);
+                currentSettings = shopImport.CreateSettings((TabType)tab);
+                shopImport.SetSettings((TabType)tab, currentSettings);
             }
-        }        
 
-        return PartialView($"~/Views/Home/{tabView}.cshtml", currentSettings);
+            if ((TabType)tab == TabType.Shop &&
+                shopImport.GetSettings((TabType)tab, true) == null)
+            {
+                var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
+                if (settings != null)
+                    shopImport.SetSettings((TabType)tab, settings);
+                else
+                {
+                    var currentShopSettings = shopImport.ShopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
+                    shopImport.SetSettings((TabType)tab, currentShopSettings);
+                }
+            }
+
+            return PartialView($"~/Views/Home/{tabView}.cshtml", currentSettings);
+        }
+        catch(Exception e)
+        {
+            return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
+        }
     }
 
     public IActionResult Privacy()
