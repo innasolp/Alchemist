@@ -38,4 +38,11 @@ public abstract class SettingsModelBase
     {
         return $"{nameof(Id)}:{Id};{nameof(Name)}:{Name};{nameof(Guid)}:{Guid};{nameof(ShopGuid)}:{ShopGuid};{nameof(Tab)}:{Tab}";
     }
+
+    public override bool Equals(object? obj)
+    {
+        return obj != null && obj is SettingsModelBase settingsModel
+            && string.Equals(Name, settingsModel.Name, StringComparison.InvariantCultureIgnoreCase)
+            && Tab == settingsModel.Tab;
+    }
 }

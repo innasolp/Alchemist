@@ -4,18 +4,18 @@
 
 @{
     TabType tabType = Model.Tab;
-    var selectedTabViewName = ViewHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType);
-    var selectedTabName = ViewHelper.TabNames.FirstOrDefault(d => d.Key == tabType);    
+    var selectedTabViewName = TabHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType);
+    var selectedTabName = TabHelper.TabNames.FirstOrDefault(d => d.Key == tabType);    
 }
 
 
-    @foreach (var tab in ViewHelper.TabNames)
+    @foreach (var tab in TabHelper.TabNames)
     {
         <div class="@CssHelper.GetMenuItemStyle(tab.Key,selectedTabName.Key)">
             <form method="get" asp-action="Index" asp-controller="Home" asp-antiforgery="true"
                   asp-route-shopGuid="@Model.ShopGuid"
                   asp-route-tab="@((int)tab.Key)">
-                <label class="display-7  menu_header" onclick="saveTab($('#settingsForm'), ()=>{ this.parentElement.submit();})">@tab.Value</label>
+            <label class="display-7  menu_header" onclick="tabChanged($('#settingsForm'), ()=>{ this.parentElement.submit();})">@tab.Value</label>
             </form>
         </div>
     }

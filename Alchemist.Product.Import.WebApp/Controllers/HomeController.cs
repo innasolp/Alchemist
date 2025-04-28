@@ -180,6 +180,33 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+    [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> IsTabChanged(Guid shopGuid, int tab, string json)
+    {
+        if (string.IsNullOrEmpty(json)) return BadRequest(json);
+
+        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
+            return NotFound(shopGuid);
+
+        var settings = shopImport.GetSettings((TabType)tab, true);
+        if (settings == null) return Ok(false);
+
+        var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
+        if (modelFromJson == null) return Ok(false);
+
+        if((TabType)tab != TabType.Shop)
+            return Ok(!settings.Equals(modelFromJson));
+
+        var originalSettings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
+        if(originalSettings == null)
+            return Ok(!modelFromJson.Equals(shopGuid.CreateShopSettings((settings as ShopSettingsModel).ShopSettingType)));
+
+        return Ok(!modelFromJson.Equals(originalSettings));
+    }
+
+    [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateShops()

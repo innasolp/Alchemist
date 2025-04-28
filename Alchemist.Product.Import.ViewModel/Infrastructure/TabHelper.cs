@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 
-public static class ViewHelper
+public static class TabHelper
 {
     public static TabType[] Tabs { get; }
 
@@ -15,7 +15,7 @@ public static class ViewHelper
 
     public static Dictionary<ShopSettingType, string> ShopSettingTypeNames { get; }
 
-    static ViewHelper()
+    static TabHelper()
     {
         Tabs = Enum.GetValues<TabType>();
         var tabType = typeof(TabType);

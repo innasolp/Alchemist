@@ -4,11 +4,13 @@
 // Write your JavaScript code.
 
 function formDataToJson(formData) {
-    var object = {};
-    formData.forEach(function (value, key) {
-        if (!(value instanceof File))
-            object[key] = value;
-    });
+    var object = {};  
+
+    for (const key of formData.keys()) {
+        if (!(formData.get(key) instanceof File))
+            object[key] = formData.get(key);
+    }
+
     var json = JSON.stringify(object);
     return json;
 }
@@ -16,14 +18,16 @@ function formDataToJson(formData) {
 function getFormData(formSelector) {
     var formData = new FormData(formSelector[0]);
     var object = {};
-    formData.forEach(function (value, key) {
-        if (!(value instanceof File))
-         object[key] = value;
-    });
+
+    for (const key of formData.keys()) {
+        if (!(formData.get(key) instanceof File))
+            object[key] = formData.get(key);
+    }
+
     return object;
 }
 
-async function fetchFormData(formData, action, method = 'post', callback = null)
+async function fetchFormData(formData, action, method = 'post', onSuccess = null, onError=null)
 {
     const request = new Request(action, {
             method: method,
@@ -32,14 +36,16 @@ async function fetchFormData(formData, action, method = 'post', callback = null)
 
     await fetch(request).then((r) => {
         if (r.ok) {
-
-            if (callback != null)
-                callback();
+            if (onSuccess != null)
+                onSuccess(r.body);
 
             console.log(r);
         }
-        else 
+        else {
+            if (onError != null)
+                onError(r.body);
             console.error(r);
+        }
     });    
 }
 
@@ -144,3 +150,45 @@ function setValIfValid(selectorId, value) {
 
     return form.valid();
 }
+
+function confirm(title, message, onSuccess = null, onCancel = null) {
+    $.confirm({
+        title: title,
+        content: message,
+        buttons: {
+            'confirm':               
+            { text: 'Yes',
+                action: function () {
+                    if (onSuccess != null)
+                        onSuccess();
+                }
+            }                ,
+            cancel: function () {
+                if (onCancel != null)
+                    onCancel();
+            }            
+        }
+    });   
+}
+
+async function tabChanged(formSelector, callback = null) {
+
+    var formData = getFormData(formSelector);
+    var json = formDataToJson(new FormData(formSelector[0]));
+    formData['json'] =  json;
+
+    postData('/Home/IsTabChanged', formData, (result) => {
+
+        if (!result) {
+            if (callback != null) callback();
+            return;
+        }
+
+        confirm('Confirmation', 'Imput data will be reset. Continue?',
+            () => {
+                if (callback != null) callback();
+            }
+        );
+    });
+}
+

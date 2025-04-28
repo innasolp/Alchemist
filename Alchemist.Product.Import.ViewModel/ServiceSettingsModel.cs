@@ -10,7 +10,7 @@ using Alchemist.Import.Settings.Extensions;
 
 namespace Alchemist.Product.Import.Model;
 
-public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDeserialized
+public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDeserialized, IEquatable<ServiceSettingsModel>
 {
     public override string ToString()
     {
@@ -85,5 +85,19 @@ public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDe
     void IJsonOnDeserialized.OnDeserialized()
     {
         this.DeserializeValueIfNeed();
+    }
+
+    public bool Equals(ServiceSettingsModel? other)
+    {
+        return other != null && Name == other.Name
+           && ((string.IsNullOrEmpty(ServiceTypeName) && string.IsNullOrEmpty(other.ServiceTypeName))
+             || string.Equals(ServiceTypeName, other.ServiceTypeName, StringComparison.CurrentCultureIgnoreCase))
+            && ((string.IsNullOrEmpty(AssemblyPath) && string.IsNullOrEmpty(other.AssemblyPath))
+             || string.Equals(AssemblyPath, other.AssemblyPath, StringComparison.CurrentCultureIgnoreCase))
+            && ((string.IsNullOrEmpty(ServiceProviderPath) && string.IsNullOrEmpty(other.ServiceProviderPath))
+             || string.Equals(ServiceProviderPath, other.ServiceProviderPath, StringComparison.CurrentCultureIgnoreCase))
+             && ((string.IsNullOrEmpty(ImplementationTypeName) && string.IsNullOrEmpty(other.ImplementationTypeName))
+             || string.Equals(ImplementationTypeName, other.ImplementationTypeName, StringComparison.CurrentCultureIgnoreCase))
+             && ((Value == null && other.Value == null) || JsonNode.DeepEquals(Value, other.Value));
     }
 }

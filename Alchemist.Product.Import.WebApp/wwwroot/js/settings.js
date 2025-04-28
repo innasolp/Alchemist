@@ -7,9 +7,32 @@
     );
 }
 
+function onCloseWithConfirm(event) {
+    event.preventDefault();
+
+    var data = getFormData($('#serviceSettingsForm'));
+
+    postData('/ShopSettings/IsServiceSettingsChanged', data,
+        (result) => {
+
+            if (!result) {
+                closeServiceSettingsModal(false);
+                return;
+            }
+
+            confirm('Reseting', 'Input values will be reset. Are you sure?',
+                function () {
+                    closeServiceSettingsModal(false);
+                });
+        }
+    );    
+}
+
 function showServiceSettingsModal(url, data, onHide = null) {
     
     $('#settingsForm').on('submit', submitPreventDefault);
+
+    $('#serviceSettingsCloseBtn').on('click', onCloseWithConfirm);
 
     $("#modalBodyDiv").on('load', function (event) {
         console.log(event);
@@ -28,9 +51,11 @@ function onSaveServiceSettings(onHide = null) {
         onHide(false);
 }
 
-function closeServiceSettingsModal() {
-    $("#divModal").append("<input type='hidden' id='modalResult' value='success'/>");
+function closeServiceSettingsModal(success = true) {
+    if(success)
+        $("#divModal").append("<input type='hidden' id='modalResult' value='success'/>");
     $("#divModal").modal("hide");
+    $('#serviceSettingsCloseBtn').off('click', onCloseWithConfirm);
     $('#settingsForm').off('submit', submitPreventDefault);
 }
 
