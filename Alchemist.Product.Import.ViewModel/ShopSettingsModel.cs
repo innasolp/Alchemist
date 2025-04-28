@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.Model;
 
-public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
+public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings, IEquatable<ShopSettingsModel>
 {
     public override string ToString()
     {
@@ -148,5 +148,21 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
             Services.RemoveAll(s => !Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name) && 
             !sourceShopSettings.Services.Any(source => source.IsEqual(s)));
         }
+    }
+
+    public virtual bool Equals(ShopSettingsModel? other)
+    {
+        return other != null && ShopSettingType == other.ShopSettingType
+            && ((string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(other.Name)) || string.Equals(Name, other.Name, StringComparison.InvariantCultureIgnoreCase))
+            && ((string.IsNullOrEmpty(Url) && string.IsNullOrEmpty(other.Url)) || string.Equals(Url, other.Url, StringComparison.InvariantCultureIgnoreCase))
+            && ImportService?.Equals(other.ImportService) != false
+            && WebLoader?.Equals(other.WebLoader)!= false
+            && BrowserDataLoader?.Equals(other.BrowserDataLoader) != false
+            && RequestHeaders?.Equals(other.RequestHeaders) != false;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return (obj is ShopSettingsModel shopSettingsModel) ? Equals(shopSettingsModel) : base.Equals(obj);
     }
 }

@@ -1,13 +1,12 @@
 ﻿@model Alchemist.Product.Import.Model.ServiceSettingsModel
 
 @functions{
-    public string GetUploadOnChange(string id) => "postFormInputFile('/FileUpload/UploadJson', $('#modalForm'), '" + id + "', null, (data)=>{ $('#jsonValueHidden').val(data);" + UploadFromFileModel.onSuccess + " })";
+    public string GetUploadOnChange(string id) => "postFormInputFile('/FileUpload/UploadJson', $('#serviceSettingsForm'), '" + id + "', null, (data)=>{ $('#jsonValueHidden').val(data);" + UploadFromFileModel.onSuccess + " })";
 }
 
-
-<h4>ServiceSettingsModel</h4>
+<h4>Service settings</h4>
 <hr />
-<form id="modalForm">
+<form id="serviceSettingsForm">
     <input type="hidden" name="ShopGuid" value="@Model.ShopGuid" />
     <input type="hidden" name="Id" value="@Model.Guid" />
     <input type="hidden" name="ShopSettingType" value="@((int)Model.ShopSettingType)" />
@@ -43,7 +42,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                        onclick="save('#modalForm','/ShopSettings/SaveServiceSettings', getFormData($('#modalForm')), null, (data)=>{ if(!data) return; setValIfValid('#@Model.Name',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
+                        onclick="save('#serviceSettingsForm','/ShopSettings/SaveServiceSettings', getFormData($('#serviceSettingsForm')), null, (data)=>{ if(!data) return; setValIfValid('#@Model.Name',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
                     Save
                 </button>
             </div>

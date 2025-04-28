@@ -124,6 +124,27 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult IsServiceSettingsChanged(ServiceSettingsModel data)
+    {
+        if (data == null)
+            return BadRequest(data);
+
+        if (!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
+            return NotFound(data.ShopGuid);
+
+        var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
+        var serviceSettings = shopSettings.GetServiceSettings(data.Name);
+        
+        if (serviceSettings == null) return Ok(false);
+
+        return Ok(!serviceSettings.Equals(data));
+    }
+
+
+    [HttpPost]
+    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundResult>(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]

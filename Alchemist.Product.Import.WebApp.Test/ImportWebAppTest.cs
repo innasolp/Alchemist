@@ -71,7 +71,8 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         {
             var serviceSettings = shopSetting.ToImportServiceSettings<ImportServiceSettings>();
             serviceSettings.AssemblyPath = $"C:\\Folder{shopSetting.Id}";
-            serviceSettings.ImplementationTypeName = $"Service{shopSetting.Id}";
+            serviceSettings.ImplementationTypeName = $"ServiceImplementation{shopSetting.Id}";
+            serviceSettings.ImplementationTypeName = $"ServiceType{shopSetting.Id}";
 
             shopSetting.JsonValue = JsonSerializer.Serialize(serviceSettings);
         }
@@ -113,8 +114,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
         await locator.ClickAsync();
 
-        var currentSelectedLocator = page.Locator("li[class='left-menu-ul selected']");
-        await Expect(currentSelectedLocator).ToHaveTextAsync(shop.Name);
+        await ExpectSelectedShopAsync(page, shop);
 
         var shopSettings = await GetShopImportSettingsAsync(shop.Id, ShopSettingType.Product);
         await Expect(page.Locator("#Url")).ToHaveValueAsync(shopSettings.Url);
@@ -122,21 +122,51 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         return shopSettings;
     }
 
-    protected async Task SelectTabAsync(IPage page, TabType tabType, string tabText, TabType prevTabType)
+    protected async Task ExpectSelectedShopAsync(IPage page, IShop shop)
+    {
+        var currentSelectedLocator = page.Locator("li[class='left-menu-ul selected']");
+        await Expect(currentSelectedLocator).ToHaveTextAsync(shop.Name);
+    }
+
+    protected async Task ClickSelectShopAsync(IPage page, IShop shop)
+    {
+        var locator = page.Locator("form[name='itemShopForm']").GetByText(shop.Name);
+        await Expect(locator).ToHaveCountAsync(1);
+
+        await locator.ClickAsync();
+    }
+
+    protected async Task ExpectSelectTabAsync(IPage page, TabType tabType, string tabText, TabType prevTabType)
     {
         var menu = page.Locator("#menuDiv");
-        var tab = menu.GetByText(ViewHelper.TabNames[tabType]);
+        var tab = menu.GetByText(TabHelper.TabNames[tabType]);
         await Expect(tab).ToHaveCountAsync(1);
 
         await tab.ClickAsync();
 
-        await Expect(menu.Locator("div[class = 'menu_item selected']").GetByText(ViewHelper.TabNames[prevTabType]))
+        await Expect(menu.Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[prevTabType]))
           .ToHaveCountAsync(0);
-        await Expect(menu.Locator("div[class = 'menu_item selected']").GetByText(ViewHelper.TabNames[tabType]))
+        await Expect(menu.Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[tabType]))
           .ToHaveCountAsync(1);
 
         await Expect(page.GetByText(tabText)).ToHaveCountAsync(1);
         await Expect(page.Locator("#tabsMenuDiv")).ToHaveCountAsync(0);
+    }
+
+    protected async Task ExpectSelectedTabAsync(IPage page, TabType tabType)
+    {
+        var menu = page.Locator("#menuDiv");
+        await Expect(menu.Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[tabType]))
+          .ToHaveCountAsync(1);
+    }
+
+    protected async Task ClickSelectTabAsync(IPage page, TabType tabType)
+    {
+        var menu = page.Locator("#menuDiv");
+        var tab = menu.GetByText(TabHelper.TabNames[tabType]);
+        await Expect(tab).ToHaveCountAsync(1);
+
+        await tab.ClickAsync();
     }
 
     protected async Task ExpectWithNullValueAsync(ILocator locator, string? value)
@@ -147,5 +177,37 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             await Expect(locator).ToHaveValueAsync(value);
         else
             await Expect(locator).ToHaveValueAsync("");
+    }
+
+    protected async Task<ILocator> GetConfirmationLocatorAsync(IPage page)
+    {
+        var confirmationLocator = page.Locator("div[class='jconfirm-box jconfirm-hilight-shake jconfirm-type-default jconfirm-type-animated']");
+        await Expect(confirmationLocator).Not.ToBeVisibleAsync();
+        return confirmationLocator;
+    }
+
+    protected async Task ExpectConfirmationAsync(ILocator confirmationLocator)
+    {
+        await Expect(confirmationLocator).ToBeVisibleAsync();
+
+        var buttonsLocator = confirmationLocator.Locator("div[class='jconfirm-buttons']");
+        await Expect(buttonsLocator).ToContainTextAsync("Yes");
+        await Expect(buttonsLocator).ToContainTextAsync("cancel");
+    }
+
+    protected async Task<ILocator> CancelConfirmationAsync(ILocator confirmationLocator)
+    {
+        var cancel = confirmationLocator.Locator("button").GetByText("cancel");
+        await Expect(cancel).ToHaveCountAsync(1);
+        await cancel.ClickAsync();
+        return cancel;
+    }
+    
+    protected async Task<ILocator> ConfirmAsync(ILocator confirmationLocator)
+    {
+        var yes = confirmationLocator.Locator("button").GetByText("Yes");
+        await Expect(yes).ToHaveCountAsync(1);
+        await yes.ClickAsync();
+        return yes;
     }
 }
