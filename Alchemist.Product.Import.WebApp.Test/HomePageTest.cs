@@ -35,11 +35,11 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var shopSetting = _shopSettings.First(s => s.ShopId == shop.Id && s.Type == ShopSettingType.Product);
         var productShopSettings = JsonSerializer.Deserialize<ProductShopImportSettings>(shopSetting.JsonValue);
 
-        await Expect(Page.Locator("#menuDiv").Locator("div[class = 'menu_item selected']").GetByText(ViewHelper.TabNames[TabType.Shop]))
+        await Expect(Page.Locator("#menuDiv").Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[TabType.Shop]))
            .ToHaveCountAsync(1);
 
         var tabsLocator = Page.Locator("#tabsMenuDiv");
-        await Expect(tabsLocator.Locator("div[class = 'menu_item-a selected-a']").GetByText(ViewHelper.ShopSettingTypeNames[ShopSettingType.Product]))
+        await Expect(tabsLocator.Locator("div[class = 'menu_item-a selected-a']").GetByText(TabHelper.ShopSettingTypeNames[ShopSettingType.Product]))
             .ToHaveCountAsync(1);
 
         await Expect(Page.Locator("form[name='itemShopForm']")).ToHaveCountAsync(3);
@@ -68,7 +68,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     {
         var startShopSettings = await ExpectLoadIndexPageAsync(Page);
 
-        await SelectTabAsync(Page, TabType.Products, "Hello Products", TabType.Shop);
+        await ExpectSelectTabAsync(Page, TabType.Products, "Hello Products", TabType.Shop);
     }
 
     [Fact]
@@ -76,11 +76,11 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     {
         await ExpectLoadIndexPageAsync(Page);
 
-        await SelectTabAsync(Page, TabType.Categories, "Hello Categories", TabType.Shop);
-    }
-
+        await ExpectSelectTabAsync(Page, TabType.Categories, "Hello Categories", TabType.Shop);
+    }    
+    
     [Fact]
-    public async Task SaveInputShopSettingsDataToSession()
+    public async Task ShowConfirmationWindowWhenSelectOtherTabAfterDataEditing()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);       
 
@@ -90,14 +90,86 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         startShopImportSettings.Name = Guid.NewGuid().ToString();
         await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
 
-        var startShopSettings = _shopSettings.FirstOrDefault(s => s.Id == startShopImportSettings.Id);
-        startShopSettings.JsonValue = JsonSerializer.Serialize(startShopImportSettings);
+        var confirmationLocator = await GetConfirmationLocatorAsync(Page);
+
+        await ClickSelectTabAsync(Page, TabType.Products);
+
+        await ExpectConfirmationAsync(confirmationLocator);
+    }
+
+    [Fact]
+    public async Task ShowConfirmationWindowWhenSelectOtherShopAfterDataEditing()
+    {
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
+
+        startShopImportSettings.Url = Guid.NewGuid().ToString();
+        await Page.Locator("#Url").FillAsync(startShopImportSettings.Url);
+
+        startShopImportSettings.Name = Guid.NewGuid().ToString();
+        await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
+
+        var confirmationLocator = await GetConfirmationLocatorAsync(Page);
 
         var nextShop = _shops.FirstOrDefault(s => s.Id != startShopImportSettings.ShopId);
 
+        await ClickSelectShopAsync(Page, nextShop);
+
+        await ExpectConfirmationAsync(confirmationLocator);
+    }
+
+    [Fact]
+    public async Task SelectedItemNotChangedAfterConfirmationCancel()
+    {
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
+
+        startShopImportSettings.Url = Guid.NewGuid().ToString();
+        await Page.Locator("#Url").FillAsync(startShopImportSettings.Url);
+
+        startShopImportSettings.Name = Guid.NewGuid().ToString();
+        await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
+
+        var confirmationLocator = await GetConfirmationLocatorAsync(Page);
+
+        await ClickSelectTabAsync(Page, TabType.Products);
+
+        await ExpectConfirmationAsync(confirmationLocator);
+
+        await CancelConfirmationAsync(confirmationLocator);
+
+        await Expect(confirmationLocator).Not.ToBeVisibleAsync();
+
+        await ExpectSelectedTabAsync(Page, TabType.Shop);
+    }
+
+    [Fact]
+    public async Task SelectedItemResetAndChangedAfterConfirmationYes()
+    {
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
+
+        var newName = Guid.NewGuid().ToString();
+        var newUrl = Guid.NewGuid().ToString();
+
+        startShopImportSettings.Url = Guid.NewGuid().ToString();
+        await Page.Locator("#Url").FillAsync(newName);
+
+        startShopImportSettings.Name = Guid.NewGuid().ToString();
+        await Page.Locator("#Name").FillAsync(newUrl);
+
+        var confirmationLocator = await GetConfirmationLocatorAsync(Page);
+
+        var nextShop = _shops.FirstOrDefault(s => s.Id != startShopImportSettings.ShopId);
+        await ClickSelectShopAsync(Page, nextShop);
+
+        await ExpectConfirmationAsync(confirmationLocator);
+
+        await ConfirmAsync(confirmationLocator);
+
+        await Expect(confirmationLocator).Not.ToBeVisibleAsync();
+
         await ExpectForSelectShopAsync(Page, nextShop);
 
-        var startShop = _shops.SingleOrDefault(s => s.Id == startShopImportSettings.ShopId);
-        await ExpectForSelectShopAsync(Page, startShop);
+        var prevShop = _shops.FirstOrDefault(s => s.Id == startShopImportSettings.ShopId);
+        await ClickSelectShopAsync(Page, prevShop);
+        await ExpectForSelectShopAsync(Page, prevShop);
     }
 }

@@ -165,24 +165,6 @@ public class HomeController : Controller
     [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult SaveTabSettings(Guid shopGuid, int tab, string json)
-    {
-        if (string.IsNullOrEmpty(json)) return BadRequest(json);
-
-        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return NotFound(shopGuid);
-
-        var settings = shopImport.GetSettings((TabType)tab, true);
-        var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
-        settings.Update(modelFromJson);
-
-        return Ok();
-    }
-
-    [HttpPost]
-    [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IsTabChanged(Guid shopGuid, int tab, string json)
     {
         if (string.IsNullOrEmpty(json)) return BadRequest(json);

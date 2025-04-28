@@ -93,7 +93,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
 
         var currentTab = indexViewModel.SelectedTab;
-        var nextTab = ViewHelper.Tabs.FirstOrDefault(t => t != currentTab);
+        var nextTab = TabHelper.Tabs.FirstOrDefault(t => t != currentTab);
         var shopGuid = indexViewModel.SelectedTabModel.ShopGuid;
 
         var homeController = CreateHomeController();
@@ -126,30 +126,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
 
         var homeController = CreateHomeController();
         var shopGuid = indexViewModel.SelectedTabModel.ShopGuid;
-        var nextTab = ViewHelper.Tabs.Max() + 1;
+        var nextTab = TabHelper.Tabs.Max() + 1;
         Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(shopGuid, (int)nextTab));
-    }
-
-    [Fact]
-    public async Task SavePreviousTabModelWhenIndexActionAsync()
-    {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        var homeController = CreateHomeController();
-        var shopGuid = indexViewModel.SelectedShopImport.ShopGuid;
-        var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true) as ShopSettingsModel;
-        Assert.NotNull(shopSettings);
-
-        var oldSettings = shopSettings.GetCopy();
-
-        var savingShopSettings = shopSettings.GetCopy();
-        savingShopSettings.FillShopSettingsFields();
-
-        Assert.IsType<OkResult>(homeController.SaveTabSettings(shopGuid, (int)savingShopSettings.Tab, JsonSerializer.Serialize(savingShopSettings)));
-        Assert.True(_importFacade.TryGetShopSettings(shopGuid, shopSettings.ShopSettingType, out var savedShopSettings));
-        Assert.Equal(shopSettings.Guid, savedShopSettings.Guid);
-
-        ModelAssert.EqualFields(savingShopSettings, savedShopSettings);
-        ModelAssert.NotEqualFields(oldSettings, savedShopSettings);
-    }
+    }    
 }

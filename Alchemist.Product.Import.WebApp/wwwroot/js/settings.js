@@ -59,15 +59,6 @@ function closeServiceSettingsModal(success = true) {
     $('#settingsForm').off('submit', submitPreventDefault);
 }
 
-async function saveTab(formSelector, callback = null) {
-    var formData = new FormData(formSelector[0]);
-
-    var json = formDataToJson(formData);
-    formData.append('json', json);
-
-    await fetchFormData(formData, '/Home/SaveTabSettings', 'post', callback);    
-}
-
 async function saveShopSettings(formSelector, callback = null) {
     var formData = new FormData(formSelector[0]);
 
