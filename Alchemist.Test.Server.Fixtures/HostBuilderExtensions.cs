@@ -57,7 +57,7 @@ public static class HostBuilderExtensions
             .Select(x => new Uri(x))
             .Last();
     }
-    public static void SetKestrelPortsConfig(this WebHostBuilderContext context, int httpPort, int httpsPort)
+    public static void SetKestrelLocalhostPortsConfig(this WebHostBuilderContext context, int httpPort, int httpsPort)
     {
         var http = context.Configuration.GetSection("Kestrel:EndPoints:Http:Url");
         http.Value = $"https://localhost:{httpPort}";

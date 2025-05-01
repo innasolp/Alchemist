@@ -272,6 +272,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.SignalRWebAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.WebApp.Test", "Alchemist.Product.Import.WebApp.Test\Alchemist.Product.Import.WebApp.Test.csproj", "{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.WebApp.IntegrationTest", "Alchemist.Product.Import.WebApp.IntegrationTest\Alchemist.Product.Import.WebApp.IntegrationTest.csproj", "{AF53F1B4-C5A7-44CA-9E37-078935BD690A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -796,6 +798,12 @@ Global
 		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF53F1B4-C5A7-44CA-9E37-078935BD690A}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF53F1B4-C5A7-44CA-9E37-078935BD690A}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{AF53F1B4-C5A7-44CA-9E37-078935BD690A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF53F1B4-C5A7-44CA-9E37-078935BD690A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF53F1B4-C5A7-44CA-9E37-078935BD690A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF53F1B4-C5A7-44CA-9E37-078935BD690A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -895,6 +903,7 @@ Global
 		{7A728EEE-2A05-4B84-BE56-6395D81A666C} = {29F409A8-DE7C-43BE-916A-920352B78953}
 		{C689B882-E46C-425A-B564-83173325940C} = {29F409A8-DE7C-43BE-916A-920352B78953}
 		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0} = {29F409A8-DE7C-43BE-916A-920352B78953}
+		{AF53F1B4-C5A7-44CA-9E37-078935BD690A} = {29F409A8-DE7C-43BE-916A-920352B78953}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
