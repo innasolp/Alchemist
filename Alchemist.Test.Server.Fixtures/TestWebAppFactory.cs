@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public class TestWebAppFactory<TEntryPoint>:WebApplicationFactory<TEntryPoint>
-    where TEntryPoint:class
+public class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>
+    where TEntryPoint : class
 {
 
     private IHost _host;

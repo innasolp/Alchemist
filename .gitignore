@@ -253,3 +253,5 @@ node_modules/
 /Alchemist.Product.Import.WebApp.Controller.Test/obj
 /.github/workflows
 /Alchemist.TestWebApp/bin/Debug/net8.0
+/Alchemist.Product.Import.WebApp.IntegrationTest/bin/Debug/net8.0
+/Alchemist.Product.Import.WebApp.IntegrationTest/obj

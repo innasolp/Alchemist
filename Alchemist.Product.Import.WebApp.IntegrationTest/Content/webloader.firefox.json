@@ -1,0 +1,6 @@
+{
+		  "ServiceTypeName":"IWebLoader",
+        "ImplementationTypeName": "Firefox",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
+        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
+      }
