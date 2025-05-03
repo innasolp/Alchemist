@@ -16,7 +16,11 @@ var logPath = $"{appPath}/Logs";
 
 var builder = WebApplication.CreateBuilder(args);
 
-var allShopSettings = await ShopSettingsContainerBuilder.BuildAsync(args, builder.Configuration, logPath, "shopProducts.json", "shopCategories.json");
+var settingsHost = ShopSettingsContainerBuilder.BuildSettingsHost(args, builder.Configuration, logPath, "shopProducts.json", "shopCategories.json");
+var allShopSettings = await ShopSettingsContainerBuilder.GetAvailableSettingsWithHighestPriority(settingsHost.Services);
+
+await settingsHost.StartAsync();
+await settingsHost.StopAsync();
 
 foreach (var shop in allShopSettings)
 {

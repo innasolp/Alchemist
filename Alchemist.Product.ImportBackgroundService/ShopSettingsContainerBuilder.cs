@@ -11,9 +11,9 @@ namespace Alchemist.Product.Import.Background.Service;
 
 public static class ShopSettingsContainerBuilder
 {
-    public static async Task<List<ShopSettingsContainer>> BuildAsync(string[] args, IConfiguration configuration, string logPath, string shopProductsJsonFile, string shopCategoriesJsonFile)
+    public static IHost BuildSettingsHost(string[] args, IConfiguration configuration, string logPath, string shopProductsJsonFile, string shopCategoriesJsonFile)
     {
-        using var settingsHost = Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(
+        return  Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(
         settingsWebHostBuilder =>
         {
             settingsWebHostBuilder.UseUrls("http://localhost:9000", "https://localhost:9001");
@@ -30,8 +30,11 @@ public static class ShopSettingsContainerBuilder
             settingsLogging.BuildSerilog(configuration, settingsHostBuilderContext.HostingEnvironment, logPath);
         })
         .Build();
+    }
 
-        var settingsBuilders = settingsHost.Services.GetServices<ISettingsBuilder>().OrderBy(b => b.Priority).ToList();
+    public static async Task<List<ShopSettingsContainer>> GetAvailableSettingsWithHighestPriority(IServiceProvider services)
+    {
+        var settingsBuilders = services.GetServices<ISettingsBuilder>().OrderBy(b => b.Priority).ToList();
         var allShopSettings = new List<ShopSettingsContainer>();
         foreach (var settingsBuilder in settingsBuilders)
         {
@@ -40,11 +43,9 @@ public static class ShopSettingsContainerBuilder
                 break;
         }
 
-        await settingsHost.StartAsync();
-        await settingsHost.StopAsync();
-
         return allShopSettings;
     }
+    
 
     private static void BuildSerilog(this ILoggingBuilder settingsLogging,IConfiguration configuration, IHostEnvironment hostEnvironment,  string logPath)
     {
