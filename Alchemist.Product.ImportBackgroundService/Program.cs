@@ -7,29 +7,16 @@ using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
-using Alchemist.Import.Settings.Builders;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.Background.Service;
 
-var shopProductsJsonFile = "shopProducts.json";
-var shopCategoriesJsonFile = "shopCategories.json";
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
 
-var settingsHostBuilder = WebApplication.CreateBuilder(args);
-var settingsSerilogBuilder = new AppSerilogBuilder(settingsHostBuilder);
-var settingsBuilders = new ISettingsBuilder[]
-{
-    new ShopSettingsAppBuilder(settingsHostBuilder,"SettingsAPIHost", "RestAPIHost"),
-    new ShopSettingsJsonBuilder(shopProductsJsonFile,shopCategoriesJsonFile)
-};
-settingsSerilogBuilder.AddSourceContextLogConfig($"{logPath}/ImportBackgroundService", nameof(ShopSettingsAppBuilder));
-settingsSerilogBuilder.AddSourceContextLogConfig($"{logPath}/ImportBackgroundService", nameof(ShopSettingsJsonBuilder));
 
-settingsSerilogBuilder.SetSerilog(settingsHostBuilder.Logging);
-using var settingsHost = settingsHostBuilder.Build();
-var allShopSettings = await settingsBuilders[0].Build(settingsHost);
-if (allShopSettings.Count == 0 || allShopSettings.All(s => s.ProductShopImportSettings == null && s.CategoryShopImportSettings == null))
-    allShopSettings = await settingsBuilders[1].Build(settingsHost);
+var builder = WebApplication.CreateBuilder(args);
+
+var allShopSettings = await ShopSettingsContainerBuilder.BuildAsync(args, builder.Configuration, logPath, "shopProducts.json", "shopCategories.json");
 
 foreach (var shop in allShopSettings)
 {
@@ -37,26 +24,23 @@ foreach (var shop in allShopSettings)
     shop.CategoryShopImportSettings?.SetAppPath(appPath);
 }
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-var shopImportWorkerBuilder = new ShopImportWorkerBuilder(builder);
+var shopImportWorkerBuilder = new ShopImportWorkerBuilder(builder.Services);
 
 shopImportWorkerBuilder.ConfigureDefaultHttps();
-shopImportWorkerBuilder.AddRestApiClient<ShopApiClient>("RestAPIHost");
+shopImportWorkerBuilder.AddRestApiClient<ShopApiClient>(builder.Configuration, "RestAPIHost");
 var restApiHost = builder.Configuration.GetSection("RestAPIHost").Get<string>()?.SetEnvironmentLocalHostIfNeed();
 shopImportWorkerBuilder.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(restApiHost);
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
-shopImportWorkerBuilder.AddGrpcServiceClient<Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>("GrpcAPIHost");
+shopImportWorkerBuilder.AddGrpcServiceClient<Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
 builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
 builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
 
-var shopProductsSettings = allShopSettings.Select(s => s.ProductShopImportSettings).ToList();
+var shopProductsSettings = allShopSettings.Where(s=>s.ProductShopImportSettings != null).Select(s => s.ProductShopImportSettings).ToList();
 shopImportWorkerBuilder.AddShopProducts(shopProductsSettings);
 shopImportWorkerBuilder.AddProductsHandler();
 
-var shopCategoriesSettings = allShopSettings.Select(s => s.CategoryShopImportSettings).ToList();
+var shopCategoriesSettings = allShopSettings.Where(s => s.CategoryShopImportSettings != null).Select(s => s.CategoryShopImportSettings).ToList();
 
 if (shopCategoriesSettings.Count > 0)
 {
@@ -65,9 +49,8 @@ if (shopCategoriesSettings.Count > 0)
     shopImportWorkerBuilder.AddCategoriesHandler();
 }
 
-
-shopImportWorkerBuilder.AddShopImportMessageSender("SignalRImportUrl");
-shopImportWorkerBuilder.AddShopImportDataReceiver("SignalREventsUrl");
+shopImportWorkerBuilder.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl");
+shopImportWorkerBuilder.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl");
 
 
 var appSerilogBuilder = new AppSerilogBuilder(builder);
@@ -93,6 +76,8 @@ builder.Services.AddHostedService<ShopImportWorker>();
 
 builder.Services.AddAuthentication("https");
 
+builder.WebHost.UseUrls("http://localhost:8130", "https://localhost:8131");
+
 var app = builder.Build();
 
 app.UseAuthentication();
@@ -101,10 +86,15 @@ app.UseAuthentication();
 
 app.UseHttpsRedirection();
 
-app.UsePerfomanceCounters();
+(app as IHost).UsePerfomanceCounters();
 
 //app.UseAuthorization();
 
-app.MapGet("/", () => "Hello World!");
+app.UseRouting();
 
-app.Run();
+app.MapGet("/", () => "Hello ImportBackgroundService!");
+
+await app.RunAsync();
+
+public class ImportBackgroundServiceProgram
+{ }

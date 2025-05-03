@@ -3,10 +3,7 @@ using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Import.Settings.Adapter;
 
-public interface ISettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>
-    where TProductShopImportSettings : class, IProductShopImportSettings
-    where TCategoryShopImportSettings : class, ICategoryShopImportSettings
-    where TImportServiceSettings : class, IImportServiceSettings
+public interface ISettingsDataAdapter
 {
     Task<IShopImportSettings?> GetShopSettings(int shopId, ShopSettingType shopSettingType);
 

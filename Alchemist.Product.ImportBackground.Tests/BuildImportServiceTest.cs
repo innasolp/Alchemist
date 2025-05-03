@@ -30,7 +30,7 @@ public abstract class BuildImportServiceTest
     public BuildImportServiceTest()
     {
         _builder = new HostApplicationBuilder();
-        _shopImportWorkerBuilder = new ShopImportWorkerBuilder(_builder);
+        _shopImportWorkerBuilder = new ShopImportWorkerBuilder(_builder.Services);
         _builder.Services.AddSingleton(_shopApiClientMock.Object);
         _builder.Services.AddSingleton(_alchemyDataServiceMock.Object);
         _builder.Services.AddKeyedSingleton(ShopImportWorkerKeys.DataMessageReceiverKey, _messageReceiver.Object);

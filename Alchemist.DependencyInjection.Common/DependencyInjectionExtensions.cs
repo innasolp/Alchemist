@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Alchemist.Common;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.DependencyInjection.Common;
@@ -25,6 +27,17 @@ public static class DependencyInjectionExtensions
 
         builder.Services.AddKeyedSingleton(key, restApiHost);
         return builder.Services.AddSingleton<TService, TImplementation>();
+    }
+    
+    public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string key)
+        where TService : class
+        where TImplementation : class, TService
+    {
+        var restApiHost = configuration.GetSection(restApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        services.AddHttpClient();
+
+        services.AddKeyedSingleton(key, restApiHost);
+        return services.AddSingleton<TService, TImplementation>();
     }
 
     public static IServiceCollection AddHttpMessageDelegatingHandler<TMessageHandler>(this IHostApplicationBuilder builder, IHttpClientBuilder httpClientBuilder, string apiHost)

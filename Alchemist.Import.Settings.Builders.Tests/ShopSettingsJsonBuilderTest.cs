@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Import.Settings.Builders.Tests;
@@ -9,9 +9,12 @@ public class ShopSettingsJsonBuilderTest
     public async Task BuildSettingsFromJson()
     {
         var builder = new HostApplicationBuilder();
-        var shopSettingsJsonBuilder = new ShopSettingsJsonBuilder("shopProducts.json", "shopCategories.json");
+        builder.Services.AddSettingsJsonBuilder(0, "shopProducts.json", "shopCategories.json");
         var host = builder.Build();
-        var shopSettings = await shopSettingsJsonBuilder.Build(host);
+
+        var shopSettingsJsonBuilder = host.Services.GetRequiredService<ISettingsBuilder>();             
+        
+        var shopSettings = await shopSettingsJsonBuilder.Build();
         Assert.NotNull(shopSettings);
         Assert.Equal(2, shopSettings.Count);
         Assert.Contains(shopSettings, s => s.ProductShopImportSettings != null);

@@ -46,6 +46,8 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         if (!WebLoader.IsStarted)
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
+        if (!WebLoader.IsStarted) return;
+
         JsonDocument? document;
 
         if (HtmlSearcher != null)

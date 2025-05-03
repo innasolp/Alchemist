@@ -52,6 +52,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
+            if (!WebLoader.IsStarted) return;
+
             while (Categories.Count > 0)
             {
                 var category = Categories.Dequeue();

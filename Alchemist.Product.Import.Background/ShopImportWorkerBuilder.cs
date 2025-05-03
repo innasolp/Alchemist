@@ -8,7 +8,6 @@ using Http.RequestHandling.PerfomanceCounter;
 using Log.Interceptors.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
 using Alchemist.Import.Products.Service;
@@ -23,7 +22,7 @@ using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
-public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBuilder(builder)
+public class ShopImportWorkerBuilder(IServiceCollection services) : WorkerBuilder(services)
 {
     protected Dictionary<string, IHttpClientBuilder> HttpClientBuilders { get; } = [];
 
@@ -38,17 +37,19 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         {
             var requestSenderType = shopSetting.WebLoader.AssemblyPath.GetServiceImplementationFromAssembly(typeof(IRequestSender));
             if (requestSenderType != null)
-                Builder.Services.AddPerfomanceCounter(typeof(IWebLoader), (logger) => new SerilogUrlLogger(logger), shopSetting.Name);
+                Services.AddPerfomanceCounter(typeof(IWebLoader), (logger) => new SerilogUrlLogger(logger), shopSetting.Name);
         }
 
         if (shopSetting.RequestHeaders != null)
-            AddKeyedServiceBySettings(typeof(RequestHeaders), shopSetting.RequestHeaders, shopSetting.Name);        
+            AddKeyedServiceBySettings(typeof(RequestHeaders), shopSetting.RequestHeaders, shopSetting.Name);
+        else
+            Services.AddKeyedSingleton(typeof(RequestHeaders), shopSetting.Name, new RequestHeaders());
 
-        foreach (var serviceSettings in shopSetting.Services.OfType<IImportServiceSettings>().Where(s => string.IsNullOrEmpty(s.Name)
-        || !Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name)))
-            AddKeyedServiceBySettings(serviceSettings, shopSetting.Name);
+            foreach (var serviceSettings in shopSetting.Services.OfType<IImportServiceSettings>().Where(s => string.IsNullOrEmpty(s.Name)
+            || !Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name)))
+                AddKeyedServiceBySettings(serviceSettings, shopSetting.Name);
 
-        return Builder.Services;
+        return Services;
     }
 
     public IServiceCollection AddProductShopBySettings(IProductShopImportSettings productShopImportSettings)
@@ -57,7 +58,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
 
         AddServiceBySettings(typeof(IShopProductImportService), productShopImportSettings.ImportService, productShopImportSettings.Name);
 
-        return Builder.Services.AddKeyedSingleton(typeof(IProductShopModel), productShopImportSettings.Name,
+        return Services.AddKeyedSingleton(typeof(IProductShopModel), productShopImportSettings.Name,
             new ProductShopModel
             {
                 Name = productShopImportSettings.Name,
@@ -74,7 +75,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         {
             AddProductShopBySettings(settings);
         }
-        return Builder.Services;
+        return Services;
     }
 
     public IServiceCollection AddShopCategories(IEnumerable<ICategoryShopImportSettings> categoryShopImportSettings)
@@ -83,7 +84,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
         {
             AddCategoryShopBySettings(settings);
         }
-        return Builder.Services;
+        return Services;
     }
 
     public IServiceCollection AddCategoryShopBySettings(ICategoryShopImportSettings categoryShopImportSettings)
@@ -92,7 +93,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
 
         AddServiceBySettings(typeof(IShopCategoryImportService), categoryShopImportSettings.ImportService, categoryShopImportSettings.Name);
 
-        return Builder.Services.AddKeyedSingleton(typeof(IShop), categoryShopImportSettings.Name,
+        return Services.AddKeyedSingleton(typeof(IShop), categoryShopImportSettings.Name,
             new ShopModel
             {
                 Name = categoryShopImportSettings.Name,
@@ -100,61 +101,61 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
             });
     }
 
-    public IServiceCollection AddShopImportDataReceiver(string signalRUrlSectionName)
+    public IServiceCollection AddShopImportDataReceiver(IConfiguration configuration, string signalRUrlSectionName)
     {
-        var signalRUrl = Builder.Configuration.GetSection(signalRUrlSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        var signalRUrl = configuration.GetSection(signalRUrlSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
 
-        return Builder.Services.AddKeyedSignalRMessageReceiver(signalRUrl, ShopImportWorkerKeys.DataMessageReceiverKey);
+        return Services.AddKeyedSignalRMessageReceiver(signalRUrl, ShopImportWorkerKeys.DataMessageReceiverKey);
     }
 
-    public IServiceCollection AddShopImportMessageSender(string signalRUrlSectionName)
+    public IServiceCollection AddShopImportMessageSender(IConfiguration configuration, string signalRUrlSectionName)
     {
-        var signalRUrl = Builder.Configuration.GetSection(signalRUrlSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        var signalRUrl = configuration.GetSection(signalRUrlSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
 
-        return Builder.Services.AddKeyedSignalRMessageSender(signalRUrl, ShopImportWorkerKeys.ShopsMessageSenderKey);
+        return Services.AddKeyedSignalRMessageSender(signalRUrl, ShopImportWorkerKeys.ShopsMessageSenderKey);
     }
 
-    public IServiceCollection AddRestApiClient<T>(string restApiSectionName)
+    public IServiceCollection AddRestApiClient<T>(IConfiguration configuration, string restApiSectionName)
         where T : class, IShopDataService
     {
-        var restApiHost = Builder.Configuration.GetSection(restApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        var restApiHost = configuration.GetSection(restApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
         AddHttpClient(restApiHost);
 
-        Builder.Services.AddKeyedSingleton("ShopApiClient", restApiHost);
-        return Builder.Services.AddSingleton<IShopDataService, T>();
+        Services.AddKeyedSingleton("ShopApiClient", restApiHost);
+        return Services.AddSingleton<IShopDataService, T>();
     }
 
-    public IServiceCollection AddGrpcServiceClient<T>(string grpcApiSectionName)
+    public IServiceCollection AddGrpcServiceClient<T>(IConfiguration configuration, string grpcApiSectionName)
         where T : class, IProductDataService
     {
-        var grpcApiHost = Builder.Configuration.GetSection(grpcApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
-        Builder.Services.AddGrpcChannelWithoutCertificateCheck(grpcApiHost);
-        return Builder.Services.AddSingleton<IProductDataService, T>();
+        var grpcApiHost = configuration.GetSection(grpcApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        Services.AddGrpcChannelWithoutCertificateCheck(grpcApiHost);
+        return Services.AddSingleton<IProductDataService, T>();
     }
 
     public IServiceCollection AddProductsHandler()
     {
-        return Builder.Services.AddProductDataHandler();
+        return Services.AddProductDataHandler();
     }
 
     public IServiceCollection AddCategoriesHandler()
     {
-        return Builder.Services.AddCategoriesDataHandler();
+        return Services.AddCategoriesDataHandler();
     }
 
     public IServiceCollection AddPropertyValueInterceptorsLogging(IShopImportSettings[] shopSettings, string propertyName, Func<IShopImportSettings, object> getValue)
     {
         foreach (var shop in shopSettings)
         {
-            Builder.Services.AddKeyedLogInterception(new SerilogPropertyKeyedLogInterceptor(propertyName, getValue(shop)), shop.Id);
+            Services.AddKeyedLogInterception(new SerilogPropertyKeyedLogInterceptor(propertyName, getValue(shop)), shop.Id);
         }
 
-        return Builder.Services;
+        return Services;
     }
 
     public IServiceCollection ConfigureDefaultHttps()
     {
-        return Builder.Services.ConfigureHttpClientDefaults(builder =>
+        return Services.ConfigureHttpClientDefaults(builder =>
         {
             builder.ConfigurePrimaryHttpMessageHandler(
                 () => new HttpClientHandler()
@@ -169,7 +170,7 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
 
     public IHttpClientBuilder AddHttpClient(string name)
     {
-        var httpClientBuilder = Builder.Services.AddHttpClient(name);
+        var httpClientBuilder = Services.AddHttpClient(name);
         HttpClientBuilders.Add(name, httpClientBuilder);
         return httpClientBuilder;
     }
@@ -177,11 +178,11 @@ public class ShopImportWorkerBuilder(IHostApplicationBuilder builder) : WorkerBu
     public IServiceCollection AddHttpMessageDelegatingHandler<TMessageHandler>(string apiHost)
         where TMessageHandler : DelegatingHandler
     {
-        Builder.Services.AddSingleton<TMessageHandler>();
+        Services.AddSingleton<TMessageHandler>();
 
         if (HttpClientBuilders.TryGetValue(apiHost, out var httpClientBuilder))
             httpClientBuilder.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredService<TMessageHandler>());
 
-        return Builder.Services;
+        return Services;
     }
 }

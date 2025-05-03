@@ -6,7 +6,7 @@ using Alchemist.Import.Settings.Extensions;
 namespace Alchemist.Import.Settings.Adapter;
 
 public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>(IShopSettingsDataService shopSettingsDataService)
-    : ISettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>
+    : ISettingsDataAdapter
     where TProductShopImportSettings : class, IProductShopImportSettings
     where TCategoryShopImportSettings : class, ICategoryShopImportSettings
     where TImportServiceSettings : class, IImportServiceSettings, new()

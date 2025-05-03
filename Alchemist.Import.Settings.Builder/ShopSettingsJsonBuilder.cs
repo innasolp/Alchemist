@@ -2,20 +2,31 @@
 using Alchemist.Product.Entities;
 using Json.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Settings.Builders;
 
-public class ShopSettingsJsonBuilder(string shopProductsJsonFile, string shopCategoriesJsonFile)
-    : ISettingsBuilder
+public class ShopSettingsJsonBuilder : ISettingsBuilder
 {    
-    private readonly string _shopProductsJsonFile = shopProductsJsonFile;
-    private readonly string _shopCategoriesJsonFile = shopCategoriesJsonFile;  
+    private readonly string _shopProductsJsonFile;
+    private readonly string _shopCategoriesJsonFile;
+    private readonly ILogger<ShopSettingsJsonBuilder> _logger;
 
-    public async Task<List<ShopSettingsContainer>> Build(IHost host)
+    internal ShopSettingsJsonBuilder(ILogger<ShopSettingsJsonBuilder> logger, 
+        int priority,
+        [FromKeyedServices($"{nameof(ShopSettingsJsonBuilder)}Products")]string shopProductsJsonFile,
+        [FromKeyedServices($"{nameof(ShopSettingsJsonBuilder)}Categories")] string shopCategoriesJsonFile)
     {
-        var logger = host.Services.GetRequiredService<ILogger<ShopSettingsJsonBuilder>>();
+        _shopProductsJsonFile = shopProductsJsonFile;
+        _shopCategoriesJsonFile = shopCategoriesJsonFile;
+        _logger = logger;
+        Priority = priority;
+    }
+
+    public int Priority { get; }
+
+    public async Task<List<ShopSettingsContainer>> Build()
+    {
         try
         {
             var shopProductsSettings = await _shopProductsJsonFile.ReadFromJsonFileAsync<ProductShopImportSettings[]>();
@@ -35,13 +46,13 @@ public class ShopSettingsJsonBuilder(string shopProductsJsonFile, string shopCat
                         shopCategory
                     )).ToList();
 
-            logger.LogInformation("Shop import settings built from json.");
+            _logger.LogInformation("Shop import settings built from json.");
 
             return result;
         }
         catch (Exception e)
         {
-            logger.LogError(e, e.Message);
+            _logger.LogError(e, e.Message);
             return await Task.FromResult(new List<ShopSettingsContainer>());
         }
     }

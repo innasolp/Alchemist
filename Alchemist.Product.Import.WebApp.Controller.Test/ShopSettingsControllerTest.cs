@@ -13,7 +13,7 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 {
-    private readonly ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel> _settingsDataAdapter;
+    private readonly ISettingsDataAdapter _settingsDataAdapter;
 
     private readonly Mock<IShopSettingsDataService> _shopSettingsDataServiceMock = new();
     public ShopSettingsControllerTest()

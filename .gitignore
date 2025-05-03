@@ -255,3 +255,8 @@ node_modules/
 /Alchemist.TestWebApp/bin/Debug/net8.0
 /Alchemist.Product.Import.WebApp.IntegrationTest/bin/Debug/net8.0
 /Alchemist.Product.Import.WebApp.IntegrationTest/obj
+/Alchemist.Product.Import.Backgorund.Service.IntegrationTest/bin/Debug/net8.0
+/Alchemist.Product.Import.Backgorund.Service.IntegrationTest/obj/Debug/net8.0
+/Alchemist.Product.Import.Backgorund.Service.IntegrationTest/obj/Debug/net8.0/ref/Alchemist.Product.Import.Backgorund.Service.IntegrationTest.dll
+/Alchemist.Product.Import.Backgorund.Service.IntegrationTest/obj
+/Alchemist.Product.Import.Backgorund.Service.IntegrationTest/obj/Alchemist.Product.Import.Backgorund.Service.IntegrationTest.csproj.nuget.dgspec.json

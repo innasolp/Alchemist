@@ -18,12 +18,9 @@ public class HomeController : Controller
 
     private readonly IMessageReceiver _shopEventReceiver;
 
-    private readonly ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel> _settingsDataAdapter;
+    private readonly ISettingsDataAdapter _settingsDataAdapter;
 
-    public HomeController(ILogger<HomeController> logger,
-    ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel> settingsDataAdapter,
-        IImportFacade importFacade,
-        IMessageReceiver shopEventReceiver)
+    public HomeController(ILogger<HomeController> logger, ISettingsDataAdapter settingsDataAdapter, IImportFacade importFacade, IMessageReceiver shopEventReceiver)
     {
         _logger = logger;
         _importFacade = importFacade;
@@ -93,7 +90,7 @@ public class HomeController : Controller
         if (shopGuid == null)
             shopImport = shopImports.First();
         else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
-            return await Task.FromResult(default(IndexViewModel));        
+            return await Task.FromResult(default(IndexViewModel));
 
         var shops = shopImports.Select(s => s.Shop).ToList();
 
@@ -138,7 +135,7 @@ public class HomeController : Controller
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     [ActionName("Index")]
-    public async Task<IActionResult> IndexFromQueryAsync([FromQuery]Guid shopGuid, [FromQuery] int tab)
+    public async Task<IActionResult> IndexFromQueryAsync([FromQuery] Guid shopGuid, [FromQuery] int tab)
     {
         return await IndexAsync(shopGuid, tab);
     }
@@ -178,11 +175,11 @@ public class HomeController : Controller
         var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
         if (modelFromJson == null) return Ok(false);
 
-        if((TabType)tab != TabType.Shop)
+        if ((TabType)tab != TabType.Shop)
             return Ok(!settings.Equals(modelFromJson));
 
         var originalSettings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
-        if(originalSettings == null)
+        if (originalSettings == null)
             return Ok(!modelFromJson.Equals(shopGuid.CreateShopSettings((settings as ShopSettingsModel).ShopSettingType)));
 
         return Ok(!modelFromJson.Equals(originalSettings));
@@ -218,14 +215,14 @@ public class HomeController : Controller
         var shopImports = _importFacade.GetShops();
 
         if (shopImports.Count == 0)
-            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel()); 
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel());
 
         ShopImportModel shopImport;
 
         if (shopGuid == Guid.Empty)
             shopImport = shopImports.First();
         else if (!_importFacade.TryGetShopImport(shopGuid, out shopImport))
-            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel());        
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel());
 
         return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", shopImport.GetSettings((TabType)tab) ?? shopImport.CreateSettings((TabType)tab));
     }
@@ -270,7 +267,7 @@ public class HomeController : Controller
 
             return PartialView($"~/Views/Home/{tabView}.cshtml", currentSettings);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
         }
