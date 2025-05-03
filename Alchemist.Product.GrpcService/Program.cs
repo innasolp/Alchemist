@@ -63,7 +63,7 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UsePerfomanceCounters();
+(app as IHost).UsePerfomanceCounters();
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<AlchemyService>();

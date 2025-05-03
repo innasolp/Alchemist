@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 namespace Alchemist.Test.Server.Fixtures.Grpc;
 
 public abstract class GrpcTestFixture<TGrpcWebAppFactory, TEntryPoint> :
-    TestFixture<TGrpcWebAppFactory, TEntryPoint>
+    TestFixture<TGrpcWebAppFactory, TEntryPoint>, IDisposable
     where TEntryPoint : class   
     where TGrpcWebAppFactory : WebApplicationFactory<TEntryPoint>
 {
@@ -23,10 +23,9 @@ public abstract class GrpcTestFixture<TGrpcWebAppFactory, TEntryPoint> :
          });
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
         GrpcChannel.Dispose();
-        HttpMessageHandler.Dispose();
-        base.Dispose();
+        HttpMessageHandler.Dispose();        
     }
 }

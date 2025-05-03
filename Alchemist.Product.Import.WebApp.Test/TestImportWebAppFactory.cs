@@ -9,8 +9,7 @@ using Moq;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
-public class TestImportWebAppFactory()
-    : TestWebAppFactory<ImportWebAppProgram>
+public class TestImportWebAppFactory() : TestWebAppKestrelFactory<ImportWebAppProgram>(8110, 8111)
 {
     public Mock<IShopDataService> ShopAPIClient { get; } = new Mock<IShopDataService>();
 
@@ -18,15 +17,7 @@ public class TestImportWebAppFactory()
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        base.ConfigureWebHost(builder);
-
-        builder.ConfigureServices((context, services) =>
-        {
-            var http = context.Configuration.GetSection("Kestrel:EndPoints:Http:Url");
-            http.Value = $"https://localhost:{8110}";
-            var https = context.Configuration.GetSection("Kestrel:EndPoints:Https:Url");
-            https.Value = $"https://localhost:{8111}";
-        });
+        base.ConfigureWebHost(builder);       
 
         builder.ConfigureTestServices(MockAPIServiceClients);
     }

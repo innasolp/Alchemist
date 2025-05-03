@@ -1,16 +1,19 @@
-﻿using Alchemist.Test.Server.Fixtures;
+﻿using Alchemist.Product.SignalR;
+using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 
-namespace Alchemist.Test.SignalRWebAppFactory;
-
-public class SignalRLogContextWebAppFactory <TLogContext>: SignalRApplicationFactory
-    where TLogContext: FixtureLogContext, new()
+namespace Alchemist.Test.SignalRWebAppFactory
 {
-    public TLogContext FixtureLoggingContext { get; } = new TLogContext();
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    public class SignalRLogContextWebAppFactory <TLogContext>: WebApplicationFactory<Startup>
+        where TLogContext: FixtureLogContext, new()
     {
-        builder.ConfigureTestServices(FixtureLoggingContext.ConfigureServices);
+        public TLogContext FixtureLoggingContext { get; } = new TLogContext();
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.ConfigureTestServices(FixtureLoggingContext.ConfigureServices);
+        }
     }
 }

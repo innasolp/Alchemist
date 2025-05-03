@@ -11,10 +11,13 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
 
     private readonly List<TestLogMessage> _messages = [];
 
+    private readonly HttpClient _httpClient;
+
     public ShopApiLoggingIntegrationTest(ShopAPILoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
         : base(webAppFactory, outputHelper)
     {
         WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
+        _httpClient = WebAppFactory.CreateClient();
     }
 
     private void Log(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception)
@@ -28,7 +31,7 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
         _messages.Clear();
 
         var name = "TestShop";
-        var response = await HttpClient.GetAsync($"api/Shop/byName?name={name}");
+        var response = await _httpClient.GetAsync($"api/Shop/byName?name={name}");
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
 
         Assert.Equal(2, _messages.Count(m => m.eventId == 5001 && m.categoryName.Contains("PerfomanceCounter") && m.logLevel == LogLevel.Information));
@@ -41,7 +44,7 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
         _messages.Clear();
 
         var shop = new Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
-        var response = await HttpClient.PutAsJsonAsync($"api/Shop", shop);
+        var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop);
 
         Assert.Equal(2, _messages.Count(m => m.eventId == 5001 && m.categoryName.Contains("PerfomanceCounter") && m.logLevel == LogLevel.Information));
         Assert.Equal(1, _messages.Count(m =>m.categoryName.Contains("GlobalExceptionHandler") && m.logLevel == LogLevel.Error));

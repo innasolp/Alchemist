@@ -1,16 +1,32 @@
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Alchemist.DataService.Interfaces;
+using Alchemist.Import.Settings.Adapter;
+using Moq;
+using Alchemist.Import.Settings.Model;
 
 namespace Alchemist.Import.Settings.Builders.Tests;
 
 public class ShopSettingsAppBuilderTest
 {
+    private readonly Mock<IShopDataService> _shopApiClientMock = new();
+    private readonly Mock<IShopSettingsDataService> _shopSettingsClientMock = new();
+    
+
     [Fact]
     public async Task BuildSettingsFromApp()
-    {
+    { 
+        //todo setup for mocks
         var builder = new HostApplicationBuilder();
-        var shopSettingsAppBuilder = new ShopSettingsAppBuilder(builder, "SettingsAPIHost", "RestAPIHost");
+        builder.Services.AddSingleton(_shopApiClientMock.Object);
+        builder.Services.AddSingleton(_shopSettingsClientMock.Object);
+        builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
+        builder.Services.AddSettingsAppBuilder(0);
         var host = builder.Build();
-        var shopSettings = await shopSettingsAppBuilder.Build(host);
+
+        var shopSettingsAppBuilder = host.Services.GetRequiredService<ISettingsBuilder>();
+
+        var shopSettings = await shopSettingsAppBuilder.Build();
         Assert.NotNull(shopSettings);
         Assert.NotEmpty(shopSettings);
         Assert.True(shopSettings.Count(s=>s.ProductShopImportSettings != null) >= 2);

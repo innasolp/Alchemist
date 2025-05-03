@@ -8,14 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
-public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImportFacade importFacade, 
-    ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel> settingsDataAdapter) : Controller
+public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImportFacade importFacade, ISettingsDataAdapter settingsDataAdapter) : Controller
 {
     private readonly ILogger<ShopSettingsController> _logger = logger;
 
     private readonly IImportFacade _importFacade = importFacade;
 
-    private readonly ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel> _settingsDataAdapter = settingsDataAdapter;
+    private readonly ISettingsDataAdapter _settingsDataAdapter = settingsDataAdapter;
 
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
@@ -30,7 +29,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
             return BadRequest(json);
 
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return NotFound(shopGuid);        
+            return NotFound(shopGuid);
 
         if (!_importFacade.TryGetShopSettings(shopGuid, shopSettings.ShopSettingType, out var shopSettingsModel))
             shopSettingsModel = shopGuid.CreateShopSettings(shopSettings.ShopSettingType);
@@ -60,9 +59,9 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     private IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
     {
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return  NotFound(shopGuid);
+            return NotFound(shopGuid);
 
-        if(!_importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
+        if (!_importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
             return NotFound(shopSettingsGuid);
 
         if (!_importFacade.TryGetServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName, out var serviceSettingsModel))
@@ -108,7 +107,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         if (data == null)
             return BadRequest(data);
 
-        if(!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
+        if (!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
             return NotFound(data.ShopGuid);
 
         var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
@@ -136,7 +135,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
         var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
         var serviceSettings = shopSettings.GetServiceSettings(data.Name);
-        
+
         if (serviceSettings == null) return Ok(false);
 
         return Ok(!serviceSettings.Equals(data));
@@ -163,7 +162,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
             return Ok(productShopSettings);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
         }
@@ -192,7 +191,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         catch (Exception e)
         {
             return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
-        }    
+        }
     }
 
 }

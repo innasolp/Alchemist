@@ -24,7 +24,7 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test
 
         protected readonly IImportFacade _importFacade;
 
-        protected readonly Mock<ISettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>> _settingsDataAdapterMock = new();
+        protected readonly Mock<ISettingsDataAdapter> _settingsDataAdapterMock = new();
 
         protected readonly List<IShop> _shops = [
             new Shop { Id = 1, Name = "Shop1", Url = "https://shop1" },

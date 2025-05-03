@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpcLoggingWebAppFactory, Program>
+public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpcLoggingWebAppFactory, Program>, IDisposable
 {
     record TestLogMessage (LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
@@ -62,7 +62,7 @@ public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpc
             && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
         WebAppFactory.FixtureLoggingContext.LoggedMessage -= Log;
         base.Dispose();

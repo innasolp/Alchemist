@@ -59,7 +59,7 @@ var app = builder.Build();
 app.UseExceptionHandler();
 app.UseMiddleware<InfoLogMiddleware<ShopController>>();
 
-app.UsePerfomanceCounters();
+(app as IHost).UsePerfomanceCounters();
 
 app.UseAuthentication();
 

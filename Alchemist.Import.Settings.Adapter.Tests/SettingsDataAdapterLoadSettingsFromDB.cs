@@ -9,7 +9,7 @@ namespace Alchemist.Import.Settings.Adapter.Tests;
 
 public class SettingsDataAdapterLoadSettingsFromDB
 {
-    private readonly ISettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings> _adapter;
+    private readonly ISettingsDataAdapter _adapter;
 
     public SettingsDataAdapterLoadSettingsFromDB()
     {
@@ -18,7 +18,7 @@ public class SettingsDataAdapterLoadSettingsFromDB
         builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
         var host = builder.Build();
 
-        _adapter = host.Services.GetRequiredService<ISettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>>();
+        _adapter = host.Services.GetRequiredService<ISettingsDataAdapter>();
     }
 
     [Fact]
