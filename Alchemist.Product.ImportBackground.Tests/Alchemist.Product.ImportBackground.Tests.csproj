@@ -48,9 +48,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="DependencyInjection.WorkerBuilder">
-      <HintPath>..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
-    </Reference>
     <Reference Include="Json.Extensions">
       <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
     </Reference>
@@ -59,9 +56,6 @@
     </Reference>
     <Reference Include="WebLoader.Interfaces">
       <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="DependencyInjection.Interfaces">
-        <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
     </Reference>    
   </ItemGroup>
 

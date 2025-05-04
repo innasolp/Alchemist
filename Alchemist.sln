@@ -218,7 +218,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Html.Facto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.CategoriesSettings.Tests", "Alchemist.Import.CategoriesSettings.Tests\Alchemist.Import.CategoriesSettings.Tests.csproj", "{0012FB6B-546F-4935-9671-F163764614A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.Interfaces", "..\DependencyInjection\DependencyInjection.Interfaces\DependencyInjection.Interfaces.csproj", "{93E7B887-ED88-4539-9127-B56D2BEF5AEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.Settings", "..\DependencyInjection\DependencyInjection.Settings\DependencyInjection.Settings.csproj", "{93E7B887-ED88-4539-9127-B56D2BEF5AEE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.Playwright.Firefox.DependencyInjection", "..\WebLoaders\WebLoader.Playwright.Firefox.DependencyInjection\WebLoader.Playwright.Firefox.DependencyInjection.csproj", "{DF7E87E7-770D-4CCC-B9C1-769A2A477B04}"
 	ProjectSection(ProjectDependencies) = postProject

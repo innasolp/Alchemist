@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
+    <PackageReference Include="DependencyInjection.Interception" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
@@ -21,12 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="DependencyInjection.ImplementationFactory">
-      <HintPath>..\Libs\DependencyInjection\ImplementationFactory\DependencyInjection.ImplementationFactory.dll</HintPath>
-    </Reference>
-    <Reference Include="DependencyInjection.Interception">
-      <HintPath>..\Libs\DependencyInjection\Interception\DependencyInjection.Interception.dll</HintPath>
-    </Reference>
     <Reference Include="Log.Interceptors.DependencyInjection">
       <HintPath>..\Libs\Log\Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.dll</HintPath>
     </Reference>

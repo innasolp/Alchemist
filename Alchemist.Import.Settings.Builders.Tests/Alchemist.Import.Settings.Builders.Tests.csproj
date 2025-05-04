@@ -49,12 +49,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="DependencyInjection.Interfaces">
-      <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
