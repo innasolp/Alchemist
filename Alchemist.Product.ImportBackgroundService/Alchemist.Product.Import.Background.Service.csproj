@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DependencyInjection.WorkerBuilder" Version="1.0.0" />
     <PackageReference Include="Google.Protobuf" Version="3.29.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
@@ -33,10 +34,7 @@
     <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
   </ItemGroup>
 
-  <ItemGroup>    
-    <Reference Include="DependencyInjection.WorkerBuilder">
-      <HintPath>..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
-    </Reference>
+  <ItemGroup>
     <Reference Include="Grpc.Client.RequestInterceptor">
       <HintPath>..\Libs\Grpc\Client\RequestInterceptor\Grpc.Client.RequestInterceptor.dll</HintPath>
     </Reference>
@@ -63,10 +61,7 @@
     </Reference>
     <Reference Include="Serilog.Loggers">
       <HintPath>..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
-    </Reference>
-    <Reference Include="DependencyInjection.Interfaces">
-      <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
-    </Reference>
+    </Reference>    
   </ItemGroup>
 
 </Project>

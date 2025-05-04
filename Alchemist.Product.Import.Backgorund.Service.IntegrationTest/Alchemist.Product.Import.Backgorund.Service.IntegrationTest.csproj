@@ -38,9 +38,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Reference Include="DependencyInjection.WorkerBuilder">
-      <HintPath>..\Libs\DependencyInjection\WorkerBuilder\DependencyInjection.WorkerBuilder.dll</HintPath>
-    </Reference>
     <Reference Include="Grpc.Client.RequestInterceptor">
       <HintPath>..\Libs\Grpc\Client\RequestInterceptor\Grpc.Client.RequestInterceptor.dll</HintPath>
     </Reference>
@@ -67,9 +64,6 @@
     </Reference>
     <Reference Include="Serilog.Loggers">
       <HintPath>..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
-    </Reference>
-    <Reference Include="DependencyInjection.Interfaces">
-      <HintPath>..\Libs\DependencyInjection\DependencyInjection.Interfaces.dll</HintPath>
     </Reference>
   </ItemGroup>
 
