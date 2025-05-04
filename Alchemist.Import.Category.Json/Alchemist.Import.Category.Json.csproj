@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
     <PackageReference Include="DependencyInjection.Interception" Version="1.0.0" />
+    <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
@@ -23,9 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Log.Interceptors.DependencyInjection">
-      <HintPath>..\Libs\Log\Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.dll</HintPath>
-    </Reference>
     <Reference Include="WebLoader.Common">
       <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
     </Reference>
