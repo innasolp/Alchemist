@@ -13,6 +13,7 @@
     <PackageReference Include="DependencyInjection.Interception" Version="1.0.0" />
     <PackageReference Include="DependencyInjection.WorkerBuilder" Version="1.0.0" />
     <PackageReference Include="Google.Protobuf" Version="3.29.1" />
+    <PackageReference Include="Grpc.Client.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0" />
     <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
@@ -39,9 +40,6 @@
   <ItemGroup>
     <Reference Include="BrowserDataLoader.Interfaces">
       <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="GrpscService.Client.Extensions">
-      <HintPath>..\Libs\Grpc\Client\Extensions\Grpc.Client.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Json.Extensions">
       <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>

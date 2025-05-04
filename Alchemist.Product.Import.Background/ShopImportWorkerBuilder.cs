@@ -12,13 +12,13 @@ using Serilog.Loggers;
 using WebLoader.Interfaces;
 using Alchemist.Import.Products.Service;
 using Message.SignalR.DependencyInjection;
-using Grpc.Client.Extensions;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.DataService.Interfaces;
 using WebLoader.Common;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.Interfaces;
+using Grpc.Client.Extensions;
 
 namespace Alchemist.Product.Import.Background;
 
