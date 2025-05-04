@@ -18,10 +18,12 @@
     <PackageReference Include="Google.Protobuf" Version="3.29.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
+    <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Serilog.Loggers" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,18 +49,6 @@
     </Reference>
     <Reference Include="Http.RequestHandling.PerfomanceCounter">
       <HintPath>..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
-    </Reference>
-    <Reference Include="Log.Interceptors">
-      <HintPath>..\Libs\Log\Log.Interceptors\Log.Interceptors.dll</HintPath>
-    </Reference>
-    <Reference Include="Log.Interceptors.DependencyInjection">
-      <HintPath>..\Libs\Log\Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Configuration.Extensions">
-      <HintPath>..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Loggers">
-      <HintPath>..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
     </Reference>
   </ItemGroup>
 

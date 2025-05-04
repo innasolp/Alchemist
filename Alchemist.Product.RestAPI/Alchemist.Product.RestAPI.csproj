@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Serilog.Loggers" Version="1.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
@@ -41,9 +42,6 @@
     <Reference Include="Http.RequestHandling.PerfomanceCounter">
       <HintPath>..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
     </Reference>
-    <Reference Include="Log.Interceptors">
-      <HintPath>..\Libs\Log\Log.Interceptors\Log.Interceptors.dll</HintPath>
-    </Reference>
     <Reference Include="Message.Interfaces">
       <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
     </Reference>
@@ -52,12 +50,6 @@
     </Reference>
     <Reference Include="Message.SignalR.DependencyInjection">
       <HintPath>..\Libs\Message\SignalR.DependencyInjection\Message.SignalR.DependencyInjection.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Configuration.Extensions">
-      <HintPath>..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Loggers">
-      <HintPath>..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
     </Reference>
   </ItemGroup>
 
