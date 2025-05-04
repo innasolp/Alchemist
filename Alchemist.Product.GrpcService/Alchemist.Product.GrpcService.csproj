@@ -18,6 +18,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.29.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
+    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0" />
     <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
@@ -43,12 +44,6 @@
     </Reference>
     <Reference Include="Grpc.Server.RequestInterceptor">
       <HintPath>..\Libs\Grpc\Server\RequesInterceptor\Grpc.Server.RequestInterceptor.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.Interfaces">
-      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.PerfomanceCounter">
-      <HintPath>..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
     </Reference>
   </ItemGroup>
 

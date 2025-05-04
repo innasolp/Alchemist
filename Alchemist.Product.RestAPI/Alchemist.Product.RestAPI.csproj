@@ -11,6 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
+    <PackageReference Include="Http.Info" Version="1.0.0" />
+    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
@@ -30,18 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Http.ErrorHandling">
-      <HintPath>..\Libs\Http\ErrorHandling\Http.ErrorHandling.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.Info">
-      <HintPath>..\Libs\Http\Info\Http.Info.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.Interfaces">
-      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.PerfomanceCounter">
-      <HintPath>..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
-    </Reference>
     <Reference Include="Message.Interfaces">
       <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
     </Reference>
