@@ -60,12 +60,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Reference Include="Message.Interfaces">
-      <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR">
-      <HintPath>..\Libs\Message\SignalR\Message.SignalR.dll</HintPath>
-    </Reference>
     <Reference Include="Json.Extensions">
       <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
     </Reference>

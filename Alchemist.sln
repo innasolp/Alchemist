@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.GrpcServi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.GrpcServiceClient", "Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj", "{22FC93ED-0D2A-4B74-AE72-63E815EDB05D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.RestAPI", "Alchemist.Product.RestAPI\Alchemist.Product.RestAPI.csproj", "{1C9C9539-670E-4AEC-B005-B3DFC60C8967}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.RestAPIClient", "Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj", "{EA542EC3-0632-4681-9C73-390F75ABB083}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.DataService.Interfaces", "Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj", "{44BF50F1-6750-42D0-B7DA-D185B1CEA034}"
@@ -135,8 +133,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Service", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Loggers", "..\Logging\Serilog.Loggers\Serilog.Loggers.csproj", "{78F2AC0B-672A-45DC-BD1F-49EC0BAF1979}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.Interception", "..\DependencyInjection\DependencyInjection.Interception\DependencyInjection.Interception.csproj", "{86D9BF11-D317-4AF5-9088-04B8F849DBB5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserDataLoader.Firefox.DevEdition.Windows", "..\BrowserDataLoader\BrowserDataLoader.FireFox.DevEdition.Windows\BrowserDataLoader.Firefox.DevEdition.Windows.csproj", "{EE998F47-98E1-4931-B2EA-3C44F1E15444}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserDataLoader.Firefox.Standart.Windows", "..\BrowserDataLoader\BrowserDataLoader.Firefox.Standart.Windows\BrowserDataLoader.Firefox.Standart.Windows.csproj", "{BE8EEC18-9195-4D18-ADEF-7758A2753191}"
@@ -154,9 +150,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log.Interceptors", "..\Logging\Log.Interceptors\Log.Interceptors.csproj", "{3321EFA3-579C-45C9-A7B1-6A631FBA0DF5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log.Interceptors.DependencyInjection", "..\Logging\Log.Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.csproj", "{42FD8762-4F25-4648-BEF4-A4DADC4F1A0F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{86D9BF11-D317-4AF5-9088-04B8F849DBB5} = {86D9BF11-D317-4AF5-9088-04B8F849DBB5}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.Common", "..\WebLoaders\WebLoader.Common\WebLoader.Common.csproj", "{8B2EC4CB-781C-493E-9995-75C1A62BF501}"
 EndProject
@@ -276,6 +269,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.We
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.Backgorund.Service.IntegrationTest", "Alchemist.Product.Import.Backgorund.Service.IntegrationTest\Alchemist.Product.Import.Backgorund.Service.IntegrationTest.csproj", "{A574217E-168E-4381-AA30-7978C7269C7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.RestAPI", "Alchemist.Product.RestAPI\Alchemist.Product.RestAPI.csproj", "{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.InterceptionExtensions", "..\DependencyInjection\DependencyInjection.InterceptionExtensions\DependencyInjection.InterceptionExtensions.csproj", "{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -313,11 +310,6 @@ Global
 		{22FC93ED-0D2A-4B74-AE72-63E815EDB05D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22FC93ED-0D2A-4B74-AE72-63E815EDB05D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22FC93ED-0D2A-4B74-AE72-63E815EDB05D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C9C9539-670E-4AEC-B005-B3DFC60C8967}.debug libs|Any CPU.ActiveCfg = debug libs|Any CPU
-		{1C9C9539-670E-4AEC-B005-B3DFC60C8967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C9C9539-670E-4AEC-B005-B3DFC60C8967}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C9C9539-670E-4AEC-B005-B3DFC60C8967}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C9C9539-670E-4AEC-B005-B3DFC60C8967}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EA542EC3-0632-4681-9C73-390F75ABB083}.debug libs|Any CPU.ActiveCfg = debug libs|Any CPU
 		{EA542EC3-0632-4681-9C73-390F75ABB083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EA542EC3-0632-4681-9C73-390F75ABB083}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -514,11 +506,6 @@ Global
 		{78F2AC0B-672A-45DC-BD1F-49EC0BAF1979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{78F2AC0B-672A-45DC-BD1F-49EC0BAF1979}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78F2AC0B-672A-45DC-BD1F-49EC0BAF1979}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86D9BF11-D317-4AF5-9088-04B8F849DBB5}.debug libs|Any CPU.ActiveCfg = debug libs|Any CPU
-		{86D9BF11-D317-4AF5-9088-04B8F849DBB5}.debug libs|Any CPU.Build.0 = debug libs|Any CPU
-		{86D9BF11-D317-4AF5-9088-04B8F849DBB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86D9BF11-D317-4AF5-9088-04B8F849DBB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86D9BF11-D317-4AF5-9088-04B8F849DBB5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE998F47-98E1-4931-B2EA-3C44F1E15444}.debug libs|Any CPU.ActiveCfg = debug libs|Any CPU
 		{EE998F47-98E1-4931-B2EA-3C44F1E15444}.debug libs|Any CPU.Build.0 = debug libs|Any CPU
 		{EE998F47-98E1-4931-B2EA-3C44F1E15444}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -812,6 +799,18 @@ Global
 		{A574217E-168E-4381-AA30-7978C7269C7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A574217E-168E-4381-AA30-7978C7269C7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A574217E-168E-4381-AA30-7978C7269C7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.debug libs|Any CPU.ActiveCfg = debug libs|Any CPU
+		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.debug libs|Any CPU.Build.0 = debug libs|Any CPU
+		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.debug libs|Any CPU.ActiveCfg = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.debug libs|Any CPU.Build.0 = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -859,7 +858,6 @@ Global
 		{26DC887E-9309-469C-8D48-3B49645F64CD} = {0C8C3B79-E379-4760-9E34-A3C18FCC193C}
 		{A52C6976-87B4-4A8E-86F1-AC2C75153172} = {28543099-9E94-4C23-9CFD-E56B0F68695E}
 		{78F2AC0B-672A-45DC-BD1F-49EC0BAF1979} = {94A9C5AB-5BF8-40A1-A469-89285A8D3C9A}
-		{86D9BF11-D317-4AF5-9088-04B8F849DBB5} = {4A75A9ED-5D0D-4230-A04C-957AFE79D9FC}
 		{EE998F47-98E1-4931-B2EA-3C44F1E15444} = {A9FD0C19-B42F-4F0C-819B-D316E734ACF9}
 		{BE8EEC18-9195-4D18-ADEF-7758A2753191} = {A9FD0C19-B42F-4F0C-819B-D316E734ACF9}
 		{A0F5E7C3-C66A-48F4-8326-9C716D0CFC08} = {8DD0CA95-E6CF-4919-8F23-00B6929081FC}
@@ -913,6 +911,7 @@ Global
 		{48292CC0-6CBF-4DF0-A46C-CB9A74B88CF0} = {29F409A8-DE7C-43BE-916A-920352B78953}
 		{AF53F1B4-C5A7-44CA-9E37-078935BD690A} = {29F409A8-DE7C-43BE-916A-920352B78953}
 		{A574217E-168E-4381-AA30-7978C7269C7F} = {29F409A8-DE7C-43BE-916A-920352B78953}
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2} = {4A75A9ED-5D0D-4230-A04C-957AFE79D9FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
