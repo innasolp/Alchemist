@@ -14,6 +14,7 @@
     <PackageReference Include="DependencyInjection.WorkerBuilder" Version="1.0.0" />
     <PackageReference Include="Google.Protobuf" Version="3.29.1" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
+    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0" />
     <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
@@ -41,12 +42,6 @@
     </Reference>
     <Reference Include="GrpscService.Client.Extensions">
       <HintPath>..\Libs\Grpc\Client\Extensions\Grpc.Client.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.Interfaces">
-      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.PerfomanceCounter">
-      <HintPath>..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
     </Reference>
     <Reference Include="Json.Extensions">
       <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
