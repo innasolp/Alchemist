@@ -9,23 +9,12 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup>   
     <ProjectReference Include="..\Alchemist.Product.SignalR\Alchemist.Product.SignalR.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>    
-    <Reference Include="Message.Interfaces">
-      <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR">
-      <HintPath>..\Libs\Message\SignalR\Message.SignalR.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR.DependencyInjection">
-      <HintPath>..\Libs\Message\SignalR.DependencyInjection\Message.SignalR.DependencyInjection.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

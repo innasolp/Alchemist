@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
   </ItemGroup>
@@ -14,15 +15,6 @@
   <ItemGroup>
     <Reference Include="WebLoader.Common">
       <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.Interfaces">
-      <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR">
-      <HintPath>..\Libs\Message\SignalR\Message.SignalR.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR.DependencyInjection">
-      <HintPath>..\Libs\Message\SignalR.DependencyInjection\Message.SignalR.DependencyInjection.dll</HintPath>
     </Reference>
   </ItemGroup>
 
