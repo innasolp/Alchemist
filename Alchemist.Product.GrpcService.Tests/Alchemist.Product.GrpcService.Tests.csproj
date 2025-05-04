@@ -32,15 +32,6 @@
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures.Grpc\Alchemist.Test.Server.Fixtures.Grpc.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="Grpc.Server.Interceptors">
-      <HintPath>..\Libs\Grpc\Server\Interceptors\Grpc.Server.Interceptors.dll</HintPath>
-    </Reference>
-    <Reference Include="Grpc.Server.RequestInterceptor">
-      <HintPath>..\Libs\Grpc\Server\RequesInterceptor\Grpc.Server.RequestInterceptor.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />

@@ -38,9 +38,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Reference Include="Grpc.Client.RequestInterceptor">
-      <HintPath>..\Libs\Grpc\Client\RequestInterceptor\Grpc.Client.RequestInterceptor.dll</HintPath>
-    </Reference>
     <Reference Include="Json.Extensions">
       <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
     </Reference>
