@@ -9,9 +9,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
-    <PackageReference Include="DependencyInjection.Interception" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
+       <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
+       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup>

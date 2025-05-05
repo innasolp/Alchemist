@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
   </ItemGroup>
 
@@ -16,9 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="BrowserDataLoader.Interfaces">
-      <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
-    </Reference>
     <Reference Include="WebLoader.Common">
       <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
     </Reference>
