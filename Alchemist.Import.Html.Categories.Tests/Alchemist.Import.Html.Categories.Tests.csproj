@@ -29,6 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BrowserDataLoader.Firefox.DevEdition.Windows" Version="1.0.0" />
+    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Http.RequestHandling.Interfaces" Version="1.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
@@ -55,18 +57,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="BrowserDataLoader.FireFox.DevEdition.Windows">
-      <HintPath>..\Libs\BrowserDataLoader\Firefox\DevEdition\BrowserDataLoader.FireFox.DevEdition.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="BrowserDataLoader.Firefox.Standart.Windows">
-      <HintPath>..\Libs\BrowserDataLoader\Firefox\Standart\BrowserDataLoader.Firefox.Standart.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="BrowserDataLoader.Firefox.Windows">
-      <HintPath>..\Libs\BrowserDataLoader\Firefox\BrowserDataLoader.Firefox.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="BrowserDataLoader.Interfaces">
-      <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
-    </Reference>
     <Reference Include="Json.Extensions">
       <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
     </Reference>
