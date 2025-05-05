@@ -25,6 +25,8 @@
     <PackageReference Include="RabbitMQ.Client.Core.DependencyInjection" Version="5.0.0" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0" />
+    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,15 +39,6 @@
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="BrowserDataLoader.Interfaces">
-      <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
-    </Reference>    
-    <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

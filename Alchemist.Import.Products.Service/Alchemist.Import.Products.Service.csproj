@@ -11,6 +11,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.1" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Common" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,15 +21,6 @@
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Service\Alchemist.Import.Service.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="WebLoader.Common">
-      <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+  </ItemGroup> 
 
 </Project>

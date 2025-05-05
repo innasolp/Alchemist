@@ -46,16 +46,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.Builders.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>    
-    <Reference Include="Message.Interfaces">
-      <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>    
-  </ItemGroup>
+  </ItemGroup>  
 
   <ItemGroup>
     <Using Include="Xunit" />

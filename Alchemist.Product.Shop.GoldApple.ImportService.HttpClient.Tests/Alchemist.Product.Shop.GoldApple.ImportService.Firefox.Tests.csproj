@@ -24,26 +24,13 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0" />
+
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.Model\Alchemist.Product.Shop.GoldApple.Model.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="WebLoader.Common">
-      <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
-    </Reference>   
-    <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>    
-    <Reference Include="WebLoader.Playwright">
-      <HintPath>..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Playwright.Firefox">
-      <HintPath>..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.Firefox.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+  </ItemGroup>  
 
   <ItemGroup>
     <Using Include="Xunit" />
