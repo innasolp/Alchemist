@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
 using System.Text.Json;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using WebLoader.Common;
 using System.Reflection;
-using Json.Extensions;
+using Json.FileExtensions;
 using BrowserDataLoader.Interfaces;
 using BrowserDataLoader.Firefox.Standart.Windows;
 using WebLoader.Playwright.Firefox;

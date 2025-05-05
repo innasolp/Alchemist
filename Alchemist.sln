@@ -127,7 +127,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.WorkerB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Json", "Json", "{0C8C3B79-E379-4760-9E34-A3C18FCC193C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Json.Extensions", "..\Json\Json.Extensions\Json.Extensions.csproj", "{26DC887E-9309-469C-8D48-3B49645F64CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Json.FileExtensions", "..\Json\Json.FileExtensions\Json.FileExtensions.csproj", "{26DC887E-9309-469C-8D48-3B49645F64CD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Service", "Alchemist.Import.Service\Alchemist.Import.Service.csproj", "{A52C6976-87B4-4A8E-86F1-AC2C75153172}"
 EndProject

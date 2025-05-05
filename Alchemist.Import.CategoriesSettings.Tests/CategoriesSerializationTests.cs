@@ -1,5 +1,5 @@
 using Alchemist.Import.Settings.Model;
-using Json.Extensions;
+using Json.FileExtensions;
 
 namespace Alchemist.Import.CategoriesSettings.Tests;
 

@@ -23,6 +23,7 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,10 +36,7 @@
     </Reference>   
     <Reference Include="WebLoader.Interfaces">
       <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Json.Extensions">
-      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
-    </Reference>
+    </Reference>    
     <Reference Include="WebLoader.Playwright">
       <HintPath>..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.dll</HintPath>
     </Reference>
