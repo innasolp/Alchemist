@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="RabbitMQ.Client.Core.DependencyInjection" Version="5.0.0" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0" />
+    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,10 +42,7 @@
   <ItemGroup>
     <Reference Include="BrowserDataLoader.Interfaces">
       <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Json.Extensions">
-      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
-    </Reference>
+    </Reference>    
     <Reference Include="WebLoader.Interfaces">
       <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
     </Reference>

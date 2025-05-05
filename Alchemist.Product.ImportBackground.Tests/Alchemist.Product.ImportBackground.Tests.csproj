@@ -40,6 +40,7 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,10 +48,7 @@
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Json.Extensions">
-      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
-    </Reference>
+  <ItemGroup>    
     <Reference Include="Message.Interfaces">
       <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
     </Reference>

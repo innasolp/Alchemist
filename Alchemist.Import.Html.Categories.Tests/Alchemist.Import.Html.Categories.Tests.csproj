@@ -43,6 +43,7 @@
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,9 +58,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Json.Extensions">
-      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
-    </Reference>
     <Reference Include="WebLoader.Common">
       <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
     </Reference>

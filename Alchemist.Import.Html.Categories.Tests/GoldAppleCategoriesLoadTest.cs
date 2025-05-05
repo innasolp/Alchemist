@@ -1,6 +1,6 @@
 using Alchemist.Import.Category.Json;
 using BrowserDataLoader.Interfaces;
-using Json.Extensions;
+using Json.FileExtensions;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;

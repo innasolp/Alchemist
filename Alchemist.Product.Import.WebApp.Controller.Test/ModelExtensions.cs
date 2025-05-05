@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
-using Json.Extensions;
+using Json.FileExtensions;
 using System.Reflection;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
