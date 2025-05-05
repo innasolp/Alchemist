@@ -31,19 +31,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="Message.Interfaces">
-      <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR">
-      <HintPath>..\Libs\Message\SignalR\Message.SignalR.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR.DependencyInjection">
-      <HintPath>..\Libs\Message\SignalR.DependencyInjection\Message.SignalR.DependencyInjection.dll</HintPath>
-    </Reference>    
-  </ItemGroup>
+  </ItemGroup> 
 
   <ItemGroup>
     <Using Include="Xunit" />

@@ -8,13 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
   </ItemGroup>
 
 </Project>
