@@ -2,13 +2,13 @@ using Alchemist.Common;
 using Alchemist.Log.Serilog;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.RestAPIClient;
-using Grpc.Client.RequestInterceptor;
 using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Background.Service;
+using Grpc.Client.RequestInterceptor;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";

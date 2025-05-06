@@ -9,8 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
+    <PackageReference Include="DependencyInjection.Interception" Version="1.0.0" />
+    <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Common" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,24 +23,6 @@
     <ProjectReference Include="..\Alchemist.Import.Common\Alchemist.Import.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Html\Alchemist.Import.Html.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Service\Alchemist.Import.Service.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="DependencyInjection.ImplementationFactory">
-      <HintPath>..\Libs\DependencyInjection\ImplementationFactory\DependencyInjection.ImplementationFactory.dll</HintPath>
-    </Reference>
-    <Reference Include="DependencyInjection.Interception">
-      <HintPath>..\Libs\DependencyInjection\Interception\DependencyInjection.Interception.dll</HintPath>
-    </Reference>
-    <Reference Include="Log.Interceptors.DependencyInjection">
-      <HintPath>..\Libs\Log\Interceptors.DependencyInjection\Log.Interceptors.DependencyInjection.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Common">
-      <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

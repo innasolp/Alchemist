@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Entities;
-using Json.Extensions;
+using Json.FileExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

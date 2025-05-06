@@ -7,22 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
+    <PackageReference Include="Http.Info" Version="1.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Http.ErrorHandling">
-      <HintPath>..\Libs\Http\ErrorHandling\Http.ErrorHandling.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.Info">
-      <HintPath>..\Libs\Http\Info\Http.Info.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Configuration.Extensions">
-      <HintPath>..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Loggers">
-      <HintPath>..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

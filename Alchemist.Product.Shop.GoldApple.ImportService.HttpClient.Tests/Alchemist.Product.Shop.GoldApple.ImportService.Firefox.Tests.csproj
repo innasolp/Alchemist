@@ -12,7 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Http.RequestHandling.Interfaces" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
@@ -21,41 +23,14 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0" />
+
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.Model\Alchemist.Product.Shop.GoldApple.Model.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Http.RequestHandling.Interfaces">
-      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Common">
-      <HintPath>..\Libs\webLoader\WebLoader.Common.dll</HintPath>
-    </Reference>   
-    <Reference Include="WebLoader.Interfaces">
-      <HintPath>..\Libs\webLoader\WebLoader.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Json.Extensions">
-      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="BrowserDataLoader.Firefox.Standart.Windows">
-      <HintPath>..\Libs\BrowserDataLoader\Firefox\Standart\BrowserDataLoader.Firefox.Standart.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="BrowserDataLoader.Firefox.Windows">
-      <HintPath>..\Libs\BrowserDataLoader\Firefox\BrowserDataLoader.Firefox.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="BrowserDataLoader.Interfaces">
-      <HintPath>..\Libs\BrowserDataLoader\BrowserDataLoader.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Playwright">
-      <HintPath>..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.dll</HintPath>
-    </Reference>
-    <Reference Include="WebLoader.Playwright.Firefox">
-      <HintPath>..\Libs\webLoader\Playwright\Firefox\WebLoader.Playwright.Firefox.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+  </ItemGroup>  
 
   <ItemGroup>
     <Using Include="Xunit" />

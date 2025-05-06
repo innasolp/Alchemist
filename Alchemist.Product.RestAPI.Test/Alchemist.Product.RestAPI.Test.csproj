@@ -21,38 +21,6 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Http.ErrorHandling">
-      <HintPath>..\Libs\Http\ErrorHandling\Http.ErrorHandling.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.Info">
-      <HintPath>..\Libs\Http\Info\Http.Info.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.Interfaces">
-      <HintPath>..\Libs\Http\RequestHandling.Interfaces\Http.RequestHandling.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Http.RequestHandling.PerfomanceCounter">
-      <HintPath>..\Libs\Http\RequestHandling.PerfomanceCounter\Http.RequestHandling.PerfomanceCounter.dll</HintPath>
-    </Reference>
-    <Reference Include="Log.Interceptors">
-      <HintPath>..\Libs\Log\Log.Interceptors\Log.Interceptors.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.Interfaces">
-      <HintPath>..\Libs\Message\Message.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR">
-      <HintPath>..\Libs\Message\SignalR\Message.SignalR.dll</HintPath>
-    </Reference>
-    <Reference Include="Message.SignalR.DependencyInjection">
-      <HintPath>..\Libs\Message\SignalR.DependencyInjection\Message.SignalR.DependencyInjection.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Configuration.Extensions">
-      <HintPath>..\Libs\Log\Serilog.Configuration.Extensions\Serilog.Configuration.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Loggers">
-      <HintPath>..\Libs\Log\Serilog.Loggers\Serilog.Loggers.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />

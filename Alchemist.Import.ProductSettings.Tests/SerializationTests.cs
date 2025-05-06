@@ -1,5 +1,5 @@
 using Alchemist.Import.Settings.Model;
-using Json.Extensions;
+using Json.FileExtensions;
 using System.Text.Json;
 using WebLoader.Common;
 
