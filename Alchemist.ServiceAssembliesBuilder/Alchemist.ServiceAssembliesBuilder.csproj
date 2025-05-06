@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0" GeneratePathProperty="true" />
+    <PackageReference Include="WebLoader.HttpClient" Version="1.0.0" GeneratePathProperty="true"/>
+    <PackageReference Include="WebLoader.Playwright.Firefox.DependencyInjection" Version="1.0.0" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <Target Name="RemoveBrowserDataLoaderFirefoxDir" BeforeTargets="Build">
+    <RemoveDir Directories="$(SolutionDir)Libs\BrowserDataLoader\Firefox\Standart"/>
+  </Target>
+
+  <Target Name="CopyBrowserDataLoaderFirefox" AfterTargets="Build">
+    <ItemGroup>
+      <BrowserDataLoaderFirefoxFiles Include="$(PkgBrowserDataLoader_Firefox_Standart_Windows)\lib\dependencies\*.dll"></BrowserDataLoaderFirefoxFiles>
+    </ItemGroup>
+    <Copy SourceFiles="@(BrowserDataLoaderFirefoxFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserDataLoader\Firefox\Standart"></Copy>
+  </Target>
+
+  <Target Name="RemoveWebLoaderHttpClientDir" BeforeTargets="Build">
+    <RemoveDir Directories="$(SolutionDir)Libs\WebLoader\HttpClient"/>
+  </Target>
+
+  <Target Name="CopyWebLoaderHttpClient" AfterTargets="Build">
+    <ItemGroup>
+      <CopyWebLoaderHttpClientFiles Include="$(PkgWebLoader_HttpClient)\lib\dependencies\*.dll"></CopyWebLoaderHttpClientFiles>
+    </ItemGroup>
+    <Copy SourceFiles="@(CopyWebLoaderHttpClientFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\HttpClient"></Copy>
+  </Target>
+
+  <Target Name="RemoveWebLoaderPlaywrightFirefoxDir" BeforeTargets="Build">
+    <RemoveDir Directories="$(SolutionDir)Libs\WebLoader\Playwright\Firefox"/>
+  </Target>
+
+  <Target Name="CopyWebLoaderPlaywrightFirefox" AfterTargets="Build">
+    <ItemGroup>
+      <CopyWebLoaderPlaywrightFirefoxFiles Include="$(PkgWebLoader_Playwright_Firefox_DependencyInjection)\lib\dependencies\*.dll"></CopyWebLoaderPlaywrightFirefoxFiles>
+    </ItemGroup>
+    <Copy SourceFiles="@(CopyWebLoaderPlaywrightFirefoxFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox"></Copy>
+  </Target>
+
+</Project>

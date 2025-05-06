@@ -261,3 +261,5 @@ node_modules/
 /Alchemist.Product.Import.Backgorund.Service.IntegrationTest/obj
 /Alchemist.Product.Import.Backgorund.Service.IntegrationTest/obj/Alchemist.Product.Import.Backgorund.Service.IntegrationTest.csproj.nuget.dgspec.json
 /Alchemist.Product.Import.WebApp.Controller.Test/bin/Debug/net8.0/af/Humanizer.resources.dll
+/Alchemist.ServiceAssembliesBuilder/bin/Debug/net8.0
+/Alchemist.ServiceAssembliesBuilder/obj
