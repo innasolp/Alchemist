@@ -24,7 +24,7 @@ public class ShopSettingsAppBuilderTest
         builder.Services.AddSettingsAppBuilder(0);
         var host = builder.Build();
 
-        var shopSettingsAppBuilder = host.Services.GetRequiredService<ISettingsBuilder>();
+        var shopSettingsAppBuilder = host.Services.GetRequiredService<ISettingsBuilder>() as ShopSettingsAppBuilder;
 
         var shopSettings = await shopSettingsAppBuilder.Build();
         Assert.NotNull(shopSettings);

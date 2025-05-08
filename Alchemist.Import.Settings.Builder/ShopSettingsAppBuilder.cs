@@ -1,6 +1,7 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.Adapter;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Settings.Builders;
@@ -21,6 +22,7 @@ public class ShopSettingsAppBuilder : ISettingsBuilder
 
     public int Priority { get; }
 
+    [Obsolete]
     public async Task<List<ShopSettingsContainer>> Build()
     {
         try
@@ -34,6 +36,16 @@ public class ShopSettingsAppBuilder : ISettingsBuilder
             _logger.LogError(e, e.Message);
             return await Task.FromResult(new List<ShopSettingsContainer>());
         }
+    }
+
+    public async Task<IShopImportSettings?> Build(string shopSettingsName, ShopSettingType shopSettingType) 
+    {
+        var shopImportSettings = await _settingsDataAdapter.GetShopImportSettings(shopSettingsName);
+        if (shopImportSettings == null) return null;
+
+        return shopImportSettings?.ShopSettingType != shopSettingType
+            ? throw new InvalidDataException($"Settings type for {shopSettingsName} is {shopImportSettings.ShopSettingType}")
+            : shopImportSettings;
     }
 
     private async Task<List<ShopSettingsContainer>> GetResult()

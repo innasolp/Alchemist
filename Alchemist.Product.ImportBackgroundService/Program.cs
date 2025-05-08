@@ -6,29 +6,36 @@ using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
-using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Import.Background.Service;
 using Grpc.Client.RequestInterceptor;
-
+using Alchemist.DataService.Interfaces;
+using Alchemist.Import.Settings.Model;
+using Alchemist.Settings.RestAPIClient;
+using Alchemist.DependencyInjection.Common;
+using Alchemist.Import.Settings.Adapter;
+using Alchemist.Import.Settings.Builders;
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-var settingsHost = ShopSettingsContainerBuilder.BuildSettingsHost(args, builder.Configuration, logPath, "shopProducts.json", "shopCategories.json");
-var allShopSettings = await ShopSettingsContainerBuilder.GetAvailableSettingsWithHighestPriority(settingsHost.Services);
+builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient));
+builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
+builder.Services.AddSettingsAppBuilder(0);
+builder.Services.AddSettingsJsonBuilder(1, ["shopProducts.json", "shopCategories.json"]);
 
-await settingsHost.StartAsync();
-await settingsHost.StopAsync();
-
-foreach (var shop in allShopSettings)
-{
-    shop.ProductShopImportSettings?.SetAppPath(appPath);
-    shop.CategoryShopImportSettings?.SetAppPath(appPath);
-}
+//todo load browserdataloaders from assemblies
+//todo load webloaders from assemblies
 
 var shopImportWorkerBuilder = new ShopImportWorkerBuilder(builder.Services);
+
+shopImportWorkerBuilder.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl");
+shopImportWorkerBuilder.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl");
+
+shopImportWorkerBuilder.AddGrpcServiceClient<Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
+builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
+builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
+
 
 shopImportWorkerBuilder.ConfigureDefaultHttps();
 shopImportWorkerBuilder.AddRestApiClient<ShopApiClient>(builder.Configuration, "RestAPIHost");
@@ -36,43 +43,38 @@ var restApiHost = builder.Configuration.GetSection("RestAPIHost").Get<string>()?
 shopImportWorkerBuilder.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(restApiHost);
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
-shopImportWorkerBuilder.AddGrpcServiceClient<Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
-builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
-builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
 
-var shopProductsSettings = allShopSettings.Where(s=>s.ProductShopImportSettings != null).Select(s => s.ProductShopImportSettings).ToList();
-shopImportWorkerBuilder.AddShopProducts(shopProductsSettings);
-shopImportWorkerBuilder.AddProductsHandler();
+//todo 
+//var shopProductsSettings = allShopSettings.Where(s=>s.ProductShopImportSettings != null).Select(s => s.ProductShopImportSettings).ToList();
+//shopImportWorkerBuilder.AddShopProducts(shopProductsSettings);
+//shopImportWorkerBuilder.AddProductsHandler();
 
-var shopCategoriesSettings = allShopSettings.Where(s => s.CategoryShopImportSettings != null).Select(s => s.CategoryShopImportSettings).ToList();
+//var shopCategoriesSettings = allShopSettings.Where(s => s.CategoryShopImportSettings != null).Select(s => s.CategoryShopImportSettings).ToList();
 
-if (shopCategoriesSettings.Count > 0)
-{
-    shopImportWorkerBuilder.AddShopCategories(shopCategoriesSettings);
-    shopImportWorkerBuilder.AddPropertyValueInterceptorsLogging(shopCategoriesSettings.OfType<IShopImportSettings>().ToArray(), "ClassName", (shopSetting) => shopSetting.Id);
-    shopImportWorkerBuilder.AddCategoriesHandler();
-}
-
-shopImportWorkerBuilder.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl");
-shopImportWorkerBuilder.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl");
-
+//if (shopCategoriesSettings.Count > 0)
+//{
+//    shopImportWorkerBuilder.AddShopCategories(shopCategoriesSettings);
+//    shopImportWorkerBuilder.AddPropertyValueInterceptorsLogging(shopCategoriesSettings.OfType<IShopImportSettings>().ToArray(), "ClassName", (shopSetting) => shopSetting.Id);
+//    shopImportWorkerBuilder.AddCategoriesHandler();
+//}
 
 var appSerilogBuilder = new AppSerilogBuilder(builder);
 appSerilogBuilder.AddServiceBaseConfigs(typeof(ShopImportWorker).Name);
 appSerilogBuilder.AddPerfomanceCounter(url:"alchemygrpcservice", EventIds.Perfomance.Id, logPath, serviceName:"AlchemyGrpcClient");
 appSerilogBuilder.AddPerfomanceCounter(url: restApiHost, EventIds.Perfomance.Id, logPath, serviceName:"AlchemyRestAPIClient");
 
-if (shopProductsSettings.Count != 0)
-{
-    appSerilogBuilder.AddShopsSerilogSourceContextConfigs(shopProductsSettings, $"{logPath}/Shops");
-    appSerilogBuilder.AddShopsWebPerfomanceConfigs(shopProductsSettings, logPath);
-}
+//todo
+//if (shopProductsSettings.Count != 0)
+//{
+//    appSerilogBuilder.AddShopsSerilogSourceContextConfigs(shopProductsSettings, $"{logPath}/Shops");
+//    appSerilogBuilder.AddShopsWebPerfomanceConfigs(shopProductsSettings, logPath);
+//}
 
-if (shopCategoriesSettings.Count != 0)
-{
-    appSerilogBuilder.AddShopsSerilogPropertyConfigs(shopCategoriesSettings, $"{logPath}/ShopCategories");
-    appSerilogBuilder.AddShopsWebPerfomanceConfigs(shopCategoriesSettings, logPath);
-}
+//if (shopCategoriesSettings.Count != 0)
+//{
+//    appSerilogBuilder.AddShopsSerilogPropertyConfigs(shopCategoriesSettings, $"{logPath}/ShopCategories");
+//    appSerilogBuilder.AddShopsWebPerfomanceConfigs(shopCategoriesSettings, logPath);
+//}
 
 appSerilogBuilder.SetSerilog(builder.Logging);
 

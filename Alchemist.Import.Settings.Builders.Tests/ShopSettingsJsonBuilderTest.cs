@@ -12,7 +12,7 @@ public class ShopSettingsJsonBuilderTest
         builder.Services.AddSettingsJsonBuilder(0, "shopProducts.json", "shopCategories.json");
         var host = builder.Build();
 
-        var shopSettingsJsonBuilder = host.Services.GetRequiredService<ISettingsBuilder>();             
+        var shopSettingsJsonBuilder = host.Services.GetRequiredService<ISettingsBuilder>() as ShopSettingsJsonBuilder;             
         
         var shopSettings = await shopSettingsJsonBuilder.Build();
         Assert.NotNull(shopSettings);

@@ -18,12 +18,22 @@ public static class ShopSettingsBuilderDependencyInjection
         });
     }
 
+    [Obsolete]
     public static IServiceCollection AddSettingsJsonBuilder(this IServiceCollection services, int priority, string shopProductsJsonFile, string shopCategoriesJsonFile)
     {
         return services.AddSingleton<ISettingsBuilder>((serviceProvider) =>
         {
             var logger = serviceProvider.GetRequiredService<ILogger<ShopSettingsJsonBuilder>>();
             return new ShopSettingsJsonBuilder(logger, priority, shopProductsJsonFile, shopCategoriesJsonFile);
+        });
+    }
+
+    public static IServiceCollection AddSettingsJsonBuilder(this IServiceCollection services, int priority, string[] jsonFiles)
+    {
+        return services.AddSingleton<ISettingsBuilder>((serviceProvider) =>
+        {
+            var logger = serviceProvider.GetRequiredService<ILogger<ShopSettingsJsonBuilder>>();
+            return new ShopSettingsJsonBuilder(logger, priority, jsonFiles);
         });
     }
 }
