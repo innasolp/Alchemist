@@ -24,7 +24,7 @@ public class SettingsDataAdapterLoadSettingsFromDB
     [Fact]
     public async Task LoadProductSettings()
     {        
-        var shopSettings = await _adapter.GetShopSettings(1, Product.Interfaces.ShopSettingType.Product);
+        var shopSettings = await _adapter.GetShopImportSettings(1, Product.Interfaces.ShopSettingType.Product);
         Assert.NotNull(shopSettings);
         Assert.NotEmpty(shopSettings.Services);
         Assert.NotNull(shopSettings.RequestHeaders);
@@ -34,7 +34,7 @@ public class SettingsDataAdapterLoadSettingsFromDB
     [Fact]
     public async Task LoadCategorySettings()
     {
-        var shopSettings = await _adapter.GetShopSettings(1, Product.Interfaces.ShopSettingType.Category);
+        var shopSettings = await _adapter.GetShopImportSettings(1, Product.Interfaces.ShopSettingType.Category);
         Assert.NotNull(shopSettings);
         Assert.NotEmpty(shopSettings.Services);
     }

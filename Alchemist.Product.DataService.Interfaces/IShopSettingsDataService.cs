@@ -8,6 +8,8 @@ public interface IShopSettingsDataService
 
     Task<IShopSettings?> GetShopSettings(int id);
 
+    Task<IShopSettings?> GetShopSettings(string shopSettingsName);
+
     Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings);
 
     Task<List<IShopSettings>> SaveShopSettings(IShopSettings shopSettings, IEnumerable<IShopSettings> services);

@@ -5,7 +5,9 @@ namespace Alchemist.Import.Settings.Adapter;
 
 public interface ISettingsDataAdapter
 {
-    Task<IShopImportSettings?> GetShopSettings(int shopId, ShopSettingType shopSettingType);
+    Task<IShopImportSettings?> GetShopImportSettings(int shopId, ShopSettingType shopSettingType);
+
+    Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName);
 
     Task Save(IShopImportSettings shopSettingsModel);
 }

@@ -42,7 +42,7 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test
         {
             _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
 
-            _settingsDataAdapterMock.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>()))
+            _settingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>()))
                 .Returns(GetShopSettingsModelAsync);
 
             _messageReceiverMock.Setup(m => m.On(Messages.ReceiveShopCreated, It.IsAny<Action<Shop>>())).Callback(() => { });

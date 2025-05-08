@@ -120,4 +120,9 @@ public class SettingsRepository(AlchemyContext context) : ISettingsRepository
             return await Task.FromResult(new List<IShopSettings>());
         }
     }
+
+    public async Task<IShopSettings?> GetShopSettings(string shopSettingsName)
+    {
+        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.Name == shopSettingsName);
+    }
 }

@@ -12,5 +12,5 @@ public class ShopSettings : IShopSettings
     public string JsonValue { get; set; }
     public ShopSettingType Type { get; set; }
 
-    public string? Name { get; set; }
+    public string Name { get; set; }
 }

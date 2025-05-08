@@ -42,8 +42,8 @@ public class ShopSettingsAppBuilder : ISettingsBuilder
         var shops = await _shopDataService.GetShops();
         foreach (var shop in shops)
         {
-            var productShopSettings = await _settingsDataAdapter.GetShopSettings(shop.Id, Product.Interfaces.ShopSettingType.Product);
-            var categoryShopSettings = await _settingsDataAdapter.GetShopSettings(shop.Id, Product.Interfaces.ShopSettingType.Category);
+            var productShopSettings = await _settingsDataAdapter.GetShopImportSettings(shop.Id, Product.Interfaces.ShopSettingType.Product);
+            var categoryShopSettings = await _settingsDataAdapter.GetShopImportSettings(shop.Id, Product.Interfaces.ShopSettingType.Category);
             result.Add(new ShopSettingsContainer(shop,
                 productShopSettings as IProductShopImportSettings,
                 categoryShopSettings as ICategoryShopImportSettings));

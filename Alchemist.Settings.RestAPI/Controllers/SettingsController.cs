@@ -37,6 +37,16 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound(id);
     }
 
+    [HttpGet("shopSettings/byName/{shopSettingsName:string}", Name = nameof(GetShopSettingsByName))]
+    public async Task<Results<BadRequest<string>, NotFound<string>, Ok<ShopSettings>>> GetShopSettingsByName(string shopSettingsName)
+    {
+        if (string.IsNullOrEmpty(shopSettingsName))
+            return TypedResults.BadRequest(shopSettingsName);
+
+        var shopSettings = await _settingsRepository.GetShopSettings(shopSettingsName);
+        return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound(shopSettingsName);
+    }
+
     [HttpPost("shopSettings", Name = nameof(SaveShopSettings))]
     public async Task<Results<BadRequest, BadRequest<ShopSettings>, Created<ShopSettings>>> SaveShopSettings(ShopSettings shopSettings)
     {
