@@ -4,5 +4,5 @@ namespace Alchemist.Import.Factory;
 
 public interface IShopImportServiceFactory
 {
-    IImportService Create(IShopModel productShopModel);
+    IImportService Create(IShopModel shopModel);
 }

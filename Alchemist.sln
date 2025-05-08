@@ -283,6 +283,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GoldApple", "GoldApple", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ozon", "Ozon", "{53BFEBDC-CEC7-4C24-9928-C9E09AE129A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Category.Json.Factory", "Alchemist.Import.Category.Json.Factory\Alchemist.Import.Category.Json.Factory.csproj", "{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -842,6 +844,12 @@ Global
 		{EDDD6A1D-7280-4F0E-823B-EB9E2E9FD84C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDDD6A1D-7280-4F0E-823B-EB9E2E9FD84C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDDD6A1D-7280-4F0E-823B-EB9E2E9FD84C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -945,6 +953,7 @@ Global
 		{EDDD6A1D-7280-4F0E-823B-EB9E2E9FD84C} = {5FBF81BB-A557-4C8E-805F-DD24F16E7090}
 		{5FBF81BB-A557-4C8E-805F-DD24F16E7090} = {711E878E-94CF-4AA7-B817-1DAD885D7EB8}
 		{53BFEBDC-CEC7-4C24-9928-C9E09AE129A4} = {711E878E-94CF-4AA7-B817-1DAD885D7EB8}
+		{E7D1C3A8-190A-4659-B85B-A05E243D1AE0} = {CE5C7C99-8757-4B3A-AF34-028754FC6712}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

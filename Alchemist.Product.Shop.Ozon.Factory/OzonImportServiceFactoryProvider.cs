@@ -1,5 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Shop.Ozon.ImportService;
+﻿using Alchemist.Product.Shop.Ozon.ImportService;
 using DependencyInjection.ImplementationFactory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -7,6 +6,7 @@ using Microsoft.VisualStudio.Threading;
 using System.Text.Json;
 using WebLoader.Common;
 using Alchemist.Import.Factory;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Shop.Ozon.Factory;
 
@@ -15,12 +15,12 @@ public class OzonImportServiceFactoryProvider : IServiceImplementationFactory, I
     private static OzonImportServiceFactory GetService(IServiceProvider serviceProvider, string key)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<OzonImportService>>();
-
+               
         var joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
         var productShopImportSettings = joinableTaskFactory.Run(async () =>
         {
-            return await serviceProvider.GetProductShopImportSettingsAsync<IProductShopImportSettings>(key);
-        });
+            return await serviceProvider.GetAvailableSettingsWithHighestPriority(key, ShopSettingType.Product);
+        }) ?? throw new InvalidDataException($"Shop settings {key} for type {ShopSettingType.Product} not found."); 
 
         var browserDataLoader = serviceProvider.GetBrowserDataLoader(productShopImportSettings.BrowserDataLoader.ImplementationTypeName);
 

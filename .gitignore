@@ -269,3 +269,5 @@ node_modules/
 /Alchemist.Product.Shop.GoldApple.Factory/obj
 /Alchemist.Product.Shop.Ozon.Factory/bin/Debug/net8.0
 /Alchemist.Product.Shop.Ozon.Factory/obj
+/Alchemist.Import.Category.Json.Factory/bin/Debug/net8.0
+/Alchemist.Import.Category.Json.Factory/obj

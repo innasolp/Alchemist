@@ -1,5 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
-using DependencyInjection.ImplementationFactory;
+﻿using DependencyInjection.ImplementationFactory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
@@ -7,6 +6,7 @@ using System.Text.Json;
 using WebLoader.Common;
 using Alchemist.Import.Factory;
 using Alchemist.Product.Shop.GoldApple.ImportService;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Shop.GoldApple.Factory;
 
@@ -17,21 +17,21 @@ public class GoldappleImportServiceFactoryProvider : IServiceImplementationFacto
         var logger = serviceProvider.GetRequiredService<ILogger<GoldAppleImportService>>();
 
         var joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
-        var productShopImportSettings = joinableTaskFactory.Run(async () =>
+        var shopImportSettings = joinableTaskFactory.Run(async () =>
         {
-            return await serviceProvider.GetProductShopImportSettingsAsync<IProductShopImportSettings>(key);
-        });
+            return await serviceProvider.GetAvailableSettingsWithHighestPriority(key, ShopSettingType.Product);
+        }) ?? throw new InvalidDataException($"Shop settings {key} for type {ShopSettingType.Product} not found.");
 
-        var browserDataLoader = serviceProvider.GetBrowserDataLoader(productShopImportSettings.BrowserDataLoader.ImplementationTypeName);
+        var browserDataLoader = serviceProvider.GetBrowserDataLoader(shopImportSettings.BrowserDataLoader.ImplementationTypeName);
 
-        var webLoaderFactory = serviceProvider.GetWebLoaderFactory(productShopImportSettings.WebLoader.ImplementationTypeName);
+        var webLoaderFactory = serviceProvider.GetWebLoaderFactory(shopImportSettings.WebLoader.ImplementationTypeName);
 
         if (webLoaderFactory == null)
             throw new InvalidDataException($"Webloader factory for {key} not found");
 
         var webLoader = webLoaderFactory.CreateWebLoader(browserDataLoader?.GetType().Name);
 
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(productShopImportSettings.RequestHeaders.Value);
+        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(shopImportSettings.RequestHeaders.Value);
 
         return new GoldappleImportServiceFactory(webLoader, requestHeaders, logger);
     }
