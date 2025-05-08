@@ -1,7 +1,8 @@
 ﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Products.Service;
+using Alchemist.Import.Interfaces;
+using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Import.Background;
@@ -70,7 +71,7 @@ public abstract class BuildImportServiceTest
         Assert.NotNull(shopImportService);
 
         Assert.Equal(2, host.Services.GetServices<IShopCategoryImportService>().Count());
-        Assert.Equal(2, host.Services.GetServices<IShopProductImportService>().Count());
+        Assert.Equal(2, host.Services.GetServices<IImportService>().Count());
     }
 
     [Fact]
@@ -96,6 +97,6 @@ public abstract class BuildImportServiceTest
         Assert.NotNull(shopImportService);
 
         Assert.Empty(host.Services.GetServices<IShopCategoryImportService>());
-        Assert.Equal(2, host.Services.GetServices<IShopProductImportService>().Count());
+        Assert.Equal(2, host.Services.GetServices<IImportService>().Count());
     }
 }

@@ -6,16 +6,15 @@ using Alchemist.Import.Service;
 using System.Collections.ObjectModel;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
-using Alchemist.Import.Shop.Interfaces;
 using WebLoader.Common;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Import.Category.Json;
 
 public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
     IHtmlSearcher? htmlSearcher,
     IWebLoader webLoader,
-    IShop shop,
+    IShopModel shop,
     RequestHeaders? requestHeaders,
     CategoryLoadOptions categoryLoadOptions)
     : ShopImportService(logger, webLoader, requestHeaders), IShopCategoryImportService
@@ -26,7 +25,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     public override string Name { get; } = categoryLoadOptions.Name;
 
-    public IShop ShopModel { get; } = shop;
+    protected IShopModel ShopModel { get; } = shop;
 
     private readonly int _defaultInterval = 3600;
 
@@ -34,7 +33,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
    public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
    IWebLoader webLoader,
-   IShop shopUrlModel,
+   IShopModel shopUrlModel,
    RequestHeaders? requestHeaders,
    CategoryLoadOptions categoryLoadOptions)
         :this(logger, null, webLoader, shopUrlModel, requestHeaders, categoryLoadOptions)

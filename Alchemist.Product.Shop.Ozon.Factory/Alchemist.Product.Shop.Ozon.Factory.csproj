@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
+    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Factory\Alchemist.Import.Factory.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.Adapter.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Shop.Ozon.ImportService\Alchemist.Product.Shop.Ozon.ImportService.csproj" />
+  </ItemGroup>
+
+</Project>

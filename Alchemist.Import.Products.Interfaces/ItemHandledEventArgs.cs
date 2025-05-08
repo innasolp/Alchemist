@@ -1,6 +1,4 @@
-﻿using Alchemist.Common;
-
-namespace Alchemist.Import.Products.Interfaces;
+﻿namespace Alchemist.Import.Products.Interfaces;
 
 public class ItemHandledEventArgs(IProductItem item, string apiUrl, bool success) : EventArgs
 {

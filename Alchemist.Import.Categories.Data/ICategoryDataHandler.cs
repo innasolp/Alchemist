@@ -1,5 +1,5 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Shop.Interfaces;
+using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Import.Categories.Data;
 

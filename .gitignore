@@ -263,3 +263,9 @@ node_modules/
 /Alchemist.Product.Import.WebApp.Controller.Test/bin/Debug/net8.0/af/Humanizer.resources.dll
 /Alchemist.ServiceAssembliesBuilder/bin/Debug/net8.0
 /Alchemist.ServiceAssembliesBuilder/obj
+/Alchemist.Import.Factory/bin/Debug/net8.0
+/Alchemist.Import.Factory/obj
+/Alchemist.Product.Shop.GoldApple.Factory/bin/Debug/net8.0
+/Alchemist.Product.Shop.GoldApple.Factory/obj
+/Alchemist.Product.Shop.Ozon.Factory/bin/Debug/net8.0
+/Alchemist.Product.Shop.Ozon.Factory/obj

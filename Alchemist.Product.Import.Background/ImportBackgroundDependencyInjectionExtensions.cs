@@ -29,8 +29,9 @@ public static class ImportBackgroundDependencyInjectionExtensions
     public static async Task<bool> SetShopProductCategoriesAsync(this IProductShopModel productShopModel,
        IShopDataService shopApiClient)
     {   
-        var shopCategories = await shopApiClient.GetShopCategories(productShopModel.Id);
-        shopCategories?.ForEach(productShopModel.Categories.Add);
+        //todo
+        //var shopCategories = await shopApiClient.GetShopCategories(productShopModel.Id);
+        //shopCategories?.ForEach(productShopModel.Categories.Add);
 
         return await Task.FromResult(true);
     }

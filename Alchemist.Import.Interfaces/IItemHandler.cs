@@ -1,6 +1,6 @@
 ﻿using Alchemist.Common;
 
-namespace Alchemist.Import.Shop.Interfaces;
+namespace Alchemist.Import.Interfaces;
 
 public interface IItemHandler
 {

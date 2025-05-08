@@ -1,5 +1,5 @@
-﻿using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Shop.Interfaces;
+﻿using Alchemist.Import.Interfaces;
+using Alchemist.Import.Products.Interfaces;
 
 namespace Alchemist.Import.Products.Data;
 

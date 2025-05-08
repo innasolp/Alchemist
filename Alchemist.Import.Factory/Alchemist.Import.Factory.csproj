@@ -4,18 +4,17 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;debug libs</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.1" />
-    <PackageReference Include="WebLoader.Common" Version="1.0.0" />
+    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
-  </ItemGroup>  
+    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.Adapter.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+  </ItemGroup>
 
 </Project>

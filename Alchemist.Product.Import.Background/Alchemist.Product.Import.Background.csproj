@@ -25,7 +25,7 @@
     <PackageReference Include="RabbitMQ.Client.Core.DependencyInjection" Version="5.0.0" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.1" />
     <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
   </ItemGroup>
 
