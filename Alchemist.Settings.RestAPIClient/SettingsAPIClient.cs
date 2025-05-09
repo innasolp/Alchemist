@@ -96,4 +96,13 @@ public class SettingsAPIClient : IShopSettingsDataService
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ShopSettings?>();
     }
+
+    public async Task<List<IShopSettings>> GetAllParentShopSettings()
+    {
+        var response = await _httpClient.GetAsync($"api/Settings/shopSettings/allParents");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return await Task.FromResult(default(List<IShopSettings>));
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<List<ShopSettings>>())?.OfType<IShopSettings>().ToList() ?? [];
+    }
 }

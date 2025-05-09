@@ -17,4 +17,6 @@ public interface IShopSettingsDataService
     Task<bool> UpdateShopSettings(IShopSettings shopSettings);
 
     Task<List<IShopSettings>> GetChildSettings(int parentSettingsId);
+
+    Task<List<IShopSettings>> GetAllParentShopSettings();
 }

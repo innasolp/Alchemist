@@ -17,4 +17,6 @@ public interface ISettingsRepository
     Task<List<IShopSettings>> GetChildSettings(int parentSettingsId);
 
     Task<List<IShopSettings>> SaveShopSettings(IShopSettings parentShopSettings, IEnumerable<IShopSettings> childrenSettings);
+
+    Task<List<IShopSettings>> GetAllParentShopSettings();
 }

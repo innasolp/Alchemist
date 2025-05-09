@@ -128,4 +128,11 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         var childSettings = await _settingsRepository.GetChildSettings(parentSettingsId);
         return TypedResults.Ok(childSettings.Select(c => c.To<ShopSettings>()).ToList());
     }
+
+    [HttpGet("shopSettings/allParents", Name = nameof(GetAllParentShopSettings))]
+    public async Task<Results<BadRequest<int>, Ok<List<ShopSettings>>>> GetAllParentShopSettings()
+    {
+        var allParents = await _settingsRepository.GetAllParentShopSettings();
+        return TypedResults.Ok(allParents.Select(c => c.To<ShopSettings>()).ToList());
+    }
 }
