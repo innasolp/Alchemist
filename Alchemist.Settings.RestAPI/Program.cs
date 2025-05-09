@@ -30,7 +30,7 @@ builder.Services.AddSingleton<InfoLogMiddleware<SettingsController>>();
 builder.Services.AddProblemDetails();
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
-var appSerilogBuilder = new AppSerilogBuilder(builder);
+var appSerilogBuilder = new AppSerilogBuilder(builder.Configuration, builder.Environment);
 var serviceName = "Alchemist.Settings.RestAPI";
 appSerilogBuilder.AddServiceBaseConfigs(serviceName);
 appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
