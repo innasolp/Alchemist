@@ -12,7 +12,15 @@ using Alchemist.Import.Settings.Model;
 using Alchemist.Settings.RestAPIClient;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Import.Settings.Adapter;
-using Alchemist.Import.Settings.Builders;
+using WebLoader.Interfaces;
+using BrowserDataLoader.Interfaces;
+using Alchemist.Import.Interfaces;
+using Alchemist.Import.Factory;
+using DependencyInjection.AssemblyExtensions;
+using Alchemist.Import.Settings.JsonAdapter;
+using Alchemist.Import.Products.Data;
+using Alchemist.Import.Categories.Data;
+
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
 
@@ -21,11 +29,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient));
 builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
-builder.Services.AddSettingsAppBuilder(0);
-builder.Services.AddSettingsJsonBuilder(1, ["shopProducts.json", "shopCategories.json"]);
+builder.Services.AddSettingsJsonAdapter("shopProducts.json", "shopCategories.json");
 
-//todo load browserdataloaders from assemblies
-//todo load webloaders from assemblies
+builder.Services.AddServiceImplementationsFromPath(typeof(IBrowserDataLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("BrowserDataLoaderPath").Value}");
+builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoaderFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("WebLoaderPath").Value}");
 
 var shopImportWorkerBuilder = new ShopImportWorkerBuilder(builder.Services);
 
@@ -43,8 +50,11 @@ var restApiHost = builder.Configuration.GetSection("RestAPIHost").Get<string>()?
 shopImportWorkerBuilder.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(restApiHost);
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
-
 //todo 
+builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopProductImportPath").Value}");
+builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
+builder.Services.AddProductDataHandler();
+builder.Services.AddCategoriesDataHandler();
 //var shopProductsSettings = allShopSettings.Where(s=>s.ProductShopImportSettings != null).Select(s => s.ProductShopImportSettings).ToList();
 //shopImportWorkerBuilder.AddShopProducts(shopProductsSettings);
 //shopImportWorkerBuilder.AddProductsHandler();

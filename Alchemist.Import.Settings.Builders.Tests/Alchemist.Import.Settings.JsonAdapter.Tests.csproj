@@ -42,8 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.Adapter.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.Builders.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
     <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
   </ItemGroup>

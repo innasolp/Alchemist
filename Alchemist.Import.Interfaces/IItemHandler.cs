@@ -4,12 +4,12 @@ namespace Alchemist.Import.Interfaces;
 
 public interface IItemHandler
 {
-    Task<ItemProcessStatus> HandleItem(object item, int shopId);
+    Task<ItemProcessStatus> HandleItem(object item, IShopModel shopModel);
 }
 
 public interface IItemHandler<T> : IItemHandler
 {
-    Task<ItemProcessStatus> HandleItem(T item, int shopId);
+    Task<ItemProcessStatus> HandleItem(T item, IShopModel shopModel);
 }
 
 

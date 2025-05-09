@@ -52,4 +52,20 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
                         select service).ToList();
         await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
     }
+
+    public async Task<List<IShopImportSettings>> GetAllShopImportSettings()
+    {
+        var allParents = await _shopSettingsDataService.GetAllParentShopSettings();
+        var shopImportSettings = new List<IShopImportSettings>();
+        foreach (var shopSettings in allParents)
+        {
+            shopImportSettings.Add(await GetShopImportSettings(shopSettings));
+        }
+        return shopImportSettings;
+    }
+
+    public async Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName, ShopSettingType shopSettingType)
+    {
+        return await GetShopImportSettings(shopSettingsName);
+    }
 }

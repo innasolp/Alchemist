@@ -6,6 +6,7 @@ using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using System.ComponentModel;
 using WebLoader.Common;
+using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Import.Products.Service;
 
@@ -17,16 +18,21 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected readonly Queue<ICategoryProductItem> _unhandledProductItemUrls = new();
 
-    public event Microsoft.VisualStudio.Threading.AsyncEventHandler<ItemHandledEventArgs>? ItemHandled;
+    private readonly IItemHandler _itemHandler;
 
     protected Queue<IProductShopCategoryModel> Categories { get; }
 
     protected IProductShopModel ProductShopModel { get; }    
 
-    public ShopImportCategoryProductsService(ILogger logger, IProductShopModel shopUrlModel, IWebLoader webLoader, RequestHeaders requestHeaders)
+    public ShopImportCategoryProductsService(ILogger logger,
+        IProductShopModel shopUrlModel,
+        IWebLoader webLoader, 
+        RequestHeaders requestHeaders,
+        IItemHandler itemHandler)
         : base(logger, webLoader, requestHeaders)
     {
         ProductShopModel = shopUrlModel;
+        _itemHandler = itemHandler;
         Categories = new();
 
         ProductShopModel.Categories.ToList().ForEach(c => Categories.Enqueue(c));
@@ -147,7 +153,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task OnItemHandleAsync(IProductItem item, string apiUrl, bool status)
     {
-        await ItemHandled.InvokeAsync(this, new ItemHandledEventArgs(item, apiUrl, status));
+        //todo
+        item.ApiUrl = apiUrl;
+
+        await _itemHandler.HandleItem(item, ProductShopModel);
     }
 
     protected virtual async Task<TCategory?> LoadCategoryProductsAsync(string categoryUrl, int page)

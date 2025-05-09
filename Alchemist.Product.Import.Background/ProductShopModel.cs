@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Products.Interfaces;
-using Alchemist.Product.Interfaces;
 using System.Collections.ObjectModel;
 
 namespace Alchemist.Product.Import.Background;

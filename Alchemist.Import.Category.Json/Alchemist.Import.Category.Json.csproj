@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
-    <PackageReference Include="DependencyInjection.Interception" Version="1.0.0" />
     <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />

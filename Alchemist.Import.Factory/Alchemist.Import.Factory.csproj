@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.1" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.2" />
     <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.Builders.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
   </ItemGroup>
 

@@ -7,13 +7,17 @@ using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Import.Products.Data;
 
-internal class ProductDataHandler(IProductDataService alchemyServiceClient, IShopDataService shopDataService) : IProductDataHandler
+internal class ProductDataHandler(IProductDataService alchemyServiceClient, IShopDataService shopDataService) : IProductItemHandler
 {
     private readonly IProductDataService _alchemyServiceClient = alchemyServiceClient;
 
     private readonly IShopDataService _shopDataService = shopDataService;
-    public async Task<ItemProcessStatus> HandleItem(IProductItem productItem, int shopId)
+    public async Task<ItemProcessStatus> HandleItem(IProductItem productItem, IShopModel shopModel)
     {
+        //todo
+        var shop = shopModel as IShop;
+        var shopId = shop.Id;
+
         var shopProduct = await _alchemyServiceClient.GetShopProductByShopAndItemId(shopId, productItem.ItemId)
             ??
             new ShopProduct
@@ -166,11 +170,11 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         return brand;
     }
 
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, int shopId)
+    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, IShopModel shopModel)
     {
         if (item is not IProductItem productItem)
             return await Task.FromResult(ItemProcessStatus.Error);
 
-        return await HandleItem(productItem, shopId);
+        return await HandleItem(productItem, shopModel);
     }
 }

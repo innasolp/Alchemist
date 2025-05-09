@@ -11,6 +11,7 @@ public static class DependencyInjectionExtensions
     where TCategoryShopImportSettings : class, ICategoryShopImportSettings
     where TImportServiceSettings : class, IImportServiceSettings, new()
     {
+        services.AddSingleton<ISettingsAdapter, SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>>();
         return services.AddSingleton<ISettingsDataAdapter, SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>>();
     }
 }

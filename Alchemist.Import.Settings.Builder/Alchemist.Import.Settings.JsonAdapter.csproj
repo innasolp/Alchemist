@@ -8,17 +8,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.Adapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
-    <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
   </ItemGroup> 
 
   <ItemGroup>
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

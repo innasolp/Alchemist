@@ -1,23 +1,37 @@
 ﻿using Alchemist.Import.Factory;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Shop.GoldApple.ImportService;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Product.Shop.GoldApple.Factory;
 
-public class GoldappleImportServiceFactory(IWebLoader webLoader, RequestHeaders requestHeaders, ILogger<GoldAppleImportService> logger) : IShopImportServiceFactory
+public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logger, 
+    IEnumerable<IWebLoaderFactory> webLoaderFactories,
+    IProductItemHandler productItemHandler) 
+    : IShopImportServiceFactory
 {
-    private readonly IWebLoader _webLoader = webLoader;
-
-    private readonly RequestHeaders _requestHeaders = requestHeaders;
+    private readonly IEnumerable<IWebLoaderFactory> _webLoaderFactories = webLoaderFactories;
 
     private readonly ILogger<GoldAppleImportService> _logger = logger;
 
-    public IImportService Create(IShopModel productShopModel)
+    private readonly IProductItemHandler _productItemHandler = productItemHandler;
+
+    Type IShopImportServiceFactory.ServiceImplementationType => typeof(GoldAppleImportService);
+
+    public IImportService Create(IShopModel shopModel, IShopImportSettings shopImportSettings)
     {
-        return new GoldAppleImportService(_logger, productShopModel as IProductShopModel, _webLoader, _requestHeaders);
+        var webLoaderFactory = _webLoaderFactories.FirstOrDefault(f => f.WebLoaderType.Name == shopImportSettings.WebLoader.ImplementationTypeName)
+            ?? throw new InvalidDataException($"Web loader of type {shopImportSettings.WebLoader.ImplementationTypeName} not found");
+        
+        var webLoader = webLoaderFactory.CreateWebLoader(shopImportSettings.BrowserDataLoader?.ImplementationTypeName ?? "");
+        
+        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(shopImportSettings.RequestHeaders.Value);
+        
+        return new GoldAppleImportService(_logger, shopModel as IProductShopModel, webLoader, requestHeaders, _productItemHandler);
     }
 }

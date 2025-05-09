@@ -52,6 +52,7 @@ public class ShopImportWorkerBuilder(IServiceCollection services) : WorkerBuilde
         return Services;
     }
 
+    [Obsolete]
     public IServiceCollection AddProductShopBySettings(IProductShopImportSettings productShopImportSettings)
     {
         AddShopDependenciesBySettings(productShopImportSettings);
@@ -69,6 +70,7 @@ public class ShopImportWorkerBuilder(IServiceCollection services) : WorkerBuilde
             });
     }
 
+    [Obsolete]
     public IServiceCollection AddShopProducts(IEnumerable<IProductShopImportSettings> productShopImportSettings)
     {
         foreach (var settings in productShopImportSettings)
@@ -78,6 +80,7 @@ public class ShopImportWorkerBuilder(IServiceCollection services) : WorkerBuilde
         return Services;
     }
 
+    [Obsolete]
     public IServiceCollection AddShopCategories(IEnumerable<ICategoryShopImportSettings> categoryShopImportSettings)
     {
         foreach (var settings in categoryShopImportSettings)
@@ -87,11 +90,13 @@ public class ShopImportWorkerBuilder(IServiceCollection services) : WorkerBuilde
         return Services;
     }
 
+    [Obsolete]
     public IServiceCollection AddCategoryShopBySettings(ICategoryShopImportSettings categoryShopImportSettings)
     {
         AddShopDependenciesBySettings(categoryShopImportSettings);
 
-        AddServiceBySettings(typeof(IShopCategoryImportService), categoryShopImportSettings.ImportService, categoryShopImportSettings.Name);
+        //todo
+        //AddServiceBySettings(typeof(IShopCategoryImportService), categoryShopImportSettings.ImportService, categoryShopImportSettings.Name);
 
         return Services.AddKeyedSingleton(typeof(IShop), categoryShopImportSettings.Name,
             new ShopModel
@@ -133,11 +138,13 @@ public class ShopImportWorkerBuilder(IServiceCollection services) : WorkerBuilde
         return Services.AddSingleton<IProductDataService, T>();
     }
 
+    [Obsolete]
     public IServiceCollection AddProductsHandler()
     {
         return Services.AddProductDataHandler();
     }
 
+    [Obsolete]
     public IServiceCollection AddCategoriesHandler()
     {
         return Services.AddCategoriesDataHandler();

@@ -21,7 +21,7 @@ public class OzonImportServiceFirefoxLoaderTest
     private readonly string _categoryUrl = "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2Fantivozrastnoy-uhod-38000%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D2%26page%3D2";
     private readonly string _requestHeadersFireFoxFileName = "Ozon.Headers.Firefox.json";
     private readonly RequestHeaders _requestHeaders;
-
+    private readonly Moq.Mock<IProductItemHandler> _productItemHandler = new(); 
     public OzonImportServiceFirefoxLoaderTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
@@ -34,7 +34,8 @@ public class OzonImportServiceFirefoxLoaderTest
 
         s.Close();
 
-        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, _requestHeaders);
+        //todo
+        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, _requestHeaders, _productItemHandler.Object);
     }
 
     private async Task InitializeAsync()

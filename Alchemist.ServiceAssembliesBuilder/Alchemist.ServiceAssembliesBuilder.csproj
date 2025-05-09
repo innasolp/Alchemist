@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0" GeneratePathProperty="true" />
+    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0" />
     <PackageReference Include="WebLoader.HttpClient" Version="1.0.0.1" GeneratePathProperty="true" />
-    <PackageReference Include="WebLoader.HttpClient.Factory" Version="1.0.0" GeneratePathProperty="true" />
+    <PackageReference Include="WebLoader.HttpClient.Factory" Version="1.0.0.1" GeneratePathProperty="true" />
     <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.1" GeneratePathProperty="true" />
-    <PackageReference Include="WebLoader.Playwright.Firefox.Factory" Version="1.0.0" GeneratePathProperty="true" />
+    <PackageReference Include="WebLoader.Playwright.Firefox.Factory" Version="1.0.0.1" GeneratePathProperty="true" />
   </ItemGroup>
 
   <Target Name="RemoveBrowserDataLoaderFirefoxDir" BeforeTargets="Build">

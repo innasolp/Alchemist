@@ -19,6 +19,7 @@ public class OzonImportServiceInitializationTest
     private readonly string _requestHeadersFireFoxFileName = "Ozon.Headers.Firefox.json";
     private readonly string _requestHeadersChromeFileName = "Ozon.Headers.Chrome.json";
 
+    private readonly Moq.Mock<IProductItemHandler> _productItemHandler = new();
 
     public OzonImportServiceInitializationTest(ITestOutputHelper testOutputHelper)
     {
@@ -51,7 +52,8 @@ public class OzonImportServiceInitializationTest
 
         try
         {
-            ozonImportService = new OzonImportService(_logger,  _shopUrlModelMock.Object, _webLoader, requestHeaders);
+            //todo
+            ozonImportService = new OzonImportService(_logger,  _shopUrlModelMock.Object, _webLoader, requestHeaders, _productItemHandler.Object);
         }
         catch (Exception e) { ex = e; }
 
