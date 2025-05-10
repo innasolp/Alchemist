@@ -8,10 +8,11 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Factory;
 using Alchemist.Import.Settings.Interfaces;
-using Microsoft.VisualStudio.Threading;
 using Alchemist.Product.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Settings.Model;
+using Alchemist.Import.Settings.Extensions;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -24,10 +25,12 @@ public class ShopImportWorker : BackgroundService
     private readonly IEnumerable<ISettingsAdapter> _settingsAdapters;
     private readonly IMessageSender _itemMessageSender;
     private readonly IProductItemHandler _productDataHandler;
-    private readonly ICategoryItemHandler _categoryDataHandler;
+    private readonly ICategoryItemHandler? _categoryDataHandler;
+    private readonly IShopSettingsDataService _settingsDataService;
 
-    private readonly List<IImportService>  _services = [];
+    protected List<IImportService> Services { get; } = [];
 
+    protected List<IShopModel> ShopModels { get; } = [];
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
         [FromKeyedServices(ShopImportWorkerKeys.DataMessageReceiverKey)]
@@ -37,7 +40,8 @@ public class ShopImportWorker : BackgroundService
         IEnumerable<IShopImportServiceFactory> shopImportFactories,
         [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)]
         IMessageSender itemMessageSender,
-        IProductItemHandler productDataHandler)
+        IProductItemHandler productDataHandler,
+        IShopSettingsDataService settingsDataService)
     {
         _logger = logger;
         _messageReceiver = messageReceiver;
@@ -47,11 +51,13 @@ public class ShopImportWorker : BackgroundService
         _settingsAdapters = settingsAdapters;
 
         _shopServiceFactories = shopImportFactories;
-        //todo _shopProductImportServices.ForEach(s => s.ItemHandled += ServiceItemHandledAsync);
 
-        _messageReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);       
+        _productDataHandler.ItemProcessed += ProductItemHandledAsync;
+
+        _messageReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreatedAsync);
 
         _messageReceiver.On<ShopCategory>(Messages.ReceiveCategoryAdded, OnShopCategoryAdded);
+        _settingsDataService = settingsDataService;
     }
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
@@ -63,91 +69,134 @@ public class ShopImportWorker : BackgroundService
         [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)]
         IMessageSender itemMessageSender,
         IProductItemHandler productDataHandler,
-        ICategoryItemHandler categoryDataHandler)
-        : this(logger, messageReceiver, shopDataService, settingsAdapters, shopImportFactories, itemMessageSender, productDataHandler)
+        ICategoryItemHandler categoryDataHandler,
+        IShopSettingsDataService settingsDataService)
+        : this(logger, messageReceiver, shopDataService, settingsAdapters, shopImportFactories, itemMessageSender, productDataHandler, settingsDataService)
     {
-        _categoryDataHandler = categoryDataHandler;        
+        _categoryDataHandler = categoryDataHandler;
+        _categoryDataHandler.ItemProcessed += CategoryHandledAsync;
     }
 
-    //todo
-    //private async Task NewCategoryLoadAsync(object? sender, NewCategoryEventArgs e)
-    //{
-    //    if (sender is not IShopCategoryImportService service || e.NewCategory == null)
-    //        return;
+    private async Task CategoryHandledAsync(object sender, ICategory item, IShopModel shopModel, ItemProcessStatus processStatus)
+    {
+        var categoryModel = new ImportCategory { Category = item.Name, ItemId = item.Id, Status = processStatus };
 
-    // //todo
-    //    //var result = await _categoryDataHandler.HandleItem(e.NewCategory, service.ShopModel.Id);
+        if (shopModel is IShop shop) categoryModel.ShopId = shop.Id;
 
-    //    //var categoryModel = new ImportCategory { Category = e.NewCategory.Name, ItemId = e.NewCategory.Id, ShopId = service.ShopModel.Id, Status = result };
+        await _itemMessageSender.Send(categoryModel, Messages.SendCategoryItem);
+    }
 
-    //    //await _itemMessageSender.Send(categoryModel, Messages.SendCategoryItem);
-    //}
 
-    //todo
-    //private async Task ServiceItemHandledAsync(object? sender, ItemHandledEventArgs e)
-    //{
-    //    if (sender is not IImportService service)
-    //        return;
+    private async Task ProductItemHandledAsync(object sender, IProductItem item, IShopModel shopModel, ItemProcessStatus processStatus)
+    {        
+        var productItemModel = new ImportProduct { Name = item.Name, ShopName = shopModel.Name, Url = item.ItemUrl, Status = processStatus }; 
 
-    //    //todo
-    //    //var result = await _productDataHandler.HandleItem(e.Item, service.ShopModel.Id);
-
-    //    //var productItemModel = new ImportProduct { Name = e.Item.Name, ShopName = service.Name, Url = e.Item.ItemUrl, Status = result };
-    //    //await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
-    //}
+        await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
+    }
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
     {
-        //todo
-        //var service = _shopProductImportServices.OfType<IImportService>().FirstOrDefault(s => s.ShopModel.Id == shopCategory.ShopId);
-        //service?.ProductShopModel.Categories.Add(shopCategory);
+        var shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
+        shop?.Categories.Add(new ProductShopCategoryModel { Category = shopCategory.Category, ItemId = shopCategory.ItemId });
     }    
 
-    private void OnShopCreated(Shop shop)
+    private async Task OnShopCreatedAsync(Shop newShop)
+    {        
+        var shopModel = ShopModels.FirstOrDefault(s => s.Name.Equals(newShop.Name, StringComparison.CurrentCultureIgnoreCase));
+        if (shopModel != null)
+        {
+            if (shopModel is IShop shop) shop.Id = newShop.Id;
+            return;
+        }
+
+        var productShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, ShopSettingType.Product);
+        var categoryShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, ShopSettingType.Category);
+
+        if(productShopSettings != null)
+            await CreateShopImportServiceAsync(productShopSettings);
+
+        if(categoryShopSettings != null)
+            await CreateShopImportServiceAsync(categoryShopSettings);
+    }
+
+    private async Task CreateShopImportServiceAsync(IShopSettings shopSettings)
     {
-        //todo
-        //var service = _shopProductImportServices.FirstOrDefault(s => s.ShopModel.Name.Equals(shop.Name, StringComparison.CurrentCultureIgnoreCase));
-        //if (service != null)
-        //    service.ShopModel.Id = shop.Id;
+        IShopImportSettings shopImportSettings = shopSettings.Type == ShopSettingType.Product
+             ? await shopSettings.GetShopImportSettings<ProductShopImportSettings, ImportServiceSettings>(_settingsDataService.GetChildSettings)
+             : await shopSettings.GetShopImportSettings<CategoryShopImportSettings, ImportServiceSettings>(_settingsDataService.GetChildSettings); 
+        
+        var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
+
+        IShopModel shopModel = shopImportSettings.ShopSettingType == ShopSettingType.Product
+            ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
+            : await _shopDataService.CreateShopModelAsync(shopImportSettings);
+
+        var service = await CreateServiceForShopImportSettingsAsync(shopImportSettings, shopModel);
+
+        Services.Add(service); 
+        
+        ShopModels.Add(shopModel);        
+    }
+
+    private async Task<IImportService> CreateServiceForShopImportSettingsAsync(IShopImportSettings shopImportSettings, IShopModel shopModel)
+    {
+        var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
+        if (serviceFactory == null) 
+            return await Task.FromResult(default(IImportService));        
+
+        return await Task.FromResult(serviceFactory.Create(shopModel, shopImportSettings));
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _messageReceiver.Start();
-
-        await _itemMessageSender.Start();
-
-        _logger.LogInformation("Import service connected to rabbitMq.");
-
-        var joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
-
-        var allShopImportSettings = new List<IShopImportSettings>();
-        foreach(var adapter in _settingsAdapters)
+        try
         {
-            var shopImportSettings = await adapter.GetAllShopImportSettings();
-            var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Name == s.Name));
-            allShopImportSettings.AddRange(newSettings);
-        }
+            await _messageReceiver.Start();
 
-        
-        foreach (var shopImportSettings  in allShopImportSettings)
-        {
-            var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
-            if (serviceFactory == null) continue;
+            await _itemMessageSender.Start();
             
-            IShopModel shopModel = shopImportSettings.ShopSettingType == ShopSettingType.Product
-                ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
-                : await _shopDataService.CreateShopModelAsync(shopImportSettings);
-
-            var shopImportService = serviceFactory.Create(shopModel, shopImportSettings);
-            _services.Add(shopImportService);
+            _logger.LogInformation("Import service connected to messaging host.");
         }
-
-        _logger.LogInformation("Import services initialized.");
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }        
 
         try
         {
-            await Parallel.ForEachAsync(_services, (s, t) => new ValueTask(s.Start(stoppingToken)));
+            var allShopImportSettings = new List<IShopImportSettings>();
+            foreach (var adapter in _settingsAdapters)
+            {
+                var shopImportSettings = await adapter.GetAllShopImportSettings();
+                var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Name == s.Name));
+                allShopImportSettings.AddRange(newSettings);
+            }
+
+            foreach (var shopImportSettings in allShopImportSettings)
+            {
+                var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
+                if (serviceFactory == null) continue;
+
+                IShopModel shopModel = shopImportSettings.ShopSettingType == ShopSettingType.Product
+                    ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
+                    : await _shopDataService.CreateShopModelAsync(shopImportSettings);
+
+                ShopModels.Add(shopModel);
+
+                var shopImportService = serviceFactory.Create(shopModel, shopImportSettings);
+                Services.Add(shopImportService);
+            }
+            
+            _logger.LogInformation("Import services initialized.");
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }        
+
+        try
+        {
+            await Parallel.ForEachAsync(Services, (s, t) => new ValueTask(s.Start(stoppingToken)));
         }
         catch (Exception e)
         {
@@ -164,7 +213,11 @@ public class ShopImportWorker : BackgroundService
 
     public override void Dispose()
     {
-        //todo _shopProductImportServices.ForEach(s => s.ItemHandled -= ServiceItemHandledAsync);
+        _productDataHandler.ItemProcessed -= ProductItemHandledAsync;
+        
+        if (_categoryDataHandler != null)
+            _categoryDataHandler.ItemProcessed -= CategoryHandledAsync;
+        
         base.Dispose();
     }
 }

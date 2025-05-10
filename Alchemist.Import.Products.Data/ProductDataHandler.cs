@@ -4,6 +4,8 @@ using Alchemist.Import.Products.Interfaces;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Import.Interfaces;
+using System.ComponentModel;
+using Component = Alchemist.Product.Entities.Component;
 
 namespace Alchemist.Import.Products.Data;
 
@@ -12,62 +14,79 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
     private readonly IProductDataService _alchemyServiceClient = alchemyServiceClient;
 
     private readonly IShopDataService _shopDataService = shopDataService;
+
+    public event AsyncItemHandler<IProductItem> ItemProcessed;
+
     public async Task<ItemProcessStatus> HandleItem(IProductItem productItem, IShopModel shopModel)
     {
-        //todo
-        var shop = shopModel as IShop;
-        var shopId = shop.Id;
+        try
+        {
+            //todo
+            var shop = shopModel as IShop;
+            var shopId = shop.Id;
 
-        var shopProduct = await _alchemyServiceClient.GetShopProductByShopAndItemId(shopId, productItem.ItemId)
-            ??
-            new ShopProduct
+            var shopProduct = await _alchemyServiceClient.GetShopProductByShopAndItemId(shopId, productItem.ItemId)
+                ??
+                new ShopProduct
+                {
+                    ShopId = shopId,
+                    ItemId = productItem.ItemId,
+                    ApiUrl = productItem.ApiUrl,
+                    ItemUrl = productItem.ItemUrl,
+                    LastUpdate = DateTime.Now
+                };
+
+            if (shopProduct.ProductId != 0)
             {
-                ShopId = shopId,
-                ItemId = productItem.ItemId,
-                ApiUrl = productItem.ApiUrl,
-                ItemUrl = productItem.ItemUrl,
-                LastUpdate = DateTime.Now
-            };
+                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shopId, shopProduct.Id, productItem.CategoryId);
+                //todo
+                //if(!categoryResult)
+                //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
 
-        if (shopProduct.ProductId != 0)
-        {
-            var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shopId, shopProduct.Id, productItem.CategoryId);
-            //todo
-            //if(!categoryResult)
-            //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
+                var setPriceResult = await SetShopProductPriceForItemAsync(productItem, shopProduct.Id);
+                //todo
+                //if (!result)
+                //    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");            
 
-            var setPriceResult = await SetShopProductPriceForItemAsync(productItem, shopProduct.Id);
-            //todo
-            //if (!result)
-            //    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");            
+                var result = !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
 
-            return !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
+                await ItemProcessed.Invoke(this, productItem, shopModel, result);
+
+                return result;
+            }
+
+            var product = await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand)
+                                ?? await _alchemyServiceClient.FindProductByName(productItem?.Name);
+
+            if (product != null)
+            {
+                if (await _alchemyServiceClient.GetShopProductByShopAndProductId(shopId, product.Id) != null)
+                    return ItemProcessStatus.AlreadyExists;
+            }
+            else
+                product = await CreateProductFromModelAsync(productItem, shopId);
+
+            shopProduct.ProductId = product.Id;
+            shopProduct.IsActual = true;
+
+            var newShopProduct = await _alchemyServiceClient.CreateShopProduct(shopProduct);
+
+            if (!await SetShopProductPriceForItemAsync(productItem, newShopProduct.Id) ||
+                    !await SetShopProductCategoryIfNeedAsync(shopId, newShopProduct.Id, productItem.CategoryId))
+                return await Task.FromResult(ItemProcessStatus.Error);
+
+            //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
+            await ItemProcessed(this, productItem, shopModel, ItemProcessStatus.New);
+
+            return ItemProcessStatus.New;
         }
-
-        var product = await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand)
-                            ?? await _alchemyServiceClient.FindProductByName(productItem?.Name);
-
-        if (product != null)
+        catch(Exception e)
         {
-            if (await _alchemyServiceClient.GetShopProductByShopAndProductId(shopId, product.Id) != null)
-                return ItemProcessStatus.AlreadyExists;
+            await ItemProcessed?.Invoke(this, productItem, shopModel, ItemProcessStatus.Warning);
+
+            throw new WarningException($"Product {productItem.ItemUrl} proccessed with error.", e);
         }
-        else
-            product = await CreateProductFromModelAsync(productItem, shopId);
-
-        shopProduct.ProductId = product.Id;
-        shopProduct.IsActual = true;
-
-        var newShopProduct = await _alchemyServiceClient.CreateShopProduct(shopProduct);
-
-        if (!await SetShopProductPriceForItemAsync(productItem, newShopProduct.Id) ||
-                !await SetShopProductCategoryIfNeedAsync(shopId, newShopProduct.Id, productItem.CategoryId))
-            return await Task.FromResult(ItemProcessStatus.Error);
-
-        //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
-
-        return ItemProcessStatus.New;
-    }
+    }    
 
     private async Task<bool> SetShopProductCategoryIfNeedAsync(int shopId, long shopProductId, int categoryItemId)
     {

@@ -12,6 +12,8 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
 {
     private readonly IShopDataService _shopDataService = shopDataService;
 
+    public event AsyncItemHandler<ICategory> ItemProcessed;
+
     public async Task<ItemProcessStatus> HandleItem(ICategory category, IShopModel shopModel)
     {
         //todo
@@ -21,16 +23,21 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
         var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(shopId, category.Id);
 
         if (shopCategory != null)
-            return ItemProcessStatus.AlreadyExists;
+        {
+            await ItemProcessed?.Invoke(this, category, shopModel, ItemProcessStatus.AlreadyExists);
+            return ItemProcessStatus.AlreadyExists;            
+        }
         else
         {
             try
             {
                 shopCategory = await AddShopCategoryAsync(shopId, category);
+                await ItemProcessed?.Invoke(this, category, shopModel, ItemProcessStatus.New);
                 return ItemProcessStatus.New;
             }
             catch (Exception ex)
             {
+                await ItemProcessed?.Invoke(this, category, shopModel, ItemProcessStatus.Warning);
                 throw new WarningException($"Category {category.Url} proccessed with error.", ex);
             }
         }

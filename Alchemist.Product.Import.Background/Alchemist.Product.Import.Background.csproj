@@ -10,12 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
-    <PackageReference Include="DependencyInjection.WorkerBuilder" Version="1.0.0" />
     <PackageReference Include="Google.Protobuf" Version="3.29.1" />
     <PackageReference Include="Grpc.Client.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0" />
-    <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
+    <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0.1" />
     <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
@@ -29,10 +28,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\WebLoaders\WebLoader.Common\WebLoader.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Categories.Data\Alchemist.Import.Categories.Data.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory\Alchemist.Import.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Categories.Data\Alchemist.Import.Categories.Data.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Data\Alchemist.Import.Products.Data.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
