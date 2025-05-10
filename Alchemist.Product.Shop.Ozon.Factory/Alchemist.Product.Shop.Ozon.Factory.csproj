@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory\Alchemist.Import.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />

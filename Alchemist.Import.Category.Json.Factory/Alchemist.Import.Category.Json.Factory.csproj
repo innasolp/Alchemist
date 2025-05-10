@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Category.Json\Alchemist.Import.Category.Json.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory\Alchemist.Import.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Html.Factory\Alchemist.Import.Html.Factory.csproj" />
   </ItemGroup>
