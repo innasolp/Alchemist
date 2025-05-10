@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings.Adapter;
+﻿using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;

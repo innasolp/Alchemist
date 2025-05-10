@@ -1,9 +1,6 @@
 using Alchemist.Test.Server.Fixtures;
 using System.Net;
 using Xunit.Abstractions;
-using System.Net.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Any;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 

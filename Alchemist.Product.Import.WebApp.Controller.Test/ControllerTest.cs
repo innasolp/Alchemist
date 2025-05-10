@@ -1,6 +1,6 @@
 ﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Settings.Adapter;
+using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;

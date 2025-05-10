@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Import.Settings.Adapter;
+namespace Alchemist.Import.Settings.DataAdapter;
 
 public interface ISettingsDataAdapter: ISettingsAdapter
 {

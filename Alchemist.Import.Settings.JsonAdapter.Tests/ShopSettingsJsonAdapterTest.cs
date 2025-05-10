@@ -1,9 +1,10 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.JsonAdapter;
+using Alchemist.Import.Settings.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Alchemist.Import.Settings.Builders.Tests;
+namespace Alchemist.Import.Settings.JsonAdapter.Tests;
 
 public class ShopSettingsJsonAdapterTest
 {
@@ -11,12 +12,12 @@ public class ShopSettingsJsonAdapterTest
     public async Task BuildSettingsFromJson()
     {
         var builder = new HostApplicationBuilder();
-        builder.Services.AddSettingsJsonAdapter("shopProducts.json", "shopCategories.json");
+        builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
         var host = builder.Build();
 
-        var shopSettingsJsonBuilder = host.Services.GetRequiredService<ISettingsAdapter>() as ShopSettingsJsonAdapter;             
+        var shopSettingsJsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>() as ShopSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>;             
         
-        var shopSettings = await shopSettingsJsonBuilder.GetAllShopImportSettings();
+        var shopSettings = await shopSettingsJsonAdapter.GetAllShopImportSettings();
         Assert.NotNull(shopSettings);
         Assert.Equal(2, shopSettings.Count);
         Assert.Contains(shopSettings, s => s.ShopSettingType == Product.Interfaces.ShopSettingType.Product);

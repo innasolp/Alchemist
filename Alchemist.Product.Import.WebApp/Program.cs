@@ -1,6 +1,6 @@
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
-using Alchemist.Import.Settings.Adapter;
+using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;

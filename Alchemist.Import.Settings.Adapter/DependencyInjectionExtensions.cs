@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Import.Settings.Adapter;
+namespace Alchemist.Import.Settings.DataAdapter;
 
 public static class DependencyInjectionExtensions
 {

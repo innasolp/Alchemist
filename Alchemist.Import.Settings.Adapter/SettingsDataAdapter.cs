@@ -3,7 +3,7 @@ using Alchemist.Product.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 
-namespace Alchemist.Import.Settings.Adapter;
+namespace Alchemist.Import.Settings.DataAdapter;
 
 public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>(IShopSettingsDataService shopSettingsDataService)
     : ISettingsDataAdapter
