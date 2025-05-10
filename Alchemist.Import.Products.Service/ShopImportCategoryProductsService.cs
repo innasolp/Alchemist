@@ -6,7 +6,6 @@ using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using System.ComponentModel;
 using WebLoader.Common;
-using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Import.Products.Service;
 
@@ -18,7 +17,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected readonly Queue<ICategoryProductItem> _unhandledProductItemUrls = new();
 
-    private readonly IItemHandler _itemHandler;
+    private readonly IProductItemHandler _itemHandler;
 
     protected Queue<IProductShopCategoryModel> Categories { get; }
 
@@ -28,7 +27,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         IProductShopModel shopUrlModel,
         IWebLoader webLoader, 
         RequestHeaders requestHeaders,
-        IItemHandler itemHandler)
+        IProductItemHandler itemHandler)
         : base(logger, webLoader, requestHeaders)
     {
         ProductShopModel = shopUrlModel;

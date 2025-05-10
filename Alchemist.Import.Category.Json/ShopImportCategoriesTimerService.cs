@@ -30,7 +30,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     private readonly int _defaultInterval = 3600;
 
-    private readonly IItemHandler _itemHandler = itemHandler;
+    private readonly ICategoryItemHandler _itemHandler = itemHandler;
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
    IWebLoader webLoader,

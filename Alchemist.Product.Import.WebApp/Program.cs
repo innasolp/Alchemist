@@ -13,7 +13,7 @@ builder.AddKeyedRestApiClient<IShopSettingsDataService, SettingsAPIClient>("Sett
 builder.Services.AddSettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>();
 builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 
-var signalRUrl = builder.GetHostSectionValue("ShopMessageReceiver");
+var signalRUrl = builder.Configuration.GetHostSectionValue("ShopMessageReceiver");
 builder.Services.AddSignalRMessageReceiver(signalRUrl);
 
 // Add services to the container.

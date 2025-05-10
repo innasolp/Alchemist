@@ -11,7 +11,7 @@ public static class DependencyInjectionExtensions
         where TService:class
         where TImplementation : class, TService
     {
-        var restApiHost = builder.GetHostSectionValue(restApiSectionName);
+        var restApiHost = builder.Configuration.GetHostSectionValue(restApiSectionName);
         httpClientBuilder = builder.Services.AddHttpClient(restApiHost);
 
         builder.Services.AddKeyedSingleton(key, restApiHost);
@@ -22,7 +22,7 @@ public static class DependencyInjectionExtensions
         where TService : class
         where TImplementation : class, TService
     {
-        var restApiHost = builder.GetHostSectionValue(restApiSectionName);
+        var restApiHost = builder.Configuration.GetHostSectionValue(restApiSectionName);
         builder.Services.AddHttpClient();
 
         builder.Services.AddKeyedSingleton(key, restApiHost);

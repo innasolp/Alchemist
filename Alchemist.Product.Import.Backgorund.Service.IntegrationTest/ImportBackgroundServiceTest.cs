@@ -3,21 +3,22 @@ using System.Net;
 using Xunit.Abstractions;
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Any;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
 public class ImportBackgroundServiceTest : TestFixture<ImportBackgroundServiceWebAppFactory, ImportBackgroundServiceProgram>
 {
+    private readonly HttpClient _httpClient;
     public ImportBackgroundServiceTest(ImportBackgroundServiceWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : base(webAppFactory, outputHelper)
     {
-        WebAppFactory.CreateClient();   
+        _httpClient = WebAppFactory.CreateClient();   
     }
 
     [Fact]
     public async Task Start()
     {
-        var httpClient = WebAppFactory.Services.GetRequiredService<IHttpClientFactory>().CreateClient();
-        var response = await httpClient.GetAsync("http://localhost:8130/");
+        var response = await _httpClient.GetAsync("/");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var hello = await response.Content.ReadAsStringAsync();
         Assert.Equal("Hello ImportBackgroundService!", hello);

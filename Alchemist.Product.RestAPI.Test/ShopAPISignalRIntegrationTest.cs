@@ -3,6 +3,7 @@ using Alchemist.Product.SignalR;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.RestAPI.Test;

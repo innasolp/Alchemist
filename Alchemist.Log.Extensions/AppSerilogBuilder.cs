@@ -7,44 +7,21 @@ using Serilog.Configuration.Extensions;
 
 namespace Alchemist.Log.Serilog;
 
-public class AppSerilogBuilder
+public class AppSerilogBuilder(IConfiguration configuration, string appPath, string logContextRootPath)
 {
     private readonly IConfigurationBuilder _configurationBuilder = new ConfigurationBuilder();
 
-    public LoggerConfiguration LoggerConfiguration { get; }
+    public LoggerConfiguration LoggerConfiguration { get; } = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     private const string LogPropertyFile = "log.property.json";
 
-    private readonly string _logPath;
+    private readonly string _logPath = Utils.CombinePath($"{appPath}/Logs");
 
     private const string SourceContextParam = "SourceContext";
 
     private const string ContainsFunc = "Contains";
 
-    private readonly string _logContextRootPath;
-
-    public AppSerilogBuilder(IHostApplicationBuilder builder)
-        : this(builder, Utils.GetAppPath(), builder.Environment.ContentRootPath)
-    {
-    }
-
-    public AppSerilogBuilder(IHostApplicationBuilder builder, string logContextRootPath)
-        : this(builder, Utils.GetAppPath(), logContextRootPath)
-    {
-    }
-
-
-    public AppSerilogBuilder(IHostApplicationBuilder builder, string appPath, string logContextRootPath)
-        : this(builder.Configuration, appPath, logContextRootPath)
-    {
-    }
-
-    public AppSerilogBuilder(IConfiguration configuration, string appPath, string logContextRootPath)
-    {
-        LoggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
-        _logPath = Utils.CombinePath($"{appPath}/Logs");
-        _logContextRootPath = logContextRootPath;
-    }
+    private readonly string _logContextRootPath = logContextRootPath;
 
     public AppSerilogBuilder(IConfiguration configuration, IHostEnvironment env)
         : this(configuration, Utils.GetAppPath(), env.ContentRootPath)

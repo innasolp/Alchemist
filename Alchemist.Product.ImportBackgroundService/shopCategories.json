@@ -56,6 +56,7 @@
       },
       "Perfomance": true,
       "ImportService": {
+        "ImplementationTypeName": "ShopImportCategoriesTimerService",
         "AssemblyPath": "Import\\Categories\\Json",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
@@ -192,11 +193,12 @@
       }
       },
       "Perfomance": true,
-      "ImportService": {
-        "AssemblyPath": "Import\\Categories\\Json",
-        "ServiceProviderPath": "Import\\Categories"
+    "ImportService": {
+      "ImplementationTypeName": "ShopImportCategoriesTimerService",
+      "AssemblyPath": "Import\\Categories\\Json",
+      "ServiceProviderPath": "Import\\Categories"
 
-      },
+    },
       "BrowserDataLoader": {
         "Name": "Firefox.Standart",
         "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"

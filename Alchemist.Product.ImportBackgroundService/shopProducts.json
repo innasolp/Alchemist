@@ -6,6 +6,7 @@
       "ProductUrl": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fproduct%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
       "CategoryUrl": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2F{0}%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D{1}%26page%3D2",
       "ImportService": {
+        "ImplementationTypeName": "OzonImportService",
         "AssemblyPath": "Import\\Products\\Ozon"
       },
       "RequestHeaders": {
@@ -78,6 +79,7 @@
       "PageProductCount": 30,
       "Perfomance": true,
       "ImportService": {
+        "ImplementationTypeName": "GoldAppleImportService",
         "AssemblyPath": "Import\\Products\\GoldApple"
       },
       "WebLoader": {

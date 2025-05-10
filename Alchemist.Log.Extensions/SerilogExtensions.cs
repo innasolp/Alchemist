@@ -7,7 +7,7 @@ public static class SerilogExtensions
 {
     public static AppSerilogBuilder AddAppSerilogLogging(this IHostApplicationBuilder builder)
     {
-        var appLogging = new AppSerilogBuilder(builder);
+        var appLogging = new AppSerilogBuilder(builder.Configuration, builder.Environment);
         builder.Services.AddSingleton(appLogging);
         return appLogging;
     }
