@@ -8,11 +8,12 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Factory;
 using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Model;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Product.Interfaces;
+
 
 namespace Alchemist.Product.Import.Background;
 
@@ -109,8 +110,8 @@ public class ShopImportWorker : BackgroundService
             return;
         }
 
-        var productShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, ShopSettingType.Product);
-        var categoryShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, ShopSettingType.Category);
+        var productShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, Interfaces.ShopSettingType.Product);
+        var categoryShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, Interfaces.ShopSettingType.Category);
 
         if(productShopSettings != null)
             await CreateShopImportServiceAsync(productShopSettings);
@@ -121,13 +122,13 @@ public class ShopImportWorker : BackgroundService
 
     private async Task CreateShopImportServiceAsync(IShopSettings shopSettings)
     {
-        IShopImportSettings shopImportSettings = shopSettings.Type == ShopSettingType.Product
+        IShopImportSettings shopImportSettings = shopSettings.Type == Interfaces.ShopSettingType.Product
              ? await shopSettings.GetShopImportSettings<ProductShopImportSettings, ImportServiceSettings>(_settingsDataService.GetChildSettings)
              : await shopSettings.GetShopImportSettings<CategoryShopImportSettings, ImportServiceSettings>(_settingsDataService.GetChildSettings); 
         
         var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
 
-        IShopModel shopModel = shopImportSettings.ShopSettingType == ShopSettingType.Product
+        IShopModel shopModel = shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
             ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
             : await _shopDataService.CreateShopModelAsync(shopImportSettings);
 
@@ -177,7 +178,7 @@ public class ShopImportWorker : BackgroundService
                 var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
                 if (serviceFactory == null) continue;
 
-                IShopModel shopModel = shopImportSettings.ShopSettingType == ShopSettingType.Product
+                IShopModel shopModel = shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
                     ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
                     : await _shopDataService.CreateShopModelAsync(shopImportSettings);
 

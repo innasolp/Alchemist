@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
 using DependencyInjection.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;

@@ -1,6 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
-
-namespace Alchemist.Import.Settings.Interfaces;
+﻿namespace Alchemist.Import.Settings.Interfaces;
 
 public interface ISettingsAdapter
 {

@@ -1,7 +1,7 @@
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
 using Moq;
 
 namespace Alchemist.Product.Import.Model.Test;
@@ -10,7 +10,7 @@ public class ImportFacadeTest
 {
     private readonly Mock<IShopDataService> _shopDataServiceMock = new();
 
-    private readonly List<IShop> _shops = [
+    private readonly List<Interfaces.IShop> _shops = [
         new Shop { Id = 1, Name = "Shop1", Url = "https://shop1" },
         new Shop { Id = 2, Name = "Shop2", Url = "https://shop2" },
         new Shop { Id = 3, Name = "Shop3", Url = "https://shop3" }
@@ -19,7 +19,7 @@ public class ImportFacadeTest
     [Fact]
     public async Task LoadNewShops()
     {
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<IShop>([.. _shops.Take(2)])));
+        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<Interfaces.IShop>([.. _shops.Take(2)])));
 
         var importFacade = new ImportFacade(_shopDataServiceMock.Object);
 
@@ -40,7 +40,7 @@ public class ImportFacadeTest
         Assert.NotNull(shops);
         Assert.Equal(3, shops.Count);
 
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<IShop>([.. _shops.Take(2)])));
+        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<Interfaces.IShop>([.. _shops.Take(2)])));
         var reloadedShops = await importFacade.LoadShops();
         Assert.Contains(reloadedShops, s => s.Shop.Id == _shops[2].Id && s.Shop.IsDeprecated);
     }
@@ -48,7 +48,7 @@ public class ImportFacadeTest
     [Fact]
     public async Task AddNewShop()
     {
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<IShop>([.. _shops.Take(2)])));
+        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<Interfaces.IShop>([.. _shops.Take(2)])));
 
         var importFacade = new ImportFacade(_shopDataServiceMock.Object);
 

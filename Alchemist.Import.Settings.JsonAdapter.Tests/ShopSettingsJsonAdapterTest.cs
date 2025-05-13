@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Import.Settings.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,8 +19,8 @@ public class ShopSettingsJsonAdapterTest
         var shopSettings = await shopSettingsJsonAdapter.GetAllShopImportSettings();
         Assert.NotNull(shopSettings);
         Assert.Equal(2, shopSettings.Count);
-        Assert.Contains(shopSettings, s => s.ShopSettingType == Product.Interfaces.ShopSettingType.Product);
-        Assert.Contains(shopSettings, s => s.ShopSettingType == Product.Interfaces.ShopSettingType.Category);
+        Assert.Contains(shopSettings, s => s.ShopSettingType == ShopSettingType.Product);
+        Assert.Contains(shopSettings, s => s.ShopSettingType == ShopSettingType.Category);
 
         //todo
         //var ozonShop = shopSettings[0];

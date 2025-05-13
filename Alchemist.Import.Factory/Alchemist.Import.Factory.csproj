@@ -6,10 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.2" />
-    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
-  </ItemGroup>
+  
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />

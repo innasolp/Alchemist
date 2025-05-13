@@ -17,7 +17,7 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         return _shopImports.TryGetValue(guid, out shopImport) && shopImport != null;
     }    
 
-    public bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out ShopSettingsModel shopSettings)
+    public bool TryGetShopSettings(Guid shopGuid, Alchemist.Import.Settings.Interfaces.ShopSettingType shopSettingType, out ShopSettingsModel shopSettings)
     {
         shopSettings = default;
 
@@ -58,7 +58,7 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         return serviceSettings != null;
     }    
 
-    public ShopImportModel AddNewShop(IShop shop)
+    public ShopImportModel AddNewShop(Interfaces.IShop shop)
     {
         var newShop = shop.To<ShopModel>();
         var newShopImport = new ShopImportModel(newShop);

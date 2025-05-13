@@ -1,5 +1,4 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 
@@ -15,7 +14,7 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
 
     public async Task<IShopImportSettings?> GetShopImportSettings(int shopId, ShopSettingType shopSettingType)
     {
-        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, shopSettingType);
+        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, (Product.Interfaces.ShopSettingType) (int)shopSettingType);
         if (shopSettings == null) return null;
 
         return await GetShopImportSettings(shopSettings);
@@ -28,9 +27,9 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
         return await GetShopImportSettings(shopSettings);
     }
 
-    private async Task<IShopImportSettings?> GetShopImportSettings(IShopSettings shopSettings)
+    private async Task<IShopImportSettings?> GetShopImportSettings(Product.Interfaces.IShopSettings shopSettings)
     {
-        IShopImportSettings shopSettingsModel = shopSettings.Type == ShopSettingType.Product
+        IShopImportSettings shopSettingsModel = shopSettings.Type == Product.Interfaces.ShopSettingType.Product
            ? shopSettings.ToShopImportSettings<TProductShopImportSettings>()
            : shopSettings.ToShopImportSettings<TCategoryShopImportSettings>();
 

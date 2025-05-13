@@ -1,7 +1,7 @@
-﻿using Alchemist.Product.Interfaces;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using Alchemist.Import.Settings.Interfaces;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 

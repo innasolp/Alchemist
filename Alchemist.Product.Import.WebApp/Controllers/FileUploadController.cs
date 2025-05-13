@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.Import.Model;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Nodes;

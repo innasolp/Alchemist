@@ -7,7 +7,6 @@ using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
-using Alchemist.Product.Interfaces;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -26,7 +25,7 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test
 
         protected readonly Mock<ISettingsDataAdapter> _settingsDataAdapterMock = new();
 
-        protected readonly List<IShop> _shops = [
+        protected readonly List<Interfaces.IShop> _shops = [
             new Shop { Id = 1, Name = "Shop1", Url = "https://shop1" },
             new Shop { Id = 2, Name = "Shop2", Url = "https://shop2" },
             new Shop { Id = 3, Name = "Shop3", Url = "https://shop3" }

@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
 using Json.FileExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

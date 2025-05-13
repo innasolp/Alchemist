@@ -1,4 +1,5 @@
 using Alchemist.Product.Import.Model;
+using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -53,7 +54,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     {
         var shopSettingsController = new ShopSettingsController(null, _importFacade, _settingsDataAdapterMock.Object);
 
-        var categorySettings = await CommonActions.ChangeShopSettingsAsync<CategoryShopSettingsModel>(CreateHomeController(), shopSettingsController, Interfaces.ShopSettingType.Category);
+        var categorySettings = await CommonActions.ChangeShopSettingsAsync<CategoryShopSettingsModel>(CreateHomeController(), shopSettingsController, ShopSettingType.Category);
 
         await UploadShopSettingsActionAsync(categorySettings, "ozoncategories.json");
     }

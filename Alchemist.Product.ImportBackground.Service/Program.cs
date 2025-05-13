@@ -11,7 +11,6 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Settings.RestAPIClient;
 using Alchemist.DependencyInjection.Common;
 using WebLoader.Interfaces;
-using BrowserDataLoader.Interfaces;
 using Alchemist.Import.Factory;
 using DependencyInjection.AssemblyExtensions;
 using Alchemist.Import.Settings.JsonAdapter;
@@ -21,6 +20,7 @@ using Alchemist.Import.Logging;
 using Alchemist.Import.Settings.Model;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
+using BrowserDataLoader.Interfaces;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
@@ -28,7 +28,7 @@ var logPath = $"{appPath}/Logs";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
+//builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
 builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
 
 builder.Services.AddServiceImplementationsFromPath(typeof(IBrowserDataLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("BrowserDataLoaderPath").Value}");

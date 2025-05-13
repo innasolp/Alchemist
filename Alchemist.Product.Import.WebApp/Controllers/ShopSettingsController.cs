@@ -1,8 +1,8 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
-using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
