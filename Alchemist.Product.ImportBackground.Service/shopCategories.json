@@ -61,7 +61,7 @@
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
       "BrowserDataLoader": {
-        "ImplementationTypeName": "Firefox.Standart",
+        "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
       },
       "WebLoader": {
@@ -199,10 +199,10 @@
       "ServiceProviderPath": "Import\\Categories"
 
     },
-      "BrowserDataLoader": {
-        "Name": "Firefox.Standart",
-        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
-      },
+    "BrowserDataLoader": {
+      "Name": "FirefoxStandart",
+      "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+    },
       "WebLoader": {
         "ImplementationTypeName": "Firefox",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",

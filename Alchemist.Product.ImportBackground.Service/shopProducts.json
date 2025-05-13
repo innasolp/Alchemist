@@ -59,10 +59,10 @@
         }
         },
         "Perfomance": true,
-        "BrowserDataLoader": {
-          "ImplementationTypeName": "Firefox.Standart",
-          "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
-        },
+      "BrowserDataLoader": {
+        "ImplementationTypeName": "FirefoxStandart",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
         "WebLoader": {
           "ImplementationTypeName": "Firefox",
           "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",

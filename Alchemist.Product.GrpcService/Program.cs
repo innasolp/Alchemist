@@ -39,8 +39,8 @@ builder.Services.AddGrpc(options =>
 var logPath = $"{Utils.GetAppPath()}/Logs";
 var appSerilogBuilder = new AppSerilogBuilder(builder.Configuration, builder.Environment);
 appSerilogBuilder.AddServiceBaseConfigs(typeof(AlchemyService).Name);
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
 
 appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8071", EventIds.Perfomance.Id, logPath, typeof(AlchemyService).Name);
 

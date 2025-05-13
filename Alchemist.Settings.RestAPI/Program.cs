@@ -33,8 +33,8 @@ var logPath = $"{Utils.GetAppPath()}/Logs";
 var appSerilogBuilder = new AppSerilogBuilder(builder.Configuration, builder.Environment);
 var serviceName = "Alchemist.Settings.RestAPI";
 appSerilogBuilder.AddServiceBaseConfigs(serviceName);
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
 
 appSerilogBuilder.SetSerilog(builder.Logging);
 
