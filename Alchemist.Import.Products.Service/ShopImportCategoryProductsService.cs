@@ -96,11 +96,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         var currentCategoryUrl = string.Format(ProductShopModel.CategoryUrl, category.GetCategoryForUrl(), page);
 
-        var currentCategoryProducts = await LoadCategoryProductsAsync(currentCategoryUrl, page + 1);
-        if (currentCategoryProducts == null)
-            throw new WarningException($"Category {currentCategoryUrl} page {page} failed.");
-
-
+        var currentCategoryProducts = await LoadCategoryProductsAsync(currentCategoryUrl, page + 1)
+            ?? throw new WarningException($"Category {currentCategoryUrl} page {page} failed.");
+        
         if (IsEndOfCategory(currentCategoryProducts))
             return await Task.FromResult(new CategoryResult<TCategory>(currentCategoryProducts, 0, true));
 

@@ -28,59 +28,17 @@ public class AppSerilogBuilder(IConfiguration configuration, string appPath, str
     {
     }
 
-    public LoggerConfiguration AddSystemLogConfig(string logPath, string logContextPath)
-    {
-        return LoggerConfiguration.SetSystemsSerilogConfig(_configurationBuilder, logContextPath, logPath);
-    }
-
-    public LoggerConfiguration AddPropertyLogConfig(string logPath, string logContextPath, string? func, string? propertyName, string? propertyValue)
-    {
-        return LoggerConfiguration.SetSerilogConfigForServiceByFunc(_configurationBuilder, logContextPath, logPath, func, propertyName, propertyValue);
-    }    
-
-    public LoggerConfiguration AddPropertyLogConfig(string logPath, string? func, string? propertyName, string? propertyValue)
-    {
-        var logContextPath = Utils.CombinePath(_logContextRootPath, LogPropertyFile);
-        return LoggerConfiguration.SetSerilogConfigForServiceByFunc(_configurationBuilder, logContextPath, logPath, func, propertyName, propertyValue);
-    }
-
     public LoggerConfiguration AddPropertiesLogConfig(string logPath, IEnumerable<SerilogPropertyExpression> expressions)
     {
         var logContextPath = Utils.CombinePath(_logContextRootPath, LogPropertyFile);
         return LoggerConfiguration.SetSerilogConfigProperties(_configurationBuilder, logContextPath, logPath, expressions);
     }
 
-    public LoggerConfiguration AddSourceContextContainsLogConfig(string logContextPath, string logPath, string? propertyValue)
-    {
-        return LoggerConfiguration.SetSerilogConfigForServiceByFunc(_configurationBuilder, logContextPath, logPath, ContainsFunc, SourceContextParam, propertyValue);
-    }
-
     public LoggerConfiguration AddSourceContextContainsLogConfig(string logPath, string? propertyValue)
     {
         var logContextPath = Utils.CombinePath(_logContextRootPath, LogPropertyFile);
         return LoggerConfiguration.SetSerilogConfigForServiceByFunc(_configurationBuilder, logContextPath, logPath, ContainsFunc, SourceContextParam, propertyValue);
-    }
-
-    public LoggerConfiguration AddSourceContextContainsLogConfig(string? propertyValue)
-    {
-        var logContextPath = Utils.CombinePath(_logContextRootPath, LogPropertyFile);
-        return LoggerConfiguration.SetSerilogConfigForServiceByFunc(_configurationBuilder, logContextPath, _logPath, ContainsFunc, SourceContextParam, propertyValue);
-    }
-
-    public LoggerConfiguration AddSourceContextLogConfig(string logContextPath, string logPath, string propertyValue)
-    {
-        return LoggerConfiguration.SetSerilogConfigForServiceBySourceContext(_configurationBuilder, logContextPath, logPath, propertyValue);
-    }
-
-    public LoggerConfiguration AddClassNameLogConfig(string logContextPath, string logPath, string classNameValue)
-    {
-        return LoggerConfiguration.SetSerilogConfigForServiceByFunc(_configurationBuilder, logContextPath, logPath, ContainsFunc, "ClassName", classNameValue);
-    }
-    public LoggerConfiguration AddClassNameLogConfig(string logPath, string classNameValue)
-    {
-        var logContextPath = Utils.CombinePath(_logContextRootPath, LogPropertyFile);
-        return AddClassNameLogConfig(logContextPath, logPath, classNameValue);
-    }
+    }             
 
     public LoggerConfiguration AddServiceBaseConfigs(string logPath, string serviceName)
     {
@@ -123,19 +81,13 @@ public class AppSerilogBuilder(IConfiguration configuration, string appPath, str
             };
         return AddPropertiesLogConfig(Utils.CombinePath(logPath, $"Perfomance/{serviceName}"), expressions);
     }
-
-    public LoggerConfiguration AddContextPropertyConfig(string logContextPath, string logPath, string sourceContext)
-    {
-        var conf = _configurationBuilder.AddJsonFile(logContextPath).Build();
-        conf.SetSerilogLoggersPath(["path", "pathFormat"], logPath);
-        conf.SetSerilogLoggersFilterSourceContext(sourceContext);
-        return LoggerConfiguration.ReadFrom.Configuration(conf);
-    }
+    
 
     public LoggerConfiguration AddContextPropertyConfig(string logContextPath, 
         string logPath,
         string propertyName,
         string? sourceContext = null,
+        string[]? outputProperties = null,
         IEnumerable<SerilogPropertyExpression>? expressions = null)
     {
         var conf = _configurationBuilder.AddJsonFile(logContextPath).Build();
@@ -143,6 +95,9 @@ public class AppSerilogBuilder(IConfiguration configuration, string appPath, str
         conf.SetSerilogLoggersPath(["path", "pathFormat"], logPath);
 
         conf.SetSerilogWriteToContextPropertyName(propertyName);
+
+        if(outputProperties != null)
+            conf.SetSerilogOutputTemplateProperties(outputProperties);
 
         if (!string.IsNullOrEmpty(sourceContext)) conf.SetSerilogLoggersFilterSourceContext(sourceContext);
 

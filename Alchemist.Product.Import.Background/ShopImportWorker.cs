@@ -175,7 +175,7 @@ public class ShopImportWorker : BackgroundService
 
             foreach (var shopImportSettings in allShopImportSettings)
             {
-                var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
+                var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
                 if (serviceFactory == null) continue;
 
                 IShopModel shopModel = shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product

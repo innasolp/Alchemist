@@ -17,7 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Factory.Abstractions\Alchemist.Import.Factory.Abstractions.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Interfaces\Alchemist.Import.Factory.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.ImportService\Alchemist.Product.Shop.GoldApple.ImportService.csproj" />
   </ItemGroup>
   

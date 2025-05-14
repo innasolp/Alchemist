@@ -74,18 +74,21 @@ appSerilogBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environmen
     logPath: $"{logPath}/Import/Products",
     propertyName: "ShopImportService", 
     sourceContext: "Import",
+    null,
     [ new SerilogPropertyExpression(SerilogExpressions.Contains, "ShopSettingsType", ShopSettingType.Product.ToString()) ]);
 
 appSerilogBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
     logPath: $"{logPath}/Import/Categories",
     propertyName: "ShopImportService",
     sourceContext: "Import",
+    null,
     [new SerilogPropertyExpression(SerilogExpressions.Contains, "ShopSettingsType", ShopSettingType.Category.ToString())]);
 
 appSerilogBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
     logPath: $"{logPath}/Perfomance",
-    propertyName: "Url",
+    propertyName: "Host",
     sourceContext: "Perfomance",
+    ["Url"],
     [new SerilogPropertyExpression(SerilogExpressions.EventId, EventIds.Perfomance.Id)]);
 
 appSerilogBuilder.SetSerilog(builder.Logging);

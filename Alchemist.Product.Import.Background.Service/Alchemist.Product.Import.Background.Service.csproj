@@ -23,7 +23,7 @@
     <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
     <PackageReference Include="Serilog.Configuration.Extensions" Version="1.0.0.1" />
     <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0" />
-    <PackageReference Include="Serilog.Loggers" Version="1.0.0.1" />
+    <PackageReference Include="Serilog.Loggers" Version="1.0.0.2" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
     <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
