@@ -132,12 +132,24 @@ public class AppSerilogBuilder(IConfiguration configuration, string appPath, str
         return LoggerConfiguration.ReadFrom.Configuration(conf);
     }
 
-    public LoggerConfiguration AddContextPropertyConfig(string logContextPath, string logPath, string propertyName, string? sourceContext = null)
+    public LoggerConfiguration AddContextPropertyConfig(string logContextPath, 
+        string logPath,
+        string propertyName,
+        string? sourceContext = null,
+        IEnumerable<SerilogPropertyExpression>? expressions = null)
     {
         var conf = _configurationBuilder.AddJsonFile(logContextPath).Build();
+
         conf.SetSerilogLoggersPath(["path", "pathFormat"], logPath);
+
         conf.SetSerilogWriteToContextPropertyName(propertyName);
-        if (sourceContext != null) conf.SetSerilogLoggersFilterSourceContext(sourceContext);
+
+        if (!string.IsNullOrEmpty(sourceContext)) conf.SetSerilogLoggersFilterSourceContext(sourceContext);
+
+        if (expressions != null)
+            foreach (var expression in expressions)
+                conf.AddSerilogExpressionFilter(expression);
+
         return LoggerConfiguration.ReadFrom.Configuration(conf);
     }
 }

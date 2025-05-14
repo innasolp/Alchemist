@@ -31,7 +31,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.ImportBackground.Service\Alchemist.Product.Import.Background.Service.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.Background.Service\Alchemist.Product.Import.Background.Service.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPI\Alchemist.Product.RestAPI.csproj" />
     <ProjectReference Include="..\Alchemist.Settings.RestAPI\Alchemist.Settings.RestAPI.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures.Grpc\Alchemist.Test.Server.Fixtures.Grpc.csproj" />

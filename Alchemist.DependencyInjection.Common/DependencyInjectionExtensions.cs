@@ -1,33 +1,21 @@
 ﻿using Alchemist.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.DependencyInjection.Common;
 
 public static class DependencyInjectionExtensions
 {
-    public static IServiceCollection AddKeyedRestApiClient<TService, TImplementation>(this IHostApplicationBuilder builder, string restApiSectionName, string key, out IHttpClientBuilder httpClientBuilder)
+    public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string key, out IHttpClientBuilder httpClientBuilder)
         where TService:class
         where TImplementation : class, TService
     {
-        var restApiHost = builder.Configuration.GetHostSectionValue(restApiSectionName);
-        httpClientBuilder = builder.Services.AddHttpClient(restApiHost);
+        var restApiHost = configuration.GetHostSectionValue(restApiSectionName);
+        httpClientBuilder = services.AddHttpClient(restApiHost);
 
-        builder.Services.AddKeyedSingleton(key, restApiHost);
-        return builder.Services.AddSingleton<TService, TImplementation>();
-    }
-
-    public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IHostApplicationBuilder builder, string restApiSectionName, string key)
-        where TService : class
-        where TImplementation : class, TService
-    {
-        var restApiHost = builder.Configuration.GetHostSectionValue(restApiSectionName);
-        builder.Services.AddHttpClient();
-
-        builder.Services.AddKeyedSingleton(key, restApiHost);
-        return builder.Services.AddSingleton<TService, TImplementation>();
-    }
+        services.AddKeyedSingleton(key, restApiHost);
+        return services.AddSingleton<TService, TImplementation>();
+    }    
     
     public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string key)
         where TService : class
@@ -40,13 +28,35 @@ public static class DependencyInjectionExtensions
         return services.AddSingleton<TService, TImplementation>();
     }
 
-    public static IServiceCollection AddHttpMessageDelegatingHandler<TMessageHandler>(this IHostApplicationBuilder builder, IHttpClientBuilder httpClientBuilder, string apiHost)
+    public static IServiceCollection SetHttpMessageDelegatingHandler<TMessageHandler>(this IServiceCollection services, IHttpClientBuilder httpClientBuilder, string key)
         where TMessageHandler : DelegatingHandler
     {
-        builder.Services.AddSingleton<TMessageHandler>();
+        //services.AddKeyedSingleton<TMessageHandler>(key);
 
-        httpClientBuilder.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredService<TMessageHandler>());
+        httpClientBuilder.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredKeyedService<TMessageHandler>(key));
 
-        return builder.Services;
+        return services;
+    }
+
+    public static IServiceCollection SetHttpMessageDelegatingHandler<TMessageHandler>(this IServiceCollection services, IHttpClientBuilder httpClientBuilder, TMessageHandler messageHandler)
+        where TMessageHandler : DelegatingHandler
+    {
+        //services.AddKeyedSingleton<TMessageHandler>(key);
+
+        httpClientBuilder.AddHttpMessageHandler(serviceProvider => messageHandler);
+
+        return services;
+    }
+
+    public static IServiceCollection AddHttpMessageDelegatingHandler<TMessageHandler>(this IServiceCollection services, IHttpClientBuilder httpClientBuilder)
+        where TMessageHandler : DelegatingHandler, new()
+    {
+        var messageHandler = new TMessageHandler();
+        
+        services.AddSingleton(messageHandler);
+
+        httpClientBuilder.AddHttpMessageHandler(serviceProvider => messageHandler);
+
+        return services;
     }
 }

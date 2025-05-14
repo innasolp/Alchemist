@@ -11,11 +11,13 @@
     <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
     <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.2" />
+    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Factory.Abstractions\Alchemist.Import.Factory.Abstractions.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory\Alchemist.Import.Factory.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Factory.Interfaces\Alchemist.Import.Factory.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.ImportService\Alchemist.Product.Shop.GoldApple.ImportService.csproj" />
   </ItemGroup>
   

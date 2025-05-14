@@ -8,8 +8,8 @@ using Message.SignalR.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddKeyedRestApiClient<IShopDataService, ShopApiClient>("ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
-builder.AddKeyedRestApiClient<IShopSettingsDataService, SettingsAPIClient>("SettingsAPIHost", nameof(SettingsAPIClient), out IHttpClientBuilder settingsHttpClientBuilder);
+builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
+builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient), out IHttpClientBuilder settingsHttpClientBuilder);
 builder.Services.AddSettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>();
 builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 
@@ -17,7 +17,7 @@ var signalRUrl = builder.Configuration.GetHostSectionValue("ShopMessageReceiver"
 builder.Services.AddSignalRMessageReceiver(signalRUrl);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(); 
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 

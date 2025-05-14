@@ -56,8 +56,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
             serviceSettings.ServiceProviderPath = Utils.CombinePath(appPath, serviceSettings.ServiceProviderPath);
         
         if(!string.IsNullOrEmpty(serviceSettings.AssemblyPath))
-            serviceSettings.AssemblyPath = Utils.CombinePath(appPath, serviceSettings.AssemblyPath);        
-        
+            serviceSettings.AssemblyPath = Utils.CombinePath(appPath, serviceSettings.AssemblyPath); 
     }
 
     public static IServiceCollection AddShopImportDataReceiver(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName)
@@ -88,14 +87,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
                     }
                 });
         });
-    }      
-
-    public static IServiceCollection AddHttpMessageDelegatingHandler<TMessageHandler>(this IServiceCollection services, string apiHost)
-        where TMessageHandler : DelegatingHandler
-    {
-        services.AddSingleton<TMessageHandler>();        
-        return services;
-    }
+    } 
 
     public static IServiceCollection AddShopImportMessageSender(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)
     {

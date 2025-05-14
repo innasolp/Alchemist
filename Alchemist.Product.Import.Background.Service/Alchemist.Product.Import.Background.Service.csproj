@@ -23,16 +23,15 @@
     <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
     <PackageReference Include="Serilog.Configuration.Extensions" Version="1.0.0.1" />
     <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0" />
-    <PackageReference Include="Serilog.Loggers" Version="1.0.0" />
+    <PackageReference Include="Serilog.Loggers" Version="1.0.0.1" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0" />
+    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
     <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory\Alchemist.Import.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />

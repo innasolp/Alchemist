@@ -1,51 +1,39 @@
-﻿using Alchemist.Import.Factory;
+﻿using Alchemist.Import.Factory.Abstractions;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Logging;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Shop.Ozon.ImportService;
+using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Product.Shop.Ozon.Factory;
 
-public class OzonImportServiceFactory(ILogger<OzonImportService> logger, 
+public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
     IEnumerable<IWebLoaderFactory> webLoaderFactories,
-    IProductItemHandler productItemHandler)
-    : IShopImportServiceFactory
+    IProductItemHandler itemHandler,
+    IImportServiceLogFactory? logFactory = null,
+    IPerfomanceCounter? perfomanceCounter = null)
+        : ShopImportFactory(logger, webLoaderFactories, itemHandler, logFactory, perfomanceCounter)
 {
-    private readonly IEnumerable<IWebLoaderFactory> _webLoaderFactories = webLoaderFactories;
+    public override Type ServiceImplementationType => typeof(OzonImportService);
 
-    private readonly ILogger<OzonImportService> _logger = logger;
-
-    private readonly IProductItemHandler _productItemHandler = productItemHandler;
-
-    private readonly IImportServiceLogFactory? _logFactory;
-
-    Type IShopImportServiceFactory.ServiceImplementationType => typeof(OzonImportService);
-
-    public OzonImportServiceFactory(ILogger<OzonImportService> logger,
-    IEnumerable<IWebLoaderFactory> webLoaderFactories,
-    IProductItemHandler productItemHandler,
-    IImportServiceLogFactory logFactory) : this(logger, webLoaderFactories, productItemHandler)
+    protected override IImportService Create(ILogger logger, IShopModel shopModel, IShopImportSettings shopImportSettings, IWebLoader webLoader, IItemHandler itemHandler, RequestHeaders? requestHeaders)
     {
-        _logFactory = logFactory;
+        return new OzonImportService(logger as ILogger<OzonImportService>,
+            shopModel as IProductShopModel,
+            webLoader,
+            requestHeaders, 
+            itemHandler as IProductItemHandler);
     }
 
-    public IImportService Create(IShopModel shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopModel shopModel, IShopImportSettings shopImportSettings)
     {
-        var webLoaderFactory = _webLoaderFactories.FirstOrDefault(f => f.WebLoaderType.Name == shopImportSettings.WebLoader.ImplementationTypeName
-            || f.WebLoaderType.Name.Contains(shopImportSettings.WebLoader.ImplementationTypeName, StringComparison.InvariantCultureIgnoreCase))
-            ?? throw new InvalidDataException($"Web loader of type {shopImportSettings.WebLoader.ImplementationTypeName} not found");
-        
-        var webLoader = webLoaderFactory.CreateWebLoader(shopImportSettings.BrowserDataLoader?.ImplementationTypeName ?? "");
-        
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(shopImportSettings.RequestHeaders.Value);
-
-        var logger = _logFactory?.GetLogger(_logger, shopModel, shopImportSettings) ?? _logger;
-
-        return new OzonImportService(logger, shopModel as IProductShopModel, webLoader, requestHeaders, _productItemHandler);
+        if (logger is ILogger<OzonImportService> serviceLogger)
+            return importServiceLogFactory?.GetLogger(serviceLogger, shopModel, shopImportSettings) ?? serviceLogger;
+        else
+            throw new InvalidDataException(logger.GetType().FullName);
     }
 }

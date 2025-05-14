@@ -6,13 +6,13 @@ using Message.Interfaces;
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Interfaces;
-using Alchemist.Import.Factory;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Model;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Interfaces;
+using Alchemist.Import.Factory.Interfaces;
 
 
 namespace Alchemist.Product.Import.Background;

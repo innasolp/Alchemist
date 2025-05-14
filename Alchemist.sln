@@ -94,7 +94,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Common", "Alchemi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grpc.Client.Extensions", "..\Grpc\Grpc.Client.Extensions\Grpc.Client.Extensions.csproj", "{2430C844-ED5D-464A-A241-3F6750A43BFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.Background.Service", "Alchemist.Product.ImportBackground.Service\Alchemist.Product.Import.Background.Service.csproj", "{F8AEFF69-1F19-4ADA-8489-723204053D75}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.Background.Service", "Alchemist.Product.Import.Background.Service\Alchemist.Product.Import.Background.Service.csproj", "{F8AEFF69-1F19-4ADA-8489-723204053D75}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grpc.Server.Interceptors", "..\Grpc\Grpc.Server.Interceptors\Grpc.Server.Interceptors.csproj", "{E517FBAE-3659-4654-8B05-43F65AAAC975}"
 EndProject
@@ -275,7 +275,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.ServiceAssemblies
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Shop.Ozon.Factory", "Alchemist.Product.Shop.Ozon.Factory\Alchemist.Product.Shop.Ozon.Factory.csproj", "{B447066D-C098-4460-83C8-26A2C9F23800}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory", "Alchemist.Import.Factory\Alchemist.Import.Factory.csproj", "{A656665A-1956-4A8B-A7DE-F5BC08B1DF08}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory.Interfaces", "Alchemist.Import.Factory.Interfaces\Alchemist.Import.Factory.Interfaces.csproj", "{A656665A-1956-4A8B-A7DE-F5BC08B1DF08}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Shop.GoldApple.Factory", "Alchemist.Product.Shop.GoldApple.Factory\Alchemist.Product.Shop.GoldApple.Factory.csproj", "{EDDD6A1D-7280-4F0E-823B-EB9E2E9FD84C}"
 EndProject
@@ -292,6 +292,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.HttpClient.Factory", "..\WebLoaders\WebLoader.HttpClient.Factory\WebLoader.HttpClient.Factory.csproj", "{51CFC91B-94BE-43C7-8FE9-4CAE605BA9F8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.Playwright.Firefox.Factory", "..\WebLoaders\WebLoader.Playwright.Firefox.Factory\WebLoader.Playwright.Firefox.Factory.csproj", "{34D414A6-6EB5-4AD7-AEC0-0EDFEACEB18D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory.Abstractions", "Alchemist.Import.Factory.Abstractions\Alchemist.Import.Factory.Abstractions.csproj", "{40D8C30C-B37A-218B-9A7C-15DBF54B5853}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.ContextFileSink", "..\Logging\Serilog.ContextFileSink\Serilog.ContextFileSink.csproj", "{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -989,6 +993,22 @@ Global
 		{34D414A6-6EB5-4AD7-AEC0-0EDFEACEB18D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{34D414A6-6EB5-4AD7-AEC0-0EDFEACEB18D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34D414A6-6EB5-4AD7-AEC0-0EDFEACEB18D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.build import|Any CPU.ActiveCfg = Release|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.build import|Any CPU.Build.0 = Release|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.build import|Any CPU.ActiveCfg = Release|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.build import|Any CPU.Build.0 = Release|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1099,6 +1119,8 @@ Global
 		{C463F9DC-A250-4170-A792-689831E8AA12} = {4A75A9ED-5D0D-4230-A04C-957AFE79D9FC}
 		{51CFC91B-94BE-43C7-8FE9-4CAE605BA9F8} = {D57540CD-C3BF-4BF4-BBAD-C7D537FB5726}
 		{34D414A6-6EB5-4AD7-AEC0-0EDFEACEB18D} = {D57540CD-C3BF-4BF4-BBAD-C7D537FB5726}
+		{40D8C30C-B37A-218B-9A7C-15DBF54B5853} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E482EA7E-6395-3722-74B6-C77C8F8FD1BF} = {94A9C5AB-5BF8-40A1-A469-89285A8D3C9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
