@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Alchemist.Import.Settings.Interfaces;
 using System.ComponentModel;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;

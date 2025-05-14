@@ -4,21 +4,21 @@ using WebLoader.Interfaces;
 using Microsoft.VisualStudio.Threading;
 using Alchemist.Import.Service;
 using System.Collections.ObjectModel;
-using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
-using Alchemist.Import.Shop.Interfaces;
 using WebLoader.Common;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Interfaces;
+using Alchemist.Import.Category.Interfaces;
 
 namespace Alchemist.Import.Category.Json;
 
 public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
     IHtmlSearcher? htmlSearcher,
     IWebLoader webLoader,
-    IShop shop,
+    IShopModel shop,
     RequestHeaders? requestHeaders,
-    CategoryLoadOptions categoryLoadOptions)
-    : ShopImportService(logger, webLoader, requestHeaders), IShopCategoryImportService
+    CategoryLoadOptions categoryLoadOptions,
+   ICategoryItemHandler itemHandler)
+    : ShopImportService(logger, webLoader, requestHeaders)
 {
     protected IHtmlSearcher? HtmlSearcher { get; } = htmlSearcher;
 
@@ -26,19 +26,20 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     public override string Name { get; } = categoryLoadOptions.Name;
 
-    public IShop ShopModel { get; } = shop;
+    protected IShopModel ShopModel { get; } = shop;
 
     private readonly int _defaultInterval = 3600;
 
-    public event Microsoft.VisualStudio.Threading.AsyncEventHandler<NewCategoryEventArgs>? NewCategoryLoad;
+    private readonly ICategoryItemHandler _itemHandler = itemHandler;
 
-   public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+    public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
    IWebLoader webLoader,
-   IShop shopUrlModel,
+   IShopModel shopUrlModel,
    RequestHeaders? requestHeaders,
-   CategoryLoadOptions categoryLoadOptions)
-        :this(logger, null, webLoader, shopUrlModel, requestHeaders, categoryLoadOptions)
-    {
+   CategoryLoadOptions categoryLoadOptions,
+   ICategoryItemHandler itemHandler)
+        :this(logger, null, webLoader, shopUrlModel, requestHeaders, categoryLoadOptions, itemHandler)
+    {        
     }
 
     protected virtual async Task LoadCategoriesAsync(CancellationToken stoppingToken)
@@ -117,7 +118,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
             {
                 joinableTaskFactory.Run(async () =>
                 {
-                    await NewCategoryLoad.InvokeAsync(this, new NewCategoryEventArgs(category));
+                    await _itemHandler.HandleItem(category, ShopModel);
                 });
 
                 Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopModel.Name} loaded");

@@ -25,7 +25,7 @@ public class SettingsAPIClient : IShopSettingsDataService
 
     public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/shopSettings/byShopId/{shopId}/{(int)settingType}");
+        var response = await _httpClient.GetAsync($"api/Settings/byShopId/{shopId}/{(int)settingType}");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(default(ShopSettings));
         response.EnsureSuccessStatusCode();
@@ -34,7 +34,7 @@ public class SettingsAPIClient : IShopSettingsDataService
 
     public async Task<IShopSettings?> GetShopSettings(int id)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/shopSettings/byId/{id}");
+        var response = await _httpClient.GetAsync($"api/Settings/byId/{id}");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(default(ShopSettings));
         response.EnsureSuccessStatusCode();
@@ -43,7 +43,7 @@ public class SettingsAPIClient : IShopSettingsDataService
 
     public async Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/Settings/shopSettings", shopSettings.To<ShopSettings>());
+        var response = await _httpClient.PostAsJsonAsync($"api/Settings", shopSettings.To<ShopSettings>());
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ShopSettings>();
     }
@@ -54,7 +54,7 @@ public class SettingsAPIClient : IShopSettingsDataService
             parentShopSettings.To<ShopSettings>(), 
             childrenSettings.Select(s => s.To<ShopSettings>()).ToArray() };
         
-        var response = await _httpClient.PostAsJsonAsync($"api/Settings/shopSettings/save", shopSettingsWithServices);
+        var response = await _httpClient.PostAsJsonAsync($"api/Settings/save", shopSettingsWithServices);
         response.EnsureSuccessStatusCode();
         
         var result = await response.Content.ReadFromJsonAsync<ArrayList>();
@@ -76,14 +76,32 @@ public class SettingsAPIClient : IShopSettingsDataService
 
     public async Task<bool> UpdateShopSettings(IShopSettings shopSettings)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/Settings/shopSettings/update", shopSettings.To<ShopSettings>());
+        var response = await _httpClient.PutAsJsonAsync($"api/Settings/update", shopSettings.To<ShopSettings>());
         response.EnsureSuccessStatusCode();
         return true;
     }
 
     public async Task<List<IShopSettings>> GetChildSettings(int parentSettingsId)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/shopSettings/childSettings/{parentSettingsId}");
+        var response = await _httpClient.GetAsync($"api/Settings/childSettings/{parentSettingsId}");
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<List<ShopSettings>>())?.OfType<IShopSettings>().ToList() ?? [];
+    }
+
+    public async Task<IShopSettings?> GetShopSettings(string shopSettingsName)
+    {
+        var response = await _httpClient.GetAsync($"api/Settings/byName/{shopSettingsName}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return await Task.FromResult(default(ShopSettings));
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ShopSettings?>();
+    }
+
+    public async Task<List<IShopSettings>> GetAllParentShopSettings()
+    {
+        var response = await _httpClient.GetAsync($"api/Settings/allParents");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return await Task.FromResult(default(List<IShopSettings>));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<List<ShopSettings>>())?.OfType<IShopSettings>().ToList() ?? [];
     }

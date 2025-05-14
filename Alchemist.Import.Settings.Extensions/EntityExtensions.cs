@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -10,7 +9,7 @@ namespace Alchemist.Import.Settings.Extensions;
 
 public static class EntityExtensions
 {
-    public static T ToShopImportSettings<T>(this IShopSettings shopSettings)
+    public static T ToShopImportSettings<T>(this Product.Interfaces.IShopSettings shopSettings)
         where T : IShopImportSettings
     {
         var model = JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString());
@@ -22,7 +21,7 @@ public static class EntityExtensions
         return model;
     }
 
-    public static T ToImportServiceSettings<T>(this IShopSettings shopSettings)
+    public static T ToImportServiceSettings<T>(this Product.Interfaces.IShopSettings shopSettings)
         where T : IImportServiceSettings, new()
     {
         var model = shopSettings.JsonValue != null ? JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString()) : new T();
@@ -45,7 +44,7 @@ public static class EntityExtensions
         ];
     }
 
-    private static ShopSettings ToEntity<T>(this T shopSettings, ShopSettingType shopSettingType, JsonSerializerOptions options)
+    private static ShopSettings ToEntity<T>(this T shopSettings, Product.Interfaces.ShopSettingType shopSettingType, JsonSerializerOptions options)
         where T : class, ISettings
     {
         var json = JsonSerializer.Serialize(shopSettings, options);
@@ -78,7 +77,7 @@ public static class EntityExtensions
             }
         };
 
-        return shopSettings.ToEntity(ShopSettingType.Product, option);
+        return shopSettings.ToEntity(Product.Interfaces.ShopSettingType.Product, option);
     }
 
     private static ShopSettings CategorySettingsToEntity<T>(this T shopSettings)
@@ -95,7 +94,7 @@ public static class EntityExtensions
             }
         };
 
-        return shopSettings.ToEntity(ShopSettingType.Category, option);
+        return shopSettings.ToEntity(Product.Interfaces.ShopSettingType.Category, option);
     }
 
     private static ShopSettings ServiceSettingsToEntity<T>(this T service)
@@ -116,7 +115,7 @@ public static class EntityExtensions
             }
         };
 
-        return service.ToEntity(ShopSettingType.Service, option);
+        return service.ToEntity(Product.Interfaces.ShopSettingType.Service, option);
     }
 
     public static ShopSettings? ToEntity<T>(this T shopSettings)

@@ -1,7 +1,7 @@
 ﻿using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Alchemist.Product.Import.Model.Infrastructure;
 

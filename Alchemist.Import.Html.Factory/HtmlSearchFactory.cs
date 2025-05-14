@@ -5,7 +5,7 @@ namespace Alchemist.Import.Html.Factory;
 
 public class HtmlSearchFactory : IServiceImplementationFactory, IServiceImplementationFactory<IHtmlSearcher>
 {
-    public static IHtmlSearcher CreateSearcher(SearchMatchType searchMatchType, SearchElementType searchElementType = SearchElementType.Attribute)
+    public static IHtmlSearcher CreateSearcher(SearchMatchType? searchMatchType, SearchElementType? searchElementType = SearchElementType.Attribute)
     {
         if (searchElementType == SearchElementType.Attribute)
             switch (searchMatchType)

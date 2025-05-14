@@ -44,12 +44,12 @@ builder.Services.AddPerfomanceCounter<InfoLogMiddleware<ShopController>>((logger
 
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
-var appSerilogBuilder = new AppSerilogBuilder(builder);
+var appSerilogBuilder = new AppSerilogBuilder(builder.Configuration, builder.Environment);
 var serviceName = "Alchemist.Shop.RestAPI";
 appSerilogBuilder.AddServiceBaseConfigs(serviceName);
 appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8051", EventIds.Perfomance.Id, logPath, serviceName);
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
 
 appSerilogBuilder.SetSerilog(builder.Logging);
 

@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Interfaces;
 using DependencyInjection.ImplementationFactory;
 using Log.Interceptors.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,33 +10,35 @@ using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Category.Json;
 
-public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFactory, IServiceImplementationFactory<IShopCategoryImportService>
+public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFactory, IServiceImplementationFactory<ShopImportCategoriesTimerService>
 {
     private static ShopImportCategoriesTimerService GetCategoriesService(IServiceProvider serviceProvider, object? key)
     {
         var logger = serviceProvider.GetLogger<ShopImportCategoriesTimerService>(key);
         var htmlSearcher = serviceProvider.GetKeyedService<IHtmlSearcher>(key);
-        var shopUrl = serviceProvider.GetRequiredKeyedService<IShop>(key);
+        var shopUrl = serviceProvider.GetRequiredKeyedService<IShopModel>(key);
         var requestHeaders = serviceProvider.GetKeyedService<RequestHeaders>(key);
         var loadOptions = serviceProvider.GetRequiredKeyedService<CategoryLoadOptions>(key);
         var webLoader = serviceProvider.GetRequiredKeyedService<IWebLoader>(key);
+        var itemHandler = serviceProvider.GetRequiredKeyedService<ICategoryItemHandler>(key);
 
-        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, shopUrl, requestHeaders, loadOptions);
+        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, shopUrl, requestHeaders, loadOptions, itemHandler);
     }
 
     private static ShopImportCategoriesTimerService GetCategoriesService(IServiceProvider serviceProvider)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<ShopImportCategoriesTimerService>>();
         var htmlSearcher = serviceProvider.GetService<IHtmlSearcher>();
-        var shopUrl = serviceProvider.GetRequiredService<IShop>();
+        var shopUrl = serviceProvider.GetRequiredService<IShopModel>();
         var requestHeaders = serviceProvider.GetService<RequestHeaders>();
         var loadOptions = serviceProvider.GetRequiredService<CategoryLoadOptions>();
         var webLoader = serviceProvider.GetRequiredService<IWebLoader>();
+        var itemHandler = serviceProvider.GetRequiredService<ICategoryItemHandler>();
 
-        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, shopUrl, requestHeaders, loadOptions);
+        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, shopUrl, requestHeaders, loadOptions, itemHandler);
     }
 
-    public IShopCategoryImportService GetService(IServiceProvider serviceProvider, object? key)
+    public ShopImportCategoriesTimerService GetService(IServiceProvider serviceProvider, object? key)
     {
         return GetCategoriesService(serviceProvider, key);
     }
@@ -46,7 +48,7 @@ public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFact
         return GetCategoriesService(serviceProvider, key);
     }
 
-    public IShopCategoryImportService GetService(IServiceProvider serviceProvider)
+    public ShopImportCategoriesTimerService GetService(IServiceProvider serviceProvider)
     {
         return GetCategoriesService(serviceProvider);
     }

@@ -1,6 +1,6 @@
 using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
 using System.Text.Json;
 using Xunit.Abstractions;
 
@@ -32,7 +32,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         Assert.True(response?.Ok);
 
         var shop = _shops.First();
-        var shopSetting = _shopSettings.First(s => s.ShopId == shop.Id && s.Type == ShopSettingType.Product);
+        var shopSetting = _shopSettings.First(s => s.ShopId == shop.Id && s.Type == Interfaces.ShopSettingType.Product);
         var productShopSettings = JsonSerializer.Deserialize<ProductShopImportSettings>(shopSetting.JsonValue);
 
         await Expect(Page.Locator("#menuDiv").Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[TabType.Shop]))

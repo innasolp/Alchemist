@@ -1,0 +1,167 @@
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning",
+        "System.Net.Http.HttpClient": "Information",
+        "Microsoft.AspNetCore": "Information"
+      },
+      "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId", "WithThreadName" ],
+      "Properties": {
+        "Application": "Alchemist.Product.Import.Background.Service"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Fatal' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Fatal/fatal_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Day",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Fatal/fatal_.json",
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter",
+                  "rollingInterval": "Day",
+                  "retainedFileCountLimit": 7
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Error' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Error/error_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Error/error_.json",
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Warning' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Warning/warning_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Warning/warning_.json",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7,
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Information' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Info/info_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {EventId} ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[ContextPropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Info/info_.json",
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+  }

@@ -17,7 +17,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
 
     private readonly ILogger<SettingsController> _logger = logger;
 
-    [HttpGet("shopSettings/byShopId/{shopId:int}/{shopSettingType:int}", Name = nameof(GetShopSettingsByShopId))]
+    [HttpGet("byShopId/{shopId:int}/{shopSettingType:int}", Name = nameof(GetShopSettingsByShopId))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<ShopSettings>>> GetShopSettingsByShopId(int shopId, int shopSettingType)
     {
         if (shopId <= 0)
@@ -27,7 +27,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound(shopId);
     }
 
-    [HttpGet("shopSettings/byId/{id:int}", Name = nameof(GetShopSettingsById))]
+    [HttpGet("byId/{id:int}", Name = nameof(GetShopSettingsById))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<ShopSettings>>> GetShopSettingsById(int id)
     {
         if (id <= 0)
@@ -37,7 +37,18 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound(id);
     }
 
-    [HttpPost("shopSettings", Name = nameof(SaveShopSettings))]
+
+    [HttpGet("byName", Name = nameof(GetShopSettingsByName))]
+    public async Task<Results<BadRequest, NotFound<string>, Ok<ShopSettings>>> GetShopSettingsByName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return TypedResults.BadRequest();
+
+        var shopSettings = await _settingsRepository.GetShopSettings(name);
+        return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound(name);
+    }
+
+    [HttpPost(Name = nameof(SaveShopSettings))]
     public async Task<Results<BadRequest, BadRequest<ShopSettings>, Created<ShopSettings>>> SaveShopSettings(ShopSettings shopSettings)
     {
         if (shopSettings == null)
@@ -52,7 +63,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         return TypedResults.Created(location, newShopSettings);
     }
 
-    [HttpPost("shopSettings/save", Name = nameof(SaveShopSettingsWithServices))]
+    [HttpPost("save", Name = nameof(SaveShopSettingsWithServices))]
     public async Task<Results<BadRequest, BadRequest<ArrayList>, StatusCodeHttpResult, Created<ArrayList>, Accepted<ArrayList>>>
         SaveShopSettingsWithServices(ArrayList shopSettingsWithServices)
     {
@@ -93,7 +104,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         return initId == 0 ? TypedResults.Created(location, result) : TypedResults.Accepted(location, result);
     }
 
-    [HttpPut("shopSettings/update", Name = nameof(UpdateShopSettings))]
+    [HttpPut("update", Name = nameof(UpdateShopSettings))]
     public async Task<Results<BadRequest, BadRequest<ShopSettings>, Accepted<ShopSettings>, NotFound<ShopSettings>>> 
         UpdateShopSettings(ShopSettings shopSettings)
     {
@@ -109,7 +120,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         return result ? TypedResults.Accepted(location, shopSettings.To<ShopSettings>()) : TypedResults.NotFound(shopSettings);
     }
 
-    [HttpGet("shopSettings/childSettings/{parentSettingsId:int}", Name = nameof(GetChildSettings))]
+    [HttpGet("childSettings/{parentSettingsId:int}", Name = nameof(GetChildSettings))]
     public async Task<Results<BadRequest<int>, Ok<List<ShopSettings>>>> GetChildSettings(int parentSettingsId)
     {
         if (parentSettingsId <= 0)
@@ -117,5 +128,12 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
 
         var childSettings = await _settingsRepository.GetChildSettings(parentSettingsId);
         return TypedResults.Ok(childSettings.Select(c => c.To<ShopSettings>()).ToList());
+    }
+
+    [HttpGet("allParents", Name = nameof(GetAllParentShopSettings))]
+    public async Task<Results<BadRequest<int>, Ok<List<ShopSettings>>>> GetAllParentShopSettings()
+    {
+        var allParents = await _settingsRepository.GetAllParentShopSettings();
+        return TypedResults.Ok(allParents.Select(c => c.To<ShopSettings>()).ToList());
     }
 }

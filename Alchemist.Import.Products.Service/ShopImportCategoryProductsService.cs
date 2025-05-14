@@ -1,17 +1,14 @@
-﻿using Alchemist.Product.Interfaces;
-using Alchemist.Import.Service;
+﻿using Alchemist.Import.Service;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Threading;
 using System.Text.Json;
 using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Shop.Interfaces;
 using System.ComponentModel;
 using WebLoader.Common;
 
 namespace Alchemist.Import.Products.Service;
 
-public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ShopImportService, IShopProductImportService
+public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ShopImportService
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
@@ -19,18 +16,21 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected readonly Queue<ICategoryProductItem> _unhandledProductItemUrls = new();
 
-    public event Microsoft.VisualStudio.Threading.AsyncEventHandler<ItemHandledEventArgs>? ItemHandled;
+    private readonly IProductItemHandler _itemHandler;
 
-    protected Queue<IShopCategory> Categories { get; }
+    protected Queue<IProductShopCategoryModel> Categories { get; }
 
-    public IProductShopModel ProductShopModel { get; }
+    protected IProductShopModel ProductShopModel { get; }    
 
-    IShop IShopImportService.ShopModel => ProductShopModel;
-
-    public ShopImportCategoryProductsService(ILogger logger, IProductShopModel shopUrlModel, IWebLoader webLoader, RequestHeaders requestHeaders)
+    public ShopImportCategoryProductsService(ILogger logger,
+        IProductShopModel shopUrlModel,
+        IWebLoader webLoader, 
+        RequestHeaders requestHeaders,
+        IProductItemHandler itemHandler)
         : base(logger, webLoader, requestHeaders)
     {
         ProductShopModel = shopUrlModel;
+        _itemHandler = itemHandler;
         Categories = new();
 
         ProductShopModel.Categories.ToList().ForEach(c => Categories.Enqueue(c));
@@ -41,7 +41,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems?.Count > 0)
         {
-            var newItems = e.NewItems.OfType<IShopCategory>().ToList();
+            var newItems = e.NewItems.OfType<IProductShopCategoryModel>().ToList();
             newItems.ForEach(Categories.Enqueue);
         }
     }
@@ -92,15 +92,13 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected virtual async Task<CategoryResult<TCategory>?> ProcessCategoryProductsAsync(IShopCategory category, int page)
+    protected virtual async Task<CategoryResult<TCategory>?> ProcessCategoryProductsAsync(IProductShopCategoryModel category, int page)
     {
         var currentCategoryUrl = string.Format(ProductShopModel.CategoryUrl, category.GetCategoryForUrl(), page);
 
-        var currentCategoryProducts = await LoadCategoryProductsAsync(currentCategoryUrl, page + 1);
-        if (currentCategoryProducts == null)
-            throw new WarningException($"Category {currentCategoryUrl} page {page} failed.");
-
-
+        var currentCategoryProducts = await LoadCategoryProductsAsync(currentCategoryUrl, page + 1)
+            ?? throw new WarningException($"Category {currentCategoryUrl} page {page} failed.");
+        
         if (IsEndOfCategory(currentCategoryProducts))
             return await Task.FromResult(new CategoryResult<TCategory>(currentCategoryProducts, 0, true));
 
@@ -151,7 +149,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task OnItemHandleAsync(IProductItem item, string apiUrl, bool status)
     {
-        await ItemHandled.InvokeAsync(this, new ItemHandledEventArgs(item, apiUrl, status));
+        //todo
+        item.ApiUrl = apiUrl;
+
+        await _itemHandler.HandleItem(item, ProductShopModel);
     }
 
     protected virtual async Task<TCategory?> LoadCategoryProductsAsync(string categoryUrl, int page)
