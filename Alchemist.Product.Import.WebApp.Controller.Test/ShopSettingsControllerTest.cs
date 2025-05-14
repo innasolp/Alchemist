@@ -1,10 +1,10 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Settings.Adapter;
+using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Text.Json;
@@ -171,15 +171,16 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         var productShopSettings = await fileName.ReadFromFileAsync<ProductShopSettingsModel>();
         shopSettings.Update(productShopSettings, true);
 
-        _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
-            .Returns<IShopSettings, IEnumerable<IShopSettings>>((settings, services) =>
+        _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<Interfaces.IShopSettings>(), It.IsAny<IEnumerable<Interfaces.IShopSettings>>()))
+            .Returns<Interfaces.IShopSettings, IEnumerable<Interfaces.IShopSettings>>((settings, services) =>
                     SaveShopSettingsAsync<T>(settings, services, shopSettings));
         var shopSettingController = CreateShopSettingsController();
         var actionResult = Assert.IsType<OkObjectResult>(await saveAction(shopSettingController, shopSettings));
         Assert.IsType<T>(actionResult.Value);
     }
 
-    private static async Task<List<IShopSettings>> SaveShopSettingsAsync<T>(IShopSettings shopSettingsResult, IEnumerable<IShopSettings> childrenSettingResult,
+    private static async Task<List<Interfaces.IShopSettings>> SaveShopSettingsAsync<T>(Interfaces.IShopSettings shopSettingsResult, 
+        IEnumerable<Interfaces.IShopSettings> childrenSettingResult,
         ShopSettingsModel expect)
         where T:ShopSettingsModel,new()
     {
@@ -192,7 +193,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         ModelAssert.EqualServices(expect, result);
         ModelAssert.EqualCollections(expect.Services, servicesResult);        
 
-        return await Task.FromResult(new List<IShopSettings>());
+        return await Task.FromResult(new List<Interfaces.IShopSettings>());
     }
 
     private async Task IsServiceActionWithRandomShopGuidNotFoundAsync(Func<ShopSettingsController, Guid, Guid,IActionResult > getServiceSettingsAction)

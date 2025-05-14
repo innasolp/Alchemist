@@ -1,5 +1,4 @@
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Product.Interfaces;
 using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -21,20 +20,22 @@ public class OzonImportServiceFirefoxLoaderTest
     private readonly string _productUrl = "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fproduct%2Fd-alba-patchi-s-kollagenom-dlya-oblasti-vokrug-glaz-white-truffle-intensive-the-real-eye-patch-68sht-1062342797%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d";
     private readonly string _categoryUrl = "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2Fantivozrastnoy-uhod-38000%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D2%26page%3D2";
     private readonly string _requestHeadersFireFoxFileName = "Ozon.Headers.Firefox.json";
-
+    private readonly RequestHeaders _requestHeaders;
+    private readonly Moq.Mock<IProductItemHandler> _productItemHandler = new(); 
     public OzonImportServiceFirefoxLoaderTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _shopUrlModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IShopCategory>());
+        _shopUrlModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategoryModel>());
         _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader(_dataLoader);
 
         using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{_requestHeadersFireFoxFileName}");
 
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(s);
+        _requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(s);
 
         s.Close();
 
-        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, requestHeaders);
+        //todo
+        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, _requestHeaders, _productItemHandler.Object);
     }
 
     private async Task InitializeAsync()
@@ -43,7 +44,7 @@ public class OzonImportServiceFirefoxLoaderTest
         Assert.True(cookies.Count > 0);
         Assert.True(cookies.All(c=>c.Value != null));
 
-        var result = await _webLoader.Start(_ozonImportService.RequestHeaders);
+        var result = await _webLoader.Start(_requestHeaders);
         Assert.True(result);
     }
 

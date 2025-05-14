@@ -33,7 +33,7 @@ public partial class Program
         var serviceName = "SignalR";
         var appSerilogBuilder = new AppSerilogBuilder(configuration, env);
         appSerilogBuilder.AddServiceBaseConfigs(serviceName);
-        appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(LogHubFilter).GetNameWithoutGenericArity());
+        appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{serviceName}", typeof(LogHubFilter).GetNameWithoutGenericArity());
         return appSerilogBuilder;
     }
 }

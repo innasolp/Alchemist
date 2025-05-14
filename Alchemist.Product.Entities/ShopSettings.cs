@@ -13,7 +13,7 @@ public class ShopSettings : IShopSettings
     public bool? IsActual { get; set; }
     public JsonObject? JsonValue { get; set; }
     public ShopSettingType Type { get; set; }
-    public string? Name { get; set; }
+    public string Name { get; set; }
     string IShopSettings.JsonValue
     {
         get => JsonValue?.ToString();

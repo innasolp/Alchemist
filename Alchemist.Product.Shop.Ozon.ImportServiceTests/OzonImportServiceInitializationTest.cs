@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using Alchemist.Product.Shop.Ozon.ImportService;
 using Xunit.Abstractions;
 using WebLoader.Interfaces;
-using Alchemist.Product.Interfaces;
 using System.Reflection;
 using System.Text.Json;
 using Alchemist.Import.Products.Interfaces;
@@ -20,11 +19,12 @@ public class OzonImportServiceInitializationTest
     private readonly string _requestHeadersFireFoxFileName = "Ozon.Headers.Firefox.json";
     private readonly string _requestHeadersChromeFileName = "Ozon.Headers.Chrome.json";
 
+    private readonly Moq.Mock<IProductItemHandler> _productItemHandler = new();
 
     public OzonImportServiceInitializationTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _shopUrlModelMock.Setup(m => m.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IShopCategory>());
+        _shopUrlModelMock.Setup(m => m.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategoryModel>());
     }
 
     [Fact]
@@ -52,15 +52,16 @@ public class OzonImportServiceInitializationTest
 
         try
         {
-            ozonImportService = new OzonImportService(_logger,  _shopUrlModelMock.Object, _webLoader, requestHeaders);
+            //todo
+            ozonImportService = new OzonImportService(_logger,  _shopUrlModelMock.Object, _webLoader, requestHeaders, _productItemHandler.Object);
         }
         catch (Exception e) { ex = e; }
 
         if (ex != null) _testOutputHelper.WriteLine(ex.Message);
 
         Assert.NotNull(ozonImportService);
-        Assert.NotNull(ozonImportService.RequestHeaders);
-        Assert.NotEmpty(ozonImportService.RequestHeaders.Headers);
-        Assert.NotEmpty(ozonImportService.RequestHeaders.CookieKeys);
+        Assert.NotNull(requestHeaders);
+        Assert.NotEmpty(requestHeaders.Headers);
+        Assert.NotEmpty(requestHeaders.CookieKeys);
     }
 }

@@ -2,31 +2,42 @@
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.Interfaces;
 using System.ComponentModel;
-using Alchemist.Import.Shop.Interfaces;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
+using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Import.Categories.Data;
 
-internal class CategoriesDataHandler(IShopDataService shopDataService) : ICategoryDataHandler
+internal class CategoriesDataHandler(IShopDataService shopDataService) : ICategoryItemHandler
 {
     private readonly IShopDataService _shopDataService = shopDataService;
 
-    public async Task<ItemProcessStatus> HandleItem(ICategory category, int shopId)
+    public event AsyncItemHandler<ICategory> ItemProcessed;
+
+    public async Task<ItemProcessStatus> HandleItem(ICategory category, IShopModel shopModel)
     {
+        //todo
+        var shop = shopModel as IShop;
+        var shopId = shop.Id;
+
         var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(shopId, category.Id);
 
         if (shopCategory != null)
-            return ItemProcessStatus.AlreadyExists;
+        {
+            await ItemProcessed?.Invoke(this, category, shopModel, ItemProcessStatus.AlreadyExists);
+            return ItemProcessStatus.AlreadyExists;            
+        }
         else
         {
             try
             {
                 shopCategory = await AddShopCategoryAsync(shopId, category);
+                await ItemProcessed?.Invoke(this, category, shopModel, ItemProcessStatus.New);
                 return ItemProcessStatus.New;
             }
             catch (Exception ex)
             {
+                await ItemProcessed?.Invoke(this, category, shopModel, ItemProcessStatus.Warning);
                 throw new WarningException($"Category {category.Url} proccessed with error.", ex);
             }
         }
@@ -39,11 +50,11 @@ internal class CategoriesDataHandler(IShopDataService shopDataService) : ICatego
         return await _shopDataService.AddShopCategory(shopCatergory);
     }
 
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, int shopId)
+    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, IShopModel shopModel)
     {
         if (item is not ICategory category)
             return await Task.FromResult(ItemProcessStatus.Error);
 
-        return await HandleItem(category, shopId);
+        return await HandleItem(category, shopModel);
     }
 }

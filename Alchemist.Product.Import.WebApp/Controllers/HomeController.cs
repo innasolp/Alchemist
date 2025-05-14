@@ -1,5 +1,6 @@
 using Alchemist.Common;
-using Alchemist.Import.Settings.Adapter;
+using Alchemist.Import.Settings.DataAdapter;
+using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
@@ -178,7 +179,7 @@ public class HomeController : Controller
         if ((TabType)tab != TabType.Shop)
             return Ok(!settings.Equals(modelFromJson));
 
-        var originalSettings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
+        var originalSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
         if (originalSettings == null)
             return Ok(!modelFromJson.Equals(shopGuid.CreateShopSettings((settings as ShopSettingsModel).ShopSettingType)));
 
@@ -255,7 +256,7 @@ public class HomeController : Controller
             if ((TabType)tab == TabType.Shop &&
                 shopImport.GetSettings((TabType)tab, true) == null)
             {
-                var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
+                var settings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
                 if (settings != null)
                     shopImport.SetSettings((TabType)tab, settings);
                 else

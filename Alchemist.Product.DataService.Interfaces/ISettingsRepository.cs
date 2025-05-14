@@ -8,6 +8,8 @@ public interface ISettingsRepository
 
     Task<IShopSettings?> GetShopSettings(int id);
 
+    Task<IShopSettings?> GetShopSettings(string shopSettingsName);
+
     Task<IShopSettings> SaveShopSettings(IShopSettings shopSettings);
 
     Task<bool> UpdateShopSettings(IShopSettings shopSettings);
@@ -15,4 +17,6 @@ public interface ISettingsRepository
     Task<List<IShopSettings>> GetChildSettings(int parentSettingsId);
 
     Task<List<IShopSettings>> SaveShopSettings(IShopSettings parentShopSettings, IEnumerable<IShopSettings> childrenSettings);
+
+    Task<List<IShopSettings>> GetAllParentShopSettings();
 }

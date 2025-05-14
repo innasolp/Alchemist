@@ -20,7 +20,7 @@ public interface IShopSettings
 {
     int Id { get; set; }
 
-    string? Name { get; set; }
+    string Name { get; set; }
 
     int? ParentSettingsId { get; set; }
 

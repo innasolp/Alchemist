@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Alchemist.Import.Settings.Interfaces;
 
 namespace Alchemist.Product.Import.Model;
 
@@ -14,7 +14,7 @@ public interface IImportFacade
     
     bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName, out ServiceSettingsModel serviceSettings);
 
-    ShopImportModel AddNewShop(IShop shop);
+    ShopImportModel AddNewShop(Interfaces.IShop shop);
 
     List<ShopImportModel> GetShops();
 }

@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Import.Model.Infrastructure;
-using Alchemist.Product.Interfaces;
 using System.Text.Json.Serialization;
+using Alchemist.Import.Settings.Interfaces;
 
 namespace Alchemist.Product.Import.Model;
 

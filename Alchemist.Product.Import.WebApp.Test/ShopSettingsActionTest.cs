@@ -27,7 +27,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
             var savingSettings = existingSettings ?? shopSettings;
 
-            ShopImportSettings shopSettingsModel = savingSettings.Type == ShopSettingType.Product
+            ShopImportSettings shopSettingsModel = savingSettings.Type == Interfaces.ShopSettingType.Product
                     ? await savingSettings.GetShopImportSettings<ProductShopImportSettings, ImportServiceSettings>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()))
                     : await savingSettings.GetShopImportSettings<CategoryShopImportSettings, ImportServiceSettings>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()));
 

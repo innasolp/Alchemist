@@ -8,12 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0" GeneratePathProperty="true" />
-    <PackageReference Include="WebLoader.HttpClient" Version="1.0.0" GeneratePathProperty="true"/>
-    <PackageReference Include="WebLoader.Playwright.Firefox.DependencyInjection" Version="1.0.0" GeneratePathProperty="true" />
+    <PackageReference Include="WebLoader.HttpClient" Version="1.0.0.2" />
+    <PackageReference Include="WebLoader.HttpClient.Factory" Version="1.0.0.2" GeneratePathProperty="true" />
+    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.3" GeneratePathProperty="true" />
+    <PackageReference Include="WebLoader.Playwright.Firefox.Factory" Version="1.0.0.4" GeneratePathProperty="true" />
   </ItemGroup>
 
   <Target Name="RemoveBrowserDataLoaderFirefoxDir" BeforeTargets="Build">
-    <RemoveDir Directories="$(SolutionDir)Libs\BrowserDataLoader\Firefox\Standart"/>
+    <RemoveDir Directories="$(SolutionDir)Libs\BrowserDataLoader\Firefox\Standart" />
   </Target>
 
   <Target Name="CopyBrowserDataLoaderFirefox" AfterTargets="Build">
@@ -24,25 +26,35 @@
   </Target>
 
   <Target Name="RemoveWebLoaderHttpClientDir" BeforeTargets="Build">
-    <RemoveDir Directories="$(SolutionDir)Libs\WebLoader\HttpClient"/>
+    <RemoveDir Directories="$(SolutionDir)Libs\WebLoader\HttpClient" />
   </Target>
 
   <Target Name="CopyWebLoaderHttpClient" AfterTargets="Build">
     <ItemGroup>
-      <CopyWebLoaderHttpClientFiles Include="$(PkgWebLoader_HttpClient)\lib\dependencies\*.dll"></CopyWebLoaderHttpClientFiles>
+      <CopyWebLoaderHttpClientFiles Include="$(PkgWebLoader_HttpClient)\dependencies\*.dll"></CopyWebLoaderHttpClientFiles>
+      <CopyWebLoaderHttpClientFactoryFiles Include="$(PkgWebLoader_HttpClient_Factory)\dependencies\*.dll"></CopyWebLoaderHttpClientFactoryFiles>
     </ItemGroup>
     <Copy SourceFiles="@(CopyWebLoaderHttpClientFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\HttpClient"></Copy>
+    <Copy SourceFiles="@(CopyWebLoaderHttpClientFactoryFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\HttpClient"></Copy>
   </Target>
 
   <Target Name="RemoveWebLoaderPlaywrightFirefoxDir" BeforeTargets="Build">
-    <RemoveDir Directories="$(SolutionDir)Libs\WebLoader\Playwright\Firefox"/>
+    <RemoveDir Directories="$(SolutionDir)Libs\WebLoader\Playwright\Firefox" />
   </Target>
 
   <Target Name="CopyWebLoaderPlaywrightFirefox" AfterTargets="Build">
     <ItemGroup>
-      <CopyWebLoaderPlaywrightFirefoxFiles Include="$(PkgWebLoader_Playwright_Firefox_DependencyInjection)\lib\dependencies\*.dll"></CopyWebLoaderPlaywrightFirefoxFiles>
+      <CopyWebLoaderPlaywrightFirefoxFiles Include="$(PkgWebLoader_Playwright_Firefox)\dependencies\*.dll"></CopyWebLoaderPlaywrightFirefoxFiles>
+      <CopyWebLoaderPlaywrightFirefoxFactoryFiles Include="$(PkgWebLoader_Playwright_Firefox_Factory)\dependencies\*.dll"></CopyWebLoaderPlaywrightFirefoxFactoryFiles>
+      <CopyFirefoxPlaywrightFiles Include="$(PkgWebLoader_Playwright_Firefox_Factory)\dependencies\.playwright\**\*.*"></CopyFirefoxPlaywrightFiles>
+      <CopyFirefoxPlaywrightNodeFiles Include="$(PkgWebLoader_Playwright_Firefox_Factory)\dependencies\node\**\*.*"></CopyFirefoxPlaywrightNodeFiles>
+      <CopyFirefoxPlaywrightPackageFiles Include="$(PkgWebLoader_Playwright_Firefox_Factory)\dependencies\package\**\*.*"></CopyFirefoxPlaywrightPackageFiles>
     </ItemGroup>
     <Copy SourceFiles="@(CopyWebLoaderPlaywrightFirefoxFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox"></Copy>
+    <Copy SourceFiles="@(CopyWebLoaderPlaywrightFirefoxFactoryFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox"></Copy>
+    <Copy SourceFiles="@(CopyFirefoxPlaywrightFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox\.playwright\%(RecursiveDir)"></Copy>
+    <Copy SourceFiles="@(CopyFirefoxPlaywrightNodeFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox\.playwright\node\%(RecursiveDir)"></Copy>
+    <Copy SourceFiles="@(CopyFirefoxPlaywrightPackageFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox\.playwright\package\%(RecursiveDir)"></Copy>
   </Target>
 
 </Project>
