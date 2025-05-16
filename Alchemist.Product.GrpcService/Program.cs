@@ -3,13 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using Alchemist.Common;
 using Grpc.Server.Interceptors;
 using Alchemist.Product.Data.Repository;
-using Alchemist.Log.Serilog;
 using Grpc.Server.RequestInterceptor;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Loggers;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.Data;
+using Serilog.Configuration.Extensions;
+using Alchemist.Log.Extensions;
 
 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -37,12 +38,13 @@ builder.Services.AddGrpc(options =>
 });
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
-var appSerilogBuilder = new AppSerilogBuilder(builder.Configuration, builder.Environment);
-appSerilogBuilder.AddServiceBaseConfigs(typeof(AlchemyService).Name);
-appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
+var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
+var appSerilogBuilder = new SerilogConfigurationBuilder(builder.Configuration);
+appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, typeof(AlchemyService).Name);
+appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath,$"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
 
-appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8071", EventIds.Perfomance.Id, logPath, typeof(AlchemyService).Name);
+appSerilogBuilder.AddPerfomanceCounter(logContextPath, logPath, url: "https://localhost:8071", EventIds.Perfomance.Id, typeof(AlchemyService).Name);
 
 appSerilogBuilder.SetSerilog(builder.Logging);
 

@@ -145,7 +145,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HttpIntercept", "HttpInterc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Http.Info", "..\Http\Http.Info\Http.Info.csproj", "{DA7EAF09-297B-4E61-BDF9-7854BC4EC408}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Log.Serilog", "Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj", "{930E3F42-F87B-4F41-87B8-8118E72533E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Log.Extensions", "Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj", "{930E3F42-F87B-4F41-87B8-8118E72533E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log.Interceptors", "..\Logging\Log.Interceptors\Log.Interceptors.csproj", "{3321EFA3-579C-45C9-A7B1-6A631FBA0DF5}"
 EndProject

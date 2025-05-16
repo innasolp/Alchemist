@@ -41,7 +41,7 @@
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
     <ProjectReference Include="..\Alchemist.Product.GrpcService.Extensions\Alchemist.Product.GrpcService.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
+    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
-using Alchemist.Log.Serilog;
+using Alchemist.Log.Extensions;
 using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Settings.Data.Repository;
@@ -8,6 +8,7 @@ using Alchemist.Settings.RestAPI.Controllers;
 using Http.ErrorHandling;
 using Http.Info;
 using Microsoft.EntityFrameworkCore;
+using Serilog.Configuration.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,11 +31,12 @@ builder.Services.AddSingleton<InfoLogMiddleware<SettingsController>>();
 builder.Services.AddProblemDetails();
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
-var appSerilogBuilder = new AppSerilogBuilder(builder.Configuration, builder.Environment);
+var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
+var appSerilogBuilder = new SerilogConfigurationBuilder(builder.Configuration);
 var serviceName = "Alchemist.Settings.RestAPI";
-appSerilogBuilder.AddServiceBaseConfigs(serviceName);
-appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextContainsLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, serviceName);
+appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
 
 appSerilogBuilder.SetSerilog(builder.Logging);
 

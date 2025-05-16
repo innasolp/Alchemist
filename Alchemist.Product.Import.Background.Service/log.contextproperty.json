@@ -22,7 +22,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Fatal' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                  "expression": "@l='Fatal' and $[PropertyName] is not null"
                 }
               }
             ],
@@ -30,9 +30,9 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Fatal/fatal_.log",
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Fatal/fatal_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
                   "rollingInterval": "Day",
                   "retainedFileCountLimit": 7
                 }
@@ -40,8 +40,8 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Fatal/fatal_.json",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Fatal/fatal_.json",
                   "formatter": "Serilog.Formatting.Json.JsonFormatter",
                   "rollingInterval": "Day",
                   "retainedFileCountLimit": 7
@@ -59,7 +59,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Error' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                  "expression": "@l='Error'  and $[PropertyName] is not null"
                 }
               }
             ],
@@ -67,9 +67,9 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Error/error_.log",
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Error/error_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
                   "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
@@ -77,8 +77,8 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Error/error_.json",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Error/error_.json",
                   "formatter": "Serilog.Formatting.Json.JsonFormatter",
                   "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
@@ -96,7 +96,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Warning' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                  "expression": "@l='Warning'  and $[PropertyName] is not null"
                 }
               }
             ],
@@ -104,9 +104,9 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Warning/warning_.log",
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Warning/warning_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
                   "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
@@ -114,8 +114,8 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Warning/warning_.json",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Warning/warning_.json",
                   "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7,
                   "formatter": "Serilog.Formatting.Json.JsonFormatter"
@@ -133,7 +133,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Information' and SourceContext like '%$[SourceContext]%' and $[ContextPropertyName] is not null"
+                  "expression": "@l='Information'  and $[PropertyName] is not null"
                 }
               }
             ],
@@ -141,9 +141,9 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Info/info_.log",
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {EventId} ({$[ContextPropertyName]}) {Message}{NewLine}{Exception}",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Info/info_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {EventId} ({$[PropertyName]}) {Message}{NewLine}{Exception}",
                   "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7
                 }
@@ -151,8 +151,8 @@
               {
                 "Name": "ContextPropertyFile",
                 "Args": {
-                  "propertyName": "$[ContextPropertyName]",
-                  "pathFormat": "$[LoggerPath]/{$[ContextPropertyName]}/Info/info_.json",
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Info/info_.json",
                   "formatter": "Serilog.Formatting.Json.JsonFormatter",
                   "rollingInterval": "Hour",
                   "retainedFileCountLimit": 7

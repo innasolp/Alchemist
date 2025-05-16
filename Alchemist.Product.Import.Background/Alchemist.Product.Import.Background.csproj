@@ -29,7 +29,6 @@
     <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Data\Alchemist.Import.Products.Data.csproj" />
-    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />

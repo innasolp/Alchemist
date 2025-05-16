@@ -1,5 +1,4 @@
 using Alchemist.Common;
-using Alchemist.Log.Serilog;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.RestAPIClient;
 using Grpc.Core.Interceptors;
@@ -22,6 +21,7 @@ using Alchemist.Import.Settings.Interfaces;
 using BrowserDataLoader.Interfaces;
 using Alchemist.Import.Factory.Interfaces;
 using Serilog.Configuration.Extensions;
+using Alchemist.Log.Extensions;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
@@ -64,34 +64,36 @@ builder.Services.AddImportServiceLogFactory((logger, shopModel, settings) => new
     { "ShopSettingsType", settings.ShopSettingType.ToString() } }));
 builder.Services.AddPerfomanceCounter((logger) => new SerilogUrlLogger<IPerfomanceCounter>(logger));
 
-var appSerilogBuilder = new AppSerilogBuilder(builder.Configuration, builder.Environment);
-appSerilogBuilder.AddServiceBaseConfigs(typeof(ShopImportWorker).Name);
-appSerilogBuilder.AddPerfomanceCounter(url:"alchemygrpcservice", EventIds.Perfomance.Id, logPath, serviceName:"AlchemyGrpcClient");
-appSerilogBuilder.AddPerfomanceCounter(url: restApiHost, EventIds.Perfomance.Id, logPath, serviceName:"AlchemyRestAPIClient");
-appSerilogBuilder.AddPerfomanceCounter(url: settingsAPIHost, EventIds.Perfomance.Id, logPath, serviceName:"AlchemySettingsRestAPIClient");
+var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
+var appLogConfBuilder = new SerilogConfigurationBuilder(builder.Configuration);
+appLogConfBuilder.AddServiceBaseConfigs(logContextPath, logPath, typeof(ShopImportWorker).Name);
+appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: "alchemygrpcservice", EventIds.Perfomance.Id, serviceName:"AlchemyGrpcClient");
+appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: restApiHost, EventIds.Perfomance.Id, serviceName:"AlchemyRestAPIClient");
+appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: settingsAPIHost, EventIds.Perfomance.Id, serviceName:"AlchemySettingsRestAPIClient");
 
-appSerilogBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
+appLogConfBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
     logPath: $"{logPath}/Import/Products",
     propertyName: "ShopImportService", 
     sourceContext: "Import",
     null,
-    [ new SerilogPropertyExpression(SerilogExpressions.Contains, "ShopSettingsType", ShopSettingType.Product.ToString()) ]);
+    [ new SerilogPropertyExpression(SerilogFunc.Contains, [new ContextProperty("ShopSettingsType"), ShopSettingType.Product.ToString()]) ]);
 
-appSerilogBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
+appLogConfBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
     logPath: $"{logPath}/Import/Categories",
     propertyName: "ShopImportService",
     sourceContext: "Import",
     null,
-    [new SerilogPropertyExpression(SerilogExpressions.Contains, "ShopSettingsType", ShopSettingType.Category.ToString())]);
+    [new SerilogPropertyExpression(SerilogFunc.Contains, [new ContextProperty("ShopSettingsType"), ShopSettingType.Category.ToString()])]);
 
-appSerilogBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
+appLogConfBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
     logPath: $"{logPath}/Perfomance",
     propertyName: "Host",
     sourceContext: "Perfomance",
     ["Url"],
-    [new SerilogPropertyExpression(SerilogExpressions.EventId, EventIds.Perfomance.Id)]);
+    [new SerilogPropertyExpression("=", [SerilogExpressions.EventId, EventIds.Perfomance.Id]), 
+     new SerilogPropertyExpression("<>",[new ContextProperty("Host"), "localhost"])]);
 
-appSerilogBuilder.SetSerilog(builder.Logging);
+appLogConfBuilder.SetSerilog(builder.Logging);
 
 builder.Services.AddHostedService<ShopImportWorker>();
 
