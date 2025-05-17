@@ -24,34 +24,25 @@ public class OzonCategoriesLoadTest
 
     private readonly string _shopUrl = "https://www.ozon.ru/?__rr=1";
 
-    private static async Task<IWebLoader> CreateWebLoaderAsync(string requestHeadersFileName)
+    private static async Task<IWebLoader> CreateWebLoaderAsync()
     {
-        using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}");
-
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(s);
-
-        s.Close();
-
-        if (requestHeaders == null)
-            Assert.Fail("request header not loaded");
-
         var browserDataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
         var cookies = await browserDataLoader.LoadCookies();
         Assert.True(cookies.Count > 0);
         Assert.True(cookies.All(c => c.Value != null));
 
         var webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader(browserDataLoader);
-        var result = await webLoader.Start(requestHeaders);
+        var result = await webLoader.Start();
         Assert.True(result);
 
         return webLoader;
     }
 
-    private async Task<JsonDocument?> GetJsonDocumentAsync(IWebLoader webLoader)
+    private async Task<JsonDocument?> GetJsonDocumentAsync(IWebLoader webLoader, RequestHeaders requestHeaders)
     {
         var htmlSearcher = HtmlSearchFactory.CreateSearcher(SearchMatchType.Like);
 
-        using var stream = await webLoader.LoadFromUrl(_shopUrl);
+        using var stream = await webLoader.LoadFromUrl(_shopUrl, requestHeaders);
         var values = await htmlSearcher.GetValues(stream, new HtmlSearchOptions
         {
             Tag = "div",
@@ -67,12 +58,28 @@ public class OzonCategoriesLoadTest
         return await Task.FromResult(document);
     }
 
+    private static RequestHeaders GetRequestHeaders(string requestHeadersFileName)
+    {
+        using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}");
+
+        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(s);
+
+        s.Close();
+
+        if (requestHeaders == null)
+            Assert.Fail("request header not loaded");
+
+        return requestHeaders;
+    }
+
     [Fact]
     public async Task StandartLoadCategoriesListTestAsync()
     {        
-        var webLoader = await CreateWebLoaderAsync(_requestHeadersStandartFileName);
-        
-        var document = await GetJsonDocumentAsync(webLoader);
+        var webLoader = await CreateWebLoaderAsync();
+
+        var requestHeaders = GetRequestHeaders(_requestHeadersStandartFileName);
+       
+        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
 
         Assert.NotNull(document);
         
@@ -86,7 +93,7 @@ public class OzonCategoriesLoadTest
         foreach(var parentCategory in parentCategories)
         {
             var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url);
+            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
             
             var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
 
@@ -101,9 +108,11 @@ public class OzonCategoriesLoadTest
     [Fact]
     public async Task LoadCategoriesToCollectionTestAsync()
     {
-        var webLoader = await CreateWebLoaderAsync(_requestHeadersStandartFileName);
+        var webLoader = await CreateWebLoaderAsync();
 
-        var document = await GetJsonDocumentAsync(webLoader);
+        var requestHeaders = GetRequestHeaders(_requestHeadersStandartFileName);
+
+        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
 
         Assert.NotNull(document);
 
@@ -120,7 +129,7 @@ public class OzonCategoriesLoadTest
         foreach (var parentCategory in parentCategories)
         {
             var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url);
+            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
 
             var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
 

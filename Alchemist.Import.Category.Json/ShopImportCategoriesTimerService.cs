@@ -88,7 +88,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     private async Task<List<string>?> LoadHtmlFromUrlAsync(string url)
     {
-        using var stream = await WebLoader.LoadFromUrl(ShopModel.Url);
+        using var stream = await WebLoader.LoadFromUrl(ShopModel.Url, RequestHeaders);
         var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions);
         stream.Close();
         return await Task.FromResult(values);
@@ -96,7 +96,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     private async Task<JsonDocument?> LoadFromUrlAsync(string url, CancellationToken stoppingToken)
     {
-        using var stream = await WebLoader.LoadFromUrl(url);
+        using var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
 
         var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
 

@@ -8,8 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.2" />
+    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />    
   </ItemGroup>
 
   <ItemGroup>

@@ -173,7 +173,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task<Stream> LoadFromUrlAsync(string url)
     {
-        var stream = await WebLoader.LoadFromUrl(url);
+        var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
         return await Task.FromResult(stream);
     }
 

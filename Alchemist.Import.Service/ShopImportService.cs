@@ -11,9 +11,9 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
 {
     public abstract string Name { get; }
 
-    public IWebLoader WebLoader { get; } = webLoader;
+    protected IWebLoader WebLoader { get; } = webLoader;
 
-    private readonly RequestHeaders? _requestHeaders = requestHeaders;
+    protected RequestHeaders? RequestHeaders { get; } = requestHeaders;
 
     protected ILogger Logger { get; } = logger;
 
@@ -26,7 +26,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             try
             {
                 if (!WebLoader.IsStarted)
-                    await WebLoader.Start(_requestHeaders);
+                    await WebLoader.Start();
             }
             catch (WarningException warning)
             {
@@ -69,11 +69,11 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             Logger.LogWarning("Too many request. Thread would be sleeped 10 sec");
             await Task.Delay(10000);
         }
-        else if (_requestHeaders != null &&
+        else if (RequestHeaders != null &&
             (e.StatusCode == System.Net.HttpStatusCode.Forbidden || e.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable))
         {
             Logger.LogWarning($"Response status {e.StatusCode} for url {url}. Web loader {WebLoader.GetType().Name} will be restarted.");
-            await WebLoader.Start(_requestHeaders);
+            await WebLoader.Start();
         }
         else
         {

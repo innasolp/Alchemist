@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.2" />
-    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.3" />
+    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0.1" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
   </ItemGroup>
 

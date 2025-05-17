@@ -44,7 +44,7 @@ public class OzonImportServiceFirefoxLoaderTest
         Assert.True(cookies.Count > 0);
         Assert.True(cookies.All(c=>c.Value != null));
 
-        var result = await _webLoader.Start(_requestHeaders);
+        var result = await _webLoader.Start();
         Assert.True(result);
     }
 
@@ -54,7 +54,7 @@ public class OzonImportServiceFirefoxLoaderTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var stream = await _webLoader.LoadFromUrl(_productUrl);
+        var stream = await _webLoader.LoadFromUrl(_productUrl, _requestHeaders);
         var product = await JsonSerializer.DeserializeAsync<Model.Product>(stream);
         stream.Close();
 
@@ -71,7 +71,7 @@ public class OzonImportServiceFirefoxLoaderTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var stream = await _webLoader.LoadFromUrl(_categoryUrl);
+        var stream = await _webLoader.LoadFromUrl(_categoryUrl, _requestHeaders);
         var category = await JsonSerializer.DeserializeAsync<Model.Category>(stream);
         stream.Close();
 

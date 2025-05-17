@@ -42,16 +42,7 @@ public class GoldAppleCategoriesLoadTest
 
     private async Task InitializeAsync()
     {
-        var requestHeaders = await _requestHeadersPath.ReadFromJsonFileAsync<RequestHeaders>();
-
-        Assert.NotNull(requestHeaders);
-        Assert.NotNull(requestHeaders.Headers);
-        
-        var cookies = await _dataLoader.LoadCookies();
-        Assert.True(cookies.Count > 0);
-        Assert.True(cookies.All(c => c.Value != null));
-
-        var result = await _webLoader.Start(requestHeaders);
+        var result = await _webLoader.Start();
         Assert.True(result);
     }
 
@@ -61,7 +52,16 @@ public class GoldAppleCategoriesLoadTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl);
+        var requestHeaders = await _requestHeadersPath.ReadFromJsonFileAsync<RequestHeaders>();
+
+        Assert.NotNull(requestHeaders);
+        Assert.NotNull(requestHeaders.Headers);
+
+        var cookies = await _dataLoader.LoadCookies();
+        Assert.True(cookies.Count > 0);
+        Assert.True(cookies.All(c => c.Value != null));
+
+        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders);
         var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
         stream.Close();       
 

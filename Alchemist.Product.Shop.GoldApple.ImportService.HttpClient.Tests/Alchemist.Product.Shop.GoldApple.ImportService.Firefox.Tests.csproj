@@ -12,7 +12,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0" />
+    <None Remove="GoldApple.Headers.Firefox.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="GoldApple.Headers.Firefox.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.1" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Http.RequestHandling.Interfaces" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
@@ -24,7 +34,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.4" />
 
   </ItemGroup>
 

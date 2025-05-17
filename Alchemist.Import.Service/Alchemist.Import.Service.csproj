@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.2" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="WebLoader.Common" Version="1.0.0" />
   </ItemGroup>
 

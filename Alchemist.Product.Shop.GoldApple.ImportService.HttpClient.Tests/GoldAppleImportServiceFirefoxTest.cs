@@ -21,7 +21,7 @@ public class GoldAppleImportServiceFirefoxTest
     private readonly IWebLoader _webLoader;
     private readonly ITestOutputHelper _testOutputHelper;
     
-    private readonly string requestHeadersFileName = "GoldApple.Headers.Firefox.json";
+    private readonly string _requestHeadersFileName = "GoldApple.Headers.Firefox.json";
 
     private readonly string _requestHeadersPath;
 
@@ -36,24 +36,38 @@ public class GoldAppleImportServiceFirefoxTest
         _testOutputHelper = testOutputHelper;
         _browserDataLoader = new FirefoxStandartDataLoader();
         _webLoader = new PlaywrightFirefoxLoader(_browserDataLoader);  
-        _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}";       
-    } 
-    
-    private async Task InitWebLoaderIfNeed()
+        _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{_requestHeadersFileName}";       
+    }
+    private static RequestHeaders GetRequestHeaders(string requestHeadersFileName)
+    {
+        using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}");
+
+        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(s);
+
+        s.Close();
+
+        if (requestHeaders == null)
+            Assert.Fail("request header not loaded");
+
+        return requestHeaders;
+    }
+
+    private async Task InitWebLoaderIfNeedAsync()
     {
         if (_webLoader.IsStarted) return;
 
-        var requestHeaders = await _requestHeadersPath.ReadFromJsonFileAsync<RequestHeaders>();
-        var result = await _webLoader.Start(requestHeaders);
+        var result = await _webLoader.Start();
         Assert.True(result);
     }
 
     [Fact]
     public async Task LoadGoldAppleCategoryPageTestAsync()
     {
-        await InitWebLoaderIfNeed();
+        await InitWebLoaderIfNeedAsync();
 
-        var stream = await _webLoader.LoadFromUrl(_categoryUrl);
+        var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
+
+        var stream = await _webLoader.LoadFromUrl(_categoryUrl, requestHeaders);
         var category = await JsonSerializer.DeserializeAsync<CategoryProducts>(stream);
         stream.Close();
 
@@ -66,9 +80,11 @@ public class GoldAppleImportServiceFirefoxTest
     [Fact]
     public async Task LoadGoldAppleProductPageTestAsync()
     {
-        await InitWebLoaderIfNeed();
+        await InitWebLoaderIfNeedAsync();
 
-        var stream = await _webLoader.LoadFromUrl(_productUrl);
+        var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
+
+        var stream = await _webLoader.LoadFromUrl(_productUrl, requestHeaders);
         var productData = await JsonSerializer.DeserializeAsync<ProductData>(stream);
         stream.Close();
 
