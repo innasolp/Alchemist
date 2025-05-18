@@ -1,15 +1,16 @@
-using WebLoader.Interfaces;
-using Xunit.Abstractions;
-using System.Text.Json;
+using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.Shop.GoldApple.Model;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using WebLoader.Common;
-using System.Reflection;
-using Json.FileExtensions;
-using BrowserDataLoader.Interfaces;
 using BrowserDataLoader.Firefox.Standart.Windows;
+using BrowserDataLoader.Interfaces;
+using Json.FileExtensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Reflection;
+using System.Text.Json;
+using WebLoader.Common;
+using WebLoader.Interfaces;
 using WebLoader.Playwright.Firefox;
+using Xunit.Abstractions;
 
 namespace Alchemist.Shop.GoldenApple.ImportService.HttpClient.Tests;
 
@@ -75,6 +76,7 @@ public class GoldAppleImportServiceFirefoxTest
         Assert.NotNull(category.Data);
         Assert.True(category.Data.Count > 0);
         Assert.NotEmpty(category.Data.Products);
+        Assert.DoesNotContain(category.Data.Products, i => string.IsNullOrEmpty((i as ICategoryProductItem)?.Id));
     }
 
     [Fact]

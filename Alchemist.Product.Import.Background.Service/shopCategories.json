@@ -24,7 +24,7 @@
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0"
 
           },
 
@@ -137,7 +137,7 @@
           "Sec-Fetch-User": "?1",
           "TE": "trailers",
           "Upgrade-Insecure-Requests": "1",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv) Gecko/20100101 Firefox/134.0"
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0"
         },
 
         "Cookies": [

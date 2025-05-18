@@ -63,7 +63,7 @@ public class RichAnnotationContent : IJsonOnDeserialized
     {
         FullText = string.Concat(
             Blocks != null ? string.Join(" ", Blocks.Where(b => b.Text != null).SelectMany(b => b.Text.Rows)) : "",
-            Text != null ? string.Join(" ", Text.Rows) : ""
+            Text != null && Text.Rows != null ? string.Join(" ", Text.Rows) : ""
             );       
     }
 }
