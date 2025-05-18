@@ -2,11 +2,14 @@
 
 namespace Alchemist.Product.Shop.Ozon.Model;
 
-public class Layout
+public class LayoutItem
 {
     [JsonPropertyName("widgetToken")]
     public string WidgetToken { get; set; }
 
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public int Id { get; set; }
+
+    [JsonPropertyName("stateId")]
+    public string StateId { get; set; }
 }
