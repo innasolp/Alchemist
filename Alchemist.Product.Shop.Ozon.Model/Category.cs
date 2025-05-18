@@ -25,6 +25,9 @@ public class Category : IJsonOnDeserialized, ICategoryProducts
     [JsonIgnore]
     int ICategoryProducts.TotalCount => Shared?.Catalog?.TotalFound ?? 0;
 
+    [JsonPropertyName("layout")]
+    public LayoutItem[] LayoutItems { get; set; } = [];
+
     public void OnDeserialized()
     {
         var searchResultsV2 = WidgetStates?.FirstOrDefault(ws => ws.Key.Contains("searchResultsV2"));
@@ -32,6 +35,13 @@ public class Category : IJsonOnDeserialized, ICategoryProducts
         {
             CategoryContent = JsonSerializer.Deserialize<CategoryContent>(searchResultsV2.Value.Value.ToString());
         }
+        else if(LayoutItems != null)
+        {
+            CategoryContent = WidgetStates.Where(ws => LayoutItems.Any(l => l.StateId == ws.Key)).
+                Select(ws => JsonSerializer.Deserialize<CategoryContent>(ws.Value.ToString()))
+                .FirstOrDefault(c => !string.IsNullOrEmpty(c?.TileLayout));
+        }
+
 
         if (!string.IsNullOrWhiteSpace(SharedContent))
         {

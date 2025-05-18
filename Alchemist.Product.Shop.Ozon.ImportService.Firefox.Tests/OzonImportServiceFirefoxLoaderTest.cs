@@ -80,5 +80,6 @@ public class OzonImportServiceFirefoxLoaderTest
         Assert.NotNull(category.CategoryContent);
         Assert.NotNull(category.CategoryContent.Items);
         Assert.NotEmpty(category.CategoryContent.Items);
+        Assert.DoesNotContain(category.CategoryContent.Items, i => string.IsNullOrEmpty((i as ICategoryProductItem)?.Id));
     }
 }

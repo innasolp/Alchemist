@@ -19,11 +19,13 @@
 
 */bin/debug
 */bin/debug libs
+*/bin/debug all
 */bin/Debug
 */bin/Release
 */bin/build import
 */obj/debug
 */obj/debug libs
+*/obj/debug all
 */obj/Debug
 */obj/Release
 */obj/build import
