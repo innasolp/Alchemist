@@ -50,7 +50,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
 
                 var result = !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
 
-                await ItemProcessed.Invoke(this, productItem, shopModel, result);
+                await InvokeItemProcessedAsync(productItem, shopModel, result);
 
                 return result;
             }
@@ -76,17 +76,22 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
                 return await Task.FromResult(ItemProcessStatus.Error);
 
             //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
-            await ItemProcessed(this, productItem, shopModel, ItemProcessStatus.New);
+            await InvokeItemProcessedAsync(productItem, shopModel, ItemProcessStatus.New);
 
             return ItemProcessStatus.New;
         }
         catch(Exception e)
         {
-            await ItemProcessed?.Invoke(this, productItem, shopModel, ItemProcessStatus.Warning);
+            await InvokeItemProcessedAsync(productItem, shopModel, ItemProcessStatus.Warning);
 
             throw new WarningException($"Product {productItem.ItemUrl} proccessed with error.", e);
         }
-    }    
+    }
+
+    private Task InvokeItemProcessedAsync(IProductItem productItem, IShopModel shopModel, ItemProcessStatus itemProcessStatus)
+    {
+        return ItemProcessed?.Invoke(this, productItem, shopModel, itemProcessStatus) ?? Task.FromResult(false);
+    }
 
     private async Task<bool> SetShopProductCategoryIfNeedAsync(int shopId, long shopProductId, int categoryItemId)
     {

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.1" />
+    <PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.2" />
     <PackageReference Include="Google.Protobuf" Version="3.29.2" />
     <PackageReference Include="Grpc.Client.RequestInterceptor" Version="1.0.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
@@ -41,11 +41,11 @@
     <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
   </ItemGroup>  
 
-  <Target Name="CopyDIDir" AfterTargets="Build">
+  <!--<Target Name="CopyDIDir" AfterTargets="Build">
     <ItemGroup>
       <DIFiles Include="$(PkgDependencyInjection_AssemblyExtensions)\dependencies\*.dll"></DIFiles>
     </ItemGroup>
     <Copy SourceFiles="@(DIFiles)" DestinationFolder="$(OutDir)"></Copy>
-  </Target>
+  </Target>-->
 
 </Project>

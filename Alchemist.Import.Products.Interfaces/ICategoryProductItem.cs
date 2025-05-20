@@ -11,4 +11,6 @@ public interface ICategoryProductItem
     double Price { get; }
 
     string Name { get; }
+
+    int CategoryItemId { get; set; }
 }

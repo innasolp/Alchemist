@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Alchemist.Product.Shop.Ozon.Model;
 
@@ -54,7 +53,7 @@ public class RichAnnotationContent : IJsonOnDeserialized
     public RichAnnotationContentBlock[]? Blocks { get; set; }
 
     [JsonPropertyName("text")]
-    public RichAnnotationContentBlockText Text { get; set; }
+    public RichAnnotationContentBlockText? Text { get; set; }
 
     [JsonIgnore]
     public string FullText { get; set; }
@@ -62,7 +61,7 @@ public class RichAnnotationContent : IJsonOnDeserialized
     public void OnDeserialized()
     {
         FullText = string.Concat(
-            Blocks != null ? string.Join(" ", Blocks.Where(b => b.Text != null).SelectMany(b => b.Text.Rows)) : "",
+            Blocks != null ? string.Join(" ", Blocks.Where(b => b.Text != null && b.Text.Rows != null).SelectMany(b => b.Text.Rows)) : "",
             Text != null && Text.Rows != null ? string.Join(" ", Text.Rows) : ""
             );       
     }
@@ -110,11 +109,14 @@ public class RichAnnotationContentBlockText : IJsonOnDeserialized
     public string[] ContentRows { get; set; }
 
     [JsonIgnore]
-    public string[] Rows { get; set; }
+    public string[]? Rows { get; set; }
+
+    [JsonPropertyName("items")]
+    public RichAnnotationContentBlockTextItem[] Items { get; set; }
 
     public void OnDeserialized()
     {
-        Rows = TextRows ?? ContentRows;
+        Rows = TextRows ?? ContentRows ?? Items?.Where(i=>i.Type == "text").Select(i=>i.Content).ToArray();
     }
 }
 
@@ -122,4 +124,13 @@ public class RichAnnotationContentBlockTitle
 {
     [JsonPropertyName("content")]
     public string[]? Content { get; set; }
+}
+
+public class RichAnnotationContentBlockTextItem
+{
+    [JsonPropertyName("content")]
+    public string Content { get; set; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
 }
