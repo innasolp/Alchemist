@@ -200,7 +200,7 @@
 
     },
     "BrowserDataLoader": {
-      "Name": "FirefoxStandart",
+      "ImplementationTypeName": "FirefoxStandart",
       "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
     },
       "WebLoader": {

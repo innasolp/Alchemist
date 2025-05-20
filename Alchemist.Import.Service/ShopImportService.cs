@@ -1,4 +1,5 @@
-﻿using Alchemist.Import.Interfaces;
+﻿using Alchemist.Common;
+using Alchemist.Import.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using WebLoader.Common;
@@ -73,6 +74,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             (e.StatusCode == System.Net.HttpStatusCode.Forbidden || e.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable))
         {
             Logger.LogWarning($"Response status {e.StatusCode} for url {url}. Web loader {WebLoader.GetType().Name} will be restarted.");
+            await Task.Delay(500);
             await WebLoader.Start();
         }
         else
@@ -110,59 +112,59 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
     }
 
-    protected async Task<T?> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
+    protected async Task<TaskResult<T>> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
     {
         try
         {
-            return await task(url);
+            return  TaskResult<T>.Success(await task(url));
         }
         catch (HttpRequestException e)
         {
             await HandleHttpExceptionAsync(e, url);
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default));
         }
         catch (WebLoaderException wle)
         {
             await HandleWebLoaderExceptionAsync(wle);
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default));
         }
         catch (WarningException warning)
         {
             HandleWarningException(warning, url);
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default));
         }
         catch (Exception e)
         {
             Logger.LogError(e, $"process {url} failed");
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Failed(default));
         }
     }
 
-    protected async Task<T?> ProcessUrlTaskAsync<TUrl, T>(Func<TUrl, Task<T?>> task, Func<TUrl, string> getUrl, TUrl itemUrl)
+    protected async Task<TaskResult<T>> ProcessUrlTaskAsync<TUrl, T>(Func<TUrl, Task<T?>> task, Func<TUrl, string> getUrl, TUrl itemUrl)
     {
         try
         {
-            return await task(itemUrl);
+            return TaskResult<T>.Success(await task(itemUrl));
         }
         catch (HttpRequestException e)
         {
             await HandleHttpExceptionAsync(e, getUrl(itemUrl));
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default));
         }
         catch (WebLoaderException wle)
         {
             await HandleWebLoaderExceptionAsync(wle);
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default));
         }
         catch (WarningException warning)
         {
             HandleWarningException(warning, getUrl(itemUrl));
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default));
         }
         catch (Exception e)
         {
             Logger.LogError(e, $"process {getUrl(itemUrl)} failed");
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Failed(default));
         }
     }
 

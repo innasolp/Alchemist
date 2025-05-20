@@ -19,7 +19,7 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
 
     protected override bool IsEndOfCategory(CategoryProducts category)
     {
-        return category.Data.Products == null;
+        return !(category.Data.Products?.Length > 0) ;
     }
 
     protected override string GetApiUrl(ICategoryProductItem productItem)

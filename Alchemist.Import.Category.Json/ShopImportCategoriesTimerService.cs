@@ -38,8 +38,8 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
    RequestHeaders? requestHeaders,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
-        :this(logger, null, webLoader, shopUrlModel, requestHeaders, categoryLoadOptions, itemHandler)
-    {        
+        : this(logger, null, webLoader, shopUrlModel, requestHeaders, categoryLoadOptions, itemHandler)
+    {
     }
 
     protected virtual async Task LoadCategoriesAsync(CancellationToken stoppingToken)
@@ -54,12 +54,18 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         if (HtmlSearcher != null)
         {
             var values = await ProcessUrlTaskAsync(LoadHtmlFromUrlAsync, ShopModel.Url);
-            if (values == null) return;
+            if (values.Result == null || values.Status == Alchemist.Common.Status.Error) return;
 
-            document = JsonDocument.Parse(values[0]);
+            document = JsonDocument.Parse(values.Result[0]);
         }
         else
-            document = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(ShopModel.Url, stoppingToken), ShopModel.Url);
+        {
+            var result = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(ShopModel.Url, stoppingToken), ShopModel.Url);
+
+            if (result.Result == null || result.Status == Alchemist.Common.Status.Error) return;
+
+            document = result.Result;
+        }
 
         var categories = new ObservableCollection<JsonCategory>();
         categories.CollectionChanged += CategoryCollectionChanged;
@@ -76,11 +82,11 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         {
             var url = string.Format(CategoryLoadOptions.CategoriesApiUrlFormat, parentCategory.Id);
 
-            var categoriesJson = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken), url);
-            if (categoriesJson == null) return;
+            var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken), url);
+            if (categoriesJsonResult.Result == null || categoriesJsonResult.Status == Alchemist.Common.Status.Error) return;
 
             JsonCategory.LoadAllChildren(parentCategory, categories,
-                categoriesJson.RootElement,
+                categoriesJsonResult.Result.RootElement,
                 CategoryLoadOptions.FirstNodePath,
                  CategoryLoadOptions.CategoryPropertyPaths);
         }

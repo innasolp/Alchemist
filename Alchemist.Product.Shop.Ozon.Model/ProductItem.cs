@@ -32,6 +32,7 @@ public class ProductItem : ICategoryProductItem, IJsonOnDeserialized
 
     [JsonPropertyName("topRightButtons")]
     public TopRightButton[]? TopRightButtons { get; set; }
+    int ICategoryProductItem.CategoryItemId { get; set; }
 
     public void OnDeserialized()
     {
@@ -39,7 +40,7 @@ public class ProductItem : ICategoryProductItem, IJsonOnDeserialized
         {
             var substr = Action.Link.Replace(productLink, "");
             var startParamsIndex = substr.IndexOf(startParams);
-            Name = substr.Substring(0, startParamsIndex);
+            Name = startParamsIndex >= 0 ? substr[..startParamsIndex] : substr;
         }
 
         var priceMainState = MainState.FirstOrDefault(m => m.Atom?.PriceV2 != null || m.PriceV2 != null);

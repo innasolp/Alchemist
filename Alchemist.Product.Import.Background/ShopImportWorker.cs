@@ -203,7 +203,7 @@ public class ShopImportWorker : BackgroundService
         {
             _logger.LogError(e, e.Message);
         }
-    }
+    }    
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
