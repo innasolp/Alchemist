@@ -31,13 +31,14 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             }
             catch (WarningException warning)
             {
-                Logger.LogWarning(warning, $"importer {WebLoader.GetType()} not started.Warning : {warning.Message}. ");
+                Logger.LogWarning(warning, LogMessages.WebLoaderNotStartedWarning, [WebLoader.GetType().Name, warning.Message]);
             }
             catch (Exception e)
             {
-                Logger.LogError(e, $"importer {WebLoader.GetType()} was not executed. Import is stopped");
+                Logger.LogError(e, LogMessages.ImportWasStoppedBecuaseWebLoaderNotExecute, WebLoader.GetType().Name);
                 return;
             }
+
             await Task.Delay(1000, stoppingToken);
         }
     }
@@ -49,11 +50,11 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             case NsError.NS_ERROR_REDIRECT_LOOP:
                 if (WebLoader.IsStarted)
                 {
-                    Logger.LogWarning($"Web loader will be reset. {wle.Message}");
-                    Logger.LogInformation("Web loader is reseting...");
+                    Logger.LogWarning(wle, LogMessages.WebLoaderThrowsNsRedirectLoopAndWillBeReseted, wle.Message);
+                    Logger.LogInformation(LogMessages.WebLoaderIsReseting);
                     await WebLoader.Reset();
                     await Task.Delay(30000);
-                    Logger.LogInformation("Web loader reset successfully.");
+                    Logger.LogInformation(LogMessages.WebLoaderResetSuccessfully);
                 }
                 return;
 
@@ -67,25 +68,25 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
     {
         if (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
-            Logger.LogWarning("Too many request. Thread would be sleeped 10 sec");
+            Logger.LogWarning(e, LogMessages.TooManyRequestsError);
             await Task.Delay(10000);
         }
         else if (RequestHeaders != null &&
             (e.StatusCode == System.Net.HttpStatusCode.Forbidden || e.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable))
         {
-            Logger.LogWarning($"Response status {e.StatusCode} for url {url}. Web loader {WebLoader.GetType().Name} will be restarted.");
+            Logger.LogWarning(e, LogMessages.HttpRequestErrorAndWebLoaderRestart, [e.StatusCode, url, WebLoader.GetType().Name]);
             await Task.Delay(500);
             await WebLoader.Start();
         }
         else
         {
-            Logger.LogError(e, $"request url {url} failed with error {e.HttpRequestError} status {e.StatusCode}");
+            Logger.LogError(e, LogMessages.RequestUrlFailedWithErrorAndStatusCode, [url, e.HttpRequestError, e.StatusCode]);
         }
     }
 
     protected virtual void HandleWarningException(WarningException warning, string url)
     {
-        Logger.LogWarning(warning, $"process url {url} not complete. Warning : {warning.Message}.");
+        Logger.LogWarning(warning, LogMessages.ProcessUrlNotCompleteWarning, [url, warning.Message]);
     }
 
     protected async Task ProcessUrlTaskAsync(Func<string, Task> task, string url)
@@ -104,11 +105,11 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (WarningException warning)
         {
-            HandleWarningException(warning, url);    
+            HandleWarningException(warning, url);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, $"process {url} failed");
+            Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
         }
     }
 
@@ -116,27 +117,27 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
     {
         try
         {
-            return  TaskResult<T>.Success(await task(url));
+            return TaskResult<T>.Success(await task(url));
         }
         catch (HttpRequestException e)
         {
             await HandleHttpExceptionAsync(e, url);
-            return await Task.FromResult(TaskResult<T>.Warning(default));
+            return await Task.FromResult(TaskResult<T>.Warning(default, e));
         }
         catch (WebLoaderException wle)
         {
             await HandleWebLoaderExceptionAsync(wle);
-            return await Task.FromResult(TaskResult<T>.Warning(default));
+            return await Task.FromResult(TaskResult<T>.Warning(default, wle));
         }
         catch (WarningException warning)
         {
             HandleWarningException(warning, url);
-            return await Task.FromResult(TaskResult<T>.Warning(default));
+            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
         }
         catch (Exception e)
         {
-            Logger.LogError(e, $"process {url} failed");
-            return await Task.FromResult(TaskResult<T>.Failed(default));
+            Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
+            return await Task.FromResult(TaskResult<T>.Failed(default, e));
         }
     }
 
@@ -149,22 +150,22 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         catch (HttpRequestException e)
         {
             await HandleHttpExceptionAsync(e, getUrl(itemUrl));
-            return await Task.FromResult(TaskResult<T>.Warning(default));
+            return await Task.FromResult(TaskResult<T>.Warning(default, e));
         }
         catch (WebLoaderException wle)
         {
             await HandleWebLoaderExceptionAsync(wle);
-            return await Task.FromResult(TaskResult<T>.Warning(default));
+            return await Task.FromResult(TaskResult<T>.Warning(default, wle));
         }
         catch (WarningException warning)
         {
             HandleWarningException(warning, getUrl(itemUrl));
-            return await Task.FromResult(TaskResult<T>.Warning(default));
+            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
         }
         catch (Exception e)
         {
-            Logger.LogError(e, $"process {getUrl(itemUrl)} failed");
-            return await Task.FromResult(TaskResult<T>.Failed(default));
+            Logger.LogError(e, LogMessages.ProcessUrlFailedError, getUrl(itemUrl));
+            return await Task.FromResult(TaskResult<T>.Failed(default, e));
         }
     }
 
