@@ -29,13 +29,18 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
         IItemHandler itemHandler,
         RequestHeaders requestHeaders)
     {
-        var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value);
+        var loadOptionsService = (shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value) 
+            ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopImportSettings.Name}");
+        var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
 
-        var htmlSearchFactoryOptions = JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(HtmlSearchFactoryOptions))?.Value);
+        var htmlSearchOptionsService = shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(HtmlSearchFactoryOptions))?.Value;
+        var htmlSearchFactoryOptions = htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
 
-        var htmlSearcher = HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions?.SearchMatchType, htmlSearchFactoryOptions?.SearchElementType);
+        var htmlSearcher = htmlSearchFactoryOptions != null 
+            ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)
+            : null;
 
-        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, htmlSearcher, webLoader, shopModel, requestHeaders, categoryLoadOptions, itemHandler as ICategoryItemHandler);
+        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, htmlSearcher, webLoader, shopModel as ICategoryShopModel, requestHeaders, categoryLoadOptions, itemHandler as ICategoryItemHandler);
     }
 
     protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopModel shopModel, IShopImportSettings shopImportSettings)

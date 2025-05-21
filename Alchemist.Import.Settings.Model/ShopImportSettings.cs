@@ -59,4 +59,7 @@ public abstract class ShopImportSettings : IShopImportSettings
     protected abstract ShopSettingType ShopSettingType { get; }
 
     ShopSettingType ISettings.ShopSettingType => ShopSettingType;
+
+    public string ShopName { get; set; }
+    public string ShopUrl { get; set; }
 }

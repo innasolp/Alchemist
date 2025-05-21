@@ -2,7 +2,7 @@
 
 public interface IShopModel
 {
-    string Name { get; set; }
+    string ShopName { get; set; }
 
-    string Url { get; set; }
+    string ShopUrl { get; set; }
 }

@@ -19,4 +19,8 @@ public interface IShopImportSettings: ISettings
     public bool? Perfomance { get; set; }
 
     IList Services { get; }
+
+    string ShopName { get; set; }
+
+    string ShopUrl { get; set; }
 }

@@ -75,6 +75,7 @@ public class GoldAppleCategoriesLoadTest
 
         Assert.True(categories.Count > 0);
 
-        Assert.NotEmpty(categories.Where(c => c.ParentId != 0));
+        Assert.NotEmpty(categories.Where(c => c.ParentId > 0));
+        Assert.Equal(14, categories.Count(c => c.ParentId == null));
     }
 }

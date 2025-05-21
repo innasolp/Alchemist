@@ -55,15 +55,16 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     
     public override async Task Start(CancellationToken stoppingToken)
     {
+        var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken), stoppingToken);
+        
+        var unprocessedProductsTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoryProductsAsync(stoppingToken), stoppingToken);
+
         while (!stoppingToken.IsCancellationRequested)
         {
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
             if (!WebLoader.IsStarted) return;
-
-            var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken), stoppingToken);
-            var unprocessedProductsTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoryProductsAsync(stoppingToken), stoppingToken);
-
+            
             await ProcessCategoriesAsync();
         }
     }
@@ -147,6 +148,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         var unprocessedProductItems = new List<ICategoryProductItem>();
         foreach (var item in currentCategoryProducts.CategoryProductItems)
         {
+            item.CategoryItemId = categoryItemId;
             var productItem = await ProcessUrlTaskAsync(url => GetProductItemFromCategoryItemAsync(item, url), GetApiUrl(item));
             if (productItem.Result != null && productItem.Status == Status.Success)
             {

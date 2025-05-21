@@ -61,6 +61,9 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 
     int ISettings.ShopId { get; set; }
 
+    string IShopImportSettings.ShopName { get; set; }
+    string IShopImportSettings.ShopUrl { get; set; }
+
     public override void Update(SettingsModelBase source)
     {
         base.Update(source);
