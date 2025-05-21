@@ -123,8 +123,7 @@ public class OzonCategoriesLoadTest
             _categoryPropertyPathes);
 
         Assert.True(categories.Count > 0);
-        var parentCount = categories.Count;
-
+        
         var parentCategories = new List<JsonCategory>(categories);
         foreach (var parentCategory in parentCategories)
         {
@@ -138,6 +137,6 @@ public class OzonCategoriesLoadTest
             JsonCategory.LoadAllChildren(parentCategory, categories, categoriesJson.RootElement, _nodePath, _categoryPropertyPathes);
         }
 
-        Assert.True(categories.Count > parentCount);       
+        Assert.Equal(parentCategories.Count, categories.Count(c=>c.ParentId == null));       
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
-using Alchemist.Import.Interfaces;
 using DependencyInjection.ImplementationFactory;
 using Log.Interceptors.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +15,7 @@ public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFact
     {
         var logger = serviceProvider.GetLogger<ShopImportCategoriesTimerService>(key);
         var htmlSearcher = serviceProvider.GetKeyedService<IHtmlSearcher>(key);
-        var shopUrl = serviceProvider.GetRequiredKeyedService<IShopModel>(key);
+        var shopUrl = serviceProvider.GetRequiredKeyedService<ICategoryShopModel>(key);
         var requestHeaders = serviceProvider.GetKeyedService<RequestHeaders>(key);
         var loadOptions = serviceProvider.GetRequiredKeyedService<CategoryLoadOptions>(key);
         var webLoader = serviceProvider.GetRequiredKeyedService<IWebLoader>(key);
@@ -29,7 +28,7 @@ public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFact
     {
         var logger = serviceProvider.GetRequiredService<ILogger<ShopImportCategoriesTimerService>>();
         var htmlSearcher = serviceProvider.GetService<IHtmlSearcher>();
-        var shopUrl = serviceProvider.GetRequiredService<IShopModel>();
+        var shopUrl = serviceProvider.GetRequiredService<ICategoryShopModel>();
         var requestHeaders = serviceProvider.GetService<RequestHeaders>();
         var loadOptions = serviceProvider.GetRequiredService<CategoryLoadOptions>();
         var webLoader = serviceProvider.GetRequiredService<IWebLoader>();

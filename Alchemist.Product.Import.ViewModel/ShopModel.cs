@@ -15,7 +15,7 @@ public class ShopModel : IShop
     public bool IsDeprecated { get; set; } = false;
 
     [Required]
-    public string Url { get; set; }
+    public string ShopUrl { get; set; }
 
     public string? Caption { get; set; }
 

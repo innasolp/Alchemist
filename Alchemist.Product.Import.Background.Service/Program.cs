@@ -29,7 +29,7 @@ var logPath = $"{appPath}/Logs";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
+//builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
 builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
 
 builder.Services.AddServiceImplementationsFromPath(typeof(IBrowserDataLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("BrowserDataLoaderPath").Value}");
@@ -60,7 +60,7 @@ builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFact
 builder.Services.AddProductDataHandler();
 builder.Services.AddCategoriesDataHandler();
 builder.Services.AddImportServiceLogFactory((logger, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{ 
-    { "ShopImportService", shopModel.Name },
+    { "ShopImportService", settings.Name },
     { "ShopSettingsType", settings.ShopSettingType.ToString() } }));
 builder.Services.AddPerfomanceCounter((logger) => new SerilogUrlLogger<IPerfomanceCounter>(logger));
 

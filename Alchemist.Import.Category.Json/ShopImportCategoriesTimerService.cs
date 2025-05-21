@@ -6,7 +6,6 @@ using Alchemist.Import.Service;
 using System.Collections.ObjectModel;
 using Alchemist.Import.Html;
 using WebLoader.Common;
-using Alchemist.Import.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 
 namespace Alchemist.Import.Category.Json;
@@ -14,7 +13,7 @@ namespace Alchemist.Import.Category.Json;
 public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
     IHtmlSearcher? htmlSearcher,
     IWebLoader webLoader,
-    IShopModel shop,
+    ICategoryShopModel shop,
     RequestHeaders? requestHeaders,
     CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
@@ -26,7 +25,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     public override string Name { get; } = categoryLoadOptions.Name;
 
-    protected IShopModel ShopModel { get; } = shop;
+    protected ICategoryShopModel ShopModel { get; } = shop;
 
     private readonly int _defaultInterval = 3600;
 
@@ -34,7 +33,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
    IWebLoader webLoader,
-   IShopModel shopUrlModel,
+   ICategoryShopModel shopUrlModel,
    RequestHeaders? requestHeaders,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
@@ -53,14 +52,14 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
         if (HtmlSearcher != null)
         {
-            var values = await ProcessUrlTaskAsync(LoadHtmlFromUrlAsync, ShopModel.Url);
+            var values = await ProcessUrlTaskAsync(LoadHtmlFromUrlAsync, ShopModel.CategorySourceUrl);
             if (values.Result == null || values.Status == Alchemist.Common.Status.Error) return;
 
             document = JsonDocument.Parse(values.Result[0]);
         }
         else
         {
-            var result = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(ShopModel.Url, stoppingToken), ShopModel.Url);
+            var result = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken), ShopModel.CategorySourceUrl);
 
             if (result.Result == null || result.Status == Alchemist.Common.Status.Error) return;
 
@@ -94,7 +93,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
     private async Task<List<string>?> LoadHtmlFromUrlAsync(string url)
     {
-        using var stream = await WebLoader.LoadFromUrl(ShopModel.Url, RequestHeaders);
+        using var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
         var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions);
         stream.Close();
         return await Task.FromResult(values);
@@ -127,7 +126,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
                     await _itemHandler.HandleItem(category, ShopModel);
                 });
 
-                Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopModel.Name} loaded");
+                Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopModel.ShopName} loaded");
             }
         }
     }

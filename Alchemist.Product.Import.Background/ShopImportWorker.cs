@@ -90,7 +90,7 @@ public class ShopImportWorker : BackgroundService
 
     private async Task ProductItemHandledAsync(object sender, IProductItem item, IShopModel shopModel, ItemProcessStatus processStatus)
     {        
-        var productItemModel = new ImportProduct { Name = item.Name, ShopName = shopModel.Name, Url = item.ItemUrl, Status = processStatus }; 
+        var productItemModel = new ImportProduct { Name = item.Name, ShopName = shopModel.ShopName, Url = item.ItemUrl, Status = processStatus }; 
 
         await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
     }
@@ -103,7 +103,7 @@ public class ShopImportWorker : BackgroundService
 
     private async Task OnShopCreatedAsync(Shop newShop)
     {        
-        var shopModel = ShopModels.FirstOrDefault(s => s.Name.Equals(newShop.Name, StringComparison.CurrentCultureIgnoreCase));
+        var shopModel = ShopModels.FirstOrDefault(s => s.ShopName.Equals(newShop.Name, StringComparison.CurrentCultureIgnoreCase));
         if (shopModel != null)
         {
             if (shopModel is IShop shop) shop.Id = newShop.Id;
@@ -130,7 +130,7 @@ public class ShopImportWorker : BackgroundService
 
         IShopModel shopModel = shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
             ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
-            : await _shopDataService.CreateShopModelAsync(shopImportSettings);
+            : await _shopDataService.CreateCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
 
         var service = await CreateServiceForShopImportSettingsAsync(shopImportSettings, shopModel);
 
@@ -180,7 +180,7 @@ public class ShopImportWorker : BackgroundService
 
                 IShopModel shopModel = shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
                     ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
-                    : await _shopDataService.CreateShopModelAsync(shopImportSettings);
+                    : await _shopDataService.CreateCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
 
                 ShopModels.Add(shopModel);
 

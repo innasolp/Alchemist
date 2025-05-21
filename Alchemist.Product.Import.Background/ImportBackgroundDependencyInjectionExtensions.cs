@@ -1,5 +1,4 @@
 ﻿using Alchemist.Common;
-using Alchemist.Import.Products.Interfaces;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using DependencyInjection.Interfaces;
@@ -13,32 +12,6 @@ namespace Alchemist.Product.Import.Background;
 
 public static class ImportBackgroundDependencyInjectionExtensions
 {
-    internal static async Task<ShopModel> CreateShopModelAsync(this IShopDataService shopDataService, IShopImportSettings shopImportSettings)
-    {
-        var shop = shopImportSettings.Id != 0
-                ? await shopDataService.GetShop(shopImportSettings.Id)
-                : await shopDataService.GetShopByName(shopImportSettings.Name) ?? await shopDataService.GetShopByUrl(shopImportSettings.Url);
-        return shop != null
-                ? await Task.FromResult(new ShopModel { Name = shop.Name, Url = shop.Url, Id = shop.Id })
-                : await Task.FromResult(new ShopModel { Name = shopImportSettings.Name, Url = shopImportSettings.Url });
-    }
-
-    internal static async Task<IProductShopModel> CreateProductShopModelAsync(this IShopDataService shopDataService, IProductShopImportSettings shopImportSettings)
-    {
-        var shopModel = await shopDataService.CreateShopModelAsync(shopImportSettings);
-        var productShopModel = new ProductShopModel { Name = shopModel.Name, Url = shopModel.Url, Id = shopModel.Id,
-            ProductUrl = shopImportSettings.ProductUrl, 
-            CategoryUrl = shopImportSettings.CategoryUrl };
-
-        if (productShopModel.Id != 0)
-        {
-            var shopCategories = await shopDataService.GetShopCategories(productShopModel.Id);
-            shopCategories?.ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId }));
-        }
-
-        return productShopModel;
-    }
-        
     public static void SetAppPath(this IShopImportSettings shopImportSettings, string appPath)
     {
         shopImportSettings.BrowserDataLoader?.SetAppPath(appPath);
