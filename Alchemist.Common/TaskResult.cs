@@ -13,12 +13,15 @@ public readonly struct TaskResult<T>
 
     public T? Result { get; }
 
+    public Exception? Exception { get; }
+
     public TaskResult() { Status = Status.Error; }
 
-    private TaskResult(T? value, Status result)
+    private TaskResult(T? value, Status result, Exception? exception = null)
     {
         Status = result;
         Result = value;
+        Exception = exception;
     }
 
     public static TaskResult<T> Success(T? value)
@@ -26,13 +29,13 @@ public readonly struct TaskResult<T>
         return new TaskResult<T>(value, Status.Success);
     }
 
-    public static TaskResult<T> Warning(T? value)
+    public static TaskResult<T> Warning(T? value, Exception? exception = null)
     {
-        return new TaskResult<T>(value, Status.Warning);
+        return new TaskResult<T>(value, Status.Warning, exception);
     }
 
-    public static TaskResult<T> Failed(T? value)
+    public static TaskResult<T> Failed(T? value, Exception exception)
     {
-        return new TaskResult<T>(value, Status.Error);
+        return new TaskResult<T>(value, Status.Error, exception);
     }    
 }

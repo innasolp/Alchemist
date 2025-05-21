@@ -50,13 +50,15 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             var newItems = e.NewItems.OfType<IProductShopCategoryModel>().ToList();
             newItems.ForEach(Categories.Enqueue);
+            foreach (var item in newItems)            
+                Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, item.GetCategoryForUrl());            
         }
     }
-    
+
     public override async Task Start(CancellationToken stoppingToken)
     {
         var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken), stoppingToken);
-        
+
         var unprocessedProductsTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoryProductsAsync(stoppingToken), stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
@@ -64,14 +66,18 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
             if (!WebLoader.IsStarted) return;
-            
-            await ProcessCategoriesAsync();
+
+            Logger.LogInformation(ImportProductLogMessages.ServiceStarted, Name);
+
+            await ProcessCategoriesAsync(stoppingToken);
         }
+
+        Logger.LogInformation(ImportProductLogMessages.ServiceWasStopped, Name);
     }
 
-    protected async Task ProcessCategoriesAsync()
+    protected async Task ProcessCategoriesAsync(CancellationToken stoppingToken)
     {
-        while (Categories.Count > 0)
+        while (Categories.Count > 0 && !stoppingToken.IsCancellationRequested)
         {
             var category = Categories.Dequeue();
 
@@ -85,13 +91,17 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             {
                 var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, categoryUrl, page);
 
-                var result = await ProcessUrlTaskAsync((c) => ProcessCategoryPageAsync(c, category.ItemId), categoryPageUrl);                
+                var result = await ProcessUrlTaskAsync((c) => ProcessCategoryPageAsync(c, category.ItemId), categoryPageUrl);
+                if (result.Status == Status.Warning)
+                {
+                    _unhandledCategoryPages.Enqueue(new CategoryPage(category, page));
+                    Logger.LogWarning(ImportProductLogMessages.CategoryProcessWarning, [categoryPageUrl, result.Exception.Message]);
+                }
+                else if (result.Status == Status.Error)                
+                    Logger.LogError(ImportProductLogMessages.CategoryProcessFault, [categoryPageUrl, result.Exception.Message]);  
 
                 if (result.Result == null)
                 {
-                    if (result.Status == Status.Warning)
-                        _unhandledCategoryPages.Enqueue(new CategoryPage(category, page));
-
                     page++;
                     continue;
                 }
@@ -100,10 +110,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
                 productCount += categoryResult.Count ?? 0;
                 page++;
-            }
-                ;
+            }                
 
-            Logger.LogInformation($"Category {categoryUrl} completed. {productCount} products handled. {_unhandledCategoryProductItems.Count} unhandled.");
+            Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, [categoryUrl, productCount, _unhandledCategoryProductItems.Count]);
         }
     }
 
@@ -124,19 +133,22 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
                 if (categoryResult.Status == Status.Success)
                 {
-                    Logger.LogInformation($"Category {categoryUrl} recompleted succsessfully. {categoryResult} product items handled.");
+                    Logger.LogInformation(ImportProductLogMessages.CategoryRecompletedInfo, [categoryUrl, categoryResult.Result.Count]);
                 }
                 else if (categoryResult.Status == Status.Warning)
                 {
                     _unhandledCategoryPages.Enqueue(unhandledCategory);
+                    Logger.LogWarning(ImportProductLogMessages.CategoryRecompletedWarning, [categoryUrl, categoryResult.Exception.Message]);
                 }
+                else
+                    Logger.LogError(ImportProductLogMessages.CategoryRehandlingFailed, [categoryUrl, categoryResult.Exception.Message]);
             }
         }
     }
 
     protected virtual async Task<CategoryProductsResult?> ProcessCategoryPageAsync(string categoryUrl, int categoryItemId)
     {
-        var currentCategoryProducts = await LoadCategoryProductsAsync(categoryUrl);
+        var currentCategoryProducts = await GetFromApiUrlAsync<TCategory>(categoryUrl);
 
         if (currentCategoryProducts == null)
             return null;
@@ -153,11 +165,16 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             if (productItem.Result != null && productItem.Status == Status.Success)
             {
                 productCount++;
+                Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, [productItem.Result.Name, productItem.Result.ApiUrl]);
                 if (await HandleProductItemAsync(productItem.Result) == ItemProcessStatus.Error)
                     _unhandledProductItems.Enqueue(productItem.Result);
             }
             else if (productItem.Status == Status.Warning)
+            {
                 _unhandledCategoryProductItems.Enqueue(item);
+                Logger.LogWarning(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded,
+                    [item.Name, item.ItemUrl, productItem.Exception?.Message ?? ""]);
+            }
         }
 
         return await Task.FromResult(new CategoryProductsResult(currentCategoryProducts, productCount, false));
@@ -169,7 +186,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             while (_unhandledCategoryProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && WebLoader.IsStarted)
             {
-                if(!_unhandledCategoryProductItems.TryDequeue(out var unprocessedItem))
+                if (!_unhandledCategoryProductItems.TryDequeue(out var unprocessedItem))
                     continue;
 
                 var productItem = await ProcessUrlTaskAsync(url => GetProductItemFromCategoryItemAsync(unprocessedItem, url), GetApiUrl(unprocessedItem));
@@ -178,7 +195,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
                 if (productItem.Status == Status.Warning)
                     _unhandledCategoryProductItems.Enqueue(unprocessedItem);
-                else if (productItem.Result != null &&  await HandleProductItemAsync(productItem.Result) == ItemProcessStatus.Warning)
+                else if (productItem.Result != null && await HandleProductItemAsync(productItem.Result) == ItemProcessStatus.Warning)
                     _unhandledProductItems.Enqueue(productItem.Result);
             }
         }
@@ -190,7 +207,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             while (_unhandledProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && WebLoader.IsStarted)
             {
-                if(!_unhandledProductItems.TryDequeue(out var unhandledItem))
+                if (!_unhandledProductItems.TryDequeue(out var unhandledItem))
                     continue;
 
                 if (await HandleProductItemAsync(unhandledItem) == ItemProcessStatus.Error)
@@ -203,25 +220,25 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         var result = await ProcessUrlTaskAsync((i) => _itemHandler.HandleItem(i, ProductShopModel), i => i.ApiUrl, productItem);
 
-        Logger.LogInformation($"Product {productItem.Name} {productItem.ApiUrl} handled with status {result.Result}.");
+        Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, [productItem.Name, productItem.ApiUrl, result.Result]);
 
         return result.Result;
     }
 
-    protected virtual async Task<TProductItem?> GetShopProductItemFromApiUrlAsync(string apiUrl)
+    protected virtual async Task<T?> GetFromApiUrlAsync<T>(string apiUrl)
     {
         using var stream = await LoadFromUrlAsync(apiUrl);
-        var product = await JsonSerializer.DeserializeAsync<TProductItem>(stream);
+        var product = await JsonSerializer.DeserializeAsync<T>(stream);
         stream.Close();
         return await Task.FromResult(product);
     }
 
     protected async Task<TProductItem?> GetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl)
     {
-        var productItem = await GetShopProductItemFromApiUrlAsync(apiUrl);
+        var productItem = await GetFromApiUrlAsync<TProductItem>(apiUrl);
 
         if (productItem == null)
-            throw new Exception($"Product item from {apiUrl} is null");
+            throw new Exception(string.Format(ImportProductLogMessages.ProductFromUrlIsNullError, apiUrl));
 
         productItem.ItemUrl = categoryProductItem.ItemUrl;
         productItem.Price = categoryProductItem.Price;
@@ -230,26 +247,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         productItem.CategoryId = categoryProductItem.CategoryItemId;
 
         return await Task.FromResult(productItem);
-    }
-
-    protected virtual async Task<TCategory?> LoadCategoryProductsAsync(string categoryUrl)
-    {
-        try
-        {
-            using var stream = await LoadFromUrlAsync(categoryUrl);
-            var category = await JsonSerializer.DeserializeAsync<TCategory>(stream);
-            stream.Close();
-            return category;
-        }
-        catch (JsonException e)
-        {
-            throw new CategoryUrlStreamDeserializeException($"data from url {categoryUrl} has invalid format", e);
-        }
-        catch
-        {
-            throw;
-        }
-    }
+    }   
 
     protected virtual async Task<Stream> LoadFromUrlAsync(string url)
     {
