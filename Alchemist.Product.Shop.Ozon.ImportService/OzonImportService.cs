@@ -15,7 +15,9 @@ public class OzonImportService(ILogger<OzonImportService> logger,
         ) : ShopImportCategoryProductsService<Category, Model.Product>(logger, shopUrlModel, shopImporter, requestHeaders, itemHandler)
 {
     public override string Name => "OzonImport";
-    
+
+    protected override int PageProductCount => 12;
+
     protected override string GetApiUrl(ICategoryProductItem productItem)
     {
         var ozonCategoryItem = productItem as ProductItem;

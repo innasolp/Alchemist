@@ -17,6 +17,8 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
 {
     public override string Name => "GoldAppleImport";
 
+    protected override int PageProductCount => 24;
+
     protected override bool IsEndOfCategory(CategoryProducts category)
     {
         return !(category.Data.Products?.Length > 0) ;

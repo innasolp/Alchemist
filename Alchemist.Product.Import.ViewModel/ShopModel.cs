@@ -18,11 +18,12 @@ public class ShopModel : IShop
     public string ShopUrl { get; set; }
 
     public string? Caption { get; set; }
+    string IShop.Url { get => ShopUrl; set => ShopUrl = value; }
 
     public void Update(IShop shop)
     {
         Name = shop.Name;
-        Url = shop.Url;
+        ShopUrl = shop.Url;
         Caption = shop.Caption;
     }
 }
