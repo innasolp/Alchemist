@@ -120,7 +120,7 @@
   <data name="HttpRequestErrorAndWebLoaderRestart" xml:space="preserve">
     <value>Response status code {0} for url {1}. Web loader {2} will be restarted.</value>
   </data>
-  <data name="ImportWasStoppedBecuaseWebLoaderNotExecute" xml:space="preserve">
+  <data name="ImportWasStoppedWebLoaderNotExecute" xml:space="preserve">
     <value>WebLoader {0} was not executed. Import was stopped.</value>
   </data>
   <data name="ProcessUrlFailedError" xml:space="preserve">
@@ -145,6 +145,6 @@
     <value>Web loader reset successfully.</value>
   </data>
   <data name="WebLoaderThrowsNsRedirectLoopAndWillBeReseted" xml:space="preserve">
-    <value>Web loader throws exception {0} and will be reseted.</value>
+    <value>Web loader throws redirect loop exception and will be reseted. {0}</value>
   </data>
 </root>

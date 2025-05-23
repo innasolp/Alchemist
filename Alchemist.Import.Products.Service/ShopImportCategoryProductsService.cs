@@ -29,6 +29,12 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected IProductShopModel ProductShopModel { get; }
 
+    protected bool? IsStarted { get; private set; }
+
+    protected abstract int PageProductCount { get; }
+
+    protected virtual int MaxUnsuccessRequestCount => 20;
+
     public ShopImportCategoryProductsService(ILogger logger,
         IProductShopModel shopUrlModel,
         IWebLoader webLoader,
@@ -55,19 +61,28 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    public override async Task Start(CancellationToken stoppingToken)
+    public override async Task Start(CancellationTokenSource stoppingToken)
     {
-        var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken), stoppingToken);
+        var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken), 
+            stoppingToken.Token, 
+            TaskCreationOptions.None,
+            TaskScheduler.Default);
 
-        var unprocessedProductsTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoryProductsAsync(stoppingToken), stoppingToken);
+        var unprocessedProductsTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoryProductsAsync(stoppingToken), 
+            stoppingToken.Token, 
+            TaskCreationOptions.None,
+            TaskScheduler.Default);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
-            if (!WebLoader.IsStarted) return;
-
-            Logger.LogInformation(ImportProductLogMessages.ServiceStarted, Name);
+            if (!WebLoader.IsStarted) break;
+            else if (IsStarted == null)
+            {
+                IsStarted = true;
+                Logger.LogInformation(ImportProductLogMessages.ServiceStarted, Name);
+            }
 
             await ProcessCategoriesAsync(stoppingToken);
         }
@@ -75,7 +90,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         Logger.LogInformation(ImportProductLogMessages.ServiceWasStopped, Name);
     }
 
-    protected async Task ProcessCategoriesAsync(CancellationToken stoppingToken)
+    protected async Task ProcessCategoriesAsync(CancellationTokenSource stoppingToken)
     {
         while (Categories.Count > 0 && !stoppingToken.IsCancellationRequested)
         {
@@ -83,11 +98,12 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             int productCount = 0;
             int page = 1;
+            var unsuccessRequestCount = 0;
 
             var categoryUrl = category.GetCategoryForUrl();
 
-            CategoryProductsResult? categoryResult = null;
-            while (categoryResult?.IsEnd != true)
+            bool? isEnd = null;
+            while (isEnd != true)
             {
                 var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, categoryUrl, page);
 
@@ -96,19 +112,38 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 {
                     _unhandledCategoryPages.Enqueue(new CategoryPage(category, page));
                     Logger.LogWarning(ImportProductLogMessages.CategoryProcessWarning, [categoryPageUrl, result.Exception.Message]);
+                    unsuccessRequestCount++;
                 }
-                else if (result.Status == Status.Error)                
-                    Logger.LogError(ImportProductLogMessages.CategoryProcessFault, [categoryPageUrl, result.Exception.Message]);  
-
+                else if (result.Status == Status.Error)
+                {
+                    Logger.LogError(ImportProductLogMessages.CategoryProcessFault, [categoryPageUrl, result.Exception.Message]);
+                    break;
+                }
+                
                 if (result.Result == null)
                 {
                     page++;
                     continue;
                 }
 
-                categoryResult = result.Result;
+                productCount += result.Result.Count ?? 0;
 
-                productCount += categoryResult.Count ?? 0;
+                if (unsuccessRequestCount > MaxUnsuccessRequestCount)                
+                    break;                
+
+                var currentTotalCount = result.Result?.CategoryItem?.TotalCount;
+                if (currentTotalCount != null)
+                {
+                    var totalPageCount = currentTotalCount % PageProductCount > 0
+                        ? currentTotalCount / PageProductCount + 1
+                        : currentTotalCount / PageProductCount;
+
+                    if (page >= totalPageCount)
+                        break;
+                }                
+
+                isEnd = result.Result.IsEnd;
+                
                 page++;
             }                
 
@@ -116,7 +151,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected async Task ProcessUnhandledCategoriesAsync(CancellationToken stoppingToken)
+    protected async Task ProcessUnhandledCategoriesAsync(CancellationTokenSource stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -180,7 +215,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return await Task.FromResult(new CategoryProductsResult(currentCategoryProducts, productCount, false));
     }
 
-    protected async Task ProcessUnhandledCategoryProductsAsync(CancellationToken stoppingToken)
+    protected async Task ProcessUnhandledCategoryProductsAsync(CancellationTokenSource stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -201,7 +236,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected async Task ProcessUnhandledProductItemsAsync(CancellationToken stoppingToken)
+    protected async Task ProcessUnhandledProductItemsAsync(CancellationTokenSource stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {

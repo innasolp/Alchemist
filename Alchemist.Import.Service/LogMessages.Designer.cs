@@ -72,9 +72,9 @@ namespace Alchemist.Import.Service {
         /// <summary>
         ///   Looks up a localized string similar to WebLoader {0} was not executed. Import was stopped..
         /// </summary>
-        internal static string ImportWasStoppedBecuaseWebLoaderNotExecute {
+        internal static string ImportWasStoppedWebLoaderNotExecute {
             get {
-                return ResourceManager.GetString("ImportWasStoppedBecuaseWebLoaderNotExecute", resourceCulture);
+                return ResourceManager.GetString("ImportWasStoppedWebLoaderNotExecute", resourceCulture);
             }
         }
         
@@ -142,7 +142,7 @@ namespace Alchemist.Import.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Web loader throws exception {0} and will be reseted..
+        ///   Looks up a localized string similar to Web loader throws redirect loop exception and will be reseted. {0}.
         /// </summary>
         internal static string WebLoaderThrowsNsRedirectLoopAndWillBeReseted {
             get {

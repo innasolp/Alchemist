@@ -41,7 +41,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
     {
     }
 
-    protected virtual async Task LoadCategoriesAsync(CancellationToken stoppingToken)
+    protected virtual async Task LoadCategoriesAsync(CancellationTokenSource stoppingToken)
     {
         if (!WebLoader.IsStarted)
             await StartWebLoaderIfNeedAsync(stoppingToken);
@@ -59,7 +59,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         }
         else
         {
-            var result = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken), ShopModel.CategorySourceUrl);
+            var result = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken.Token), ShopModel.CategorySourceUrl);
 
             if (result.Result == null || result.Status == Alchemist.Common.Status.Error) return;
 
@@ -81,7 +81,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         {
             var url = string.Format(CategoryLoadOptions.CategoriesApiUrlFormat, parentCategory.Id);
 
-            var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken), url);
+            var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken.Token), url);
             if (categoriesJsonResult.Result == null || categoriesJsonResult.Status == Alchemist.Common.Status.Error) return;
 
             JsonCategory.LoadAllChildren(parentCategory, categories,
@@ -131,7 +131,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         }
     }
 
-    public override async Task Start(CancellationToken stoppingToken)
+    public override async Task Start(CancellationTokenSource stoppingToken)
     {
         try
         {
@@ -146,7 +146,7 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
 
         try
         {
-            while (await timer.WaitForNextTickAsync(stoppingToken))
+            while (await timer.WaitForNextTickAsync(stoppingToken.Token))
             {
                 await LoadCategoriesAsync(stoppingToken);
             }

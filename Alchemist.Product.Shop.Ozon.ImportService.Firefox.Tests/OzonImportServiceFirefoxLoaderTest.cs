@@ -18,7 +18,7 @@ public class OzonImportServiceFirefoxLoaderTest
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly OzonImportService _ozonImportService;
     private readonly string _productUrl = "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fproduct%2Fd-alba-patchi-s-kollagenom-dlya-oblasti-vokrug-glaz-white-truffle-intensive-the-real-eye-patch-68sht-1062342797%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d";
-    private readonly string _categoryUrl = "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2Fantivozrastnoy-uhod-38000%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D2%26page%3D2";
+    private readonly string _categoryUrl = "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2Fantivozrastnoy-uhod-38000%2F%3Flayout_page_index%3D2%26page%3D2";
     private readonly string _requestHeadersFireFoxFileName = "Ozon.Headers.Firefox.json";
     private readonly RequestHeaders _requestHeaders;
     private readonly Moq.Mock<IProductItemHandler> _productItemHandler = new(); 
@@ -81,5 +81,6 @@ public class OzonImportServiceFirefoxLoaderTest
         Assert.NotNull(category.CategoryContent.Items);
         Assert.NotEmpty(category.CategoryContent.Items);
         Assert.DoesNotContain(category.CategoryContent.Items, i => string.IsNullOrEmpty((i as ICategoryProductItem)?.Id));
+        Assert.True((category as ICategoryProducts)?.TotalCount > 0);
     }
 }
