@@ -16,9 +16,9 @@ public class ImportShopProductServiceTest:ImportProductsTest
         WebLoaderMock.Setup(w => w.Start()).Throws(exception);
 
         var token = new CancellationTokenSource();
-        await Service.Start(token);
+        await Service.Start(token.Token);
 
-        LoggerMock.VerifyInfo(ImportProductsResourceManager.GetString("ServiceWasStopped"), name);
+        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceWasStopped"), name);
 
         LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ImportWasStoppedWebLoaderNotExecute"), WebLoaderMock.Object.GetType().Name); 
     }
@@ -34,11 +34,11 @@ public class ImportShopProductServiceTest:ImportProductsTest
 
         var token = new CancellationTokenSource();
 
-        var task = Service.StartServiceInFactoryAsync(token);        
+        var task = Service.StartServiceInFactoryAsync(token.Token);        
         
         await Task.Delay(2000);
 
-        LoggerMock.VerifyInfo(ImportProductsResourceManager.GetString("ServiceStarted"), name);        
+        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceStarted"), name);        
     }
 
     [Fact]
@@ -51,12 +51,12 @@ public class ImportShopProductServiceTest:ImportProductsTest
         WebLoaderMock.SetupStartSuccess();
        
         var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token);
+        var task = Service.StartServiceInFactoryAsync(token.Token);
 
         await Task.Delay(1000);
 
         await token.CancelAsync();
 
-        LoggerMock.VerifyInfo(ImportProductsResourceManager.GetString("ServiceWasStopped"), name);
+        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceWasStopped"), name);
     }    
 }

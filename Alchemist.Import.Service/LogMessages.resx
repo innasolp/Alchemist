@@ -132,6 +132,12 @@
   <data name="RequestUrlFailedWithErrorAndStatusCode" xml:space="preserve">
     <value>Request url {0} failed with error {1} and status code {2}</value>
   </data>
+  <data name="ServiceStarted" xml:space="preserve">
+    <value>Service {0} started.</value>
+  </data>
+  <data name="ServiceWasStopped" xml:space="preserve">
+    <value>Service {0} was stopped.</value>
+  </data>
   <data name="TooManyRequestsError" xml:space="preserve">
     <value>Too many request. Thread would be sleeped 10 sec.</value>
   </data>

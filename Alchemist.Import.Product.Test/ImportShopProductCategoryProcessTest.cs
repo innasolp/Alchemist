@@ -68,7 +68,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
 
         var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token); ;
+        var task = Service.StartServiceInFactoryAsync(token.Token); ;
 
         await Task.Delay(1000);
 
@@ -89,7 +89,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
 
         var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token); 
+        var task = Service.StartServiceInFactoryAsync(token.Token); 
 
         await Task.Delay(3000);
 
@@ -111,11 +111,12 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     {
         var exception = new WarningException("warning");        
         SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
+        Service.SetPageProductCount(10);
 
         var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token);
+        var task = Service.StartServiceInFactoryAsync(token.Token);
 
-        await Task.Delay(500);
+        await Task.Delay(500);       
 
         await token.CancelAsync();
 
@@ -133,7 +134,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
 
         var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token);
+        var task = Service.StartServiceInFactoryAsync(token.Token);
 
         await Task.Delay(1000);
 
@@ -150,7 +151,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         SetupServiceWithCategoryLoadSuccessfull(Guid.NewGuid().ToString(), 10, out var categoryProducts, out var categoryUrl);
 
         var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token);
+        var task = Service.StartServiceInFactoryAsync(token.Token);
 
         await Task.Delay(3000);
         

@@ -1049,7 +1049,6 @@ Global
 		{7E4292A6-9667-458C-944C-F18EA8C1E5B3}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
 		{7E4292A6-9667-458C-944C-F18EA8C1E5B3}.debug libs|Any CPU.Build.0 = Debug|Any CPU
 		{7E4292A6-9667-458C-944C-F18EA8C1E5B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E4292A6-9667-458C-944C-F18EA8C1E5B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E4292A6-9667-458C-944C-F18EA8C1E5B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E4292A6-9667-458C-944C-F18EA8C1E5B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

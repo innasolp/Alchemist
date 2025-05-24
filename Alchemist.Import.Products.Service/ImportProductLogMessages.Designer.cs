@@ -158,23 +158,5 @@ namespace Alchemist.Import.Products.Service {
                 return ResourceManager.GetString("ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service {0} started..
-        /// </summary>
-        internal static string ServiceStarted {
-            get {
-                return ResourceManager.GetString("ServiceStarted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service {0} was stopped..
-        /// </summary>
-        internal static string ServiceWasStopped {
-            get {
-                return ResourceManager.GetString("ServiceWasStopped", resourceCulture);
-            }
-        }
     }
 }

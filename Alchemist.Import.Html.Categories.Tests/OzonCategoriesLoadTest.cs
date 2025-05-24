@@ -5,10 +5,11 @@ using System.Reflection;
 using System.Text.Json;
 using WebLoader.Common;
 using WebLoader.Interfaces;
+using Xunit.Abstractions;
 
 namespace Alchemist.Import.Html.Categories.Tests;
 
-public class OzonCategoriesLoadTest
+public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
 {    
     private readonly string _requestHeadersStandartFileName = "Ozon.Headers.Firefox.Standart.json";   
 
@@ -23,6 +24,8 @@ public class OzonCategoriesLoadTest
     };
 
     private readonly string _shopUrl = "https://www.ozon.ru/?__rr=1";
+
+    private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
     private static async Task<IWebLoader> CreateWebLoaderAsync()
     {
@@ -42,13 +45,15 @@ public class OzonCategoriesLoadTest
     {
         var htmlSearcher = HtmlSearchFactory.CreateSearcher(SearchMatchType.Like);
 
+        var token = new CancellationTokenSource();
+
         using var stream = await webLoader.LoadFromUrl(_shopUrl, requestHeaders);
         var values = await htmlSearcher.GetValues(stream, new HtmlSearchOptions
         {
             Tag = "div",
             SearchString = "id=state-catalogMenu",
             ValueString = "data-state",
-        });
+        }, token.Token);
         stream.Close();
 
         Assert.True(values.Count > 0);
@@ -73,7 +78,7 @@ public class OzonCategoriesLoadTest
     }
 
     [Fact]
-    public async Task StandartLoadCategoriesListTestAsync()
+    public async Task StandartLoadCategoriesListTest()
     {        
         var webLoader = await CreateWebLoaderAsync();
 
@@ -103,6 +108,9 @@ public class OzonCategoriesLoadTest
         }
 
         Assert.True(endCategories.Count > 0);
+
+        _testOutputHelper.WriteLine($"parent categories {parentCategories.Count}");
+        _testOutputHelper.WriteLine($"all categories {endCategories.Count}");
     }
 
     [Fact]
@@ -118,9 +126,12 @@ public class OzonCategoriesLoadTest
 
         var categories = new ObservableCollection<JsonCategory>();
 
-        JsonCategory.LoadAllChildren(null, categories, document.RootElement,
+        var tokenSource = new CancellationTokenSource();
+
+        await JsonCategoryAsync.LoadAllChildrenAsync(null, categories, document.RootElement,
             _nodePath,
-            _categoryPropertyPathes);
+            _categoryPropertyPathes,
+            tokenSource.Token);
 
         Assert.True(categories.Count > 0);
         
@@ -134,9 +145,50 @@ public class OzonCategoriesLoadTest
 
             categoryStream.Close();
 
+            await JsonCategoryAsync.LoadAllChildrenAsync(parentCategory, categories, categoriesJson.RootElement, _nodePath, _categoryPropertyPathes, tokenSource.Token);
+        }
+
+        Assert.Equal(parentCategories.Count, categories.Count(c=>c.ParentId == null));
+
+        _testOutputHelper.WriteLine($"parent categories {parentCategories.Count}");
+        _testOutputHelper.WriteLine($"all categories {categories.Count}");
+    }
+
+    [Fact]
+    public async Task LoadCategoriesToCollectionTestSync()
+    {
+        var webLoader = await CreateWebLoaderAsync();
+
+        var requestHeaders = GetRequestHeaders(_requestHeadersStandartFileName);
+
+        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
+
+        Assert.NotNull(document);
+
+        var categories = new ObservableCollection<JsonCategory>();        
+
+        JsonCategory.LoadAllChildren(null, categories, document.RootElement,
+            _nodePath,
+            _categoryPropertyPathes);
+
+        Assert.True(categories.Count > 0);
+
+        var parentCategories = new List<JsonCategory>(categories);
+        foreach (var parentCategory in parentCategories)
+        {
+            var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
+            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
+
+            var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
+
+            categoryStream.Close();
+
             JsonCategory.LoadAllChildren(parentCategory, categories, categoriesJson.RootElement, _nodePath, _categoryPropertyPathes);
         }
 
-        Assert.Equal(parentCategories.Count, categories.Count(c=>c.ParentId == null));       
+        Assert.Equal(parentCategories.Count, categories.Count(c => c.ParentId == null));
+
+        _testOutputHelper.WriteLine($"parent categories {parentCategories.Count}");
+        _testOutputHelper.WriteLine($"all categories {categories.Count}");
     }
 }

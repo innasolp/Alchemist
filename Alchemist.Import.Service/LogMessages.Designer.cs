@@ -106,6 +106,24 @@ namespace Alchemist.Import.Service {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Service {0} started..
+        /// </summary>
+        internal static string ServiceStarted {
+            get {
+                return ResourceManager.GetString("ServiceStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Service {0} was stopped..
+        /// </summary>
+        internal static string ServiceWasStopped {
+            get {
+                return ResourceManager.GetString("ServiceWasStopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Too many request. Thread would be sleeped 10 sec..
         /// </summary>
         internal static string TooManyRequestsError {

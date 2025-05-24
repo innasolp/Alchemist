@@ -14,13 +14,40 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
 
     protected IWebLoader WebLoader { get; } = webLoader;
 
+    private readonly SemaphoreSlim _webLoaderSemaphoreSlim = new(1,1);
+
     protected RequestHeaders? RequestHeaders { get; } = requestHeaders;
 
     protected ILogger Logger { get; } = logger;
 
-    public abstract Task Start(CancellationTokenSource stoppingToken);
+    public virtual async Task Start(CancellationToken stoppingToken)
+    {
+        bool? isStarted = null;
+        while (!await ExecutingCancellationNeeded(stoppingToken))
+        {
+            await StartWebLoaderIfNeedAsync(stoppingToken);
 
-    protected virtual async Task StartWebLoaderIfNeedAsync(CancellationTokenSource stoppingToken)
+            if (!WebLoader.IsStarted) break;
+            else if (isStarted == null)
+            {
+                isStarted = true;
+                Logger.LogInformation(LogMessages.ServiceStarted, Name);
+            }
+
+            await ProcessAsync(stoppingToken);
+        }
+
+        Logger.LogInformation(LogMessages.ServiceWasStopped, Name);
+    }
+
+    protected virtual async Task<bool> ExecutingCancellationNeeded(CancellationToken stoppingToken)
+    {
+        return await Task.FromResult(stoppingToken.IsCancellationRequested);
+    }
+
+    protected abstract Task ProcessAsync(CancellationToken stoppingToken);
+
+    protected virtual async Task StartWebLoaderIfNeedAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested && !WebLoader.IsStarted)
         {
@@ -32,7 +59,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             catch (WarningException warning)
             {
                 Logger.LogWarning(warning, LogMessages.WebLoaderNotStartedWarning, [WebLoader.GetType().Name, warning.Message]);
-                await Task.Delay(1000, stoppingToken.Token);
+                await Task.Delay(1000, stoppingToken);
             }
             catch (Exception e)
             {
@@ -108,8 +135,14 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (Exception e)
         {
-            Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
+            await HandleException(e, url);            
         }
+    }
+
+    protected virtual async Task HandleException(Exception e, string url)
+    {
+        Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
+        await Task.FromResult(true);
     }
 
     protected async Task<TaskResult<T>> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
@@ -135,7 +168,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (Exception e)
         {
-            Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
+            await HandleException(e, url);
             return await Task.FromResult(TaskResult<T>.Failed(default, e));
         }
     }
@@ -163,13 +196,27 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (Exception e)
         {
-            Logger.LogError(e, LogMessages.ProcessUrlFailedError, getUrl(itemUrl));
+            await HandleException(e, getUrl(itemUrl));
             return await Task.FromResult(TaskResult<T>.Failed(default, e));
         }
     }
 
+    protected virtual async Task<Stream> LoadFromUrlAsync(string url)
+    {
+        await _webLoaderSemaphoreSlim.WaitAsync();
+        try
+        {
+            var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
+            return await Task.FromResult(stream);
+        }
+        catch { throw; }
+        finally
+        {
+            _webLoaderSemaphoreSlim.Release();
+        }        
+    }
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
         if (WebLoader == null)
             return;
