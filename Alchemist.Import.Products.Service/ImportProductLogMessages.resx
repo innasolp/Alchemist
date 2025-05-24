@@ -150,10 +150,4 @@
   <data name="ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded" xml:space="preserve">
     <value>Product {0} was not loaded from url {1} with not fatal error {2} and would be reload.</value>
   </data>
-  <data name="ServiceStarted" xml:space="preserve">
-    <value>Service {0} started.</value>
-  </data>
-  <data name="ServiceWasStopped" xml:space="preserve">
-    <value>Service {0} was stopped.</value>
-  </data>
 </root>

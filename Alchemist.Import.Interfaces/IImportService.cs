@@ -2,7 +2,7 @@
 
 public interface IImportService
 {
-    Task Start(CancellationTokenSource stoppingToken);
+    Task Start(CancellationToken stoppingToken);
 
     string Name { get; }
 }

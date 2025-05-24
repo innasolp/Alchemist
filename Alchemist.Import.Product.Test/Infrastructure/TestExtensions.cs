@@ -43,10 +43,10 @@ internal static class TestExtensions
         return await Task.FromResult(fs);
     }
 
-    public static Task StartServiceInFactoryAsync(this IImportService service, CancellationTokenSource token)
+    public static Task StartServiceInFactoryAsync(this IImportService service, CancellationToken token)
     {
         return Task.Factory.StartNew(async () => await service.Start(token),
-           token.Token,
+           token,
            TaskCreationOptions.None,
            TaskScheduler.Default);
     }

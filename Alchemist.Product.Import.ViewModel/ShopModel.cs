@@ -15,15 +15,14 @@ public class ShopModel : IShop
     public bool IsDeprecated { get; set; } = false;
 
     [Required]
-    public string ShopUrl { get; set; }
+    public string Url { get; set; }
 
-    public string? Caption { get; set; }
-    string IShop.Url { get => ShopUrl; set => ShopUrl = value; }
+    public string? Caption { get; set; }   
 
     public void Update(IShop shop)
     {
         Name = shop.Name;
-        ShopUrl = shop.Url;
+        Url = shop.Url;
         Caption = shop.Caption;
     }
 }

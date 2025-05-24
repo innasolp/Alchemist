@@ -10,26 +10,40 @@ using Alchemist.Import.Category.Interfaces;
 
 namespace Alchemist.Import.Category.Json;
 
-public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
-    IHtmlSearcher? htmlSearcher,
-    IWebLoader webLoader,
-    ICategoryShopModel shop,
-    RequestHeaders? requestHeaders,
-    CategoryLoadOptions categoryLoadOptions,
-   ICategoryItemHandler itemHandler)
-    : ShopImportService(logger, webLoader, requestHeaders)
+public class ShopImportCategoriesTimerService : ShopImportService
 {
-    protected IHtmlSearcher? HtmlSearcher { get; } = htmlSearcher;
+    protected IHtmlSearcher? HtmlSearcher { get; }
 
-    protected CategoryLoadOptions CategoryLoadOptions { get; } = categoryLoadOptions;
+    protected CategoryLoadOptions CategoryLoadOptions { get; }
 
-    public override string Name { get; } = categoryLoadOptions.Name;
+    public override string Name { get; }
 
-    protected ICategoryShopModel ShopModel { get; } = shop;
+    protected ICategoryShopModel ShopModel { get; }
 
     private readonly int _defaultInterval = 3600;
 
-    private readonly ICategoryItemHandler _itemHandler = itemHandler;
+    private readonly ICategoryItemHandler _itemHandler;
+
+    private readonly PeriodicTimer _timer;
+
+    private bool? _isStarted;
+
+    public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+        IHtmlSearcher? htmlSearcher,
+        IWebLoader webLoader,
+        ICategoryShopModel shop,
+        RequestHeaders? requestHeaders,
+        CategoryLoadOptions categoryLoadOptions,
+       ICategoryItemHandler itemHandler) : base(logger, webLoader, requestHeaders)
+    {
+        HtmlSearcher = htmlSearcher;
+        CategoryLoadOptions = categoryLoadOptions;
+        Name = categoryLoadOptions.Name;
+        ShopModel = shop;
+        _itemHandler = itemHandler;
+
+        _timer = new(TimeSpan.FromSeconds(CategoryLoadOptions.SecondsInterval ?? _defaultInterval));
+    }
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
    IWebLoader webLoader,
@@ -41,67 +55,85 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
     {
     }
 
-    protected virtual async Task LoadCategoriesAsync(CancellationTokenSource stoppingToken)
+    protected async Task<JsonDocument?> LoadJsonDocumentAsync(string url, CancellationToken cancellationToken)
     {
-        if (!WebLoader.IsStarted)
-            await StartWebLoaderIfNeedAsync(stoppingToken);
-
-        if (!WebLoader.IsStarted) return;
-
-        JsonDocument? document;
-
         if (HtmlSearcher != null)
         {
-            var values = await ProcessUrlTaskAsync(LoadHtmlFromUrlAsync, ShopModel.CategorySourceUrl);
-            if (values.Result == null || values.Status == Alchemist.Common.Status.Error) return;
-
-            document = JsonDocument.Parse(values.Result[0]);
+            var values = await LoadHtmlFromUrlAsync(url, cancellationToken);
+            return JsonDocument.Parse(values[0]);
         }
         else
+            return await LoadJsonDocumentFromUrlAsync(url, cancellationToken);
+    }
+
+
+    protected override async Task<bool> ExecutingCancellationNeeded(CancellationToken stoppingToken)
+    {
+        return await base.ExecutingCancellationNeeded(stoppingToken)
+            || (_isStarted != null && !await _timer.WaitForNextTickAsync(stoppingToken));
+    }    
+
+    protected override async Task ProcessAsync(CancellationToken stoppingToken)
+    {
+        if(_isStarted == null)
+            _isStarted = true;
+
+        var documentResult = await ProcessUrlTaskAsync((url) => LoadJsonDocumentAsync(url, stoppingToken), ShopModel.CategorySourceUrl);
+        if (documentResult.Status != Alchemist.Common.Status.Success || documentResult.Result == null)
         {
-            var result = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken.Token), ShopModel.CategorySourceUrl);
-
-            if (result.Result == null || result.Status == Alchemist.Common.Status.Error) return;
-
-            document = result.Result;
+            //todo log error
+            return;
         }
 
         var categories = new ObservableCollection<JsonCategory>();
         categories.CollectionChanged += CategoryCollectionChanged;
 
-        JsonCategory.LoadAllChildren(null, categories, document.RootElement,
+        await JsonCategoryAsync.LoadAllChildrenAsync(null, categories, documentResult.Result.RootElement,
                CategoryLoadOptions.FirstNodePath,
-               CategoryLoadOptions.CategoryPropertyPaths);
+               CategoryLoadOptions.CategoryPropertyPaths,
+               stoppingToken);
 
-        if (CategoryLoadOptions.CategoriesApiUrlFormat == null)
+        if (string.IsNullOrEmpty(CategoryLoadOptions.CategoriesApiUrlFormat))
+        {
+            categories.CollectionChanged -= CategoryCollectionChanged;
             return;
+        }
 
         var parentCategories = new List<JsonCategory>(categories);
-        foreach (var parentCategory in parentCategories)
-        {
-            var url = string.Format(CategoryLoadOptions.CategoriesApiUrlFormat, parentCategory.Id);
+        await Task.WhenAll(parentCategories.Select(c=>LoadCategoryChildrentTreeAsync(c, CategoryLoadOptions.CategoriesApiUrlFormat, categories, stoppingToken)));
 
-            var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadFromUrlAsync(url, stoppingToken.Token), url);
-            if (categoriesJsonResult.Result == null || categoriesJsonResult.Status == Alchemist.Common.Status.Error) return;
-
-            JsonCategory.LoadAllChildren(parentCategory, categories,
-                categoriesJsonResult.Result.RootElement,
-                CategoryLoadOptions.FirstNodePath,
-                 CategoryLoadOptions.CategoryPropertyPaths);
-        }
+        categories.CollectionChanged -= CategoryCollectionChanged;
     }
 
-    private async Task<List<string>?> LoadHtmlFromUrlAsync(string url)
+    private async Task LoadCategoryChildrentTreeAsync(JsonCategory parentCategory, string urlFormat, ICollection<JsonCategory> categories, CancellationToken token)
     {
-        using var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
-        var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions);
+        var url = string.Format(urlFormat, parentCategory.Id);
+
+        var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadJsonDocumentFromUrlAsync(url, token), url);
+        if (categoriesJsonResult.Result == null || categoriesJsonResult.Status == Alchemist.Common.Status.Error)
+        {
+            //todo log error
+            return;
+        }
+
+        await JsonCategoryAsync.LoadAllChildrenAsync(parentCategory, categories,
+            categoriesJsonResult.Result.RootElement,
+            CategoryLoadOptions.FirstNodePath,
+             CategoryLoadOptions.CategoryPropertyPaths,
+             token);
+    }
+
+    private async Task<List<string>?> LoadHtmlFromUrlAsync(string url, CancellationToken token)
+    {
+        using var stream = await LoadFromUrlAsync(url); 
+        var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
         stream.Close();
         return await Task.FromResult(values);
     }
 
-    private async Task<JsonDocument?> LoadFromUrlAsync(string url, CancellationToken stoppingToken)
+    private async Task<JsonDocument?> LoadJsonDocumentFromUrlAsync(string url, CancellationToken stoppingToken)
     {
-        using var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
+        using var stream = await LoadFromUrlAsync(url);
 
         var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
 
@@ -110,54 +142,35 @@ public class ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerS
         return await Task.FromResult(categoriesJson);
     }
 
+    private readonly object _categoryCollectionChangedLock = new();
     private void CategoryCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
         {
-            var joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
-
-            var newItems = e.NewItems?.OfType<JsonCategory>();
-            if (newItems == null) return;
-
-            foreach (var category in newItems)
+            lock(_categoryCollectionChangedLock)
             {
-                joinableTaskFactory.Run(async () =>
-                {
-                    await _itemHandler.HandleItem(category, ShopModel);
-                });
+                var newItems = e.NewItems?.OfType<JsonCategory>();
+                if (newItems == null) return;
 
-                Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopModel.ShopName} loaded");
+                var joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
+
+                foreach (var category in newItems)
+                {
+                    joinableTaskFactory.Run(async () =>
+                    {
+                        await _itemHandler.HandleItem(category, ShopModel);
+                    });
+
+                    Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopModel.ShopName} handled");
+                }
             }
         }
     }
 
-    public override async Task Start(CancellationTokenSource stoppingToken)
+    public override ValueTask DisposeAsync()
     {
-        try
-        {
-            await LoadCategoriesAsync(stoppingToken);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, ex.Message);
-        }
+        _timer.Dispose();
 
-        using PeriodicTimer timer = new(TimeSpan.FromSeconds(CategoryLoadOptions.SecondsInterval ?? _defaultInterval));
-
-        try
-        {
-            while (await timer.WaitForNextTickAsync(stoppingToken.Token))
-            {
-                await LoadCategoriesAsync(stoppingToken);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            Logger.LogInformation($"Timed Service {Name} is stopping.");
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, ex.Message);
-        }
+        return base.DisposeAsync();
     }
 }

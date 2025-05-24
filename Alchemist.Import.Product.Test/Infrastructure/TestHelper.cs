@@ -15,8 +15,13 @@ internal static class TestHelper
 
     public static TestCategory CreateCategoryWithProducts()
     {
-        var productsCategory = new TestCategory();
-        productsCategory.CategoryProductItems = new TestCategoryProduct[new Random().Next(10)];
+        var productCount = new Random().Next(20);
+        var productsCategory = new TestCategory
+        {
+            CategoryProductItems = new TestCategoryProduct[productCount],
+            TotalCount = productCount
+        };        
+
         for (var i = 0; i < productsCategory.CategoryProductItems.Length; i++)
         {
             productsCategory.CategoryProductItems[i] = new TestCategoryProduct()

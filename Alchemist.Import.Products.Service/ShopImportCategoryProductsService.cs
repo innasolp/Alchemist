@@ -29,8 +29,6 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected IProductShopModel ProductShopModel { get; }
 
-    protected bool? IsStarted { get; private set; }
-
     protected abstract int PageProductCount { get; }
 
     protected virtual int MaxUnsuccessRequestCount => 20;
@@ -61,36 +59,22 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    public override async Task Start(CancellationTokenSource stoppingToken)
+    public override async Task Start(CancellationToken stoppingToken)
     {
-        var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken), 
-            stoppingToken.Token, 
+        var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken),
+            stoppingToken, 
             TaskCreationOptions.None,
             TaskScheduler.Default);
 
         var unprocessedProductsTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoryProductsAsync(stoppingToken), 
-            stoppingToken.Token, 
+            stoppingToken, 
             TaskCreationOptions.None,
             TaskScheduler.Default);
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await StartWebLoaderIfNeedAsync(stoppingToken);
-
-            if (!WebLoader.IsStarted) break;
-            else if (IsStarted == null)
-            {
-                IsStarted = true;
-                Logger.LogInformation(ImportProductLogMessages.ServiceStarted, Name);
-            }
-
-            await ProcessCategoriesAsync(stoppingToken);
-        }
-
-        Logger.LogInformation(ImportProductLogMessages.ServiceWasStopped, Name);
+        await base.Start(stoppingToken);        
     }
 
-    protected async Task ProcessCategoriesAsync(CancellationTokenSource stoppingToken)
+    protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
         while (Categories.Count > 0 && !stoppingToken.IsCancellationRequested)
         {
@@ -120,6 +104,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                     break;
                 }
                 
+                if (unsuccessRequestCount > MaxUnsuccessRequestCount)                
+                    break;        
+                
                 if (result.Result == null)
                 {
                     page++;
@@ -128,8 +115,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
                 productCount += result.Result.Count ?? 0;
 
-                if (unsuccessRequestCount > MaxUnsuccessRequestCount)                
-                    break;                
+                        
 
                 var currentTotalCount = result.Result?.CategoryItem?.TotalCount;
                 if (currentTotalCount != null)
@@ -151,7 +137,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected async Task ProcessUnhandledCategoriesAsync(CancellationTokenSource stoppingToken)
+    protected async Task ProcessUnhandledCategoriesAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -215,7 +201,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return await Task.FromResult(new CategoryProductsResult(currentCategoryProducts, productCount, false));
     }
 
-    protected async Task ProcessUnhandledCategoryProductsAsync(CancellationTokenSource stoppingToken)
+    protected async Task ProcessUnhandledCategoryProductsAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -236,7 +222,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected async Task ProcessUnhandledProductItemsAsync(CancellationTokenSource stoppingToken)
+    protected async Task ProcessUnhandledProductItemsAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -282,12 +268,6 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         productItem.CategoryId = categoryProductItem.CategoryItemId;
 
         return await Task.FromResult(productItem);
-    }   
-
-    protected virtual async Task<Stream> LoadFromUrlAsync(string url)
-    {
-        var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
-        return await Task.FromResult(stream);
     }
 
     protected abstract bool IsEndOfCategory(TCategory category);
