@@ -3,7 +3,7 @@
 
 namespace Alchemist.Import.Product.Test.Infrastructure;
 
-internal class TestCategory : ICategoryProducts
+public class TestCategory : ICategoryProducts
 {
     public TestCategoryProduct[] CategoryProductItems { get; set; }
 
@@ -12,7 +12,7 @@ internal class TestCategory : ICategoryProducts
     ICategoryProductItem[] ICategoryProducts.CategoryProductItems => CategoryProductItems;
 }
 
-internal class TestCategoryProduct : ICategoryProductItem
+public class TestCategoryProduct : ICategoryProductItem
 {
     public string Id { get; set; }
 
@@ -27,7 +27,7 @@ internal class TestCategoryProduct : ICategoryProductItem
     public int CategoryItemId { get; set; } 
 }
 
-internal class TestProductItem : IProductItem
+public class TestProductItem : IProductItem
 {
     public string ItemId { get; set; }
 

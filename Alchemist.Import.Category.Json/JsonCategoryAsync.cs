@@ -3,15 +3,18 @@
 namespace Alchemist.Import.Category.Json;
 
 public class JsonCategoryAsync : JsonCategory
-{   
-
-    private static readonly SemaphoreSlim _categoriesSemaphoreSlim = new(1, 1);
-    protected static async Task AddCategoryToCollectionAsync(ICollection<JsonCategory> jsonCategories, JsonCategory jsonCategory)
+{ 
+    private readonly SemaphoreSlim _categoriesSemaphoreSlim = new(1, 1);
+    protected async Task AddCategoryToCollectionAsync(ICollection<JsonCategory> jsonCategories, CancellationToken? cancellationToken = null)
     {
-        await _categoriesSemaphoreSlim.WaitAsync();
+        if(cancellationToken != null)        
+            await _categoriesSemaphoreSlim.WaitAsync(cancellationToken.Value);
+        else 
+            await _categoriesSemaphoreSlim.WaitAsync();
+
         try
         {
-            jsonCategories.Add(jsonCategory);
+            jsonCategories.Add(this);
         }
         catch { throw; }
         finally
@@ -25,13 +28,17 @@ public class JsonCategoryAsync : JsonCategory
         Dictionary<string, PropertyPath> propertyPathes,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (categoriesElement.ValueKind != JsonValueKind.Array)
             throw new InvalidCastException($"element {categoriesElement.GetRawText()} is not json array.");
 
         var categoryElementQueue = new Queue<JsonElement>(categoriesElement.EnumerateArray());
 
-        while (categoryElementQueue.Count > 0 && !cancellationToken.IsCancellationRequested)
+        while (categoryElementQueue.Count > 0)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var categoryElement = categoryElementQueue.Dequeue();
             var category = new JsonCategoryAsync();
             var isLoaded = category.TryLoad(categoryElement, propertyPathes);
@@ -42,7 +49,7 @@ public class JsonCategoryAsync : JsonCategory
             if (isLoaded && parentCategory?.Id > 0)
                 category.SetParent(parentCategory);
 
-            await AddCategoryToCollectionAsync(jsonCategories, category);
+            await category.AddCategoryToCollectionAsync(jsonCategories, cancellationToken);
 
             if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out JsonElement childrenElement) &&
                 childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() > 0)
@@ -63,7 +70,7 @@ public class JsonCategoryAsync : JsonCategory
         if (parentCategory?.Id > 0)
             jsonCategory.SetParent(parentCategory);
 
-        await AddCategoryToCollectionAsync(jsonCategories, jsonCategory);
+        await jsonCategory.AddCategoryToCollectionAsync(jsonCategories, cancellationToken);
 
         if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out var childrenElement)
             && childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() > 0)
@@ -79,7 +86,7 @@ public class JsonCategoryAsync : JsonCategory
     {
         try
         {
-            var categoriesElements = GetAllElementsByNodePath(jsonElement, nodePath);
+            var categoriesElements = nodePath?.Length > 0 ? GetAllElementsByNodePath(jsonElement, nodePath) : [jsonElement];
 
             var categoryElementArrays = categoriesElements.Where(e => e.ValueKind == JsonValueKind.Array);
             if (!categoryElementArrays.Any())

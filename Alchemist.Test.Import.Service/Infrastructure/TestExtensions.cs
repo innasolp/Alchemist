@@ -1,14 +1,12 @@
-﻿using Alchemist.Import.Products.Interfaces;
-using Moq;
+﻿using Moq;
 using WebLoader.Interfaces;
-using Alchemist.Import.Products.Service;
 using WebLoader.Common;
 using System.Text.Json;
 using Alchemist.Import.Interfaces;
 
-namespace Alchemist.Import.Product.Test.Infrastructure;
+namespace Alchemist.Test.Import.Service.Infrastructure;
 
-internal static class TestExtensions
+public static class TestExtensions
 {
     public static void SetupStartSuccess(this Mock<IWebLoader> webLoaderMock)
     {
@@ -16,16 +14,12 @@ internal static class TestExtensions
             .Returns(Task.FromResult(true))
             .Callback(() => webLoaderMock.Setup(w => w.IsStarted).Returns(true));
     }
-    
-    public static string GetCategoryPageUrl(this IProductShopModel productShopModel, IProductShopCategoryModel category, int page)
-    {
-        return string.Format(productShopModel.CategoryUrl, category.GetCategoryForUrl(), page);
-    }    
+      
 
     public static void SetupLoadItem<T>(this Mock<IWebLoader> webLoaderMock, string itemUrl, RequestHeaders requestHeaders, T item)
         where T:class
     {
-        webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl, requestHeaders)).Returns(LoadItemAsync(item));
+        webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl, requestHeaders)).Returns((string url, RequestHeaders headers) => LoadItemAsync(item));
     }
 
     public static void SetupLoadItems<T>(this Mock<IWebLoader> webLoaderMock, Dictionary<string,T> itemUrls, RequestHeaders requestHeaders)
@@ -45,9 +39,13 @@ internal static class TestExtensions
 
     public static Task StartServiceInFactoryAsync(this IImportService service, CancellationToken token)
     {
-        return Task.Factory.StartNew(async () => await service.Start(token),
-           token,
-           TaskCreationOptions.None,
-           TaskScheduler.Default);
+        return Task.Factory.StartNew(async () => await service.Start(token),token,
+            TaskCreationOptions.RunContinuationsAsynchronously,            
+           TaskScheduler.Current);
+    }
+
+    public static void VerifyLoadUrlAndRequestHeaders(this Mock<IWebLoader> webLoaderMock, string url, RequestHeaders requestHeaders)
+    {
+        webLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), It.Is<RequestHeaders>(r=>r == requestHeaders)));
     }
 }

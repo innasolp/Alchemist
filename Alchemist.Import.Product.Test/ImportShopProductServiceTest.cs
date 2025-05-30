@@ -1,62 +1,50 @@
 using Alchemist.Import.Product.Test.Infrastructure;
+using Alchemist.Import.Products.Interfaces;
+using Alchemist.Test.Import.Service;
+using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit.Abstractions;
 
 namespace Alchemist.Import.Product.Test;
 
-public class ImportShopProductServiceTest:ImportProductsTest
+public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImportProductService<TestCategory, TestProductItem>, ILogger>
 {
-    [Fact]
-    public async Task ImportWasStoppedWhenWebLoaderNotExecuted()
+    public ImportShopProductServiceTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
-        var exception = new InvalidOperationException("test fatal error");
-        var name = Guid.NewGuid().ToString();
-        Service.SetName(name);
+        ProductShopModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategoryModel>());
 
+        Service = new TestImportProductService<TestCategory, TestProductItem>(
+             LoggerMock.Object,
+             ProductShopModelMock.Object,
+             WebLoaderMock.Object,
+             RequestHeaders,
+             ProductItemHandlerMock.Object);
+    }
+
+    protected override TestImportProductService<TestCategory, TestProductItem> Service { get; }
+
+    protected Mock<IProductShopModel> ProductShopModelMock { get; } = new Mock<IProductShopModel>();
+
+    protected Mock<IProductItemHandler> ProductItemHandlerMock { get; } = new Mock<IProductItemHandler>();
+
+    [Fact]
+    public async Task StoppedWhenWebLoaderNotExecutedAsync()
+    {
         WebLoaderMock.Reset();
-        WebLoaderMock.Setup(w => w.Start()).Throws(exception);
-
-        var token = new CancellationTokenSource();
-        await Service.Start(token.Token);
-
-        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceWasStopped"), name);
-
-        LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ImportWasStoppedWebLoaderNotExecute"), WebLoaderMock.Object.GetType().Name); 
+        await ImportWasStoppedWhenWebLoaderNotExecutedAsync();
     }
 
     [Fact]
-    public async Task ImportStartedWhenWebLoaderExecutedSuccessfull()
+    public async Task StartedWhenWebLoaderExecutedSuccessfullAsync()
     {
-        var name = Guid.NewGuid().ToString();
-        Service.SetName(name);
-
         WebLoaderMock.Reset();
-        WebLoaderMock.SetupStartSuccess();
-
-        var token = new CancellationTokenSource();
-
-        var task = Service.StartServiceInFactoryAsync(token.Token);        
-        
-        await Task.Delay(2000);
-
-        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceStarted"), name);        
+        await ImportStartedWhenWebLoaderExecutedSuccessfullAsync();
     }
 
     [Fact]
-    public async Task ImportStoppedWhenCancellationRequested()
+    public async Task StoppedWhenCancellationRequestedAsync()
     {
-        var name = Guid.NewGuid().ToString();
-        Service.SetName(name);
-
         WebLoaderMock.Reset();
-        WebLoaderMock.SetupStartSuccess();
-       
-        var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token.Token);
-
-        await Task.Delay(1000);
-
-        await token.CancelAsync();
-
-        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceWasStopped"), name);
-    }    
+        await ImportStoppedWhenCancellationRequestedAsync();
+    }
 }
