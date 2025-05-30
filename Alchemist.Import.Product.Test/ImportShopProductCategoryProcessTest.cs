@@ -4,12 +4,14 @@ using WebLoader.Common;
 using Alchemist.Import.Products.Service;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Product.Test.Infrastructure;
+using Alchemist.Test.Import.Service.Infrastructure;
+using Xunit.Abstractions;
 
 namespace Alchemist.Import.Product.Test;
 
 public class ImportShopProductCategoryProcessTest : ImportProductsTest
 {
-    public ImportShopProductCategoryProcessTest()
+    public ImportShopProductCategoryProcessTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
         ProductShopModelMock.Setup(s => s.ProductUrl).Returns("Product_{0}");
         ProductShopModelMock.Setup(s => s.CategoryUrl).Returns("Category_{0}_page{1}");

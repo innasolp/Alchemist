@@ -26,6 +26,7 @@
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
     <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0.1" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.3" />
   </ItemGroup>
 
   <ItemGroup>

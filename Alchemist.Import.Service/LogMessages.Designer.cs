@@ -115,6 +115,42 @@ namespace Alchemist.Import.Service {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Service {0} was cancelled..
+        /// </summary>
+        internal static string ServiceWasCancelled {
+            get {
+                return ResourceManager.GetString("ServiceWasCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Service {0} was cancelled. {1}..
+        /// </summary>
+        internal static string ServiceWasCancelledOn {
+            get {
+                return ResourceManager.GetString("ServiceWasCancelledOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Service {0} was cancelled on loading from url {1}..
+        /// </summary>
+        internal static string ServiceWasCancelledOnLoadingFromUrl {
+            get {
+                return ResourceManager.GetString("ServiceWasCancelledOnLoadingFromUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Service {0} was cancelled on loading from url {1} by error {2}..
+        /// </summary>
+        internal static string ServiceWasCancelledOnLoadingFromUrlByError {
+            get {
+                return ResourceManager.GetString("ServiceWasCancelledOnLoadingFromUrlByError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Service {0} was stopped..
         /// </summary>
         internal static string ServiceWasStopped {

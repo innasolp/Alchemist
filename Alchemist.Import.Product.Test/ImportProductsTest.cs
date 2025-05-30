@@ -1,43 +1,31 @@
 ﻿using Alchemist.Import.Product.Test.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
-using Alchemist.Import.Service;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Collections.ObjectModel;
 using System.Resources;
-using WebLoader.Common;
-using WebLoader.Interfaces;
+
+using Xunit.Abstractions;
 
 namespace Alchemist.Import.Product.Test;
 
-public abstract class ImportProductsTest
+public abstract class ImportProductsTest : ImportServiceTest<TestImportProductService<TestCategory, TestProductItem>, ILogger>
 {
-    protected ResourceManager ServiceResourceManager { get; }
-
     protected ResourceManager ImportProductsResourceManager { get; }
-    
-    protected Mock<ILogger> LoggerMock { get; } = new Mock<ILogger>();
-
-    protected Mock<IWebLoader> WebLoaderMock { get; } = new Mock<IWebLoader>();
 
     protected Mock<IProductShopModel> ProductShopModelMock { get; } = new Mock<IProductShopModel>();
 
-    protected RequestHeaders RequestHeaders { get; } = new RequestHeaders();
-
     protected Mock<IProductItemHandler> ProductItemHandlerMock { get; } = new Mock<IProductItemHandler>();
 
-    internal TestImportProductService<TestCategory, TestProductItem> Service { get; }
+    protected override TestImportProductService<TestCategory, TestProductItem> Service { get; }
         
 
-    protected ImportProductsTest()
+    protected ImportProductsTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
         ImportProductsResourceManager = new ResourceManager("Alchemist.Import.Products.Service.ImportProductLogMessages",
                                typeof(ShopImportCategoryProductsService<TestCategory, TestProductItem>).Assembly);
-
-        ServiceResourceManager = new ResourceManager("Alchemist.Import.Service.LogMessages",
-                               typeof(ShopImportService).Assembly);
-
+       
         ProductShopModelMock.Setup(s => s.Categories).Returns(new ObservableCollection<IProductShopCategoryModel>());        
 
         Service = new TestImportProductService<TestCategory, TestProductItem>( 

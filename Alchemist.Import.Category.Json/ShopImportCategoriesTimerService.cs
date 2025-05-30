@@ -60,38 +60,71 @@ public class ShopImportCategoriesTimerService : ShopImportService
         if (HtmlSearcher != null)
         {
             var values = await LoadHtmlFromUrlAsync(url, cancellationToken);
-            return JsonDocument.Parse(values[0]);
+            return values != null ? JsonDocument.Parse(values[0]) : null;
         }
         else
-            return await LoadJsonDocumentFromUrlAsync(url, cancellationToken);
+            return await LoadJsonFromUrlAsync(url, cancellationToken);
     }
-
-
-    protected override async Task<bool> ExecutingCancellationNeeded(CancellationToken stoppingToken)
-    {
-        return await base.ExecutingCancellationNeeded(stoppingToken)
-            || (_isStarted != null && !await _timer.WaitForNextTickAsync(stoppingToken));
-    }    
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        if(_isStarted == null)
-            _isStarted = true;
-
-        var documentResult = await ProcessUrlTaskAsync((url) => LoadJsonDocumentAsync(url, stoppingToken), ShopModel.CategorySourceUrl);
-        if (documentResult.Status != Alchemist.Common.Status.Success || documentResult.Result == null)
+        if (_isStarted == null)
         {
-            //todo log error
+            _isStarted = true;
+            await LoadCategoriesAsync(stoppingToken);
+        }
+        else if (!stoppingToken.IsCancellationRequested)
+        {            
+            var nextTickResult = await ProcessTaskAsync(() => _timer.WaitForNextTickAsync(stoppingToken).AsTask());
+            
+            if (nextTickResult.Status == Alchemist.Common.Status.Cancelled)
+                return;
+
+            if(nextTickResult.Status == Alchemist.Common.Status.Success && nextTickResult.Result)
+             await LoadCategoriesAsync(stoppingToken);
+        }
+    }
+
+    private async Task LoadCategoriesAsync(CancellationToken stoppingToken)
+    {
+        var documentResult = await ProcessUrlTaskAsync((url) => LoadJsonDocumentAsync(url, stoppingToken), ShopModel.CategorySourceUrl);
+        
+        if (documentResult.Status != Alchemist.Common.Status.Success || documentResult.Result == null)
+        {            
+            if (documentResult.Status == Alchemist.Common.Status.Cancelled)
+                Logger.LogInformation(ImportCategoryLogMessages.ServiceNotLoadedJsonDocFromUrlOperationWasCancelled,
+                    [Name, ShopModel.CategorySourceUrl]);
+            
+            else if (documentResult.Status == Alchemist.Common.Status.Error)
+                Logger.LogError(ImportCategoryLogMessages.JsonLoadFromUrlFailed, [ShopModel.CategorySourceUrl, documentResult.Exception.Message]);
+            
+            else if (documentResult.Status == Alchemist.Common.Status.Warning)
+                Logger.LogInformation(ImportCategoryLogMessages.JsonDocumentNotLoadedFromUrlWithWarning,
+                    [ShopModel.CategorySourceUrl, documentResult.Exception.Message]);
+
             return;
         }
 
         var categories = new ObservableCollection<JsonCategory>();
         categories.CollectionChanged += CategoryCollectionChanged;
 
-        await JsonCategoryAsync.LoadAllChildrenAsync(null, categories, documentResult.Result.RootElement,
-               CategoryLoadOptions.FirstNodePath,
-               CategoryLoadOptions.CategoryPropertyPaths,
-               stoppingToken);
+
+        var loadParentCategoriesResult = await ProcessTaskAsync(() => JsonCategoryAsync.LoadAllChildrenAsync(null, categories, documentResult.Result.RootElement,
+                CategoryLoadOptions.FirstNodePath,
+                CategoryLoadOptions.CategoryPropertyPaths,
+                stoppingToken));
+
+        if (loadParentCategoriesResult.Status != Alchemist.Common.Status.Success)
+        {
+            if (loadParentCategoriesResult.Status == Alchemist.Common.Status.Cancelled)           
+                Logger.LogInformation(ImportCategoryLogMessages.ServiceCancelledOnLoadingStartCategories, Name); 
+            else if (loadParentCategoriesResult.Status == Alchemist.Common.Status.Warning)
+                Logger.LogWarning(ImportCategoryLogMessages.ServiceNotLoadedCategories, Name, loadParentCategoriesResult.Exception.Message);
+            else if (loadParentCategoriesResult.Status == Alchemist.Common.Status.Error)
+                Logger.LogError(ImportCategoryLogMessages.ServiceNotLoadedCategories, Name, loadParentCategoriesResult.Exception.Message);
+           
+            return;
+        }
 
         if (string.IsNullOrEmpty(CategoryLoadOptions.CategoriesApiUrlFormat))
         {
@@ -100,7 +133,16 @@ public class ShopImportCategoriesTimerService : ShopImportService
         }
 
         var parentCategories = new List<JsonCategory>(categories);
-        await Task.WhenAll(parentCategories.Select(c=>LoadCategoryChildrentTreeAsync(c, CategoryLoadOptions.CategoriesApiUrlFormat, categories, stoppingToken)));
+        var categoriesResult = await ProcessTaskAsync(() => Task.WhenAll(parentCategories.Select(c => LoadCategoryChildrentTreeAsync(c, CategoryLoadOptions.CategoriesApiUrlFormat, categories, stoppingToken))));
+        if (categoriesResult.Status != Alchemist.Common.Status.Success)
+        {
+            if (categoriesResult.Status == Alchemist.Common.Status.Cancelled)
+                Logger.LogInformation(ImportCategoryLogMessages.ServiceCancelledOnLoadingChildCategories, Name);
+            else if (loadParentCategoriesResult.Status == Alchemist.Common.Status.Warning)
+                Logger.LogWarning(ImportCategoryLogMessages.ServiceNotLoadedChildCategories, Name, loadParentCategoriesResult.Exception.Message);
+            else if (loadParentCategoriesResult.Status == Alchemist.Common.Status.Error)
+                Logger.LogError(ImportCategoryLogMessages.ServiceNotLoadedChildCategories, Name, loadParentCategoriesResult.Exception.Message);
+        }
 
         categories.CollectionChanged -= CategoryCollectionChanged;
     }
@@ -109,30 +151,43 @@ public class ShopImportCategoriesTimerService : ShopImportService
     {
         var url = string.Format(urlFormat, parentCategory.Id);
 
-        var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadJsonDocumentFromUrlAsync(url, token), url);
-        if (categoriesJsonResult.Result == null || categoriesJsonResult.Status == Alchemist.Common.Status.Error)
+        //todo if html?
+        var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadJsonFromUrlAsync(url, token), url);
+        if (categoriesJsonResult.Status == Alchemist.Common.Status.Cancelled)
+            token.ThrowIfCancellationRequested();
+
+        if (categoriesJsonResult.Result == null || categoriesJsonResult.Status != Alchemist.Common.Status.Success)
         {
-            //todo log error
-            return;
+            if (categoriesJsonResult.Status == Alchemist.Common.Status.Warning)
+                Logger.LogWarning(ImportCategoryLogMessages.ServiceCategoryFailedOnLoadingFromUrl, Name, parentCategory.Name, categoriesJsonResult.Exception.Message);
+            else if (categoriesJsonResult.Status == Alchemist.Common.Status.Error)
+                Logger.LogError(ImportCategoryLogMessages.ServiceCategoryFailedOnLoadingFromUrl, Name, parentCategory.Name, categoriesJsonResult.Exception.Message);
+
+            if (categoriesJsonResult.Exception != null)
+                throw categoriesJsonResult.Exception;
         }
 
         await JsonCategoryAsync.LoadAllChildrenAsync(parentCategory, categories,
             categoriesJsonResult.Result.RootElement,
             CategoryLoadOptions.FirstNodePath,
              CategoryLoadOptions.CategoryPropertyPaths,
-             token);
+             token);        
     }
 
     private async Task<List<string>?> LoadHtmlFromUrlAsync(string url, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();       
+
         using var stream = await LoadFromUrlAsync(url); 
         var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
         stream.Close();
         return await Task.FromResult(values);
     }
 
-    private async Task<JsonDocument?> LoadJsonDocumentFromUrlAsync(string url, CancellationToken stoppingToken)
+    private async Task<JsonDocument?> LoadJsonFromUrlAsync(string url, CancellationToken stoppingToken)
     {
+        stoppingToken.ThrowIfCancellationRequested();       
+
         using var stream = await LoadFromUrlAsync(url);
 
         var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
@@ -156,12 +211,16 @@ public class ShopImportCategoriesTimerService : ShopImportService
 
                 foreach (var category in newItems)
                 {
+                    Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasLoaded,
+                        category.Name, category.Id, ShopModel.ShopName);
+
                     joinableTaskFactory.Run(async () =>
                     {
                         await _itemHandler.HandleItem(category, ShopModel);
                     });
 
-                    Logger.LogInformation($"Category {category.Name}-{category.Id} for shop {ShopModel.ShopName} handled");
+                    Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
+                        category.Name, category.Id, ShopModel.ShopName);
                 }
             }
         }

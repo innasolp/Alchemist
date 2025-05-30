@@ -23,7 +23,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
     public virtual async Task Start(CancellationToken stoppingToken)
     {
         bool? isStarted = null;
-        while (!await ExecutingCancellationNeeded(stoppingToken))
+        while (!stoppingToken.IsCancellationRequested)
         {
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
@@ -35,15 +35,12 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             }
 
             await ProcessAsync(stoppingToken);
+
+            await Task.Delay(100);
         }
 
         Logger.LogInformation(LogMessages.ServiceWasStopped, Name);
-    }
-
-    protected virtual async Task<bool> ExecutingCancellationNeeded(CancellationToken stoppingToken)
-    {
-        return await Task.FromResult(stoppingToken.IsCancellationRequested);
-    }
+    }    
 
     protected abstract Task ProcessAsync(CancellationToken stoppingToken);
 
@@ -133,6 +130,10 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         {
             HandleWarningException(warning, url);
         }
+        catch (OperationCanceledException operationCancelledException)
+        {
+             await HandleCancelling(operationCancelledException, url);            
+        }
         catch (Exception e)
         {
             await HandleException(e, url);            
@@ -143,6 +144,36 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
     {
         Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
         await Task.FromResult(true);
+    }
+
+    protected virtual async Task HandleCancelling(OperationCanceledException operationCancelledException, string url)
+    {
+        if (operationCancelledException.InnerException != null)
+        {
+            Logger.LogError(operationCancelledException.InnerException, LogMessages.ServiceWasCancelledOnLoadingFromUrlByError,
+                [Name, url, operationCancelledException.InnerException.Message]);
+            await Task.FromResult(false);
+        }
+        else
+        {
+            Logger.LogInformation(LogMessages.ServiceWasCancelledOnLoadingFromUrl, Name, url);
+            await Task.FromResult(true);
+        }
+    }
+
+    protected virtual async Task HandleCancelling(OperationCanceledException operationCancelledException)
+    {
+        if (operationCancelledException.InnerException != null)
+        {
+            Logger.LogError(operationCancelledException.InnerException, LogMessages.ServiceWasCancelledOn,
+                [Name, operationCancelledException.InnerException.Message]);
+            await Task.FromResult(false);
+        }
+        else
+        {
+            Logger.LogInformation(LogMessages.ServiceWasCancelled, Name);
+            await Task.FromResult(true);
+        }
     }
 
     protected async Task<TaskResult<T>> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
@@ -165,6 +196,11 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         {
             HandleWarningException(warning, url);
             return await Task.FromResult(TaskResult<T>.Warning(default, warning));
+        }
+        catch(OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException, url);
+            return await Task.FromResult(TaskResult<T>.Cancelled());
         }
         catch (Exception e)
         {
@@ -194,9 +230,57 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             HandleWarningException(warning, getUrl(itemUrl));
             return await Task.FromResult(TaskResult<T>.Warning(default, warning));
         }
+        catch (OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException, getUrl(itemUrl));
+            return await Task.FromResult(TaskResult<T>.Cancelled());
+        }
         catch (Exception e)
         {
             await HandleException(e, getUrl(itemUrl));
+            return await Task.FromResult(TaskResult<T>.Failed(default, e));
+        }
+    }
+
+    protected async Task<TaskResult> ProcessTaskAsync(Func<Task> task)
+    {
+        try
+        {
+            await task();
+            return TaskResult.Success();
+        }
+        catch (WarningException warning)
+        {
+            return await Task.FromResult(TaskResult.Warning(warning));
+        }
+        catch (OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException);
+            return await Task.FromResult(TaskResult.Cancelled());
+        }
+        catch (Exception e)
+        {
+            return await Task.FromResult(TaskResult.Failed(e));
+        }
+    }
+
+    protected async Task<TaskResult<T>> ProcessTaskAsync<T>(Func<Task<T?>> task)
+    {
+        try
+        {
+            return TaskResult<T>.Success(await task());
+        }        
+        catch (WarningException warning)
+        {
+            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
+        }
+        catch (OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException);
+            return await Task.FromResult(TaskResult<T>.Cancelled());
+        }
+        catch (Exception e)
+        {
             return await Task.FromResult(TaskResult<T>.Failed(default, e));
         }
     }
