@@ -46,7 +46,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         await Expect(Page.Locator("li[class='left-menu-ul selected']").GetByText(shop.Name)).ToHaveCountAsync(1);
 
-        var urlLocator = Page.Locator("#Url");
+        var urlLocator = Page.Locator("#SettingsUrl");
         await Expect(urlLocator).ToHaveCountAsync(1);
         await Expect(urlLocator).ToHaveValueAsync(productShopSettings.Url);
     }
@@ -60,7 +60,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         await ExpectForSelectShopAsync(Page, nextShop);
 
-        await Expect(Page.Locator("#Url")).Not.ToHaveValueAsync(startShopSettings.Url);
+        await Expect(Page.Locator("#SettingsUrl")).Not.ToHaveValueAsync(startShopSettings.Url);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);       
 
         startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#Url").FillAsync(startShopImportSettings.Url);
+        await Page.Locator("#SettingsUrl").FillAsync(startShopImportSettings.Url);
 
         startShopImportSettings.Name = Guid.NewGuid().ToString();
         await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
@@ -103,7 +103,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
 
         startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#Url").FillAsync(startShopImportSettings.Url);
+        await Page.Locator("#SettingsUrl").FillAsync(startShopImportSettings.Url);
 
         startShopImportSettings.Name = Guid.NewGuid().ToString();
         await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
@@ -123,7 +123,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
 
         startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#Url").FillAsync(startShopImportSettings.Url);
+        await Page.Locator("#SettingsUrl").FillAsync(startShopImportSettings.Url);
 
         startShopImportSettings.Name = Guid.NewGuid().ToString();
         await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
@@ -150,7 +150,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var newUrl = Guid.NewGuid().ToString();
 
         startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#Url").FillAsync(newName);
+        await Page.Locator("#SettingsUrl").FillAsync(newName);
 
         startShopImportSettings.Name = Guid.NewGuid().ToString();
         await Page.Locator("#Name").FillAsync(newUrl);

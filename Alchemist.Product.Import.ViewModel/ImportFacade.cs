@@ -58,7 +58,7 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         return serviceSettings != null;
     }    
 
-    public ShopImportModel AddNewShop(Interfaces.IShop shop)
+    public ShopImportModel AddNewShop(IShop shop)
     {
         var newShop = shop.To<ShopModel>();
         var newShopImport = new ShopImportModel(newShop);
@@ -93,5 +93,10 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
     public List<ShopImportModel> GetShops()
     {
         return _shopImports.Select(s => s.Value).ToList();
+    }
+
+    public void Reset()
+    {
+        _shopImports.Clear();
     }
 }

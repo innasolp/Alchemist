@@ -5,9 +5,9 @@ namespace Alchemist.Test.Server.Fixtures;
 public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) : TestWebAppFactory<TEntryPoint>
      where TEntryPoint : class
 {
-    public int HttpPort { get; } = httpPort;
+    public int HttpPort { get; set; } = httpPort;
 
-    public int HttpsPort { get; } = httpsPort;
+    public int HttpsPort { get; set; } = httpsPort;
 
     protected override void ConfigureHostAdresses(IWebHostBuilder builder)
     {

@@ -17,4 +17,6 @@ public interface IImportFacade
     ShopImportModel AddNewShop(Interfaces.IShop shop);
 
     List<ShopImportModel> GetShops();
+
+    void Reset();
 }

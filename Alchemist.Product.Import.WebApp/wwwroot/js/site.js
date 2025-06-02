@@ -184,7 +184,7 @@ async function tabChanged(formSelector, callback = null) {
             return;
         }
 
-        confirm('Confirmation', 'Imput data will be reset. Continue?',
+        confirm('Confirmation', 'Input data will be reset. Continue?',
             () => {
                 if (callback != null) callback();
             }

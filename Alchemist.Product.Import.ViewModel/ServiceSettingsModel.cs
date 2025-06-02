@@ -69,6 +69,12 @@ public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDe
     int ISettings.ShopId { get ; set; }
     int? ISettings.ParentSettingsId { get; set; }
 
+    public bool IsEmpty()
+    {
+        return string.IsNullOrEmpty(AssemblyPath) && string.IsNullOrEmpty(ServiceProviderPath)
+            && string.IsNullOrEmpty(ServiceTypeName) && string.IsNullOrEmpty(ImplementationTypeName);
+    }
+
     public void Update(ServiceSettingsModel source)
     {
         ShopSettingType = source.ShopSettingType;
