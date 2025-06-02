@@ -12,7 +12,7 @@ namespace Alchemist.Product.Import.WebApp.Test;
 public class ShopSettingsActionTest : ImportWebAppTest
 {
     public ShopSettingsActionTest(TestImportWebAppFactory testImportWebAppFactory, ITestOutputHelper testOutputHelper)
-        : base(testImportWebAppFactory, testOutputHelper)
+        : base(testImportWebAppFactory, testOutputHelper, httpPort:8114, httpsPort:8115)
     {
         _webAppFactory.SettingsAPIClient.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
             .Returns(SaveShopSettingsWithServicesAsync);
@@ -85,7 +85,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         var settingsForm = newPage.Locator("#settingsForm");
 
         await settingsForm.Locator("#Name").FillAsync("");
-        await settingsForm.Locator("#Url").FillAsync("");
+        await settingsForm.Locator("#SettingsUrl").FillAsync("");
 
         var saveButton = settingsForm.GetByRole(AriaRole.Button).GetByText("Save");
         await saveButton.ClickAsync();
@@ -93,8 +93,8 @@ public class ShopSettingsActionTest : ImportWebAppTest
         await Expect(settingsForm.Locator("#Name-error")).ToBeVisibleAsync();
         await Expect(settingsForm.Locator("#Name-error")).ToHaveTextAsync("The Name field is required.");
 
-        await Expect(settingsForm.Locator("#Url-error")).ToBeVisibleAsync();
-        await Expect(settingsForm.Locator("#Url-error")).ToHaveTextAsync("The Url field is required.");
+        await Expect(settingsForm.Locator("#SettingsUrl-error")).ToBeVisibleAsync();
+        await Expect(settingsForm.Locator("#SettingsUrl-error")).ToHaveTextAsync("The SettingsUrl field is required.");
     }
 
     private async Task<ILocator> ShowServiceModalFormAsync(IPage page, string serviceName)
@@ -109,9 +109,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
         var serviceSettingsForm = page.Locator("#serviceSettingsForm");
         await Expect(serviceSettingsForm).Not.ToBeVisibleAsync();
 
-        await modalButton.ClickAsync();
+        await modalButton.ClickAsync(new LocatorClickOptions { Delay = 500});        
 
-        await Expect(serviceSettingsForm).ToBeVisibleAsync();
+        await Expect(serviceSettingsForm).ToBeVisibleAsync();        
 
         return await Task.FromResult(serviceSettingsForm);
     }
@@ -157,7 +157,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         serviceSettings.AssemblyPath = Guid.NewGuid().ToString();
 
         await serviceForm.Locator("#ServiceTypeName").FillAsync(serviceSettings.ServiceTypeName);
-        await serviceForm.Locator("input[name='AssemblyPath']").FillAsync(serviceSettings.AssemblyPath);
+        await serviceForm.Locator("#AssemblyPath").FillAsync(serviceSettings.AssemblyPath);
 
         return await Task.FromResult(serviceSettings);
     }
@@ -183,8 +183,8 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
 //        await ExpectWithNullValueAsync(serviceForm.Locator("#ImplementationTypeName"), serviceSettings.ImplementationTypeName); 
         await ExpectWithNullValueAsync(serviceForm.Locator("#ServiceTypeName"), serviceSettings.ServiceTypeName);
-        await ExpectWithNullValueAsync(serviceForm.Locator("#assemblyPathDisplay"), serviceSettings.AssemblyPath);
-        await ExpectWithNullValueAsync(serviceForm.Locator("#serviceProviderPathDisplay"), serviceSettings.ServiceProviderPath);
+        await ExpectWithNullValueAsync(serviceForm.Locator("#AssemblyPath"), serviceSettings.AssemblyPath);
+        await ExpectWithNullValueAsync(serviceForm.Locator("#ServiceProviderPath"), serviceSettings.ServiceProviderPath);
 
         var closeModal = page.Locator("#divModal").Locator("a[class='close']");
         await closeModal.ClickAsync();
@@ -310,7 +310,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
     {
         var newPage = await Context.NewPageAsync();
 
-        await ExpectLoadIndexPageAsync(newPage);
+        var shopImportSettings = await ExpectLoadIndexPageAsync(newPage);
 
         var settingsForm = newPage.Locator("#settingsForm");
 
@@ -347,7 +347,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         };
 
         await settingsForm.Locator("#Name").FillAsync(shopProductSettings.Name);
-        await settingsForm.Locator("#Url").FillAsync(shopProductSettings.Url);
+        await settingsForm.Locator("#SettingsUrl").FillAsync(shopProductSettings.Url);
 
         var saveButton = settingsForm.GetByRole(AriaRole.Button).GetByText("Save");
         await saveButton.ClickAsync();
@@ -366,7 +366,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         var newSettingsForm = newPage.Locator("#settingsForm");
 
         await Expect(newSettingsForm.Locator("#Name")).ToHaveValueAsync(shopProductSettings.Name);
-        await Expect(newSettingsForm.Locator("#Url")).ToHaveValueAsync(shopProductSettings.Url);
+        await Expect(newSettingsForm.Locator("#SettingsUrl")).ToHaveValueAsync(shopProductSettings.Url);
 
         await CheckServiceSettingsAsync(newPage, importService);
         await CheckServiceSettingsAsync(newPage, browserDataLoader);
@@ -427,7 +427,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         await Expect(confirmationLocator).Not.ToBeVisibleAsync();
 
         await Expect(serviceForm.Locator("#ServiceTypeName")).ToHaveValueAsync(serviceSettings.ServiceTypeName);
-        await Expect(serviceForm.Locator("input[name='AssemblyPath']")).ToHaveValueAsync(serviceSettings.AssemblyPath);
+        await Expect(serviceForm.Locator("#AssemblyPath")).ToHaveValueAsync(serviceSettings.AssemblyPath);
     }
 
     [Fact]
@@ -439,23 +439,26 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var serviceForm = await ShowServiceModalFormAsync(newPage, nameof(IShopImportSettings.ImportService));
 
+        await ExpectWithNullValueAsync(serviceForm.Locator("#ServiceTypeName"), shopImportSettings.ImportService?.ServiceTypeName);
+        await ExpectWithNullValueAsync(serviceForm.Locator("#AssemblyPath"), shopImportSettings.ImportService?.AssemblyPath);
+
         var serviceSettings = await FillServiceSettingsInputsAsync(serviceForm, nameof(IShopImportSettings.ImportService), shopImportSettings);
-        var confirmationLocator = await GetConfirmationLocatorAsync(newPage);
+        var resetConfirmationLocator = await GetConfirmationLocatorAsync(newPage);
 
         await ExpectCloseServiceSettingsButtonClickAsync(newPage);
 
-        await ExpectConfirmationAsync(confirmationLocator);
+        await ExpectConfirmationAsync(resetConfirmationLocator);
 
-        await ConfirmAsync(confirmationLocator);
+        await ConfirmAsync(resetConfirmationLocator);
 
-        await Expect(confirmationLocator).Not.ToBeVisibleAsync();
+        await Expect(resetConfirmationLocator).Not.ToBeVisibleAsync();
 
         await Expect(serviceForm).Not.ToBeVisibleAsync();
 
         serviceForm = await ShowServiceModalFormAsync(newPage, nameof(IShopImportSettings.ImportService));        
 
         await ExpectWithNullValueAsync(serviceForm.Locator("#ServiceTypeName"), shopImportSettings.ImportService?.ServiceTypeName);
-        await ExpectWithNullValueAsync(serviceForm.Locator("input[name='AssemblyPath']"),shopImportSettings.ImportService?.AssemblyPath);
+        await ExpectWithNullValueAsync(serviceForm.Locator("#AssemblyPath"),shopImportSettings.ImportService?.AssemblyPath);
     }
 
 }

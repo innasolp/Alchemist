@@ -136,7 +136,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
         var serviceSettings = shopSettings.GetServiceSettings(data.Name);
 
-        if (serviceSettings == null) return Ok(false);
+        if (serviceSettings == null) return Ok(!data.IsEmpty());
 
         return Ok(!serviceSettings.Equals(data));
     }

@@ -10,6 +10,8 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
 
     private IHost _host;
 
+    protected IHost Host => _host;
+
     public string ServerAddress
     {
         get
@@ -19,7 +21,7 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
         }
     }
 
-    private void EnsureServer()
+    protected void EnsureServer()
     {
         if (_host is null)
         {
@@ -37,8 +39,5 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
         return testHost;
     }
 
-    protected abstract void ConfigureHostAdresses(IWebHostBuilder builder);
-    //{
-    //    builder.UseKestrel();
-    //}
+    protected abstract void ConfigureHostAdresses(IWebHostBuilder builder);    
 }

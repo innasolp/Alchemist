@@ -8,7 +8,7 @@ namespace Alchemist.Product.Import.WebApp.Test;
 public class ShopActionsTest : ImportWebAppTest
 {
     public ShopActionsTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper) 
-        : base(webAppFactory, testOutputHelper)
+        : base(webAppFactory, testOutputHelper, httpPort:8112, httpsPort:8113)
     {
         _webAppFactory.ShopAPIClient.Setup(s => s.CreateShop(It.IsAny<IShop>())).Returns((IShop shop) =>
         {

@@ -41,10 +41,17 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product },
         ];
 
-    protected ImportWebAppTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper)
+    protected ImportWebAppTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper, int? httpPort = null, int? httpsPort = null)
     {
-        _webAppFactory = webAppFactory;
         _testOutputHelper = testOutputHelper;
+        
+        _webAppFactory = webAppFactory;
+        if (httpPort != null) _webAppFactory.HttpPort = httpPort.Value;
+        if (httpsPort != null) _webAppFactory.HttpsPort = httpsPort.Value;        
+
+        _webAppFactory.ShopAPIClient.Reset();
+        _webAppFactory.SettingsAPIClient.Reset();
+        _webAppFactory.Reset();
 
         _webAppFactory.ShopAPIClient.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
 
@@ -95,7 +102,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         var response = await page.GotoAsync(_webAppFactory.ServerAddress);
         Assert.True(response?.Ok);
 
-        var urlLocator = page.Locator("#Url");
+        var urlLocator = page.Locator("#SettingsUrl");
         await Expect(urlLocator).ToHaveCountAsync(1);
 
         var shop = _shops.First();
@@ -116,7 +123,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         await ExpectSelectedShopAsync(page, shop);
 
         var shopSettings = await GetShopImportSettingsAsync(shop.Id, ShopSettingType.Product);
-        await Expect(page.Locator("#Url")).ToHaveValueAsync(shopSettings.Url);
+        await Expect(page.Locator("#SettingsUrl")).ToHaveValueAsync(shopSettings.Url);
         
         return shopSettings;
     }
