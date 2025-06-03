@@ -24,56 +24,52 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     private ShopSettingsController CreateShopSettingsController()
     {
         return new ShopSettingsController(_loggerMock.Object, _importFacade, _settingsDataAdapter);
-    }
+    }    
 
     [Fact]
     public async Task SaveProductShopSettingsFieldsOnSaveShopSettingsActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        var shopSettingController = CreateShopSettingsController();
-
-        var currentShopSettings = Assert.IsType<ProductShopSettingsModel>(indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true));
-
-        var oldShopSettings = currentShopSettings.GetCopy();
-
-        var changedShopSettings = currentShopSettings.GetCopy();
-        changedShopSettings.FillShopSettingsFields();
-        var json = JsonSerializer.Serialize(changedShopSettings);
-
-        var actionResult = Assert.IsType<OkObjectResult>(shopSettingController.SaveShopSettings(currentShopSettings.ShopGuid, (int)ShopSettingType.Product, json));
-        Assert.True(Assert.IsType<bool>(actionResult.Value));        
-
-        ModelAssert.EqualFields(changedShopSettings, currentShopSettings);
-        ModelAssert.NotEqualFields(oldShopSettings, currentShopSettings);
+        await SaveShopSettingsAsync(ShopSettingType.Product);
     }
 
     [Fact]
     public async Task SaveCategoryShopSettingsFieldsOnSaveShopSettingsActionAsync()
     {
-        var homeController = CreateHomeController();
-        var shopSettingController = CreateShopSettingsController();
-        
-        var categorySettings = await CommonActions.ChangeShopSettingsAsync<CategoryShopSettingsModel>(homeController, shopSettingController, ShopSettingType.Category);
-        var oldShopSettings = categorySettings.GetCopy();
+        await SaveShopSettingsAsync(ShopSettingType.Category);
+    }
 
-        var changedShopSettings = categorySettings.GetCopy();
+    private async Task SaveShopSettingsAsync(ShopSettingType shopSettingType)
+    {
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+
+        var shopSettings = await SetShopSettingAsync(shopGuid, shopSettingType);
+        var oldShopSettings = shopSettings.GetCopy();
+
+        var changedShopSettings = shopSettings.GetCopy();
         changedShopSettings.FillShopSettingsFields();
         var json = JsonSerializer.Serialize(changedShopSettings);
 
-        var actionResult = Assert.IsType<OkObjectResult>(shopSettingController.SaveShopSettings(categorySettings.ShopGuid, (int)ShopSettingType.Category, json));
+        var shopSettingController = CreateShopSettingsController();
+        var actionResult = Assert.IsType<OkObjectResult>(shopSettingController.SaveShopSettings(shopSettings.ShopGuid, (int)shopSettingType, json));
         Assert.True(Assert.IsType<bool>(actionResult.Value));
 
-        ModelAssert.EqualFields(changedShopSettings, categorySettings);
-        ModelAssert.NotEqualFields(oldShopSettings, categorySettings);
-    }
+        ModelAssert.EqualFields(changedShopSettings, shopSettings);
+        ModelAssert.NotEqualFields(oldShopSettings, shopSettings);
+    }    
 
     [Fact]
     public async Task ChangeShopSettingWhenSetShopSettingsActionAsync()
-    {         
-        await CommonActions.ChangeShopSettingsAsync<CategoryShopSettingsModel>(CreateHomeController(),
-            CreateShopSettingsController(), 
-            ShopSettingType.Category);
+    {
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+
+        var shopSettingType = ShopSettingType.Category;
+        var shopSettings = await SetShopSettingAsync(shopGuid, shopSettingType);
+
+        var shopSettingController = CreateShopSettingsController();
+        var actionResult = Assert.IsType<OkObjectResult>(shopSettingController.SetShopSettings(shopSettings.ShopGuid, (int)shopSettingType));
+        Assert.True(Assert.IsType<bool>(actionResult.Value));
     }
     
 
@@ -100,9 +96,9 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 
     private async Task SetServiceSettingsActionAsync(Func<ShopSettingsController, Guid, Guid, IActionResult> getServiceAction, string serviceName)
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true);
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
 
         var shopSettingController = CreateShopSettingsController();
 
@@ -116,12 +112,11 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     [Fact]
     public async Task SaveServiceFieldsOnSaveServiceSettingsActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
 
-        var shopSettingController = CreateShopSettingsController();
-
-        var shopSettings = Assert.IsType<ProductShopSettingsModel>(indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true));
-        shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.BrowserDataLoader)));
+        var shopSettingController = CreateShopSettingsController();       
 
         var oldService = shopSettings.BrowserDataLoader.GetCopy();
 
@@ -129,7 +124,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         changedService.FillServiceSettingsFields();
 
         var actionResult = Assert.IsType<OkObjectResult>(shopSettingController.SaveServiceSettings(changedService));
-        var result = Assert.IsType<bool>(actionResult.Value);
+        Assert.IsType<bool>(actionResult.Value);
 
         ModelAssert.EqualFields(changedService, shopSettings.BrowserDataLoader);
         ModelAssert.NotEqualFields(oldService, shopSettings.BrowserDataLoader);
@@ -138,9 +133,11 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     [Fact]
     public async Task SaveProductShopSettingsToDbActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var currentShopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
 
-        await SaveShopSettingsToDbActionAsync<ProductShopSettingsModel>(indexViewModel.SelectedShopImport.ShopGuid,
+        await SaveShopSettingsToDbActionAsync<ProductShopSettingsModel>(currentShopSettings.ShopGuid,
             ShopSettingType.Product,
             "OzonProductSettings.json",
             (controller, shopSettings) => controller.SaveProductShopSettingsToDb(shopSettings));
@@ -149,14 +146,11 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     [Fact]
     public async Task SaveCategoryShopSettingsToDbActionAsync()
     {
-        var homeController = CreateHomeController();
-        var indexViewModel = await CommonActions.GetIndexActionViewModelAfterUpdateShopsAsync(homeController);
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var currentShopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Category);
 
-        var shopSettingController = CreateShopSettingsController();
-        shopSettingController.SetShopSettings(indexViewModel.SelectedShopImport.ShopGuid, (int)ShopSettingType.Category);
-        await homeController.IndexFromQueryAsync(indexViewModel.SelectedShopImport.ShopGuid, (int)indexViewModel.SelectedTab);
-
-        await SaveShopSettingsToDbActionAsync<CategoryShopSettingsModel>(indexViewModel.SelectedShopImport.ShopGuid,
+        await SaveShopSettingsToDbActionAsync<CategoryShopSettingsModel>(shopGuid,
             ShopSettingType.Category,
             "ozoncategories.json",
             (controller, shopSettings) => controller.SaveCategoryShopSettingsToDb(shopSettings));
@@ -174,6 +168,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<Interfaces.IShopSettings>(), It.IsAny<IEnumerable<Interfaces.IShopSettings>>()))
             .Returns<Interfaces.IShopSettings, IEnumerable<Interfaces.IShopSettings>>((settings, services) =>
                     SaveShopSettingsAsync<T>(settings, services, shopSettings));
+
         var shopSettingController = CreateShopSettingsController();
         var actionResult = Assert.IsType<OkObjectResult>(await saveAction(shopSettingController, shopSettings));
         Assert.IsType<T>(actionResult.Value);
@@ -198,26 +193,26 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 
     private async Task IsServiceActionWithRandomShopGuidNotFoundAsync(Func<ShopSettingsController, Guid, Guid,IActionResult > getServiceSettingsAction)
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true);
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
 
         var shopSettingController = CreateShopSettingsController();
 
-        var shopGuid = Guid.NewGuid();
+        var newShopGuid = Guid.NewGuid();
         
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(getServiceSettingsAction(shopSettingController, shopGuid, shopSettings.Guid));
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(getServiceSettingsAction(shopSettingController, newShopGuid, shopSettings.Guid));
 
         var guid = Assert.IsType<Guid>(notFoundResult.Value);
-        Assert.Equal(shopGuid, guid);
+        Assert.Equal(newShopGuid, guid);
     }
 
     private async Task IsServiceActionWithRandomShopSettingsGuidNotFoundAsync(Func<ShopSettingsController, Guid, Guid, IActionResult> getServiceSettingsAction)
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true);
-
+        await SetShopsAsync();
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
+        
         var shopSettingController = CreateShopSettingsController();
 
         var shopSettingsGuid = Guid.NewGuid();

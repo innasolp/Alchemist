@@ -6,11 +6,9 @@ namespace Alchemist.Product.Import.Model;
 
 public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 {
-    private readonly IShopDataService _shopDataService = shopDataService;
-    
+    private readonly IShopDataService _shopDataService = shopDataService;    
 
     private readonly Dictionary<Guid, ShopImportModel> _shopImports = [];
-
 
     public bool TryGetShopImport(Guid guid, out ShopImportModel shopImport)
     {

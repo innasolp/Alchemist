@@ -12,7 +12,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     private ShopController CreateShopController()
     {
         return new ShopController(_importFacade, _shopDataServiceMock.Object);
-    }
+    }    
 
     [Fact]
     public void NewActionIsPartialView()
@@ -32,9 +32,6 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task EditActionIsBadRequestWhenEmptyShopGuidAsync()
     {
-        var homeController = CreateHomeController();
-        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
-
         var shopController = CreateShopController();
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(shopController.Edit(Guid.Empty));
         Assert.IsType<Guid>(badRequestResult.Value);
@@ -43,9 +40,6 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task EditActionIsNotFoundWhenInvalidShopGuidAsync()
     {
-        var homeController = CreateHomeController();
-        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
-
         var shopController = CreateShopController();
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(shopController.Edit(Guid.NewGuid()));
         Assert.IsType<Guid>(notFoundResult.Value);
@@ -54,9 +48,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task EditActionIsPartialViewAsync()
     {
-        var homeController = CreateHomeController();
-        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
-
+        await SetShopsAsync();
         var shopController = CreateShopController();
         Assert.IsType<PartialViewResult>(shopController.Edit(_importFacade.GetShops().First().ShopGuid));
     }
@@ -64,8 +56,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task EditActionModelIsShopModelAsync()
     {
-        var homeController = CreateHomeController();
-        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        await SetShopsAsync();
 
         var shopController = CreateShopController();
         var shopGuid = _importFacade.GetShops().First().ShopGuid;
@@ -84,11 +75,10 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task SaveActionIsNotFoundWhenShopWithNonexistsGuidAsync()
     {
-        var homeController = CreateHomeController();
-        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        await SetShopsAsync();
 
         var shopController = CreateShopController();
-        var shop = new ShopModel { Id = _importFacade.GetShops().First().Shop.Id };
+        var shop = new ShopModel { Id = _importFacade.GetShops().First().Shop.Id, Guid = Guid.NewGuid() };
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(await shopController.Save(shop));
         var notFoundShop = Assert.IsType<ShopModel>(notFoundResult.Value);
         Assert.Equal(shop.Id, notFoundShop.Id);
@@ -115,8 +105,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task SaveActionIsOkShopGuidWhenNewShopAsync()
     {
-        var homeController = CreateHomeController();
-        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        await SetShopsAsync();
 
         var shopController = CreateShopController();
         var shop = new ShopModel() { Name = nameof(SaveActionIsOkShopGuidWhenNewShopAsync), Url="https://test" };
@@ -125,7 +114,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
         var prevShopCount = _importFacade.GetShops().Count;
 
         var okResult = Assert.IsType<OkObjectResult>(await shopController.Save(shop));
-        Assert.IsType<Guid>(okResult.Value);       
+        Assert.IsType<ShopModel>(okResult.Value);       
         Assert.Equal(prevShopCount + 1, _importFacade.GetShops().Count);
         Assert.Contains(_importFacade.GetShops(), s => s.Shop.Name == shop.Name);
     }
@@ -138,8 +127,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task SaveActionIsOkShopGuidWhenShopUpdatedAsync()
     {
-        var homeController = CreateHomeController();
-        Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        await SetShopsAsync();
 
         var shopController = CreateShopController();
         var index = new Random().Next(_shops.Count);
@@ -149,7 +137,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
         var prevShopCount = _importFacade.GetShops().Count;
 
         var okResult = Assert.IsType<OkObjectResult>(await shopController.Save(shop));
-        Assert.Equal(shop.Guid, Assert.IsType<Guid>(okResult.Value));
+        Assert.Equal(shop.Guid, Assert.IsType<ShopModel>(okResult.Value).Guid);
         Assert.Equal(prevShopCount, _importFacade.GetShops().Count);
         Assert.Contains(_importFacade.GetShops(), s => s.Shop.Name == shop.Name);
     }

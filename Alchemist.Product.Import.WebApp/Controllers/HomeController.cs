@@ -104,7 +104,7 @@ public class HomeController : Controller
     }
 
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Index()
     {
         var shopGuid = GetCurrentShopGuid();
@@ -122,8 +122,9 @@ public class HomeController : Controller
 
     [Route("Home/Index/shopGuid={shopGuid}&tab={tab}")]
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ActionName("Index")]
     public async Task<IActionResult> IndexRouteAsync(Guid shopGuid, int tab)
     {
@@ -132,8 +133,9 @@ public class HomeController : Controller
 
     [Route("Home/Index")]
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ActionName("Index")]
     public async Task<IActionResult> IndexFromQueryAsync([FromQuery] Guid shopGuid, [FromQuery] int tab)
     {
@@ -144,23 +146,26 @@ public class HomeController : Controller
     {
         try
         {
+            if (shopGuid == Guid.Empty || tab <0 || tab > (int)Enum.GetValues<TabType>().Max())
+                return BadRequest();
+
             var viewModel = await GetIndexViewModelAsync(shopGuid, (TabType)tab);
 
             SetCurrentShopGuid(shopGuid);
             SetCurrentTab((TabType)tab);
 
-            return viewModel != null ? View(viewModel) : BadRequest();
+            return viewModel != null ? View(viewModel) : NotFound(shopGuid);
         }
         catch (InvalidOperationException e)
         {
             _logger.LogError(e, $"Index({shopGuid},{tab})");
-            return await Task.FromResult(BadRequest());
+            return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
         }
     }
 
     [HttpPost]
     [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IsTabChanged(Guid shopGuid, int tab, string json)
     {

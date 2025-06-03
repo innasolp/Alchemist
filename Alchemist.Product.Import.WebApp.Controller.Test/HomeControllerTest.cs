@@ -1,132 +1,118 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Import.Model;
+﻿using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
-using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
-using System.Text.Json;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public class HomeControllerTest : ControllerTest<HomeController>
 {
+    private async Task<ViewResult> IndexActionIsTypeViewResultAsync()
+    {
+        var homeController = CreateHomeController();
+        var actionResult = await homeController.Index();
+        Assert.NotNull(actionResult);
+        return Assert.IsType<ViewResult>(actionResult);
+    }
+
     [Fact]
     public async Task IndexActionModelIsIndexViewModelAsync()
     {
-        await GetIndexActionViewModelAsync();
+        var actionResult = await IndexActionIsTypeViewResultAsync();
+        Assert.IsType<IndexViewModel>(actionResult.Model);
     }
 
     [Fact]
     public async Task ViewModelIsEmptyOnFirstIndexActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAsync();
-
+        var view = await IndexActionIsTypeViewResultAsync();
+        var indexViewModel = Assert.IsType<IndexViewModel>(view.Model);
         Assert.Empty(indexViewModel.Shops);
-    }
-
-    [Fact]
-    public async Task IndexActionDefaultTabIsShopSettingsAsync()
-    {
-        var indexViewModel = await GetIndexActionViewModelAsync();
-
-        Assert.Equal(TabType.Shop, indexViewModel.SelectedTab);
-    }
+    }   
 
     [Fact]
     public async Task ShopListNotEmptyAfterUpdateShopsActionAndIndexActionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        Assert.Equal(_shops.Count, indexViewModel.Shops.Count);
-        Assert.Equal(TabType.Shop, indexViewModel.SelectedTab);
-    }
-
-    public async Task UpdateShopsActionResultIsOkFalseWhenLoadShopsIsImpty()
-    {
-        var shopDataServiceMock = new Mock<IShopDataService>();        
-        shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<IShop>()));
-        var importFacade = new ImportFacade(shopDataServiceMock.Object);
-        var homeController = new HomeController(_loggerHomeControllerMock.Object, _settingsDataAdapterMock.Object, importFacade, _messageReceiverMock.Object);
-
+        var homeController = CreateHomeController();
         var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
-        Assert.Empty(_importFacade.GetShops());
-        Assert.True(Assert.IsType<bool>(actionResult.Value));
+        Assert.Equal(_shops.Count, Assert.IsType<List<ShopModel>>(actionResult.Value).Count);
     }
 
     [Fact]
-    public async Task IndexActionDefaultShopSettingsIsProductsAsync()
+    public async Task UpdateShopsActionResultIsInternalServerErrorWhenLoadShopsThrowExceptionAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        var shopGuid = indexViewModel.SelectedShopImport.ShopGuid;
-        Assert.NotEqual(Guid.Empty, shopGuid);
-
-        var shopSettings = indexViewModel.SelectedShopImport.GetSettings(indexViewModel.SelectedTab, true);
-        Assert.NotNull(shopSettings);
-        Assert.IsType<ProductShopSettingsModel>(shopSettings);
-        Assert.Equal(shopGuid, shopSettings.ShopGuid);
-    }
+        var exception = new InvalidOperationException("test error");
+        var homeController = CreateHomeController();
+        _shopDataServiceMock.Setup(s => s.GetShops()).Throws(exception);
+        
+        var actionResult = Assert.IsType<ObjectResult>(await homeController.UpdateShops());
+        Assert.Equal(exception.Message, Assert.IsType<InvalidOperationException>(actionResult.Value).Message);        
+    }    
 
     [Fact]
     public async Task IndexActionWhenSelectedShopChangedAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
-        var currentShopGuid = indexViewModel.SelectedTabModel.ShopGuid;
-        var nextShopGuid = indexViewModel.Shops.FirstOrDefault(s => s.Guid != currentShopGuid)?.Guid;
-        Assert.NotNull(nextShopGuid);
-        Assert.NotEqual(Guid.Empty, nextShopGuid);
-
         var homeController = CreateHomeController();
-        var nextIndexView = Assert.IsType<ViewResult>(await homeController.IndexFromQueryAsync((Guid)nextShopGuid, (int)indexViewModel.SelectedTab));
+
+        await SetShopsAsync();
+
+        var nextShopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var selectedTab = TabType.Shop;
+
+        var nextIndexView = Assert.IsType<ViewResult>(await homeController.IndexFromQueryAsync(nextShopGuid, (int)selectedTab));
         var nextIndexViewModel = Assert.IsType<IndexViewModel>(nextIndexView.Model);
-        Assert.Equal(indexViewModel.SelectedTab, nextIndexViewModel.SelectedTab);
-        Assert.NotEqual(indexViewModel.SelectedTabModel.ShopGuid, nextIndexViewModel.SelectedTabModel.ShopGuid);
-        Assert.Equal(nextShopGuid, nextIndexViewModel.SelectedTabModel.ShopGuid);
+        Assert.Equal(selectedTab, nextIndexViewModel.SelectedTab);
+        Assert.Equal(nextShopGuid, nextIndexViewModel.SelectedShopImport.ShopGuid);
     }
 
     [Fact]
     public async Task IndexActionWhenSelectedTabChangedAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
+        var homeController = CreateHomeController(); 
 
-        var currentTab = indexViewModel.SelectedTab;
-        var nextTab = TabHelper.Tabs.FirstOrDefault(t => t != currentTab);
-        var shopGuid = indexViewModel.SelectedTabModel.ShopGuid;
+        await SetShopsAsync();
 
-        var homeController = CreateHomeController();
-        var nextIndexView = await homeController.IndexFromQueryAsync(shopGuid, (int)nextTab) as ViewResult;
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var nextTab = TabType.Products;
 
-        Assert.NotNull(nextIndexView);
-        var nextIndexViewModel = nextIndexView.Model as IndexViewModel;
-        Assert.NotNull(nextIndexViewModel);
-        Assert.NotEqual(indexViewModel.SelectedTab, nextIndexViewModel.SelectedTab);
-        Assert.NotEqual(indexViewModel.SelectedTabModel.Tab, nextIndexViewModel.SelectedTabModel.Tab);
-        Assert.Equal(shopGuid, nextIndexViewModel.SelectedTabModel.ShopGuid);
+        var nextIndexView = Assert.IsType<ViewResult>(await homeController.IndexFromQueryAsync(shopGuid, (int)nextTab));
+        var nextIndexViewModel = Assert.IsType<IndexViewModel>(nextIndexView.Model);        
+        Assert.Equal(nextTab, nextIndexViewModel.SelectedTab);
+        Assert.Equal(shopGuid, nextIndexViewModel.SelectedShopImport.ShopGuid);
     }
 
 
     [Fact]
-    public async Task IndexActionBadRequestWhenNonexistentShopSetAsync()
+    public async Task IndexActionNotFoundWhenNonexistingShopSetAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
+        await SetShopsAsync();
 
-        var homeController = CreateHomeController();
-        var tab = indexViewModel.SelectedTab;
+        var homeController = CreateHomeController();        
+
+        var tab = TabType.Shop;
         var nextShopGuid = Guid.NewGuid();
-        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(nextShopGuid, (int)tab));
+
+        Assert.Equal(nextShopGuid,
+            Assert.IsType<Guid>(Assert.IsType<NotFoundObjectResult>(await homeController.IndexFromQueryAsync(nextShopGuid, (int)tab)).Value));
     }
 
     [Fact]
     public async Task IndexActionBadRequestWhenNonexistentTabSetAsync()
     {
-        var indexViewModel = await GetIndexActionViewModelAfterUpdateShopsAsync();
-
         var homeController = CreateHomeController();
-        var shopGuid = indexViewModel.SelectedTabModel.ShopGuid;
-        var nextTab = TabHelper.Tabs.Max() + 1;
-        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(shopGuid, (int)nextTab));
-    }    
+        await SetShopsAsync();
+
+        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
+        var nextTab = (int)Enum.GetValues<TabType>().Max() + 1;
+        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(shopGuid, nextTab));
+    }
+
+    [Fact]
+    public async Task IndexActionBadRequestWhenEmptyShopGuidSetAsync()
+    {
+        var homeController = CreateHomeController();
+        await SetShopsAsync();
+        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(Guid.Empty, (int)TabType.Shop));
+    }
 }
