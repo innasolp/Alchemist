@@ -7,11 +7,11 @@ namespace Alchemist.Product.Import.Model.Infrastructure;
 
 public static class ModelExtensions
 {
-    public static SettingsModelBase? GetSettings(this ShopImportModel shopImport, TabType tab, bool last = false)
+    public static SettingsModelBase? GetSettings(this ShopImportModel shopImport, TabType tab, bool lastSelected = false)
     {
         return tab switch
         {
-            TabType.Shop => !last ? shopImport.ShopSettingTabs
+            TabType.Shop => !lastSelected ? shopImport.ShopSettingTabs
                                     : shopImport.ShopSettingTabs?.GetShopSettingsByType(shopImport.ShopSettingTabs.SelectedSettingsTab),
             TabType.Products => shopImport.ImportProducts,
             TabType.Categories => shopImport.ImportCategories,
@@ -78,22 +78,19 @@ public static class ModelExtensions
                     else
                     {
                         shopImport.ShopSettingTabs ??= new ShopSettingTabsModel() { ShopGuid = shopImport.ShopGuid };
-                        if (shopImport.ShopSettingTabs.SelectedSettingsTab == ShopSettingType.Product)
-                        {
-                            if (settings is not ProductShopSettingsModel productShopSettings)
-                                return false;
+                        if (settings is ProductShopSettingsModel productShopSettings)
+                        {                            
                             shopImport.ShopSettingTabs.ShopProductsSettings = productShopSettings;
                             shopImport.ShopSettingTabs.ShopProductsSettings.Init(shopImport.ShopGuid);
                             return true;
                         }
-                        else
-                        {
-                            if (settings is not CategoryShopSettingsModel categoryShopSettings)
-                                return false;
+                        else if(settings is CategoryShopSettingsModel categoryShopSettings)    
+                        {                           
                             shopImport.ShopSettingTabs.ShopCategoriesSettings = categoryShopSettings;
                             shopImport.ShopSettingTabs.ShopCategoriesSettings.Init(shopImport.ShopGuid);
                             return true;
                         }
+                        return false;
                     }
                 }
 

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Alchemist.Product.Interfaces;
 
 [JsonConverter(typeof(JsonStringEnumConverter<ShopSettingType>))]
-public enum ShopSettingType:short
+public enum ShopSettingType : short
 {
     [Description("Service")]
     Service = 0,
