@@ -30,9 +30,7 @@ public abstract class ControllerTest<T>
         new Shop { Id = 1, Name = "Shop1", Url = "https://shop1" },
         new Shop { Id = 2, Name = "Shop2", Url = "https://shop2" },
         new Shop { Id = 3, Name = "Shop3", Url = "https://shop3" }
-    ];
-
-    private int _settingsIdCounter = 0;
+    ];    
 
     protected readonly Mock<ILogger<T>> _loggerMock = new();
 
@@ -80,45 +78,45 @@ public abstract class ControllerTest<T>
     protected async Task SetShopsAsync()
     {
         await _importFacade.LoadShops();
-    }  
-
+    } 
+    
 
     //todo change to get or create
     protected async Task<IShopImportSettings> GetShopSettingsModelAsync(int shopId, ShopSettingType shopSettingType)
     {
         if (shopSettingType == ShopSettingType.Service)
-            throw new InvalidOperationException();        
+            throw new InvalidOperationException();       
+        
+        var shop = _importFacade.GetShops().FirstOrDefault(s=>s.Shop.Id == shopId) ?? throw new InvalidOperationException("shops are not set");
 
-        ShopSettingsModel shopSettings = shopSettingType == ShopSettingType.Product
-            ? new ProductShopSettingsModel { Id = _settingsIdCounter++}
-            : new CategoryShopSettingsModel { Id = _settingsIdCounter++ };
+        if (!_importFacade.TryGetShopSettings(shop.ShopGuid, shopSettingType, out var shopSettings))
+            shopSettings = await SetShopSettingAsync(shop.ShopGuid, shopSettingType);        
 
         ((ISettings)shopSettings).ShopId = shopId;
-
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.ImportService));
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.BrowserDataLoader));
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.RequestHeaders));
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.WebLoader));
     
         return await Task.FromResult(shopSettings);
     }
 
-    private void SetServiceSetting(ShopSettingsModel shopSettings, string serviceName)
+    private static void SetServiceSetting(ShopSettingsModel shopSettings, string serviceName, int id)
     {
-        var service = new ServiceSettingsModel { Name = serviceName, Id = _settingsIdCounter++ };
+        var service = new ServiceSettingsModel { Name = serviceName, Id = id };
         ((ISettings)service).ParentSettingsId = shopSettings.Id;
         ((ISettings)service).ShopId = ((ISettings)shopSettings).ShopId;
         service.ServiceTypeName = $"{shopSettings.ShopSettingType}{serviceName}Type{shopSettings.Id}";
         shopSettings.SetServiceSettings(service);
     }
 
-    protected void SetShopSettings(ShopImportModel shopImport, ShopSettingType shopSettingType)
+    protected static void SetShopSettings(ShopImportModel shopImport, ShopSettingType shopSettingType)
     {
         var shopSettings = shopImport.ShopGuid.CreateShopSettings(shopSettingType);
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.ImportService));
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.BrowserDataLoader));
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.RequestHeaders));
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.WebLoader));
+
+        shopSettings.Id = shopImport.Shop.Id;
+
+        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.ImportService), shopSettings.Id + 1);
+        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.BrowserDataLoader), shopSettings.Id + 2);
+        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.RequestHeaders), shopSettings.Id + 3);
+        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.WebLoader), shopSettings.Id + 4);
+
         shopImport.SetSettings(TabType.Shop, shopSettings);
     }
 

@@ -7,6 +7,7 @@ using Alchemist.Product.Import.WebApp.Models;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
@@ -166,7 +167,7 @@ public class HomeController : Controller
     [HttpPost]
     [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IsTabChanged(Guid shopGuid, int tab, string json)
     {
         if (string.IsNullOrEmpty(json)) return BadRequest(json);
@@ -177,7 +178,16 @@ public class HomeController : Controller
         var settings = shopImport.GetSettings((TabType)tab, true);
         if (settings == null) return Ok(false);
 
-        var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
+        SettingsModelBase modelFromJson;
+        try
+        {
+            modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
+        }
+        catch(JsonException)
+        {
+            return BadRequest(json);
+        }
+        
         if (modelFromJson == null) return Ok(false);
 
         if ((TabType)tab != TabType.Shop)
@@ -260,8 +270,7 @@ public class HomeController : Controller
             if ((TabType)tab == TabType.Shop &&
                 shopImport.GetSettings((TabType)tab, true) == null)
             {
-                var settings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
-                if (settings != null)
+                if (await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) is ShopSettingsModel settings)
                     shopImport.SetSettings((TabType)tab, settings);
                 else
                 {

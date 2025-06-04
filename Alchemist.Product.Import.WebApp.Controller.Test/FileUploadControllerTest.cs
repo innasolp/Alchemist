@@ -16,6 +16,86 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         return new FileUploadController(_importFacade);
     }
 
+    [Fact]
+    public async Task UploadShopSettingsBadRequestWhenFileIsNull()
+    {
+        var fileUploadController = CreateFileUploadController();
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettings(Guid.Empty, (int)ShopSettingType.Product, null));
+        Assert.Equal("file", Assert.IsType<string>(actionResult.Value));
+    }
+    
+
+    [Fact]
+    public async Task UploadServiceSettingsBadRequestWhenFileIsNull()
+    {
+        var fileUploadController = CreateFileUploadController();
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.Empty, Guid.Empty, "", null));
+        Assert.Equal("file", Assert.IsType<string>(actionResult.Value));
+    }
+
+    [Fact]
+    public async Task UploadServiceSettingsBadRequestWhenShopGuidEmpty()
+    {
+        var fileName = "importservice.json";
+        var formFile = GetFormFile(fileName);
+        var fileUploadController = CreateFileUploadController();
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.Empty, Guid.Empty, "", formFile));
+        Assert.Equal("shopGuid", Assert.IsType<string>(actionResult.Value));
+    }
+
+    [Fact]
+    public async Task UploadShopSettingsBadRequestWhenShopGuidEmpty()
+    {
+        var fileName = "importservice.json";
+        var formFile = GetFormFile(fileName);
+        var fileUploadController = CreateFileUploadController();
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettings(Guid.Empty, (int)ShopSettingType.Product, formFile));
+        Assert.Equal("shopGuid", Assert.IsType<string>(actionResult.Value));
+    }
+
+    [Fact]
+    public async Task UploadServiceSettingsBadRequestWhenShopSettingsGuidEmpty()
+    {
+        var fileName = "importservice.json";
+        var formFile = GetFormFile(fileName);
+        var fileUploadController = CreateFileUploadController();
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.NewGuid(), Guid.Empty, "", formFile));
+        Assert.Equal("shopSettingsGuid", Assert.IsType<string>(actionResult.Value));
+    }
+
+    [Fact]
+    public async Task UploadServiceSettingsBadRequestWhenServiceSettingsEmpty()
+    {
+        var fileName = "importservice.json";
+        var formFile = GetFormFile(fileName);
+        var fileUploadController = CreateFileUploadController();
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.NewGuid(), Guid.NewGuid(), "", formFile));
+        Assert.Equal("serviceSettingsName", Assert.IsType<string>(actionResult.Value));
+    }
+
+    [Fact]
+    public async Task UploadServiceSettingsNotFoundWhenShopNotExists()
+    {
+        var fileName = "importservice.json";
+        var formFile = GetFormFile(fileName);
+        var fileUploadController = CreateFileUploadController();
+        var shopGuid = Guid.NewGuid();
+        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadServiceSettings(shopGuid, Guid.NewGuid(), "importservice", formFile));
+        Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
+    }
+
+    [Fact]
+    public async Task UploadShopSettingsNotFoundWhenShopNotExists()
+    {
+        var fileName = "importservice.json";
+        var formFile = GetFormFile(fileName);
+        var shopGuid = Guid.NewGuid();
+        var fileUploadController = CreateFileUploadController();
+        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadShopSettings(shopGuid, (int)ShopSettingType.Product, formFile));
+        Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
+    }
+
+
     private static IFormFile GetFormFile(string fileName, string? path = null)
     {
         var fileMock = new Mock<IFormFile>();

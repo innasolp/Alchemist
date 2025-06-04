@@ -7,11 +7,11 @@ namespace Alchemist.Product.Import.Model.Infrastructure;
 
 public static class ModelExtensions
 {
-    public static SettingsModelBase? GetSettings(this ShopImportModel shopImport, TabType tab, bool last = false)
+    public static SettingsModelBase? GetSettings(this ShopImportModel shopImport, TabType tab, bool lastSelected = false)
     {
         return tab switch
         {
-            TabType.Shop => !last ? shopImport.ShopSettingTabs
+            TabType.Shop => !lastSelected ? shopImport.ShopSettingTabs
                                     : shopImport.ShopSettingTabs?.GetShopSettingsByType(shopImport.ShopSettingTabs.SelectedSettingsTab),
             TabType.Products => shopImport.ImportProducts,
             TabType.Categories => shopImport.ImportCategories,
