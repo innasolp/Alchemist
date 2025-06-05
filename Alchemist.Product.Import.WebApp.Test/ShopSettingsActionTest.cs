@@ -141,6 +141,8 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         await Expect(serviceForm).ToBeVisibleAsync();
 
+        await serviceForm.Locator("#ServiceTypeName").FillAsync("");       
+
         await Expect(serviceForm.Locator("#ServiceTypeName-error")).ToBeVisibleAsync();
         await Expect(serviceForm.Locator("#ServiceTypeName-error")).ToContainTextAsync("The Service type field is required.");
     }
@@ -181,7 +183,6 @@ public class ShopSettingsActionTest : ImportWebAppTest
     {
         var serviceForm = await ShowServiceModalFormAsync(page, serviceSettings.Name);      
 
-//        await ExpectWithNullValueAsync(serviceForm.Locator("#ImplementationTypeName"), serviceSettings.ImplementationTypeName); 
         await ExpectWithNullValueAsync(serviceForm.Locator("#ServiceTypeName"), serviceSettings.ServiceTypeName);
         await ExpectWithNullValueAsync(serviceForm.Locator("#AssemblyPath"), serviceSettings.AssemblyPath);
         await ExpectWithNullValueAsync(serviceForm.Locator("#ServiceProviderPath"), serviceSettings.ServiceProviderPath);
