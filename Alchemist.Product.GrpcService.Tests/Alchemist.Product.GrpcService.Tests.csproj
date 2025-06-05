@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.GrpcService\Alchemist.Product.GrpcService.csproj" />
-    <ProjectReference Include="..\Alchemist.Test.Server.Fixtures.Grpc\Alchemist.Test.Server.Fixtures.Grpc.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
   </ItemGroup>
 

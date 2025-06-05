@@ -1,11 +1,12 @@
-﻿using Alchemist.Test.Server.Fixtures.Grpc;
+﻿using Alchemist.Product.GrpcService.Tests.Infrastructure;
+using Alchemist.Test.Server.Fixtures;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpcLoggingWebAppFactory, Program>, IDisposable
+public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLoggingWebAppFactory, Program>, IDisposable
 {
     record TestLogMessage (LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
@@ -16,7 +17,10 @@ public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpc
     public AlchemistGrpcLoggingIntegrationTest(AlchemistGrpcLoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
         : base(webAppFactory, outputHelper)
     {
-        _client = new AlchemyGrpcService.AlchemyGrpcServiceClient(GrpcChannel);
+        WebAppFactory.DataBase = "test_ci_db_grpc_logging";
+
+        var grpcChannel = webAppFactory.CreateChannel("http://localhost");
+        _client = new AlchemyGrpcService.AlchemyGrpcServiceClient(grpcChannel);
 
         WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
     }
@@ -64,7 +68,6 @@ public class AlchemistGrpcLoggingIntegrationTest : GrpcTestFixture<AlchemistGrpc
 
     public void Dispose()
     {
-        WebAppFactory.FixtureLoggingContext.LoggedMessage -= Log;
-        base.Dispose();
+        WebAppFactory.FixtureLoggingContext.LoggedMessage -= Log;        
     }
 }

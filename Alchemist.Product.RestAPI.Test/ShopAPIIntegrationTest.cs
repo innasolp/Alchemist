@@ -1,4 +1,5 @@
 using Alchemist.Product.Data;
+using Alchemist.Product.RestAPI.Test.Infrastructure;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 

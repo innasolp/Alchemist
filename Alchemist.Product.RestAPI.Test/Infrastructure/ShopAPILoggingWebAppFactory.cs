@@ -1,7 +1,7 @@
 ﻿using Alchemist.Product.RestAPI.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Product.RestAPI.Test;
+namespace Alchemist.Product.RestAPI.Test.Infrastructure;
 
 public class ShopAPILoggingWebAppFactory: ShopAPISignlRMockWebAppFactory
 {

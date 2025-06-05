@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Product.RestAPI.Test;
+namespace Alchemist.Product.RestAPI.Test.Infrastructure;
 
 public class ShopAPISignalRWebAppFactory(TestServer signalRServer) : ShopAPIWebAppFactory
 {

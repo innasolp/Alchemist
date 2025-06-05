@@ -4,19 +4,22 @@ using Alchemist.Test.Server.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Product.GrpcService.Tests;
+namespace Alchemist.Product.RestAPI.Test.Infrastructure;
 
-public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<Program, AlchemyContext>
+public abstract class ShopAPIWebAppFactory : DbContextWebAppFactory<ShopAPIProgram, AlchemyContext>
 {
+    public string DataBase { get; set; } = "test_ci_db";
+
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        dbContext.Brands.Add(new Brand { Name = "Elizavecca" });
+        dbContext.Shops.Add(new Shop { Name = "TestShop", Url = "https://testshop1" });
         dbContext.SaveChanges();
     }
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
         return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder =>
-        optionsBuilder.UseNpgsql("Host=localhost;Database=test_ci_db;Username=postgres;Password=P@ssw0rd;"));
+        optionsBuilder.UseNpgsql($"Host=localhost;Database={DataBase};Username=postgres;Password=P@ssw0rd;"));
     }
 }
+

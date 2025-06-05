@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Product.Import.WebApp.IntegrationTest;
+namespace Alchemist.Product.Import.WebApp.IntegrationTest.Infrastructure;
 
 public class SettingsAPIWebAppFactory : DbAPIWebAppFactory<SettingsAPIProgram, AlchemyContext>
 {
@@ -17,7 +17,7 @@ public class SettingsAPIWebAppFactory : DbAPIWebAppFactory<SettingsAPIProgram, A
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
         return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder =>
-        optionsBuilder.UseNpgsql("Host=localhost;Database=test_ci_db;Username=postgres;Password=P@ssw0rd;"));
+        optionsBuilder.UseNpgsql("Host=localhost;Database=test_ci_db_importwebapp;Username=postgres;Password=P@ssw0rd;"));
     }
 
     protected override void FillTestData(AlchemyContext dbContext)
