@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 
-namespace Alchemist.Import.Settings.Builders.Tests;
+namespace Alchemist.Import.Settings.JsonAdapter.Tests;
 
 public static class ShopSettingsAsserts
 {

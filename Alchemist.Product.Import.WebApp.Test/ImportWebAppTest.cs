@@ -78,7 +78,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             var serviceSettings = shopSetting.ToImportServiceSettings<ImportServiceSettings>();
             serviceSettings.AssemblyPath = $"C:\\Folder{shopSetting.Id}";
             serviceSettings.ImplementationTypeName = $"ServiceImplementation{shopSetting.Id}";
-            serviceSettings.ImplementationTypeName = $"ServiceType{shopSetting.Id}";
+            serviceSettings.ServiceTypeName = $"ServiceType{shopSetting.Id}";
 
             shopSetting.JsonValue = JsonSerializer.Serialize(serviceSettings);
         }
