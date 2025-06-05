@@ -2,7 +2,7 @@
 using Alchemist.Test.Server.Fixtures;
 using Xunit.Abstractions;
 
-namespace Alchemist.Product.RestAPI.Test;
+namespace Alchemist.Product.RestAPI.Test.Infrastructure;
 
 public class ShopAPITestFixture<TWebAppFactory>(TWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
     : TestFixture<TWebAppFactory, ShopAPIProgram>(webAppFactory, outputHelper)

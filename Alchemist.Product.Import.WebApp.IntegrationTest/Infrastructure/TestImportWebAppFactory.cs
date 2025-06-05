@@ -2,7 +2,7 @@
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace Alchemist.Product.Import.WebApp.IntegrationTest;
+namespace Alchemist.Product.Import.WebApp.IntegrationTest.Infrastructure;
 
 public class TestImportWebAppFactory : TestWebAppKestrelFactory<ImportWebAppProgram>
 {

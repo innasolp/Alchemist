@@ -6,7 +6,7 @@ using System.Text.Json.Nodes;
 using Alchemist.Import.Settings.Extensions;
 using System.Reflection;
 
-namespace Alchemist.Product.Import.WebApp.IntegrationTest;
+namespace Alchemist.Product.Import.WebApp.IntegrationTest.Infrastructure;
 
 public static class TestRepository
 {
@@ -28,12 +28,12 @@ public static class TestRepository
 
         foreach (var shop in shops)
         {
-            var productShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Product };
+            var productShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Product, Name = Guid.NewGuid().ToString() };
             var productShopImportSettings = new ProductShopImportSettings() { Url = $"https://url{Guid.NewGuid()}" };
             productShopSettings.JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(productShopImportSettings));
             shopSettings.Add(productShopSettings);
 
-            var categoryShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Category };
+            var categoryShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Category, Name = Guid.NewGuid().ToString() };
             var categoryShopImportSettings = new CategoryShopImportSettings() { Url = $"https://url{Guid.NewGuid()}" };
             categoryShopSettings.JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(categoryShopImportSettings));
             shopSettings.Add(categoryShopSettings);

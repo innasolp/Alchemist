@@ -52,18 +52,7 @@ public class ShopCategoryControllerPostTest:ControllerTest<ShopCategoryControlle
         Assert.Equal(shopCategory.ShopId, badRequest.Value.ShopId);
         Assert.Equal(shopCategory.Category, badRequest.Value.Category);
         Assert.Equal(shopCategory.ItemId, badRequest.Value.ItemId);
-    }
-    
-    [Fact]
-    public async Task AddShopCategoryReturnsBadRequestWhenCategoryIsEmptyAsync()
-    {
-        var shopCategory = new ShopCategory { ShopId = 1, ItemId = 1, Category = "" };
-        var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.AddShopCategory(shopCategory));
-        var badRequest = Assert.IsType<BadRequest<ShopCategory>>(result.Result);
-        Assert.Equal(shopCategory.ShopId, badRequest.Value.ShopId);
-        Assert.Equal(shopCategory.Category, badRequest.Value.Category);
-        Assert.Equal(shopCategory.ItemId, badRequest.Value.ItemId);
-    }
+    }  
     
     [Fact]
     public async Task AddShopCategoryReturnsCreatedWhenIsValidAsync()

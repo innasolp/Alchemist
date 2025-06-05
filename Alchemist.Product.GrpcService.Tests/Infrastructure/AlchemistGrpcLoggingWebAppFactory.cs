@@ -1,7 +1,7 @@
 ﻿using Alchemist.Test.Server.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Product.GrpcService.Tests;
+namespace Alchemist.Product.GrpcService.Tests.Infrastructure;
 
 public class AlchemistGrpcLoggingWebAppFactory: AlchemistGrpcWebAppFactory
 {
