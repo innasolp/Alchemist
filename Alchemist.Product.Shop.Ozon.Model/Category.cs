@@ -42,6 +42,13 @@ public class Category : IJsonOnDeserialized, ICategoryProducts
                 .FirstOrDefault(c => !string.IsNullOrEmpty(c?.TileLayout));
         }
 
+        if(CategoryContent == null)
+        {
+            var tileGridDesktop = WidgetStates?.FirstOrDefault(ws => ws.Key.Contains("tileGridDesktop"));
+            if (tileGridDesktop != null)
+                CategoryContent = JsonSerializer.Deserialize<CategoryContent>(tileGridDesktop.Value.Value.ToString());
+        }
+
 
         if (!string.IsNullOrWhiteSpace(SharedContent))
         {
