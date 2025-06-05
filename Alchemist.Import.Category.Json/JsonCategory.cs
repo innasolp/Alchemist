@@ -38,7 +38,7 @@ public class JsonCategory : ICategory
     private static readonly string _invalidUrlMessageFormat = "Url '{0}' not contains {1}";
 
 
-    private JsonCategory()
+    protected JsonCategory()
     {
         _children.CollectionChanged += OnChildrenCollectionChanged;
     }
@@ -67,28 +67,23 @@ public class JsonCategory : ICategory
 
     private delegate bool TryGetValueFromUrl<TResult>(string url, out TResult result);
 
-    private static bool TryGetPropertyFromUrl<T>(JsonElement categoryElement,
-        string propertyName,
+    private static bool TryGetPropertyFromUrl<T>(string propertyName,
         string? url,
         TryGetValueFromUrl<T> tryGetValueFromUrl,
         out T? result)
     {
-        result = default;
-
         if (tryGetValueFromUrl(url, out result))
             return true;
         else
             throw new InvalidDataException(string.Format(_invalidUrlMessageFormat, url, propertyName));
     }
 
-    public static bool TryLoad(JsonElement categoryElement, Dictionary<string, PropertyPath> propertyPathes, out JsonCategory category)
+    protected bool TryLoad(JsonElement categoryElement, Dictionary<string, PropertyPath> propertyPathes)       
     {
-        category = new JsonCategory();
-
-        if (TryGetProperty(categoryElement, propertyPathes[nameof(Url)], (e) => e.GetString(), out string url))
+        if (TryGetProperty(categoryElement, propertyPathes[nameof(Url)], (e) => e.GetString(), out string? url))
         {
-            category.Url = url;
-            if (string.IsNullOrEmpty(category.Url)) return false;
+            if (url == null) return false;
+            Url = url;
         }
         else
             return false;
@@ -96,28 +91,28 @@ public class JsonCategory : ICategory
         if (propertyPathes.TryGetValue(nameof(Id), out PropertyPath idPath))
         {
             if (TryGetProperty(categoryElement, idPath, (e) => e.GetInt32(), out int id))
-                category.Id = id;
+                Id = id;
             else
                 return false;
         }
-        else if (TryGetPropertyFromUrl(categoryElement, nameof(Id), category.Url, Utils.TryGetCategoryIdFromUrl, out int categoryId))
-            category.Id = categoryId;
+        else if (TryGetPropertyFromUrl(nameof(Id), Url, Utils.TryGetCategoryIdFromUrl, out int categoryId))
+            Id = categoryId;
 
         if (propertyPathes.TryGetValue(nameof(Name), out PropertyPath namePath))
         {
-            if (TryGetProperty(categoryElement, namePath, (e) => e.GetString(), out string name))
-                category.Name = name;
+            if (TryGetProperty(categoryElement, namePath, (e) => e.GetString(), out string? name))
+                Name = name;
             else
                 return false;
         }
-        else if (TryGetPropertyFromUrl(categoryElement, nameof(Name), category.Url, Utils.TryGetCategoryNameFromUrl, out string categoryName))
-            category.Name = categoryName;
+        else
+            Name = Utils.TryGetCategoryNameFromUrl(Url, out string categoryName) ? categoryName : "";
 
 
         if (propertyPathes.TryGetValue(nameof(Description), out PropertyPath descriptionPath))
         {
-            if (TryGetProperty(categoryElement, descriptionPath, (e) => e.GetString(), out string description))
-                category.Description = description;
+            if (TryGetProperty(categoryElement, descriptionPath, (e) => e.GetString(), out string? description))
+                Description = description;
             else
                 return false;
         }
@@ -125,7 +120,7 @@ public class JsonCategory : ICategory
         if (propertyPathes.TryGetValue(nameof(IsParented), out PropertyPath isParentedPath))
         {
             if (TryGetProperty(categoryElement, isParentedPath, (e) => e.GetBoolean(), out bool isParented))
-                category.IsParented = isParented;
+                IsParented = isParented;
             else
                 return false;
         }
@@ -133,19 +128,41 @@ public class JsonCategory : ICategory
         return true;
     }
 
-
     public static List<JsonCategory> LoadAllChildren(JsonCategory? parentCategory, JsonElement jsonElement, string[] nodePath, Dictionary<string, PropertyPath> propertyPathes)
     {
         try
         {
             var categoriesElements = GetAllElementsByNodePath(jsonElement, nodePath);
 
+            var categoryElementArrays = categoriesElements.Where(e => e.ValueKind == JsonValueKind.Array);
+
             var endChildren = new List<JsonCategory>();
-            foreach (var categoryElement in categoriesElements.Where(e => e.ValueKind == JsonValueKind.Array))
+
+            if (!categoryElementArrays.Any())
             {
-                var children = LoadChildrenTree(parentCategory, categoryElement, propertyPathes);
-                endChildren.AddRange(children);
+                foreach (var categoryElement in categoriesElements.Where(c => c.GetPropertyCount() > 0))
+                {
+                    var category = new JsonCategory();
+                    
+                   if (!category.TryLoad(categoryElement, propertyPathes))
+                        continue;                   
+
+                    endChildren.Add(category);
+
+                    if (parentCategory?.Id > 0)
+                        category.SetParent(parentCategory);
+
+                    if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out JsonElement childrenElement)
+                        && childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() > 0)
+                        endChildren.AddRange(LoadChildrenTree(category, childrenElement, propertyPathes));
+                }
             }
+            else
+                foreach (var categoryElement in categoryElementArrays)
+                {
+                    var children = LoadChildrenTree(parentCategory, categoryElement, propertyPathes);
+                    endChildren.AddRange(children);
+                }
 
             return endChildren;
         }
@@ -154,21 +171,30 @@ public class JsonCategory : ICategory
             throw;
         }
     }
-    public static void LoadAllChildren(JsonCategory? parentCategory, ICollection<JsonCategory> jsonCategories, JsonElement jsonElement, string[] nodePath, Dictionary<string, PropertyPath> propertyPathes)
+
+    public static void LoadAllChildren(JsonCategory? parentCategory, 
+        ICollection<JsonCategory> jsonCategories,
+        JsonElement jsonElement,
+        string[] nodePath,
+        Dictionary<string, PropertyPath> propertyPathes)
     {
         try
         {
             var categoriesElements = GetAllElementsByNodePath(jsonElement, nodePath);
 
-            //var endChildren = new List<JsonCategory>();
-            foreach (var categoryElement in categoriesElements.Where(e => e.ValueKind == JsonValueKind.Array))
+            var categoryElementArrays = categoriesElements.Where(e => e.ValueKind == JsonValueKind.Array);
+            if (!categoryElementArrays.Any())
             {
-                //var children = LoadChildrenTree(parentCategory, categoryElement, propertyPathes);
-                //children.ForEach(jsonCategories.Add);
-                LoadChildrenTree(parentCategory, jsonCategories, categoryElement, propertyPathes);
+                foreach (var categoryElement in categoriesElements.Where(c => c.GetPropertyCount() > 0))
+                {
+                    LoadChildrenTreeFromElement(parentCategory, categoryElement, jsonCategories, propertyPathes);                    
+                }
             }
-
-            //return endChildren;
+            else
+                foreach (var categoryElement in categoryElementArrays)
+                {
+                    LoadChildrenTree(parentCategory, jsonCategories, categoryElement, propertyPathes);
+                }
         }
         catch (Exception ex)
         {
@@ -176,7 +202,28 @@ public class JsonCategory : ICategory
         }
     }
 
-    private static List<JsonElement> GetAllElementsByNodePath(JsonElement jsonElement, string[] nodePath)
+    
+
+    private static void LoadChildrenTreeFromElement(JsonCategory? parentCategory,
+        JsonElement categoryElement,
+        ICollection<JsonCategory> jsonCategories,
+        Dictionary<string, PropertyPath> propertyPathes)
+    {
+        var jsonCategory = new JsonCategory();
+        if (!jsonCategory.TryLoad(categoryElement, propertyPathes))
+            return;
+
+        if (parentCategory?.Id > 0)
+            jsonCategory.SetParent(parentCategory);
+
+        jsonCategories.Add(jsonCategory);
+
+        if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out var childrenElement)
+            && childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() > 0)
+            LoadChildrenTree(jsonCategory, jsonCategories, childrenElement, propertyPathes);
+    }    
+
+    protected static List<JsonElement> GetAllElementsByNodePath(JsonElement jsonElement, string[] nodePath)
     {
         var currentElement = jsonElement;
         var lastNodePath = new List<string>(nodePath);
@@ -191,7 +238,7 @@ public class JsonCategory : ICategory
 
             currentElement = nextElement;
 
-            if (lastNodePath.Count > 0 && currentElement.ValueKind == JsonValueKind.Array)
+            if (currentElement.ValueKind == JsonValueKind.Array)
             {
                 var arrayElements = currentElement.EnumerateArray();
 
@@ -222,90 +269,59 @@ public class JsonCategory : ICategory
 
         foreach (var categoryElement in categoriesArray)
         {
-            var isLoaded = TryLoad(categoryElement, propertyPathes, out JsonCategory category);
+            var category = new JsonCategory();
+            var isLoaded = category.TryLoad(categoryElement, propertyPathes);
 
             if (category.Id == parentCategory?.Id)
                 continue;
 
-            if (isLoaded)
-            {
-                //todo
-                if ((parentCategory == null || parentCategory.Id == 0) && category.IsParented == false)
-                {
-                    //endChildren.Add(category);
-                    continue;
-                }
+            if (isLoaded && parentCategory?.Id > 0)
+                category.SetParent(parentCategory);
 
-                if (parentCategory != null && parentCategory.Id > 0)
-                {
-                    category.ParentId = parentCategory.Id;
-                    category.ItemParent = parentCategory;
-                    parentCategory._children.Add(category);
-                    parentCategory._childrenIds.Add(category.Id);
-                }
-            }
+            endChildren.Add(category);
 
-            if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out JsonElement childrenElement))
-            {
-                if (childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() == 0)
-                    endChildren.Add(category);
-                else
-                    endChildren.AddRange(LoadChildrenTree(category, childrenElement, propertyPathes));
-            }
-            else if (isLoaded)
-                endChildren.Add(category);
+            if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out JsonElement childrenElement)
+                && childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() > 0)            
+                endChildren.AddRange(LoadChildrenTree(category, childrenElement, propertyPathes));               
         }
 
         return endChildren;
     }
 
-    private static void LoadChildrenTree(JsonCategory? parentCategory, ICollection<JsonCategory> categories,
+    private static void LoadChildrenTree(JsonCategory? parentCategory, ICollection<JsonCategory> jsonCategories,
         JsonElement categoriesElement,
         Dictionary<string, PropertyPath> propertyPathes)
     {
         if (categoriesElement.ValueKind != JsonValueKind.Array)
             throw new InvalidCastException($"element {categoriesElement.GetRawText()} is not json array.");
 
-        var categoriesArray = categoriesElement.EnumerateArray();
+        var categoryElementQueue = new Queue<JsonElement>(categoriesElement.EnumerateArray());
 
-        //var endChildren = new List<JsonCategory>();
-
-        foreach (var categoryElement in categoriesArray)
+        while (categoryElementQueue.Count > 0)
         {
-            var isLoaded = TryLoad(categoryElement, propertyPathes, out JsonCategory category);
+            var categoryElement = categoryElementQueue.Dequeue();
+            var category = new JsonCategory();
+            var isLoaded = category.TryLoad(categoryElement, propertyPathes);
 
             if (category.Id == parentCategory?.Id)
                 continue;
 
-            if (isLoaded)
-            {
-                //todo
-                if ((parentCategory == null || parentCategory.Id == 0) && category.IsParented == false)
-                {
-                    //endChildren.Add(category);
-                    continue;
-                }
+            if (isLoaded && parentCategory?.Id > 0)
+                category.SetParent(parentCategory);
 
-                if (parentCategory != null && parentCategory.Id > 0)
-                {
-                    category.ParentId = parentCategory.Id;
-                    category.ItemParent = parentCategory;
-                    parentCategory._children.Add(category);
-                    parentCategory._childrenIds.Add(category.Id);
-                }
-            }
+            jsonCategories.Add(category);
 
-            if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out JsonElement childrenElement))
-            {
-                if (childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() == 0)
-                    categories.Add(category);
-                else
-                    LoadChildrenTree(category, categories, childrenElement, propertyPathes);
-            }
-            else if (isLoaded)
-                categories.Add(category);
+            if (categoryElement.TryGetProperty(propertyPathes[nameof(Children)].Path, out JsonElement childrenElement) &&
+                childrenElement.ValueKind == JsonValueKind.Array && childrenElement.GetArrayLength() > 0)
+                LoadChildrenTree(category, jsonCategories, childrenElement, propertyPathes);
         }
+    }
 
-        //return categories;
+    protected void SetParent(JsonCategory parentCategory)
+    {
+        ParentId = parentCategory.Id;
+        ItemParent = parentCategory;
+        parentCategory._children.Add(this);
+        parentCategory._childrenIds.Add(Id);
     }
 }

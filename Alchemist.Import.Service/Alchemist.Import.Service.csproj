@@ -8,14 +8,29 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="WebLoader.Common" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="LogMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LogMessages.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="LogMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LogMessages.Designer.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>  
 
 </Project>

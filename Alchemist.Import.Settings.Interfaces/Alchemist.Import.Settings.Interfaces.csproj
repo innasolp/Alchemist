@@ -8,11 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="DependencyInjection.Settings" Version="1.0.0" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
+    <PackageReference Include="System.Text.Json" Version="9.0.1" />
   </ItemGroup>
 
 </Project>

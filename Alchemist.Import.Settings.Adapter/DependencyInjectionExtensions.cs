@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Import.Settings.Adapter;
+namespace Alchemist.Import.Settings.DataAdapter;
 
 public static class DependencyInjectionExtensions
 {
@@ -11,6 +11,7 @@ public static class DependencyInjectionExtensions
     where TCategoryShopImportSettings : class, ICategoryShopImportSettings
     where TImportServiceSettings : class, IImportServiceSettings, new()
     {
+        services.AddSingleton<ISettingsAdapter, SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>>();
         return services.AddSingleton<ISettingsDataAdapter, SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>>();
     }
 }

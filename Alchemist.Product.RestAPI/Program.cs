@@ -1,6 +1,6 @@
 using Alchemist.Common;
 using Alchemist.Product.Data.Repository;
-using Alchemist.Log.Serilog;
+using Alchemist.Log.Extensions;
 using Http.ErrorHandling;
 using Http.Info;
 using Http.RequestHandling.PerfomanceCounter;
@@ -11,6 +11,7 @@ using Alchemist.Product.RestAPI.Controllers;
 using Message.SignalR.DependencyInjection;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Data.Postgresql;
+using Serilog.Configuration.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,12 +45,13 @@ builder.Services.AddPerfomanceCounter<InfoLogMiddleware<ShopController>>((logger
 
 
 var logPath = $"{Utils.GetAppPath()}/Logs";
-var appSerilogBuilder = new AppSerilogBuilder(builder);
+var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
+var appSerilogBuilder = new SerilogConfigurationBuilder(builder.Configuration);
 var serviceName = "Alchemist.Shop.RestAPI";
-appSerilogBuilder.AddServiceBaseConfigs(serviceName);
-appSerilogBuilder.AddPerfomanceCounter(url: "https://localhost:8051", EventIds.Perfomance.Id, logPath, serviceName);
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, serviceName);
+appSerilogBuilder.AddPerfomanceCounter(logContextPath, logPath, url: "https://localhost:8051", EventIds.Perfomance.Id, serviceName);
+appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
 
 appSerilogBuilder.SetSerilog(builder.Logging);
 

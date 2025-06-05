@@ -68,9 +68,9 @@ public class SettingsControllerGetTest
     [Fact]
     public async Task GetShopSettingsByShopIdReturnsNotFoundWhenShopIdNotExistsAsync()
     {
-        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _settingsController.GetShopSettingsByShopId(3, (int)ShopSettingType.Product));
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _settingsController.GetShopSettingsByShopId(4, (int)ShopSettingType.Product));
         var notFound = Assert.IsType<NotFound<int>>(result.Result);
-        Assert.Equal(3, notFound.Value);
+        Assert.Equal(4, notFound.Value);
     }
 
     [Fact]

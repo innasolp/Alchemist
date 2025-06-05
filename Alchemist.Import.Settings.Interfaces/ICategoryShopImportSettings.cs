@@ -2,4 +2,5 @@
 
 public interface ICategoryShopImportSettings: IShopImportSettings
 {
+    string CategorySourceUrl { get; set; }
 }

@@ -1,13 +1,15 @@
 ﻿using Alchemist.Product.Data;
+using Alchemist.Product.RestAPI.Test.Infrastructure;
 using Alchemist.Product.SignalR;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.RestAPI.Test;
 
-public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>, SignalR.Startup>
+public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>, Startup>
 {
     record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
@@ -22,7 +24,10 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
     {
         WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
 
-        _shopAPIFactory = new ShopAPISignalRWebAppFactory(WebAppFactory.Server);
+        _shopAPIFactory = new ShopAPISignalRWebAppFactory(WebAppFactory.Server)
+        {
+            DataBase = "test_ci_db_signalr"
+        };
         _shopAPIHttpClient = _shopAPIFactory.CreateClient();        
     }
 

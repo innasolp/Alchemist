@@ -5,9 +5,9 @@ namespace Alchemist.Common;
 [DefaultValue(Error)]
 public enum ItemProcessStatus
 {
-    New = 0,
-    Error = -1,
-    AlreadyExists = 1,
-    Updated = 2,
-    Warning = 3
+    Error = 0,
+    New = 1,
+    AlreadyExists = 2,
+    Updated = 3,
+    Warning = 4
 }

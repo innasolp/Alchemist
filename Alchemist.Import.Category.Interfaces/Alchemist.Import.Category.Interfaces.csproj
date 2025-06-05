@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Shop.Interfaces\Alchemist.Import.Shop.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

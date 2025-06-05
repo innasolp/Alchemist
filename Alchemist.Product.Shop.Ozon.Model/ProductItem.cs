@@ -12,7 +12,7 @@ public class ProductItem : ICategoryProductItem, IJsonOnDeserialized
     public Action Action { get; set; }
 
     [JsonPropertyName("skuId")]
-    public string SkuId { get; set; }
+    public string? SkuId { get; set; }
 
     [JsonIgnore]
     public string Name { get; set; }
@@ -20,7 +20,8 @@ public class ProductItem : ICategoryProductItem, IJsonOnDeserialized
     [JsonPropertyName("mainState")]
     public MainState[] MainState {  get; set; }
 
-    string ICategoryProductItem.Id => SkuId;
+    string ICategoryProductItem.Id => SkuId ?? 
+        TopRightButtons?.FirstOrDefault(t=>!string.IsNullOrEmpty(t.FavoriteProductMoleculeV2?.Id))?.FavoriteProductMoleculeV2?.Id;
 
     string ICategoryProductItem.ItemUrl => Action.Link;
 
@@ -29,19 +30,26 @@ public class ProductItem : ICategoryProductItem, IJsonOnDeserialized
     [JsonIgnore]
     public double Price { get; set; }
 
+    [JsonPropertyName("topRightButtons")]
+    public TopRightButton[]? TopRightButtons { get; set; }
+    int ICategoryProductItem.CategoryItemId { get; set; }
+
     public void OnDeserialized()
     {
         if (!string.IsNullOrEmpty(Action.Link))
         {
             var substr = Action.Link.Replace(productLink, "");
             var startParamsIndex = substr.IndexOf(startParams);
-            Name = substr.Substring(0, startParamsIndex);
+            Name = startParamsIndex >= 0 ? substr[..startParamsIndex] : substr;
         }
 
-        var priceMainState = MainState.FirstOrDefault(m => m.Atom.PriceV2 != null);
+        var priceMainState = MainState.FirstOrDefault(m => m.Atom?.PriceV2 != null || m.PriceV2 != null);
         if (priceMainState != null)
         {
-            var priceItem = priceMainState.Atom.PriceV2.PriceItems.FirstOrDefault(i => i.PriceTextStyle == PriceTextStyle.Price) ?? priceMainState.Atom.PriceV2.PriceItems.FirstOrDefault();
+            var priceItem = priceMainState.Atom?.PriceV2.PriceItems.FirstOrDefault(i => i.PriceTextStyle == PriceTextStyle.Price)
+                ?? priceMainState.Atom?.PriceV2.PriceItems.FirstOrDefault()
+                ?? priceMainState.PriceV2?.PriceItems.FirstOrDefault();
+            
             if (priceItem != null)
                 Price = priceItem.Price;
         }
@@ -61,6 +69,9 @@ public class MainState
 
     [JsonPropertyName("atom")]
     public Atom Atom { get; set; }
+
+    [JsonPropertyName("priceV2")]
+    public PriceV2 PriceV2 { get; set; }
 }
 
 public class Atom
@@ -124,5 +135,21 @@ public class PriceItem: IJsonOnDeserialized
             Price = price;
     }
 }
+
+public class TopRightButton
+{
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
+
+    [JsonPropertyName("favoriteProductMoleculeV2")]
+    public FavoriteProductMoleculeV2? FavoriteProductMoleculeV2 { get; set; }
+}
+
+public class FavoriteProductMoleculeV2
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+}
+
 
 

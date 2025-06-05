@@ -44,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Settings.Builder\Alchemist.Import.Settings.Builders.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
   </ItemGroup>  
 

@@ -17,7 +17,7 @@ public class ShopModel : IShop
     [Required]
     public string Url { get; set; }
 
-    public string? Caption { get; set; }
+    public string? Caption { get; set; }   
 
     public void Update(IShop shop)
     {

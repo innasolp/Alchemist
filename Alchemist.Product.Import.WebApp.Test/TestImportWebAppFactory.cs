@@ -1,4 +1,5 @@
 ﻿using Alchemist.DataService.Interfaces;
+using Alchemist.Product.Import.Model;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using Alchemist.Test.Server.Fixtures;
@@ -14,6 +15,16 @@ public class TestImportWebAppFactory() : TestWebAppKestrelFactory<ImportWebAppPr
     public Mock<IShopDataService> ShopAPIClient { get; } = new Mock<IShopDataService>();
 
     public Mock<IShopSettingsDataService> SettingsAPIClient { get; } = new Mock<IShopSettingsDataService>();
+
+    private IImportFacade? _importFacade;
+
+    public void Reset()
+    {
+        EnsureServer();
+        _importFacade ??= Host.Services.GetRequiredService<IImportFacade>();
+        _importFacade?.Reset();
+    }
+
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -36,4 +47,5 @@ public class TestImportWebAppFactory() : TestWebAppKestrelFactory<ImportWebAppPr
 
         services.AddSingleton(SettingsAPIClient.Object);
     }
+
 }

@@ -18,7 +18,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Fatal' and $[Func]($[PropertyName], '$[PropertyValue]')"
+                  "expression": "@l='Fatal'"
                 }
               }
             ],
@@ -53,7 +53,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Error' and $[Func]($[PropertyName], '$[PropertyValue]')"
+                  "expression": "@l='Error'"
                 }
               }
             ],
@@ -88,7 +88,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Warning' and $[Func]($[PropertyName], '$[PropertyValue]')"
+                  "expression": "@l='Warning'"
                 }
               }
             ],
@@ -123,7 +123,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "@l='Information' and $[Func]($[PropertyName], '$[PropertyValue]')"
+                  "expression": "@l='Information'"
                 }
               }
             ],

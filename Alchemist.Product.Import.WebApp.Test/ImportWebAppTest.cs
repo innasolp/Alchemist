@@ -8,7 +8,6 @@ using Alchemist.Import.Settings.Extensions;
 using Xunit.Abstractions;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Microsoft.Playwright;
-using Alchemist.Import.Settings.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -31,21 +30,28 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             new ShopSettings { Id = 2, ShopId = 2, Type = ShopSettingType.Product },
             new ShopSettings { Id = 3, ShopId = 1, Type = ShopSettingType.Category },
             new ShopSettings { Id = 4, ShopId = 2, Type = ShopSettingType.Category },
-            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.WebLoader) },
-            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.BrowserDataLoader) },
-            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.RequestHeaders) },
-            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.WebLoader) },
+            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.WebLoader) },
+            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.BrowserDataLoader) },
+            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.RequestHeaders) },
+            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
+            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.WebLoader) },
             new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product },
         ];
 
-    protected ImportWebAppTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper)
+    protected ImportWebAppTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper, int? httpPort = null, int? httpsPort = null)
     {
-        _webAppFactory = webAppFactory;
         _testOutputHelper = testOutputHelper;
+        
+        _webAppFactory = webAppFactory;
+        if (httpPort != null) _webAppFactory.HttpPort = httpPort.Value;
+        if (httpsPort != null) _webAppFactory.HttpsPort = httpsPort.Value;        
+
+        _webAppFactory.ShopAPIClient.Reset();
+        _webAppFactory.SettingsAPIClient.Reset();
+        _webAppFactory.Reset();
 
         _webAppFactory.ShopAPIClient.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
 
@@ -72,7 +78,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             var serviceSettings = shopSetting.ToImportServiceSettings<ImportServiceSettings>();
             serviceSettings.AssemblyPath = $"C:\\Folder{shopSetting.Id}";
             serviceSettings.ImplementationTypeName = $"ServiceImplementation{shopSetting.Id}";
-            serviceSettings.ImplementationTypeName = $"ServiceType{shopSetting.Id}";
+            serviceSettings.ServiceTypeName = $"ServiceType{shopSetting.Id}";
 
             shopSetting.JsonValue = JsonSerializer.Serialize(serviceSettings);
         }
@@ -96,7 +102,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         var response = await page.GotoAsync(_webAppFactory.ServerAddress);
         Assert.True(response?.Ok);
 
-        var urlLocator = page.Locator("#Url");
+        var urlLocator = page.Locator("#SettingsUrl");
         await Expect(urlLocator).ToHaveCountAsync(1);
 
         var shop = _shops.First();
@@ -117,7 +123,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         await ExpectSelectedShopAsync(page, shop);
 
         var shopSettings = await GetShopImportSettingsAsync(shop.Id, ShopSettingType.Product);
-        await Expect(page.Locator("#Url")).ToHaveValueAsync(shopSettings.Url);
+        await Expect(page.Locator("#SettingsUrl")).ToHaveValueAsync(shopSettings.Url);
         
         return shopSettings;
     }

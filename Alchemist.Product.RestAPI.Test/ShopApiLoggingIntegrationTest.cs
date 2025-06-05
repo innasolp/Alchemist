@@ -1,4 +1,5 @@
 ﻿using Alchemist.Product.Data;
+using Alchemist.Product.RestAPI.Test.Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
@@ -16,6 +17,7 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
     public ShopApiLoggingIntegrationTest(ShopAPILoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
         : base(webAppFactory, outputHelper)
     {
+        WebAppFactory.DataBase = "test_ci_db_logging";
         WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
         _httpClient = WebAppFactory.CreateClient();
     }

@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.Import.Model;
-using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -42,12 +42,15 @@ public class FileUploadController(IImportFacade importFacade) : Controller
 
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadShopSettings(Guid shopGuid, int shopSettingsType, IFormFile file)
     {
         if (file == null || file.Length == 0)
-            return BadRequest();
+            return BadRequest(nameof(file));
+
+        if (shopGuid == Guid.Empty)
+            return BadRequest(nameof(shopGuid));
 
         //using var stream = file.OpenReadStream();
         using var stream = new MemoryStream();
@@ -71,8 +74,8 @@ public class FileUploadController(IImportFacade importFacade) : Controller
 
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadServiceSettings(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
     {
         //todo for net.9
@@ -81,11 +84,20 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         //    RespectRequiredConstructorParameters = true
         //};
         if (file == null || file.Length == 0)
-            return BadRequest();
+            return BadRequest(nameof(file));
+        
+        if (shopGuid == Guid.Empty)
+            return BadRequest(nameof(shopGuid));
+        
+        if (shopSettingsGuid == Guid.Empty)
+            return BadRequest(nameof(shopSettingsGuid));
+
+        if (string.IsNullOrEmpty(serviceSettingsName))
+            return BadRequest(nameof(serviceSettingsName)); 
 
         var uplodedServiceSettings = await GetFromJsonAsync<ServiceSettingsModel>(file);
         if (uplodedServiceSettings == null)
-            return BadRequest();
+            return BadRequest(nameof(file));
 
         if (_importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
         {

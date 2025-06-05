@@ -1,19 +1,27 @@
-﻿using Alchemist.Test.Server.Fixtures.Grpc;
+﻿using Alchemist.Product.GrpcService.Tests.Infrastructure;
+using Alchemist.Test.Server.Fixtures;
 using Grpc.Core;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
-    : GrpcTestFixture<AlchemistGrpcWebAppFactory, Program>(webAppFactory, outputHelper)
+public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebAppFactory, Program>
 {
+    private readonly AlchemyGrpcService.AlchemyGrpcServiceClient _client;
+
+    public AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+        : base(webAppFactory, outputHelper)
+    {
+        WebAppFactory.DataBase = "test_ci_db_grpc";
+        var grpcChannel = webAppFactory.CreateChannel("http://localhost");
+        _client = new AlchemyGrpcService.AlchemyGrpcServiceClient(grpcChannel);
+    }
+
     [Fact]
     public async Task FindBrandByExistingNameSuccess()
     {
-        var client = new AlchemyGrpcService.AlchemyGrpcServiceClient(GrpcChannel);
-
         var brandName = "Elizavecca";        
-        var response = await client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName});
+        var response = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName});
 
         Assert.NotNull(response);
         Assert.Equal(brandName, response.Name);
@@ -22,11 +30,9 @@ public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webA
     [Fact]
     public async Task FindBrandByEmptyNameThrowsBadRequestRpcException()
     {
-        var client = new AlchemyGrpcService.AlchemyGrpcServiceClient(GrpcChannel);
-
         var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
         {
-            await client.FindBrandByNameAsync(new FindByNameRequest { Name = "" });
+            await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "" });
         });
 
         OutputHelper.WriteLine(rpcException.Message);
@@ -38,12 +44,10 @@ public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webA
     [Fact]
     public async Task FindBrandByNotExistingNameThrowsNotFoundRpcException()
     {
-        var client = new AlchemyGrpcService.AlchemyGrpcServiceClient(GrpcChannel);
-
         var brandName = Guid.NewGuid().ToString();
         var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
         {
-            await client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName });
+            await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName });
         });
 
         OutputHelper.WriteLine(rpcException.Message);
@@ -55,15 +59,13 @@ public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webA
     [Fact]
     public async Task CreateBrandSuccess()
     {
-        var client = new AlchemyGrpcService.AlchemyGrpcServiceClient(GrpcChannel);
-
         var brand = new CreateBrandRequest { Name = Guid.NewGuid().ToString() };
-        var createResponse = await client.CreateBrandAsync(brand);
+        var createResponse = await _client.CreateBrandAsync(brand);
 
         Assert.NotNull(createResponse);
         Assert.Equal(brand.Name, createResponse.Name);
 
-        var findResponse = await client.FindBrandByNameAsync(new FindByNameRequest { Name = brand.Name });
+        var findResponse = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brand.Name });
         Assert.NotNull(findResponse);
         Assert.Equal(createResponse.Id, findResponse.Id);
     }
@@ -71,8 +73,6 @@ public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webA
     [Fact]
     public async Task CreateShopProductWithNonUniqueShopIdProductIdThrowsInternalRpcException()
     {
-        var client = new AlchemyGrpcService.AlchemyGrpcServiceClient(GrpcChannel);
-
         var createShopProductRequest = new CreateShopProductRequest
         {
             Apiurl = Guid.NewGuid().ToString(),
@@ -82,7 +82,7 @@ public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webA
             Itemurl = Guid.NewGuid().ToString(),
             Price = 0.0
         };
-        var reply = await client.CreateShopProductAsync(createShopProductRequest);
+        var reply = await _client.CreateShopProductAsync(createShopProductRequest);
         
         var createShopProductRequestInvalid = new CreateShopProductRequest
         {
@@ -96,7 +96,7 @@ public class AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webA
 
         var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
         {
-            await client.CreateShopProductAsync(createShopProductRequestInvalid);
+            await _client.CreateShopProductAsync(createShopProductRequestInvalid);
         });
 
         OutputHelper.WriteLine(rpcException.Message);

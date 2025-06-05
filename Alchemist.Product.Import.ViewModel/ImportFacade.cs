@@ -6,18 +6,16 @@ namespace Alchemist.Product.Import.Model;
 
 public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 {
-    private readonly IShopDataService _shopDataService = shopDataService;
-    
+    private readonly IShopDataService _shopDataService = shopDataService;    
 
     private readonly Dictionary<Guid, ShopImportModel> _shopImports = [];
-
 
     public bool TryGetShopImport(Guid guid, out ShopImportModel shopImport)
     {
         return _shopImports.TryGetValue(guid, out shopImport) && shopImport != null;
     }    
 
-    public bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out ShopSettingsModel shopSettings)
+    public bool TryGetShopSettings(Guid shopGuid, Alchemist.Import.Settings.Interfaces.ShopSettingType shopSettingType, out ShopSettingsModel shopSettings)
     {
         shopSettings = default;
 
@@ -93,5 +91,10 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
     public List<ShopImportModel> GetShops()
     {
         return _shopImports.Select(s => s.Value).ToList();
+    }
+
+    public void Reset()
+    {
+        _shopImports.Clear();
     }
 }

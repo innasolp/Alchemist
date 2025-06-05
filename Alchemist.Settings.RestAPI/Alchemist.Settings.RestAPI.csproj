@@ -9,12 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
     <PackageReference Include="Http.Info" Version="1.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
-    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Serilog.csproj" />
+    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />

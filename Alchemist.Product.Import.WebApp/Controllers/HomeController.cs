@@ -1,5 +1,5 @@
 using Alchemist.Common;
-using Alchemist.Import.Settings.Adapter;
+using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
@@ -7,6 +7,7 @@ using Alchemist.Product.Import.WebApp.Models;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
@@ -104,7 +105,7 @@ public class HomeController : Controller
     }
 
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Index()
     {
         var shopGuid = GetCurrentShopGuid();
@@ -122,8 +123,9 @@ public class HomeController : Controller
 
     [Route("Home/Index/shopGuid={shopGuid}&tab={tab}")]
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ActionName("Index")]
     public async Task<IActionResult> IndexRouteAsync(Guid shopGuid, int tab)
     {
@@ -132,8 +134,9 @@ public class HomeController : Controller
 
     [Route("Home/Index")]
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ActionName("Index")]
     public async Task<IActionResult> IndexFromQueryAsync([FromQuery] Guid shopGuid, [FromQuery] int tab)
     {
@@ -144,24 +147,27 @@ public class HomeController : Controller
     {
         try
         {
+            if (shopGuid == Guid.Empty || tab <0 || tab > (int)Enum.GetValues<TabType>().Max())
+                return BadRequest();
+
             var viewModel = await GetIndexViewModelAsync(shopGuid, (TabType)tab);
 
             SetCurrentShopGuid(shopGuid);
             SetCurrentTab((TabType)tab);
 
-            return viewModel != null ? View(viewModel) : BadRequest();
+            return viewModel != null ? View(viewModel) : NotFound(shopGuid);
         }
         catch (InvalidOperationException e)
         {
             _logger.LogError(e, $"Index({shopGuid},{tab})");
-            return await Task.FromResult(BadRequest());
+            return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
         }
     }
 
     [HttpPost]
     [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IsTabChanged(Guid shopGuid, int tab, string json)
     {
         if (string.IsNullOrEmpty(json)) return BadRequest(json);
@@ -172,13 +178,22 @@ public class HomeController : Controller
         var settings = shopImport.GetSettings((TabType)tab, true);
         if (settings == null) return Ok(false);
 
-        var modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
+        SettingsModelBase modelFromJson;
+        try
+        {
+            modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
+        }
+        catch(JsonException)
+        {
+            return BadRequest(json);
+        }
+        
         if (modelFromJson == null) return Ok(false);
 
         if ((TabType)tab != TabType.Shop)
             return Ok(!settings.Equals(modelFromJson));
 
-        var originalSettings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
+        var originalSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
         if (originalSettings == null)
             return Ok(!modelFromJson.Equals(shopGuid.CreateShopSettings((settings as ShopSettingsModel).ShopSettingType)));
 
@@ -255,8 +270,7 @@ public class HomeController : Controller
             if ((TabType)tab == TabType.Shop &&
                 shopImport.GetSettings((TabType)tab, true) == null)
             {
-                var settings = await _settingsDataAdapter.GetShopSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) as ShopSettingsModel;
-                if (settings != null)
+                if (await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) is ShopSettingsModel settings)
                     shopImport.SetSettings((TabType)tab, settings);
                 else
                 {

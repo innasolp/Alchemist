@@ -53,6 +53,8 @@ public class ProductInCategory : ProductBase, IJsonOnDeserialized, ICategoryProd
         }
     }
     string ICategoryProductItem.Name => $"{Name} {ShortDescription} {Brand}";
+
+    int ICategoryProductItem.CategoryItemId { get; set; }
 }
 public class ProductItemPrice
 {

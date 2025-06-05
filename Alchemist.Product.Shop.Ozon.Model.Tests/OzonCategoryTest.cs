@@ -1,3 +1,4 @@
+using Alchemist.Import.Products.Interfaces;
 using System.Text.Json;
 
 namespace Alchemist.Product.Shop.Ozon.Model.Tests;
@@ -25,6 +26,7 @@ public class OzonCategoryTest
     public void CheckProductItemsPrices()
     {
         Assert.NotNull(_category?.CategoryContent?.Items);
-        Assert.True(_category.CategoryContent.Items.All(i=>i.Price > 0));      
+        Assert.True(_category.CategoryContent.Items.All(i=>i.Price > 0));
+        Assert.DoesNotContain(_category.CategoryContent.Items, i => string.IsNullOrEmpty((i as ICategoryProductItem)?.Id));
     }
 }

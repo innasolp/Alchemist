@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
 using DependencyInjection.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -69,6 +68,12 @@ public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDe
     }
     int ISettings.ShopId { get ; set; }
     int? ISettings.ParentSettingsId { get; set; }
+
+    public bool IsEmpty()
+    {
+        return string.IsNullOrEmpty(AssemblyPath) && string.IsNullOrEmpty(ServiceProviderPath)
+            && string.IsNullOrEmpty(ServiceTypeName) && string.IsNullOrEmpty(ImplementationTypeName);
+    }
 
     public void Update(ServiceSettingsModel source)
     {

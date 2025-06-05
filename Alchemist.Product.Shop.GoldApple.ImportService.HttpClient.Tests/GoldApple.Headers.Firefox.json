@@ -16,7 +16,7 @@
     "Sec-Fetch-User": "?1",
     "TE": "trailers",
     "Upgrade-Insecure-Requests": "1",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0"
   },
 
   "Cookies": [
@@ -25,11 +25,9 @@
     "_ga_QE5MQ8XJJK",
     "_gcl_au",
     "_gid",
-    "_spx",
     "_ym_d",
     "_ym_isad",
     "_ym_uid",
-    "_ym_visorc",
     "acs_3",
     "adrcid",
     "adrdel",
@@ -38,21 +36,16 @@
     "advcake_track_url",
     "cfidsw-goldapple-ru",
     "client-store-code",
-    "digi-analytics-sessionId",
     "directCrm-session",
-    "domain_sid",
     "fgsscw-goldapple-ru",
     "ga-device-id",
     "ga-lang",
-    "ga-selected-address-id",
-    "isAddressConfirmed",
     "ga-session-id",
     "gsscw-goldapple-ru",
     "mage-cache-sessid",
     "MCS_SESSID",
     "mindboxDeviceUUID",
-    "ngenix_jscv_2198e54375cc",
-    "tmr_detect",
+    "section_data_ids",
     "tmr_lvid",
     "tmr_lvidTS"
   ],
@@ -65,7 +58,7 @@
     "_ym_isad": "2",
     "_ym_visorc": "b",
     "ga-selected-address-id": "555e7d61-d9a7-4ba6-9770-6caa8198c483",
-    "section_data_ids": "{cart:1736630062}"
+    "section_data_ids": "{cart:1747396843}"
   },
 
   "CookieIndex": 4,

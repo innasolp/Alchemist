@@ -52,11 +52,23 @@ public static class HostBuilderExtensions
     public static Uri GetBaseAddress(this IHost host)
     {
         var server = host.Services.GetRequiredService<IServer>();
+        return server.GetBaseAddress();
+    }
+
+    public static Uri GetBaseAddress(this IServer server)
+    {
         var addresses = server.Features.Get<IServerAddressesFeature>();
         return addresses!.Addresses
             .Select(x => new Uri(x))
             .Last();
     }
+
+    public static Uri GetBaseAddress(this IWebHost host)
+    {
+        var server = host.Services.GetRequiredService<IServer>();
+        return server.GetBaseAddress();
+    }
+
     public static void SetKestrelLocalhostPortsConfig(this WebHostBuilderContext context, int httpPort, int httpsPort)
     {
         var http = context.Configuration.GetSection("Kestrel:EndPoints:Http:Url");

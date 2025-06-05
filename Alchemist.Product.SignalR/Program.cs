@@ -1,6 +1,7 @@
 using Alchemist.Common;
-using Alchemist.Log.Serilog;
+using Alchemist.Log.Extensions;
 using Alchemist.Product.SignalR;
+using Serilog.Configuration.Extensions;
 
 public partial class Program
 {
@@ -27,13 +28,14 @@ public partial class Program
         return builder;
     }
 
-    private static AppSerilogBuilder SetLog(IConfiguration configuration, IHostEnvironment env)
+    private static SerilogConfigurationBuilder SetLog(IConfiguration configuration, IHostEnvironment env)
     {
         var logPath = $"{Utils.GetAppPath()}/Logs";
+        var logContextPath = $"{env.ContentRootPath}/log.property.json";
         var serviceName = "SignalR";
-        var appSerilogBuilder = new AppSerilogBuilder(configuration, env);
-        appSerilogBuilder.AddServiceBaseConfigs(serviceName);
-        appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(LogHubFilter).GetNameWithoutGenericArity());
+        var appSerilogBuilder = new SerilogConfigurationBuilder(configuration);
+        appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, serviceName);
+        appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(LogHubFilter).GetNameWithoutGenericArity());
         return appSerilogBuilder;
     }
 }

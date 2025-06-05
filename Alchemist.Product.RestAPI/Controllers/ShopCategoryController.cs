@@ -36,7 +36,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
         if (shopCategory == null)
             return TypedResults.BadRequest();
 
-        if (shopCategory.ShopId <= 0 || shopCategory.ItemId <= 0 || string.IsNullOrEmpty(shopCategory.Category))
+        if (shopCategory.ShopId <= 0 || shopCategory.ItemId <= 0 || shopCategory.Category == null)
             return TypedResults.BadRequest(shopCategory);
 
         var newShopCategory = (await _alchemyRepository.AddShopCategory(shopCategory)).To<ShopCategory>();

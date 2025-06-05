@@ -1,4 +1,5 @@
-﻿using Alchemist.Import.Interfaces;
+﻿using Alchemist.Common;
+using Alchemist.Import.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using WebLoader.Common;
@@ -11,13 +12,37 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
 {
     public abstract string Name { get; }
 
-    public IWebLoader WebLoader { get; } = webLoader;
+    protected IWebLoader WebLoader { get; } = webLoader;
 
-    public RequestHeaders? RequestHeaders { get; } = requestHeaders;
+    private readonly SemaphoreSlim _webLoaderSemaphoreSlim = new(1,1);
+
+    protected RequestHeaders? RequestHeaders { get; } = requestHeaders;
 
     protected ILogger Logger { get; } = logger;
 
-    public abstract Task Start(CancellationToken stoppingToken);
+    public virtual async Task Start(CancellationToken stoppingToken)
+    {
+        bool? isStarted = null;
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await StartWebLoaderIfNeedAsync(stoppingToken);
+
+            if (!WebLoader.IsStarted) break;
+            else if (isStarted == null)
+            {
+                isStarted = true;
+                Logger.LogInformation(LogMessages.ServiceStarted, Name);
+            }
+
+            await ProcessAsync(stoppingToken);
+
+            await Task.Delay(100);
+        }
+
+        Logger.LogInformation(LogMessages.ServiceWasStopped, Name);
+    }    
+
+    protected abstract Task ProcessAsync(CancellationToken stoppingToken);
 
     protected virtual async Task StartWebLoaderIfNeedAsync(CancellationToken stoppingToken)
     {
@@ -26,33 +51,33 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             try
             {
                 if (!WebLoader.IsStarted)
-                    await WebLoader.Start(RequestHeaders);
+                    await WebLoader.Start();
             }
             catch (WarningException warning)
             {
-                Logger.LogWarning(warning, $"importer {WebLoader.GetType()} not started.Warning : {warning.Message}. ");
+                Logger.LogWarning(warning, LogMessages.WebLoaderNotStartedWarning, [WebLoader.GetType().Name, warning.Message]);
+                await Task.Delay(1000, stoppingToken);
             }
             catch (Exception e)
             {
-                Logger.LogError(e, $"importer {WebLoader.GetType()} was not executed. Import is stopped");
+                Logger.LogError(e, LogMessages.ImportWasStoppedWebLoaderNotExecute, WebLoader.GetType().Name);
                 return;
-            }
-            await Task.Delay(1000, stoppingToken);
+            }            
         }
     }
 
-    protected virtual async Task HandleWebLoaderExceptionAsync(WebLoaderException wle)
+    protected virtual async Task HandleWebLoaderExceptionAsync(WebLoaderException wle, string url)
     {
         switch (wle.NsError)
         {
             case NsError.NS_ERROR_REDIRECT_LOOP:
                 if (WebLoader.IsStarted)
                 {
-                    Logger.LogWarning($"Web loader will be reset. {wle.Message}");
-                    Logger.LogInformation("Web loader is reseting...");
+                    Logger.LogWarning(wle, LogMessages.WebLoaderThrowsNsRedirectLoopAndWillBeReseted, url);
+                    Logger.LogInformation(LogMessages.WebLoaderIsReseting);
                     await WebLoader.Reset();
-                    await Task.Delay(30000);
-                    Logger.LogInformation("Web loader reset successfully.");
+                    await Task.Delay(1000);
+                    Logger.LogInformation(LogMessages.WebLoaderResetSuccessfully);
                 }
                 return;
 
@@ -66,24 +91,25 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
     {
         if (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
-            Logger.LogWarning("Too many request. Thread would be sleeped 10 sec");
+            Logger.LogWarning(e, LogMessages.TooManyRequestsError);
             await Task.Delay(10000);
         }
         else if (RequestHeaders != null &&
             (e.StatusCode == System.Net.HttpStatusCode.Forbidden || e.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable))
         {
-            Logger.LogWarning($"Response status {e.StatusCode} for url {url}. Web loader {WebLoader.GetType().Name} will be restarted.");
-            await WebLoader.Start(RequestHeaders);
+            Logger.LogWarning(e, LogMessages.HttpRequestErrorAndWebLoaderRestart, [e.StatusCode, url, WebLoader.GetType().Name]);
+            await Task.Delay(500);
+            await WebLoader.Start();
         }
         else
         {
-            Logger.LogError(e, $"request url {url} failed with error {e.HttpRequestError} status {e.StatusCode}");
+            Logger.LogError(e, LogMessages.RequestUrlFailedWithErrorAndStatusCode, [url, e.HttpRequestError, e.StatusCode]);
         }
     }
 
     protected virtual void HandleWarningException(WarningException warning, string url)
     {
-        Logger.LogWarning(warning, $"process url {url} not complete. Warning : {warning.Message}.");
+        Logger.LogWarning(warning, LogMessages.ProcessUrlNotCompleteWarning, [url, warning.Message]);
     }
 
     protected async Task ProcessUrlTaskAsync(Func<string, Task> task, string url)
@@ -98,74 +124,181 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
         catch (WebLoaderException wle)
         {
-            await HandleWebLoaderExceptionAsync(wle);
-        }
-        catch (WarningException warning)
-        {
-            HandleWarningException(warning, url);    
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e, $"process {url} failed");
-        }
-    }
-
-    protected async Task<T?> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
-    {
-        try
-        {
-            return await task(url);
-        }
-        catch (HttpRequestException e)
-        {
-            await HandleHttpExceptionAsync(e, url);
-            return await Task.FromResult(default(T));
-        }
-        catch (WebLoaderException wle)
-        {
-            await HandleWebLoaderExceptionAsync(wle);
-            return await Task.FromResult(default(T));
+            await HandleWebLoaderExceptionAsync(wle, url);
         }
         catch (WarningException warning)
         {
             HandleWarningException(warning, url);
-            return await Task.FromResult(default(T));
+        }
+        catch (OperationCanceledException operationCancelledException)
+        {
+             await HandleCancelling(operationCancelledException, url);            
         }
         catch (Exception e)
         {
-            Logger.LogError(e, $"process {url} failed");
-            return await Task.FromResult(default(T));
+            await HandleException(e, url);            
         }
     }
 
-    protected async Task<T?> ProcessUrlTaskAsync<TUrl, T>(Func<TUrl, Task<T?>> task, Func<TUrl, string> getUrl, TUrl itemUrl)
+    protected virtual async Task HandleException(Exception e, string url)
+    {
+        Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
+        await Task.FromResult(true);
+    }
+
+    protected virtual async Task HandleCancelling(OperationCanceledException operationCancelledException, string url)
+    {
+        if (operationCancelledException.InnerException != null)
+        {
+            Logger.LogError(operationCancelledException.InnerException, LogMessages.ServiceWasCancelledOnLoadingFromUrlByError,
+                [Name, url, operationCancelledException.InnerException.Message]);
+            await Task.FromResult(false);
+        }
+        else
+        {
+            Logger.LogInformation(LogMessages.ServiceWasCancelledOnLoadingFromUrl, Name, url);
+            await Task.FromResult(true);
+        }
+    }
+
+    protected virtual async Task HandleCancelling(OperationCanceledException operationCancelledException)
+    {
+        if (operationCancelledException.InnerException != null)
+        {
+            Logger.LogError(operationCancelledException.InnerException, LogMessages.ServiceWasCancelledOn,
+                [Name, operationCancelledException.InnerException.Message]);
+            await Task.FromResult(false);
+        }
+        else
+        {
+            Logger.LogInformation(LogMessages.ServiceWasCancelled, Name);
+            await Task.FromResult(true);
+        }
+    }
+
+    protected async Task<TaskResult<T>> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
     {
         try
         {
-            return await task(itemUrl);
+            return TaskResult<T>.Success(await task(url));
+        }
+        catch (HttpRequestException e)
+        {
+            await HandleHttpExceptionAsync(e, url);
+            return await Task.FromResult(TaskResult<T>.Warning(default, e));
+        }
+        catch (WebLoaderException wle)
+        {
+            await HandleWebLoaderExceptionAsync(wle, url);
+            return await Task.FromResult(TaskResult<T>.Warning(default, wle));
+        }
+        catch (WarningException warning)
+        {
+            HandleWarningException(warning, url);
+            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
+        }
+        catch(OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException, url);
+            return await Task.FromResult(TaskResult<T>.Cancelled());
+        }
+        catch (Exception e)
+        {
+            await HandleException(e, url);
+            return await Task.FromResult(TaskResult<T>.Failed(default, e));
+        }
+    }
+
+    protected async Task<TaskResult<T>> ProcessUrlTaskAsync<TUrl, T>(Func<TUrl, Task<T?>> task, Func<TUrl, string> getUrl, TUrl itemUrl)
+    {
+        try
+        {
+            return TaskResult<T>.Success(await task(itemUrl));
         }
         catch (HttpRequestException e)
         {
             await HandleHttpExceptionAsync(e, getUrl(itemUrl));
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default, e));
         }
         catch (WebLoaderException wle)
         {
-            await HandleWebLoaderExceptionAsync(wle);
-            return await Task.FromResult(default(T));
+            await HandleWebLoaderExceptionAsync(wle, getUrl(itemUrl));
+            return await Task.FromResult(TaskResult<T>.Warning(default, wle));
         }
         catch (WarningException warning)
         {
             HandleWarningException(warning, getUrl(itemUrl));
-            return await Task.FromResult(default(T));
+            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
+        }
+        catch (OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException, getUrl(itemUrl));
+            return await Task.FromResult(TaskResult<T>.Cancelled());
         }
         catch (Exception e)
         {
-            Logger.LogError(e, $"process {getUrl(itemUrl)} failed");
-            return await Task.FromResult(default(T));
+            await HandleException(e, getUrl(itemUrl));
+            return await Task.FromResult(TaskResult<T>.Failed(default, e));
         }
     }
 
+    protected async Task<TaskResult> ProcessTaskAsync(Func<Task> task)
+    {
+        try
+        {
+            await task();
+            return TaskResult.Success();
+        }
+        catch (WarningException warning)
+        {
+            return await Task.FromResult(TaskResult.Warning(warning));
+        }
+        catch (OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException);
+            return await Task.FromResult(TaskResult.Cancelled());
+        }
+        catch (Exception e)
+        {
+            return await Task.FromResult(TaskResult.Failed(e));
+        }
+    }
+
+    protected async Task<TaskResult<T>> ProcessTaskAsync<T>(Func<Task<T?>> task)
+    {
+        try
+        {
+            return TaskResult<T>.Success(await task());
+        }        
+        catch (WarningException warning)
+        {
+            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
+        }
+        catch (OperationCanceledException operationCancelledException)
+        {
+            await HandleCancelling(operationCancelledException);
+            return await Task.FromResult(TaskResult<T>.Cancelled());
+        }
+        catch (Exception e)
+        {
+            return await Task.FromResult(TaskResult<T>.Failed(default, e));
+        }
+    }
+
+    protected virtual async Task<Stream> LoadFromUrlAsync(string url)
+    {
+        await _webLoaderSemaphoreSlim.WaitAsync();
+        try
+        {
+            var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
+            return await Task.FromResult(stream);
+        }
+        catch { throw; }
+        finally
+        {
+            _webLoaderSemaphoreSlim.Release();
+        }        
+    }
 
     public virtual async ValueTask DisposeAsync()
     {
