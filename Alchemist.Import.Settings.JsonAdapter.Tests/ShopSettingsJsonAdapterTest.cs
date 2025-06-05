@@ -7,28 +7,56 @@ namespace Alchemist.Import.Settings.JsonAdapter.Tests;
 
 public class ShopSettingsJsonAdapterTest
 {
-    [Fact]
-    public async Task BuildSettingsFromJson()
+    private readonly ISettingsAdapter _shopSettingsJsonAdapter;
+
+    public ShopSettingsJsonAdapterTest()
     {
         var builder = new HostApplicationBuilder();
         builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
         var host = builder.Build();
 
-        var shopSettingsJsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>() as ShopSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>;             
-        
-        var shopSettings = await shopSettingsJsonAdapter.GetAllShopImportSettings();
+        _shopSettingsJsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>() as ShopSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>;
+    }
+
+    [Fact]
+    public async Task GetAllShopImportSettingsSuccessWhenJsonFileIsValid()
+    {
+        var shopSettings = await _shopSettingsJsonAdapter.GetAllShopImportSettings();
         Assert.NotNull(shopSettings);
-        Assert.Equal(2, shopSettings.Count);
-        Assert.Contains(shopSettings, s => s.ShopSettingType == ShopSettingType.Product);
-        Assert.Contains(shopSettings, s => s.ShopSettingType == ShopSettingType.Category);
+        Assert.Equal(4, shopSettings.Count);
+        Assert.Equal(2, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Product));
+        Assert.Equal(2, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Category));
 
-        //todo
-        //var ozonShop = shopSettings[0];
-        //ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonShop.ProductShopImportSettings, 0);
-        //ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonShop.CategoryShopImportSettings, 3);
+        var ozonProducts = shopSettings.Where(s=>s.ShopSettingType == ShopSettingType.Product && s.Url.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        Assert.NotNull(ozonProducts);
+        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonProducts, 0);
 
-        //var goldAppleShop = shopSettings[1];
-        //ShopSettingsAsserts.AssertHttpRequestLoaderShopSettings(goldAppleShop.ProductShopImportSettings, 0);
-        //ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(goldAppleShop.CategoryShopImportSettings, 3);
+        var ozonCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.Url.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        Assert.NotNull(ozonCategories);
+        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonCategories, 3);
+
+        var goldAppleProducts = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Product && s.Url.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        Assert.NotNull(goldAppleProducts); 
+        ShopSettingsAsserts.AssertHttpRequestLoaderShopSettings(goldAppleProducts, 0);
+
+        var goldAppleCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.Url.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        Assert.NotNull(goldAppleCategories);
+        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(goldAppleCategories, 3);
+    }
+
+    [Fact]
+    public async Task GetShopImportSettingsProductsSuccessWhenLoadingFromJsonByValidNames()
+    {
+        var shopSettings = await _shopSettingsJsonAdapter.GetShopImportSettings("Ozon", ShopSettingType.Product);
+        Assert.NotNull(shopSettings);
+        Assert.Contains("ozon", shopSettings.Url);
+    }
+
+    [Fact]
+    public async Task GetShopImportSettingsCategoriessSuccessWhenLoadingFromJsonByValidNames()
+    {
+        var shopSettings = await _shopSettingsJsonAdapter.GetShopImportSettings("GoldAppleCategories", ShopSettingType.Category);
+        Assert.NotNull(shopSettings);
+        Assert.Contains("goldapple", shopSettings.Url);
     }
 }

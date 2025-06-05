@@ -16,7 +16,6 @@ using Alchemist.Import.Products.Data;
 using Alchemist.Import.Categories.Data;
 using Alchemist.Import.Logging;
 using Alchemist.Import.Settings.Model;
-using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using BrowserDataLoader.Interfaces;
 using Alchemist.Import.Factory.Interfaces;
