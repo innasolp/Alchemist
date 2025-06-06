@@ -75,4 +75,17 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
             TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :
             TypedResults.NotFound(shopId);
     }
+
+    [HttpGet("shopCategories/getAllChildren/{parentId:int}", Name = nameof(GetAllCategoryChildren))]
+    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<List<ShopCategory>>>> GetAllCategoryChildren(int parentId)
+    {
+        if (parentId <= 0)
+            return TypedResults.BadRequest(parentId);
+
+        var shopCategories = await _alchemyRepository.GetAllCategoryChildren(parentId);
+
+        return shopCategories != null && shopCategories.Count != 0 ?
+            TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :
+            TypedResults.NotFound(parentId);
+    }
 }

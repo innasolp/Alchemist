@@ -40,6 +40,8 @@ public interface IAlchemyRepository
 
     Task<IShopCategory?> GetShopCategory(int shopId, int itemId);
 
+    Task<List<IShopCategory>> GetAllCategoryChildren(int parentId);
+
     Task<IShopCategory> AddShopCategory(IShopCategory shopCategory);
 
     Task<IShopProduct> CreateShopProduct(IShopProduct shopProduct);

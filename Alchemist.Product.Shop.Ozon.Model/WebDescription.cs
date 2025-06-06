@@ -18,7 +18,9 @@ public class WebDescription : IJsonOnDeserialized
         if (componentCharacteristic != null)
         {
             var currentSeparator = _componentSeparators.Where(componentCharacteristic.Content.Contains).FirstOrDefault();
-            Components = currentSeparator != null ? componentCharacteristic.Content.Split(currentSeparator) : ([componentCharacteristic.Content]);
+            Components = currentSeparator != null 
+                ? componentCharacteristic.Content.Trim().Split(currentSeparator) 
+                : [componentCharacteristic.Content];
         }
     }
 }

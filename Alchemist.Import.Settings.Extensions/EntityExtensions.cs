@@ -65,8 +65,8 @@ public static class EntityExtensions
     {
         var props = GetShopImportSettingsSerializeProperties();
         props.AddRange([nameof(IProductShopImportSettings.PageProductCount),
-                nameof(IProductShopImportSettings.CategoryUrl),
-                nameof(IProductShopImportSettings.ProductUrl) ]);
+                nameof(IProductShopImportSettings.CategoryUrlFormat),
+                nameof(IProductShopImportSettings.ProductUrlFormat) ]);
 
         var option = new JsonSerializerOptions
         {

@@ -85,7 +85,7 @@ message PurposeTypeReply{
 
 message CreateCountryRequest{
   string name=1;  
-  string transcript = 2;
+  google.protobuf.StringValue transcript = 2;
 }
 
 message CountryReply{

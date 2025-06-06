@@ -35,6 +35,16 @@ public class ShopApiClient : IShopDataService
         return await response.Content.ReadFromJsonAsync<Shop>();
     }
 
+    public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId)
+    {
+        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/getAllChildren/{parentId}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return await Task.FromResult(new List<IShopCategory>());
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<List<ShopCategory>>();
+        return await Task.FromResult(result.OfType<IShopCategory>().ToList());
+    }
+
     public async Task<IShop?> GetShop(int id)
     {
         var response = await _httpClient.GetAsync($"api/Shop/{id}");

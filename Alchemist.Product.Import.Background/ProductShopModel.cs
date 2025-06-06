@@ -33,6 +33,6 @@ internal class ProductShopModel : ShopModel, IProductShopModel
         }
     }
 
-    public ObservableCollection<IProductShopCategoryModel> Categories { get; } = [];
+    public ObservableCollection<IProductShopCategory> Categories { get; } = [];
     public int? PageProductCount { get; set; }   
 }

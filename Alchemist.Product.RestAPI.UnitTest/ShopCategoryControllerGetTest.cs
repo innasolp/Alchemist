@@ -10,26 +10,40 @@ namespace Alchemist.Product.RestAPI.UnitTest;
 
 public class ShopCategoryControllerGetTest : ControllerTest<ShopCategoryController, ShopCategory>
 {
-    public ShopCategoryControllerGetTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
-        var shopCategories = new List<ShopCategory>
-        {
+    private readonly List<ShopCategory> _shopCategories =
+    [
             new() {Id=1, ItemId = 2, ShopId = 1},
             new() {Id=4, ItemId = 5, ShopId = 1},
             new() {Id=3, ItemId = 3, ShopId = 2}
-        };
+        ];
+
+    public ShopCategoryControllerGetTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+        
 
         _alchemyRepository.Setup(r => r.GetShopCategory(It.IsAny<int>(), It.IsAny<int>())).Returns((int shopId, int itemId) =>
         {
-            return Task.FromResult((IShopCategory)shopCategories.FirstOrDefault(sc => sc.ShopId == shopId && sc.ItemId == itemId));
+            return Task.FromResult((IShopCategory)_shopCategories.FirstOrDefault(sc => sc.ShopId == shopId && sc.ItemId == itemId));
         });
         
         _alchemyRepository.Setup(r => r.GetShopCategories(It.IsAny<int>())).Returns((int shopId) =>
         {
-            var result = shopCategories.Where(sc => sc.ShopId == shopId).OfType<IShopCategory>().ToList();
+            var result = _shopCategories.Where(sc => sc.ShopId == shopId).OfType<IShopCategory>().ToList();
             return Task.FromResult(result);
         });
+
+        _alchemyRepository.Setup(r => r.GetAllCategoryChildren(It.IsAny<int>())).Returns(GetAllCategoryChildren);
     }
+
+    private async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId)
+    {
+        var children = _shopCategories.Where(c => c.ParentId == parentId).ToList<IShopCategory>();
+        var next = new List<IShopCategory>(children);
+        children.ForEach(async c => next.AddRange(await GetAllCategoryChildren(c.Id)));
+
+        return await Task.FromResult(next);
+    }
+
 
     protected override ShopCategoryController CreateController()
     {
@@ -95,5 +109,39 @@ public class ShopCategoryControllerGetTest : ControllerTest<ShopCategoryControll
         Assert.Equal(2, ok.Value.Count);
         Assert.Contains(ok.Value, (sc) => sc.Id == 1);
         Assert.Contains(ok.Value, (sc) => sc.Id == 4);
+    }
+
+    [Fact]
+    public async Task GetAllChildCategoriesSuccess()
+    {
+        _shopCategories.AddRange(
+            [
+                new() {Id=5, ItemId = 4, ShopId = 1, ParentId = 1},
+                new() {Id=6, ItemId = 6, ShopId = 1, ParentId = 5},
+                new() {Id=7, ItemId = 7, ShopId = 2, ParentId = 3},
+                new() {Id=8, ItemId = 8, ShopId = 1, ParentId = 6},
+                new() {Id=9, ItemId = 9, ShopId = 1, ParentId = 6},
+                new() {Id=10, ItemId = 10, ShopId = 1, ParentId = 8},
+            ]);
+
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetAllCategoryChildren(1));
+        var ok = Assert.IsType<Ok<List<ShopCategory>>>(result.Result);
+        Assert.Equal(5, ok.Value.Count);
+    }
+
+    [Fact]
+    public async Task GetAllChildCategoriesBadRequestWhenParentIdLessOrEqual0()
+    {
+        var parentId = -1;
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetAllCategoryChildren(parentId));
+        Assert.Equal(parentId, Assert.IsType<BadRequest<int>>(result.Result).Value);
+    }
+
+    [Fact]
+    public async Task GetAllChildCategoriesNotFoundWhenParentIdNotExists()
+    {
+        var parentId = _shopCategories.Count + 1;
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetAllCategoryChildren(_shopCategories.Count + 1));
+        Assert.Equal(parentId, Assert.IsType<NotFound<int>>(result.Result).Value);
     }
 }

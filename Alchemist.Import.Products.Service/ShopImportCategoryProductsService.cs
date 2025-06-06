@@ -13,7 +13,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
-    protected record CategoryPage(IProductShopCategoryModel Category, int Page);
+    protected record CategoryPage(IProductShopCategory Category, int Page);
 
     protected record CategoryProductsResult(TCategory? CategoryItem, int? Count, bool IsEnd);
 
@@ -25,7 +25,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly IProductItemHandler _itemHandler;
 
-    protected Queue<IProductShopCategoryModel> Categories { get; }
+    protected Queue<IProductShopCategory> Categories { get; }
 
     protected IProductShopModel ProductShopModel { get; }
 
@@ -52,10 +52,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems?.Count > 0)
         {
-            var newItems = e.NewItems.OfType<IProductShopCategoryModel>().ToList();
+            var newItems = e.NewItems.OfType<IProductShopCategory>().ToList();
             newItems.ForEach(Categories.Enqueue);
             foreach (var item in newItems)            
-                Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, item.GetCategoryForUrl());            
+                Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, item.GetCategoryUrl());            
         }
     }
 
@@ -84,7 +84,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             int page = 1;
             var unsuccessRequestCount = 0;
 
-            var categoryUrl = category.GetCategoryForUrl();
+            var categoryUrl = category.GetCategoryUrl();
 
             bool? isEnd = null;
             while (isEnd != true)
@@ -149,9 +149,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 if (!_unhandledCategoryPages.TryDequeue(out var unhandledCategory))
                     continue;
 
-                var categoryUrl = unhandledCategory.Category.GetCategoryForUrl();
+                var categoryUrl = unhandledCategory.Category.GetCategoryUrl();
 
-                var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, unhandledCategory.Category.GetCategoryForUrl(), unhandledCategory.Page);
+                var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, unhandledCategory.Category.GetCategoryUrl(), unhandledCategory.Page);
 
                 var categoryResult = await ProcessUrlTaskAsync((c) => ProcessCategoryPageAsync(c, unhandledCategory.Category.ItemId, stoppingToken), categoryPageUrl);
                 
