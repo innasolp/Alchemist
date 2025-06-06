@@ -16,6 +16,7 @@ public partial class Shop : IShop, IEntity<int> { }
 public partial class ShopCategory : IShopCategory { }
 public partial class ShopProduct : IShopProduct { }
 public partial class PurposeComponentGroup : IPurposeComponentGroup { }
+public partial class ProductPurpose : IProductPurpose { }
 
 public partial class Currency:IEntity<short>, ICurrency { }
 

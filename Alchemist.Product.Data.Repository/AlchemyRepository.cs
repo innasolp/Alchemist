@@ -381,4 +381,35 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         return [.. next.Union(children)];
     }
 
+    public async Task<List<IPurposeType>> GetProductPurposes(long productId)
+    {
+        try
+        {
+            var purposeTypes = await Context.ProductPurposes.Where(pp => pp.ProductId == productId).Join(Context.PurposeTypes, pp => pp.PurposeTypeId, pt => pt.Id,
+                (pp, pt) => new PurposeType { Id= pt.Id, Name = pt.Name }).ToListAsync();
+
+            return await Task.FromResult(purposeTypes.OfType<IPurposeType>().ToList());
+        }
+        catch(Exception e)
+        {
+            throw e;
+        }
+    }
+
+    public async Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose)
+    {
+        var existed = await Context.ProductPurposes.FirstOrDefaultAsync(
+            pp=>pp.ProductId == productPurpose.ProductId && pp.PurposeTypeId == productPurpose.PurposeTypeId);
+
+        if (existed == null)
+        {
+            var entity = productPurpose.To<ProductPurpose>();
+            return await Context.Create(entity);
+        }
+        else 
+        {
+            var updated = Context.Update(existed);            
+            return await Task.FromResult(updated.Entity);
+        }
+    }
 }

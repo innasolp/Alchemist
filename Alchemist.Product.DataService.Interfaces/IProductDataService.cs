@@ -23,6 +23,8 @@ public interface IProductDataService
     Task<IProduct> CreateProduct(IProduct product);
     Task<IProduct?> FindProductByName(string name);
     Task<IProduct?> FindProductByNameAndBrand(string name, string brand);
+    Task<List<IPurposeType>> GetProductPurposes(long productId);
+    Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose);
 
     Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl);
     Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId);

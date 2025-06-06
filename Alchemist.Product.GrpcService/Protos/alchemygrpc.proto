@@ -38,6 +38,9 @@ service AlchemyGrpcService {
 
 	rpc SetProductComponent(SetProductComponentRequest) returns(ProductComponentReply);
 
+	rpc GetProductPurposes(GetProductPurposesRequest) returns(PurposeTypeListReply) ;
+	rpc SetProductPurpose(SetProductPurposeRequest) returns(ProductPurposeReply);
+
 	rpc GetCurrencyByName(FindByNameRequest) returns (CurrencyReply);
 	rpc GetCurrencyByCode(GetCurrencyByCodeRequest) returns (CurrencyReply);
 	rpc CreateCurrency(CreateCurrencyRequest) returns(CurrencyReply);
@@ -217,6 +220,28 @@ message ProductComponentReply
 	int64 productid=1;
 	int32 componentid=2;
 	int32 sequalNumber=3;
+}
+
+message SetProductPurposeRequest
+{
+	int64 productid=1;
+	int32 purposetypeid=2;
+}
+
+message ProductPurposeReply
+{
+	int64 productid=1;
+	int32 purposetypeid=2;
+}
+
+message GetProductPurposesRequest
+{
+	int64 productid=1;
+}
+
+message PurposeTypeListReply
+{
+	repeated PurposeTypeReply PurposeTypes = 1;
 }
 
 message GetCurrencyByCodeRequest

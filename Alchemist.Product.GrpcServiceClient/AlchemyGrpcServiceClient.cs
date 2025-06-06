@@ -309,4 +309,19 @@ public class AlchemyGrpcServiceClient : IProductDataService
         var result = await _serviceClient.UpdateShopProductPriceAsync(request);
         return await Task.FromResult(result.Value);
     }
+
+    public async Task<List<IPurposeType>> GetProductPurposes(long productId)
+    {
+        var request = new GetProductPurposesRequest { Productid = productId };
+        var reply = await _serviceClient.GetProductPurposesAsync(request);
+        return await reply.FromListReply<PurposeTypeListReply, PurposeTypeReply, IPurposeType>(
+            (s) =>new PurposeType { Id = (short)s.Id, Name = s.Name  });
+    }
+
+    public async Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose)
+    {
+        var request = new SetProductPurposeRequest { Productid = productPurpose.ProductId, Purposetypeid = productPurpose.PurposeTypeId };
+        var reply = await _serviceClient.SetProductPurposeAsync(request);
+        return new ProductPurpose { ProductId = reply.Productid, PurposeTypeId = (short)reply.Purposetypeid };
+    }
 }

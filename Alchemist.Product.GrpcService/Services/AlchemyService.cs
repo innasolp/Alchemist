@@ -390,4 +390,33 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         reply.Id = shopProductPrice.Id;
         return await Task.FromResult(reply);
     }
+
+    public override async Task<PurposeTypeListReply> GetProductPurposes(GetProductPurposesRequest request, ServerCallContext context)
+    {
+        if (request.Productid <= 0)
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetProductPurposesRequest.Productid), "Invalid value");
+
+        var purposeTypes = await _repository.GetProductPurposes(request.Productid);
+        
+        var reply = await purposeTypes.ToListReply<PurposeTypeListReply, PurposeTypeReply, IPurposeType>(
+            (purpose) => new PurposeTypeReply { Id = purpose.Id, Name = purpose.Name  }
+        );
+
+        return await Task.FromResult(reply);
+    }
+
+    public override async Task<ProductPurposeReply> SetProductPurpose(SetProductPurposeRequest request, ServerCallContext context)
+    {
+        if (request.Productid <= 0)
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(SetProductPurposeRequest.Productid), "Invalid value");
+
+        if (request.Purposetypeid <= 0)
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(SetProductPurposeRequest.Purposetypeid), "Invalid value");
+
+        var productPurpose = new ProductPurpose { ProductId = request.Productid, PurposeTypeId = (short)request.Purposetypeid };
+        var entity = await _repository.SetProductPurpose(productPurpose);
+        var reply = new ProductPurposeReply { Productid = entity.ProductId, Purposetypeid = entity.PurposeTypeId };
+
+        return await Task.FromResult(reply);
+    }
 }

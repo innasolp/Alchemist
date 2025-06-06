@@ -34,7 +34,11 @@ public interface IAlchemyRepository
     List<IProduct> GetProductsByShop(int shopId);
     Task<IProduct?> FindProductByName(string name);
 
-    Task<IProduct?> FindProductByNameAndBrand(string name, string brand);    
+    Task<IProduct?> FindProductByNameAndBrand(string name, string brand);
+
+    Task<List<IPurposeType>> GetProductPurposes(long productId);
+
+    Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose);
 
     Task<List<IShopCategory>> GetShopCategories(int shopId);
 
