@@ -9,5 +9,5 @@ public interface IProductShopModel : IShopModel
 
     string CategoryUrl { get; set; }
 
-    ObservableCollection<IProductShopCategoryModel> Categories { get; }
+    ObservableCollection<IProductShopCategory> Categories { get; }
 }

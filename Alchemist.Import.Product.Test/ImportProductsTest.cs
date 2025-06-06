@@ -26,7 +26,7 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
         ImportProductsResourceManager = new ResourceManager("Alchemist.Import.Products.Service.ImportProductLogMessages",
                                typeof(ShopImportCategoryProductsService<TestCategory, TestProductItem>).Assembly);
        
-        ProductShopModelMock.Setup(s => s.Categories).Returns(new ObservableCollection<IProductShopCategoryModel>());        
+        ProductShopModelMock.Setup(s => s.Categories).Returns(new ObservableCollection<IProductShopCategory>());        
 
         Service = new TestImportProductService<TestCategory, TestProductItem>( 
             LoggerMock.Object,

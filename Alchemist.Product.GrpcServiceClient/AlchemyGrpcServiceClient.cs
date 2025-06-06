@@ -26,8 +26,8 @@ public class AlchemyGrpcServiceClient : IProductDataService
         _channel = channel;
         _interceptors = interceptors;
         var invoker = _channel.Intercept([.. _interceptors])
-            .Intercept(new ClientExceptionErrorInfoInterceptor())
-            .Intercept(new ClientNotFoundInterceptor());
+            .Intercept(new ClientNotFoundInterceptor())
+            .Intercept(new ClientExceptionErrorInfoInterceptor());
         _serviceClient = new AlchemyGrpcService.AlchemyGrpcServiceClient(invoker);
     }
 

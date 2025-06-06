@@ -339,4 +339,46 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         var savedCount = await Context.SaveChangesAsync();
         return updated.Entity;
     }
+
+    private readonly SemaphoreSlim _addCategoryChildrenSemaphore = new(1, 1);
+    public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId)
+    {
+        var children = await Context.ShopCategories
+            .Where(c=>c.ParentId == parentId).ToListAsync();
+
+        var tokenSource = new CancellationTokenSource();
+
+        var result = new List<IShopCategory>();
+
+        foreach(var child in children)
+        {
+            var categoryChildren = await GetCategoryChildrenTree(child.Id, tokenSource.Token);
+            await AddCategoryChildren(result, categoryChildren, tokenSource.Token);
+        }
+
+        return [.. children.Union(result)];
+    }    
+
+    private async Task AddCategoryChildren(List<IShopCategory> categories, IEnumerable<IShopCategory> children, CancellationToken token)
+    {
+        await _addCategoryChildrenSemaphore.WaitAsync(token);
+        categories.AddRange(children);
+        _addCategoryChildrenSemaphore.Release();
+    }
+
+    private async Task<List<IShopCategory>> GetCategoryChildrenTree(int parentId, CancellationToken token)
+    {
+        var children = await Context.ShopCategories.Where(c => c.ParentId == parentId).ToListAsync(cancellationToken: token);
+
+        var next = new List<IShopCategory>();
+
+        foreach (var child in children)
+        {
+            var childrenTree = await GetCategoryChildrenTree(child.Id, token);
+            next.AddRange(childrenTree);
+        }
+
+        return [.. next.Union(children)];
+    }
+
 }

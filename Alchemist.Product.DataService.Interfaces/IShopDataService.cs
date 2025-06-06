@@ -20,4 +20,6 @@ public interface IShopDataService
     Task<IShop?> GetShopByUrl(string url);
 
     Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId);
+
+    Task<List<IShopCategory>> GetAllCategoryChildren(int parentId);
 }

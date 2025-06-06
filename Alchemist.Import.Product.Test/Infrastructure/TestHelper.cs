@@ -5,9 +5,9 @@ namespace Alchemist.Import.Product.Test.Infrastructure;
 
 internal static class TestHelper
 {
-    public static Mock<IProductShopCategoryModel> CreateCategoryMock()
+    public static Mock<IProductShopCategory> CreateCategoryMock()
     {
-        var categoryMock = new Mock<IProductShopCategoryModel>();
+        var categoryMock = new Mock<IProductShopCategory>();
         categoryMock.Setup(c => c.ItemId).Returns(new Random().Next(10000));
         categoryMock.Setup(c => c.Category).Returns(Guid.NewGuid().ToString());
         return categoryMock;

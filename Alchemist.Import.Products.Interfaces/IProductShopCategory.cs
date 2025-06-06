@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Import.Products.Interfaces;
 
-public interface IProductShopCategoryModel
+public interface IProductShopCategory
 {
     string Category { get; set; }
 

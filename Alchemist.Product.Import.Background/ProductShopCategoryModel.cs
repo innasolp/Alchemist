@@ -2,7 +2,7 @@
 
 namespace Alchemist.Product.Import.Background;
 
-internal class ProductShopCategoryModel : IProductShopCategoryModel
+internal class ProductShopCategoryModel : IProductShopCategory
 {
     public string Category { get ; set; }
     public int ItemId { get; set; }

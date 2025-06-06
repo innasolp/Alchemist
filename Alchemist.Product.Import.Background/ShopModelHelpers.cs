@@ -3,7 +3,6 @@ using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
@@ -15,17 +14,38 @@ internal static class ShopModelHelpers
     {
         var productShopModel = await shopDataService.CreateShopModelAsync<ProductShopModel>(shopImportSettings);
 
-        productShopModel.ProductUrl = shopImportSettings.ProductUrl;
-        productShopModel.CategoryUrl = shopImportSettings.CategoryUrl;        
+        productShopModel.ProductUrl = shopImportSettings.ProductUrlFormat;
+        productShopModel.CategoryUrl = shopImportSettings.CategoryUrlFormat;        
 
         if (productShopModel.Id != 0)
         {
-            var categoriesService = shopImportSettings.Services.OfType<ImportServiceSettings>().FirstOrDefault(s=>s.Value?.ToString().Contains("Categories") == true);
-            var categories = categoriesService?.Value["Categories"]?.AsArray().Select(v=>v.ToString());
+            if (shopImportSettings.RootCategories?.Length > 0)
+            {
+                var shopCategories = new List<IShopCategory>();
 
-            var shopCategories = await shopDataService.GetShopCategories(productShopModel.Id);
-            shopCategories?.ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId }));
+                foreach(var c in shopImportSettings.RootCategories)
+                {
+                    var shopCategory = await shopDataService.GetShopCategoryByShopIdAndItemId(productShopModel.Id, c.Item);
+                    var children = await shopDataService.GetAllCategoryChildren(shopCategory.Id);
+                    var children2 = new List<IShopCategory>(children);
+                    shopCategories.AddRange(children.Where(child => !children2.Any(c2 => c2.ParentId == child.Id)));
+                }                
+
+                if (shopCategories.Count > 0)
+                    shopCategories?.ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId }));
+                else
+                    shopImportSettings.RootCategories.ToList().ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Url, ItemId = c.Item }));
+            }
+            else
+            {
+                var allShopCategories = await shopDataService.GetShopCategories(productShopModel.Id);
+                var categories2 = new List<IShopCategory>(allShopCategories);
+                var lastShopCategories = allShopCategories.Where(c => !categories2.Any(c2 => c2.ParentId == c.Id)).ToList();
+                lastShopCategories.ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId }));
+            }
         }
+        else 
+            shopImportSettings.RootCategories?.ToList().ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Url, ItemId = c.Item }));
 
         return productShopModel;
     }

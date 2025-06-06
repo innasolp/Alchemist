@@ -167,7 +167,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         }
 
         LoggerMock.VerifyInfo(ImportProductsResourceManager.GetString("CategoryCompletedInfo"),
-            ProductShopModelMock.Object.Categories[0].GetCategoryForUrl(), categoryProducts.CategoryProductItems.Length, 0);
+            ProductShopModelMock.Object.Categories[0].GetCategoryUrl(), categoryProducts.CategoryProductItems.Length, 0);
         
     }
 }

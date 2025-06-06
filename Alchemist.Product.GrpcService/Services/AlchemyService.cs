@@ -37,9 +37,9 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateCountryRequest.Name));
 
-        var country = new Country { Name = request.Name };
+        var country = new Country { Name = request.Name, Transcript = request.Transcript };
         var newCountry = await _repository.CreateCountry(country);
-        var reply = new CountryReply() { Id = newCountry.Id, Name = newCountry.Name };
+        var reply = new CountryReply() { Id = newCountry.Id, Name = newCountry.Name, Transcript = newCountry.Transcript };
         return await Task.FromResult(reply);
     }
 

@@ -11,7 +11,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
 {
     public ImportShopProductServiceTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
-        ProductShopModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategoryModel>());
+        ProductShopModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategory>());
 
         Service = new TestImportProductService<TestCategory, TestProductItem>(
              LoggerMock.Object,
