@@ -32,6 +32,11 @@ public partial class ShopProductCategoryListReply : IListReply<ShopProductCatego
     RepeatedField<ShopProductCategoryReply> IListReply<ShopProductCategoryReply>.Repeated => ShopProductCategories;
 }
 
+public partial class PurposeTypeListReply : IListReply<PurposeTypeReply>
+{
+    RepeatedField<PurposeTypeReply> IListReply<PurposeTypeReply>.Repeated => PurposeTypes;
+}
+
 public partial class SetProductComponentRequest : IProductComponentMessage { }
 
 public partial class ProductComponentReply : IProductComponentMessage { }

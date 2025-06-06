@@ -107,6 +107,16 @@ public static class IntefaceExtensions
         };
     }
 
+    public static T To<T>(this IProductPurpose @in)
+        where T : class, IProductPurpose, new()
+    {
+        return new T
+        {
+            ProductId = @in.ProductId,
+            PurposeTypeId = @in.PurposeTypeId
+        };
+    }
+
     public static T To<T>(this IShop @in)
         where T : class, IShop, new()
     {

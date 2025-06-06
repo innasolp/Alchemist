@@ -139,14 +139,6 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         var productType = await _alchemyServiceClient.FindProductTypeByName(productItem.ProductType) ??
             await _alchemyServiceClient.CreateProductType(new ProductType { Name = productItem.ProductType });
 
-        var purposeTypes = new List<IPurposeType>();
-        foreach (var purpose in productItem.Purposes)
-        {
-            var purposeType = await _alchemyServiceClient.FindPurposeTypeByName(purpose) ??
-                await _alchemyServiceClient.CreatePurposeType(new PurposeType { Name = purpose });
-            purposeTypes.Add(purposeType);
-        }
-
         var product = await _alchemyServiceClient.CreateProduct(new Product.Entities.Product
         {
             Name = productItem.Name,
@@ -156,6 +148,9 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
             AddedTime = DateTime.UtcNow,
             Articul = productItem.Articul
         });
+
+        if (productItem.Purposes.Length > 0)
+            await SetProductPurposesAsync(productItem.Purposes, product.Id);
 
         if (productItem.Components != null)
             await SetProductComponentsAsync(productItem.Components, product.Id);
@@ -168,13 +163,27 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         int componentNumber = 0;
         foreach (var itemComponent in components)
         {
-            var componentName = itemComponent.RemoveSpecialCharacters();
+            var componentName = itemComponent.Trim().RemoveSpecialCharacters();
             var component = await _alchemyServiceClient.FindComponentByName(componentName) ??
                 await _alchemyServiceClient.CreateComponent(new Component { Name = componentName });
 
             componentNumber++;
 
             var productComponent = _alchemyServiceClient.SetProductComponent(new ProductComponent { ProductId = productId, ComponentId = component.Id, SequalNumber = (short)componentNumber });
+        }
+    }
+
+    private async Task SetProductPurposesAsync(IEnumerable<string> purposes, long productId)
+    {
+        var productPurposes = await _alchemyServiceClient.GetProductPurposes(productId);
+        foreach(var purpose in purposes.Where(p=>!productPurposes.Any(pp=>pp.Name.Equals(p.Trim(), StringComparison.InvariantCultureIgnoreCase))))
+        {
+            var name = purpose.Trim().RemoveSpecialCharacters();
+
+            var newPurposeType = await _alchemyServiceClient.FindPurposeTypeByName(name) ??
+                await _alchemyServiceClient.CreatePurposeType(new PurposeType { Name = name });
+
+            await _alchemyServiceClient.SetProductPurpose(new ProductPurpose { ProductId = productId, PurposeTypeId = newPurposeType.Id });
         }
     }
 
