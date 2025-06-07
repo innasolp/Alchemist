@@ -135,30 +135,30 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     {
         var shopCategories = await Context.ShopCategories.Where(su => su.ShopId == shopId).OfType<IShopCategory>().ToListAsync();
         return shopCategories;
-    }    
+    }
 
     public async Task<IShopCategory> AddShopCategory(IShopCategory shopCategory)
     {
         var shopCategoryEntity = shopCategory.To<ShopCategory>();
         return await Context.Create(shopCategoryEntity);
     }
-    
+
     public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId)
     {
         var shopProductCategoryEntity = new ShopProductCategory { ShopProductId = shopProductId, ShopCategoryId = shopCategoryId };
         return await Context.Create(shopProductCategoryEntity);
     }
-    
+
     public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId)
     {
         return await Context.ShopProductCategories.AnyAsync(s => s.ShopProductId == shopProductId && s.ShopCategoryId == s.ShopCategoryId);
     }
-    
+
     public async Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId)
     {
-        return await Context.ShopProductCategories.Where(s=>s.ShopProductId == shopProductId).OfType<IShopProductCategory>().ToListAsync();
+        return await Context.ShopProductCategories.Where(s => s.ShopProductId == shopProductId).OfType<IShopProductCategory>().ToListAsync();
     }
-    
+
     public async Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopProductCategory)
     {
         var shopProductCategoryEntity = shopProductCategory.To<ShopProductCategory>();
@@ -219,10 +219,10 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
 
     public async Task<IProduct?> FindProductByNameAndBrand(string name, string brand)
     {
-        var brands = await Context.Brands.Where(b=> b.Name.ToLower() == brand.ToLower()).ToListAsync();
+        var brands = await Context.Brands.Where(b => b.Name.Trim().ToUpper() == brand.Trim().ToUpper()).ToListAsync();
         if (brands.Count == 0) return default;
-        var products = await Context.Products.Where(p => p.Name.ToLower() == name.ToLower()).ToListAsync();
-        products = products.Where(p=> brands.Any(b => b.Id == p.Id)).ToList();
+        var products = await Context.Products.Where(p => p.Name.Trim().ToUpper() == name.Trim().ToUpper()).ToListAsync();
+        products = [.. products.Where(p => brands.Any(b => b.Id == p.Id))];
         if (products.Count > 1)
         {
             throw new Exception($"multiple products with name {name} and brand {brand}");
@@ -344,20 +344,20 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId)
     {
         var children = await Context.ShopCategories
-            .Where(c=>c.ParentId == parentId).ToListAsync();
+            .Where(c => c.ParentId == parentId).ToListAsync();
 
         var tokenSource = new CancellationTokenSource();
 
         var result = new List<IShopCategory>();
 
-        foreach(var child in children)
+        foreach (var child in children)
         {
             var categoryChildren = await GetCategoryChildrenTree(child.Id, tokenSource.Token);
             await AddCategoryChildren(result, categoryChildren, tokenSource.Token);
         }
 
         return [.. children.Union(result)];
-    }    
+    }
 
     private async Task AddCategoryChildren(List<IShopCategory> categories, IEnumerable<IShopCategory> children, CancellationToken token)
     {
@@ -383,32 +383,25 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
 
     public async Task<List<IPurposeType>> GetProductPurposes(long productId)
     {
-        try
-        {
-            var purposeTypes = await Context.ProductPurposes.Where(pp => pp.ProductId == productId).Join(Context.PurposeTypes, pp => pp.PurposeTypeId, pt => pt.Id,
-                (pp, pt) => new PurposeType { Id= pt.Id, Name = pt.Name }).ToListAsync();
+        var purposeTypes = await Context.ProductPurposes.Where(pp => pp.ProductId == productId).Join(Context.PurposeTypes, pp => pp.PurposeTypeId, pt => pt.Id,
+                 (pp, pt) => new PurposeType { Id = pt.Id, Name = pt.Name }).ToListAsync();
 
-            return await Task.FromResult(purposeTypes.OfType<IPurposeType>().ToList());
-        }
-        catch(Exception e)
-        {
-            throw e;
-        }
+        return await Task.FromResult(purposeTypes.OfType<IPurposeType>().ToList());
     }
 
     public async Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose)
     {
         var existed = await Context.ProductPurposes.FirstOrDefaultAsync(
-            pp=>pp.ProductId == productPurpose.ProductId && pp.PurposeTypeId == productPurpose.PurposeTypeId);
+            pp => pp.ProductId == productPurpose.ProductId && pp.PurposeTypeId == productPurpose.PurposeTypeId);
 
         if (existed == null)
         {
             var entity = productPurpose.To<ProductPurpose>();
             return await Context.Create(entity);
         }
-        else 
+        else
         {
-            var updated = Context.Update(existed);            
+            var updated = Context.Update(existed);
             return await Task.FromResult(updated.Entity);
         }
     }

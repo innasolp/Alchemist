@@ -40,7 +40,7 @@ public class ProductItem : ICategoryProductItem, IJsonOnDeserialized
         {
             var substr = Action.Link.Replace(productLink, "");
             var startParamsIndex = substr.IndexOf(startParams);
-            Name = startParamsIndex >= 0 ? substr[..startParamsIndex] : substr;
+            Name = startParamsIndex >= 0 ? substr[..startParamsIndex].Trim() : substr.Trim();
         }
 
         var priceMainState = MainState.FirstOrDefault(m => m.Atom?.PriceV2 != null || m.PriceV2 != null);

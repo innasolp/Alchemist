@@ -40,7 +40,7 @@ public class RichAnnotationJson : IJsonOnDeserialized
     {
         ProductTypeTitle = Contents?.Where(c=>c.Blocks != null).SelectMany(c=>c.Blocks)
                                    .FirstOrDefault(b => b?.RichAnnotationContentBlockType == RichAnnotationContentBlockType.Chess
-                                                      && b.Title?.Content?.Length > 0)?.Title?.Content?.FirstOrDefault(c => !string.IsNullOrEmpty(c));
+                                                      && b.Title?.Content?.Length > 0)?.Title?.Content?.FirstOrDefault(c => !string.IsNullOrEmpty(c))?.Trim();
     }
 }
 

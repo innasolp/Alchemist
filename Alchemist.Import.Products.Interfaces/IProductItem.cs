@@ -12,7 +12,7 @@ public interface IProductItem
 
     string Brand { get; }
 
-    string Country { get; }
+    string? Country { get; }
 
     string Comment { get; }
 

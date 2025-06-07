@@ -187,17 +187,17 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         }
     }
 
-    private async Task<IBrand?> GetBrandAsync(IProductItem shopProductModel)
+    private async Task<IBrand?> GetBrandAsync(IProductItem productItem)
     {
-        var brand = await _alchemyServiceClient.FindBrandByName(shopProductModel.Brand);
+        var brand = await _alchemyServiceClient.FindBrandByName(productItem.Brand);
         if (brand == null)
         {
-            var country = !string.IsNullOrEmpty(shopProductModel.Country) ?
-            (await _alchemyServiceClient.FindCountryByName(shopProductModel.Country)
-                ?? await _alchemyServiceClient.CreateCountry(new Country { Name = shopProductModel.Country.RemoveSpecialCharacters() }))
+            var country = !string.IsNullOrEmpty(productItem.Country) ?
+            (await _alchemyServiceClient.FindCountryByName(productItem.Country)
+                ?? await _alchemyServiceClient.CreateCountry(new Country { Name = productItem.Country.Trim().RemoveSpecialCharacters() }))
                 : null;
 
-            brand = await _alchemyServiceClient.CreateBrand(new Brand() { CountryId = country?.Id, Name = shopProductModel.Brand });
+            brand = await _alchemyServiceClient.CreateBrand(new Brand() { CountryId = country?.Id, Name = productItem.Brand.Trim() });
         }
 
         return brand;

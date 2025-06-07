@@ -26,7 +26,7 @@ public class WebCharacteristics : IJsonOnDeserialized
 
 
     [JsonIgnore]
-    public string Brand { get; set; }
+    public string? Brand { get; set; }
 
     [JsonIgnore]
     public string Type { get; set; }
@@ -41,17 +41,16 @@ public class WebCharacteristics : IJsonOnDeserialized
     public string[] Components { get; set; }
 
     [JsonIgnore]
-    public string Country { get; set; }
+    public string? Country { get; set; }
 
     public void OnDeserialized()
     {
-        var brandCharacteristicItem = Characteristics.SelectMany(c => c.AllCharacteristicItems).FirstOrDefault(cv => cv.WebCharacteristicType == WebCharacteristicType.Brand);
-        if (brandCharacteristicItem != null)
-            Brand = brandCharacteristicItem.Values[0].Text;
+        Brand = Characteristics.SelectMany(c => c.AllCharacteristicItems).FirstOrDefault(cv => cv.WebCharacteristicType == WebCharacteristicType.Brand)?
+                .Values.FirstOrDefault()?.Text.Trim();
 
         var typeCharacteristicItem = Characteristics.SelectMany(c => c.AllCharacteristicItems).FirstOrDefault(cv => cv.WebCharacteristicType == WebCharacteristicType.Type);
         if (typeCharacteristicItem != null)
-            Type = typeCharacteristicItem.Values[0].Text;
+            Type = typeCharacteristicItem.Values[0].Text.Trim();
 
         var skuCharacteristicItem = Characteristics.SelectMany(c => c.AllCharacteristicItems).FirstOrDefault(cv => cv.WebCharacteristicType == WebCharacteristicType.Sku);
         if (skuCharacteristicItem != null)
@@ -59,12 +58,13 @@ public class WebCharacteristics : IJsonOnDeserialized
 
         var purposeTypeCharacteristicItem = Characteristics.SelectMany(c => c.AllCharacteristicItems).FirstOrDefault(cv => cv.WebCharacteristicType == WebCharacteristicType.SkinEffect);
         PurposeTypes = purposeTypeCharacteristicItem != null
-                ? purposeTypeCharacteristicItem.Values.Select(v => v.Text).ToArray()
+                ? [.. purposeTypeCharacteristicItem.Values.Select(v => v.Text.Trim())]
                 : [];
 
-        var countryCharacteristicItem = Characteristics.SelectMany(c => c.AllCharacteristicItems).FirstOrDefault(cv => cv.WebCharacteristicType == WebCharacteristicType.Country);
-        if (countryCharacteristicItem != null)
-            Country = countryCharacteristicItem.Values[0].Text;
+       
+        Country = Characteristics.SelectMany(c => c.AllCharacteristicItems)
+            .FirstOrDefault(cv => cv.WebCharacteristicType == WebCharacteristicType.Country)
+            ?.Values.FirstOrDefault()?.Text.Trim();
 
         var componentsCharacteristicItems = Characteristics.SelectMany(c => c.AllCharacteristicItems).
             Where(ci => ci.WebCharacteristicType == WebCharacteristicType.Material || ci.WebCharacteristicType == WebCharacteristicType.Composition).ToList();

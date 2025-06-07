@@ -24,7 +24,7 @@ namespace Alchemist.Product.Data.Repository
             where TEntity : class, IEntity<TId>, new()
         {
             var allEntities = await dbContext.Set<TEntity>().ToListAsync();
-            var entities = allEntities.Where(e => e.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            var entities = allEntities.Where(e => e.Name.Trim().ToUpper() == name.Trim().ToUpper()).ToList();
             if (entities.Count > 1)
             {
                 throw new Exception($"multiple entities with name {name}");
@@ -37,10 +37,11 @@ namespace Alchemist.Product.Data.Repository
             where TEntity : class, IEntity<TId>, new()
         {
             var allEntities = await dbContext.Set<TEntity>().ToListAsync();
+
+            var compareName = name.Trim().ToUpper();
             
             var entities = allEntities.Where(
-                e => e.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase) ||
-            nameProperties(e).Any(n => !string.IsNullOrEmpty(n) && n.Equals(name, StringComparison.CurrentCultureIgnoreCase))).ToList();
+                e => e.Name.Trim().ToUpper() == compareName  || nameProperties(e).Any(n => !string.IsNullOrEmpty(n) && n.Trim().ToUpper() == compareName)).ToList();
 
             if (entities.Count > 1)
             {
