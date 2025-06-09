@@ -31,7 +31,7 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
     }
 
     [Fact]
-    public async Task LogFindBrandByNameSuccess()
+    public async Task FindBrandByNameLogInfoSuccessWhenNameExists()
     {
         var brandName = "Elizavecca";
         _messages.Clear();
@@ -47,7 +47,7 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
     }
 
     [Fact]
-    public async Task LogFindBrandByNameThrowsException()
+    public async Task FindBrandByNameLogErrorBadRequestWhenNameIsEmpty()
     {
         _messages.Clear();
 
@@ -63,6 +63,51 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
             && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
         
         Assert.Equal(1, _messages.Count(m=> m.logLevel == LogLevel.Error
+            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+    }
+
+    [Fact]
+    public async Task FindBrandByNameLogErrorNotFoundWhenNameNotExists()
+    {        
+        _messages.Clear();
+
+        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+        {
+            await _client.FindBrandByNameAsync(new FindByNameRequest { Name = Guid.NewGuid().ToString() });
+        });
+
+        Assert.Equal(StatusCode.NotFound, rpcException.Status.StatusCode);
+
+        Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Error
+            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+    }
+
+    [Fact]
+    public async Task AddEqualShopProductsLogInternalServerError()
+    {
+        _messages.Clear();
+
+        await _client.CreateShopProductAsync(new CreateShopProductRequest { Shopid=1, Productid = 1, Itemurl = Guid.NewGuid().ToString() });
+
+        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+        {
+            await _client.CreateShopProductAsync(new CreateShopProductRequest { Shopid = 1, Productid = 1, Itemurl = Guid.NewGuid().ToString() });
+        });
+
+        Assert.Equal(StatusCode.Internal, rpcException.Status.StatusCode);
+
+        Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Error
+            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.CreateShopProduct))));
+    }
+
+    [Fact]
+    public async Task FindBrandByNameLogWarningMutipleEntitesWhenNameDubles()
+    {
+        _messages.Clear();
+
+        var result = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "infinite" });       
+
+        Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Warning
             && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
     }
 

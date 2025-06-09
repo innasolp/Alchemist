@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Common;
 
-public enum Status
+public enum ResultStatus
 {
     Success = 0,
     Warning = 1,
@@ -10,13 +10,13 @@ public enum Status
 
 public readonly struct TaskResult
 {
-    public Status Status { get; }
+    public ResultStatus Status { get; }
 
     public Exception? Exception { get; }
 
-    public TaskResult() { Status = Status.Error; }
+    public TaskResult() { Status = ResultStatus.Error; }
 
-    private TaskResult(Status result, Exception? exception = null)
+    private TaskResult(ResultStatus result, Exception? exception = null)
     {
         Status = result;
         Exception = exception;
@@ -24,59 +24,59 @@ public readonly struct TaskResult
 
     public static TaskResult Success()
     {
-        return new TaskResult(Status.Success);
+        return new TaskResult(ResultStatus.Success);
     }
 
     public static TaskResult Warning(Exception? exception = null)
     {
-        return new TaskResult(Status.Warning, exception);
+        return new TaskResult(ResultStatus.Warning, exception);
     }
 
     public static TaskResult Failed(Exception exception)
     {
-        return new TaskResult(Status.Error, exception);
+        return new TaskResult(ResultStatus.Error, exception);
     }
 
     public static TaskResult Cancelled()
     {
-        return new TaskResult(Status.Cancelled, null);
+        return new TaskResult(ResultStatus.Cancelled, null);
     }
 }
 
 public readonly struct TaskResult<T>
 {
-    public Status Status { get; }
+    public ResultStatus Status { get; }
 
-    public T? Result { get; }
+    public T? Value { get; }
 
     public Exception? Exception { get; }
 
-    public TaskResult() { Status = Status.Error; }
+    public TaskResult() { Status = ResultStatus.Error; }
 
-    private TaskResult(T? value, Status result, Exception? exception = null)
+    private TaskResult(T? value, ResultStatus result, Exception? exception = null)
     {
         Status = result;
-        Result = value;
+        Value = value;
         Exception = exception;
     }
 
     public static TaskResult<T> Success(T? value)
     {
-        return new TaskResult<T>(value, Status.Success);
+        return new TaskResult<T>(value, ResultStatus.Success);
     }
 
     public static TaskResult<T> Warning(T? value, Exception? exception = null)
     {
-        return new TaskResult<T>(value, Status.Warning, exception);
+        return new TaskResult<T>(value, ResultStatus.Warning, exception);
     }
 
     public static TaskResult<T> Failed(T? value, Exception exception)
     {
-        return new TaskResult<T>(value, Status.Error, exception);
+        return new TaskResult<T>(value, ResultStatus.Error, exception);
     }
     
     public static TaskResult<T> Cancelled()
     {
-        return new TaskResult<T>(default(T), Status.Cancelled, null);
+        return new TaskResult<T>(default(T), ResultStatus.Cancelled, null);
     }
 }

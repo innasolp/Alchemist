@@ -1,4 +1,6 @@
-﻿using Alchemist.DataService.Interfaces;
+﻿using Alchemist.Common;
+using Alchemist.DataService.Interfaces;
+using Alchemist.Exceptions;
 using Alchemist.Product.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,7 +54,7 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
 
     public List<IBrand> GetBrands()
     {
-        return Context.Brands.OfType<IBrand>().ToList();
+        return [.. Context.Brands.OfType<IBrand>()];
     }
 
     public async Task<IComponent?> GetComponent(int id)
@@ -62,7 +64,7 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
 
     public List<IComponentGroup> GetComponentGroups()
     {
-        return Context.ComponentGroups.OfType<IComponentGroup>().ToList();
+        return [.. Context.ComponentGroups.OfType<IComponentGroup>()];
     }
 
     public List<IComponentGroup> GetComponentGroupsByParent(int parentGroupId)
@@ -92,7 +94,7 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
 
     public List<ICountry> GetCountries()
     {
-        return Context.Countries.OfType<ICountry>().ToList();
+        return [.. Context.Countries.OfType<ICountry>()];
     }
 
     public async Task<IProduct?> GetProduct(long id)
@@ -107,12 +109,12 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
 
     public List<IProductType> GetProductTypes()
     {
-        return Context.ProductTypes.OfType<IProductType>().ToList();
+        return [.. Context.ProductTypes.OfType<IProductType>()];
     }
 
     public List<IPurposeType> GetPurposeTypes()
     {
-        return Context.PurposeTypes.OfType<IPurposeType>().ToList();
+        return [.. Context.PurposeTypes.OfType<IPurposeType>()];
     }
 
     public async Task<IShop?> GetShop(int id)
@@ -223,12 +225,9 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         if (brands.Count == 0) return default;
         var products = await Context.Products.Where(p => p.Name.Trim().ToUpper() == name.Trim().ToUpper()).ToListAsync();
         products = [.. products.Where(p => brands.Any(b => b.Id == p.Id))];
-        if (products.Count > 1)
-        {
-            throw new Exception($"multiple products with name {name} and brand {brand}");
-        }
-
-        return await Task.FromResult(products.FirstOrDefault());
+        return products.Count > 1
+            ? throw new WarningException($"multiple products with name {name} and brand {brand}", products.FirstOrDefault())
+            : (IProduct?)await Task.FromResult(products.FirstOrDefault());
     }
 
     public async Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl)
@@ -287,19 +286,10 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
 
     public async Task<ICurrency?> GetCurrencyByCode(short code)
     {
-        try
-        {
-            var entities = Context.Currencies.Where(e => e.Code == code).ToList();
-            if (entities.Count > 1)
-            {
-                throw new Exception($"multiple currencies with code {code}");
-            }
-            return await Task.FromResult(entities.FirstOrDefault());
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        var entities = Context.Currencies.Where(e => e.Code == code).ToList();
+        return entities.Count > 1
+            ? throw new WarningException($"multiple currencies with code {code}", entities.FirstOrDefault())
+            : (ICurrency?)await Task.FromResult(entities.FirstOrDefault());
     }
 
     public async Task<bool> UpdateShopProductPrice(IShopProductPrice shopProductPrice)
