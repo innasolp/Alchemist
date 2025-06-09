@@ -100,7 +100,7 @@ public class ProductData : IProductItem
 
     string IProductItem.Brand => Data.Brand;
 
-    string IProductItem.Country => Data.Country;
+    string? IProductItem.Country => Data.Country;
 
     string IProductItem.ProductType => Data.ProductType;
 
@@ -125,7 +125,7 @@ public class Product : ProductBase, IJsonOnDeserialized
     public string Description { get; set; }
 
     [JsonIgnore]
-    public string Country { get; set; }
+    public string? Country { get; set; }
 
     [JsonIgnore]
     public string ProductType { get; set; }
@@ -147,9 +147,9 @@ public class Product : ProductBase, IJsonOnDeserialized
             Description = description.Content;
             if (description.Attributes != null && description.Attributes.Any())
             {
-                ProductType = description.Attributes[(int)ProductDescriptionAttributeType.ProductType].Value;
+                ProductType = description.Attributes[(int)ProductDescriptionAttributeType.ProductType].Value.Trim();
                 Purposes = (description.Attributes.Length > 2)
-                    ? description.Attributes[(int)ProductDescriptionAttributeType.Purpose].Value.Split(",")
+                    ? [.. description.Attributes[(int)ProductDescriptionAttributeType.Purpose].Value.Split(",").Select(s=>s.Trim())]
                     : [];
             }
             else Purposes = [];
@@ -158,7 +158,7 @@ public class Product : ProductBase, IJsonOnDeserialized
         var brand = ProductDescriptions.FirstOrDefault(pd => pd.ProductDescriptionType == ProductDescriptionType.Brand);
         if (brand != null && !string.IsNullOrWhiteSpace(brand.Title))
         {
-            Country = brand.Subtitle;
+            Country = brand.Subtitle.Trim();
         }
     }
 }

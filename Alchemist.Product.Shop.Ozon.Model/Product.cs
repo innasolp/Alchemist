@@ -33,7 +33,7 @@ public class Product : IJsonOnDeserialized, IProductItem
 
     string IProductItem.Brand => WebCharacteristics.Brand ?? WebSeller?.Name;
 
-    string IProductItem.Country => WebCharacteristics.Country;
+    string? IProductItem.Country => WebCharacteristics.Country;
 
     string IProductItem.Comment => WebRichDescription.RichDescription;
 
