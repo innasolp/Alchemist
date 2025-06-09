@@ -17,7 +17,9 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.30.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
-    <PackageReference Include="Grpc.Server.Interceptors" Version="1.0.0" />
+    <PackageReference Include="Grpc.Interception.Extensions" Version="1.0.0" />
+    <PackageReference Include="Grpc.Message.Extensions" Version="1.0.0" />
+    <PackageReference Include="Grpc.Server.Interceptors" Version="1.0.0.1" />
     <PackageReference Include="Grpc.Server.RequestInterceptor" Version="1.0.0" />
     <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
     <PackageReference Include="Grpc.Tools" Version="2.72.0">
@@ -34,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Repository\Alchemist.Product.Data.Repository.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />

@@ -1,20 +1,22 @@
 ﻿using Google.Protobuf.Collections;
 using Alchemist.Product.GrpcService.Extensions;
+using Grpc.Interfaces;
+using Grpc.Message.Extensions;
 
 namespace Alchemist.Product.GrpcService;
 
-public partial class ProductTypeReply : IBaseReply<int> { }
+public partial class ProductTypeReply : IBaseReply<int>, IMessageWarning { }
 
-public partial class PurposeTypeReply : IBaseReply<int> { }
+public partial class PurposeTypeReply : IBaseReply<int>, IMessageWarning { }
 
-public partial class CountryReply : IBaseReply<int> { }
+public partial class CountryReply : IBaseReply<int>, IMessageWarning { }
 
 
-public partial class BrandReply : IBaseReply<int> { }
+public partial class BrandReply : IBaseReply<int>, IMessageWarning { }
 
 public partial class ComponentReply : IBaseReply<int>, IComponentMessage { }
 
-public partial class ProductReply : IBaseReply<long> { }
+public partial class ProductReply : IBaseReply<long>, IProductMessage, IMessageWarning { }
 
 public partial class CreateShopProductRequest : IShopProductMessage { }
 
@@ -26,7 +28,6 @@ public partial class UpdateShopProductRequest : IShopProductMessage { }
 
 
 public partial class CreateProductRequest : IProductMessage { }
-public partial class ProductReply : IProductMessage { }
 
 public partial class ShopProductPriceReply : IShopProductPriceMessage { }
 
@@ -56,5 +57,5 @@ public partial class ProductComponentReply : IProductComponentMessage { }
 
 public partial class CreateCurrencyRequest : ICurrencyMessage { }
 
-public partial class CurrencyReply : ICurrencyMessage { }
+public partial class CurrencyReply : ICurrencyMessage, IMessageWarning { }
 

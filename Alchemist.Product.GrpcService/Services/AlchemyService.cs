@@ -1,9 +1,12 @@
 ﻿using Alchemist.DataService.Interfaces;
+using Alchemist.Exceptions;
 using Alchemist.Product.Entities;
 using Alchemist.Product.GrpcService.Extensions;
 using Alchemist.Product.Interfaces;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Grpc.Interception.Extensions;
+using Grpc.Message.Extensions;
 
 namespace Alchemist.Product.GrpcService.Services;
 
@@ -159,9 +162,27 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        var brand = await _repository.FindBrandByName(request.Name)
-         ?? throw new RpcException(new Status(StatusCode.NotFound,$"Brand with name '{request.Name}' not found"));
-        return  await Task.FromResult(new BrandReply { Id = brand.Id, Name = brand.Name, Countryid = brand.CountryId, Comment = brand.Comment });
+        IBrand brand;
+        string? message = null;
+        try
+        {
+            brand = await _repository.FindBrandByName(request.Name)
+            ?? throw new RpcException(new Status(StatusCode.NotFound, $"Brand with name '{request.Name}' not found"));
+        }
+        catch (WarningException warning)
+        {
+            brand = warning.Result as IBrand;
+            message = warning.Message;
+        }
+
+        return await Task.FromResult(new BrandReply
+        {
+            Id = brand.Id,
+            Name = brand.Name,
+            Countryid = brand.CountryId,
+            Comment = brand.Comment,
+            Warning = message
+        });
     }
 
     public override async Task<ComponentReply> FindComponentByName(FindByNameRequest request, ServerCallContext context)
@@ -169,8 +190,17 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        var component = await _repository.FindComponentByName(request.Name)
-            ?? throw new RpcException(new Status(StatusCode.NotFound, $"Component with name '{request.Name}' not found"));
+        IComponent component;
+        try
+        {
+            component = await _repository.FindComponentByName(request.Name)
+                ?? throw new RpcException(new Status(StatusCode.NotFound, $"Component with name '{request.Name}' not found"));
+        }
+        catch(WarningException warning)
+        {
+            component = warning.Result as IComponent;
+        }
+
         var reply = component.ToMessage<ComponentReply>();
         reply.Id = component.Id;
         return  await Task.FromResult(reply);
@@ -181,8 +211,16 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        var country = await _repository.FindCountryByName(request.Name)
+        ICountry country;
+        try 
+        { 
+            country = await _repository.FindCountryByName(request.Name)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Country with name '{request.Name}' not found"));
+        }
+        catch (WarningException warning)
+        {
+            country = warning.Result as ICountry;
+        }
         return  await Task.FromResult(new CountryReply { Id = country.Id, Name = country.Name });
 
     }
@@ -192,8 +230,17 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        var product = await _repository.FindProductByName(request.Name)
-            ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product with name '{request.Name}' not found"));
+        IProduct product;
+        try
+        {
+            product = await _repository.FindProductByName(request.Name)
+               ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product with name '{request.Name}' not found"));
+        }
+        catch (WarningException warning)
+        {
+            product = warning.Result as IProduct;
+        }
+
         var reply = product.ToMessage<ProductReply>();
         reply.Id = product.Id;
         return  await Task.FromResult(reply);

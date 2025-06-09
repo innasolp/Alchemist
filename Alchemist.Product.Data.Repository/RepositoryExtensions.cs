@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Alchemist.Common;
+using Alchemist.Exceptions;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Alchemist.Product.Data.Repository
 {
@@ -16,7 +19,8 @@ namespace Alchemist.Product.Data.Repository
             where TId:struct
         {
             var entity = await dbContext.Set<TEntity>().FindAsync(id);
-            return entity ?? throw new Exception(string.Format("{0} with id={1} not found", typeof(TEntity), id));
+            return entity ?? throw new NotFoundException(string.Format("{0} with id={1} not found", typeof(TEntity), id),
+                new Dictionary<string, object>() { { "id", id } });
         }
 
         public static async Task<TEntity?> FindByName<TEntity, TId>(this AlchemyContext dbContext, string name)
@@ -25,11 +29,9 @@ namespace Alchemist.Product.Data.Repository
         {
             var allEntities = await dbContext.Set<TEntity>().ToListAsync();
             var entities = allEntities.Where(e => e.Name.Trim().ToUpper() == name.Trim().ToUpper()).ToList();
-            if (entities.Count > 1)
-            {
-                throw new Exception($"multiple entities with name {name}");
-            }
-            return await Task.FromResult(entities.FirstOrDefault());
+            return entities.Count > 1
+                ? throw new WarningException($"multiple entities with name {name}", entities.FirstOrDefault())
+                : await Task.FromResult(entities.FirstOrDefault());
         }
 
         public static async Task<TEntity?> FindByName<TEntity, TId>(this AlchemyContext dbContext, string name, Func<TEntity, string[]> nameProperties )
@@ -43,11 +45,9 @@ namespace Alchemist.Product.Data.Repository
             var entities = allEntities.Where(
                 e => e.Name.Trim().ToUpper() == compareName  || nameProperties(e).Any(n => !string.IsNullOrEmpty(n) && n.Trim().ToUpper() == compareName)).ToList();
 
-            if (entities.Count > 1)
-            {
-                throw new Exception($"multiple entities with name {name}");
-            }
-            return await Task.FromResult(entities.FirstOrDefault());
+            return entities.Count > 1
+                ? throw new WarningException($"multiple entities with name {name}", entities.FirstOrDefault())
+                : await Task.FromResult(entities.FirstOrDefault());
         }
     }
 }

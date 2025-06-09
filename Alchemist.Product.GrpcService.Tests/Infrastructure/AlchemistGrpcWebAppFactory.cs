@@ -13,6 +13,8 @@ public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<Program, Alchem
     protected override void FillTestData(AlchemyContext dbContext)
     {
         dbContext.Brands.Add(new Brand { Name = "Elizavecca" });
+        dbContext.Brands.Add(new Brand { Name = "infinite" });
+        dbContext.Brands.Add(new Brand { Name = "Infinite " });
         dbContext.SaveChanges();
     }
 

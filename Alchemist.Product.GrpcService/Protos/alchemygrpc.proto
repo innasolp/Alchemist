@@ -75,6 +75,7 @@ message CreateProductTypeRequest{
 message ProductTypeReply{
   int32 id = 1;
   string name=2;
+  google.protobuf.StringValue warning = 3;
 }
 
 message CreatePurposeTypeRequest{
@@ -84,6 +85,7 @@ message CreatePurposeTypeRequest{
 message PurposeTypeReply{
   int32 id = 1;
   string name=2;
+  google.protobuf.StringValue warning = 3;
 }
 
 message CreateCountryRequest{
@@ -95,6 +97,7 @@ message CountryReply{
   int32 id = 1;
   string name=2;
   google.protobuf.StringValue transcript=3;
+  google.protobuf.StringValue warning = 4;
 }
 
 message CreateBrandRequest{
@@ -108,6 +111,7 @@ message BrandReply{
   string name=2;
   google.protobuf.Int32Value countryid=3;
   google.protobuf.StringValue comment=4;
+  google.protobuf.StringValue warning = 5;
 }
 
 message CreateComponentRequest{
@@ -123,6 +127,7 @@ message ComponentReply{
   google.protobuf.StringValue description=3;
   google.protobuf.Int32Value groupid=4;
   google.protobuf.StringValue transcript = 5;
+  google.protobuf.StringValue warning = 6;
 }
 
 message CreateProductRequest{
@@ -150,6 +155,7 @@ message ProductReply{
   google.protobuf.Int32Value initshopid=6;
   google.protobuf.Timestamp addedts=7;
   int32 producttypeid=8;
+  google.protobuf.StringValue warning = 9;
 }
 
 message CreateShopProductRequest
@@ -206,6 +212,7 @@ message ShopProductReply
 	google.protobuf.BoolValue isactual=7; 
 	 google.protobuf.Timestamp lastupdate=8;
 	 google.protobuf.DoubleValue price=9;
+	 google.protobuf.StringValue warning = 10;
 }
 
 message SetProductComponentRequest
@@ -255,6 +262,7 @@ message CurrencyReply
 	string name=2;
 	google.protobuf.StringValue fullname=3;
 	google.protobuf.Int32Value code=4;
+	google.protobuf.StringValue warning = 5;
 }
 
 message CreateCurrencyRequest

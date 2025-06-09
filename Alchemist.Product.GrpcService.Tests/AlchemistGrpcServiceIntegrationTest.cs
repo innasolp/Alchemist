@@ -18,7 +18,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebA
     }
 
     [Fact]
-    public async Task FindBrandByExistingNameSuccess()
+    public async Task FindBrandSuccessWhenNameExists()
     {
         var brandName = "Elizavecca";        
         var response = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName});
@@ -28,7 +28,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebA
     }
 
     [Fact]
-    public async Task FindBrandByEmptyNameThrowsBadRequestRpcException()
+    public async Task FindBrandByNameThrowsBadRequestRpcExceptionWhenNameIsEmpty()
     {
         var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
         {
@@ -42,7 +42,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebA
     }
 
     [Fact]
-    public async Task FindBrandByNotExistingNameThrowsNotFoundRpcException()
+    public async Task FindBrandByNameThrowsNotFoundRpcExceptionWhenNameNotExists()
     {
         var brandName = Guid.NewGuid().ToString();
         var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
@@ -57,7 +57,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebA
     }
 
     [Fact]
-    public async Task CreateBrandSuccess()
+    public async Task CreateBrandSuccessWhenNameIsValid()
     {
         var brand = new CreateBrandRequest { Name = Guid.NewGuid().ToString() };
         var createResponse = await _client.CreateBrandAsync(brand);
@@ -71,7 +71,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebA
     }
 
     [Fact]
-    public async Task CreateShopProductWithNonUniqueShopIdProductIdThrowsInternalRpcException()
+    public async Task CreateShopProductThrowsInternalRpcExceptionWhenShopIdOrProductIdAreNonUnique()
     {
         var createShopProductRequest = new CreateShopProductRequest
         {
