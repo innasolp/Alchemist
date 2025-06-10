@@ -7,4 +7,6 @@ public partial class Country
     public string? Transcript { get; set; }
 
     public short Id { get; set; }
+
+    public DateTime AddedTs { get; set; }
 }

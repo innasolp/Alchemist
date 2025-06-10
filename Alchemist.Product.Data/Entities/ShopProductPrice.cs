@@ -1,6 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
-
-namespace Alchemist.Product.Data;
+﻿namespace Alchemist.Product.Data;
 
 public partial class ShopProductPrice
 {
@@ -10,7 +8,9 @@ public partial class ShopProductPrice
 
     public double Price { get; set; }
 
-    public DateTime LastUpdate { get; set; }
-
     public int CurrencyId { get; set; }
+
+    public DateTime AddedTs { get; set; }
+
+    public DateTime? UpdatedTs { get; set; }
 }

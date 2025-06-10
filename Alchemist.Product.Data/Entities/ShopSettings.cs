@@ -2,7 +2,7 @@
 
 namespace Alchemist.Product.Data;
 
-public class ShopSettings : IShopSettings
+public partial class ShopSettings 
 {
     public int Id { get; set; }
 
@@ -13,4 +13,8 @@ public class ShopSettings : IShopSettings
     public ShopSettingType Type { get; set; }
 
     public string Name { get; set; }
+
+    public DateTime AddedTs { get; set; }
+
+    public DateTime? UpdatedTs { get; set; }
 }

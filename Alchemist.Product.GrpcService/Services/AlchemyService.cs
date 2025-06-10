@@ -358,6 +358,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductRequest.Apiurl));
 
         var shopProduct = request.FromMessage<ShopProduct>();
+        shopProduct.Id = request.Id;
         var result = await _repository.UpdateShopProduct(shopProduct);
         return await Task.FromResult(new BoolValue { Value = result });
     }
@@ -422,6 +423,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductPriceRequest.Price), "Invalid value");
 
         var shopProductPrice = request.FromMessage<ShopProductPrice>();
+        shopProductPrice.Id = request.Id;
         var result = await _repository.UpdateShopProductPrice(shopProductPrice);
         return await Task.FromResult(new BoolValue { Value = result });
     }

@@ -1,5 +1,4 @@
-﻿using System;
-namespace Alchemist.Product.Data;
+﻿namespace Alchemist.Product.Data;
 
 public partial class Brand
 {
@@ -10,4 +9,6 @@ public partial class Brand
     public string? Comment { get; set; }
 
     public int Id { get; set; }
+
+    public DateTime AddedTs { get; set; }
 }

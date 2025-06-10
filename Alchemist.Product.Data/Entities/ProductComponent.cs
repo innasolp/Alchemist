@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Alchemist.Product.Data;
+﻿namespace Alchemist.Product.Data;
 
 public partial class ProductComponent
 {
@@ -10,4 +7,9 @@ public partial class ProductComponent
     public int ComponentId { get; set; }
 
     public short SequalNumber { get; set; }
+
+    public DateTime AddedTs { get; set; }
+
+    public DateTime? UpdatedTs { get; set; }
+
 }
