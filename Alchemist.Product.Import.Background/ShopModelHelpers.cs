@@ -26,9 +26,12 @@ internal static class ShopModelHelpers
                 foreach(var c in shopImportSettings.RootCategories)
                 {
                     var shopCategory = await shopDataService.GetShopCategoryByShopIdAndItemId(productShopModel.Id, c.Item);
-                    var children = await shopDataService.GetAllCategoryChildren(shopCategory.Id);
-                    var children2 = new List<IShopCategory>(children);
-                    shopCategories.AddRange(children.Where(child => !children2.Any(c2 => c2.ParentId == child.Id)));
+                    if (shopCategory != null)
+                    {
+                        var children = await shopDataService.GetAllCategoryChildren(shopCategory.Id);
+                        var children2 = new List<IShopCategory>(children);
+                        shopCategories.AddRange(children.Where(child => !children2.Any(c2 => c2.ParentId == child.Id)));
+                    }
                 }                
 
                 if (shopCategories.Count > 0)

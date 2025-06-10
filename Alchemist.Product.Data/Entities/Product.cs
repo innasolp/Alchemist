@@ -17,4 +17,8 @@ public partial class Product
     public short ProductTypeId { get; set; }
 
     public long Id { get; set; }
+
+    public DateTime AddedTs { get; set; }
+
+    public DateTime? UpdatedTs { get; set; }
 }

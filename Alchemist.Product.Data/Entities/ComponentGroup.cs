@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Alchemist.Product.Data;
+﻿namespace Alchemist.Product.Data;
 
 public partial class ComponentGroup
 {
@@ -10,4 +7,8 @@ public partial class ComponentGroup
     public int? ParentGroupId { get; set; }
 
     public int Id { get; set; }
+
+    public DateTime AddedTs { get; set; }
+
+    public DateTime? UpdatedTs { get; set; }
 }

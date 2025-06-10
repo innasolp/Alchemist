@@ -6,6 +6,7 @@ using Grpc.Core.Interceptors;
 using Grpc.Client.Interceptors;
 using Alchemist.Product.Interfaces;
 using Alchemist.DataService.Interfaces;
+using Grpc.Message.Extensions;
 
 namespace Alchemist.Product.GrpcServiceClient;
 

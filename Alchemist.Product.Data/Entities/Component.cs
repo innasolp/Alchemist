@@ -11,4 +11,6 @@ public partial class Component
     public int Id { get; set; }
 
     public string? Transcript { get; set; }
+
+    public DateTime AddedTs { get; set; }
 }

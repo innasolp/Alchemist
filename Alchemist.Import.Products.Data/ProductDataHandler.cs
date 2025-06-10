@@ -32,8 +32,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
                     ShopId = shopId,
                     ItemId = productItem.ItemId,
                     ApiUrl = productItem.ApiUrl,
-                    ItemUrl = productItem.ItemUrl,
-                    LastUpdate = DateTime.Now
+                    ItemUrl = productItem.ItemUrl
                 };
 
             if (shopProduct.ProductId != 0)
@@ -118,15 +117,13 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
             {
                 ShopProductId = shopProductId,
                 Price = item.Price,
-                CurrencyId = currency.Id,
-                LastUpdate = DateTime.Now
+                CurrencyId = currency.Id
             });
             return await Task.FromResult(true);
         }
         else
         {
             shopProductPrice.Price = item.Price;
-            shopProductPrice.LastUpdate = DateTime.Now;
             var result = await _alchemyServiceClient.UpdateShopProductPrice(shopProductPrice);
             return await Task.FromResult(result);
         }

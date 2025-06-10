@@ -179,8 +179,7 @@ public static class IntefaceExtensions
             ItemId = @in.ItemId,
             ApiUrl = @in.ApiUrl,
             ItemUrl = @in.ItemUrl,
-            IsActual = @in.IsActual,
-            LastUpdate = @in.LastUpdate
+            IsActual = @in.IsActual
         };
     }
 
@@ -204,7 +203,6 @@ public static class IntefaceExtensions
             Id = @in.Id,
             ShopProductId = @in.ShopProductId,
             CurrencyId = @in.CurrencyId,
-            LastUpdate = @in.LastUpdate,
             Price = @in.Price,
         };
     }

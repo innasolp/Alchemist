@@ -136,8 +136,7 @@ message CreateProductRequest{
   google.protobuf.Int32Value brandid=3;
   google.protobuf.StringValue articul=4;
   google.protobuf.Int32Value initshopid=5;
-  google.protobuf.Timestamp addedts=6;
-  int32 producttypeid=7;
+  int32 producttypeid=6;
 }
 
 message FindProductByNameAndBrandRequest
@@ -153,7 +152,6 @@ message ProductReply{
   google.protobuf.Int32Value brandid=4;
   google.protobuf.StringValue articul=5;
   google.protobuf.Int32Value initshopid=6;
-  google.protobuf.Timestamp addedts=7;
   int32 producttypeid=8;
   google.protobuf.StringValue warning = 9;
 }
@@ -166,8 +164,7 @@ message CreateShopProductRequest
 	string apiurl=4;
 	google.protobuf.StringValue itemurl=5;
 	google.protobuf.BoolValue isactual=6; 
-	 google.protobuf.Timestamp lastupdate=7;
-	 google.protobuf.DoubleValue price=8;
+	 google.protobuf.DoubleValue price=7;
 }
 
 message GetShopProductByShopAndApiUrlRequest
@@ -196,9 +193,8 @@ message UpdateShopProductRequest
 	string itemid=4;
 	string apiurl=5;
 	google.protobuf.StringValue itemurl=6;
-	google.protobuf.BoolValue isactual=7; 
-	google.protobuf.Timestamp lastupdate=8;
-	google.protobuf.DoubleValue price=9;
+	google.protobuf.BoolValue isactual=7;
+	google.protobuf.DoubleValue price=8;
 }
 
 message ShopProductReply
@@ -210,9 +206,8 @@ message ShopProductReply
 	string apiurl=5;
 	google.protobuf.StringValue itemurl=6;
 	google.protobuf.BoolValue isactual=7; 
-	 google.protobuf.Timestamp lastupdate=8;
-	 google.protobuf.DoubleValue price=9;
-	 google.protobuf.StringValue warning = 10;
+	 google.protobuf.DoubleValue price=8;
+	 google.protobuf.StringValue warning = 9;
 }
 
 message SetProductComponentRequest
@@ -277,7 +272,6 @@ message CreateShopProductPriceRequest
 	int64 shopproductid=1;
 	double price=2;
 	int32 currencyid=3;
-	google.protobuf.Timestamp lastupdate=4;
 }
 
 message UpdateShopProductPriceRequest
@@ -286,7 +280,6 @@ message UpdateShopProductPriceRequest
 	int64 shopproductid=2;
 	double price=3;
 	int32 currencyid=4;
-	google.protobuf.Timestamp lastupdate=5;
 }
 
 message ShopProductPriceReply
@@ -295,7 +288,6 @@ message ShopProductPriceReply
 	int64 shopproductid=2;
 	double price=3;
 	int32 currencyid=4;
-	google.protobuf.Timestamp lastupdate=5;
 }
 
 message ShopProductCategoryRequest

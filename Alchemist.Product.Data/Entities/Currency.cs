@@ -6,4 +6,6 @@ public partial class Currency
     public short? Code { get; set; }
     public string  Name { get; set; }
     public string?  FullName { get; set; }
+
+    public DateTime AddedTs { get; set; }
 }

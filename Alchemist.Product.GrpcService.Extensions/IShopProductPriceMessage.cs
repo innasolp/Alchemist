@@ -9,6 +9,4 @@ public interface IShopProductPriceMessage
     long Shopproductid { get; set; }
 
     double Price { get; set; }
-
-    Timestamp Lastupdate { get; set; }
 }

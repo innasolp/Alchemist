@@ -10,6 +10,5 @@ public interface IShopProductMessage
     string Apiurl { get; set; }
     string Itemurl { get; set; }
     bool? Isactual { get; set; }
-    Timestamp Lastupdate { get; set; }
     double? Price { get; set; }
 }

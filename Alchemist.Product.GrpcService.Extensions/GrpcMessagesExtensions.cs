@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.Interfaces;
-using Google.Protobuf.WellKnownTypes;
 
 namespace Alchemist.Product.GrpcService.Extensions;
 
@@ -15,7 +14,6 @@ public static class GrpcMessagesExtensions
             Brandid = product.BrandId,
             Initshopid = product.InitShopId,
             Transcript = product.Transcript,
-            Addedts = product.AddedTime.ToUniversalTime().ToTimestamp(),
             Articul = product.Articul
         };
     }
@@ -30,7 +28,6 @@ public static class GrpcMessagesExtensions
             Itemid = shopProduct.ItemId,
             Itemurl = shopProduct.ItemUrl,
             Apiurl = shopProduct.ApiUrl,
-            Lastupdate = shopProduct.LastUpdate.ToUniversalTime().ToTimestamp(),
             Isactual = shopProduct.IsActual
         };
     }
@@ -43,7 +40,6 @@ public static class GrpcMessagesExtensions
             ProductTypeId = (short)message.Producttypeid,
             BrandId = message.Brandid,
             InitShopId = message.Initshopid,
-            AddedTime = message.Addedts?.ToDateTime() ?? DateTime.Now.ToUniversalTime(),
             Articul = message.Articul
         };
     }
@@ -58,7 +54,6 @@ public static class GrpcMessagesExtensions
             ItemId = message.Itemid,
             ApiUrl = message.Apiurl,
             ItemUrl = message.Itemurl,
-            LastUpdate = message.Lastupdate?.ToDateTime() ?? DateTime.Now.ToUniversalTime(),
             IsActual = message.Isactual
         };
     }
@@ -103,8 +98,7 @@ public static class GrpcMessagesExtensions
         {
             ShopProductId = message.Shopproductid,
             Price = message.Price,
-            CurrencyId = message.Currencyid,
-            LastUpdate = message.Lastupdate?.ToDateTime() ?? DateTime.Now.ToUniversalTime(),
+            CurrencyId = message.Currencyid
         };
     }
 
@@ -116,7 +110,6 @@ public static class GrpcMessagesExtensions
             Shopproductid = shopProductPrice.ShopProductId,
             Price = shopProductPrice.Price,
             Currencyid = shopProductPrice.CurrencyId,
-            Lastupdate = shopProductPrice.LastUpdate.ToUniversalTime().ToTimestamp()
         };
     }
 

@@ -4,6 +4,7 @@ namespace Alchemist.Product.Data;
 
 public partial class AlchemyContext : DbContext
 {
+    private readonly DateChangedInterceptor _dateChangedInterceptor = new DateChangedInterceptor();
     public AlchemyContext()
     {
         Database.EnsureCreated();
@@ -56,6 +57,8 @@ public partial class AlchemyContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        optionsBuilder.AddInterceptors(_dateChangedInterceptor);
         base.OnConfiguring(optionsBuilder);
     }
 
@@ -75,6 +78,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+
+            entity.SetAddedTsColumn();
         });
 
         modelBuilder.Entity<Component>(entity =>
@@ -92,6 +97,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Transcript)
                 .HasMaxLength(255)
                 .HasColumnName("transcript");
+
+            entity.SetAddedTsColumn();
         });
 
         modelBuilder.Entity<ComponentGroup>(entity =>
@@ -105,6 +112,8 @@ public partial class AlchemyContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("name");
             entity.Property(e => e.ParentGroupId).HasColumnName("parent_group_id");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<Country>(entity =>
@@ -120,6 +129,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Transcript)
                 .HasMaxLength(255)
                 .HasColumnName("transcript");
+
+            entity.SetAddedTsColumn();
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -142,6 +153,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Transcript)
                 .HasMaxLength(255)
                 .HasColumnName("transcript");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<ProductComponent>(entity =>
@@ -154,7 +167,7 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.SequalNumber).HasColumnName("sequal_number");
 
-
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<ProductType>(entity =>
@@ -169,6 +182,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(63)
                 .HasColumnName("name");
+
+            entity.SetAddedTsColumn();
         });
 
         modelBuilder.Entity<PurposeComponentGroup>(entity =>
@@ -182,6 +197,8 @@ public partial class AlchemyContext : DbContext
                 .HasColumnName("comment");
             entity.Property(e => e.ComponentGroupId).HasColumnName("component_group_id");
             entity.Property(e => e.PurposeTypeId).HasColumnName("purpose_type_id");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<PurposeType>(entity =>
@@ -194,6 +211,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+
+            entity.SetAddedTsColumn();
         });
 
         modelBuilder.Entity<ProductPurpose>(entity =>
@@ -203,6 +222,8 @@ public partial class AlchemyContext : DbContext
 
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.PurposeTypeId).HasColumnName("purpose_type_id");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<Shop>(entity =>
@@ -221,6 +242,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Caption)
                 .HasMaxLength(255)
                 .HasColumnName("caption");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<ShopCategory>(entity =>
@@ -238,6 +261,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.ShopId).HasColumnName("shop_id");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
             entity.Property(e => e.ItemId).HasColumnName("item_id");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<ShopProduct>(entity =>
@@ -260,9 +285,10 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.ItemUrl)
                 .HasMaxLength(1023)
                 .HasColumnName("item_url");
-            entity.Property(e => e.LastUpdate).HasColumnName("last_update");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.ShopId).HasColumnName("shop_id");            
+            entity.Property(e => e.ShopId).HasColumnName("shop_id");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<ShopProductCategory>(entity =>
@@ -275,6 +301,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
             entity.Property(e => e.ShopCategoryId).HasColumnName("shop_category_id");
+
+            entity.SetChangedTsColumns();
         });        
         
         modelBuilder.Entity<ShopSettings>(entity =>
@@ -293,6 +321,8 @@ public partial class AlchemyContext : DbContext
                 .HasColumnName("json_value");
             entity.Property(e => e.Type).HasColumnName("type");
             entity.Property(e => e.IsActual).HasColumnName("is_actual");
+
+            entity.SetChangedTsColumns();
         });
 
         modelBuilder.Entity<Currency>(entity =>
@@ -309,6 +339,8 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(16)
                 .HasColumnName("name");
+
+            entity.SetAddedTsColumn();
         });
 
         modelBuilder.Entity<ShopProductPrice>(entity =>
@@ -320,8 +352,9 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ShopProductId).HasColumnName("shop_product_id");
             entity.Property(e => e.Price).HasColumnName("price");
-            entity.Property(e => e.LastUpdate).HasColumnName("last_update");
             entity.Property(e => e.CurrencyId).HasColumnName("currency_id");
+
+            entity.SetChangedTsColumns();
         });
 
         OnModelCreatingPartial(modelBuilder);

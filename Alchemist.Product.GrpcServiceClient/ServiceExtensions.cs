@@ -1,5 +1,6 @@
 ﻿using Alchemist.Product.GrpcService.Extensions;
 using Google.Protobuf.Collections;
+using Grpc.Message.Extensions;
 
 namespace Alchemist.Product.GrpcService;
 

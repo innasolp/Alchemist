@@ -11,4 +11,9 @@ public partial class ShopCategory
     public int? ParentId { get; set; }
 
     public int ItemId { get; set; }
+
+    public DateTime AddedTs { get; set; }
+
+    public DateTime? UpdatedTs { get; set; }
+
 }

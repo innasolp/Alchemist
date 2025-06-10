@@ -8,7 +8,6 @@ public interface IProductMessage
     int Producttypeid { get; set; }
     int? Brandid { get; set; }
     int? Initshopid { get; set; }
-    Timestamp Addedts { get; set; }
     string Articul { get; set; }
     string Transcript { get; set; }
 }
