@@ -24,14 +24,14 @@ internal static class ModelExtensions
 
     internal static ShopSettingsModel GetCopy(this ShopSettingsModel shopSettings)
     {
-        var newShopSettings = shopSettings.ShopGuid.CreateShopSettings(shopSettings.ShopSettingType);
+        var newShopSettings = ModelHelper.CreateShopSettings(shopSettings.ShopGuid, shopSettings.ShopId, shopSettings.ShopSettingType);
         newShopSettings.Update(shopSettings, true);
         return newShopSettings;
     }
     
     internal static ServiceSettingsModel GetCopy(this ServiceSettingsModel serviceSettings)
     {
-        var newServiceSettings = serviceSettings.ShopGuid.CreateServiceSettingsModel(serviceSettings.ShopSettingsGuid, serviceSettings.Name);
+        var newServiceSettings = ModelHelper.CreateServiceSettingsModel(serviceSettings.ShopGuid, serviceSettings.ShopId, serviceSettings.ShopSettingsGuid,  serviceSettings.Name);
         newServiceSettings.Update(serviceSettings);
         return newServiceSettings;
     }

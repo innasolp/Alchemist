@@ -37,7 +37,7 @@
            @await Html.PartialAsync($"~/Views/Home/_TabsMenuPartial.cshtml", Model?.SelectedTabModel ?? new ShopSettingTabsModel())
         </div>
         <div id="settingsPartialDiv">
-            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel ?? tabType.CreateDefaultTabModel())
+            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel ?? ModelHelper.CreateDefaultTabModel(tabType))
         </div>
     </div>
 </div>

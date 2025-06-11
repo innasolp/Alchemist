@@ -122,6 +122,10 @@
           "Connection": "keep-alive",
           "Host": "goldapple.ru",
           "Priority": "u=0,i",
+          "plaid-language-id": "ru_RU",
+          "plaid-platform": "web",
+          "plaid-store-id": "ru",
+          "plaid-version" : "1.0.0",
           "Sec-Fetch-Dest": "document",
           "Sec-Fetch-Mode": "navigate",
           "Sec-Fetch-Site": "none",
@@ -155,10 +159,10 @@
           "domain_sid",
           "fgsscw-goldapple-ru",
           "ga-device-id",
+          "ga-gun-init",
           "ga-lang",
           "ga-session-id",
-          "gsscw-goldapple-ru",
-          "isAddressConfirmed",
+          "gsscw-goldapple-ru",          
           "mage-cache-sessid",
           "MCS_SESSID",
           "mindboxDeviceUUID",
@@ -176,7 +180,8 @@
           "_ym_isad": "2",
           "_ym_visorc": "b",
           "ga-selected-address-id": "555e7d61-d9a7-4ba6-9770-6caa8198c483",
-          "section_data_ids": "{cart:1747590776}"
+          "section_data_ids": "{cart:1747590776}",
+          "ga-gun-init": "true"
         },
 
         "CookieIndex": 4,

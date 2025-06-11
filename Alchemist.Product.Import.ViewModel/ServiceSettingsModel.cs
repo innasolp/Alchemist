@@ -6,10 +6,11 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Product.Import.Model.Infrastructure;
 
 namespace Alchemist.Product.Import.Model;
 
-public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDeserialized, IEquatable<ServiceSettingsModel>
+public class ServiceSettingsModel: SettingsModelBase, IImportServiceSettings, IJsonValue, IJsonOnDeserialized, IEquatable<ServiceSettingsModel>
 {
     public override string ToString()
     {
@@ -20,17 +21,9 @@ public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDe
             {nameof(ImplementationTypeName)}:{ImplementationTypeName}";
     }
 
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
-    public int Id { get; set; }
-
-    public Guid ShopGuid { get; set; }
-
     public Guid ShopSettingsGuid { get; set; }
 
-    public string Name { get; set; }
-
-    public ShopSettingType ShopSettingType { get; set; }
+    public ShopSettingType ShopSettingType => ShopSettingType.Service;
     
     [Required(AllowEmptyStrings = true)]
     [Display(Name = "Service type")]
@@ -69,15 +62,25 @@ public class ServiceSettingsModel: IImportServiceSettings, IJsonValue, IJsonOnDe
     int ISettings.ShopId { get ; set; }
     int? ISettings.ParentSettingsId { get; set; }
 
+    public override TabType Tab => TabType.Shop;
+
     public bool IsEmpty()
     {
         return string.IsNullOrEmpty(AssemblyPath) && string.IsNullOrEmpty(ServiceProviderPath)
             && string.IsNullOrEmpty(ServiceTypeName) && string.IsNullOrEmpty(ImplementationTypeName);
     }
 
+    public override void Update(SettingsModelBase source)
+    {
+        if(source is ServiceSettingsModel serviceSettingsModel)
+            Update(serviceSettingsModel);
+        else 
+            base.Update(source);
+    }
+
     public void Update(ServiceSettingsModel source)
     {
-        ShopSettingType = source.ShopSettingType;
+        base.Update(source);
         ServiceTypeName = source.ServiceTypeName;
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;
