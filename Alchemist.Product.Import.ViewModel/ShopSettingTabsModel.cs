@@ -26,13 +26,13 @@ public class ShopSettingTabsModel : SettingsModelBase
 
         if (shopSettingTabsModel.ShopProductsSettings != null)
         {
-            ShopProductsSettings ??= new ProductShopSettingsModel { ShopGuid = ShopGuid };
+            ShopProductsSettings ??= new ProductShopSettingsModel { ShopGuid = ShopGuid, ShopId = ShopId  };
             ShopProductsSettings.Update(shopSettingTabsModel.ShopProductsSettings);
         }
         
         if (shopSettingTabsModel.ShopCategoriesSettings != null)
         {
-            ShopCategoriesSettings ??= new CategoryShopSettingsModel { ShopGuid = ShopGuid };
+            ShopCategoriesSettings ??= new CategoryShopSettingsModel { ShopGuid = ShopGuid, ShopId = ShopId };
             ShopCategoriesSettings.Update(shopSettingTabsModel.ShopCategoriesSettings);
         }
     }

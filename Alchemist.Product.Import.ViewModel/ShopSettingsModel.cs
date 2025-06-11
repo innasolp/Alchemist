@@ -59,10 +59,8 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 
     IList IShopImportSettings.Services => Services;
     
-    int? ISettings.ParentSettingsId { get =>null; set {; } }
-
-    int ISettings.ShopId { get; set; }    
-    
+    int? ISettings.ParentSettingsId { get =>null; set {; } }     
+      
     string IShopImportSettings.ShopName { get; set; }
     string IShopImportSettings.ShopUrl { get; set; }
 

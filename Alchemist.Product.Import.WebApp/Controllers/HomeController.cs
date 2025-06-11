@@ -99,7 +99,7 @@ public class HomeController : Controller
         {
             SelectedShopImport = shopImport,
             SelectedTab = tab,
-            SelectedTabModel = shopImport.GetSettings(tab) ?? tab.CreateDefaultTabModel(),
+            SelectedTabModel = shopImport.GetSettings(tab) ?? ModelHelper.CreateDefaultTabModel(tab),
             Shops = shops
         };
     }
@@ -181,7 +181,7 @@ public class HomeController : Controller
         SettingsModelBase modelFromJson;
         try
         {
-            modelFromJson = json.DeserializeWithNumberHandling(settings.GetType());
+            modelFromJson = ModelHelper.DeserializeWithNumberHandling(json, settings.GetType());
         }
         catch(JsonException)
         {
@@ -195,7 +195,7 @@ public class HomeController : Controller
 
         var originalSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
         if (originalSettings == null)
-            return Ok(!modelFromJson.Equals(shopGuid.CreateShopSettings((settings as ShopSettingsModel).ShopSettingType)));
+            return Ok(!modelFromJson.Equals(ModelHelper.CreateShopSettings(shopGuid, settings.ShopId,(settings as ShopSettingsModel).ShopSettingType)));
 
         return Ok(!modelFromJson.Equals(originalSettings));
     }
@@ -230,14 +230,14 @@ public class HomeController : Controller
         var shopImports = _importFacade.GetShops();
 
         if (shopImports.Count == 0)
-            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel());
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ModelHelper.CreateDefaultTabModel((TabType)tab));
 
         ShopImportModel shopImport;
 
         if (shopGuid == Guid.Empty)
             shopImport = shopImports.First();
         else if (!_importFacade.TryGetShopImport(shopGuid, out shopImport))
-            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ((TabType)tab).CreateDefaultTabModel());
+            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ModelHelper.CreateDefaultTabModel((TabType)tab));
 
         return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", shopImport.GetSettings((TabType)tab) ?? shopImport.CreateSettings((TabType)tab));
     }
@@ -257,7 +257,7 @@ public class HomeController : Controller
             if (shopGuid == null)
                 shopImport = shopImports.First();
             else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
-                return PartialView($"~/Views/Home/{tabView}.cshtml", ((TabType)tab).CreateDefaultTabModel());
+                return PartialView($"~/Views/Home/{tabView}.cshtml", ModelHelper.CreateDefaultTabModel((TabType)tab));
 
 
             var currentSettings = shopImport.GetSettings((TabType)tab);
@@ -274,7 +274,7 @@ public class HomeController : Controller
                     shopImport.SetSettings((TabType)tab, settings);
                 else
                 {
-                    var currentShopSettings = shopImport.ShopGuid.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
+                    var currentShopSettings = shopImport.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
                     shopImport.SetSettings((TabType)tab, currentShopSettings);
                 }
             }

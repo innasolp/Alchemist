@@ -85,7 +85,7 @@ public class ImportFacadeTest
         Assert.Contains(_shops, s => s.Id == shopImport.Shop.Id);
         Assert.True(shops.All(s => s.ShopSettingTabs == null));
 
-        var productShopSettings = shopImport.ShopGuid.CreateShopSettings(ShopSettingType.Product);
+        var productShopSettings = shopImport.CreateShopSettings(ShopSettingType.Product);
         shopImport.SetSettings(TabType.Shop, productShopSettings);
         Assert.True(importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var result));
         Assert.NotNull(shopImport.ShopSettingTabs);
@@ -104,7 +104,7 @@ public class ImportFacadeTest
         
         Assert.True(importFacade.TryGetShopImport(shops[1].ShopGuid, out var shopImport));
 
-        var productShopSettings = shopImport.ShopGuid.CreateShopSettings(ShopSettingType.Product);        
+        var productShopSettings = shopImport.CreateShopSettings(ShopSettingType.Product);        
         shopImport.SetSettings(TabType.Shop, productShopSettings);
         Assert.True(importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var shopSettings));
 
@@ -136,7 +136,7 @@ public class ImportFacadeTest
 
         Assert.True(importFacade.TryGetShopImport(shops[1].ShopGuid, out var shopImport));
 
-        var productShopSettings = shopImport.ShopGuid.CreateShopSettings(ShopSettingType.Product);
+        var productShopSettings = shopImport.CreateShopSettings(ShopSettingType.Product);
         shopImport.SetSettings(TabType.Shop, productShopSettings);
         Assert.True(importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var shopSettings));
 

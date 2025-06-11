@@ -3,7 +3,6 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -28,7 +27,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         ShopSettingsModel shopSettings;
         try
         {
-            shopSettings = json.GetShopSettingsFromJson((ShopSettingType)shopSettingType);
+            shopSettings = ModelHelper.GetShopSettingsFromJson(json,(ShopSettingType)shopSettingType);
         }
         catch (JsonException)
         {
@@ -41,7 +40,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
             return NotFound(shopGuid);
 
         if (!_importFacade.TryGetShopSettings(shopGuid, shopSettings.ShopSettingType, out var shopSettingsModel))
-            shopSettingsModel = shopGuid.CreateShopSettings(shopSettings.ShopSettingType);
+            shopSettingsModel = ModelHelper.CreateShopSettings(shopGuid, shopSettings.ShopId, shopSettings.ShopSettingType);
 
         shopSettingsModel?.Update(shopSettings);
 
@@ -83,7 +82,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
             return NotFound(shopSettingsGuid);
 
         if (!_importFacade.TryGetServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName, out var serviceSettingsModel))
-            serviceSettingsModel = shopGuid.CreateServiceSettingsModel(shopSettingsGuid, serviceSettingsName);
+            serviceSettingsModel = ModelHelper.CreateServiceSettingsModel(shopGuid, shopSettings.ShopId, shopSettingsGuid, serviceSettingsName);
 
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
     }

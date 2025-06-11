@@ -1,15 +1,19 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
+using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Moq;
+using System.Reflection;
 using System.Text.Json;
-using Alchemist.Product.Interfaces;
-
 using ShopSettingType = Alchemist.Import.Settings.Interfaces.ShopSettingType;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
@@ -19,9 +23,20 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     private readonly ISettingsDataAdapter _settingsDataAdapter;
 
     private readonly Mock<IShopSettingsDataService> _shopSettingsDataServiceMock = new();
+
+    private readonly ISettingsAdapter _jsonAdapter;
+
     public ShopSettingsControllerTest()
     {
         _settingsDataAdapter = new SettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>(_shopSettingsDataServiceMock.Object);
+
+        var builder = new HostApplicationBuilder();
+        builder.Services.AddSettingsJsonAdapter<ProductShopSettingsModel, CategoryShopSettingsModel>(
+            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/OzonProductSettings.json",
+            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/ozoncategories.json");
+        var host = builder.Build();
+
+        _jsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>();
     }
 
     private ShopSettingsController CreateShopSettingsController()
@@ -336,10 +351,19 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         Assert.True(_importFacade.TryGetShopSettings(shopGuid, shopSettingType,out var settings));
         var shopSettings = Assert.IsType<T>(settings);
 
-        var productShopSettings = await fileName.ReadFromFileAsync<ProductShopSettingsModel>();
-        shopSettings.Update(productShopSettings, true);
+        var shopSettingsModel = await fileName.ReadFromFileAsync<ProductShopSettingsModel>();
+        shopSettings.Update(shopSettingsModel, true);
 
-        _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<Interfaces.IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
+        shopSettings.ImportService.Name = nameof(IShopImportSettings.ImportService);
+        shopSettings.RequestHeaders.Name = nameof(IShopImportSettings.RequestHeaders);
+        shopSettings.BrowserDataLoader.Name = nameof(IShopImportSettings.BrowserDataLoader);
+        shopSettings.WebLoader.Name = nameof(IShopImportSettings.WebLoader);
+        shopSettings.Services.Add(shopSettings.ImportService);
+        shopSettings.Services.Add(shopSettings.RequestHeaders);
+        shopSettings.Services.Add(shopSettings.BrowserDataLoader);
+        shopSettings.Services.Add(shopSettings.WebLoader);
+
+        _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
             .Returns<IShopSettings, IEnumerable<IShopSettings>>((settings, services) =>
                     SaveShopSettingsAsync<T>(settings, services, shopSettings));
 

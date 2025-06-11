@@ -52,12 +52,11 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         if (shopGuid == Guid.Empty)
             return BadRequest(nameof(shopGuid));
 
-        //using var stream = file.OpenReadStream();
         using var stream = new MemoryStream();
         await file.CopyToAsync(stream);
         stream.Position = 0;
 
-        var uploadedShopSettings = await stream.GetShopSettingsFromJsonAsync((ShopSettingType)shopSettingsType);
+        var uploadedShopSettings = await ModelHelper.GetShopSettingsFromJsonAsync(stream, (ShopSettingType)shopSettingsType);
         if (uploadedShopSettings == null)
             return BadRequest(shopSettingsType);
 

@@ -108,7 +108,7 @@ public abstract class ControllerTest<T>
 
     protected static void SetShopSettings(ShopImportModel shopImport, ShopSettingType shopSettingType)
     {
-        var shopSettings = shopImport.ShopGuid.CreateShopSettings(shopSettingType);
+        var shopSettings = shopImport.CreateShopSettings(shopSettingType);
 
         shopSettings.Id = shopImport.Shop.Id;
 
