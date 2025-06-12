@@ -211,4 +211,33 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         }
     }
 
+    [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]    
+    public IActionResult RootCategory(Guid shopSettingsGuid, Guid? guid)
+    {
+        var model = new CategoryUrlModel { ShopSettingsGuid = shopSettingsGuid };
+        if (guid != null) model.Guid = guid.Value;
+        return PartialView("~/Views/Home/RootCategoryUrl.cshtml",model );
+    }
+
+    [HttpPost]
+    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult SetRootCategory(CategoryUrlModel data)
+    {
+        if (data == null)
+            return BadRequest(data);
+
+        if (!_importFacade.TryGetShopSettings(data.ShopSettingsGuid, out var shopSettings) 
+            || shopSettings is not ProductShopSettingsModel productShopSettings )
+            return NotFound(data.ShopSettingsGuid);
+
+        var rootCategory = productShopSettings.RootCategories.FirstOrDefault(c=>c.Guid == data.Guid);
+        if (rootCategory != null)
+            rootCategory.Update(data);
+        else productShopSettings.RootCategories.Add(data);
+
+        return Ok(true);
+    }
 }

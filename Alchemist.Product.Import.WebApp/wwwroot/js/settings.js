@@ -83,3 +83,18 @@ async function setShopSettingsFromJson(formSelector, fileInputName, shopGuid, sh
         }        
     );
 }
+
+function showRootCategory(data) {   
+
+    $("#categoryModalBodyDiv").on('load', function (event) {
+        console.log(event);
+        console.trace(event);
+    });    
+
+    $('#divRootCategoryModal').on("show.bs.modal", function () {
+        if ($('#rootCategoryForm').length == 0)
+            setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
+    });
+
+    showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), 'ShopSettings/RootCategory', data);
+}

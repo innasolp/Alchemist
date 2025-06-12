@@ -69,7 +69,6 @@ function sendFormData(url, data, onSuccess = null) {
 
 function showItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide = null)
 {
-
     if (onHide != null)
         divModelSelector.on('hide.bs.modal', function () {
             onHide();
@@ -120,23 +119,23 @@ function postData(url, data, onSuccess = null, onError = null) {
     });
 }
 
-function save(selectorId, url, data, onValidationError = null, onSuccess=null, onError=null) {
+function save(formSelector, url, data, onValidationError = null, onSuccess=null, onError=null) {
 
-    $.validator.unobtrusive.parse($(selectorId));
+    $.validator.unobtrusive.parse(formSelector);
 
-    if (!$(selectorId).valid()) {
+    if (!formSelector.valid()) {
         if (onValidationError != null)
             onValidationError();
         return;
     }
 
-    var pendingRequest = $(selectorId).data('validator').pendingRequest;
+    var pendingRequest = formSelector.data('validator').pendingRequest;
     if (pendingRequest == 0)
         postData(url, data, onSuccess, onError);
     else
         setTimeout(() =>
         {
-            if ($(selectorId).valid())
+            if (formSelector.valid())
                 postData(url, data, onSuccess, onError);
         }
         ,500);
@@ -191,4 +190,12 @@ async function tabChanged(formSelector, callback = null) {
         );
     });
 }
+function setDivToForm(formDiv, div, formId) {
+    var form = $("<form id='" + formId + "'></form>");
+    formDiv.append(form);
+    var newDiv = $(div[0].outerHTML);
+    form.append(newDiv);
+    div.remove();
+}
+
 

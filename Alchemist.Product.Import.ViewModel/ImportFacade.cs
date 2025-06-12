@@ -45,6 +45,16 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         return shopSettings != null;
     }
 
+    public bool TryGetShopSettings(Guid shopSettingsGuid, out ShopSettingsModel? shopSettings)
+    {
+       var shopSettingsTabs = _shopImports.Values.Where(s => s.ShopSettingTabs != null).Select(s => s.ShopSettingTabs);
+
+        shopSettings = shopSettingsTabs.Where(t => t.ShopProductsSettings?.Guid == shopSettingsGuid).Select(t=>t.ShopProductsSettings).FirstOrDefault() as ShopSettingsModel
+            ?? shopSettingsTabs.Where(t => t.ShopCategoriesSettings?.Guid == shopSettingsGuid).Select(t => t.ShopCategoriesSettings).FirstOrDefault() as ShopSettingsModel;
+
+        return shopSettings != null;
+    }
+
     public bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName, out ServiceSettingsModel serviceSettings)
     {
         serviceSettings = null;

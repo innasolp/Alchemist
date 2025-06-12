@@ -1,0 +1,53 @@
+﻿@model Alchemist.Product.Import.Model.ProductShopSettingsModel
+
+<div class="form-group">
+    <label asp-for="ProductUrlFormat" class="control-label"></label>
+    <input asp-for="ProductUrlFormat" class="form-control form-input" value="@Model.ProductUrlFormat" />
+    <span asp-validation-for="ProductUrlFormat" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="CategoryUrlFormat" class="control-label"></label>
+    <input asp-for="CategoryUrlFormat" class="form-control form-input" value="@Model.CategoryUrlFormat" />
+    <span asp-validation-for="CategoryUrlFormat" class="text-danger"></span>
+</div>
+
+<div class="form-group-table">
+    <ul class="table-ul">
+        <li class="table-ul">
+            <div class="flex">
+                <div class="table_header">Item ID</div>
+                <div class="table_header">Url</div>
+                <div></div>
+            </div>
+        </li>
+        @foreach (var category in Model.RootCategories)
+        {
+            <li id="rootcategory_li_@(category.ShopSettingsGuid)" class="table-ul">
+                <div class="flex">
+                    <div>@category.Item</div>
+                    <div>@category.Url</div>
+                </div>
+            </li>
+        }
+        <li class="table-ul">
+            <div>
+                <a id="addRootCategory"
+                   onclick="showRootCategory( { shopGuid:'@Model.ShopGuid', shopSettingsGuid : '@Model.Guid'})">Add category</a>
+            </div>         
+        </li>
+        <li class="table-ul">
+            <div class="modal fade" id="divRootCategoryModal" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <div class="modal-body" id="categoryModalBodyDiv">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+

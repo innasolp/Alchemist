@@ -50,6 +50,13 @@
                 <input asp-for="SettingsUrl" class="form-control form-input" />
                 <span asp-validation-for="SettingsUrl" class="text-danger"></span>
             </div>
+
+            <div>
+                @if(Model.ShopSettingType == ShopSettingType.Product)
+                    @await Html.PartialAsync($"~/Views/Home/ProductShopSettings.cshtml", Model)
+                
+            </div>
+
             <div class="form-group">
                 <label asp-for="ImportService" class="control-label"></label>
                 <div class="flex">
@@ -107,7 +114,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary form-button"
-                        onclick="this.disabled=true;save('#settingsForm','@GetSubmitUrl()', getFormData($('#settingsForm')), ()=> { this.disabled = false;}, (result)=> { this.disabled = false;}, (error)=>{this.disabled = false;});">
+                        onclick="this.disabled=true;save($('#settingsForm'),'@GetSubmitUrl()', getFormData($('#settingsForm')), ()=> { this.disabled = false;}, (result)=> { this.disabled = false;}, (error)=>{this.disabled = false;});">
                     Save
                 </button>
             </div>
