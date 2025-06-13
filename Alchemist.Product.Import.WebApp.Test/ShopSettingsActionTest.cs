@@ -23,7 +23,11 @@ public class ShopSettingsActionTest : ImportWebAppTest
         try
         {
             var existingSettings = _shopSettings.FirstOrDefault(s => s.ShopId == shopSettings.ShopId && s.Type == shopSettings.Type);
-            if (existingSettings != null) existingSettings.JsonValue = shopSettings.JsonValue;
+            if (existingSettings != null)
+            {
+                existingSettings.Name = shopSettings.Name;
+                existingSettings.JsonValue = shopSettings.JsonValue;
+            }
 
             var savingSettings = existingSettings ?? shopSettings;
 
@@ -84,17 +88,13 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var settingsForm = newPage.Locator("#settingsForm");
 
-        await settingsForm.Locator("#Name").FillAsync("");
-        await settingsForm.Locator("#SettingsUrl").FillAsync("");
+        await settingsForm.Locator("#ShopSettingsName").FillAsync("");       
 
         var saveButton = settingsForm.GetByRole(AriaRole.Button).GetByText("Save");
         await saveButton.ClickAsync();
 
-        await Expect(settingsForm.Locator("#Name-error")).ToBeVisibleAsync();
-        await Expect(settingsForm.Locator("#Name-error")).ToHaveTextAsync("The Name field is required.");
-
-        await Expect(settingsForm.Locator("#SettingsUrl-error")).ToBeVisibleAsync();
-        await Expect(settingsForm.Locator("#SettingsUrl-error")).ToHaveTextAsync("The SettingsUrl field is required.");
+        await Expect(settingsForm.Locator("#ShopSettingsName-error")).ToBeVisibleAsync();
+        await Expect(settingsForm.Locator("#ShopSettingsName-error")).ToHaveTextAsync("The Name field is required.");
     }
 
     private async Task<ILocator> ShowServiceModalFormAsync(IPage page, string serviceName)
@@ -344,11 +344,13 @@ public class ShopSettingsActionTest : ImportWebAppTest
             BrowserDataLoader = browserDataLoader,
             WebLoader = webLoader,
             Name = Guid.NewGuid().ToString(),
-            Url = Guid.NewGuid().ToString()
+            ProductUrlFormat = Guid.NewGuid().ToString(),
+            CategoryUrlFormat = Guid.NewGuid().ToString()
         };
 
-        await settingsForm.Locator("#Name").FillAsync(shopProductSettings.Name);
-        await settingsForm.Locator("#SettingsUrl").FillAsync(shopProductSettings.Url);
+        await settingsForm.Locator("#ShopSettingsName").FillAsync(shopProductSettings.Name);
+        await settingsForm.Locator("#ProductUrlFormat").FillAsync(shopProductSettings.ProductUrlFormat);
+        await settingsForm.Locator("#CategoryUrlFormat").FillAsync(shopProductSettings.CategoryUrlFormat);
 
         var saveButton = settingsForm.GetByRole(AriaRole.Button).GetByText("Save");
         await saveButton.ClickAsync();
@@ -366,8 +368,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var newSettingsForm = newPage.Locator("#settingsForm");
 
-        await Expect(newSettingsForm.Locator("#Name")).ToHaveValueAsync(shopProductSettings.Name);
-        await Expect(newSettingsForm.Locator("#SettingsUrl")).ToHaveValueAsync(shopProductSettings.Url);
+        await Expect(newSettingsForm.Locator("#ShopSettingsName")).ToHaveValueAsync(shopProductSettings.Name);
+        await Expect(newSettingsForm.Locator("#ProductUrlFormat")).ToHaveValueAsync(shopProductSettings.ProductUrlFormat);
+        await Expect(newSettingsForm.Locator("#CategoryUrlFormat")).ToHaveValueAsync(shopProductSettings.CategoryUrlFormat);
 
         await CheckServiceSettingsAsync(newPage, importService);
         await CheckServiceSettingsAsync(newPage, browserDataLoader);

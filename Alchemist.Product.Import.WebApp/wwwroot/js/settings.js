@@ -96,5 +96,33 @@ function showRootCategory(data) {
             setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
     });
 
-    showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), 'ShopSettings/RootCategory', data);
+    showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory', data);
+}
+
+function setRootCategoryLi(rootCategory, ulRootCategories) {
+
+    var item = ulRootCategories.find("#rootcategory_li_" + (rootCategory.guid));
+    if (item.length > 0) {
+        item.find('.item').text(rootCategory.item);
+        item.find('.url').text(rootCategory.url);
+        item.find('.guid').val(rootCategory.guid);
+    }
+    else {
+        var items = ulRootCategories.children('.rootcategory_li');
+        if (items.length == 0) items = ulRootCategories.children('.header');
+        if (items.length == 0) return;
+
+        var li = $("<li>", { "id": "rootcategory_li_" + rootCategory.guid, "class": "table-ul rootcategory_li" });
+        var divFlex = $("<div>", { "class": "flex rootCategoryRow" });
+        var divItem = $("<div>", { "class": "table_cell item" }).text(rootCategory.item);
+        var divUrl = $("<div>", { "class": "table_cell url" }).text(rootCategory.url);
+        var hiddenGuid = $("<input>", { "type": "hidden", "class": "guid" }).val(rootCategory.guid);
+        var divEdit = $("<div>");
+        var btnEdit = $("<i>", { "class": "fa fa-edit editRootCategory", "style": "font-size:18px" })
+            .on("click", function () { showRootCategory(rootCategory); });
+        divEdit.append(btnEdit);
+        divFlex.append(divItem).append(divUrl).append(hiddenGuid).append(divEdit);
+        li.append(divFlex);
+        items.last().after(li);
+    }
 }

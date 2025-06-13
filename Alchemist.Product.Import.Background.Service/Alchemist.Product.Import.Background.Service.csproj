@@ -17,11 +17,11 @@
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
     <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
     <PackageReference Include="Http.DelegatingRequestSender" Version="1.0.0" />
-    <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0.1" />
+    <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
-    <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0" />
+    <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0.2" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />

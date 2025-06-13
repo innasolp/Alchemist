@@ -16,7 +16,7 @@ public class ProductShopImportSettings : ShopImportSettings, IProductShopImportS
 
     public int? PageProductCount { get; set; }
 
-    public CategoryUrl[]? RootCategories { get; set; }
+    public CategoryUrl[]? RootCategories { get; set; } = [];
 
     protected override ShopSettingType ShopSettingType => ShopSettingType.Product;
 

@@ -46,21 +46,28 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         await Expect(Page.Locator("li[class='left-menu-ul selected']").GetByText(shop.Name)).ToHaveCountAsync(1);
 
-        var urlLocator = Page.Locator("#SettingsUrl");
+        await Task.Delay(1000);
+
+        var shopSettingsNameLocator = Page.Locator("#ShopSettingsName");
+        await Expect(shopSettingsNameLocator).ToHaveCountAsync(1);
+        await Expect(shopSettingsNameLocator).ToHaveValueAsync(productShopSettings.Name);
+
+        var urlLocator = Page.Locator("#ProductUrlFormat");
         await Expect(urlLocator).ToHaveCountAsync(1);
-        await Expect(urlLocator).ToHaveValueAsync(productShopSettings.Url);
+        await Expect(urlLocator).ToHaveValueAsync(productShopSettings.ProductUrlFormat);
     }
 
     [Fact]
     public async Task SelectShop()
     {
         var startShopSettings =  await ExpectLoadIndexPageAsync(Page);
+        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopSettings);
 
-        var nextShop = _shops.FirstOrDefault(s => s.Id != startShopSettings.ShopId);
+        var nextShop = _shops.FirstOrDefault(s => s.Id != productShopSettings.ShopId);
 
         await ExpectForSelectShopAsync(Page, nextShop);
 
-        await Expect(Page.Locator("#SettingsUrl")).Not.ToHaveValueAsync(startShopSettings.Url);
+        await Expect(Page.Locator("#ProductUrlFormat")).Not.ToHaveValueAsync(productShopSettings.ProductUrlFormat);
     }
 
     [Fact]
@@ -82,13 +89,14 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     [Fact]
     public async Task ShowConfirmationWindowWhenSelectOtherTabAfterDataEditing()
     {
-        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);       
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
+        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
 
-        startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#SettingsUrl").FillAsync(startShopImportSettings.Url);
+        productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
+        await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
 
         startShopImportSettings.Name = Guid.NewGuid().ToString();
-        await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
+        await Page.Locator("#ShopSettingsName").FillAsync(startShopImportSettings.Name);
 
         var confirmationLocator = await GetConfirmationLocatorAsync(Page);
 
@@ -101,16 +109,17 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task ShowConfirmationWindowWhenSelectOtherShopAfterDataEditing()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
+        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
 
-        startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#SettingsUrl").FillAsync(startShopImportSettings.Url);
+        productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
+        await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
 
         startShopImportSettings.Name = Guid.NewGuid().ToString();
-        await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
+        await Page.Locator("#ShopSettingsName").FillAsync(productShopSettings.Name);
 
         var confirmationLocator = await GetConfirmationLocatorAsync(Page);
 
-        var nextShop = _shops.FirstOrDefault(s => s.Id != startShopImportSettings.ShopId);
+        var nextShop = _shops.FirstOrDefault(s => s.Id != productShopSettings.ShopId);
 
         await ClickSelectShopAsync(Page, nextShop);
 
@@ -121,12 +130,13 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectedItemNotChangedAfterConfirmationCancel()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
+        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
 
-        startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#SettingsUrl").FillAsync(startShopImportSettings.Url);
+        productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
+        await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
 
-        startShopImportSettings.Name = Guid.NewGuid().ToString();
-        await Page.Locator("#Name").FillAsync(startShopImportSettings.Name);
+        productShopSettings.Name = Guid.NewGuid().ToString();
+        await Page.Locator("#ShopSettingsName").FillAsync(productShopSettings.Name);
 
         var confirmationLocator = await GetConfirmationLocatorAsync(Page);
 
@@ -145,19 +155,20 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectedItemResetAndChangedAfterConfirmationYes()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
+        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
 
         var newName = Guid.NewGuid().ToString();
         var newUrl = Guid.NewGuid().ToString();
 
-        startShopImportSettings.Url = Guid.NewGuid().ToString();
-        await Page.Locator("#SettingsUrl").FillAsync(newName);
+        productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
+        await Page.Locator("#ProductUrlFormat").FillAsync(newUrl);
 
-        startShopImportSettings.Name = Guid.NewGuid().ToString();
-        await Page.Locator("#Name").FillAsync(newUrl);
+        productShopSettings.Name = Guid.NewGuid().ToString();
+        await Page.Locator("#ShopSettingsName").FillAsync(newName);
 
         var confirmationLocator = await GetConfirmationLocatorAsync(Page);
 
-        var nextShop = _shops.FirstOrDefault(s => s.Id != startShopImportSettings.ShopId);
+        var nextShop = _shops.FirstOrDefault(s => s.Id != productShopSettings.ShopId);
         await ClickSelectShopAsync(Page, nextShop);
 
         await ExpectConfirmationAsync(confirmationLocator);
@@ -168,7 +179,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         await ExpectForSelectShopAsync(Page, nextShop);
 
-        var prevShop = _shops.FirstOrDefault(s => s.Id == startShopImportSettings.ShopId);
+        var prevShop = _shops.FirstOrDefault(s => s.Id == productShopSettings.ShopId);
         await ClickSelectShopAsync(Page, prevShop);
         await ExpectForSelectShopAsync(Page, prevShop);
     }

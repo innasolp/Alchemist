@@ -13,4 +13,13 @@ public class CategoryShopSettingsModel : ShopSettingsModel, ICategoryShopImportS
     {
         return @$"{nameof(CategoryShopSettingsModel)}:{base.ToString()}";
     }
+
+    public override void Update(ShopSettingsModel sourceShopSettings, bool setNullServices = false)
+    {
+        if (sourceShopSettings is CategoryShopSettingsModel categoryShopSettingsModel)
+        {
+            CategorySourceUrl = categoryShopSettingsModel.CategorySourceUrl;
+        }
+        base.Update(sourceShopSettings, setNullServices);
+    }
 }

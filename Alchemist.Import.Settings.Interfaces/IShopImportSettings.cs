@@ -6,8 +6,6 @@ public interface IShopImportSettings: ISettings
 {        
     IImportServiceSettings ImportService { get; set; }
 
-    string? Url { get; set; }
-
     IImportServiceSettings? RequestHeaders { get; set; }
 
     IImportServiceSettings WebLoader { get; set; }

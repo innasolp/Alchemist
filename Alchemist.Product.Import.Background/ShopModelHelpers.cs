@@ -59,7 +59,7 @@ internal static class ShopModelHelpers
         var shop = (shopImportSettings.Id != 0
                 ? await shopDataService.GetShop(shopImportSettings.ShopId)
                 : await shopDataService.GetShopByName(shopImportSettings.ShopName ?? shopImportSettings.Name)
-                ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl ?? shopImportSettings.Url))
+                ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl))
                 ?? await shopDataService.CreateShop(new Shop { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl });
 
         return shop != null
@@ -67,7 +67,7 @@ internal static class ShopModelHelpers
                 : await Task.FromResult(new T
                 {
                     ShopName = shopImportSettings.ShopName ?? shopImportSettings.Name,
-                    ShopUrl = shopImportSettings.ShopUrl ?? shopImportSettings.Url
+                    ShopUrl = shopImportSettings.ShopUrl
                 });
     }
 

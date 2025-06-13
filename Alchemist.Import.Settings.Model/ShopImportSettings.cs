@@ -8,8 +8,6 @@ public abstract class ShopImportSettings : IShopImportSettings
 {
     public ImportServiceSettings ImportService { get; set; }
 
-    public string? Url { get; set; }
-
     public ImportServiceSettings? RequestHeaders { get; set; }
 
     public ImportServiceSettings WebLoader { get; set; }

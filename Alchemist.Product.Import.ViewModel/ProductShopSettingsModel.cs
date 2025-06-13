@@ -1,10 +1,15 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Alchemist.Product.Import.Model;
 
 public class CategoryUrlModel : ICategoryUrl
 {
+    [Required]
+    [Range(0, int.MaxValue)]
     public int Item { get; set; }
+
+    [Required]
     public string Url { get; set; }
 
     public Guid Guid { get; set; } = Guid.NewGuid();
@@ -20,8 +25,12 @@ public class CategoryUrlModel : ICategoryUrl
 
 public class ProductShopSettingsModel : ShopSettingsModel, IProductShopImportSettings
 {
+    [Required]
     public string? ProductUrlFormat { get; set; }
+
+    [Required]
     public string? CategoryUrlFormat { get; set; }
+
     public int? PageProductCount { get; set; }
 
     public override ShopSettingType ShopSettingType => ShopSettingType.Product;
@@ -38,5 +47,15 @@ public class ProductShopSettingsModel : ShopSettingsModel, IProductShopImportSet
     {
         return @$"{nameof(ProductShopSettingsModel)}:{base.ToString()};
                 {nameof(ProductUrlFormat)}:{ProductUrlFormat};{nameof(CategoryUrlFormat)}:{CategoryUrlFormat};{nameof(PageProductCount)}:{PageProductCount}";
+    }
+
+    public override void Update(ShopSettingsModel sourceShopSettings, bool setNullServices = false)
+    {
+        if(sourceShopSettings is ProductShopSettingsModel productShopSettingsModel)
+        {
+            ProductUrlFormat = productShopSettingsModel.ProductUrlFormat;
+            CategoryUrlFormat = productShopSettingsModel.CategoryUrlFormat;
+        }
+        base.Update(sourceShopSettings, setNullServices);
     }
 }

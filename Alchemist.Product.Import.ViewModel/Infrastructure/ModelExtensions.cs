@@ -54,13 +54,13 @@ public static class ModelExtensions
                         if (settings is ProductShopSettingsModel productShopSettings)
                         {                            
                             shopImport.ShopSettingTabs.ShopProductsSettings = productShopSettings;
-                            shopImport.ShopSettingTabs.ShopProductsSettings.Init(shopImport.ShopGuid);
+                            shopImport.ShopSettingTabs.ShopProductsSettings.InitProductShopSettings(shopImport.ShopGuid);
                             return true;
                         }
                         else if(settings is CategoryShopSettingsModel categoryShopSettings)    
                         {                           
                             shopImport.ShopSettingTabs.ShopCategoriesSettings = categoryShopSettings;
-                            shopImport.ShopSettingTabs.ShopCategoriesSettings.Init(shopImport.ShopGuid);
+                            shopImport.ShopSettingTabs.ShopCategoriesSettings.InitCategoryShopSettings(shopImport.ShopGuid);
                             return true;
                         }
                         return false;
@@ -93,7 +93,21 @@ public static class ModelExtensions
     {
         shopSettings.ShopGuid = shopGuid;
         shopSettings.Services.ForEach(s => { s.ShopGuid = shopGuid; s.ShopSettingsGuid = shopSettings.Guid; });
-    }    
+    }
+    
+    private static void InitProductShopSettings(this ProductShopSettingsModel productShopSettingsModel, Guid shopGuid)
+    {
+        productShopSettingsModel.Init(shopGuid);
+        foreach(var rootCategory in productShopSettingsModel.RootCategories)
+        {
+            rootCategory.ShopSettingsGuid = productShopSettingsModel.Guid;
+        }
+    }
+
+    private static void InitCategoryShopSettings(this CategoryShopSettingsModel categoryShopSettingsModel, Guid shopGuid)
+    {
+        categoryShopSettingsModel.Init(shopGuid);
+    }
 
     public static ShopSettingsModel? GetShopSettingsByType(this ShopSettingTabsModel shopSettingTabs, ShopSettingType shopSettingType)
     {

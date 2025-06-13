@@ -38,7 +38,6 @@ public static class EntityExtensions
     {
         return
         [
-            nameof(IProductShopImportSettings.Url),
             nameof(IProductShopImportSettings.Name),
             nameof(IProductShopImportSettings.Perfomance)
         ];
@@ -66,14 +65,15 @@ public static class EntityExtensions
         var props = GetShopImportSettingsSerializeProperties();
         props.AddRange([nameof(IProductShopImportSettings.PageProductCount),
                 nameof(IProductShopImportSettings.CategoryUrlFormat),
-                nameof(IProductShopImportSettings.ProductUrlFormat) ]);
+                nameof(IProductShopImportSettings.ProductUrlFormat), 
+                nameof(IProductShopImportSettings.RootCategories), ]);
 
         var option = new JsonSerializerOptions
         {
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
-                Modifiers = { JsonExtensions.SetPropertiesForSerialize(typeof(T), props.ToArray()) }
+                Modifiers = { JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
             }
         };
 
@@ -84,13 +84,14 @@ public static class EntityExtensions
         where T : class, ICategoryShopImportSettings
     {
         var props = GetShopImportSettingsSerializeProperties();
+        props.AddRange([nameof(ICategoryShopImportSettings.CategorySourceUrl)]);
 
         var option = new JsonSerializerOptions
         {
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
-                Modifiers = { JsonExtensions.SetPropertiesForSerialize(typeof(T), props.ToArray()) }
+                Modifiers = { JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
             }
         };
 

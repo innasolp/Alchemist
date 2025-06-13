@@ -29,12 +29,12 @@ public static class TestRepository
         foreach (var shop in shops)
         {
             var productShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Product };
-            var productShopImportSettings = new ProductShopImportSettings() { Url = $"https://url{Guid.NewGuid()}" };
+            var productShopImportSettings = new ProductShopImportSettings() { ProductUrlFormat = $"https://url{Guid.NewGuid()}" };
             productShopSettings.JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(productShopImportSettings));
             shopSettings.Add(productShopSettings);
 
             var categoryShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Category };
-            var categoryShopImportSettings = new CategoryShopImportSettings() { Url = $"https://url{Guid.NewGuid()}" };
+            var categoryShopImportSettings = new CategoryShopImportSettings() { CategorySourceUrl = $"https://url{Guid.NewGuid()}" };
             categoryShopSettings.JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(categoryShopImportSettings));
             shopSettings.Add(categoryShopSettings);
         }

@@ -1,4 +1,6 @@
-﻿@model Alchemist.Product.Import.Model.ProductShopSettingsModel
+﻿@using System.Text.Json
+@using Alchemist.Product.Import.Model
+@model Alchemist.Product.Import.Model.ProductShopSettingsModel
 
 <div class="form-group">
     <label asp-for="ProductUrlFormat" class="control-label"></label>
@@ -12,27 +14,32 @@
 </div>
 
 <div class="form-group-table">
-    <ul class="table-ul">
-        <li class="table-ul">
+    <ul class="table-ul" id="rootCategoriesUl">
+        <li class="table-ul header">
             <div class="flex">
                 <div class="table_header">Item ID</div>
                 <div class="table_header">Url</div>
                 <div></div>
             </div>
         </li>
-        @foreach (var category in Model.RootCategories)
+        @foreach (var category in (Model.RootCategories ?? []))
         {
-            <li id="rootcategory_li_@(category.ShopSettingsGuid)" class="table-ul">
-                <div class="flex">
-                    <div>@category.Item</div>
-                    <div>@category.Url</div>
+            <li id="rootcategory_li_@(category.Guid)" class="table-ul rootcategory_li">
+                <div class="flex rootCategoryRow">
+                    <div class="table_cell item" >@category.Item</div>
+                    <div class="table_cell url">@category.Url</div>
+                    <input type="hidden" class="guid" value="@category.Guid"/>
+                    <div>
+                        <i class='fa fa-edit editRootCategory' style='font-size:18px'
+                           onclick="showRootCategory( @JsonSerializer.Serialize(category))"></i>
+                    </div>                    
                 </div>
             </li>
         }
         <li class="table-ul">
             <div>
                 <a id="addRootCategory"
-                   onclick="showRootCategory( { shopGuid:'@Model.ShopGuid', shopSettingsGuid : '@Model.Guid'})">Add category</a>
+                   onclick="showRootCategory(@JsonSerializer.Serialize(new CategoryUrlModel(){ShopSettingsGuid = Model.Guid, Guid = Guid.Empty}))">Add category</a>
             </div>         
         </li>
         <li class="table-ul">

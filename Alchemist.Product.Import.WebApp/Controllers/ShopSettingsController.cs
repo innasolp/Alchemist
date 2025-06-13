@@ -212,12 +212,20 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     }
 
     [HttpPost]
-    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]    
-    public IActionResult RootCategory(Guid shopSettingsGuid, Guid? guid)
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult RootCategory(CategoryUrlModel data)
     {
-        var model = new CategoryUrlModel { ShopSettingsGuid = shopSettingsGuid };
-        if (guid != null) model.Guid = guid.Value;
-        return PartialView("~/Views/Home/RootCategoryUrl.cshtml",model );
+        if (data == null)
+            return BadRequest("category url is null");
+        
+        if (data.ShopSettingsGuid == Guid.Empty)
+            return BadRequest("category shopSettingsGuid is empty");
+
+        if (data.Guid == Guid.Empty)
+            data.Guid = Guid.NewGuid();
+
+        return PartialView("~/Views/Home/RootCategoryUrl.cshtml",data );
     }
 
     [HttpPost]
@@ -238,6 +246,6 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
             rootCategory.Update(data);
         else productShopSettings.RootCategories.Add(data);
 
-        return Ok(true);
+        return Ok(data);
     }
 }

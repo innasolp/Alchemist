@@ -2,7 +2,8 @@
     {
       "Name": "OzonCategories",
       "Caption": "Ozon",
-      "Url": "https://www.ozon.ru",
+      "ShopUrl": "https://www.ozon.ru",
+      "ShopName": "ozon",
       "RequestHeaders": {
 
         "Value": {
@@ -115,7 +116,8 @@
 
   {
     "Name": "GoldAppleCategories",
-    "Url": "https://goldapple.ru",
+    "ShopName": "Goldapple",
+    "ShopUrl": "https://goldapple.ru",
     "Caption": "Золотое яблоко",
     "RequestHeaders": {
       "Value": {
@@ -168,9 +170,7 @@
           "ga-session-id",
           "gsscw-goldapple-ru",
           "mage-cache-sessid",
-          "MCS_SESSID",
           "mindboxDeviceUUID",
-          "ngenix_jscv_2198e54375cc",
           "tmr_detect",
           "tmr_lvid",
           "tmr_lvidTS"
