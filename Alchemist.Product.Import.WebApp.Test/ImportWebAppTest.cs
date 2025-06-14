@@ -2,6 +2,7 @@
 using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Interfaces;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using Moq;
@@ -74,6 +75,17 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             shopSetting.JsonValue = JsonSerializer.Serialize(productShopImportSettings);
         }
 
+        foreach (var shopSetting in _shopSettings.Where(s => s.Type == Interfaces.ShopSettingType.Category))
+        {
+            var categoryShopImportSettings = new CategoryShopImportSettings()
+            {
+                Name = shopSetting.Name,
+                CategorySourceUrl = $"https://url{shopSetting.Id}_category",
+            };
+            shopSetting.JsonValue = JsonSerializer.Serialize(categoryShopImportSettings);
+        }
+
+
         foreach (var shopSetting in _shopSettings.Where(s => s.Type == Interfaces.ShopSettingType.Service))
         {
             var serviceSettings = shopSetting.ToImportServiceSettings<ImportServiceSettings>();
@@ -83,7 +95,17 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
             shopSetting.JsonValue = JsonSerializer.Serialize(serviceSettings);
         }
-    }    
+    } 
+    
+    protected IShopSettings CreateServiceSettings(IShopSettings shopSetting, int id)
+    {
+        IShopSettings serviceSettings = new ShopSettings { Id = id, ShopId = shopSetting.ShopId, ParentSettingsId = shopSetting.Id, Type = ShopSettingType.Service };
+        var service = shopSetting.ToImportServiceSettings<ImportServiceSettings>();
+        service.Name = Guid.NewGuid().ToString();
+        service.ServiceTypeName = Guid.NewGuid().ToString();
+        serviceSettings.JsonValue = JsonSerializer.Serialize(service);
+        return serviceSettings;
+    }
 
     protected async Task<ShopImportSettings?> GetShopImportSettingsAsync(int shopId, Interfaces.ShopSettingType shopSettingType)
     {

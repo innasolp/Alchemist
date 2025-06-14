@@ -12,9 +12,9 @@
             <div></div>
         </div>
     </li>
-    @foreach (var service in (Model.Services.Where(s => !ModelHelper.IsServiceSettingsPrimary(s.Name)) ?? []))
+    @foreach (var service in Model.Services.Where(s => !ModelHelper.IsServiceSettingsPrimary(s.Name)))
     {
-        <li id="service_li_@(service.Guid)" class="table-ul service">
+        <li id="service_li_@(service.Guid)" class="table-ul service_li">
             <div class="flex serviceRow">
                 <div class="table_cell name" style="width:200px">@service.Name</div>
                 <div class="table_cell serviceTypeName" style="width:200px">@service.ServiceTypeName</div>

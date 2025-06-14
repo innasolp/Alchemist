@@ -20,6 +20,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ShopSettings(Guid shopGuid, int shopSettingType)
     {
         if (shopGuid == Guid.Empty)
@@ -34,7 +35,15 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         var shopSettings = shopImport.ShopSettingTabs?.GetShopSettingsByType((ShopSettingType)shopSettingType);
         if (shopSettings == null)
         {
-            shopSettings = shopImport.CreateShopSettings((ShopSettingType)shopSettingType);
+            try
+            {
+                shopSettings = (await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (ShopSettingType)shopSettingType) as ShopSettingsModel)
+                    ?? shopImport.CreateShopSettings((ShopSettingType)shopSettingType);
+            }
+            catch(Exception e)
+            {
+                return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
             shopImport.SetSettings(TabType.Shop, shopSettings);
         }
 

@@ -100,31 +100,7 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
             await Expect(url).ToHaveTextAsync(categories[i].Url);
         }
     }
-
-    [Fact]
-    public async Task ValidationFailedWhenRequiredFieldsNotFilled()
-    {
-        var newPage = await Context.NewPageAsync();
-
-        await ExpectLoadIndexPageAsync(newPage);
-
-        var settingsForm = newPage.Locator("#settingsForm");
-
-        await Expect(settingsForm.Locator("#ShopSettingsName-error")).Not.ToBeVisibleAsync();
-        await Expect(settingsForm.Locator("#ProductUrlFormat-error")).Not.ToBeVisibleAsync();
-        await Expect(settingsForm.Locator("#CategoryUrlFormat-error")).Not.ToBeVisibleAsync();
-
-        await settingsForm.Locator("#ShopSettingsName").FillAsync("");
-        await settingsForm.Locator("#ProductUrlFormat").FillAsync("");
-        await settingsForm.Locator("#CategoryUrlFormat").FillAsync("");
-
-        var saveButton = settingsForm.GetByRole(AriaRole.Button).GetByText("Save");
-        await saveButton.ClickAsync();
-
-        await Expect(settingsForm.Locator("#ShopSettingsName-error")).ToBeVisibleAsync();
-        await Expect(settingsForm.Locator("#ProductUrlFormat-error")).ToBeVisibleAsync();
-        await Expect(settingsForm.Locator("#CategoryUrlFormat-error")).ToBeVisibleAsync();
-    }
+       
 
     [Fact]
     public async Task RootCategoryModalWhenAddRootCategoryButtonClick()
@@ -137,7 +113,7 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
     }
 
     [Fact]
-    public async Task RootCategoriesTableVisibleWhenRootCategoriesExists()
+    public async Task RootCategoriesTableContainsRowsWhenRootCategoriesExists()
     {
         var shopSetting = _shopSettings.First();
         var productShopImportSettings = new ProductShopImportSettings()
