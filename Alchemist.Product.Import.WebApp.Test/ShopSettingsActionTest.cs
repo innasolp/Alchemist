@@ -109,7 +109,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
         var serviceSettingsForm = page.Locator("#serviceSettingsForm");
         await Expect(serviceSettingsForm).Not.ToBeVisibleAsync();
 
-        await modalButton.ClickAsync(new LocatorClickOptions { Delay = 500});        
+        await modalButton.ClickAsync();
+
+        await Task.Delay(500);
 
         await Expect(serviceSettingsForm).ToBeVisibleAsync();        
 

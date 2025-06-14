@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace Alchemist.Product.Import.Model;
@@ -7,6 +8,7 @@ public class CategoryShopSettingsModel : ShopSettingsModel, ICategoryShopImportS
 {
     public override ShopSettingType ShopSettingType => ShopSettingType.Category;
 
+    [Required]
     public string CategorySourceUrl { get; set; }
 
     public override string ToString()

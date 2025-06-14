@@ -16,6 +16,8 @@ public interface IImportFacade
 
     bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName, out ServiceSettingsModel serviceSettings);
 
+    bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, Guid guid, out ServiceSettingsModel serviceSettings);
+
     ShopImportModel AddNewShop(Interfaces.IShop shop);
 
     List<ShopImportModel> GetShops();

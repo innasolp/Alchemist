@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using DependencyInjection.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -76,5 +77,13 @@ public static class ModelHelper
         return shopSettingType == ShopSettingType.Product
             ? await JsonSerializer.DeserializeAsync<ProductShopSettingsModel>(jsonStream, option)
             : await JsonSerializer.DeserializeAsync<CategoryShopSettingsModel>(jsonStream, option);
+    }
+
+    public static bool IsServiceSettingsPrimary(string name)
+    {
+        return name == nameof(IShopImportSettings.ImportService)
+            || name == nameof(IShopImportSettings.BrowserDataLoader)
+            || name == nameof(IShopImportSettings.WebLoader)
+            || name == nameof(IShopImportSettings.RequestHeaders);
     }
 }

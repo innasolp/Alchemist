@@ -64,6 +64,17 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
 
         serviceSettings = shopSettings.GetServiceSettings(serviceSettingsName);
         return serviceSettings != null;
+    }  
+    
+    public bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, Guid guid, out ServiceSettingsModel serviceSettings)
+    {
+        serviceSettings = null;
+
+        if (!TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
+            return false;
+
+        serviceSettings = shopSettings?.Services.FirstOrDefault(s => s.Guid == guid);
+        return serviceSettings != null;
     }    
 
     public ShopImportModel AddNewShop(IShop shop)

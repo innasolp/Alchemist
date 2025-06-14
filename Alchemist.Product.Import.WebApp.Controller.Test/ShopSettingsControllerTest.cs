@@ -244,10 +244,10 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         changedService.FillServiceSettingsFields();
 
         var actionResult = Assert.IsType<OkObjectResult>(shopSettingController.SaveServiceSettings(changedService));
-        Assert.IsType<bool>(actionResult.Value);
+        var resultService = Assert.IsType<ServiceSettingsModel>(actionResult.Value);
 
-        ModelAssert.EqualFields(changedService, shopSettings.BrowserDataLoader);
-        ModelAssert.NotEqualFields(oldService, shopSettings.BrowserDataLoader);
+        ModelAssert.EqualFields(changedService, resultService);
+        ModelAssert.NotEqualFields(oldService, resultService);
     }
 
 
