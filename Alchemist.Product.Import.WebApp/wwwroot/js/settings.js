@@ -68,6 +68,16 @@ async function saveShopSettings(formSelector, callback = null) {
     await fetchFormData(formData, '/ShopSettings/SaveShopSettings', 'post', callback);
 }
 
+async function redirectToShopSettings(data, currentTab) {
+    await saveShopSettings($('#settingsForm'),
+        (result) => {
+            $('#shopSettingsPartialDiv').load(
+                '/ShopSettings/ShopSettings',
+                data,
+                function (response, status, xhr) { setTabsSelection($('.shopTab'), currentTab, "selected-a"); })
+    });
+}
+
 async function setShopSettingsFromJson(formSelector, fileInputName, shopGuid, shopSettingsType) {
 
     uploadFromJson('/FileUpload/UploadShopSettings',

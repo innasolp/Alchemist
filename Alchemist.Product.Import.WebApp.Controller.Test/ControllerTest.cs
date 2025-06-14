@@ -110,6 +110,8 @@ public abstract class ControllerTest<T>
     {
         var shopSettings = shopImport.CreateShopSettings(shopSettingType);
 
+        shopSettings.Name = Guid.NewGuid().ToString();
+
         shopSettings.Id = shopImport.Shop.Id;
 
         SetServiceSetting(shopSettings, nameof(ShopSettingsModel.ImportService), shopSettings.Id + 1);

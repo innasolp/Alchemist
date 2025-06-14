@@ -17,6 +17,33 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     private readonly ISettingsDataAdapter _settingsDataAdapter = settingsDataAdapter;
 
     [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ShopSettings(Guid shopGuid, int shopSettingType)
+    {
+        if (shopGuid == Guid.Empty)
+            return BadRequest(shopGuid);
+
+        if ((ShopSettingType)shopSettingType == ShopSettingType.Service)
+            return BadRequest((ShopSettingType)shopSettingType);
+
+        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
+            return NotFound(shopGuid);
+        
+        var shopSettings = shopImport.ShopSettingTabs?.GetShopSettingsByType((ShopSettingType)shopSettingType);
+        if (shopSettings == null)
+        {
+            shopSettings = shopImport.CreateShopSettings((ShopSettingType)shopSettingType);
+            shopImport.SetSettings(TabType.Shop, shopSettings);
+        }
+
+        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
+
+        return PartialView("~/Views/Home/ShopSettings.cshtml", shopSettings);
+    }
+
+    [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
@@ -43,23 +70,6 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
             shopSettingsModel = ModelHelper.CreateShopSettings(shopGuid, shopSettings.ShopId, shopSettings.ShopSettingType);
 
         shopSettingsModel?.Update(shopSettings);
-
-        return Ok(true);
-    }
-
-    [HttpPost]
-    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult SetShopSettings(Guid shopGuid, int shopSettingType)
-    {
-        if ((ShopSettingType)shopSettingType == ShopSettingType.Service)
-            return BadRequest((ShopSettingType)shopSettingType);
-
-        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return NotFound(shopGuid);
-
-        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
 
         return Ok(true);
     }
