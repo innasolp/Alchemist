@@ -6,7 +6,7 @@
 @functions {
 
     public object GetServiceData() => JsonSerializer.Serialize(new { shopGuid = Model.ShopGuid, shopSettingsId = Model.Id, shopSettingsGuid = Model.Guid });
-    public string GetSubmitUrl() => Model.ShopSettingType == ShopSettingType.Product ? "/ShopSettings/SaveProductShopSettingsToDb" : "/ShopSettings/SaveCategoryShopSettingsToDb";
+    public string GetSubmitUrl() => Model.ShopSettingType == ShopSettingType.Product ? "/ShopSettings/Save/Products" : "/ShopSettings/Save/Category";
     public string GetServiceUploadOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + Model.ShopGuid + "', '" + Model.Guid + "', '" + serviceName + "', (data)=>{setValIfValid('#" + serviceName + "', data.serviceTypeName); " + UploadFromFileModel.onSuccess + " })";
     public string GetUploadServiceValueOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + Model.ShopGuid + "', '" + Model.Guid + "', '" + serviceName + "', (data)=>{" + UploadFromFileModel.onSuccess + " })";
     public string GetUploadShopSettingsOnChange(string id) => "setShopSettingsFromJson($('#loadSettingsFromJsonForm'), '" + id + "', '" + Model.ShopGuid + "', " + (int)Model.ShopSettingType + ")";
@@ -63,7 +63,7 @@
                                 </div>
                                 <div class="flex control-group">
                                     <div>
-                                        <button onclick="showServiceSettingsModal('/ShopSettings/ImportServiceSettings', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('importServiceJson'); }  )"
+                                        <button onclick="showServiceSettingsModal('/ServiceSettings/ImportService', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('importServiceJson'); }  )"
                                                 class="btn btn-primary btn-sm form-button">
                                             Set
                                         </button>
@@ -80,7 +80,7 @@
                                     <span asp-validation-for="BrowserDataLoader" class="text-danger"></span>
                                 </div>
                                 <div class="flex control-group">
-                                    <button onclick="showServiceSettingsModal('/ShopSettings/BrowserDataLoaderSettings', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('browserDataLoaderJson'); }  )"
+                                    <button onclick="showServiceSettingsModal('/ServiceSettings/BrowserDataLoader', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('browserDataLoaderJson'); }  )"
                                             class="btn btn-primary btn-sm form-button">
                                         Set
                                     </button>
@@ -101,7 +101,7 @@
                                     <span asp-validation-for="WebLoader" class="text-danger"></span>
                                 </div>
                                 <div class="flex  control-group">
-                                    <button onclick="showServiceSettingsModal('/ShopSettings/WebLoaderSettings', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('webLoaderJson'); } )"
+                                    <button onclick="showServiceSettingsModal('/ServiceSettings/WebLoader', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('webLoaderJson'); } )"
                                             class="btn btn-primary btn-sm form-button">
                                         Set
                                     </button>
