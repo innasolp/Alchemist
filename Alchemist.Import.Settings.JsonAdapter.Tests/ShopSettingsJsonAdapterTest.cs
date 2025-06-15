@@ -27,19 +27,19 @@ public class ShopSettingsJsonAdapterTest
         Assert.Equal(2, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Product));
         Assert.Equal(2, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Category));
 
-        var ozonProducts = shopSettings.Where(s=>s.ShopSettingType == ShopSettingType.Product && s.Url.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        var ozonProducts = shopSettings.Where(s=>s.ShopSettingType == ShopSettingType.Product && s.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(ozonProducts);
         ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonProducts, 0);
 
-        var ozonCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.Url.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        var ozonCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(ozonCategories);
         ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonCategories, 3);
 
-        var goldAppleProducts = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Product && s.Url.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        var goldAppleProducts = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Product && s.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleProducts); 
         ShopSettingsAsserts.AssertHttpRequestLoaderShopSettings(goldAppleProducts, 0);
 
-        var goldAppleCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.Url.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        var goldAppleCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleCategories);
         ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(goldAppleCategories, 3);
     }
@@ -49,7 +49,7 @@ public class ShopSettingsJsonAdapterTest
     {
         var shopSettings = await _shopSettingsJsonAdapter.GetShopImportSettings("Ozon", ShopSettingType.Product);
         Assert.NotNull(shopSettings);
-        Assert.Contains("ozon", shopSettings.Url);
+        Assert.Contains("ozon", shopSettings.ShopUrl);
     }
 
     [Fact]
@@ -57,6 +57,6 @@ public class ShopSettingsJsonAdapterTest
     {
         var shopSettings = await _shopSettingsJsonAdapter.GetShopImportSettings("GoldAppleCategories", ShopSettingType.Category);
         Assert.NotNull(shopSettings);
-        Assert.Contains("goldapple", shopSettings.Url);
+        Assert.Contains("goldapple", shopSettings.ShopUrl);
     }
 }

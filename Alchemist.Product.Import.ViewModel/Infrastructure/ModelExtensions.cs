@@ -54,13 +54,13 @@ public static class ModelExtensions
                         if (settings is ProductShopSettingsModel productShopSettings)
                         {                            
                             shopImport.ShopSettingTabs.ShopProductsSettings = productShopSettings;
-                            shopImport.ShopSettingTabs.ShopProductsSettings.Init(shopImport.ShopGuid);
+                            shopImport.ShopSettingTabs.ShopProductsSettings.InitProductShopSettings(shopImport.ShopGuid);
                             return true;
                         }
                         else if(settings is CategoryShopSettingsModel categoryShopSettings)    
                         {                           
                             shopImport.ShopSettingTabs.ShopCategoriesSettings = categoryShopSettings;
-                            shopImport.ShopSettingTabs.ShopCategoriesSettings.Init(shopImport.ShopGuid);
+                            shopImport.ShopSettingTabs.ShopCategoriesSettings.InitCategoryShopSettings(shopImport.ShopGuid);
                             return true;
                         }
                         return false;
@@ -93,7 +93,21 @@ public static class ModelExtensions
     {
         shopSettings.ShopGuid = shopGuid;
         shopSettings.Services.ForEach(s => { s.ShopGuid = shopGuid; s.ShopSettingsGuid = shopSettings.Guid; });
-    }    
+    }
+    
+    private static void InitProductShopSettings(this ProductShopSettingsModel productShopSettingsModel, Guid shopGuid)
+    {
+        productShopSettingsModel.Init(shopGuid);
+        foreach(var rootCategory in productShopSettingsModel.RootCategories)
+        {
+            rootCategory.ShopSettingsGuid = productShopSettingsModel.Guid;
+        }
+    }
+
+    private static void InitCategoryShopSettings(this CategoryShopSettingsModel categoryShopSettingsModel, Guid shopGuid)
+    {
+        categoryShopSettingsModel.Init(shopGuid);
+    }
 
     public static ShopSettingsModel? GetShopSettingsByType(this ShopSettingTabsModel shopSettingTabs, ShopSettingType shopSettingType)
     {
@@ -162,9 +176,9 @@ public static class ModelExtensions
         shopSettings.UpdateServiceSettings(serviceSettings.Name, serviceSettings);
     }
 
-    public static void SetServiceSettings(this ShopSettingsModel shopSettings, ServiceSettingsModel serviceSettings)
+    public static void SetServiceSettings(this ShopSettingsModel shopSettings, ServiceSettingsModel serviceSettings, string serviceName)
     {
-        switch (serviceSettings?.Name)
+        switch (serviceName)
         {
             case nameof(ShopSettingsModel.ImportService):
                 shopSettings.ImportService = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.ImportService));
@@ -213,7 +227,8 @@ public static class ModelExtensions
     {
         return target.Guid == source.Guid
         || (!string.IsNullOrEmpty(source.Name) && !string.IsNullOrEmpty(target.Name) && target.Name == source.Name)
-        || target.ServiceTypeName == source.ServiceTypeName;
+        || (!string.IsNullOrEmpty(source.ServiceTypeName) && !string.IsNullOrEmpty(target.ServiceTypeName) && 
+                    target.ServiceTypeName == source.ServiceTypeName);
     }
 
     public static void AddOrUpdateServices(this ShopSettingsModel shopSettings, ServiceSettingsModel source)

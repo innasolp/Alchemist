@@ -23,7 +23,7 @@ function closeShopModal() {
 }
 
 function saveShop(newShopGuidSelector) {
-    save('#shopForm',
+    save($('#shopForm'),
         '/Shop/Save',       
         getFormData($('#shopForm')),
         null,

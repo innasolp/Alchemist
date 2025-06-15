@@ -1,7 +1,11 @@
-﻿@model Alchemist.Product.Import.Model.ServiceSettingsModel
+﻿@using Alchemist.Product.Import.Model.Infrastructure
+@model Alchemist.Product.Import.Model.ServiceSettingsModel
 
 @functions{
-    public string GetUploadOnChange(string id) => "postFormInputFile('/FileUpload/UploadJson', $('#serviceSettingsForm'), '" + id + "', null, (data)=>{ $('#jsonValueHidden').val(data);" + UploadFromFileModel.onSuccess + " })";
+    public string GetUploadOnChange(string id) => "postFormInputFile('/FileUpload/UploadJson', $('#serviceSettingsForm'), '" + id + "', null, (data)=>{ $('#StringValue').val(data);" + UploadFromFileModel.onSuccess + " })";
+    public string Callback() => ModelHelper.IsServiceSettingsPrimary(Model.Name) 
+    ? $"setValIfValid('#{Model.Name}',$('#ServiceTypeName').val())" 
+    : "setServiceSettingsLi(data, $('#servicesUl'))";
 }
 
 <h4>Service settings</h4>
@@ -12,15 +16,28 @@
     <input type="hidden" name="ShopSettingType" value="@((int)Model.ShopSettingType)" />
     <input type="hidden" name="Guid" value="@Model.Guid" />
     <input type="hidden" name="ShopSettingsGuid" value="@Model.ShopSettingsGuid" />
-    <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
+    @if (ModelHelper.IsServiceSettingsPrimary(Model.Name))
+    {
+        <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
+    }
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
-            <div class="form-group">                
-                <input type="hidden" asp-for="StringValue" id="jsonValueHidden" />
-                <span asp-validation-for="StringValue" class="text-danger"></span>
+            <div class="form-group"> 
+                @if (ModelHelper.IsServiceSettingsPrimary(Model.Name))
+                {
+                    <input type="hidden" asp-for="StringValue" id="StringValue" />
+                }
                 @await Html.PartialAsync($"~/Views/UploadFromFile.cshtml", new UploadFromFileModel { Id = "uploadValueFromJson", OnChange = GetUploadOnChange("uploadValueFromJson"), FileName = Model.FileName })
             </div>
+            @if(!ModelHelper.IsServiceSettingsPrimary(Model.Name))
+            {
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control form-input" id="ServiceName" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            }
             <div class="form-group">
                 <label asp-for="ServiceTypeName" class="control-label"></label>
                 <input asp-for="ServiceTypeName" class="form-control form-input" id="ServiceTypeName" />
@@ -35,14 +52,23 @@
                 <label asp-for="AssemblyPath" class="control-label"></label>
                 <input asp-for="AssemblyPath" id="AssemblyPath" class="form-control form-input"/>
                 <span asp-validation-for="AssemblyPath" class="text-danger"></span>
-            </div><div class="form-group">
+            </div>
+            <div class="form-group">
                 <label asp-for="ServiceProviderPath" class="control-label"></label>
                 <input asp-for="ServiceProviderPath" class="form-control form-input" />
                 <span asp-validation-for="ServiceProviderPath" class="text-danger"></span>                
             </div>
+            @if(!ModelHelper.IsServiceSettingsPrimary(Model.Name))
+            {
+                <div class="form-group">
+                    <label asp-for="StringValue" class="control-label"></label>
+                    <textarea asp-for="StringValue" class="form-control form-input" id="StringValue"></textarea>
+                    <span asp-validation-for="StringValue" class="text-danger"></span>
+                </div>
+            }
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                        onclick="save('#serviceSettingsForm','/ShopSettings/SaveServiceSettings', getFormData($('#serviceSettingsForm')), null, (data)=>{ if(!data) return; setValIfValid('#@Model.Name',$('#ServiceTypeName').val()); closeServiceSettingsModal(); } )">
+                        onclick="save($('#serviceSettingsForm'),'/ShopSettings/SaveServiceSettings', getFormData($('#serviceSettingsForm')), null, (data)=>{ if(data == null) return; @Callback(); closeServiceSettingsModal(); } )">
                     Save
                 </button>
             </div>

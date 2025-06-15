@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 
@@ -29,6 +30,7 @@ public abstract class SettingsModelBase
 
     public int ShopId { get; set; }
 
+    [Required]
     public string Name { get; set; }
 
     public virtual void Update(SettingsModelBase source)
@@ -46,5 +48,10 @@ public abstract class SettingsModelBase
         return obj != null && obj is SettingsModelBase settingsModel
             && string.Equals(Name, settingsModel.Name, StringComparison.InvariantCultureIgnoreCase)
             && Tab == settingsModel.Tab;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 }

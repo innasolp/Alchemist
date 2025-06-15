@@ -10,7 +10,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
 {
     public override string ToString()
     {
-        return  @$"{base.ToString()};{nameof(SettingsUrl)}:{SettingsUrl};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
+        return  @$"{base.ToString()};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
                   {nameof(ImportService)}:{GetServiceValueString(ImportService)};
                   {nameof(BrowserDataLoader)}:{GetServiceValueString(BrowserDataLoader)};
                   {nameof(RequestHeaders)}:{GetServiceValueString(RequestHeaders)};
@@ -28,11 +28,6 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     public override TabType Tab => TabType.Shop;
 
     public abstract ShopSettingType ShopSettingType { get; }    
-
-    [Required]    
-    public string? SettingsUrl { get; set; }
-    
-    public string? Url { get => SettingsUrl; set => SettingsUrl = value; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
     public ServiceSettingsModel? RequestHeaders { get; set; }
@@ -75,7 +70,6 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     public virtual void Update(ShopSettingsModel sourceShopSettings, bool setNullServices = false)
     {        
         Name = sourceShopSettings.Name;
-        SettingsUrl = sourceShopSettings.SettingsUrl;
         Perfomance = sourceShopSettings.Perfomance;
         FileName = sourceShopSettings.FileName;
 
@@ -87,7 +81,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(ImportService);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.ImportService);            
+                this.SetServiceSettings(sourceShopSettings.ImportService, nameof(IShopImportSettings.ImportService));            
         }
         else if (setNullServices)
         {
@@ -103,7 +97,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(BrowserDataLoader);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.BrowserDataLoader);
+                this.SetServiceSettings(sourceShopSettings.BrowserDataLoader, nameof(IShopImportSettings.BrowserDataLoader));
         }
         else if (setNullServices)
         {
@@ -119,7 +113,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(WebLoader);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.WebLoader);
+                this.SetServiceSettings(sourceShopSettings.WebLoader, nameof(IShopImportSettings.WebLoader));
         }
         else if (setNullServices)
         {
@@ -135,7 +129,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(RequestHeaders);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.RequestHeaders);
+                this.SetServiceSettings(sourceShopSettings.RequestHeaders, nameof(IShopImportSettings.RequestHeaders));
         }
         else if (setNullServices)
         {
@@ -156,7 +150,6 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     {
         return other != null && ShopSettingType == other.ShopSettingType
             && ((string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(other.Name)) || string.Equals(Name, other.Name, StringComparison.InvariantCultureIgnoreCase))
-            && ((string.IsNullOrEmpty(SettingsUrl) && string.IsNullOrEmpty(other.SettingsUrl)) || string.Equals(SettingsUrl, other. SettingsUrl, StringComparison.InvariantCultureIgnoreCase))
             && ImportService?.Equals(other.ImportService) != false
             && WebLoader?.Equals(other.WebLoader)!= false
             && BrowserDataLoader?.Equals(other.BrowserDataLoader) != false
@@ -166,5 +159,10 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
     public override bool Equals(object? obj)
     {
         return (obj is ShopSettingsModel shopSettingsModel) ? Equals(shopSettingsModel) : base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 }

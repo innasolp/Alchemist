@@ -17,6 +17,42 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     private readonly ISettingsDataAdapter _settingsDataAdapter = settingsDataAdapter;
 
     [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ShopSettings(Guid shopGuid, int shopSettingType)
+    {
+        if (shopGuid == Guid.Empty)
+            return BadRequest(shopGuid);
+
+        if ((ShopSettingType)shopSettingType == ShopSettingType.Service)
+            return BadRequest((ShopSettingType)shopSettingType);
+
+        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
+            return NotFound(shopGuid);
+        
+        var shopSettings = shopImport.ShopSettingTabs?.GetShopSettingsByType((ShopSettingType)shopSettingType);
+        if (shopSettings == null)
+        {
+            try
+            {
+                shopSettings = (await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (ShopSettingType)shopSettingType) as ShopSettingsModel)
+                    ?? shopImport.CreateShopSettings((ShopSettingType)shopSettingType);
+            }
+            catch(Exception e)
+            {
+                return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+            shopImport.SetSettings(TabType.Shop, shopSettings);
+        }
+
+        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
+
+        return PartialView("~/Views/Home/ShopSettings.cshtml", shopSettings);
+    }
+
+    [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
@@ -47,24 +83,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         return Ok(true);
     }
 
-    [HttpPost]
-    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult SetShopSettings(Guid shopGuid, int shopSettingType)
-    {
-        if ((ShopSettingType)shopSettingType == ShopSettingType.Service)
-            return BadRequest((ShopSettingType)shopSettingType);
-
-        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return NotFound(shopGuid);
-
-        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
-
-        return Ok(true);
-    }
-
-    private IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName)
+    private IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string? serviceSettingsName, Guid? guid = null)
     {
         if(shopSettingsGuid == Guid.Empty)
             return BadRequest(nameof(shopSettingsGuid));
@@ -72,7 +91,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         if(shopGuid == Guid.Empty)
             return BadRequest(nameof(shopGuid));
         
-        if(string.IsNullOrEmpty(serviceSettingsName))
+        if(string.IsNullOrEmpty(serviceSettingsName) && guid == null)
             return BadRequest(nameof(serviceSettingsName));
 
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
@@ -81,8 +100,20 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         if (!_importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
             return NotFound(shopSettingsGuid);
 
-        if (!_importFacade.TryGetServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName, out var serviceSettingsModel))
+        ServiceSettingsModel? serviceSettingsModel;
+        if (!string.IsNullOrEmpty(serviceSettingsName))
+        { 
+            if(!_importFacade.TryGetServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName, out serviceSettingsModel))
             serviceSettingsModel = ModelHelper.CreateServiceSettingsModel(shopGuid, shopSettings.ShopId, shopSettingsGuid, serviceSettingsName);
+        }
+        else
+        {
+            if (!_importFacade.TryGetServiceSettingsModel(shopGuid, shopSettingsGuid, guid.Value, out serviceSettingsModel))
+            {
+                serviceSettingsModel = ModelHelper.CreateServiceSettingsModel(shopGuid, shopSettings.ShopId, shopSettingsGuid, serviceSettingsName);
+                serviceSettingsModel.Guid = guid.Value;
+            }
+        }
 
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
     }
@@ -116,6 +147,15 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     }
 
     [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, Guid? guid)
+    {
+        return ServiceSettings(shopGuid, shopSettingsGuid, "", guid ?? Guid.NewGuid());
+    }
+
+    [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
@@ -129,13 +169,30 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
         var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
 
-        if (shopSettings.GetServiceSettings(data.Name) == null)
-            shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(data.Name));
+        if (ModelHelper.IsServiceSettingsPrimary(data.Name))
+        {
+            if (shopSettings.GetServiceSettings(data.Name) == null)
+                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(data.Name), data.Name);
 
-        shopImport.ShopSettingTabs?.GetShopSettingsByGuid(data.ShopSettingsGuid)?
-                 .UpdateServiceSettings(data);
+            shopImport.ShopSettingTabs?.GetShopSettingsByGuid(data.ShopSettingsGuid)?
+                     .UpdateServiceSettings(data);
 
-        return Ok(true);
+            return Ok(shopImport.ShopSettingTabs?.GetShopSettingsByGuid(data.ShopSettingsGuid)?.GetServiceSettings(data.Name));
+        }
+        else
+        {
+            var serviceSettings = shopSettings.Services.FirstOrDefault(s => s.Guid == data.Guid);
+            if (serviceSettings == null)
+            {
+                serviceSettings = shopSettings.CreateServiceSettingsModel(data.Name);
+                serviceSettings.Update(data);
+                shopSettings.Services.Add(serviceSettings);
+            }
+            else
+                serviceSettings.Update(data);
+
+            return Ok(serviceSettings);
+        }
     }
 
     [HttpPost]
@@ -211,4 +268,41 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         }
     }
 
+    [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult RootCategory(CategoryUrlModel data)
+    {
+        if (data == null)
+            return BadRequest("category url is null");
+        
+        if (data.ShopSettingsGuid == Guid.Empty)
+            return BadRequest("category shopSettingsGuid is empty");
+
+        if (data.Guid == Guid.Empty)
+            data.Guid = Guid.NewGuid();
+
+        return PartialView("~/Views/Home/RootCategoryUrl.cshtml",data );
+    }
+
+    [HttpPost]
+    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult SetRootCategory(CategoryUrlModel data)
+    {
+        if (data == null)
+            return BadRequest(data);
+
+        if (!_importFacade.TryGetShopSettings(data.ShopSettingsGuid, out var shopSettings) 
+            || shopSettings is not ProductShopSettingsModel productShopSettings )
+            return NotFound(data.ShopSettingsGuid);
+
+        var rootCategory = productShopSettings.RootCategories.FirstOrDefault(c=>c.Guid == data.Guid);
+        if (rootCategory != null)
+            rootCategory.Update(data);
+        else productShopSettings.RootCategories.Add(data);
+
+        return Ok(data);
+    }
 }

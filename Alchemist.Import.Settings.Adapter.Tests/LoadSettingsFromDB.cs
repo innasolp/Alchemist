@@ -58,13 +58,13 @@ public class LoadSettingsFromDB
     {
         foreach (var shopSetting in _shopSettings.Where(s => s.Type == ShopSettingType.Product))
         {
-            var importSettings = new ProductShopImportSettings() { Url = $"https://url{shopSetting.Id}" };
+            var importSettings = new ProductShopImportSettings() { ShopUrl = $"https://url{shopSetting.Id}" };
             shopSetting.JsonValue = JsonSerializer.Serialize(importSettings);
         }        
         
         foreach (var shopSetting in _shopSettings.Where(s => s.Type == ShopSettingType.Category))
         {
-            var importSettings = new CategoryShopImportSettings() { Url = $"https://url{shopSetting.Id}" };
+            var importSettings = new CategoryShopImportSettings() { ShopUrl = $"https://url{shopSetting.Id}" };
             shopSetting.JsonValue = JsonSerializer.Serialize(importSettings);
         }
 

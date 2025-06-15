@@ -10,7 +10,6 @@ internal static class ModelExtensions
     internal static void FillShopSettingsFields(this ShopSettingsModel shopSettings)
     {
         shopSettings.Name = $"{shopSettings.ShopSettingType}_{Guid.NewGuid}";
-        shopSettings.Url = $"https://{shopSettings.Name}";
         shopSettings.Perfomance = true;
     }
 

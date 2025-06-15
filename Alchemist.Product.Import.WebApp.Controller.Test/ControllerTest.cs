@@ -103,12 +103,14 @@ public abstract class ControllerTest<T>
         ((ISettings)service).ParentSettingsId = shopSettings.Id;
         ((ISettings)service).ShopId = ((ISettings)shopSettings).ShopId;
         service.ServiceTypeName = $"{shopSettings.ShopSettingType}{serviceName}Type{shopSettings.Id}";
-        shopSettings.SetServiceSettings(service);
+        shopSettings.SetServiceSettings(service, serviceName);
     }
 
     protected static void SetShopSettings(ShopImportModel shopImport, ShopSettingType shopSettingType)
     {
         var shopSettings = shopImport.CreateShopSettings(shopSettingType);
+
+        shopSettings.Name = Guid.NewGuid().ToString();
 
         shopSettings.Id = shopImport.Shop.Id;
 

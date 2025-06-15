@@ -23,6 +23,8 @@
 
     <script src="~/js/utils.js"></script>
 
+    <script src="~/js/tabs.js"></script>
+
     <script>
         updateShops($('#shopListPartialDiv'), {'shopGuid': '@(shopGuid?.ToString() ?? "")', 'tab': @((int?)Model.SelectedTabModel?.Tab ?? 0), 'tabView' : '@selectedTabViewName.Value'  }, $('#settingsPartialDiv') );
     </script>

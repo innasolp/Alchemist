@@ -1,0 +1,36 @@
+﻿@using Alchemist.Product.Import.Model
+@using System.Text.Json
+@using Alchemist.Product.Import.Model.Infrastructure
+@model ShopSettingsModel
+
+
+<ul class="table-ul" id="servicesUl">
+    <li class="table-ul header">
+        <div class="flex">
+            <div class="table_header" style="width:200px">Name</div>
+            <div class="table_header" style="width:200px">ServiceTypeName</div>
+            <div></div>
+        </div>
+    </li>
+    @foreach (var service in Model.Services.Where(s => !ModelHelper.IsServiceSettingsPrimary(s.Name)))
+    {
+        <li id="service_li_@(service.Guid)" class="table-ul service_li">
+            <div class="flex serviceRow">
+                <div class="table_cell name" style="width:200px">@service.Name</div>
+                <div class="table_cell serviceTypeName" style="width:200px">@service.ServiceTypeName</div>
+                <input type="hidden" class="guid" value="@service.Guid" />
+                <div>
+                    <i class='fa fa-edit editService' style='font-size:18px'
+                       onclick="showServiceSettingsModal('/ShopSettings/ServiceSettings', {'shopGuid': '@service.ShopGuid', 'shopSettingsGuid':'@service.ShopSettingsGuid', 'guid':'@service.Guid' })"></i>
+                </div>
+            </div>
+        </li>
+    }
+    <li class="table-ul">
+        <div>
+            <a id="addService"
+               onclick="showServiceSettingsModal('/ShopSettings/ServiceSettings', {'shopGuid': '@Model.ShopGuid', 'shopSettingsGuid':'@Model.Guid' })">Add service</a>
+        </div>
+    </li>
+</ul>
+

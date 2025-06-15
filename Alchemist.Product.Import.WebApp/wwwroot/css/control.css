@@ -24,3 +24,8 @@
     row-gap:5px;
     column-gap:5px;
 }
+
+.form-group-table {
+    margin-top: 15px;
+    margin-bottom: 10px;
+}

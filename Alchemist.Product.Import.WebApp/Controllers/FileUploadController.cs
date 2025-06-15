@@ -104,7 +104,7 @@ public class FileUploadController(IImportFacade importFacade) : Controller
             uplodedServiceSettings.FileName = file.FileName;
 
             if (shopSettings.GetServiceSettings(uplodedServiceSettings.Name) == null)
-                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(uplodedServiceSettings.Name));
+                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(uplodedServiceSettings.Name), serviceSettingsName);
 
 
             shopSettings?.UpdateServiceSettings(uplodedServiceSettings);

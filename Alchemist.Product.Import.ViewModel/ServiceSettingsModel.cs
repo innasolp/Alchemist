@@ -48,7 +48,12 @@ public class ServiceSettingsModel: SettingsModelBase, IImportServiceSettings, IJ
     public JsonObject? Value { get; set; }
 
     public string? FileName { get; set; }
-   
+
+    [Display(Name = "Value in json format")]
+    [Remote(action: "InvalidJsonValue",
+        controller: "Validation",
+        HttpMethod = "POST",
+        ErrorMessage = "Invalid json value")]
     public string? StringValue { get; set; }
 
     [JsonPropertyName("Value")]
@@ -80,12 +85,13 @@ public class ServiceSettingsModel: SettingsModelBase, IImportServiceSettings, IJ
 
     public void Update(ServiceSettingsModel source)
     {
-        base.Update(source);
+        if(!ModelHelper.IsServiceSettingsPrimary(Name))
+            base.Update(source);
         ServiceTypeName = source.ServiceTypeName;
         ImplementationTypeName = source.ImplementationTypeName;
         AssemblyPath = source.AssemblyPath;
         ServiceProviderPath = source.ServiceProviderPath;
-        Value = source.Value;
+        Value = source.Value ?? (!string.IsNullOrEmpty(source.StringValue) ? JsonSerializer.Deserialize<JsonObject>(source.StringValue) : null);
         StringValue = source.StringValue;
         FileName = source.FileName;
     }
@@ -93,6 +99,8 @@ public class ServiceSettingsModel: SettingsModelBase, IImportServiceSettings, IJ
     void IJsonOnDeserialized.OnDeserialized()
     {
         this.DeserializeValueIfNeed();
+        if(Value != null)
+            StringValue = Value.ToJsonString();
     }
 
     public bool Equals(ServiceSettingsModel? other)

@@ -6,29 +6,32 @@
 
 @functions {
     public object GetServiceData(ShopSettingType shopSettingType) => JsonSerializer.Serialize(new { shopGuid = Model.ShopGuid, shopSettingType = (int)shopSettingType });
+
+    public string AnchorOnClick(ShopSettingType shopSettingType)
+    {
+        return $"$(this).on('click', function()=>{{  redirectToShopSettings({GetServiceData(shopSettingType)}) }})";
+    }
 }
 
 @{
-    var selectedShopSettings = Model.GetShopSettingsByType(Model.SelectedSettingsTab);
+    var selectedShopSettings = Model.GetShopSettingsByType(Model.SelectedSettingsTab) ?? new ProductShopSettingsModel();
 }
 <hr />
-<div>
+<div class="tabs">
     <div class="menu" id="tabsMenuDiv">
-        <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
-            <a class="display-8  menu_header"
-               onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/ShopSettings/SetShopSettings', @GetServiceData(ShopSettingType.Product), (r)=> {if(r) location.reload(); }))">
-                @TabHelper.ShopSettingTypeNames[ShopSettingType.Product]
-            </a>
+        <div class="shopTab @CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
+            <a onload="@AnchorOnClick(ShopSettingType.Product)"
+               onclick="redirectToShopSettings(@GetServiceData(ShopSettingType.Product),this.parentElement)"
+            class="display-8  menu_header">@TabHelper.ShopSettingTypeNames[ShopSettingType.Product]</a>
         </div>
-        <div class="@CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Category)">
-            <a class="display-8  menu_header"
-               onclick="saveShopSettings($('#settingsForm'),(data)=> postData('/ShopSettings/SetShopSettings',  @GetServiceData(ShopSettingType.Category), (r)=> {if(r) location.reload(); }))">
-                @TabHelper.ShopSettingTypeNames[ShopSettingType.Category]
-            </a>
+        <div class="shopTab @CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Category)">
+            <a onclick="redirectToShopSettings(@GetServiceData(ShopSettingType.Category), this.parentElement)"
+                onload ="@AnchorOnClick(ShopSettingType.Category)" 
+                class="display-8  menu_header">@TabHelper.ShopSettingTypeNames[ShopSettingType.Category]</a>
         </div>
     </div>
     <div id="shopSettingsPartialDiv">
-        @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings ?? new ProductShopSettingsModel())
+        @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings)        
     </div>
 </div>
 
