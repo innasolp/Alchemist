@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
-using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
@@ -16,6 +15,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
     private readonly ISettingsDataAdapter _settingsDataAdapter = settingsDataAdapter;
 
+    [Route("ShopSettings/")]
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
@@ -31,7 +31,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
             return NotFound(shopGuid);
-        
+
         var shopSettings = shopImport.ShopSettingTabs?.GetShopSettingsByType((ShopSettingType)shopSettingType);
         if (shopSettings == null)
         {
@@ -40,7 +40,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
                 shopSettings = (await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (ShopSettingType)shopSettingType) as ShopSettingsModel)
                     ?? shopImport.CreateShopSettings((ShopSettingType)shopSettingType);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
             }
@@ -52,6 +52,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         return PartialView("~/Views/Home/ShopSettings.cshtml", shopSettings);
     }
 
+    [Route("ShopSettings/Save")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
@@ -63,7 +64,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         ShopSettingsModel shopSettings;
         try
         {
-            shopSettings = ModelHelper.GetShopSettingsFromJson(json,(ShopSettingType)shopSettingType);
+            shopSettings = ModelHelper.GetShopSettingsFromJson(json, (ShopSettingType)shopSettingType);
         }
         catch (JsonException)
         {
@@ -83,139 +84,8 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         return Ok(true);
     }
 
-    private IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string? serviceSettingsName, Guid? guid = null)
-    {
-        if(shopSettingsGuid == Guid.Empty)
-            return BadRequest(nameof(shopSettingsGuid));
-        
-        if(shopGuid == Guid.Empty)
-            return BadRequest(nameof(shopGuid));
-        
-        if(string.IsNullOrEmpty(serviceSettingsName) && guid == null)
-            return BadRequest(nameof(serviceSettingsName));
 
-        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return NotFound(shopGuid);
-
-        if (!_importFacade.TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
-            return NotFound(shopSettingsGuid);
-
-        ServiceSettingsModel? serviceSettingsModel;
-        if (!string.IsNullOrEmpty(serviceSettingsName))
-        { 
-            if(!_importFacade.TryGetServiceSettingsModel(shopGuid, shopSettingsGuid, serviceSettingsName, out serviceSettingsModel))
-            serviceSettingsModel = ModelHelper.CreateServiceSettingsModel(shopGuid, shopSettings.ShopId, shopSettingsGuid, serviceSettingsName);
-        }
-        else
-        {
-            if (!_importFacade.TryGetServiceSettingsModel(shopGuid, shopSettingsGuid, guid.Value, out serviceSettingsModel))
-            {
-                serviceSettingsModel = ModelHelper.CreateServiceSettingsModel(shopGuid, shopSettings.ShopId, shopSettingsGuid, serviceSettingsName);
-                serviceSettingsModel.Guid = guid.Value;
-            }
-        }
-
-        return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
-    }
-
-    [HttpPost]
-    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult ImportServiceSettings(Guid shopGuid, Guid shopSettingsGuid)
-    {
-        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.ImportService));
-    }
-
-
-    [HttpPost]
-    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult BrowserDataLoaderSettings(Guid shopGuid, Guid shopSettingsGuid)
-    {
-        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.BrowserDataLoader));
-    }
-
-    [HttpPost]
-    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult WebLoaderSettings(Guid shopGuid, Guid shopSettingsGuid)
-    {
-        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.WebLoader));
-    }
-
-    [HttpPost]
-    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult ServiceSettings(Guid shopGuid, Guid shopSettingsGuid, Guid? guid)
-    {
-        return ServiceSettings(shopGuid, shopSettingsGuid, "", guid ?? Guid.NewGuid());
-    }
-
-    [HttpPost]
-    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult SaveServiceSettings(ServiceSettingsModel data)
-    {
-        if (data == null)
-            return BadRequest(data);
-
-        if (!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
-            return NotFound(data.ShopGuid);
-
-        var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
-
-        if (ModelHelper.IsServiceSettingsPrimary(data.Name))
-        {
-            if (shopSettings.GetServiceSettings(data.Name) == null)
-                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(data.Name), data.Name);
-
-            shopImport.ShopSettingTabs?.GetShopSettingsByGuid(data.ShopSettingsGuid)?
-                     .UpdateServiceSettings(data);
-
-            return Ok(shopImport.ShopSettingTabs?.GetShopSettingsByGuid(data.ShopSettingsGuid)?.GetServiceSettings(data.Name));
-        }
-        else
-        {
-            var serviceSettings = shopSettings.Services.FirstOrDefault(s => s.Guid == data.Guid);
-            if (serviceSettings == null)
-            {
-                serviceSettings = shopSettings.CreateServiceSettingsModel(data.Name);
-                serviceSettings.Update(data);
-                shopSettings.Services.Add(serviceSettings);
-            }
-            else
-                serviceSettings.Update(data);
-
-            return Ok(serviceSettings);
-        }
-    }
-
-    [HttpPost]
-    [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
-    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult IsServiceSettingsChanged(ServiceSettingsModel data)
-    {
-        if (data == null)
-            return BadRequest(data);
-
-        if (!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport))
-            return NotFound(data.ShopGuid);
-
-        var shopSettings = shopImport.ShopSettingTabs.GetShopSettingsByGuid(data.ShopSettingsGuid);
-        var serviceSettings = shopSettings.GetServiceSettings(data.Name);
-
-        if (serviceSettings == null) return Ok(!data.IsEmpty());
-
-        return Ok(!serviceSettings.Equals(data));
-    }
-
-
+    [Route("ShopSettings/Save/Products")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
@@ -242,6 +112,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         }
     }
 
+    [Route("ShopSettings/Save/Category")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
@@ -285,6 +156,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         return PartialView("~/Views/Home/RootCategoryUrl.cshtml",data );
     }
 
+    [Route("ShopSettings/RootCategory/Set")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]

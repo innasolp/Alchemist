@@ -12,7 +12,7 @@ function onCloseWithConfirm(event) {
 
     var data = getFormData($('#serviceSettingsForm'));
 
-    postData('/ShopSettings/IsServiceSettingsChanged', data,
+    postData('/ServiceSettings/IsChanged', data,
         (result) => {
 
             if (!result) {
@@ -65,14 +65,14 @@ async function saveShopSettings(formSelector, callback = null) {
     var json = formDataToJson(formData);
     formData.append('json', json);
 
-    await fetchFormData(formData, '/ShopSettings/SaveShopSettings', 'post', callback);
+    await fetchFormData(formData, '/ShopSettings/Save', 'post', callback);
 }
 
 async function redirectToShopSettings(data, currentTab) {
     await saveShopSettings($('#settingsForm'),
         (result) => {
             $('#shopSettingsPartialDiv').load(
-                '/ShopSettings/ShopSettings',
+                '/ShopSettings/',
                 data,
                 function (response, status, xhr) { setTabsSelection($('.shopTab'), currentTab, "selected-a"); })
     });
@@ -158,7 +158,7 @@ function setServiceSettingsLi(service, ulServices) {
         var divEdit = $("<div>");
         var btnEdit = $("<i>", { "class": "fa fa-edit editService", "style": "font-size:18px" })
             .on("click", function () {
-                showServiceSettingsModal('/ShopSettings/ServiceSettings',
+                showServiceSettingsModal('/ServiceSettings/',
                     { 'shopGuid': service.ShopGuid, 'shopSettingsGuid': service.shopSettingsGuid, 'guid': service.guid });
             });
         divEdit.append(btnEdit);

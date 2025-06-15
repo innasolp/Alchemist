@@ -200,16 +200,6 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         await tab.ClickAsync();
     }
 
-    protected async Task ExpectWithNullValueAsync(ILocator locator, string? value)
-    {
-        await Expect(locator).ToBeVisibleAsync();
-
-        if (!string.IsNullOrEmpty(value))
-            await Expect(locator).ToHaveValueAsync(value);
-        else
-            await Expect(locator).ToHaveValueAsync("");
-    }
-
     protected async Task<ILocator> GetConfirmationLocatorAsync(IPage page)
     {
         var confirmationLocator = page.Locator("div[class='jconfirm-box jconfirm-hilight-shake jconfirm-type-default jconfirm-type-animated']");

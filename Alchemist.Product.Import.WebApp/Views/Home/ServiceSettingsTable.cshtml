@@ -21,7 +21,7 @@
                 <input type="hidden" class="guid" value="@service.Guid" />
                 <div>
                     <i class='fa fa-edit editService' style='font-size:18px'
-                       onclick="showServiceSettingsModal('/ShopSettings/ServiceSettings', {'shopGuid': '@service.ShopGuid', 'shopSettingsGuid':'@service.ShopSettingsGuid', 'guid':'@service.Guid' })"></i>
+                       onclick="showServiceSettingsModal('/ServiceSettings/', {'shopGuid': '@service.ShopGuid', 'shopSettingsGuid':'@service.ShopSettingsGuid', 'guid':'@service.Guid' })"></i>
                 </div>
             </div>
         </li>
@@ -29,7 +29,7 @@
     <li class="table-ul">
         <div>
             <a id="addService"
-               onclick="showServiceSettingsModal('/ShopSettings/ServiceSettings', {'shopGuid': '@Model.ShopGuid', 'shopSettingsGuid':'@Model.Guid' })">Add service</a>
+               onclick="showServiceSettingsModal('/ServiceSettings/', {'shopGuid': '@Model.ShopGuid', 'shopSettingsGuid':'@Model.Guid' })">Add service</a>
         </div>
     </li>
 </ul>

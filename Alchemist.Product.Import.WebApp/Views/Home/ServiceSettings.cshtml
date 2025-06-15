@@ -68,7 +68,7 @@
             }
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                        onclick="save($('#serviceSettingsForm'),'/ShopSettings/SaveServiceSettings', getFormData($('#serviceSettingsForm')), null, (data)=>{ if(data == null) return; @Callback(); closeServiceSettingsModal(); } )">
+                        onclick="save($('#serviceSettingsForm'),'/ServiceSettings/Save', getFormData($('#serviceSettingsForm')), null, (data)=>{ if(data == null) return; @Callback(); closeServiceSettingsModal(); } )">
                     Save
                 </button>
             </div>
