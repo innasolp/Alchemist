@@ -81,7 +81,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(ImportService);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.ImportService);            
+                this.SetServiceSettings(sourceShopSettings.ImportService, nameof(IShopImportSettings.ImportService));            
         }
         else if (setNullServices)
         {
@@ -97,7 +97,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(BrowserDataLoader);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.BrowserDataLoader);
+                this.SetServiceSettings(sourceShopSettings.BrowserDataLoader, nameof(IShopImportSettings.BrowserDataLoader));
         }
         else if (setNullServices)
         {
@@ -113,7 +113,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(WebLoader);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.WebLoader);
+                this.SetServiceSettings(sourceShopSettings.WebLoader, nameof(IShopImportSettings.WebLoader));
         }
         else if (setNullServices)
         {
@@ -129,7 +129,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopImportSettings
                 this.AddOrUpdateServices(RequestHeaders);
             }
             else
-                this.SetServiceSettings(sourceShopSettings.RequestHeaders);
+                this.SetServiceSettings(sourceShopSettings.RequestHeaders, nameof(IShopImportSettings.RequestHeaders));
         }
         else if (setNullServices)
         {

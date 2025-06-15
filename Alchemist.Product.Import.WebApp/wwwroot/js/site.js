@@ -137,6 +137,8 @@ function save(formSelector, url, data, onValidationError = null, onSuccess=null,
         {
             if (formSelector.valid())
                 postData(url, data, onSuccess, onError);
+            else if (onValidationError != null)
+                onValidationError();                
         }
         ,500);
 }

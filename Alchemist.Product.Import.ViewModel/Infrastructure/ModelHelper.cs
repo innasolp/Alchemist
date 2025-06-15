@@ -66,12 +66,7 @@ public static class ModelHelper
         var option = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
-                nameof(ServiceSettingsModel.Value)) }
-            }
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
         };
 
         return shopSettingType == ShopSettingType.Product

@@ -395,7 +395,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         var result = shopSettingsResult.ToShopImportSettings<T>();
         var servicesResult = new List<ServiceSettingsModel>();
         childrenSettingResult.ToList().ForEach(s => servicesResult.Add(s.ToImportServiceSettings<ServiceSettingsModel>()));
-        servicesResult.ForEach(result.SetServiceSettings);
+        servicesResult.ForEach(s=>result.SetServiceSettings(s, s.Name));
 
         ModelAssert.EqualFields(expect, result);
         ModelAssert.EqualServices(expect, result);

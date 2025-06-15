@@ -141,8 +141,8 @@ function setServiceSettingsLi(service, ulServices) {
 
     var item = ulServices.find("#service_li_" + (service.guid));
     if (item.length > 0) {
-        item.find('.name').text(service.item);
-        item.find('.serviceTypeName').text(service.url);
+        item.find('.name').text(service.name);
+        item.find('.serviceTypeName').text(service.serviceTypeName);
         item.find('.guid').val(service.guid);
     }
     else {

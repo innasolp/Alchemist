@@ -172,7 +172,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         if (ModelHelper.IsServiceSettingsPrimary(data.Name))
         {
             if (shopSettings.GetServiceSettings(data.Name) == null)
-                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(data.Name));
+                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(data.Name), data.Name);
 
             shopImport.ShopSettingTabs?.GetShopSettingsByGuid(data.ShopSettingsGuid)?
                      .UpdateServiceSettings(data);

@@ -176,9 +176,9 @@ public static class ModelExtensions
         shopSettings.UpdateServiceSettings(serviceSettings.Name, serviceSettings);
     }
 
-    public static void SetServiceSettings(this ShopSettingsModel shopSettings, ServiceSettingsModel serviceSettings)
+    public static void SetServiceSettings(this ShopSettingsModel shopSettings, ServiceSettingsModel serviceSettings, string serviceName)
     {
-        switch (serviceSettings?.Name)
+        switch (serviceName)
         {
             case nameof(ShopSettingsModel.ImportService):
                 shopSettings.ImportService = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.ImportService));
@@ -227,7 +227,8 @@ public static class ModelExtensions
     {
         return target.Guid == source.Guid
         || (!string.IsNullOrEmpty(source.Name) && !string.IsNullOrEmpty(target.Name) && target.Name == source.Name)
-        || target.ServiceTypeName == source.ServiceTypeName;
+        || (!string.IsNullOrEmpty(source.ServiceTypeName) && !string.IsNullOrEmpty(target.ServiceTypeName) && 
+                    target.ServiceTypeName == source.ServiceTypeName);
     }
 
     public static void AddOrUpdateServices(this ShopSettingsModel shopSettings, ServiceSettingsModel source)

@@ -39,7 +39,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
            .ToHaveCountAsync(1);
 
         var tabsLocator = Page.Locator("#tabsMenuDiv");
-        await Expect(tabsLocator.Locator("div[class = 'menu_item-a selected-a']").GetByText(TabHelper.ShopSettingTypeNames[ShopSettingType.Product]))
+        await Expect(tabsLocator.Locator("div[class = 'shopTab menu_item-a selected-a']").GetByText(TabHelper.ShopSettingTypeNames[ShopSettingType.Product]))
             .ToHaveCountAsync(1);
 
         await Expect(Page.Locator("form[name='itemShopForm']")).ToHaveCountAsync(3);

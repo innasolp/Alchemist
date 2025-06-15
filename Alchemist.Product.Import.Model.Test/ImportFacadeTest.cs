@@ -120,7 +120,7 @@ public class ImportFacadeTest
 
         serviceSettings = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.WebLoader));
         serviceSettings.ServiceTypeName = "ServiceType1";
-        shopSettings.SetServiceSettings(serviceSettings);
+        shopSettings.SetServiceSettings(serviceSettings, nameof(ShopSettingsModel.WebLoader));
         Assert.True(importFacade.TryGetServiceSettingsModel(shops[1].ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.WebLoader), out var result));
         Assert.Equal(serviceSettings.ServiceTypeName, result.ServiceTypeName);
     }
@@ -152,7 +152,7 @@ public class ImportFacadeTest
 
         serviceSettings = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.WebLoader));
         serviceSettings.ServiceTypeName = "ServiceType1";
-        shopSettings.SetServiceSettings(serviceSettings);
+        shopSettings.SetServiceSettings(serviceSettings, nameof(ShopSettingsModel.WebLoader));
 
         var newService = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.WebLoader));
         newService.ServiceTypeName = "ServiceType2";
