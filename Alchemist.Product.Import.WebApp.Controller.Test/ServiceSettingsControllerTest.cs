@@ -2,7 +2,6 @@
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.JsonAdapter;
-using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;

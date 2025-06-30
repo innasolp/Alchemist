@@ -81,7 +81,7 @@ public class HomeController : Controller
         return GetIndexViewModel(shopGuid, tab);
     }
 
-    private IndexViewModel GetIndexViewModel(Guid? shopGuid, TabType tab)
+    private IndexViewModel? GetIndexViewModel(Guid? shopGuid, TabType tab)
     {
         var shopImports = _importFacade.GetShops();
 
@@ -92,8 +92,11 @@ public class HomeController : Controller
                 SelectedTab = tab
             };
 
-        if (shopGuid == null || !_importFacade.TryGetShopImport((Guid)shopGuid, out var shopImport))
+        ShopImportModel? shopImport;
+        if (shopGuid == null)
             shopImport = shopImports.First();
+        else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
+            return null;
 
         var shops = shopImports.Select(s => s.Shop).ToList();
 
@@ -120,10 +123,7 @@ public class HomeController : Controller
         if (viewModel.SelectedShopImport != null)        
             SetCurrentShopGuid(viewModel.SelectedShopImport.ShopGuid);          
         else        
-            viewModel.SelectedShopImport = _importFacade.CreateDefaultShopImport();
-
-        SetCurrentShopGuid(viewModel.SelectedShopImport?.ShopGuid != Guid.Empty 
-             ? viewModel.SelectedShopImport?.ShopGuid : null);
+            viewModel.SelectedShopImport = _importFacade.CreateDefaultShopImport();        
 
         viewModel.SelectedTabModel = viewModel.SelectedShopImport.GetTab(viewModel.SelectedTab);
 

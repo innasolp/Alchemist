@@ -6,21 +6,16 @@ namespace Alchemist.Product.Import.WebApp.Models;
 
 public abstract class SettingsModelBase(int shopId, Guid shopGuid) : ISettingsModel
 {
-    public Guid Guid { get; } = Guid.NewGuid();
+    public Guid Guid { get; set; } = Guid.NewGuid();
 
     public abstract TabType Tab { get; }
 
-    public Guid ShopGuid { get; } = shopGuid;
+    public Guid ShopGuid { get; set; } = shopGuid;
 
-    public int ShopId { get; } = shopId;
+    public int ShopId { get; set; } = shopId;
 
     [Required]
     public string Name { get; set; }
-
-    public virtual void Update(SettingsModelBase source)
-    {
-        Name = source.Name;
-    }
 
     public override string ToString()
     {

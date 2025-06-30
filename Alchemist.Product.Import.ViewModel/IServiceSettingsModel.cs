@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
-using DependencyInjection.Interfaces;
 using System.Text.Json.Nodes;
 
 namespace Alchemist.Product.Import.Model;
@@ -12,5 +11,5 @@ public interface IServiceSettingsModel: IShopSettingsModel, IImportServiceSettin
 
     string? FileName { get; set; }    
 
-    Guid ShopSettingsGuid { get; }
+    Guid ShopSettingsGuid { get; set; }
 }

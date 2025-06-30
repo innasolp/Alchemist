@@ -106,7 +106,7 @@ function showRootCategory(data) {
             setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
     });
 
-    if (typeof data == 'object')
+    if (data.hasOwnProperty('guid'))
         showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory/Edit', data);
     else
         showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory/New', data);

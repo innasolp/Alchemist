@@ -58,11 +58,9 @@ public class ServiceSettingsModel : SettingsModelBase, IServiceSettingsModel
 
     public int? ParentSettingsId { get; set; }
 
-    public Guid ShopSettingsGuid { get; }
+    public Guid ShopSettingsGuid { get; set; }
     
     string? IServiceSettings.Value { get => StringValue; set => StringValue = value; }
-
-    int ISettings.ShopId { get => ShopId; set { } }
 
     public ServiceSettingsModel() : base(0, Guid.Empty) { }
 
@@ -74,17 +72,5 @@ public class ServiceSettingsModel : SettingsModelBase, IServiceSettingsModel
         Name = serviceName;
     }
 
-    public bool IsEmpty()
-    {
-        return string.IsNullOrEmpty(AssemblyPath) && string.IsNullOrEmpty(ServiceProviderPath)
-            && string.IsNullOrEmpty(ServiceTypeName) && string.IsNullOrEmpty(ImplementationTypeName);
-    }
-
-    public override void Update(SettingsModelBase source)
-    {
-        if(source is ServiceSettingsModel serviceSettingsModel)
-            Update(serviceSettingsModel);
-        else 
-            base.Update(source);
-    }    
+    
 }

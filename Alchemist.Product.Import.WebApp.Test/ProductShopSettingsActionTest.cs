@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 namespace Alchemist.Product.Import.WebApp.Test;
 
 public class ProductShopSettingsActionTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper)
-    : ImportWebAppTest(webAppFactory, testOutputHelper, 8120, 8121)
+    : ImportWebAppTest(webAppFactory, testOutputHelper, 8122, 8123)
 {
     [Fact]
     public async Task ValidationFailedWhenRequiredFieldsNotFilled()

@@ -20,7 +20,7 @@ public class ShopModel : IShopModel
     [Required]
     public string Name { get; set; }
 
-    public int Id { get; init; }
+    public int Id { get; set; }
 
     public bool IsDeprecated { get; set; } = false;
 

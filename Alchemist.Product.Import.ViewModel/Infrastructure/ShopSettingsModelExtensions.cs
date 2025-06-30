@@ -84,10 +84,21 @@ public static class ShopSettingsModelExtensions
         {
             var targetService = target.Services.OfType<IServiceSettingsModel>().FirstOrDefault(s => s.Guid == service.Guid);
             if (targetService == null)
+            {
+                service.ShopSettingsGuid = target.Guid;
+                service.ShopGuid = target.ShopGuid;
                 target.Services.Add(service);
+            }
             else
                 targetService.Update(service);
         }
+    }
+
+    private static void UpdateShopSettingsWithoutServices(this IShopServicesSettingsModel target, IShopServicesSettingsModel source)
+    {
+        target.Name = source.Name;
+        target.FileName = source.FileName;
+        target.Perfomance = source.Perfomance;
     }
 
     public static void UpdateProductShopSettings(this IProductShopSettingsModel target, IProductShopSettingsModel source)
@@ -107,10 +118,21 @@ public static class ShopSettingsModelExtensions
         {
             var targetRootCategory = target.RootCategories.OfType<ICategoryUrlModel>().FirstOrDefault(r => r.Guid == rootCategory.Guid);
             if (targetRootCategory == null)
+            {
+                rootCategory.ShopSettingsGuid = target.Guid;
                 target.RootCategories.Add(rootCategory);
+            }
             else
                 targetRootCategory.Update(rootCategory);
         }
+    }
+
+    public static void UpdateProductShopSettingsWithoutServices(this IProductShopSettingsModel target, IProductShopSettingsModel source)
+    {
+        target.UpdateShopSettingsWithoutServices(source);
+        target.ProductUrlFormat = source.ProductUrlFormat;
+        target.CategoryUrlFormat = source.CategoryUrlFormat;
+        target.PageProductCount = source.PageProductCount;
     }
 
     public static void Update(this ICategoryUrlModel target, ICategoryUrlModel source)
@@ -123,6 +145,12 @@ public static class ShopSettingsModelExtensions
     {
         target.UpdateShopSettingsCore(source);
 
+        target.CategorySourceUrl = source.CategorySourceUrl;
+    }
+
+    public static void UpdateCategoryShopSettingsWithoutServices(this ICategoryShopSettingsModel target, ICategoryShopSettingsModel source)
+    {
+        target.UpdateShopSettingsWithoutServices(source);
         target.CategorySourceUrl = source.CategorySourceUrl;
     }
 

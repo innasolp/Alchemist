@@ -49,6 +49,7 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
         var services = (from serviceModel in shopSettingsModel.Services.OfType<IImportServiceSettings>()
                         let service = serviceModel.ToEntity()
                         select service).ToList();
+        //todo add primary services if need
         await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
     }
 

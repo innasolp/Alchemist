@@ -4,5 +4,5 @@ public interface ISettingsModel
 {
     Guid Guid { get; }
 
-    Guid ShopGuid { get; }    
+    Guid ShopGuid { get; set; }    
 }

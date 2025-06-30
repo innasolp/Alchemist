@@ -15,12 +15,17 @@ public class CategoryUrlModel(Guid shopSettingsGuid) : ICategoryUrlModel
     [Required]
     public string Url { get; set; }
 
-    public Guid Guid { get; } = Guid.NewGuid();
+    public Guid Guid { get; set; } = Guid.NewGuid();
 
-    public Guid ShopSettingsGuid { get; } = shopSettingsGuid;
+    public Guid ShopSettingsGuid { get; set; } = shopSettingsGuid;
+
+    public CategoryUrlModel() : this(Guid.Empty) { }
+
+
+    
 }
 
-public class ProductShopSettingsModel : ShopSettingsModel, IProductShopSettingsModel
+public class ProductShopSettingsModel : ShopSettingsModel, IProductShopSettingsModel, IJsonOnDeserialized
 {
     [Required]
     public string? ProductUrlFormat { get; set; }
@@ -53,5 +58,11 @@ public class ProductShopSettingsModel : ShopSettingsModel, IProductShopSettingsM
     {
         return @$"{nameof(ProductShopSettingsModel)}:{base.ToString()};
                 {nameof(ProductUrlFormat)}:{ProductUrlFormat};{nameof(CategoryUrlFormat)}:{CategoryUrlFormat};{nameof(PageProductCount)}:{PageProductCount}";
+    }
+
+    public void OnDeserialized()
+    {
+        foreach (var rootCategory in RootCategories)
+            rootCategory.ShopSettingsGuid = Guid;
     }
 }

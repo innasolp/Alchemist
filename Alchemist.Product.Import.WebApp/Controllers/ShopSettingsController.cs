@@ -40,11 +40,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
             try
             {
                 var shopSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (ShopSettingType)shopSettingType);
-                if (!_importFacade.TryGetShopSettings(shopImport.ShopGuid, (ShopSettingType)shopSettingType, out shopSettingsModel))
-                {
-                    return new ObjectResult(new Exception("Unknown error")) { StatusCode = StatusCodes.Status500InternalServerError };
-                }
-
+               shopSettingsModel.Update(shopSettings);
             }
             catch (Exception e)
             {
@@ -103,7 +99,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
         try
         {
-            shopImport.ShopSettingTabs?.ShopProductsSettings?.Update(productShopSettings);            
+            shopImport.ShopSettingTabs?.ShopProductsSettings?.UpdateProductShopSettingsWithoutServices(productShopSettings);            
 
             await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopProductsSettings);
 
@@ -130,7 +126,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
 
         try
         {
-            shopImport.ShopSettingTabs.ShopCategoriesSettings.Update(categoryShopSettings);
+            shopImport.ShopSettingTabs.ShopCategoriesSettings.UpdateCategoryShopSettingsWithoutServices(categoryShopSettings);
 
             await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopCategoriesSettings);
 
@@ -172,8 +168,6 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
             return NotFound(shopSettingsGuid);
 
         var rootCategory = new CategoryUrlModel(shopSettingsGuid);
-
-        productShopSettingsModel.RootCategories.Add(rootCategory);
 
         return PartialView("~/Views/Home/RootCategoryUrl.cshtml", rootCategory);
     }

@@ -66,6 +66,20 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         }
     }
 
+    private void SetSecondaryServices(Interfaces.IShopSettings shopSetting)
+    {
+        var categoryShopImportSettings = new CategoryShopSettingsModel()
+        {
+            Name = shopSetting.Name,
+            CategorySourceUrl = $"https://url{shopSetting.Id}_category"
+        };
+        shopSetting.JsonValue = JsonSerializer.Serialize(categoryShopImportSettings);
+
+        _shopSettings.Add(CreateServiceSettings(shopSetting.ShopId, shopSetting.Id, _shopSettings.Count));
+        _shopSettings.Add(CreateServiceSettings(shopSetting.ShopId, shopSetting.Id, _shopSettings.Count));
+    }    
+
+
     [Fact]
     public async Task CategoryShopSettingsHasServiceTable()
     {
@@ -94,22 +108,15 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
     }
 
     [Fact]
-    public async Task ServiceTableContainsRowsWhenRootCategoriesExists()
+    public async Task ServiceTableContainsRowsWhenSecondaryServicesExists()
     {
         var shopSetting = _shopSettings[2];
-        var categoryShopImportSettings = new CategoryShopSettingsModel()
-        {
-            Name = shopSetting.Name,
-            CategorySourceUrl = $"https://url{shopSetting.Id}_category"            
-        };
-        shopSetting.JsonValue = JsonSerializer.Serialize(categoryShopImportSettings);
 
-        _shopSettings.Add(CreateServiceSettings(shopSetting, _shopSettings.Count));
-        _shopSettings.Add(CreateServiceSettings(shopSetting, _shopSettings.Count));        
+        SetSecondaryServices(shopSetting);
 
         var newPage = await Context.NewPageAsync();
 
-        await ExpectLoadIndexPageAsync(newPage);        
+        var shopSettings = await ExpectLoadIndexPageAsync(newPage);        
 
         var serviceTable = await ExpectServiceTableOnShopCategoryTabAsync(newPage);
 
@@ -134,9 +141,15 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         var shopImportSettings = await GetShopImportSettingsAsync(_shops.First().Id, Interfaces.ShopSettingType.Category);
         var categoryShopSettings = Assert.IsType<CategoryShopSettingsModel>(shopImportSettings);
 
-        var serviceSettingsForm = await ExpectShowServiceFormWhenAddServiceButtonClickAsync(newPage, serviceTable);        
+        var serviceSettingsForm = await ExpectShowServiceFormWhenAddServiceButtonClickAsync(newPage, serviceTable);
 
-        var serviceSettings = await serviceSettingsForm.FillServiceSettingsInputsAsync(_shopSettings, "", categoryShopSettings);
+        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
+            .ToImportServiceSettings<ServiceSettingsModel>()
+           ?? new ServiceSettingsModel
+           {
+               Name = Guid.NewGuid().ToString()
+           };
+        serviceSettings = await serviceSettingsForm.FillServiceSettingsInputsAsync(serviceSettings, "");
 
         var saveButton = serviceSettingsForm.Locator("button[class='btn btn-primary']");
         await saveButton.ClickAsync();
@@ -144,5 +157,57 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         await Expect(serviceSettingsForm).Not.ToBeVisibleAsync();
 
         await ExpectRowsInServiceTableAsync(serviceTable, [serviceSettings]);
+    }
+
+    [Fact]
+    public async Task ServiceRowChangedWhenServiceWasEdited()
+    {
+        var shopSetting = _shopSettings[2];
+
+        SetSecondaryServices(shopSetting);
+
+        var newPage = await Context.NewPageAsync();
+
+        var shopSettings = await ExpectLoadIndexPageAsync(newPage);
+
+        var serviceTable = await ExpectServiceTableOnShopCategoryTabAsync(newPage);
+
+        var rows = await serviceTable.Locator(".serviceRow").AllAsync();
+
+        var services = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id && !Helper.IsServiceSettingsPrimary(s.Name)).ToList();
+        var service = services.Last().ToImportServiceSettings<ServiceSettingsModel>();
+        
+        ILocator? serviceRow = null;
+        foreach (var row in rows)
+        {
+            if (await row.Locator(".name").TextContentAsync() == service.Name
+                && await row.Locator(".serviceTypeName").TextContentAsync() == service.ServiceTypeName)
+            {
+                serviceRow = row;
+                break;
+            }
+        }
+
+        Assert.NotNull(serviceRow);
+
+        await Expect(serviceRow).ToHaveCountAsync(1);
+
+        var buttonEdit = serviceRow.Locator(".editService");
+        await Expect(buttonEdit).ToHaveCountAsync(1);
+        await Expect(buttonEdit).ToBeVisibleAsync();
+
+        var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, (page) => Task.FromResult(buttonEdit));
+
+        service = await serviceForm.FillServiceSettingsInputsAsync(service, service.Name);
+
+        var saveButton = serviceForm.Locator("button[class='btn btn-primary']");
+        await Expect(saveButton).ToHaveCountAsync(1);
+        await Expect(saveButton).ToBeVisibleAsync();
+
+        await saveButton.ClickAsync();
+
+        await Expect(serviceForm).Not.ToBeVisibleAsync();
+        
+        await Expect(serviceRow.Locator(".serviceTypeName")).ToContainTextAsync(service.ServiceTypeName);
     }
 }

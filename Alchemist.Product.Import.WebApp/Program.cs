@@ -19,7 +19,12 @@ var signalRUrl = builder.Configuration.GetHostSectionValue("ShopMessageReceiver"
 builder.Services.AddSignalRMessageReceiver(signalRUrl);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options=>
+{
+    options.JsonSerializerOptions.IgnoreReadOnlyProperties = false;
+    options.JsonSerializerOptions.IgnoreReadOnlyFields = true;
+    options.JsonSerializerOptions.RespectRequiredConstructorParameters = true;
+});
 
 var app = builder.Build();
 

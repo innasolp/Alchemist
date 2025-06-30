@@ -1,11 +1,11 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
-using Alchemist.Product.Import.WebApp.Models;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.Model;
+namespace Alchemist.Product.Import.WebApp.Models;
 
 public abstract class ShopSettingsModel : SettingsModelBase, IShopServicesSettingsModel
 {
@@ -68,9 +68,7 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopServicesSettin
 
     string IShopImportSettings.ShopName { get => null; set { } }
 
-    string IShopImportSettings.ShopUrl { get => null; set { } }
-
-    int ISettings.ShopId { get => ShopId; set { } }
+    string IShopImportSettings.ShopUrl { get => null; set { } }   
 
     int? ISettings.ParentSettingsId { get => null; set  { } }
 

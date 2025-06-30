@@ -13,18 +13,11 @@ public static class ServiceSettingsModelExtensions
             && string.IsNullOrEmpty(serviceSettingsModel.ServiceTypeName) && string.IsNullOrEmpty(serviceSettingsModel.ImplementationTypeName)
             && string.IsNullOrEmpty(serviceSettingsModel.Value);
     }
-
-    private static bool IsServiceSettingsPrimary(string name)
-    {
-        return name == nameof(IShopImportSettings.ImportService)
-            || name == nameof(IShopImportSettings.BrowserDataLoader)
-            || name == nameof(IShopImportSettings.WebLoader)
-            || name == nameof(IShopImportSettings.RequestHeaders);
-    }
+   
 
     public static void Update(this IServiceSettingsModel target, IServiceSettingsModel source)
     {
-        if (!IsServiceSettingsPrimary(source.Name))
+        if (!ModelHelper.IsServiceSettingsPrimary(source.Name))
             target.Name = source.Name;
 
         target.ServiceProviderPath = source.ServiceProviderPath;

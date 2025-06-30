@@ -30,8 +30,13 @@
                     <div class="table_cell url">@category.Url</div>
                     <input type="hidden" class="guid" value="@category.Guid"/>
                     <div>
-                        <i class='fa fa-edit editRootCategory' style='font-size:18px'
-                           onclick="showRootCategory( @JsonSerializer.Serialize(category))"></i>
+                        <button type="button" class="editRootCategory" onclick="showRootCategory(@JsonSerializer.Serialize(category, new JsonSerializerOptions
+                                                                       {
+                                                                           PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                                                           WriteIndented = true
+                                                                       }))">
+                            <i class='fa fa-edit' style='font-size:18px'></i>
+                        </button>
                     </div>                    
                 </div>
             </li>
@@ -39,7 +44,7 @@
         <li class="table-ul">
             <div>
                 <a id="addRootCategory"
-                   onclick="showRootCategory('@Model.Guid')">Add category</a>
+                   onclick="showRootCategory({shopSettingsGuid:'@Model.Guid'})">Add category</a>
             </div>         
         </li>
         <li class="table-ul">

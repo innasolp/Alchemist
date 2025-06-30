@@ -7,7 +7,7 @@ public interface ICategoryUrlModel : ICategoryUrl
 {
     Guid Guid { get; }   
 
-    Guid ShopSettingsGuid { get; }
+    Guid ShopSettingsGuid { get; set; }
 }
 
 public interface IProductShopSettingsModel : IShopServicesSettingsModel, IProductShopImportSettings

@@ -89,7 +89,7 @@ public static class ModelExtensions
         where TImportServiceSettings : IImportServiceSettings, new()
     {
         var serviceSettings = get(shopImportSettings);
-        if (serviceSettings?.Id == null)
+        if (serviceSettings?.Id == null || serviceSettings.Id == 0)
         {
             var service = services.FirstOrDefault(s => s.Name == serviceName);
             if (service == null) return;

@@ -98,9 +98,6 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var shopProductSettings = new ProductShopSettingsModel()
         {
-            //ImportService = importService,
-            //BrowserDataLoader = browserDataLoader,
-            //WebLoader = webLoader,
             Name = Guid.NewGuid().ToString(),
             ProductUrlFormat = Guid.NewGuid().ToString(),
             CategoryUrlFormat = Guid.NewGuid().ToString()
@@ -133,9 +130,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
         await Expect(newSettingsForm.Locator("#ProductUrlFormat")).ToHaveValueAsync(shopProductSettings.ProductUrlFormat);
         await Expect(newSettingsForm.Locator("#CategoryUrlFormat")).ToHaveValueAsync(shopProductSettings.CategoryUrlFormat);
 
-        await this.ExpectCheckServiceSettingsAsync(newPage, importService);
-        await this.ExpectCheckServiceSettingsAsync(newPage, browserDataLoader);
-        await this.ExpectCheckServiceSettingsAsync(newPage, webLoader);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, importService);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, browserDataLoader);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, webLoader);
 
         await newPage.CloseAsync();
 
@@ -151,7 +148,13 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, async (page) => await this.ExpectShowServiceSettingsButtonAsync(page, nameof(IShopImportSettings.ImportService)));
 
-        var serviceSettings  = await serviceForm.FillServiceSettingsInputsAsync(_shopSettings, nameof(IShopImportSettings.ImportService), shopImportSettings);
+        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
+            .ToImportServiceSettings<ServiceSettingsModel>()
+           ?? new ServiceSettingsModel
+           {
+               Name = Guid.NewGuid().ToString()
+           };
+        serviceSettings  = await serviceForm.FillServiceSettingsInputsAsync(serviceSettings, nameof(IShopImportSettings.ImportService));
 
         var confirmationLocator = await GetConfirmationLocatorAsync(newPage);
 
