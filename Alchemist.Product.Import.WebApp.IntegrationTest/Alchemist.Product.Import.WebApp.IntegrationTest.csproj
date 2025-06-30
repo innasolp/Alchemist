@@ -42,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.WebApp\Alchemist.Product.Import.WebApp.csproj" />

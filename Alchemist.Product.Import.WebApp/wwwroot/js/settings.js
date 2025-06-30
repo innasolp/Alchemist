@@ -106,7 +106,10 @@ function showRootCategory(data) {
             setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
     });
 
-    showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory', data);
+    if (typeof data == 'object')
+        showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory/Edit', data);
+    else
+        showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory/New', data);
 }
 
 function setRootCategoryLi(rootCategory, ulRootCategories) {

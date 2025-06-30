@@ -3,7 +3,10 @@ using Alchemist.Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.Model.Infrastructure;
+using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
+
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
@@ -62,7 +65,7 @@ public class FileUploadController(IImportFacade importFacade) : Controller
 
         if (_importFacade.TryGetShopSettings(shopGuid, (ShopSettingType)shopSettingsType, out var shopSettings))         
         {
-            shopSettings?.Update(uploadedShopSettings, true);
+            shopSettings.Update(uploadedShopSettings);
             shopSettings.FileName = file.FileName;
 
             return Ok(shopSettings);
@@ -103,11 +106,13 @@ public class FileUploadController(IImportFacade importFacade) : Controller
             uplodedServiceSettings.Name = serviceSettingsName;
             uplodedServiceSettings.FileName = file.FileName;
 
-            if (shopSettings.GetServiceSettings(uplodedServiceSettings.Name) == null)
-                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(uplodedServiceSettings.Name), serviceSettingsName);
-
-
-            shopSettings?.UpdateServiceSettings(uplodedServiceSettings);
+            if (_importFacade.TryGetServiceSettings(shopGuid, shopSettingsGuid, uplodedServiceSettings.Name, out var serviceSettingsModel) )
+                serviceSettingsModel.Update(uplodedServiceSettings);
+            else
+            {
+                _importFacade.AddNewServiceSettings(shopSettings, uplodedServiceSettings.Name, out serviceSettingsModel);
+                    serviceSettingsModel.Update(uplodedServiceSettings);
+            }            
 
             return Ok(uplodedServiceSettings);
         }

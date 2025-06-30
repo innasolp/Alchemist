@@ -1,11 +1,12 @@
 ﻿using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Microsoft.Playwright;
 using System.Text.Json;
 using Xunit.Abstractions;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
+using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -49,7 +50,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         return serviceSettingsForm;
     }
 
-    private async Task ExpectRowsInServiceTableAsync(ILocator serviceTable, ImportServiceSettings[] services)
+    private async Task ExpectRowsInServiceTableAsync(ILocator serviceTable, ServiceSettingsModel[] services)
     {
         var servicesRows = serviceTable.Locator(".service_li");
         await Expect(servicesRows).ToHaveCountAsync(services.Length);
@@ -96,7 +97,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
     public async Task ServiceTableContainsRowsWhenRootCategoriesExists()
     {
         var shopSetting = _shopSettings[2];
-        var categoryShopImportSettings = new CategoryShopImportSettings()
+        var categoryShopImportSettings = new CategoryShopSettingsModel()
         {
             Name = shopSetting.Name,
             CategorySourceUrl = $"https://url{shopSetting.Id}_category"            
@@ -115,7 +116,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         await Task.Delay(500);
 
         var services = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id && !ModelHelper.IsServiceSettingsPrimary(s.Name))
-                .Select(s => s.ToImportServiceSettings<ImportServiceSettings>()).ToArray();
+                .Select(s => s.ToImportServiceSettings<ServiceSettingsModel>()).ToArray();
         await ExpectRowsInServiceTableAsync(serviceTable, services);
     }
 
@@ -131,7 +132,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         var serviceTable = await ExpectServiceTableOnShopCategoryTabAsync(newPage);
 
         var shopImportSettings = await GetShopImportSettingsAsync(_shops.First().Id, Interfaces.ShopSettingType.Category);
-        var categoryShopSettings = Assert.IsType<CategoryShopImportSettings>(shopImportSettings);
+        var categoryShopSettings = Assert.IsType<CategoryShopSettingsModel>(shopImportSettings);
 
         var serviceSettingsForm = await ExpectShowServiceFormWhenAddServiceButtonClickAsync(newPage, serviceTable);        
 

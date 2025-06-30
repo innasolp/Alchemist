@@ -1,6 +1,6 @@
 ﻿@using Alchemist.Product.Import.Model.Infrastructure;
 
-@model IEnumerable<Alchemist.Product.Import.Model.ShopModel>
+@model IEnumerable<ShopModel>
 
 @{
     var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? TabHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : TabHelper.TabViewNames.FirstOrDefault();

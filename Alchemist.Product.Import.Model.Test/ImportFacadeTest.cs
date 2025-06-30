@@ -1,4 +1,3 @@
-using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Import.Settings.Interfaces;
@@ -8,7 +7,7 @@ namespace Alchemist.Product.Import.Model.Test;
 
 public class ImportFacadeTest
 {
-    private readonly Mock<IShopDataService> _shopDataServiceMock = new();
+    private readonly Mock<IModelFactory> _modelFactoryMock = new();
 
     private readonly List<Interfaces.IShop> _shops = [
         new Shop { Id = 1, Name = "Shop1", Url = "https://shop1" },
@@ -16,59 +15,156 @@ public class ImportFacadeTest
         new Shop { Id = 3, Name = "Shop3", Url = "https://shop3" }
     ];
 
+    private readonly IImportFacade _importFacade;
+
+    private readonly List<Mock<IShopModel>> _shopModelMocks = [];
+
+    public ImportFacadeTest()
+    {
+        _importFacade = new ImportFacade(_modelFactoryMock.Object);
+
+        _modelFactoryMock.Setup(m => m.CreateShopModel(It.IsAny<int>())).Returns((int shopId) => CreateShopModel(shopId));
+
+        _modelFactoryMock.Setup(m => m.CreateShopSettingsTabsModel(It.IsAny<int>(), It.IsAny<Guid>())).
+            Returns(CreateShopSettingsTabsModel);
+
+        _modelFactoryMock.Setup(m => m.CreateServiceSettingsModel(It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<Guid>(),
+            It.IsAny<Guid>(),
+            It.IsAny<string>())).Returns(CreateServiceSettings);
+    }
+
+    private IShopSettingTabsModel CreateShopSettingsTabsModel(int shopId, Guid shopGuid)
+    {
+        var guid = Guid.NewGuid();
+
+        var shopSettingsTabsMock = new Mock<IShopSettingTabsModel>();
+        shopSettingsTabsMock.Setup(s => s.Guid).Returns(guid);
+        shopSettingsTabsMock.Setup(s => s.ShopGuid).Returns(shopGuid);
+
+        var productShopSettings = CreateShopSettingsModel< IProductShopSettingsModel>(shopId, shopGuid, ShopSettingType.Product);        
+        shopSettingsTabsMock.Setup(s => s.ShopProductsSettings).Returns(productShopSettings);
+
+        var categoryShopSettings = CreateShopSettingsModel< ICategoryShopSettingsModel>(shopId, shopGuid, ShopSettingType.Category);
+        shopSettingsTabsMock.Setup(s => s.ShopCategoriesSettings).Returns(categoryShopSettings);
+
+        return shopSettingsTabsMock.Object;
+    }
+
+    private static T CreateShopSettingsModel<T>(int shopId, Guid shopGuid, ShopSettingType shopSettingType)
+        where T: class, IShopServicesSettingsModel
+    {
+        var guid = Guid.NewGuid();
+        var shopProductSettingsMock = new Mock<T>();
+        shopProductSettingsMock.Setup(s => s.ShopSettingType).Returns(shopSettingType);
+        shopProductSettingsMock.Setup(s => s.Guid).Returns(guid);
+        shopProductSettingsMock.Setup(s => s.ShopGuid).Returns(shopGuid);
+        shopProductSettingsMock.Setup(s => s.ShopId).Returns(shopId);
+
+        shopProductSettingsMock.Setup(s => s.ImportService).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.ImportService)));
+        shopProductSettingsMock.Setup(s => s.BrowserDataLoader).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.BrowserDataLoader)));
+        shopProductSettingsMock.Setup(s => s.RequestHeaders).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.RequestHeaders)));
+        shopProductSettingsMock.Setup(s => s.WebLoader).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.WebLoader)));
+
+        var services = new List<IServiceSettingsModel>();
+        shopProductSettingsMock.Setup(s => s.Services).Returns(services);
+
+        return shopProductSettingsMock.Object;
+    }
+
+    private static IServiceSettingsModel CreateService(int shopId, Guid shopGuid, Guid shopSettingsGuid, string serviceName)
+    {
+        var guid = Guid.NewGuid();
+        var serviceSettingsMock = new Mock<IServiceSettingsModel>();
+        serviceSettingsMock.Setup(s => s.Guid).Returns(guid);
+        serviceSettingsMock.Setup(s => s.ShopGuid).Returns(shopGuid);
+        serviceSettingsMock.Setup(s => s.ShopSettingsGuid).Returns(shopSettingsGuid);
+        serviceSettingsMock.Setup(s => s.ShopId).Returns(shopId);
+        serviceSettingsMock.Setup(s => s.Name).Returns(serviceName);
+        return serviceSettingsMock.Object;
+    }
+
+    private static IServiceSettingsModel CreateServiceSettings(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid, string serviceName)
+    {
+        var guid = Guid.NewGuid();
+        var serviceSettingsMock = new Mock<IServiceSettingsModel>();
+        serviceSettingsMock.Setup(s => s.Guid).Returns(guid);
+        serviceSettingsMock.Setup(s => s.ShopGuid).Returns(shopGuid);
+        serviceSettingsMock.Setup(s => s.ParentSettingsId).Returns(parentId);
+        serviceSettingsMock.Setup(s => s.ShopSettingsGuid).Returns(shopSettingsGuid);
+        serviceSettingsMock.Setup(s => s.ShopId).Returns(shopId);
+        serviceSettingsMock.Setup(s => s.Name).Returns(serviceName);
+        return serviceSettingsMock.Object;
+    }
+
+    private  IShopModel CreateShopModel(int shopId)
+    {
+        var shopModelMock = new Mock<IShopModel>();
+        var guid = Guid.NewGuid();
+        shopModelMock.SetupGet(s=>s.Id).Returns(shopId);
+        shopModelMock.SetupGet(s=>s.Guid).Returns(guid);
+        
+        shopModelMock.SetupSet((s)=> s.Name = It.IsAny<string>());
+        
+        _shopModelMocks.Add(shopModelMock);               
+
+        return shopModelMock.Object;
+    }
+
+
     [Fact]
     public async Task LoadNewShops()
     {
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<Interfaces.IShop>([.. _shops.Take(2)])));
+        var shops = new List<Interfaces.IShop>([.. _shops.Take(2)]);        
 
-        var importFacade = new ImportFacade(_shopDataServiceMock.Object);
-
-        var shops = await importFacade.LoadShops();
-        Assert.NotNull(shops);
-        Assert.Equal(2, shops.Count);
-        Assert.Contains(shops, s => s.Shop.Id == _shops[0].Id);
+        var shopImports = await _importFacade.LoadShops(shops);
+        Assert.NotNull(shopImports);
+        Assert.Equal(2, shopImports.Count);
+        Assert.Contains(shopImports, s => s.Shop.Id == _shops[0].Id);
     }
 
     [Fact]
     public async Task ReloadShopsWhenAnyDeprecated()
     {
-        var importFacade = new ImportFacade(_shopDataServiceMock.Object);
+        var shops = _shops;
 
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
+        var shopImports = await _importFacade.LoadShops(shops);
+        Assert.NotNull(shopImports);
+        Assert.Equal(3, shopImports.Count);
 
-        var shops = await importFacade.LoadShops();
-        Assert.NotNull(shops);
-        Assert.Equal(3, shops.Count);
+        shops = new List<Interfaces.IShop>([.. _shops.Take(2)]);
+        var reloadedShops = await _importFacade.LoadShops(shops);
 
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<Interfaces.IShop>([.. _shops.Take(2)])));
-        var reloadedShops = await importFacade.LoadShops();
-        Assert.Contains(reloadedShops, s => s.Shop.Id == _shops[2].Id && s.Shop.IsDeprecated);
+        var shopMock = _shopModelMocks.FirstOrDefault(s => s.Object.Id == _shops[2].Id);
+        Assert.NotNull(shopMock);
+        shopMock.VerifySet(s => s.IsDeprecated = true);
     }
 
     [Fact]
     public async Task AddNewShop()
     {
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(new List<Interfaces.IShop>([.. _shops.Take(2)])));
+        var shops = new List<Interfaces.IShop>([.. _shops.Take(2)]);        
 
-        var importFacade = new ImportFacade(_shopDataServiceMock.Object);
+        var shopImports = await _importFacade.LoadShops(shops);
+        Assert.NotNull(shopImports);
+        Assert.Equal(2, shopImports.Count);
 
-        var shops = await importFacade.LoadShops();
-        Assert.NotNull(shops);
-        Assert.Equal(2, shops.Count);
+        var newShopImport = _importFacade.AddNewShop(_shops[2]);
+        Assert.True(_importFacade.TryGetShopImport(newShopImport.ShopGuid, out var result));
 
-        var newShopImport = importFacade.AddNewShop(_shops[2]);
-        Assert.True(importFacade.TryGetShopImport(newShopImport.ShopGuid, out var result));
-        Assert.Equal(_shops[2].Name, result.Shop.Name);
+        var shopMock = _shopModelMocks.FirstOrDefault(s => s.Object.Id == result.Shop.Id);
+        Assert.NotNull(shopMock);
+        shopMock.VerifySet(s => s.Name = _shops[2].Name);
     }
 
     [Fact]
     public async Task TryGetShopImport()
     {
-        var importFacade = new ImportFacade(_shopDataServiceMock.Object);
-
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
-        var shops = await importFacade.LoadShops();
-        Assert.True(importFacade.TryGetShopImport(shops[0].ShopGuid, out var shopImport));
+        var shops = _shops;
+        var shopImports = await _importFacade.LoadShops(shops);
+        Assert.True(_importFacade.TryGetShopImport(shopImports[0].ShopGuid, out var shopImport));
         Assert.NotNull(shopImport);
         Assert.Contains(_shops, s => s.Id == shopImport.Shop.Id);
     }
@@ -76,52 +172,47 @@ public class ImportFacadeTest
     [Fact]
     public async Task TryGetShopImportSettings()
     {
-        var importFacade = new ImportFacade(_shopDataServiceMock.Object);
+        var shops = _shops;
 
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
-        var shops = await importFacade.LoadShops();
-        Assert.True(importFacade.TryGetShopImport(shops[1].ShopGuid, out var shopImport));
+        var shopImports = await _importFacade.LoadShops(shops);
+        Assert.True(_importFacade.TryGetShopImport(shopImports[1].ShopGuid, out var shopImport));
         Assert.NotNull(shopImport);
         Assert.Contains(_shops, s => s.Id == shopImport.Shop.Id);
-        Assert.True(shops.All(s => s.ShopSettingTabs == null));
+        Assert.True(shopImports.All(s => s.ShopSettingTabs.ShopProductsSettings.IsEmpty() && s.ShopSettingTabs.ShopCategoriesSettings.IsEmpty()));
 
-        var productShopSettings = shopImport.CreateShopSettings(ShopSettingType.Product);
-        shopImport.SetSettings(TabType.Shop, productShopSettings);
-        Assert.True(importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var result));
-        Assert.NotNull(shopImport.ShopSettingTabs);
+        var productShopSettings = shopImport.ShopSettingTabs.ShopProductsSettings;
+        Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var result));
         Assert.Equal(productShopSettings.Guid, result.Guid);
         Assert.Equal(ShopSettingType.Product, result.ShopSettingType);
-        Assert.Null(shopImport.ShopSettingTabs.ShopCategoriesSettings);
     }
 
     [Fact]
     public async Task TryGetServiceSettingsOnSetNew()
     {
-        var importFacade = new ImportFacade(_shopDataServiceMock.Object);
+        var shops = _shops;
 
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
-        var shops = await importFacade.LoadShops();
+        var shopImports = await _importFacade.LoadShops(shops);
         
-        Assert.True(importFacade.TryGetShopImport(shops[1].ShopGuid, out var shopImport));
+        Assert.True(_importFacade.TryGetShopImport(shopImports[1].ShopGuid, out var shopImport));
+        
+        Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, shopImport.ShopSettingTabs.ShopProductsSettings.Guid, out var shopSettings));
 
-        var productShopSettings = shopImport.CreateShopSettings(ShopSettingType.Product);        
-        shopImport.SetSettings(TabType.Shop, productShopSettings);
-        Assert.True(importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var shopSettings));
+        Assert.True(shopSettings.ImportService.IsEmpty());
+        Assert.True(shopSettings.RequestHeaders.IsEmpty());
+        Assert.True(shopSettings.WebLoader.IsEmpty());
+        Assert.True(shopSettings.BrowserDataLoader.IsEmpty());
 
-        Assert.Null(shopSettings.ImportService);
-        Assert.Null(shopSettings.RequestHeaders);
-        Assert.Null(shopSettings.WebLoader);
-        Assert.Null(shopSettings.BrowserDataLoader);
+        var name = Guid.NewGuid().ToString();
 
-        Assert.False(importFacade.TryGetServiceSettingsModel(shops[1].ShopGuid, 
-            shopSettings.Guid, 
-            nameof(ShopSettingsModel.WebLoader),
+        Assert.False(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, 
+            shopSettings.Guid,
+            name,
             out var serviceSettings));
 
-        serviceSettings = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.WebLoader));
+        _importFacade.AddNewServiceSettings(shopSettings, name, out serviceSettings);        
         serviceSettings.ServiceTypeName = "ServiceType1";
-        shopSettings.SetServiceSettings(serviceSettings, nameof(ShopSettingsModel.WebLoader));
-        Assert.True(importFacade.TryGetServiceSettingsModel(shops[1].ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.WebLoader), out var result));
+        
+        Assert.True(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, shopSettings.Guid, serviceSettings.Guid, out var result));
         Assert.Equal(serviceSettings.ServiceTypeName, result.ServiceTypeName);
     }
 
@@ -129,36 +220,28 @@ public class ImportFacadeTest
     [Fact]
     public async Task TryGetServiceSettingsAfterUpdated()
     {
-        var importFacade = new ImportFacade(_shopDataServiceMock.Object);
+        var shops = _shops;
 
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
-        var shops = await importFacade.LoadShops();
+        var shopImports =  await _importFacade.LoadShops(shops);
 
-        Assert.True(importFacade.TryGetShopImport(shops[1].ShopGuid, out var shopImport));
+        Assert.True(_importFacade.TryGetShopImport(shopImports[1].ShopGuid, out var shopImport));
 
-        var productShopSettings = shopImport.CreateShopSettings(ShopSettingType.Product);
-        shopImport.SetSettings(TabType.Shop, productShopSettings);
-        Assert.True(importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var shopSettings));
+        Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, shopImport.ShopSettingTabs.ShopProductsSettings.Guid, out var shopSettings));
 
-        Assert.Null(shopSettings.ImportService);
-        Assert.Null(shopSettings.RequestHeaders);
-        Assert.Null(shopSettings.WebLoader);
-        Assert.Null(shopSettings.BrowserDataLoader);
+        Assert.True(shopSettings.ImportService.IsEmpty());
+        Assert.True(shopSettings.RequestHeaders.IsEmpty());
+        Assert.True(shopSettings.WebLoader.IsEmpty());
+        Assert.True(shopSettings.BrowserDataLoader.IsEmpty());
 
-        Assert.False(importFacade.TryGetServiceSettingsModel(shops[1].ShopGuid,
+        Assert.False(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid,
             shopSettings.Guid,
-            nameof(ShopSettingsModel.WebLoader),
+            Guid.NewGuid().ToString(),
             out var serviceSettings));
 
-        serviceSettings = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.WebLoader));
+        Assert.True(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, shopSettings.Guid, nameof(IShopServicesSettingsModel.WebLoader), out serviceSettings));
         serviceSettings.ServiceTypeName = "ServiceType1";
-        shopSettings.SetServiceSettings(serviceSettings, nameof(ShopSettingsModel.WebLoader));
-
-        var newService = shopSettings.CreateServiceSettingsModel(nameof(ShopSettingsModel.WebLoader));
-        newService.ServiceTypeName = "ServiceType2";
-        shopSettings.UpdateServiceSettings(newService);
-
-        Assert.True(importFacade.TryGetServiceSettingsModel(shops[1].ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.WebLoader), out var result));
-        Assert.Equal(newService.ServiceTypeName, result.ServiceTypeName);
+        
+        Assert.True(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, shopSettings.Guid, nameof(IShopServicesSettingsModel.WebLoader), out var result));
+        Assert.Equal(serviceSettings.ServiceTypeName, result.ServiceTypeName);
     }
 }

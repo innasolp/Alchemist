@@ -4,6 +4,7 @@ using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Controllers;
+using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -65,7 +66,7 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
     [Fact]
     public async Task SetServiceSettingsIsNotFoundWhenNotExistingShopSettings()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var controller = CreateServiceSettingsController();
         var shopSettingsGuid = Guid.NewGuid();
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
@@ -104,9 +105,11 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
 
     private async Task SetServiceSettingsActionAsync(Func<ServiceSettingsController, Guid, Guid, IActionResult> getServiceAction, string? serviceName, Guid? guid = null)
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
+
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var shopSettings));
+        FillShopSettingsFields(shopSettings);
 
         var controller = CreateServiceSettingsController();
 
@@ -128,26 +131,34 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
     public async Task SaveServiceSettingsNotFoundWhenDataShopIsNotExists()
     {
         var controller = CreateServiceSettingsController();
-        var guid = Guid.NewGuid();
-        var actionResult = Assert.IsType<NotFoundObjectResult>(controller.SaveServiceSettings(new ServiceSettingsModel { ShopGuid = guid }));
-        Assert.Equal(guid, Assert.IsType<Guid>(actionResult.Value));
+        var shopGuid = Guid.NewGuid();
+        var actionResult = Assert.IsType<NotFoundObjectResult>(controller.SaveServiceSettings(new ServiceSettingsModel(0,
+            0,
+            0,
+            Guid.NewGuid(),
+            shopGuid,
+            Guid.NewGuid().ToString())));
+            
+        Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
     [Fact]
     public async Task SaveServiceFieldsOnSaveServiceSettingsActionAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
+
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var shopSettings));
+        FillShopSettingsFields(shopSettings);
 
         var controller = CreateServiceSettingsController();
 
-        var oldService = shopSettings.BrowserDataLoader.GetCopy();
+        var oldService =  ModelFactoryMock.Object.GetCopy(shopSettings.BrowserDataLoader);
 
-        var changedService = shopSettings.BrowserDataLoader.GetCopy();
+        var changedService = ModelFactoryMock.Object.GetCopy(shopSettings.BrowserDataLoader);
         changedService.FillServiceSettingsFields();
 
-        var actionResult = Assert.IsType<OkObjectResult>(controller.SaveServiceSettings(changedService));
+        var actionResult = Assert.IsType<OkObjectResult>(controller.SaveServiceSettings(changedService as ServiceSettingsModel));
         var resultService = Assert.IsType<ServiceSettingsModel>(actionResult.Value);
 
         ModelAssert.EqualFields(changedService, resultService);
@@ -165,23 +176,32 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
     public async Task IsServiceSettingsChangedNotFoundWhenDataShopIsNotExists()
     {
         var controller = CreateServiceSettingsController();
-        var guid = Guid.NewGuid();
-        var actionResult = Assert.IsType<NotFoundObjectResult>(controller.IsServiceSettingsChanged(new ServiceSettingsModel { ShopGuid = guid }));
-        Assert.Equal(guid, Assert.IsType<Guid>(actionResult.Value));
+        var shopGuid = Guid.NewGuid();
+        var actionResult = Assert.IsType<NotFoundObjectResult>(controller.IsServiceSettingsChanged(new ServiceSettingsModel(0,
+            0,
+            0,
+            Guid.NewGuid(),
+            shopGuid,
+            Guid.NewGuid().ToString())));
+        Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
     [Fact]
     public async Task IsServiceSettingsChangedOkTrueWhenOrigignalSettingsEmpty()
     {
-        await SetShopsAsync();
-        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Category);
-        shopSettings.ImportService = null;
-        var data = new ServiceSettingsModel
+        await LoadShopsAsync();
+        var shop = _importFacade.GetShops().Last();
+
+        Assert.True(_importFacade.TryGetShopSettings(shop.ShopGuid, ShopSettingType.Category, out var shopSettings));
+        
+        var data = new ServiceSettingsModel(
+            shop.Shop.Id,
+            0,
+            shopSettings.Id,
+            shopSettings.Guid,
+            shopSettings.ShopGuid,
+            nameof(ShopSettingsModel.ImportService))
         {
-            ShopGuid = shopGuid,
-            ShopSettingsGuid = shopSettings.Guid,
-            Name = nameof(ShopSettingsModel.ImportService),
             ServiceTypeName = Guid.NewGuid().ToString()
         };
 
@@ -193,16 +213,17 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
     [Fact]
     public async Task IsServiceSettingsChangedOkFalseWhenOrigignalSettingsEmptyAndSettingsNotChanged()
     {
-        await SetShopsAsync();
-        var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Category);
-        shopSettings.ImportService = null;
-        var data = new ServiceSettingsModel
-        {
-            ShopGuid = shopGuid,
-            ShopSettingsGuid = shopSettings.Guid,
-            Name = nameof(ShopSettingsModel.ImportService)
-        };
+        await LoadShopsAsync();
+        var shop = _importFacade.GetShops().Last().Shop;
+
+        Assert.True(_importFacade.TryGetShopSettings(shop.Guid, ShopSettingType.Category, out var shopSettings));        
+        
+        var data = new ServiceSettingsModel(shop.Id,
+            0,
+            0,
+            shopSettings.Guid,
+            shop.Guid,
+            nameof(ShopSettingsModel.ImportService));
 
         var controller = CreateServiceSettingsController();
         var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data));
@@ -212,27 +233,33 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
     [Fact]
     public async Task IsServiceSettingsChangedOkTrueWhenSettingsChanged()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Category);
-        var data = shopSettings.ImportService.GetCopy();
+
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Category, out var shopSettings));
+        FillShopSettingsFields(shopSettings);
+
+        var data = ModelFactoryMock.Object.GetCopy(shopSettings.ImportService);
         data.ServiceTypeName = Guid.NewGuid().ToString();
 
         var controller = CreateServiceSettingsController();
-        var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data));
+        var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data as ServiceSettingsModel));
         Assert.True(Assert.IsType<bool>(actionResult.Value));
     }
 
     [Fact]
     public async Task IsServiceSettingsChangedOkFalseWhenSettingsNotChanged()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var shopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Category);
-        var data = shopSettings.ImportService.GetCopy();
+
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var shopSettings));
+        FillShopSettingsFields(shopSettings);
+        
+        var data = ModelFactoryMock.Object.GetCopy(shopSettings.ImportService);
 
         var controller = CreateServiceSettingsController();
-        var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data));
+        var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data as ServiceSettingsModel));
         Assert.False(Assert.IsType<bool>(actionResult.Value));
     }
 }

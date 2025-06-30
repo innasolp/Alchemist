@@ -44,6 +44,12 @@ async function updateShops(divPartialShops, tabData = null, settingsPartialDiv =
             divPartialShops.load('/Home/ShopList', { 'shops': result },
                 function (response, status, xhr)
                 {
+                    if (status == "error") {
+                        console.error("/Home/ShopList error: " + xhr.status + ": " + xhr.statusText);
+                        console.trace(response);
+                        return;
+                    }
+
                     if (tabData == null) return;                     
 
                     if (tabData.shopGuid == '' && result.length > 0)

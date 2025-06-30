@@ -5,6 +5,7 @@ using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System;
 using System.Data;
 using System.Text.Json;
 using ShopSettingType = Alchemist.Import.Settings.Interfaces.ShopSettingType;
@@ -41,7 +42,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     {
         var homeController = CreateHomeController();
         var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
-        Assert.Equal(_shops.Count, Assert.IsType<List<ShopModel>>(actionResult.Value).Count);
+        Assert.Equal(_shops.Count, Assert.IsAssignableFrom<List<IShopModel>>(actionResult.Value).Count);
     }
 
     [Fact]
@@ -50,20 +51,20 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
 
         var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
-        Assert.IsType<List<ShopModel>>(actionResult.Value);       
+        Assert.IsAssignableFrom<List<IShopModel>>(actionResult.Value);       
     }
 
     [Fact]
     public async Task UpdateShopsActionResultIsLoadedShopModels()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shops = _importFacade.GetShops().Select(s=>s.Shop).ToList();
 
         var homeController = CreateHomeController();
         
         var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
-        var model = Assert.IsType<List<ShopModel>>(actionResult.Value);
+        var model = Assert.IsAssignableFrom<List<IShopModel>>(actionResult.Value);
         Assert.True(model.All(s => shops.Any(s1 => s1.Guid == s.Guid)));
     }
 
@@ -83,7 +84,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     {
         var homeController = CreateHomeController();
 
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var nextShopGuid = _importFacade.GetShops().Last().ShopGuid;
         var selectedTab = TabType.Shop;
@@ -99,7 +100,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     {
         var homeController = CreateHomeController(); 
 
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
         var nextTab = TabType.Products;
@@ -114,7 +115,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     [Fact]
     public async Task IndexActionNotFoundWhenNonexistingShopSetAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var homeController = CreateHomeController();        
 
@@ -129,7 +130,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     public async Task IndexActionBadRequestWhenNonexistentTabSetAsync()
     {
         var homeController = CreateHomeController();
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
         var nextTab = (int)Enum.GetValues<TabType>().Max() + 1;
@@ -140,7 +141,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     public async Task IndexActionBadRequestWhenEmptyShopGuidSetAsync()
     {
         var homeController = CreateHomeController();
-        await SetShopsAsync();
+        await LoadShopsAsync();
         Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(Guid.Empty, (int)TabType.Shop));
     }
 
@@ -155,7 +156,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     [Fact]
     public async Task IsTabChangedNotFoundWhenNonExistingShopGuid()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var homeController = CreateHomeController();
         var guid = Guid.NewGuid();
         string json = Guid.NewGuid().ToString();
@@ -166,7 +167,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     [Fact]
     public async Task IsTabChangedOkFalseWhenNonExistingTabSetting()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var homeController = CreateHomeController();
         var guid = _importFacade.GetShops().First().ShopGuid;
         string json = Guid.NewGuid().ToString();
@@ -178,13 +179,13 @@ public class HomeControllerTest : ControllerTest<HomeController>
     [Fact]
     public async Task IsTabChangedBadRequestWhenInvalidJson()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var homeController = CreateHomeController();
         var guid = _importFacade.GetShops().First().ShopGuid;
-        var shopSettingsType = ShopSettingType.Product;
+        //var shopSettingsType = ShopSettingType.Product;
         string json = Guid.NewGuid().ToString();
 
-        await SetShopSettingAsync(guid, shopSettingsType);
+        //await SetShopSettingAsync(guid, shopSettingsType);
 
         var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChanged(guid, (int)TabType.Shop, json));
         Assert.Equal(json, Assert.IsType<string>(result.Value));
@@ -193,16 +194,19 @@ public class HomeControllerTest : ControllerTest<HomeController>
     [Fact]
     public async Task IsTabChangedOkFalseWhenJsonEqualShopSettings()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var homeController = CreateHomeController();
 
         var guid = _importFacade.GetShops().First().ShopGuid;
-        var shopSettingsType = ShopSettingType.Product;       
-        await SetShopSettingAsync(guid, shopSettingsType);
+        var shopSettingsType = ShopSettingType.Product;      
+        
 
         Assert.True(_importFacade.TryGetShopSettings(guid, shopSettingsType, out var shopSettings));
-        var json = JsonSerializer.Serialize(shopSettings, shopSettings.GetType(),
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        FillShopSettingsFields(shopSettings);        
+
+        var json = JsonSerializer.Serialize(shopSettings, typeof(ProductShopSettingsModel),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true, 
+                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString });
 
         var result = Assert.IsType<OkObjectResult>(await homeController.IsTabChanged(guid, (int)TabType.Shop, json));
         Assert.False(Assert.IsType<bool>(result.Value));
@@ -238,46 +242,52 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
         var view = Assert.IsType< PartialViewResult>(homeController.TabsMenu(Guid.NewGuid(), (int)TabType.Shop));
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
-        Assert.Null(model.ShopProductsSettings);
-        Assert.Null(model.ShopCategoriesSettings);
+        Assert.True(model.ShopProductsSettings.IsEmpty());
+        Assert.True(model.ShopCategoriesSettings.IsEmpty());
     }
 
     [Fact]
     public async Task TabsMenuActionResultModelIsFirstShopSettingsWhenEmptyShopGuid()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopImport = _importFacade.GetShops().First();
-        await SetShopSettingAsync(shopImport.ShopGuid, ShopSettingType.Product);
+        
+        Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, ShopSettingType.Product, out var shopSettings));
+        FillShopSettingsFields(shopSettings);
 
         var homeController = CreateHomeController();
         var view = Assert.IsType<PartialViewResult>(homeController.TabsMenu(Guid.Empty, (int)TabType.Shop));
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
 
-        Assert.NotNull(model.ShopProductsSettings);
+        Assert.False(model.ShopProductsSettings.IsEmpty());
         Assert.Equal(shopImport.ShopSettingTabs.Guid, model.Guid);
     }
 
     [Fact]
     public async Task TabsMenuActionResultModelIsDefaultTabModelWhenNotExistingShopGuid()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var homeController = CreateHomeController();
         var view = Assert.IsType<PartialViewResult>(homeController.TabsMenu(Guid.NewGuid(), (int)TabType.Shop));
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
-        Assert.Null(model.ShopProductsSettings);
-        Assert.Null(model.ShopCategoriesSettings);
+        Assert.True(model.ShopProductsSettings.IsEmpty());
+        Assert.True(model.ShopCategoriesSettings.IsEmpty());
     }
 
     [Fact]
     public async Task TabsMenuActionResultModelIsTabModelShopGuid()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var productShopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Product);
-        var categoryShopSettings = await SetShopSettingAsync(shopGuid, ShopSettingType.Category);
 
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var productShopSettings));
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Category, out var categoryShopSettings));
+
+        FillShopSettingsFields(productShopSettings);
+        FillShopSettingsFields(categoryShopSettings);
+        
         var homeController = CreateHomeController();
         var view = Assert.IsType<PartialViewResult>(homeController.TabsMenu(shopGuid, (int)TabType.Shop));
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
@@ -314,14 +324,14 @@ public class HomeControllerTest : ControllerTest<HomeController>
     [Fact]
     public async Task LoadTabActionResultModelIsDefaultTabModelWhenNotExistingShopGuid()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var homeController = CreateHomeController();
         var tabType = TabType.Shop;
         var tabView = TabHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType).Value;
         var view = Assert.IsType<PartialViewResult>(await homeController.LoadTab(Guid.NewGuid(), (int)tabType, tabView));
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
-        Assert.Null(model.ShopProductsSettings);
-        Assert.Null(model.ShopCategoriesSettings);
+        Assert.True(model.ShopProductsSettings.IsEmpty());
+        Assert.True(model.ShopCategoriesSettings.IsEmpty());
     }
 
     [Fact]
@@ -330,7 +340,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var exception = new InvalidOperationException("test error");
         _settingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>())).Throws(exception);
 
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var homeController = CreateHomeController();
 
@@ -345,11 +355,13 @@ public class HomeControllerTest : ControllerTest<HomeController>
     [Fact]
     public async Task LoadTabActionResultModelIsShopProductSettingsWhenShopGuidAndShopSettingsTabProductSelected()
     {        
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopImport = _importFacade.GetShops().Last();
-        await SetShopSettingAsync(shopImport.ShopGuid, ShopSettingType.Product);
-        
+        Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, ShopSettingType.Product, out var shopSettings));
+        FillShopSettingsFields(shopSettings);
+
+
         var homeController = CreateHomeController();
 
         var tabType = TabType.Shop;

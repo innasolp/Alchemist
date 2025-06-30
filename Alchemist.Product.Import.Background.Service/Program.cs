@@ -1,27 +1,27 @@
 using Alchemist.Common;
+using Alchemist.DataService.Interfaces;
+using Alchemist.DependencyInjection.Common;
+using Alchemist.Import.Categories.Data;
+using Alchemist.Import.Factory.Interfaces;
+using Alchemist.Import.Logging;
+using Alchemist.Import.Products.Data;
+using Alchemist.Import.Settings.DataAdapter;
+using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.JsonAdapter;
+using Alchemist.Log.Extensions;
 using Alchemist.Product.Import.Background;
+using Alchemist.Product.Import.Background.Settings;
 using Alchemist.Product.RestAPIClient;
+using Alchemist.Settings.RestAPIClient;
+using BrowserDataLoader.Interfaces;
+using DependencyInjection.AssemblyExtensions;
+using Grpc.Client.RequestInterceptor;
 using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
-using Serilog.Loggers;
-using Grpc.Client.RequestInterceptor;
-using Alchemist.DataService.Interfaces;
-using Alchemist.Settings.RestAPIClient;
-using Alchemist.DependencyInjection.Common;
-using WebLoader.Interfaces;
-using DependencyInjection.AssemblyExtensions;
-using Alchemist.Import.Settings.JsonAdapter;
-using Alchemist.Import.Products.Data;
-using Alchemist.Import.Categories.Data;
-using Alchemist.Import.Logging;
-using Alchemist.Import.Settings.Model;
-using Alchemist.Import.Settings.Interfaces;
-using BrowserDataLoader.Interfaces;
-using Alchemist.Import.Factory.Interfaces;
 using Serilog.Configuration.Extensions;
-using Alchemist.Log.Extensions;
-using Alchemist.Import.Settings.DataAdapter;
+using Serilog.Loggers;
+using WebLoader.Interfaces;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
@@ -29,7 +29,7 @@ var logPath = $"{appPath}/Logs";
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
+builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
 builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
 
 builder.Services.AddServiceImplementationsFromPath(typeof(IBrowserDataLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("BrowserDataLoaderPath").Value}");

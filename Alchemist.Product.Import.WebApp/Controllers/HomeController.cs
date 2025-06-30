@@ -1,5 +1,7 @@
 using Alchemist.Common;
+using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
+using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
@@ -8,6 +10,7 @@ using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
+using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
@@ -21,9 +24,12 @@ public class HomeController : Controller
 
     private readonly ISettingsDataAdapter _settingsDataAdapter;
 
-    public HomeController(ILogger<HomeController> logger, ISettingsDataAdapter settingsDataAdapter, IImportFacade importFacade, IMessageReceiver shopEventReceiver)
+    private readonly IShopDataService _shopDataService;
+
+    public HomeController(ILogger<HomeController> logger, IShopDataService shopDataService, ISettingsDataAdapter settingsDataAdapter, IImportFacade importFacade, IMessageReceiver shopEventReceiver)
     {
         _logger = logger;
+        _shopDataService = shopDataService;
         _importFacade = importFacade;
         _shopEventReceiver = shopEventReceiver;
         _settingsDataAdapter = settingsDataAdapter;
@@ -67,15 +73,15 @@ public class HomeController : Controller
         return (TabType)tab;
     }
 
-    private async Task<IndexViewModel?> GetDefaultIndexViewModelAsync()
+    private IndexViewModel? GetDefaultIndexViewModel()
     {
         var shopGuid = GetCurrentShopGuid();
         var tab = GetCurrentTabOrDefault();
 
-        return await GetIndexViewModelAsync(shopGuid, tab);
+        return GetIndexViewModel(shopGuid, tab);
     }
 
-    private async Task<IndexViewModel?> GetIndexViewModelAsync(Guid? shopGuid, TabType tab)
+    private IndexViewModel GetIndexViewModel(Guid? shopGuid, TabType tab)
     {
         var shopImports = _importFacade.GetShops();
 
@@ -86,12 +92,8 @@ public class HomeController : Controller
                 SelectedTab = tab
             };
 
-        ShopImportModel shopImport;
-
-        if (shopGuid == null)
+        if (shopGuid == null || !_importFacade.TryGetShopImport((Guid)shopGuid, out var shopImport))
             shopImport = shopImports.First();
-        else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
-            return await Task.FromResult(default(IndexViewModel));
 
         var shops = shopImports.Select(s => s.Shop).ToList();
 
@@ -99,8 +101,8 @@ public class HomeController : Controller
         {
             SelectedShopImport = shopImport,
             SelectedTab = tab,
-            SelectedTabModel = shopImport.GetSettings(tab) ?? ModelHelper.CreateDefaultTabModel(tab),
-            Shops = shops
+            SelectedTabModel = shopImport.GetTab(tab),
+            Shops = [.. shops.OfType<ShopModel>()]
         };
     }
 
@@ -112,11 +114,18 @@ public class HomeController : Controller
         var tab = GetCurrentTabOrDefault();
 
         var viewModel = shopGuid != null
-            ? await GetIndexViewModelAsync((Guid)shopGuid, tab)
-            : await GetDefaultIndexViewModelAsync();
+            ? GetIndexViewModel((Guid)shopGuid, tab)
+            : GetDefaultIndexViewModel();
 
-        if (viewModel.SelectedShopImport != null)
-            SetCurrentShopGuid(viewModel.SelectedShopImport.ShopGuid);
+        if (viewModel.SelectedShopImport != null)        
+            SetCurrentShopGuid(viewModel.SelectedShopImport.ShopGuid);          
+        else        
+            viewModel.SelectedShopImport = _importFacade.CreateDefaultShopImport();
+
+        SetCurrentShopGuid(viewModel.SelectedShopImport?.ShopGuid != Guid.Empty 
+             ? viewModel.SelectedShopImport?.ShopGuid : null);
+
+        viewModel.SelectedTabModel = viewModel.SelectedShopImport.GetTab(viewModel.SelectedTab);
 
         return View("~/Views/Home/Index.cshtml", viewModel);
     }
@@ -150,7 +159,7 @@ public class HomeController : Controller
             if (shopGuid == Guid.Empty || tab <0 || tab > (int)Enum.GetValues<TabType>().Max())
                 return BadRequest();
 
-            var viewModel = await GetIndexViewModelAsync(shopGuid, (TabType)tab);
+            var viewModel = GetIndexViewModel(shopGuid, (TabType)tab);
 
             SetCurrentShopGuid(shopGuid);
             SetCurrentTab((TabType)tab);
@@ -175,13 +184,13 @@ public class HomeController : Controller
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
             return NotFound(shopGuid);
 
-        var settings = shopImport.GetSettings((TabType)tab, true);
+        var settings = shopImport.GetLastSelectedSettings((TabType)tab);
         if (settings == null) return Ok(false);
 
-        SettingsModelBase modelFromJson;
+        IShopServicesSettingsModel modelFromJson;
         try
         {
-            modelFromJson = ModelHelper.DeserializeWithNumberHandling(json, settings.GetType());
+            modelFromJson = ModelHelper.DeserializeWithNumberHandling(json, settings.GetType()) as IShopServicesSettingsModel;
         }
         catch(JsonException)
         {
@@ -195,9 +204,11 @@ public class HomeController : Controller
 
         var originalSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
         if (originalSettings == null)
-            return Ok(!modelFromJson.Equals(ModelHelper.CreateShopSettings(shopGuid, settings.ShopId,(settings as ShopSettingsModel).ShopSettingType)));
+            //todo
+            return Ok(true);
 
-        return Ok(!modelFromJson.Equals(originalSettings));
+        //todo
+        return Ok(!modelFromJson.FieldsEquals(originalSettings, false));
     }
 
     [HttpPost]
@@ -207,8 +218,9 @@ public class HomeController : Controller
     {
         try
         {
-            var shops = await _importFacade.LoadShops();
-            return await Task.FromResult(new OkObjectResult(shops.Select(si => si.Shop).ToList()));
+            var shops = await _shopDataService.GetShops();
+            var shopModels = await _importFacade.LoadShops(shops);
+            return await Task.FromResult(new OkObjectResult(shopModels.Select(si => si.Shop).ToList()));
         }
         catch (Exception e)
         {
@@ -229,17 +241,14 @@ public class HomeController : Controller
     {
         var shopImports = _importFacade.GetShops();
 
-        if (shopImports.Count == 0)
-            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ModelHelper.CreateDefaultTabModel((TabType)tab));
-
         ShopImportModel shopImport;
-
+        
         if (shopGuid == Guid.Empty)
             shopImport = shopImports.First();
-        else if (!_importFacade.TryGetShopImport(shopGuid, out shopImport))
-            return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", ModelHelper.CreateDefaultTabModel((TabType)tab));
+        else if (shopImports.Count == 0 || !_importFacade.TryGetShopImport(shopGuid, out shopImport))        
+            shopImport = _importFacade.CreateDefaultShopImport();        
 
-        return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", shopImport.GetSettings((TabType)tab) ?? shopImport.CreateSettings((TabType)tab));
+        return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", shopImport.GetTab((TabType)tab));
     }
 
     [HttpPost]
@@ -256,30 +265,27 @@ public class HomeController : Controller
 
             if (shopGuid == null)
                 shopImport = shopImports.First();
-            else if (!_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))
-                return PartialView($"~/Views/Home/{tabView}.cshtml", ModelHelper.CreateDefaultTabModel((TabType)tab));
+            else if (shopImports.Count == 0 || !_importFacade.TryGetShopImport((Guid)shopGuid, out shopImport))            
+                shopImport = _importFacade.CreateDefaultShopImport();
 
+            var tabModel = shopImport.GetTab((TabType)tab);
 
-            var currentSettings = shopImport.GetSettings((TabType)tab);
-            if (currentSettings == null)
+            if((TabType)tab == TabType.Shop)
             {
-                currentSettings = shopImport.CreateSettings((TabType)tab);
-                shopImport.SetSettings((TabType)tab, currentSettings);
-            }
+                IShopServicesSettingsModel selectedSettings = shopImport.ShopSettingTabs.SelectedSettingsTab == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
+                    ? shopImport.ShopSettingTabs.ShopProductsSettings
+                    : shopImport.ShopSettingTabs.ShopCategoriesSettings;
 
-            if ((TabType)tab == TabType.Shop &&
-                shopImport.GetSettings((TabType)tab, true) == null)
-            {
-                if (await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab) is ShopSettingsModel settings)
-                    shopImport.SetSettings((TabType)tab, settings);
-                else
+                if(selectedSettings.IsEmpty())
                 {
-                    var currentShopSettings = shopImport.CreateShopSettings(shopImport.ShopSettingTabs.SelectedSettingsTab);
-                    shopImport.SetSettings((TabType)tab, currentShopSettings);
+                    var shopImportSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab);
+                    
+                    if(shopImportSettings != null)
+                        selectedSettings.Update(shopImportSettings);
                 }
             }
 
-            return PartialView($"~/Views/Home/{tabView}.cshtml", currentSettings);
+            return PartialView($"~/Views/Home/{tabView}.cshtml", tabModel);
         }
         catch (Exception e)
         {

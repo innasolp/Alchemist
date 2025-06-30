@@ -26,7 +26,7 @@
     <script src="~/js/tabs.js"></script>
 
     <script>
-        updateShops($('#shopListPartialDiv'), {'shopGuid': '@(shopGuid?.ToString() ?? "")', 'tab': @((int?)Model.SelectedTabModel?.Tab ?? 0), 'tabView' : '@selectedTabViewName.Value'  }, $('#settingsPartialDiv') );
+        updateShops($('#shopListPartialDiv'), {'shopGuid': '@(shopGuid?.ToString() ?? "")', 'tab': @((int?)Model.SelectedTabModel.Tab), 'tabView' : '@selectedTabViewName.Value'  }, $('#settingsPartialDiv') );
     </script>
 }
 
@@ -36,10 +36,10 @@
     </div>
     <div style="width:100%">
         <div class="menu" id="menuDiv">
-           @await Html.PartialAsync($"~/Views/Home/_TabsMenuPartial.cshtml", Model?.SelectedTabModel ?? new ShopSettingTabsModel())
+           @await Html.PartialAsync($"~/Views/Home/_TabsMenuPartial.cshtml", Model.SelectedTabModel)
         </div>
         <div id="settingsPartialDiv">
-            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel ?? ModelHelper.CreateDefaultTabModel(tabType))
+            @await Html.PartialAsync($"~/Views/Home/{selectedTabViewName.Value}.cshtml", Model.SelectedTabModel)
         </div>
     </div>
 </div>

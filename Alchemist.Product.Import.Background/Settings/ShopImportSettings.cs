@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Import.Settings.Model;
+namespace Alchemist.Product.Import.Background.Settings;
 
 public abstract class ShopImportSettings : IShopImportSettings
 {

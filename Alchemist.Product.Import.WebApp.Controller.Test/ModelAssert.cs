@@ -1,23 +1,65 @@
 ﻿using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public static class ModelAssert
 {
-    internal static void EqualFields(ShopSettingsModel expected, ShopSettingsModel result)
+    internal static void EqualFields(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
     {
+        Assert.Equal(expected.ShopSettingType, result.ShopSettingType);
         Assert.Equal(expected.Name, result.Name);
         Assert.Equal(expected.Perfomance, result.Perfomance);
+
+        if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product)
+            EqualProductShopSettingsFields(expected as IProductShopSettingsModel, result as IProductShopSettingsModel);
+        else if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Category)
+            EqualCategoryShopSettingsFields(expected as ICategoryShopSettingsModel, result as ICategoryShopSettingsModel);
     }
 
-    internal static void NotEqualFields(ShopSettingsModel expected, ShopSettingsModel result)
+    private static void EqualProductShopSettingsFields(IProductShopSettingsModel expected, IProductShopSettingsModel result)
     {
-        Assert.NotEqual(expected.Name, result.Name);
-        Assert.NotEqual(expected.Perfomance, result.Perfomance);
+        Assert.Equal(expected.ProductUrlFormat, result.ProductUrlFormat);
+        Assert.Equal(expected.CategoryUrlFormat, result.CategoryUrlFormat);
+        Assert.Equal(expected.PageProductCount, result.PageProductCount);
+
+        Assert.Equal(expected.RootCategories.Count, result.RootCategories.Count);   
+        Assert.True(expected.RootCategories.OfType<ICategoryUrlModel>().All(c=>result.RootCategories.OfType<ICategoryUrlModel>().Any(r=>r.Item == c.Item && r.Url == c.Url)));
     }
 
-    internal static void EqualServices(ShopSettingsModel expected, ShopSettingsModel result)
+    private static void EqualCategoryShopSettingsFields(ICategoryShopSettingsModel expected, ICategoryShopSettingsModel result)
+    {
+        Assert.Equal(expected.CategorySourceUrl, result.CategorySourceUrl);
+    }
+
+
+    internal static void NotEqualFields(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
+    {
+        Assert.NotEqual(expected.Name, result.Name);        
+
+        if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product)
+            NotEqualProductShopSettingsFields(expected as IProductShopSettingsModel, result as IProductShopSettingsModel);
+        else if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Category)
+            NotEqualCategoryShopSettingsFields(expected as ICategoryShopSettingsModel, result as ICategoryShopSettingsModel);
+    }
+
+    private static void NotEqualProductShopSettingsFields(IProductShopSettingsModel expected, IProductShopSettingsModel result)
+    {
+        Assert.NotEqual(expected.ProductUrlFormat, result.ProductUrlFormat);
+        Assert.NotEqual(expected.CategoryUrlFormat, result.CategoryUrlFormat);
+        Assert.NotEqual(expected.PageProductCount, result.PageProductCount);
+
+        Assert.False(expected.RootCategories.Count == result.RootCategories.Count &&
+        expected.RootCategories.OfType<ICategoryUrlModel>().All(c => result.RootCategories.OfType<ICategoryUrlModel>().Any(r => r.Item == c.Item && r.Url == c.Url)));
+    }
+
+    private static void NotEqualCategoryShopSettingsFields(ICategoryShopSettingsModel expected, ICategoryShopSettingsModel result)
+    {
+        Assert.NotEqual(expected.CategorySourceUrl, result.CategorySourceUrl);
+    }
+
+    internal static void EqualServices(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
     {
         Assert.True((result.ImportService != null && expected.ImportService != null) ||
             (result.ImportService == null && expected.ImportService == null));
@@ -36,7 +78,7 @@ public static class ModelAssert
         EqualFields(expected.WebLoader, result.WebLoader);
     }
 
-    internal static void NotEqualServices(ShopSettingsModel expected, ShopSettingsModel result)
+    internal static void NotEqualServices(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
     {
         if (expected.ImportService != null)
             NotEqualFields(expected.ImportService, result.ImportService);
@@ -51,16 +93,16 @@ public static class ModelAssert
             NotEqualFields(expected.WebLoader, result.WebLoader);
     }
 
-    internal static void EqualFields(ServiceSettingsModel expected, ServiceSettingsModel result)
+    internal static void EqualFields(IServiceSettingsModel expected, IServiceSettingsModel result)
     {
         Assert.Equal(expected.ServiceTypeName, result.ServiceTypeName);
         Assert.Equal(expected.ServiceProviderPath, result.ServiceProviderPath);
         Assert.Equal(expected.AssemblyPath, result.AssemblyPath);
         Assert.Equal(expected.ImplementationTypeName, result.ImplementationTypeName);
-        Assert.Equal(expected.Value?.ToString(), result.Value?.ToString());
+        Assert.Equal(expected.JsonValue?.ToString(), result.JsonValue?.ToString());
     }
 
-    internal static void NotEqualFields(ServiceSettingsModel expected, ServiceSettingsModel result)
+    internal static void NotEqualFields(IServiceSettingsModel expected, IServiceSettingsModel result)
     {
         if (!string.IsNullOrEmpty(expected.ServiceTypeName) && !string.IsNullOrEmpty(result.ServiceTypeName))
             Assert.NotEqual(expected.ServiceTypeName, result.ServiceTypeName);

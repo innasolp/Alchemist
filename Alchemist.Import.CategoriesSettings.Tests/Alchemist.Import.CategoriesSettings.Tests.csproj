@@ -28,8 +28,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Html.Factory\Alchemist.Import.Html.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Html\Alchemist.Import.Html.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Test.Model\Alchemist.Import.Settings.Test.Model.csproj" />
   </ItemGroup>
  
 

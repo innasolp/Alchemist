@@ -1,17 +1,18 @@
-﻿using Alchemist.Import.Settings.Model;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using Alchemist.Import.Settings.Extensions;
 using Microsoft.Playwright.Xunit;
 using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.WebApp.Models;
 
 namespace Alchemist.Product.Import.WebApp.Test.Infrastructure;
 
 internal static class PageTestExtensions
 {
-    public static async Task<ImportServiceSettings> FillServiceSettingsInputsAsync(this ILocator serviceForm, List<Interfaces.IShopSettings> shopSettings,  string serviceName, ShopImportSettings shopImportSettings)
+    public static async Task<ServiceSettingsModel> FillServiceSettingsInputsAsync(this ILocator serviceForm, List<Interfaces.IShopSettings> shopSettings,  string serviceName, IShopImportSettings shopImportSettings)
     {
-        var serviceSettings = shopSettings.FirstOrDefault(s => s.Name == serviceName && s.ParentSettingsId == shopImportSettings.Id)?.ToImportServiceSettings<ImportServiceSettings>()
-            ?? new ImportServiceSettings
+        var serviceSettings = shopSettings.FirstOrDefault(s => s.Name == serviceName && s.ParentSettingsId == shopImportSettings.Id)?.ToImportServiceSettings<ServiceSettingsModel>()
+            ?? new ServiceSettingsModel
             {
                 Name = serviceName
             };
@@ -81,7 +82,7 @@ internal static class PageTestExtensions
         return modalButton;
     }
 
-    public static async Task ExpectCheckServiceSettingsAsync(this PageTest pageTest, IPage page, ImportServiceSettings serviceSettings)
+    public static async Task ExpectCheckServiceSettingsAsync(this PageTest pageTest, IPage page, ServiceSettingsModel serviceSettings)
     {
         var serviceForm = await pageTest.ExpectShowServiceModalFormAsync(page, async (page) => await pageTest.ExpectShowServiceSettingsButtonAsync(page, serviceSettings.Name));
 
@@ -94,7 +95,7 @@ internal static class PageTestExtensions
         await pageTest.Expect(serviceForm).Not.ToBeVisibleAsync();
     }
 
-    public static async Task<ImportServiceSettings> ExpectSetServiceSettingsAsync(this PageTest pageTest, IPage page, List<IShopSettings> shopSettings,  string serviceName, ShopImportSettings shopImportSettings)
+    public static async Task<ServiceSettingsModel> ExpectSetServiceSettingsAsync(this PageTest pageTest, IPage page, List<IShopSettings> shopSettings,  string serviceName, IShopImportSettings shopImportSettings)
     {
         var serviceForm = await pageTest.ExpectShowServiceModalFormAsync(page, async (page) => await pageTest.ExpectShowServiceSettingsButtonAsync(page, serviceName));
 

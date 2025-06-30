@@ -1,8 +1,8 @@
-using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Import.Settings.Interfaces;
 using System.Text.Json;
 using Xunit.Abstractions;
+using Alchemist.Product.Import.WebApp.Models;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -33,7 +33,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         var shop = _shops.First();
         var shopSetting = _shopSettings.First(s => s.ShopId == shop.Id && s.Type == Interfaces.ShopSettingType.Product);
-        var productShopSettings = JsonSerializer.Deserialize<ProductShopImportSettings>(shopSetting.JsonValue);
+        var productShopSettings = JsonSerializer.Deserialize<ProductShopSettingsModel>(shopSetting.JsonValue);
 
         await Expect(Page.Locator("#menuDiv").Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[TabType.Shop]))
            .ToHaveCountAsync(1);
@@ -61,7 +61,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectShop()
     {
         var startShopSettings =  await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopSettings);
 
         var nextShop = _shops.FirstOrDefault(s => s.Id != productShopSettings.ShopId);
 
@@ -90,7 +90,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task ShowConfirmationWindowWhenSelectOtherTabAfterDataEditing()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
         await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
@@ -109,7 +109,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task ShowConfirmationWindowWhenSelectOtherShopAfterDataEditing()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
         await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
@@ -130,7 +130,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectedItemNotChangedAfterConfirmationCancel()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
         await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
@@ -155,7 +155,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectedItemResetAndChangedAfterConfirmationYes()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         var newName = Guid.NewGuid().ToString();
         var newUrl = Guid.NewGuid().ToString();

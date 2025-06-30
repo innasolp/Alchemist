@@ -1,5 +1,8 @@
 ﻿using Alchemist.DataService.Interfaces;
+using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
+using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
@@ -13,7 +16,7 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
     public IActionResult New()
     {
-        return PartialView("~/Views/Home/Shop.cshtml", new ShopModel());
+        return PartialView("~/Views/Home/Shop.cshtml", new ShopModel(0));
     }
 
     
@@ -36,18 +39,26 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Save(ShopModel shop)
+    public async Task<IActionResult> Save(ShopModel shopModel)
     {
-        if (shop == null)
-            return BadRequest(shop);
+        if (shopModel == null)
+            return BadRequest(shopModel);
 
-        ShopImportModel shopImport = null;
-        if (shop.Id != 0 && !_importFacade.TryGetShopImport(shop.Guid, out shopImport))
-            return NotFound(shop);
+        ShopImportModel? shopImport = null;
+        if (shopModel.Id != 0 && !_importFacade.TryGetShopImport(shopModel.Guid, out shopImport))
+            return NotFound(shopModel);
 
         try
         {
-            var savedShop = (shop.Id == 0)
+            var shop = new Shop
+            { 
+                Id =  shopModel.Id,
+                Name = shopModel.Name,
+                Caption = shopModel.Caption,
+                Url = shopModel.Url
+            };
+
+            var savedShop = (shopModel.Id == 0)
               ? await _shopDataService.CreateShop(shop) :
                 await _shopDataService.UpdateShop(shop);
 
@@ -55,8 +66,7 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
                 shopImport = _importFacade.AddNewShop(savedShop);
             else
             {
-                shopImport.Shop.Update(savedShop);
-                shopImport.Shop.Id = savedShop.Id;
+                shopImport.Shop.SetFrom(savedShop);                
             }
 
             return Ok(shopImport.Shop);

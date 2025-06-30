@@ -1,6 +1,6 @@
 ﻿@using System.Text.Json
 @using Alchemist.Product.Import.Model
-@model Alchemist.Product.Import.Model.ProductShopSettingsModel
+@model ProductShopSettingsModel
 
 <div class="form-group">
     <label asp-for="ProductUrlFormat" class="control-label"></label>
@@ -39,7 +39,7 @@
         <li class="table-ul">
             <div>
                 <a id="addRootCategory"
-                   onclick="showRootCategory(@JsonSerializer.Serialize(new CategoryUrlModel(){ShopSettingsGuid = Model.Guid, Guid = Guid.Empty}))">Add category</a>
+                   onclick="showRootCategory('@Model.Guid')">Add category</a>
             </div>         
         </li>
         <li class="table-ul">

@@ -6,8 +6,10 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Interfaces;
 using Message.Interfaces;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -21,7 +23,9 @@ public abstract class ControllerTest<T>
     protected readonly Mock<IShopDataService> _shopDataServiceMock = new();
 
     protected readonly Mock<IMessageReceiver> _messageReceiverMock = new();
-    
+
+    protected readonly Mock<IModelFactory> ModelFactoryMock = new();
+
     protected readonly IImportFacade _importFacade;
 
     protected readonly Mock<ISettingsDataAdapter> _settingsDataAdapterMock = new();
@@ -35,9 +39,12 @@ public abstract class ControllerTest<T>
     protected readonly Mock<ILogger<T>> _loggerMock = new();
 
     protected readonly Mock<ILogger<HomeController>> _loggerHomeControllerMock = new();
+
+    protected readonly List<Mock<IShopModel>> ShopModelMocks = [];
+
     protected ControllerTest()
     {
-        _importFacade = new ImportFacade(_shopDataServiceMock.Object);
+        _importFacade = new ImportFacade(ModelFactoryMock.Object);
         
         _shopDataServiceMock.Setup(s => s.GetShops()).Returns(async () => { return _shops; });
 
@@ -65,19 +72,48 @@ public abstract class ControllerTest<T>
 
         _loggerMock.Setup(l => l.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>())).
             Callback(() => { });
-    }    
+
+        ModelFactoryMock.Setup(m => m.CreateShopModel(It.IsAny<int>())).Returns((int shopId) => CreateShopModel(shopId));
+
+        ModelFactoryMock.Setup(m => m.CreateShopSettingsTabsModel(It.IsAny<int>(), It.IsAny<Guid>())).
+            Returns(CreateShopSettingsTabsModel);
+
+        ModelFactoryMock.Setup(m => m.CreateServiceSettingsModel(It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<Guid>(),
+            It.IsAny<Guid>(),
+            It.IsAny<string>())).Returns(CreateServiceSettings);
+    }
+
+    private IShopSettingTabsModel CreateShopSettingsTabsModel(int shopId, Guid shopGuid)
+    {
+        return new ShopSettingTabsModel(shopId, shopGuid);
+    }
+
+    private IServiceSettingsModel CreateServiceSettings(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid, string serviceName)
+    {
+        return new ServiceSettingsModel(shopId, id, parentId, shopSettingsGuid, shopGuid, serviceName);
+    }
+
+    private IShopModel CreateShopModel(int shopId)
+    {
+        return new ShopModel(shopId);
+    }
 
     protected HomeController CreateHomeController()
     {
-        return new HomeController(_loggerHomeControllerMock.Object, 
+        return new HomeController(_loggerHomeControllerMock.Object,
+            _shopDataServiceMock.Object,
             _settingsDataAdapterMock.Object,
             _importFacade,
             _messageReceiverMock.Object);
     }
 
-    protected async Task SetShopsAsync()
+    protected async Task<List<ShopImportModel>> LoadShopsAsync()
     {
-        await _importFacade.LoadShops();
+        var shops = await _shopDataServiceMock.Object.GetShops();
+        return await _importFacade.LoadShops(shops);
     } 
     
 
@@ -85,51 +121,56 @@ public abstract class ControllerTest<T>
     protected async Task<IShopImportSettings> GetShopSettingsModelAsync(int shopId, ShopSettingType shopSettingType)
     {
         if (shopSettingType == ShopSettingType.Service)
-            throw new InvalidOperationException();       
+            throw new InvalidOperationException();
+
+        var shop = _importFacade.GetShops().FirstOrDefault(s => s.Shop.Id == shopId);// ?? throw new InvalidOperationException("shops are not set");
+        if (shop == null)
+            return null;
         
-        var shop = _importFacade.GetShops().FirstOrDefault(s=>s.Shop.Id == shopId) ?? throw new InvalidOperationException("shops are not set");
+        return !_importFacade.TryGetShopSettings(shop.ShopGuid, shopSettingType, out var shopSettings) ? null : await Task.FromResult(shopSettings);
+    }
 
-        if (!_importFacade.TryGetShopSettings(shop.ShopGuid, shopSettingType, out var shopSettings))
-            shopSettings = await SetShopSettingAsync(shop.ShopGuid, shopSettingType);        
-
-        ((ISettings)shopSettings).ShopId = shopId;
+    public static void SetServiceTypeName(IServiceSettingsModel service, ShopSettingType shopSettingType)
+    {
+        service.ServiceTypeName = $"{shopSettingType}{service.Name}Type{service.ParentSettingsId}";
+    }
     
-        return await Task.FromResult(shopSettings);
-    }
 
-    private static void SetServiceSetting(ShopSettingsModel shopSettings, string serviceName, int id)
+    protected void FillShopSettingsFields(IShopServicesSettingsModel shopSettings)
     {
-        var service = new ServiceSettingsModel { Name = serviceName, Id = id };
-        ((ISettings)service).ParentSettingsId = shopSettings.Id;
-        ((ISettings)service).ShopId = ((ISettings)shopSettings).ShopId;
-        service.ServiceTypeName = $"{shopSettings.ShopSettingType}{serviceName}Type{shopSettings.Id}";
-        shopSettings.SetServiceSettings(service, serviceName);
-    }
-
-    protected static void SetShopSettings(ShopImportModel shopImport, ShopSettingType shopSettingType)
-    {
-        var shopSettings = shopImport.CreateShopSettings(shopSettingType);
-
         shopSettings.Name = Guid.NewGuid().ToString();
 
-        shopSettings.Id = shopImport.Shop.Id;
+        if (shopSettings is IProductShopSettingsModel productShopSettings)
+            SetProductShopSettingsFields(productShopSettings);
+        else if (shopSettings is ICategoryShopSettingsModel categoryShopSettings)
+            SetCategoryShopSettingsFields(categoryShopSettings);
 
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.ImportService), shopSettings.Id + 1);
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.BrowserDataLoader), shopSettings.Id + 2);
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.RequestHeaders), shopSettings.Id + 3);
-        SetServiceSetting(shopSettings, nameof(ShopSettingsModel.WebLoader), shopSettings.Id + 4);
+        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.ImportService), out var importService))
+            importService.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.ImportService)}Type{shopSettings.Id}_{Guid.NewGuid()}";
 
-        shopImport.SetSettings(TabType.Shop, shopSettings);
+        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.BrowserDataLoader), out var browserDataLoader))
+            browserDataLoader.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.BrowserDataLoader)}Type{shopSettings.Id}_{Guid.NewGuid()}";
+
+        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.RequestHeaders), out var requestHeaders))
+            requestHeaders.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.RequestHeaders)}Type{shopSettings.Id}_{Guid.NewGuid()}";
+
+        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.WebLoader), out var webLoader))
+            webLoader.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.WebLoader)}Type{shopSettings.Id}_{Guid.NewGuid()}";
     }
 
-    protected async Task<ShopSettingsModel> SetShopSettingAsync(Guid shopGuid, ShopSettingType shopSettingType)
-    {    
-        Assert.True(_importFacade.TryGetShopImport(shopGuid, out var shopImport));
+    private void SetProductShopSettingsFields(IProductShopSettingsModel shopSettingsModel)
+    {
+        shopSettingsModel.ProductUrlFormat = Guid.NewGuid().ToString();
+        shopSettingsModel.CategoryUrlFormat = Guid.NewGuid().ToString();
+        shopSettingsModel.PageProductCount = new Random().Next(30);
 
-        SetShopSettings(shopImport, shopSettingType);
+        shopSettingsModel.RootCategories.Clear();
+        shopSettingsModel.RootCategories.Add(new CategoryUrlModel(shopSettingsModel.Guid) { Item = new Random().Next(10000), Url = Guid.NewGuid().ToString() });
+        shopSettingsModel.RootCategories.Add(new CategoryUrlModel(shopSettingsModel.Guid) { Item = new Random().Next(10000), Url = Guid.NewGuid().ToString() });
+    }
 
-        return shopSettingType == ShopSettingType.Product ? shopImport.ShopSettingTabs.ShopProductsSettings
-            : shopSettingType == ShopSettingType.Category ? shopImport.ShopSettingTabs.ShopCategoriesSettings 
-            : throw new InvalidOperationException(ShopSettingType.Service.ToString());
+    private void SetCategoryShopSettingsFields(ICategoryShopSettingsModel shopSettingsModel)
+    {
+        shopSettingsModel.CategorySourceUrl = Guid.NewGuid().ToString();
     }
 }

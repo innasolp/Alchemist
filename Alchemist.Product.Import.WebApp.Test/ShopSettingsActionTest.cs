@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Import.Settings.Model;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using Alchemist.Product.Interfaces;
 using Microsoft.Playwright;
@@ -31,9 +31,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
             var savingSettings = existingSettings ?? shopSettings;
 
-            ShopImportSettings shopSettingsModel = savingSettings.Type == Interfaces.ShopSettingType.Product
-                    ? await savingSettings.GetShopImportSettings<ProductShopImportSettings, ImportServiceSettings>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()))
-                    : await savingSettings.GetShopImportSettings<CategoryShopImportSettings, ImportServiceSettings>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()));
+            IShopImportSettings shopSettingsModel = savingSettings.Type == Interfaces.ShopSettingType.Product
+                    ? await savingSettings.GetShopImportSettings<ProductShopSettingsModel, ServiceSettingsModel>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()))
+                    : await savingSettings.GetShopImportSettings<CategoryShopSettingsModel, ServiceSettingsModel>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()));
 
 
             if (shopSettingsModel.Id == 0)
@@ -88,7 +88,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
     {
         var page = await Context.NewPageAsync();
 
-        var shopImportSettings = await ExpectLoadIndexPageAsync(page) as ProductShopImportSettings;
+        var shopImportSettings = await ExpectLoadIndexPageAsync(page) as ProductShopSettingsModel;
 
         var importService = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.ImportService), shopImportSettings);
         var webLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.WebLoader), shopImportSettings);
@@ -96,15 +96,18 @@ public class ShopSettingsActionTest : ImportWebAppTest
         
         var settingsForm = page.Locator("#settingsForm");
 
-        var shopProductSettings = new ProductShopImportSettings()
+        var shopProductSettings = new ProductShopSettingsModel()
         {
-            ImportService = importService,
-            BrowserDataLoader = browserDataLoader,
-            WebLoader = webLoader,
+            //ImportService = importService,
+            //BrowserDataLoader = browserDataLoader,
+            //WebLoader = webLoader,
             Name = Guid.NewGuid().ToString(),
             ProductUrlFormat = Guid.NewGuid().ToString(),
             CategoryUrlFormat = Guid.NewGuid().ToString()
         };
+        shopProductSettings.UpdateServiceSettings<ServiceSettingsModel>(importService);
+        shopProductSettings.UpdateServiceSettings<ServiceSettingsModel>(webLoader);
+        shopProductSettings.UpdateServiceSettings<ServiceSettingsModel>(browserDataLoader);
 
         await settingsForm.Locator("#ShopSettingsName").FillAsync(shopProductSettings.Name);
         await settingsForm.Locator("#ProductUrlFormat").FillAsync(shopProductSettings.ProductUrlFormat);

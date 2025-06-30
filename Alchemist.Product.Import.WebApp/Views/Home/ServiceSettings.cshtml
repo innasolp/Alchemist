@@ -1,9 +1,9 @@
-﻿@using Alchemist.Product.Import.Model.Infrastructure
-@model Alchemist.Product.Import.Model.ServiceSettingsModel
+﻿@using Alchemist.Product.Import.WebApp.Models
+@model ServiceSettingsModel
 
 @functions{
     public string GetUploadOnChange(string id) => "postFormInputFile('/FileUpload/UploadJson', $('#serviceSettingsForm'), '" + id + "', null, (data)=>{ $('#StringValue').val(data);" + UploadFromFileModel.onSuccess + " })";
-    public string Callback() => ModelHelper.IsServiceSettingsPrimary(Model.Name) 
+    public string Callback() => Alchemist.Product.Import.WebApp.Models.ModelHelper.IsServiceSettingsPrimary(Model.Name)
     ? $"setValIfValid('#{Model.Name}',$('#ServiceTypeName').val())" 
     : "setServiceSettingsLi(data, $('#servicesUl'))";
 }

@@ -1,12 +1,12 @@
-﻿using Alchemist.DataService.Interfaces;
+﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Model;
 
-public class ImportFacade(IShopDataService shopDataService) : IImportFacade
+public class ImportFacade(IModelFactory modelFactory) : IImportFacade
 {
-    private readonly IShopDataService _shopDataService = shopDataService;    
+    private readonly IModelFactory _modelFactory = modelFactory;
 
     private readonly Dictionary<Guid, ShopImportModel> _shopImports = [];
 
@@ -15,7 +15,7 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         return _shopImports.TryGetValue(guid, out shopImport) && shopImport != null;
     }    
 
-    public bool TryGetShopSettings(Guid shopGuid, Alchemist.Import.Settings.Interfaces.ShopSettingType shopSettingType, out ShopSettingsModel shopSettings)
+    public bool TryGetShopSettings(Guid shopGuid, Alchemist.Import.Settings.Interfaces.ShopSettingType shopSettingType, out IShopServicesSettingsModel shopSettings)
     {
         shopSettings = default;
 
@@ -26,11 +26,12 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         if (shopImportModel.ShopSettingTabs == null)
             return false;
 
-        shopSettings = shopImportModel.ShopSettingTabs.GetShopSettingsByType(shopSettingType);
+        shopSettings = shopImportModel.ShopSettingTabs?.GetShopSettingsByType(shopSettingType);
         return shopSettings != null;
     }
 
-    public bool TryGetShopSettings(Guid shopGuid, Guid shopSettingsGuid, out ShopSettingsModel shopSettings)
+
+    public bool TryGetShopSettings(Guid shopGuid, Guid shopSettingsGuid, out IShopServicesSettingsModel shopSettings)
     {
         shopSettings = default;
 
@@ -45,17 +46,17 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         return shopSettings != null;
     }
 
-    public bool TryGetShopSettings(Guid shopSettingsGuid, out ShopSettingsModel? shopSettings)
+    public bool TryGetShopSettings(Guid shopSettingsGuid, out IShopServicesSettingsModel? shopSettings)
     {
        var shopSettingsTabs = _shopImports.Values.Where(s => s.ShopSettingTabs != null).Select(s => s.ShopSettingTabs);
 
-        shopSettings = shopSettingsTabs.Where(t => t.ShopProductsSettings?.Guid == shopSettingsGuid).Select(t=>t.ShopProductsSettings).FirstOrDefault() as ShopSettingsModel
-            ?? shopSettingsTabs.Where(t => t.ShopCategoriesSettings?.Guid == shopSettingsGuid).Select(t => t.ShopCategoriesSettings).FirstOrDefault() as ShopSettingsModel;
+        shopSettings = shopSettingsTabs.Where(t => t?.ShopProductsSettings?.Guid == shopSettingsGuid).Select(t=>t?.ShopProductsSettings).FirstOrDefault() as IShopServicesSettingsModel
+            ?? shopSettingsTabs.Where(t => t?.ShopCategoriesSettings?.Guid == shopSettingsGuid).Select(t => t?.ShopCategoriesSettings).FirstOrDefault();
 
         return shopSettings != null;
     }
 
-    public bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName, out ServiceSettingsModel serviceSettings)
+    public bool TryGetServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName, out IServiceSettingsModel serviceSettings)
     {
         serviceSettings = null;
 
@@ -66,36 +67,41 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
         return serviceSettings != null;
     }  
     
-    public bool TryGetServiceSettingsModel(Guid shopGuid, Guid shopSettingsGuid, Guid guid, out ServiceSettingsModel serviceSettings)
+    public bool TryGetServiceSettings(Guid shopGuid, Guid shopSettingsGuid, Guid guid, out IServiceSettingsModel serviceSettings)
     {
         serviceSettings = null;
 
         if (!TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
             return false;
 
-        serviceSettings = shopSettings?.Services.FirstOrDefault(s => s.Guid == guid);
+        serviceSettings = shopSettings.Services.OfType<IServiceSettingsModel>().FirstOrDefault(s => s.Guid == guid);
         return serviceSettings != null;
     }    
 
     public ShopImportModel AddNewShop(IShop shop)
     {
-        var newShop = shop.To<ShopModel>();
-        var newShopImport = new ShopImportModel(newShop);
+        var newShop = _modelFactory.CreateShopModel(shop.Id);
+        newShop.SetFrom(shop);
+        var newShopImport =  new ShopImportModel(newShop);
+
+        newShopImport.ShopSettingTabs = _modelFactory.CreateShopSettingsTabsModel(newShop.Id, newShopImport.ShopGuid);
+        newShopImport.ImportProducts = _modelFactory.CreateProductImportSettingsModel(newShop.Id, newShopImport.ShopGuid);
+        newShopImport.ImportCategories = _modelFactory.CreateCategoryImportSettingsModel(newShop.Id, newShopImport.ShopGuid);
+
         _shopImports.Add(newShop.Guid, newShopImport);
+
         return newShopImport;
     }
 
-    public async Task<List<ShopImportModel>> LoadShops()
-    {
-        var shops = await _shopDataService.GetShops();
-
+    public async Task<List<ShopImportModel>> LoadShops(IEnumerable<IShop> shops)
+    {        
         if (_shopImports.Count != 0)
         {
-            shops.ForEach(s =>
+            shops.ToList().ForEach(s =>
             {
                 var shopImport = _shopImports.FirstOrDefault(si => si.Value.Shop.Id == s.Id);
                 if (shopImport.Value != null)
-                    shopImport.Value.Shop.Update(s);
+                    shopImport.Value.Shop.SetFrom(s);
                 else
                     AddNewShop(s);
             });
@@ -104,7 +110,7 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
                 deprecatedShop.Value.Shop.IsDeprecated = true;
         }
         else
-            shops.ForEach(s => AddNewShop(s));
+            shops.ToList().ForEach(s => AddNewShop(s));
 
         return await Task.FromResult(_shopImports.Values.ToList());
     }
@@ -117,5 +123,67 @@ public class ImportFacade(IShopDataService shopDataService) : IImportFacade
     public void Reset()
     {
         _shopImports.Clear();
+    }
+
+    public bool TryGetTab(Guid shopGuid, TabType tab, out ITabModel tabSettings)
+    {
+        tabSettings = default;
+
+        if (!_shopImports.TryGetValue(shopGuid, out var shopImportModel)
+              || shopImportModel == null)
+            return false;
+
+        tabSettings = shopImportModel.GetTab(tab);
+
+        return true;
+    }
+
+    public bool TryGetLastSelectedSettings(Guid shopGuid, TabType tab, out ISettingsModel tabSettings)
+    {
+        tabSettings = default;
+
+        if (!_shopImports.TryGetValue(shopGuid, out var shopImport)
+              || shopImport == null)
+            return false;
+
+        tabSettings = shopImport.GetLastSelectedSettings(tab);
+
+        return true;
+    }   
+    
+    
+    public ShopImportModel CreateDefaultShopImport()
+    {
+        var shopModel = _modelFactory.CreateShopModel(0);
+        var shopImport = new ShopImportModel(shopModel)
+        {
+            ShopSettingTabs = _modelFactory.CreateShopSettingsTabsModel(0, shopModel.Guid),
+            ImportProducts = _modelFactory.CreateProductImportSettingsModel(0, shopModel.Guid),
+            ImportCategories = _modelFactory.CreateCategoryImportSettingsModel(0, shopModel.Guid)
+        };
+
+        return shopImport;
+    }
+
+    public void AddNewServiceSettings(IShopServicesSettingsModel shopServicesSettingsModel, string serviceName, out IServiceSettingsModel serviceModel)
+    {
+        serviceModel = default;
+
+        if (ModelHelper.IsServiceSettingsPrimary(serviceName))
+            throw new InvalidOperationException($"Invalid service name {serviceName}");
+
+        serviceModel = CreateNewServiceSettings(shopServicesSettingsModel, serviceName);
+
+        shopServicesSettingsModel.Services.Add(serviceModel);
+    }
+
+    public IServiceSettingsModel CreateNewServiceSettings(IShopServicesSettingsModel shopServicesSettingsModel, string serviceName)
+    {
+        return _modelFactory.CreateServiceSettingsModel(shopId: (shopServicesSettingsModel as ISettings).ShopId,
+            id: 0,
+            parentId: shopServicesSettingsModel.Id,
+            shopGuid: shopServicesSettingsModel.ShopGuid,
+            shopSettingsGuid: shopServicesSettingsModel.Guid,
+            name: serviceName);
     }
 }

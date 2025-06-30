@@ -177,7 +177,7 @@ public static class ModelExtensions
             });
         get(shopSettings).Update(serviceSettings);
 
-        if (!shopSettings.Services.OfType<IImportServiceSettings>().Any(s => s.Guid == serviceSettings?.Guid))
+        if (!shopSettings.Services.OfType<IImportServiceSettings>().Any(s => s.Id == serviceSettings?.Id))
             shopSettings.Services.Add(get(shopSettings));
     }
 }
