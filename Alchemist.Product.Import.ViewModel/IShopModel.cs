@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Product.Import.Model;
 
-public interface IShopModel
+public interface IShopModel : IModel
 {
     Guid Guid { get; }
 

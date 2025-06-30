@@ -134,7 +134,7 @@ public static class ShopSettingsModelExtensions
         target.CategoryUrlFormat = source.CategoryUrlFormat;
         target.PageProductCount = source.PageProductCount;
     }
-
+   
     public static void Update(this ICategoryUrlModel target, ICategoryUrlModel source)
     {
         target.Item = source.Item;

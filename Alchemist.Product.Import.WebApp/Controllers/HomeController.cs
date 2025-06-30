@@ -230,7 +230,7 @@ public class HomeController : Controller
 
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    public IActionResult ShopList(IEnumerable<ShopModel> shops)
+    public IActionResult ShopList([ModelBinder(typeof(ModelJsonEnumerableBinder))]  IEnumerable<IShopModel> shops)
     {
         return PartialView("~/Views/Home/_ShopListPartial.cshtml", shops);
     }

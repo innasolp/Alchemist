@@ -11,7 +11,7 @@ public class ModelFactory : IModelFactory
 
     public IShopModel CreateDefaultShopModel()
     {
-        return new ShopModel();
+        return new ShopModel(0);
     }
 
     public IProductImportSettingsModel CreateProductImportSettingsModel(int shopId, Guid shopGuid)

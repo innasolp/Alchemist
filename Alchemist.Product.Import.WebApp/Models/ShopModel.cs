@@ -6,16 +6,16 @@ namespace Alchemist.Product.Import.WebApp.Models;
 
 public class ShopModel : IShopModel
 {
+    [JsonConstructor]
     public ShopModel(int id)
     {
         Id = id;
         Guid = Guid.NewGuid();
     }
-
-    [JsonConstructor]
-    public ShopModel() : this(0){}
     
-    public Guid Guid { get; set; }
+
+    [JsonInclude]
+    public Guid Guid { get; private set; }
 
     [Required]
     public string Name { get; set; }
