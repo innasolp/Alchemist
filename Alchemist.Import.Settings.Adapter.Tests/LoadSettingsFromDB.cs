@@ -70,7 +70,14 @@ public class LoadSettingsFromDB
 
         foreach (var shopServiceSetting in _shopSettings.Where(s => s.Type == ShopSettingType.Service))
         {
-            var serviceSettings = shopServiceSetting.ToImportServiceSettings<TestImportServiceSettings>();
+            var serviceSettings = shopServiceSetting.ToImportServiceSettings<TestImportServiceSettings>()
+                ?? new TestImportServiceSettings
+                {
+                    Name = shopServiceSetting.Name,
+                    ParentSettingsId = shopServiceSetting.ParentSettingsId,
+                    Id = shopServiceSetting.Id,
+                    ShopId = shopServiceSetting.ShopId
+                };
             serviceSettings.AssemblyPath = $"C:\\Folder{shopServiceSetting.Id}";
             serviceSettings.ImplementationTypeName = $"ServiceImplementation_{serviceSettings.Name}_{shopServiceSetting.ParentSettingsId}";
             serviceSettings.ServiceTypeName = $"ServiceType_{serviceSettings.Name}_{shopServiceSetting.ParentSettingsId}";

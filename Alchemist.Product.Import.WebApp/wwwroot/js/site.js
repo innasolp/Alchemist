@@ -100,11 +100,12 @@ function submitPreventDefault(event) {
     event.preventDefault();
 }
 
-function postData(url, data, onSuccess = null, onError = null) {
+function postData(url, data = null, onSuccess = null, onError = null, contentType = "application/x-www-form-urlencoded; charset=UTF-8") {
     $.ajax({
         type: 'POST',
         url: url,
         data: data,
+        contentType: contentType,
         success: function (result) {
             console.log('saved');
             if (onSuccess != null)
@@ -131,12 +132,12 @@ function save(formSelector, url, data, onValidationError = null, onSuccess=null,
 
     var pendingRequest = formSelector.data('validator').pendingRequest;
     if (pendingRequest == 0)
-        postData(url, data, onSuccess, onError);
+        postData(url = url, data = data, onSuccess = onSuccess, onError = onError);
     else
         setTimeout(() =>
         {
             if (formSelector.valid())
-                postData(url, data, onSuccess, onError);
+                postData(url = url, data = data, onSuccess = onSuccess, onError = onError);
             else if (onValidationError != null)
                 onValidationError();                
         }
@@ -178,7 +179,7 @@ async function tabChanged(formSelector, callback = null) {
     var json = formDataToJson(new FormData(formSelector[0]));
     formData['json'] =  json;
 
-    postData('/Home/IsTabChanged', formData, (result) => {
+    postData(url='/Home/IsTabChanged', data=formData, onSuccess=(result) => {
 
         if (!result) {
             if (callback != null) callback();

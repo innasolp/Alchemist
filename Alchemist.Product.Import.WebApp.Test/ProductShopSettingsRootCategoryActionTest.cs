@@ -1,6 +1,9 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Import.WebApp.Test.Infrastructure;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Playwright;
+using Microsoft.Playwright.Xunit;
 using System.Text.Json;
 using Xunit.Abstractions;
 
@@ -21,11 +24,8 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
         return rootCategoryForm;
     }
 
-    private async Task<ILocator?> ExpectEditCategoryFormModalAsync(ILocator settingsForm, ICategoryUrl categoryUrl)
-    {  
-        var rootCategoriesTable = settingsForm.Locator("#rootCategoriesUl");
-        await Expect(rootCategoriesTable).ToBeVisibleAsync();
-
+    private async Task<ILocator?> ExpectGetRowForRootCategoryAsync(ILocator rootCategoriesTable, ICategoryUrl categoryUrl)
+    {
         var rows = await rootCategoriesTable.Locator(".rootCategoryRow").AllAsync();
         ILocator? categoryRow = null;
         foreach (var row in rows)
@@ -34,18 +34,24 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
                 && await row.Locator(".url").TextContentAsync() == categoryUrl.Url)
             {
                 categoryRow = row;
+                await Expect(categoryRow).ToHaveCountAsync(1);
                 break;
             }
         }
 
+        return categoryRow;
+    }
+
+    private async Task<ILocator?> ExpectEditCategoryFormModalAsync(ILocator settingsForm, ICategoryUrl categoryUrl)
+    {  
+        var rootCategoriesTable = settingsForm.Locator("#rootCategoriesUl");
+        await Expect(rootCategoriesTable).ToBeVisibleAsync();        
+
+        var categoryRow = await ExpectGetRowForRootCategoryAsync(rootCategoriesTable, categoryUrl);
         if (categoryRow == null) return null;
 
-        await Expect(categoryRow).ToHaveCountAsync(1);
-
-        var buttonEdit = categoryRow.Locator("button");
+        var buttonEdit = await this.ExpectSingleElementAsync(categoryRow, "button");
         await Expect(buttonEdit).ToHaveClassAsync("editRootCategory");
-        await Expect(buttonEdit).ToHaveCountAsync(1);
-        await Expect(buttonEdit).ToBeVisibleAsync();
 
         var rootCategoryForm = await ExpectShowCategoryUrlFormAsync(settingsForm, buttonEdit);
 
@@ -64,7 +70,7 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
 
         await Task.Delay(500);
 
-        await Expect(settingsForm.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
+        await this.ExpectSingleElementAsync(settingsForm, "#rootCategoryFormDiv");
 
         await Expect(rootCategoryForm).ToHaveCountAsync(1);
         await Expect(rootCategoryForm).ToBeVisibleAsync();
@@ -81,11 +87,6 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
 
         var urlLocator = rootCategoryForm.Locator(".rootCategoryUrl");
         await urlLocator.FillAsync(rootCategory.Url);
-
-        var setButton = rootCategoryForm.Locator("button");
-        await Expect(setButton).ToBeVisibleAsync();
-
-        await setButton.ClickAsync();
     }
 
     private async Task ExpectRowsInRootCategoriesTableAsync(ILocator settingsForm, ICategoryUrl[] categories)
@@ -122,7 +123,7 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
     public async Task RootCategoriesTableContainsRowsWhenRootCategoriesExists()
     {
         var shopSetting = _shopSettings.First();
-        var productShopImportSettings = new ProductShopSettingsModel()
+        var productShopImportSettings = new ProductShopSettingsModel(shopSetting.ShopId, shopSetting.Id, Guid.NewGuid())
         {
             Name = shopSetting.Name,
             ProductUrlFormat = $"https://url{shopSetting.Id}_product",
@@ -186,6 +187,9 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
 
         await FillRootCategoryFormFieldsAsync(rootCategoryForm, rootCategory);
 
+        var setButton = await this.ExpectSingleElementAsync(rootCategoryForm,"button");
+        await setButton.ClickAsync();
+
         await Expect(rootCategoryForm.Locator("#Item-error")).Not.ToBeVisibleAsync();
         await Expect(rootCategoryForm.Locator("#Url-error")).Not.ToBeVisibleAsync();
 
@@ -200,7 +204,7 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
     public async Task RootCategoryCellChangedWhenRootCategoryEdited()
     {
         var shopSetting = _shopSettings.First();
-        var productShopImportSettings = new ProductShopSettingsModel()
+        var productShopImportSettings = new ProductShopSettingsModel(shopSetting.ShopId, shopSetting.Id, Guid.NewGuid())
         {
             Name = shopSetting.Name,
             ProductUrlFormat = $"https://url{shopSetting.Id}_product",
@@ -227,6 +231,9 @@ public class ProductShopSettingsRootCategoryActionTest(TestImportWebAppFactory w
         var rootCategory = new CategoryUrlModel(productShopImportSettings.Guid) { Item = 6502, Url = $"https://rootcategory_6502" };
 
         await FillRootCategoryFormFieldsAsync(rootCategoryForm, rootCategory);
+
+        var setButton = await this.ExpectSingleElementAsync(rootCategoryForm, "button");
+        await setButton.ClickAsync();
 
         await Expect(rootCategoryForm).Not.ToBeVisibleAsync();
 

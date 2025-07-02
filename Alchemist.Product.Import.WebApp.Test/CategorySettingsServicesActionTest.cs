@@ -13,13 +13,13 @@ namespace Alchemist.Product.Import.WebApp.Test;
 public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper) 
     : ImportWebAppTest(webAppFactory, testOutputHelper, 8118, 8119)
 {
-    private async Task<ILocator> ExpectServiceTableOnShopCategoryTabAsync(IPage page)
+    private async Task ExpectSopSettingsCategoryTabAsync(IPage page)
     {
-        var tabsMenuDiv = page.Locator("#tabsMenuDiv");
+        var tabsMenuDiv = await this.ExpectSingleElementAsync(page, "#tabsMenuDiv");
 
-        await Task.Delay(500);
+        await Expect(tabsMenuDiv.Locator(".menu_header")).ToHaveCountAsync(2);
 
-        var categoryTabItemDiv = tabsMenuDiv.Locator("div").GetByText(TabHelper.ShopSettingTypeNames[ShopSettingType.Category]);
+        var categoryTabItemDiv = tabsMenuDiv.Locator(".menu_header").GetByText(TabHelper.ShopSettingTypeNames[ShopSettingType.Category]);
         await Expect(categoryTabItemDiv).ToHaveCountAsync(1);
         await categoryTabItemDiv.ClickAsync();
 
@@ -27,10 +27,14 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         var settingsForm = page.Locator("#settingsForm");
 
-        await Expect(settingsForm.Locator("#CategorySourceUrl")).ToHaveCountAsync(1);
+        await this.ExpectSingleElementAsync(settingsForm, "#CategorySourceUrl");
+    }
 
-        var serviceSettingsTable = settingsForm.Locator("#servicesUl");
-        await Expect(serviceSettingsTable).ToHaveCountAsync(1);
+    private async Task<ILocator> ExpectServiceTableAsync(IPage page)
+    {
+        var settingsForm = page.Locator("#settingsForm");
+
+        var serviceSettingsTable = await this.ExpectSingleElementAsync(settingsForm, "#servicesUl");        
 
         return serviceSettingsTable;
     }
@@ -40,10 +44,9 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         var serviceSettingsForm = page.Locator("#serviceSettingsForm");
         await Expect(serviceSettingsForm).Not.ToBeVisibleAsync();
 
-        var addService = serviceTable.Locator("#addService");
-        await Expect(addService).ToHaveCountAsync(1);
+        var addServiceButton = await this.ExpectSingleElementAsync(serviceTable, "#addService");        
 
-        await addService.ClickAsync();
+        await addServiceButton.ClickAsync();
 
         await Expect(serviceSettingsForm).ToBeVisibleAsync();
 
@@ -68,7 +71,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
     private void SetSecondaryServices(Interfaces.IShopSettings shopSetting)
     {
-        var categoryShopImportSettings = new CategoryShopSettingsModel()
+        var categoryShopImportSettings = new CategoryShopSettingsModel(shopSetting.ShopId, shopSetting.Id, Guid.NewGuid())
         {
             Name = shopSetting.Name,
             CategorySourceUrl = $"https://url{shopSetting.Id}_category"
@@ -83,11 +86,13 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
     [Fact]
     public async Task CategoryShopSettingsHasServiceTable()
     {
-        var newPage = await Context.NewPageAsync();
+        var newPage = await Context.NewPageAsync();       
 
         await ExpectLoadIndexPageAsync(newPage);
 
-        await ExpectServiceTableOnShopCategoryTabAsync(newPage);
+        await ExpectSopSettingsCategoryTabAsync(newPage);
+
+        await ExpectServiceTableAsync(newPage);
     }
 
     [Fact]
@@ -97,7 +102,9 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         await ExpectLoadIndexPageAsync(newPage);
 
-        var serviceTable = await ExpectServiceTableOnShopCategoryTabAsync(newPage);
+        await ExpectSopSettingsCategoryTabAsync(newPage);
+
+        var serviceTable = await ExpectServiceTableAsync(newPage);
 
         var serviceSettingsForm = await ExpectShowServiceFormWhenAddServiceButtonClickAsync(newPage, serviceTable);
 
@@ -118,7 +125,9 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         var shopSettings = await ExpectLoadIndexPageAsync(newPage);        
 
-        var serviceTable = await ExpectServiceTableOnShopCategoryTabAsync(newPage);
+        await ExpectSopSettingsCategoryTabAsync(newPage);
+
+        var serviceTable = await ExpectServiceTableAsync(newPage);
 
         await Task.Delay(500);
 
@@ -136,7 +145,9 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         await ExpectLoadIndexPageAsync(newPage);
 
-        var serviceTable = await ExpectServiceTableOnShopCategoryTabAsync(newPage);
+        await ExpectSopSettingsCategoryTabAsync(newPage);
+
+        var serviceTable = await ExpectServiceTableAsync(newPage);
 
         var shopImportSettings = await GetShopImportSettingsAsync(_shops.First().Id, Interfaces.ShopSettingType.Category);
         var categoryShopSettings = Assert.IsType<CategoryShopSettingsModel>(shopImportSettings);
@@ -145,7 +156,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
             .ToImportServiceSettings<ServiceSettingsModel>()
-           ?? new ServiceSettingsModel
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
            {
                Name = Guid.NewGuid().ToString()
            };
@@ -170,7 +181,9 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         var shopSettings = await ExpectLoadIndexPageAsync(newPage);
 
-        var serviceTable = await ExpectServiceTableOnShopCategoryTabAsync(newPage);
+        await ExpectSopSettingsCategoryTabAsync(newPage);
+
+        var serviceTable = await ExpectServiceTableAsync(newPage);
 
         var rows = await serviceTable.Locator(".serviceRow").AllAsync();
 
@@ -192,17 +205,13 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         await Expect(serviceRow).ToHaveCountAsync(1);
 
-        var buttonEdit = serviceRow.Locator(".editService");
-        await Expect(buttonEdit).ToHaveCountAsync(1);
-        await Expect(buttonEdit).ToBeVisibleAsync();
+        var buttonEdit = await this.ExpectSingleElementAsync(serviceRow, ".editService");
 
         var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, (page) => Task.FromResult(buttonEdit));
 
         service = await serviceForm.FillServiceSettingsInputsAsync(service, service.Name);
 
-        var saveButton = serviceForm.Locator("button[class='btn btn-primary']");
-        await Expect(saveButton).ToHaveCountAsync(1);
-        await Expect(saveButton).ToBeVisibleAsync();
+        var saveButton = await this.ExpectSingleElementAsync(serviceForm, "button[class='btn btn-primary']");        
 
         await saveButton.ClickAsync();
 

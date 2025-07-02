@@ -8,7 +8,7 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
     : ISettingsDataAdapter
     where TProductShopImportSettings : class, IProductShopImportSettings
     where TCategoryShopImportSettings : class, ICategoryShopImportSettings
-    where TImportServiceSettings : class, IImportServiceSettings, new()
+    where TImportServiceSettings : class, IImportServiceSettings
 {
     private readonly IShopSettingsDataService _shopSettingsDataService = shopSettingsDataService;    
 

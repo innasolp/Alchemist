@@ -12,9 +12,9 @@ public static class TabModelExtensions
         target.Name = source.Name;
     }
 
-    public static void UpdateShopSettings(this IShopSettingTabsModel target, IShopSettingTabsModel source)
+    public static void UpdateShopSettings(this IModelFactory modelFactory, IShopSettingTabsModel target, IShopSettingTabsModel source)
     {
-        target.ShopProductsSettings.UpdateProductShopSettings(source.ShopProductsSettings);
-        target.ShopCategoriesSettings.UpdateCategoryShopSettings(source.ShopCategoriesSettings);
+        modelFactory.UpdateProductShopSettings(target.ShopProductsSettings, source.ShopProductsSettings);
+        modelFactory.UpdateCategoryShopSettings(target.ShopCategoriesSettings, source.ShopCategoriesSettings);
     }
 }

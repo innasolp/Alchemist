@@ -3,6 +3,7 @@ using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.JsonAdapter;
+using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
@@ -36,12 +37,12 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
             $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/ozoncategories.json");
         var host = builder.Build();
 
-        _jsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>();
+        _jsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>();       
     }
 
     private ShopSettingsController CreateShopSettingsController()
     {
-        return new ShopSettingsController(_loggerMock.Object, _importFacade, _settingsDataAdapter);
+        return new ShopSettingsController(_loggerMock.Object, _importFacade, ModelFactory, _settingsDataAdapter);
     }    
 
     [Fact]
@@ -56,6 +57,28 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         await AssertSaveShopSettingsAsync(ShopSettingType.Category);
     }
 
+    //[Fact]
+    //public void DeserializeService()
+    //{
+    //    //var json = "{\"Id\":0,\r\n\"ServiceTypeName\":\"CategoryImportServiceType0_d5246a67-edb1-493f-b9c1-c16526604420\",\r\n\"ImplementationTypeName\":null,\r\n\"AssemblyPath\":null,\r\n\"ServiceProviderPath\":null,\r\n\"FileName\":null,\r\n\"StringValue\":null,\r\n\"Tab\":0,\r\n\"ParentSettingsId\":0,\r\n\"ShopSettingsGuid\":\"247a4b67-20a1-4855-b659-4e99036f3c05\",\r\n\"Guid\":\"9d98ad48-ec0b-47f9-888d-f49b428b5ecf\",\r\n\"ShopGuid\":\"09f7193f-476d-4a7b-a62f-a00046d0f0d7\",\r\n\"ShopId\":3,\r\n\"Name\":\"ImportService\"}";
+    //    //var json = "{\"Id\":0,\r\n\"ParentSettingsId\":0,\r\n\"ShopSettingsGuid\":\"247a4b67-20a1-4855-b659-4e99036f3c05\",\r\n\"ShopGuid\":\"09f7193f-476d-4a7b-a62f-a00046d0f0d7\",\r\n\"ShopId\":3,\r\n\"Name\":\"ImportService\"}";
+    //    var json = "{\"id\":0,\r\n\"parentSettingsId\":0,\r\n\"shopSettingsGuid\":\"247a4b67-20a1-4855-b659-4e99036f3c05\",\r\n\"shopGuid\":\"09f7193f-476d-4a7b-a62f-a00046d0f0d7\",\r\n\"shopId\":3,\r\n\"name\":\"ImportService\"}";
+
+    //    //var source = new ServiceSettingsModel(0, 0, 0, Guid.NewGuid(), Guid.NewGuid());
+    //    //var json = JsonSerializer.Serialize(source);
+
+    //    var option = new JsonSerializerOptions
+    //    {
+    //        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+    //        IgnoreReadOnlyProperties = false,
+    //        RespectRequiredConstructorParameters = true,
+    //        PropertyNameCaseInsensitive = true,
+    //        IgnoreReadOnlyFields = true,
+    //        //PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    //    };
+    //    var service = JsonSerializer.Deserialize<ServiceSettingsModel>(json);//, option);
+    //}
+
     private async Task AssertSaveShopSettingsAsync(ShopSettingType shopSettingType)
     {
         await LoadShopsAsync();
@@ -64,11 +87,11 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         if (!_importFacade.TryGetShopSettings(shopGuid, shopSettingType, out var shopSettings))
             return;
 
-        var oldShopSettings = shopSettings.GetCopy();
+        var oldShopSettings =  ModelFactory.GetCopy(shopSettings);
 
         FillShopSettingsFields(shopSettings);        
 
-        var changedShopSettings = shopSettings.GetCopy();
+        var changedShopSettings = ModelFactory.GetCopy(shopSettings);
         FillShopSettingsFields(changedShopSettings);
         var json = JsonSerializer.Serialize(changedShopSettings, changedShopSettings.GetType());
 
@@ -150,7 +173,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     {
         var shopSettingController = CreateShopSettingsController();
         var actionResult = Assert.IsType<BadRequestObjectResult>(await shopSettingController.SaveProductShopSettingsToDb(null));
-        Assert.Equal("productShopSettings", Assert.IsType<string>(actionResult.Value));
+        Assert.Equal("data", Assert.IsType<string>(actionResult.Value));
     }
     
     [Fact]
@@ -158,7 +181,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     {
         var shopSettingController = CreateShopSettingsController();
         var actionResult = Assert.IsType<BadRequestObjectResult>(await shopSettingController.SaveCategoryShopSettingsToDb(null));
-        Assert.Equal("categoryShopSettings", Assert.IsType<string>(actionResult.Value));
+        Assert.Equal("data", Assert.IsType<string>(actionResult.Value));
     }
 
     [Fact]
@@ -191,7 +214,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>())).Throws(exception);
 
         var shopSettingController = CreateShopSettingsController();
-        var data = shopSettings.GetCopy() as T;
+        var data = ModelFactory.GetCopy(shopSettings) as T;
         var actionResult = Assert.IsType<ObjectResult>(await saveToDbAction(shopSettingController, data));
         Assert.Equal(StatusCodes.Status500InternalServerError, actionResult.StatusCode);
         Assert.Equal(exception, Assert.IsType<InvalidOperationException>(actionResult.Value));
@@ -249,13 +272,31 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     }
 
     private async Task<T> SaveShopSettingsToDbActionAsync<T>(Guid shopGuid, ShopSettingType shopSettingType, string fileName, Func<ShopSettingsController, T, Task<IActionResult>> saveAction)
-        where T:ShopSettingsModel,new()
+        where T:ShopSettingsModel
     {
         Assert.True(_importFacade.TryGetShopSettings(shopGuid, shopSettingType,out var settings));
         var shopSettings = Assert.IsType<T>(settings);
 
-        var shopSettingsModel = await fileName.ReadFromFileAsync<ProductShopSettingsModel>();
-        shopSettings.Update(shopSettingsModel);
+        var defaultServiceProperties = new Dictionary<string, object>()
+        {
+            { nameof(IServiceSettingsModel.Id), 0 },
+            { nameof(IServiceSettingsModel.ParentSettingsId), 0 },
+            { nameof(IServiceSettingsModel.ShopId), 0 },
+            { nameof(IServiceSettingsModel.ShopGuid), Guid.Empty },
+            { nameof(IServiceSettingsModel.ShopSettingsGuid), Guid.Empty },
+        };
+        var serviceSettingsModelConverter = new ModelJsonConverter<IServiceSettingsModel>(defaultServiceProperties);
+        
+        var defaultShopSettingsProperties = new Dictionary<string, object>()
+        {
+            { nameof(IShopServicesSettingsModel.Id), 0 },
+            { nameof(IShopServicesSettingsModel.ShopId), 0 },
+            { nameof(IShopServicesSettingsModel.ShopGuid), Guid.Empty }
+        };
+        var shopImportSettingsJsonConverter = new ModelJsonConverter<IShopServicesSettingsModel>(defaultShopSettingsProperties);
+
+        var shopSettingsModel = await fileName.ReadFromFileAsync<T>([serviceSettingsModelConverter,shopImportSettingsJsonConverter]);
+        ModelFactory.Update(shopSettings, shopSettingsModel);
 
         shopSettings.ImportService.Name = nameof(IShopImportSettings.ImportService);
         shopSettings.RequestHeaders.Name = nameof(IShopImportSettings.RequestHeaders);
@@ -278,7 +319,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     private static async Task<List<IShopSettings>> SaveShopSettingsAsync<T>(IShopSettings shopSettingsResult, 
         IEnumerable<IShopSettings> childrenSettingResult,
         ShopSettingsModel expect)
-        where T:ShopSettingsModel,new()
+        where T:ShopSettingsModel
     {
         var result = shopSettingsResult.ToShopImportSettings<T>();
         var servicesResult = new List<ServiceSettingsModel>();

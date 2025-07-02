@@ -179,11 +179,12 @@ public class ImportFacade(IModelFactory modelFactory) : IImportFacade
 
     public IServiceSettingsModel CreateNewServiceSettings(IShopServicesSettingsModel shopServicesSettingsModel, string serviceName)
     {
-        return _modelFactory.CreateServiceSettingsModel(shopId: (shopServicesSettingsModel as ISettings).ShopId,
+        var service =  _modelFactory.CreateServiceSettingsModel(shopId: (shopServicesSettingsModel as ISettings).ShopId,
             id: 0,
             parentId: shopServicesSettingsModel.Id,
             shopGuid: shopServicesSettingsModel.ShopGuid,
-            shopSettingsGuid: shopServicesSettingsModel.Guid,
-            name: serviceName);
+            shopSettingsGuid: shopServicesSettingsModel.Guid);
+        service.Name = serviceName;
+        return service;
     }
 }

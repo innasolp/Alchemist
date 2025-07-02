@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
+[method: JsonConstructor]
 public class CategoryUrlModel(Guid shopSettingsGuid) : ICategoryUrlModel
 {
     [Required]
@@ -15,17 +16,16 @@ public class CategoryUrlModel(Guid shopSettingsGuid) : ICategoryUrlModel
     [Required]
     public string Url { get; set; }
 
-    public Guid Guid { get; set; } = Guid.NewGuid();
+    [JsonInclude]
+    public Guid Guid { get; private set; } = Guid.NewGuid();
 
-    public Guid ShopSettingsGuid { get; set; } = shopSettingsGuid;
-
-    public CategoryUrlModel() : this(Guid.Empty) { }
-
-
-    
+    [JsonInclude]
+    public Guid ShopSettingsGuid { get; private set; } = shopSettingsGuid;
 }
 
-public class ProductShopSettingsModel : ShopSettingsModel, IProductShopSettingsModel, IJsonOnDeserialized
+[method: JsonConstructor]
+public class ProductShopSettingsModel(int shopId, int id, Guid shopGuid) 
+    : ShopSettingsModel(shopId, id, shopGuid), IProductShopSettingsModel, IJsonOnDeserialized
 {
     [Required]
     public string? ProductUrlFormat { get; set; }
@@ -48,12 +48,6 @@ public class ProductShopSettingsModel : ShopSettingsModel, IProductShopSettingsM
             RootCategories.AddRange(value.OfType<CategoryUrlModel>()); 
         } }
 
-    public ProductShopSettingsModel(int shopId, int id, Guid shopGuid) : base(shopId, id, shopGuid)
-    {
-    }
-
-    public ProductShopSettingsModel() : base(0, 0, Guid.Empty) { }
-
     public override string ToString()
     {
         return @$"{nameof(ProductShopSettingsModel)}:{base.ToString()};
@@ -62,7 +56,8 @@ public class ProductShopSettingsModel : ShopSettingsModel, IProductShopSettingsM
 
     public void OnDeserialized()
     {
-        foreach (var rootCategory in RootCategories)
-            rootCategory.ShopSettingsGuid = Guid;
+        //todo
+        //foreach (var rootCategory in RootCategories)
+        //    rootCategory.ShopSettingsGuid = Guid;
     }
 }

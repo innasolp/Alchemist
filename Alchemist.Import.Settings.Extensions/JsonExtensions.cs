@@ -26,7 +26,7 @@ public static class JsonExtensions
                 // [JsonIgnore] is implemented by setting ShouldSerialize to a function that returns false.
                 foreach (var property in typeInfo.Properties)
                 {
-                    property.ShouldSerialize =  (param1, param2) => property.Get != null && properties.Contains(property.Name);
+                    property.ShouldSerialize =  (param1, param2) => property.Get != null && properties.Contains(property.Name);                   
                 }
         };
     public static void DeserializeValueIfNeed(this IJsonValue jsonValue)

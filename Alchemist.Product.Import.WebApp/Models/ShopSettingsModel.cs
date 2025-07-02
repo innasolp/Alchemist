@@ -25,7 +25,8 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopServicesSettin
         return $"{service?.ServiceTypeName ?? service?.AssemblyPath}";
     }
 
-    public List<ServiceSettingsModel> Services { get; set; } = [];
+    [JsonInclude]
+    public List<ServiceSettingsModel> Services { get; private set; } = [];
 
     [JsonIgnore]
     public override TabType Tab => TabType.Shop;
@@ -75,9 +76,25 @@ public abstract class ShopSettingsModel : SettingsModelBase, IShopServicesSettin
     public ShopSettingsModel(int shopId, int id, Guid shopGuid) : base(shopId, shopGuid)
     {
         Id = id;
-        ImportService = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid, nameof(IShopServicesSettingsModel.ImportService));
-        BrowserDataLoader = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid, nameof(IShopServicesSettingsModel.BrowserDataLoader));
-        RequestHeaders = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid, nameof(IShopServicesSettingsModel.RequestHeaders));
-        WebLoader = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid, nameof(IShopServicesSettingsModel.WebLoader));
+
+        ImportService = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
+        {
+            Name = nameof(IShopServicesSettingsModel.ImportService)
+        };
+
+        BrowserDataLoader = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
+        {
+            Name = nameof(IShopServicesSettingsModel.BrowserDataLoader)
+        };
+
+        RequestHeaders = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
+        {
+            Name = nameof(IShopServicesSettingsModel.RequestHeaders)
+        };
+
+        WebLoader = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
+        {
+            Name = nameof(IShopServicesSettingsModel.WebLoader)
+        };
     }    
 }

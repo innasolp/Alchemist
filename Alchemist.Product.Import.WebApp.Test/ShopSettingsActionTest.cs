@@ -88,23 +88,23 @@ public class ShopSettingsActionTest : ImportWebAppTest
     {
         var page = await Context.NewPageAsync();
 
-        var shopImportSettings = await ExpectLoadIndexPageAsync(page) as ProductShopSettingsModel;
+        var startShopImportSettings = await ExpectLoadIndexPageAsync(page) as ProductShopSettingsModel;
 
-        var importService = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.ImportService), shopImportSettings);
-        var webLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.WebLoader), shopImportSettings);
-        var browserDataLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.BrowserDataLoader), shopImportSettings);
+        var importService = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.ImportService), startShopImportSettings);
+        var webLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.WebLoader), startShopImportSettings);
+        var browserDataLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.BrowserDataLoader), startShopImportSettings);
         
         var settingsForm = page.Locator("#settingsForm");
 
-        var shopProductSettings = new ProductShopSettingsModel()
+        var shopProductSettings = new ProductShopSettingsModel(startShopImportSettings.ShopId, startShopImportSettings.Id, startShopImportSettings.ShopGuid)
         {
             Name = Guid.NewGuid().ToString(),
             ProductUrlFormat = Guid.NewGuid().ToString(),
             CategoryUrlFormat = Guid.NewGuid().ToString()
         };
-        shopProductSettings.UpdateServiceSettings<ServiceSettingsModel>(importService);
-        shopProductSettings.UpdateServiceSettings<ServiceSettingsModel>(webLoader);
-        shopProductSettings.UpdateServiceSettings<ServiceSettingsModel>(browserDataLoader);
+        shopProductSettings.UpdateServiceSettings(importService);
+        shopProductSettings.UpdateServiceSettings(webLoader);
+        shopProductSettings.UpdateServiceSettings(browserDataLoader);
 
         await settingsForm.Locator("#ShopSettingsName").FillAsync(shopProductSettings.Name);
         await settingsForm.Locator("#ProductUrlFormat").FillAsync(shopProductSettings.ProductUrlFormat);
@@ -112,6 +112,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var saveButton = settingsForm.GetByRole(AriaRole.Button).GetByText("Save");
         await saveButton.ClickAsync();
+
+        await Task.Delay(500);
+
         await Expect(saveButton).ToBeEnabledAsync();
 
         await page.CloseAsync();
@@ -150,7 +153,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
             .ToImportServiceSettings<ServiceSettingsModel>()
-           ?? new ServiceSettingsModel
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
            {
                Name = Guid.NewGuid().ToString()
            };

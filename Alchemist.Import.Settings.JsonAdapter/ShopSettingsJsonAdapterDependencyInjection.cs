@@ -8,8 +8,8 @@ public static class ShopSettingsJsonAdapterDependencyInjection
 {    
     public static IServiceCollection AddSettingsJsonAdapter<TProductShopImportSettings, TCategoryShopImportSettings>
         (this IServiceCollection services, string shopProductsJsonFile, string shopCategoriesJsonFile)
-        where TProductShopImportSettings : class, IProductShopImportSettings, new()
-    where TCategoryShopImportSettings : class, ICategoryShopImportSettings, new()
+        where TProductShopImportSettings : class, IProductShopImportSettings
+    where TCategoryShopImportSettings : class, ICategoryShopImportSettings
     {
         return services.AddSingleton<ISettingsAdapter>((serviceProvider) =>
         {

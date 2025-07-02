@@ -39,34 +39,34 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Save(ShopModel shopModel)
+    public async Task<IActionResult> Save([ModelBinder(typeof(ModelJsonBinder))] ShopModel shop)
     {
-        if (shopModel == null)
-            return BadRequest(shopModel);
+        if (shop == null)
+            return BadRequest(shop);
 
         ShopImportModel? shopImport = null;
-        if (shopModel.Id != 0 && !_importFacade.TryGetShopImport(shopModel.Guid, out shopImport))
-            return NotFound(shopModel);
+        if (shop.Id != 0 && !_importFacade.TryGetShopImport(shop.Guid, out shopImport))
+            return NotFound(shop);
 
         try
         {
-            var shop = new Shop
+            var newShop = new Shop
             { 
-                Id =  shopModel.Id,
-                Name = shopModel.Name,
-                Caption = shopModel.Caption,
-                Url = shopModel.Url
+                Id =  shop.Id,
+                Name = shop.Name,
+                Caption = shop.Caption,
+                Url = shop.Url
             };
 
-            var savedShop = (shopModel.Id == 0)
-              ? await _shopDataService.CreateShop(shop) :
-                await _shopDataService.UpdateShop(shop);
+            var shopModel = (shop.Id == 0)
+              ? await _shopDataService.CreateShop(newShop) :
+                await _shopDataService.UpdateShop(newShop);
 
             if (shopImport == null)
-                shopImport = _importFacade.AddNewShop(savedShop);
+                shopImport = _importFacade.AddNewShop(shopModel);
             else
             {
-                shopImport.Shop.SetFrom(savedShop);                
+                shopImport.Shop.SetFrom(shopModel);                
             }
 
             return Ok(shopImport.Shop);

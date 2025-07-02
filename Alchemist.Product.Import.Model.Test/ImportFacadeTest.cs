@@ -32,8 +32,7 @@ public class ImportFacadeTest
             It.IsAny<int>(),
             It.IsAny<int>(),
             It.IsAny<Guid>(),
-            It.IsAny<Guid>(),
-            It.IsAny<string>())).Returns(CreateServiceSettings);
+            It.IsAny<Guid>())).Returns(CreateServiceSettings);
     }
 
     private IShopSettingTabsModel CreateShopSettingsTabsModel(int shopId, Guid shopGuid)
@@ -86,7 +85,7 @@ public class ImportFacadeTest
         return serviceSettingsMock.Object;
     }
 
-    private static IServiceSettingsModel CreateServiceSettings(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid, string serviceName)
+    private static IServiceSettingsModel CreateServiceSettings(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid)
     {
         var guid = Guid.NewGuid();
         var serviceSettingsMock = new Mock<IServiceSettingsModel>();
@@ -95,7 +94,6 @@ public class ImportFacadeTest
         serviceSettingsMock.Setup(s => s.ParentSettingsId).Returns(parentId);
         serviceSettingsMock.Setup(s => s.ShopSettingsGuid).Returns(shopSettingsGuid);
         serviceSettingsMock.Setup(s => s.ShopId).Returns(shopId);
-        serviceSettingsMock.Setup(s => s.Name).Returns(serviceName);
         return serviceSettingsMock.Object;
     }
 

@@ -29,13 +29,16 @@ public static class TestRepository
 
         foreach (var shop in shops)
         {
+            var shopGuid = Guid.NewGuid();
             var productShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Product, Name = Guid.NewGuid().ToString() };
-            var productShopImportSettings = new ProductShopSettingsModel() { ProductUrlFormat = $"https://url{Guid.NewGuid()}" };
+            var productShopImportSettings = new ProductShopSettingsModel(productShopSettings.ShopId, productShopSettings.Id, shopGuid)
+                                { ProductUrlFormat = $"https://url{Guid.NewGuid()}" };
             productShopSettings.JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(productShopImportSettings));
             shopSettings.Add(productShopSettings);
 
             var categoryShopSettings = new ShopSettings { ShopId = shop.Id, Type = ShopSettingType.Category, Name = Guid.NewGuid().ToString() };
-            var categoryShopImportSettings = new CategoryShopSettingsModel() { CategorySourceUrl = $"https://url{Guid.NewGuid()}" };
+            var categoryShopImportSettings = new CategoryShopSettingsModel(categoryShopSettings.ShopId, categoryShopSettings.Id, shopGuid)
+                { CategorySourceUrl = $"https://url{Guid.NewGuid()}" };
             categoryShopSettings.JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(categoryShopImportSettings));
             shopSettings.Add(categoryShopSettings);
         }
@@ -74,7 +77,8 @@ public static class TestRepository
     {
         var shopSetting = new ShopSettings { ShopId = shopId, ParentSettingsId = parentId, Name = serviceName };
 
-        var serviceSettings = shopSetting.ToImportServiceSettings<ServiceSettingsModel>();
+        var serviceSettings = shopSetting.ToImportServiceSettings<ServiceSettingsModel>()
+            ?? new ServiceSettingsModel(shopId, 0, parentId, Guid.NewGuid(), Guid.NewGuid());
         serviceSettings.AssemblyPath = $"C:\\Folder{Guid.NewGuid()}";
         serviceSettings.ImplementationTypeName = $"ServiceImplementation{Guid.NewGuid()}";
         serviceSettings.ImplementationTypeName = $"ServiceType{Guid.NewGuid()}";

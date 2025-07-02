@@ -47,9 +47,7 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
 
         var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, async (page) => await this.ExpectShowServiceSettingsButtonAsync(page, nameof(IShopImportSettings.ImportService)));
 
-        var saveButton = serviceForm.Locator("button[class='btn btn-primary']");
-        await Expect(saveButton).ToHaveCountAsync(1);
-
+        var saveButton = await this.ExpectSingleElementAsync(serviceForm,"button[class='btn btn-primary']");   
         await saveButton.ClickAsync();
 
         await Expect(serviceForm).ToBeVisibleAsync();
@@ -185,7 +183,7 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
 
         var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
             .ToImportServiceSettings<ServiceSettingsModel>()
-           ?? new ServiceSettingsModel
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
            {
                Name = Guid.NewGuid().ToString()
            };
@@ -219,7 +217,7 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
 
         var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
             .ToImportServiceSettings<ServiceSettingsModel>()
-           ?? new ServiceSettingsModel
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
            {
                Name = Guid.NewGuid().ToString()
            };

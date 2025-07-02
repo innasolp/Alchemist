@@ -135,9 +135,11 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
             0,
             0,
             Guid.NewGuid(),
-            shopGuid,
-            Guid.NewGuid().ToString())));
-            
+            shopGuid)
+        {
+            Name = Guid.NewGuid().ToString()
+        }));
+
         Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
@@ -152,9 +154,9 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
 
         var controller = CreateServiceSettingsController();
 
-        var oldService =  ModelFactoryMock.Object.GetCopy(shopSettings.BrowserDataLoader);
+        var oldService =  ModelFactory.GetCopy(shopSettings.BrowserDataLoader);
 
-        var changedService = ModelFactoryMock.Object.GetCopy(shopSettings.BrowserDataLoader);
+        var changedService = ModelFactory.GetCopy(shopSettings.BrowserDataLoader);
         changedService.FillServiceSettingsFields();
 
         var actionResult = Assert.IsType<OkObjectResult>(controller.SaveServiceSettings(changedService as ServiceSettingsModel));
@@ -180,8 +182,8 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
             0,
             0,
             Guid.NewGuid(),
-            shopGuid,
-            Guid.NewGuid().ToString())));
+            shopGuid)
+        {  Name = Guid.NewGuid().ToString() }));
         Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
@@ -192,15 +194,14 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
         var shop = _importFacade.GetShops().Last();
 
         Assert.True(_importFacade.TryGetShopSettings(shop.ShopGuid, ShopSettingType.Category, out var shopSettings));
-        
         var data = new ServiceSettingsModel(
             shop.Shop.Id,
             0,
             shopSettings.Id,
             shopSettings.Guid,
-            shopSettings.ShopGuid,
-            nameof(ShopSettingsModel.ImportService))
+            shopSettings.ShopGuid)
         {
+            Name = nameof(ShopSettingsModel.ImportService),
             ServiceTypeName = Guid.NewGuid().ToString()
         };
 
@@ -221,8 +222,8 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
             0,
             0,
             shopSettings.Guid,
-            shop.Guid,
-            nameof(ShopSettingsModel.ImportService));
+            shop.Guid)
+        { Name = nameof(ShopSettingsModel.ImportService) };
 
         var controller = CreateServiceSettingsController();
         var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data));
@@ -238,7 +239,7 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
         Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Category, out var shopSettings));
         FillShopSettingsFields(shopSettings);
 
-        var data = ModelFactoryMock.Object.GetCopy(shopSettings.ImportService);
+        var data = ModelFactory.GetCopy(shopSettings.ImportService);
         data.ServiceTypeName = Guid.NewGuid().ToString();
 
         var controller = CreateServiceSettingsController();
@@ -255,7 +256,7 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
         Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var shopSettings));
         FillShopSettingsFields(shopSettings);
         
-        var data = ModelFactoryMock.Object.GetCopy(shopSettings.ImportService);
+        var data = ModelFactory.GetCopy(shopSettings.ImportService);
 
         var controller = CreateServiceSettingsController();
         var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data as ServiceSettingsModel));

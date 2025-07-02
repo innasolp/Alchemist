@@ -9,9 +9,13 @@ using DependencyInjection.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
-public class ServiceSettingsModel : SettingsModelBase, IServiceSettingsModel
-{
-    public int Id { get; set; }
+[method: JsonConstructor]
+public class ServiceSettingsModel(int shopId, int id, int parentSettingsId, Guid shopSettingsGuid, Guid shopGuid) 
+    : SettingsModelBase(shopId, shopGuid), IServiceSettingsModel
+{ 
+    string? ISettings.Name { get => Name; set=> Name = value; }
+
+    public int Id { get; set; } = id;
 
     public override string ToString()
     {
@@ -22,6 +26,7 @@ public class ServiceSettingsModel : SettingsModelBase, IServiceSettingsModel
             {nameof(ImplementationTypeName)}:{ImplementationTypeName}";
     }
 
+    [JsonIgnore]
     public ShopSettingType ShopSettingType => ShopSettingType.Service;
     
     [Required(AllowEmptyStrings = true)]
@@ -52,25 +57,20 @@ public class ServiceSettingsModel : SettingsModelBase, IServiceSettingsModel
         controller: "Validation",
         HttpMethod = "POST",
         ErrorMessage = "Invalid json value")]
-    public string? StringValue { get; set; }   
+    public string? StringValue { get; set; }
 
+    [JsonIgnore]
     public override TabType Tab => TabType.Shop;
 
-    public int? ParentSettingsId { get; set; }
+    [JsonInclude]
+    public int ParentSettingsId { get; set; } = parentSettingsId;
 
-    public Guid ShopSettingsGuid { get; set; }
-    
+    int? ISettings.ParentSettingsId { get => ParentSettingsId; set => ParentSettingsId = value ?? 0; }
+
+
+    [JsonInclude]
+    public Guid ShopSettingsGuid { get; private set; } = shopSettingsGuid;
+
     string? IServiceSettings.Value { get => StringValue; set => StringValue = value; }
 
-    public ServiceSettingsModel() : base(0, Guid.Empty) { }
-
-    public ServiceSettingsModel(int shopId, int id, int parentId, Guid shopSettingsGuid, Guid shopGuid, string serviceName) : base(shopId, shopGuid)
-    {
-        Id = id;
-        ParentSettingsId = parentId;
-        ShopSettingsGuid = shopSettingsGuid;
-        Name = serviceName;
-    }
-
-    
 }

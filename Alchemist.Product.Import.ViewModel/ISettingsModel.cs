@@ -1,8 +1,6 @@
 ﻿namespace Alchemist.Product.Import.Model;
 
-public interface ISettingsModel
+public interface ISettingsModel : IModel
 {
-    Guid Guid { get; }
-
-    Guid ShopGuid { get; set; }    
+    Guid ShopGuid { get; }    
 }

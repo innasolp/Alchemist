@@ -10,9 +10,10 @@ using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
-public class FileUploadController(IImportFacade importFacade) : Controller
+public class FileUploadController(IImportFacade importFacade, IModelFactory modelFactory) : Controller
 {
     private readonly IImportFacade _importFacade = importFacade;
+    private readonly IModelFactory _modelFactory = modelFactory;
     
     public ActionResult FileUpload()
     {
@@ -65,7 +66,7 @@ public class FileUploadController(IImportFacade importFacade) : Controller
 
         if (_importFacade.TryGetShopSettings(shopGuid, (ShopSettingType)shopSettingsType, out var shopSettings))         
         {
-            shopSettings.Update(uploadedShopSettings);
+            _modelFactory.Update(shopSettings, uploadedShopSettings);
             shopSettings.FileName = file.FileName;
 
             return Ok(shopSettings);
@@ -95,7 +96,10 @@ public class FileUploadController(IImportFacade importFacade) : Controller
             return BadRequest(nameof(shopSettingsGuid));
 
         if (string.IsNullOrEmpty(serviceSettingsName))
-            return BadRequest(nameof(serviceSettingsName)); 
+            return BadRequest(nameof(serviceSettingsName));
+
+        if (!_importFacade.TryGetShopImport(shopGuid, out var shop))
+            return NotFound(shopGuid);
 
         var uplodedServiceSettings = await GetFromJsonAsync<ServiceSettingsModel>(file);
         if (uplodedServiceSettings == null)

@@ -9,7 +9,6 @@ using Alchemist.Product.Import.WebApp.Models;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Text.Json;
 using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
@@ -26,13 +25,20 @@ public class HomeController : Controller
 
     private readonly IShopDataService _shopDataService;
 
-    public HomeController(ILogger<HomeController> logger, IShopDataService shopDataService, ISettingsDataAdapter settingsDataAdapter, IImportFacade importFacade, IMessageReceiver shopEventReceiver)
+    private readonly IModelFactory _modelFactory;
+    public HomeController(ILogger<HomeController> logger, 
+        IShopDataService shopDataService,
+        ISettingsDataAdapter settingsDataAdapter,
+        IImportFacade importFacade,
+        IModelFactory modelFactory,
+        IMessageReceiver shopEventReceiver)
     {
         _logger = logger;
         _shopDataService = shopDataService;
         _importFacade = importFacade;
         _shopEventReceiver = shopEventReceiver;
         _settingsDataAdapter = settingsDataAdapter;
+        _modelFactory = modelFactory;
 
         _shopEventReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);
     }
@@ -176,7 +182,7 @@ public class HomeController : Controller
     [HttpPost]
     [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
-    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]    
     public async Task<IActionResult> IsTabChanged(Guid shopGuid, int tab, string json)
     {
         if (string.IsNullOrEmpty(json)) return BadRequest(json);
@@ -184,15 +190,23 @@ public class HomeController : Controller
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
             return NotFound(shopGuid);
 
-        var settings = shopImport.GetLastSelectedSettings((TabType)tab);
-        if (settings == null) return Ok(false);
+        ISettingsModel settings;
+        try
+        {
+            settings = shopImport.GetLastSelectedSettings((TabType)tab);
+        }
+        catch(InvalidOperationException e)
+        {
+            _logger.LogError(e, e.Message);
+            return BadRequest(tab);
+        }
 
         IShopServicesSettingsModel modelFromJson;
         try
         {
             modelFromJson = ModelHelper.DeserializeWithNumberHandling(json, settings.GetType()) as IShopServicesSettingsModel;
         }
-        catch(JsonException)
+        catch(Exception e)
         {
             return BadRequest(json);
         }
@@ -230,7 +244,7 @@ public class HomeController : Controller
 
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    public IActionResult ShopList([ModelBinder(typeof(ModelJsonEnumerableBinder))]  IEnumerable<IShopModel> shops)
+    public IActionResult ShopList([ModelBinder(typeof(ModelJsonEnumerableBinder))]  IEnumerable<ShopModel> shops)
     {
         return PartialView("~/Views/Home/_ShopListPartial.cshtml", shops);
     }
@@ -281,7 +295,7 @@ public class HomeController : Controller
                     var shopImportSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab);
                     
                     if(shopImportSettings != null)
-                        selectedSettings.Update(shopImportSettings);
+                        _modelFactory.Update(selectedSettings, shopImportSettings);
                 }
             }
 

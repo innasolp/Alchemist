@@ -17,7 +17,15 @@ public static class ModelHelper
 
     public static object? DeserializeWithNumberHandling(string json, Type type)
     {
-        var option = new JsonSerializerOptions { NumberHandling = JsonNumberHandling.AllowReadingFromString, PropertyNameCaseInsensitive = true };
+        var option = new JsonSerializerOptions
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            PropertyNameCaseInsensitive = true,
+            IgnoreReadOnlyProperties = false,
+            IgnoreReadOnlyFields = true,
+            RespectRequiredConstructorParameters = true,
+            WriteIndented = true,
+        };
         return JsonSerializer.Deserialize(json, type, option);
     }
 
@@ -26,9 +34,12 @@ public static class ModelHelper
         var option = new JsonSerializerOptions
         {
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            IgnoreReadOnlyProperties = true,
+            RespectRequiredConstructorParameters = true,
+            PropertyNameCaseInsensitive = true,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
-                Modifiers = { Alchemist.Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
+                Modifiers = { Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(ServiceSettingsModel),
                 nameof(ServiceSettingsModel.JsonValue)) }
             }
         };

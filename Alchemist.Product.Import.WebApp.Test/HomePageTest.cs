@@ -1,8 +1,9 @@
-using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using System.Text.Json;
 using Xunit.Abstractions;
-using Alchemist.Product.Import.WebApp.Models;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -15,14 +16,11 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var response = await Page.GotoAsync(_webAppFactory.ServerAddress);
         Assert.True(response?.Ok);
 
-        var menudiv = Page.Locator("#menuDiv");
-        await Expect(menudiv).ToHaveCountAsync(1);
+        var menudiv = await this.ExpectSingleElementAsync(Page, "#menuDiv");       
 
-        var shopListPartialDiv = Page.Locator("#shopListPartialDiv");
-        await Expect(shopListPartialDiv).ToHaveCountAsync(1);
+        var shopListPartialDiv = await this.ExpectSingleElementAsync(Page, "#shopListPartialDiv");        
 
-        var shopTabsLocator = Page.Locator("#tabsMenuDiv");
-        await Expect(shopTabsLocator).ToHaveCountAsync(1);
+        var shopTabsLocator = await this.ExpectSingleElementAsync(Page, "#tabsMenuDiv");        
     }
 
     [Fact]
@@ -48,12 +46,10 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         await Task.Delay(1000);
 
-        var shopSettingsNameLocator = Page.Locator("#ShopSettingsName");
-        await Expect(shopSettingsNameLocator).ToHaveCountAsync(1);
+        var shopSettingsNameLocator = await this.ExpectSingleElementAsync(Page, "#ShopSettingsName");        
         await Expect(shopSettingsNameLocator).ToHaveValueAsync(productShopSettings.Name);
 
-        var urlLocator = Page.Locator("#ProductUrlFormat");
-        await Expect(urlLocator).ToHaveCountAsync(1);
+        var urlLocator = await this.ExpectSingleElementAsync(Page, "#ProductUrlFormat");       
         await Expect(urlLocator).ToHaveValueAsync(productShopSettings.ProductUrlFormat);
     }
 

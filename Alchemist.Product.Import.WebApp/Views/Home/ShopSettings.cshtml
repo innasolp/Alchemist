@@ -6,7 +6,6 @@
 @functions {
 
     public object GetServiceData() => JsonSerializer.Serialize(new { shopGuid = Model.ShopGuid, shopSettingsId = Model.Id, shopSettingsGuid = Model.Guid });
-    public string GetSubmitUrl() => Model.ShopSettingType == ShopSettingType.Product ? "/ShopSettings/Save/Products" : "/ShopSettings/Save/Category";
     public string GetServiceUploadOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + Model.ShopGuid + "', '" + Model.Guid + "', '" + serviceName + "', (data)=>{setValIfValid('#" + serviceName + "', data.serviceTypeName); " + UploadFromFileModel.onSuccess + " })";
     public string GetUploadServiceValueOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + Model.ShopGuid + "', '" + Model.Guid + "', '" + serviceName + "', (data)=>{" + UploadFromFileModel.onSuccess + " })";
     public string GetUploadShopSettingsOnChange(string id) => "setShopSettingsFromJson($('#loadSettingsFromJsonForm'), '" + id + "', '" + Model.ShopGuid + "', " + (int)Model.ShopSettingType + ")";
@@ -117,7 +116,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-primary form-button"
-                                    onclick="this.disabled=true;save($('#settingsForm'),'@GetSubmitUrl()', getFormData($('#settingsForm')), ()=> { this.disabled = false;}, (result)=> { this.disabled = false;}, (error)=>{this.disabled = false;});">
+                                    onclick="this.disabled=true;saveShopSettings($('#settingsForm'),'@Model.ShopSettingType.ToString()', this);">
                                 Save
                             </button>
                         </div>

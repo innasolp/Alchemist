@@ -12,7 +12,9 @@ public class ModelJsonEnumerableBinder(ILogger<ModelJsonEnumerableBinder> logger
     {
         IgnoreReadOnlyProperties = false,
         IgnoreReadOnlyFields = true,
-        RespectRequiredConstructorParameters = true    
+        RespectRequiredConstructorParameters = true    ,
+        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
+        PropertyNameCaseInsensitive = true,        
     };
 
     public async Task BindModelAsync(ModelBindingContext bindingContext)

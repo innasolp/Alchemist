@@ -165,15 +165,16 @@ public class HomeControllerTest : ControllerTest<HomeController>
     }
 
     [Fact]
-    public async Task IsTabChangedOkFalseWhenNonExistingTabSetting()
+    public async Task IsTabChangedBadRequestWhenNonExistingTabSetting()
     {
         await LoadShopsAsync();
         var homeController = CreateHomeController();
         var guid = _importFacade.GetShops().First().ShopGuid;
         string json = Guid.NewGuid().ToString();
 
-        var result = Assert.IsType<OkObjectResult>(await homeController.IsTabChanged(guid, 1, json));
-        Assert.False(Assert.IsType<bool>(result.Value));
+        var tab = Enum.GetValues(typeof(TabType)).Length + 1;
+        var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChanged(guid, tab, json));
+        Assert.Equal(tab, Assert.IsType<int>(result.Value));
     }
 
     [Fact]
@@ -224,8 +225,9 @@ public class HomeControllerTest : ControllerTest<HomeController>
     public async Task ShopListActionResultModelIsShopModelEnumerable()
     {
         var homeController = CreateHomeController();
-        var view = Assert.IsType<PartialViewResult>(homeController.ShopList([]));
-        Assert.IsAssignableFrom<IEnumerable<ShopModel>>(view.Model);
+        var view = Assert.IsType<PartialViewResult>(homeController.ShopList(_shops.Select(s=>new ShopModel(s.Id) { Name = s.Name})));
+        var shopModels = Assert.IsAssignableFrom<IEnumerable<ShopModel>>(view.Model);
+        Assert.Equal(_shops.Count, shopModels.Count());
     }
 
     [Fact]

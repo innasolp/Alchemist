@@ -4,23 +4,16 @@ using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
-public class ShopModel : IShopModel
+[method: JsonConstructor]
+public class ShopModel(int id) : IShopModel
 {
-    [JsonConstructor]
-    public ShopModel(int id)
-    {
-        Id = id;
-        Guid = Guid.NewGuid();
-    }
-    
-
     [JsonInclude]
-    public Guid Guid { get; private set; }
+    public Guid Guid { get; private set; } = Guid.NewGuid();
 
     [Required]
     public string Name { get; set; }
 
-    public int Id { get; set; }
+    public int Id { get; set; } = id;
 
     public bool IsDeprecated { get; set; } = false;
 

@@ -1,20 +1,26 @@
 ﻿using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
+[method: JsonConstructor]
 public abstract class SettingsModelBase(int shopId, Guid shopGuid) : ISettingsModel
 {
-    public Guid Guid { get; set; } = Guid.NewGuid();
+    [JsonInclude]
+    public Guid Guid { get; private set; } = Guid.NewGuid();
 
     public abstract TabType Tab { get; }
 
-    public Guid ShopGuid { get; set; } = shopGuid;
+    [JsonInclude]
+    public Guid ShopGuid { get; private set; } = shopGuid;
 
+    [JsonInclude]
     public int ShopId { get; set; } = shopId;
 
     [Required]
+    [JsonInclude]
     public string Name { get; set; }
 
     public override string ToString()

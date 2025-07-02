@@ -10,5 +10,7 @@ public interface IModelFactory
 
     ICategoryImportSettingsModel CreateCategoryImportSettingsModel(int shopId, Guid shopGuid);
 
-    IServiceSettingsModel CreateServiceSettingsModel(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid, string name);
+    IServiceSettingsModel CreateServiceSettingsModel(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid);
+
+    ICategoryUrlModel CreateRootCategory(Guid shopSettingsGuid);
 }

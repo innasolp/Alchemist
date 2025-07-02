@@ -19,9 +19,14 @@ public class ModelFactory : IModelFactory
         return new ProductsImportSettingsModel(shopId, shopGuid);
     }
 
-    public IServiceSettingsModel CreateServiceSettingsModel(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid, string name)
+    public ICategoryUrlModel CreateRootCategory(Guid shopSettingsGuid)
     {
-        return new ServiceSettingsModel(shopId, id, parentId, shopSettingsGuid, shopGuid, name);
+        return new CategoryUrlModel(shopSettingsGuid);
+    }
+
+    public IServiceSettingsModel CreateServiceSettingsModel(int shopId, int id, int parentId, Guid shopGuid, Guid shopSettingsGuid)
+    {
+        return new ServiceSettingsModel(shopId, id, parentId, shopSettingsGuid, shopGuid);
     }
 
     public IShopModel CreateShopModel(int shopId)

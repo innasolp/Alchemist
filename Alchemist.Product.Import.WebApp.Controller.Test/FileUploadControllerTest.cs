@@ -1,6 +1,5 @@
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
-using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Http;
@@ -9,23 +8,44 @@ using Moq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public class FileUploadControllerTest : ControllerTest<FileUploadController>
 {
+    private readonly ModelJsonConverter<IServiceSettingsModel> _serviceSettingsModelConverter;
+
+    private readonly ModelJsonConverter<IShopServicesSettingsModel> _shopImportSettingsJsonConverter;
+    public FileUploadControllerTest()
+    {
+        var defaultServiceProperties = new Dictionary<string, object>()
+        {
+            { nameof(IServiceSettingsModel.Id), 0 },
+            { nameof(IServiceSettingsModel.ParentSettingsId), 0 },
+            { nameof(IServiceSettingsModel.ShopId), 0 },
+            { nameof(IServiceSettingsModel.ShopGuid), Guid.Empty },
+            { nameof(IServiceSettingsModel.ShopSettingsGuid), Guid.Empty },
+        };
+        _serviceSettingsModelConverter = new ModelJsonConverter<IServiceSettingsModel>(defaultServiceProperties);
+
+        var defaultShopSettingsProperties = new Dictionary<string, object>()
+        {
+            { nameof(IShopServicesSettingsModel.Id), 0 },
+            { nameof(IShopServicesSettingsModel.ShopId), 0 },
+            { nameof(IShopServicesSettingsModel.ShopGuid), Guid.Empty }
+        };
+        _shopImportSettingsJsonConverter = new ModelJsonConverter<IShopServicesSettingsModel>(defaultShopSettingsProperties);
+    }
+
     private FileUploadController CreateFileUploadController()
     {
-        return new FileUploadController(_importFacade);
+        return new FileUploadController(_importFacade, ModelFactory);
     }
 
     private static async Task<T> ReadFromFileAsync<T>(string fileName, JsonSerializerOptions options )
         where T : class
     {
         var filePath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/{fileName}";
-        //return await filePath.ReadFromJsonFileAsync<T>() ??
-        //    throw new InvalidOperationException($"Can't deserialize file {fileName}");
         using FileStream s = File.OpenRead(filePath);
         T result = await JsonSerializer.DeserializeAsync<T>(s, options);
         s.Close();
@@ -166,20 +186,18 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         FillShopSettingsFields(categorySettings);
 
         await AssertUploadShopSettingsActionAsync(categorySettings as CategoryShopSettingsModel,
-            "ozoncategories.json");
-    }
+            "ozoncategories.json");//,
+            //[nameof(ICategoryShopSettingsModel.CategorySourceUrl)]);
+    }    
 
-    private async Task AssertUploadShopSettingsActionAsync<T>(T shopSettings, string fileName)//, string[] implementationPropertyNames)
-        where T: class, IShopServicesSettingsModel, new()
+    private async Task AssertUploadShopSettingsActionAsync<T>(T shopSettings, string fileName)
+        where T: class, IShopServicesSettingsModel
     {
-        var prevShopSettings = shopSettings.GetCopy();
-
-        //var props = GetShopImportSettingsSerializeProperties();
-        //props.AddRange(implementationPropertyNames);
+        var prevShopSettings = ModelFactory.GetCopy(shopSettings);
 
         var option = new JsonSerializerOptions
         {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
         };
 
         var fileShopSettings = await ReadFromFileAsync<T>(fileName, option);
@@ -244,9 +262,9 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         FillShopSettingsFields(shopSettings);
 
         Assert.True(_importFacade.TryGetServiceSettings(shopGuid, shopSettings.Guid, serviceName, out var prevService));
-        var copy = ModelFactoryMock.Object.GetCopy(prevService);
+        var copy = ModelFactory.GetCopy(prevService);
 
-        var fileService = await fileName.ReadFromFileAsync<ServiceSettingsModel>();
+        var fileService = await fileName.ReadFromFileAsync<ServiceSettingsModel>([_serviceSettingsModelConverter]);
 
         var formFile = GetFormFile(fileName);
 

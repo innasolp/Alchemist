@@ -9,6 +9,25 @@ namespace Alchemist.Product.Import.WebApp.Test.Infrastructure;
 
 internal static class PageTestExtensions
 {
+
+    public static async Task<ILocator> ExpectSingleElementAsync(this PageTest pageTest, ILocator parent, string expression)
+    {
+        var element = parent.Locator(expression);
+        await pageTest.Expect(element).ToHaveCountAsync(1);
+        await pageTest.Expect(element).ToBeVisibleAsync();
+
+        return element;
+    }
+
+    public static async Task<ILocator> ExpectSingleElementAsync(this PageTest pageTest, IPage page, string expression)
+    {
+        var element = page.Locator(expression);
+        await pageTest.Expect(element).ToHaveCountAsync(1);
+        await pageTest.Expect(element).ToBeVisibleAsync();
+
+        return element;
+    }
+
     public static async Task<ServiceSettingsModel> FillServiceSettingsInputsAsync(this ILocator serviceForm, ServiceSettingsModel serviceSettings,  string serviceName)
     {   
         serviceSettings.ServiceTypeName = Guid.NewGuid().ToString();
@@ -99,17 +118,18 @@ internal static class PageTestExtensions
         var serviceForm = await pageTest.ExpectShowServiceModalFormAsync(page, async (page) => await pageTest.ExpectShowServiceSettingsButtonAsync(page, serviceName));
 
         var serviceSettings = shopSettings.FirstOrDefault(s => s.Name == serviceName && s.ParentSettingsId == shopImportSettings.Id)?.ToImportServiceSettings<ServiceSettingsModel>()
-           ?? new ServiceSettingsModel
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, Guid.NewGuid(), Guid.NewGuid())
            {
                Name = serviceName
            };
         serviceSettings = await serviceForm.FillServiceSettingsInputsAsync(serviceSettings, serviceName);
 
-        var saveButton = serviceForm.Locator("button[class='btn btn-primary']");
-        await pageTest.Expect(saveButton).ToHaveCountAsync(1);
+        var saveButton = await pageTest.ExpectSingleElementAsync(serviceForm, "button[class='btn btn-primary']");        
         await saveButton.ClickAsync();
 
         await pageTest.Expect(serviceForm.Locator("#AssemblyPath-error")).Not.ToBeVisibleAsync();
+
+        await Task.Delay(500);
 
         await pageTest.Expect(serviceForm).Not.ToBeVisibleAsync();
 

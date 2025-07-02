@@ -11,7 +11,8 @@ public class ModelJsonBinder(ILogger<ModelJsonBinder> logger) : IModelBinder
 
     private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.General)
     {
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
+        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        PropertyNameCaseInsensitive = true
     };
 
     public async Task BindModelAsync(ModelBindingContext bindingContext)
@@ -36,7 +37,7 @@ public class ModelJsonBinder(ILogger<ModelJsonBinder> logger) : IModelBinder
             }
 
             var model = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
-            if (model.Values.Count == 0)
+            if(model.Values.Count == 0 )
             {
                 _logger.LogError($"Model {bindingContext.ModelName} does not contaons values");
                 bindingContext.Result = ModelBindingResult.Failed();

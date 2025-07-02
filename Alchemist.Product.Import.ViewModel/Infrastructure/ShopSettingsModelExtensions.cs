@@ -61,7 +61,7 @@ public static class ShopSettingsModelExtensions
             shopSettings.Services.Add(service);
     }
 
-    private static void UpdateShopSettingsCore(this IShopServicesSettingsModel target, IShopServicesSettingsModel source)
+    private static void UpdateShopSettingsCore(this IModelFactory modelFactory, IShopServicesSettingsModel target, IShopServicesSettingsModel source)
     {
         target.Name = source.Name;
         target.FileName = source.FileName;
@@ -84,10 +84,15 @@ public static class ShopSettingsModelExtensions
         {
             var targetService = target.Services.OfType<IServiceSettingsModel>().FirstOrDefault(s => s.Guid == service.Guid);
             if (targetService == null)
-            {
-                service.ShopSettingsGuid = target.Guid;
-                service.ShopGuid = target.ShopGuid;
-                target.Services.Add(service);
+            {                
+                targetService = modelFactory.CreateServiceSettingsModel( shopId: target.ShopId, 
+                    id: service.Id,
+                    parentId: target.Id,
+                    shopGuid: target.ShopGuid, 
+                    shopSettingsGuid: target.Guid);
+                targetService.Name = service.Name;
+                targetService.Update(service);
+                target.Services.Add(targetService);
             }
             else
                 targetService.Update(service);
@@ -101,9 +106,9 @@ public static class ShopSettingsModelExtensions
         target.Perfomance = source.Perfomance;
     }
 
-    public static void UpdateProductShopSettings(this IProductShopSettingsModel target, IProductShopSettingsModel source)
+    public static void UpdateProductShopSettings(this IModelFactory modelFactory, IProductShopSettingsModel target, IProductShopSettingsModel source)
     {
-        target.UpdateShopSettingsCore(source);
+        modelFactory.UpdateShopSettingsCore(target, source);
 
         target.ProductUrlFormat = source.ProductUrlFormat;
         target.CategoryUrlFormat = source.CategoryUrlFormat;
@@ -118,9 +123,10 @@ public static class ShopSettingsModelExtensions
         {
             var targetRootCategory = target.RootCategories.OfType<ICategoryUrlModel>().FirstOrDefault(r => r.Guid == rootCategory.Guid);
             if (targetRootCategory == null)
-            {
-                rootCategory.ShopSettingsGuid = target.Guid;
-                target.RootCategories.Add(rootCategory);
+            {                
+                targetRootCategory = modelFactory.CreateRootCategory(target.Guid);
+                targetRootCategory.Update(rootCategory);
+                target.RootCategories.Add(targetRootCategory);
             }
             else
                 targetRootCategory.Update(rootCategory);
@@ -141,9 +147,9 @@ public static class ShopSettingsModelExtensions
         target.Url = source.Url;
     }
 
-    public static void UpdateCategoryShopSettings(this ICategoryShopSettingsModel target, ICategoryShopSettingsModel source)
+    public static void UpdateCategoryShopSettings(this IModelFactory modelFactory, ICategoryShopSettingsModel target, ICategoryShopSettingsModel source)
     {
-        target.UpdateShopSettingsCore(source);
+        modelFactory.UpdateShopSettingsCore(target,source);
 
         target.CategorySourceUrl = source.CategorySourceUrl;
     }
@@ -154,7 +160,7 @@ public static class ShopSettingsModelExtensions
         target.CategorySourceUrl = source.CategorySourceUrl;
     }
 
-    public static void Update(this IShopServicesSettingsModel target, IShopImportSettings source)
+    public static void Update(this IModelFactory modelFactory, IShopServicesSettingsModel target, IShopImportSettings source)
     {
         if (target.ShopSettingType != source.ShopSettingType)
             throw new InvalidOperationException("different shop settings types");
@@ -164,10 +170,10 @@ public static class ShopSettingsModelExtensions
 
         if (source.ShopSettingType == ShopSettingType.Product && source is IProductShopSettingsModel sourceProducts
             && target is IProductShopSettingsModel targetProducts)
-            targetProducts.UpdateProductShopSettings(sourceProducts);
+            modelFactory.UpdateProductShopSettings(targetProducts, sourceProducts);
         else if (source.ShopSettingType == ShopSettingType.Category && source is ICategoryShopSettingsModel sourceCategories
             && target is ICategoryShopSettingsModel targetCategories)
-            targetCategories.UpdateCategoryShopSettings(sourceCategories);
+            modelFactory.UpdateCategoryShopSettings(targetCategories, sourceCategories);
         else
             throw new InvalidOperationException("different source and target types");
     }

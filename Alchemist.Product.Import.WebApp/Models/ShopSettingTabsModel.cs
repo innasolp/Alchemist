@@ -5,6 +5,7 @@ using Alchemist.Product.Import.Model;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
+[method: JsonConstructor]
 public class ShopSettingTabsModel(int shopId, Guid shopGuid) : SettingsModelBase(shopId, shopGuid), IShopSettingTabsModel
 {
     [JsonIgnore]
