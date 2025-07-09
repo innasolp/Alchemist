@@ -10,7 +10,7 @@
     var selectedTabViewName = (ViewData["Tab"] is TabType tabType) ? TabHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType) : TabHelper.TabViewNames.FirstOrDefault();
  }
 
-<ul class="left-menu-ul" id="shopsList">
+<ul class="left-menu-ul shopsList">
     <li class="left-menu-ul">
         <a id="createNewShop"
            onclick="showShopModal('/Shop/New', null, (result)=>{ if(!result) return; tabChanged($('#settingsForm'), ()=>{$('#newShopForm')[0].submit(); });})">Новый</a>

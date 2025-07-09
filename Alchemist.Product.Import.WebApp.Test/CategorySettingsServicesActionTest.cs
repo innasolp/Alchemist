@@ -15,7 +15,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 {
     private async Task ExpectSopSettingsCategoryTabAsync(IPage page)
     {
-        var tabsMenuDiv = await this.ExpectSingleElementAsync(page, "#tabsMenuDiv");
+        var tabsMenuDiv = await this.ExpectSingleElementAsync(page, ".tabsMenuDiv");
 
         await Expect(tabsMenuDiv.Locator(".menu_header")).ToHaveCountAsync(2);
 
@@ -34,7 +34,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
     {
         var settingsForm = page.Locator("#settingsForm");
 
-        var serviceSettingsTable = await this.ExpectSingleElementAsync(settingsForm, "#servicesUl");        
+        var serviceSettingsTable = await this.ExpectSingleElementAsync(settingsForm, ".services");        
 
         return serviceSettingsTable;
     }
@@ -44,7 +44,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
         var serviceSettingsForm = page.Locator("#serviceSettingsForm");
         await Expect(serviceSettingsForm).Not.ToBeVisibleAsync();
 
-        var addServiceButton = await this.ExpectSingleElementAsync(serviceTable, "#addService");        
+        var addServiceButton = await this.ExpectSingleElementAsync(serviceTable, ".addService");        
 
         await addServiceButton.ClickAsync();
 

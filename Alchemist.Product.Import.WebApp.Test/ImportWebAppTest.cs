@@ -200,7 +200,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
     protected async Task ExpectSelectTabAsync(IPage page, TabType tabType, string tabText, TabType prevTabType)
     {
-        var menu = page.Locator("#menuDiv");
+        var menu = page.Locator(".menuDiv");
         var tab = menu.GetByText(TabHelper.TabNames[tabType]);
         await Expect(tab).ToHaveCountAsync(1);
 
@@ -212,19 +212,19 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
           .ToHaveCountAsync(1);
 
         await Expect(page.GetByText(tabText)).ToHaveCountAsync(1);
-        await Expect(page.Locator("#tabsMenuDiv")).ToHaveCountAsync(0);
+        await Expect(page.Locator(".tabsMenuDiv")).ToHaveCountAsync(0);
     }
 
     protected async Task ExpectSelectedTabAsync(IPage page, TabType tabType)
     {
-        var menu = page.Locator("#menuDiv");
+        var menu = page.Locator(".menuDiv");
         await Expect(menu.Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[tabType]))
           .ToHaveCountAsync(1);
     }
 
     protected async Task ClickSelectTabAsync(IPage page, TabType tabType)
     {
-        var menu = page.Locator("#menuDiv");
+        var menu = page.Locator(".menuDiv");
         var tab = menu.GetByText(TabHelper.TabNames[tabType]);
         await Expect(tab).ToHaveCountAsync(1);
 
