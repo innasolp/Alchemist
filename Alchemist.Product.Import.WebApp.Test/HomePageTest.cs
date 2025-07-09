@@ -16,11 +16,11 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var response = await Page.GotoAsync(_webAppFactory.ServerAddress);
         Assert.True(response?.Ok);
 
-        var menudiv = await this.ExpectSingleElementAsync(Page, "#menuDiv");       
+        var menudiv = await this.ExpectSingleElementAsync(Page, ".menuDiv");       
 
-        var shopListPartialDiv = await this.ExpectSingleElementAsync(Page, "#shopListPartialDiv");        
+        var shopListPartialDiv = await this.ExpectSingleElementAsync(Page, ".shopListPartialDiv");        
 
-        var shopTabsLocator = await this.ExpectSingleElementAsync(Page, "#tabsMenuDiv");        
+        var shopTabsLocator = await this.ExpectSingleElementAsync(Page, ".tabsMenuDiv");        
     }
 
     [Fact]
@@ -33,10 +33,10 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var shopSetting = _shopSettings.First(s => s.ShopId == shop.Id && s.Type == Interfaces.ShopSettingType.Product);
         var productShopSettings = JsonSerializer.Deserialize<ProductShopSettingsModel>(shopSetting.JsonValue);
 
-        await Expect(Page.Locator("#menuDiv").Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[TabType.Shop]))
+        await Expect(Page.Locator(".menuDiv").Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[TabType.Shop]))
            .ToHaveCountAsync(1);
 
-        var tabsLocator = Page.Locator("#tabsMenuDiv");
+        var tabsLocator = Page.Locator(".tabsMenuDiv");
         await Expect(tabsLocator.Locator("div[class = 'shopTab menu_item-a selected-a']").GetByText(TabHelper.ShopSettingTypeNames[ShopSettingType.Product]))
             .ToHaveCountAsync(1);
 

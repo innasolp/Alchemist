@@ -1,5 +1,5 @@
 ﻿@using System.Text.Json
-@using Alchemist.Product.Import.Model
+
 @model ProductShopSettingsModel
 
 <div class="form-group">
@@ -14,7 +14,7 @@
 </div>
 
 <div class="form-group-table">
-    <ul class="table-ul" id="rootCategoriesUl">
+    <ul class="table-ul rootCategories">
         <li class="table-ul header">
             <div class="flex">
                 <div class="table_header">Item ID</div>
@@ -24,7 +24,7 @@
         </li>
         @foreach (var category in (Model.RootCategories ?? []))
         {
-            <li id="rootcategory_li_@(category.Guid)" class="table-ul rootcategory_li">
+            <li class="table-ul rootcategory_li">
                 <div class="flex rootCategoryRow">
                     <div class="table_cell item" >@category.Item</div>
                     <div class="table_cell url">@category.Url</div>
@@ -43,18 +43,18 @@
         }
         <li class="table-ul">
             <div>
-                <a id="addRootCategory"
+                <a class="addRootCategory"
                    onclick="showRootCategory({shopSettingsGuid:'@Model.Guid'})">Add category</a>
             </div>         
         </li>
         <li class="table-ul">
-            <div class="modal fade" id="divRootCategoryModal" role="dialog">
+            <div class="modal fade rootCategoryModal" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <div class="modal-body" id="categoryModalBodyDiv">
+                        <div class="modal-body categoryModalBody">
                         </div>
                     </div>
                 </div>

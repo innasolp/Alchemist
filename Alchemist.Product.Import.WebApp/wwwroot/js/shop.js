@@ -1,11 +1,11 @@
 ﻿function showShopModal(url, data, onHide = null) {   
 
-    $("#modalBodyDivShop").on('load', function (event) {
+    $(".shopModalBody").on('load', function (event) {
         console.log(event);
         console.trace(event);
     });    
 
-    showItemModal($("#divModalShop"), $("#modalBodyDivShop"), url, data, () => { if (onHide != null) onSaveShop(onHide); })
+    showItemModal($(".shopModal"), $(".shopModalBody"), url, data, () => { if (onHide != null) onSaveShop(onHide); })
 }
 
 function onSaveShop(onHide = null) {
@@ -18,8 +18,8 @@ function onSaveShop(onHide = null) {
 }
 
 function closeShopModal() {
-    $("#divModalShop").append("<input type='hidden' id='shopModalResult' value='success'/>");
-    $("#divModalShop").modal("hide");    
+    $(".shopModal").append("<input type='hidden' id='shopModalResult' value='success'/>");
+    $(".shopModal").modal("hide");    
 }
 
 function saveShop(newShopGuidSelector) {
@@ -69,7 +69,7 @@ async function updateShops(divPartialShops, tabData = null, settingsPartialDiv =
                         shopLi.children('div').children('form').append(editButton);
                     }
 
-                    $('#menuDiv').load('/Home/TabsMenu', tabData,
+                    $('.menuDiv').load('/Home/TabsMenu', tabData,
                         function (response, status, xhr) {
                             settingsPartialDiv.load('/Home/LoadTab', tabData);
                         });

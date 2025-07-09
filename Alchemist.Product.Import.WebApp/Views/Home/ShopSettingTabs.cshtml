@@ -18,7 +18,7 @@
 }
 <hr />
 <div class="tabs">
-    <div class="menu" id="tabsMenuDiv">
+    <div class="menu tabsMenuDiv">
         <div class="shopTab @CssHelper.GetAnchorMenuItemStyle(Model.SelectedSettingsTab, ShopSettingType.Product)">
             <a onload="@AnchorOnClick(ShopSettingType.Product)"
                onclick="redirectToShopSettings(@GetServiceData(ShopSettingType.Product),this.parentElement)"
@@ -30,7 +30,7 @@
                 class="display-8  menu_header">@TabHelper.ShopSettingTypeNames[ShopSettingType.Category]</a>
         </div>
     </div>
-    <div id="shopSettingsPartialDiv">
+    <div class="shopSettingsPartialDiv">
         @await Html.PartialAsync($"~/Views/Home/ShopSettings.cshtml", selectedShopSettings)        
     </div>
 </div>

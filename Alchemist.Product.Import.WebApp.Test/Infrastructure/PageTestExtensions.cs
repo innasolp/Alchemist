@@ -101,7 +101,7 @@ internal static class PageTestExtensions
 
         await pageTest.ExpectCheckServiceSettingsFieldsAsync(serviceForm, serviceSettings);
 
-        var closeModal = page.Locator("#divModal").Locator("a[class='close']");
+        var closeModal = page.Locator(".serviceSettingsModal").Locator("a[class='close']");
         await closeModal.ClickAsync();
         await pageTest.Expect(serviceForm).Not.ToBeVisibleAsync();
     }

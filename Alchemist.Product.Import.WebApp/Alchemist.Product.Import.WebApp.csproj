@@ -31,7 +31,7 @@
     <Content Update="wwwroot\js\fileUpload.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="wwwroot\js\settings.js">
+    <Content Update="wwwroot\js\shopSettings.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\js\site.js">

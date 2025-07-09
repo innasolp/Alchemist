@@ -56,7 +56,7 @@ public class ShopActionsTest : ImportWebAppTest
 
         await Expect(shopFormLocator).ToBeHiddenAsync();
 
-        await Expect(Page.Locator("#shopsList").GetByText(newShop.Name)).ToHaveCountAsync(1);
+        await Expect(Page.Locator(".shopsList").GetByText(newShop.Name)).ToHaveCountAsync(1);
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class ShopActionsTest : ImportWebAppTest
 
         await Expect(shopFormLocator).ToBeHiddenAsync();
 
-        await Expect(Page.Locator("#shopsList").GetByText(shop.Name)).ToHaveCountAsync(1);
-        await Expect(Page.Locator("#shopsList").GetByText(copy.Name)).ToHaveCountAsync(0);
+        await Expect(Page.Locator(".shopsList").GetByText(shop.Name)).ToHaveCountAsync(1);
+        await Expect(Page.Locator(".shopsList").GetByText(copy.Name)).ToHaveCountAsync(0);
     }
 }
