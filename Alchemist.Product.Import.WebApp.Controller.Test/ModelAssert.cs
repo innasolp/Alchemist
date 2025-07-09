@@ -116,7 +116,15 @@ public static class ModelAssert
         if (!string.IsNullOrEmpty(expected.ImplementationTypeName) && !string.IsNullOrEmpty(result.ImplementationTypeName))
             Assert.NotEqual(expected.ImplementationTypeName, result.ImplementationTypeName);
     }
-    
+
+    private static bool IsEqual(this IServiceSettingsModel source, IServiceSettingsModel target)
+    {
+        return target.Guid == source.Guid
+        || (!string.IsNullOrEmpty(source.Name) && !string.IsNullOrEmpty(target.Name) && target.Name == source.Name)
+        || (!string.IsNullOrEmpty(source.ServiceTypeName) && !string.IsNullOrEmpty(target.ServiceTypeName) &&
+                    target.ServiceTypeName == source.ServiceTypeName);
+    }
+
     internal static void EqualCollections(IEnumerable<ServiceSettingsModel> expected, IEnumerable<ServiceSettingsModel> result)
     {
         var expectedList = expected.ToList();

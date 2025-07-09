@@ -136,21 +136,7 @@ public class ImportFacade(IModelFactory modelFactory) : IImportFacade
         tabSettings = shopImportModel.GetTab(tab);
 
         return true;
-    }
-
-    public bool TryGetLastSelectedSettings(Guid shopGuid, TabType tab, out ISettingsModel tabSettings)
-    {
-        tabSettings = default;
-
-        if (!_shopImports.TryGetValue(shopGuid, out var shopImport)
-              || shopImport == null)
-            return false;
-
-        tabSettings = shopImport.GetLastSelectedSettings(tab);
-
-        return true;
-    }   
-    
+    }    
     
     public ShopImportModel CreateDefaultShopImport()
     {

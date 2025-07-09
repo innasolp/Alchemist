@@ -19,10 +19,7 @@ public class ModelJsonEnumerableBinder(ILogger<ModelJsonEnumerableBinder> logger
 
     public async Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        if (bindingContext == null)
-        {
-            throw new ArgumentNullException(nameof(bindingContext));
-        }
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
         if (!typeof(IEnumerable<IModel>).IsAssignableFrom(bindingContext.ModelType))
         {

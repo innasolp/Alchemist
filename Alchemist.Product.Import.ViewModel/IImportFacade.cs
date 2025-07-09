@@ -25,8 +25,6 @@ public interface IImportFacade
 
     bool TryGetTab(Guid shopGuid, TabType tab, out ITabModel settings);
 
-    bool TryGetLastSelectedSettings(Guid shopGuid, TabType tab, out ISettingsModel settings);
-
     void Reset();
 
     ShopImportModel CreateDefaultShopImport();

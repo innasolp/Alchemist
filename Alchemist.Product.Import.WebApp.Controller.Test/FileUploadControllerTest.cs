@@ -57,7 +57,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadShopSettingsBadRequestWhenFileIsNull()
     {
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettings(Guid.Empty, (int)ShopSettingType.Product, null));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettingsAsync(Guid.Empty, (int)ShopSettingType.Product, null));
         Assert.Equal("file", Assert.IsType<string>(actionResult.Value));
     }
     
@@ -66,7 +66,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadServiceSettingsBadRequestWhenFileIsNull()
     {
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.Empty, Guid.Empty, "", null));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.Empty, Guid.Empty, "", null));
         Assert.Equal("file", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -76,7 +76,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.Empty, Guid.Empty, "", formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.Empty, Guid.Empty, "", formFile));
         Assert.Equal("shopGuid", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -86,7 +86,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettings(Guid.Empty, (int)ShopSettingType.Product, formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettingsAsync(Guid.Empty, (int)ShopSettingType.Product, formFile));
         Assert.Equal("shopGuid", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -96,7 +96,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.NewGuid(), Guid.Empty, "", formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.NewGuid(), Guid.Empty, "", formFile));
         Assert.Equal("shopSettingsGuid", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -106,7 +106,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.NewGuid(), Guid.NewGuid(), "", formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.NewGuid(), Guid.NewGuid(), "", formFile));
         Assert.Equal("serviceSettingsName", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -117,7 +117,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
         var shopGuid = Guid.NewGuid();
-        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadServiceSettings(shopGuid, Guid.NewGuid(), "importservice", formFile));
+        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadServiceSettingsAsync(shopGuid, Guid.NewGuid(), "importservice", formFile));
         Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
@@ -128,7 +128,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var formFile = GetFormFile(fileName);
         var shopGuid = Guid.NewGuid();
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadShopSettings(shopGuid, (int)ShopSettingType.Product, formFile));
+        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadShopSettingsAsync(shopGuid, (int)ShopSettingType.Product, formFile));
         Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
@@ -205,7 +205,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileUploadController = CreateFileUploadController();
         var formFile = GetFormFile(fileName);
 
-        var uploadedShopSettingsResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadShopSettings(shopSettings.ShopGuid, (int)shopSettings.ShopSettingType, formFile));
+        var uploadedShopSettingsResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadShopSettingsAsync(shopSettings.ShopGuid, (int)shopSettings.ShopSettingType, formFile));
         var uploadedShopSettings = Assert.IsType<T>(uploadedShopSettingsResult.Value);
         Assert.Equal(fileName, uploadedShopSettings.FileName);
 
@@ -270,7 +270,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
 
         var fileUploadController = CreateFileUploadController();
 
-        var uploadedServiceResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, serviceName, formFile));
+        var uploadedServiceResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadServiceSettingsAsync(shopSettings.ShopGuid, shopSettings.Guid, serviceName, formFile));
         var uploadedService = Assert.IsType<ServiceSettingsModel>(uploadedServiceResult.Value);
         Assert.NotNull(uploadedService);
         Assert.Equal(fileName, uploadedService.FileName);

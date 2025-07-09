@@ -198,46 +198,6 @@ public static class ShopSettingsModelExtensions
             : (shopSettingTabs?.ShopCategoriesSettings?.Guid == shopSettingsGuid ? shopSettingTabs.ShopCategoriesSettings : null);
     }
 
-    public static bool FieldsEquals(this IShopServicesSettingsModel source, IShopServicesSettingsModel? other)
-    {
-        return other != null && source.ShopSettingType == other.ShopSettingType
-            && ((string.IsNullOrEmpty(source.Name) && string.IsNullOrEmpty(other.Name))
-                || string.Equals(source.Name, other.Name, StringComparison.InvariantCultureIgnoreCase))
-            && source.ImportService.Equals(other.ImportService) != false
-            && source.WebLoader.Equals(other.WebLoader) != false
-            && source.BrowserDataLoader.Equals(other.BrowserDataLoader) != false
-            && source.RequestHeaders.Equals(other.RequestHeaders) != false;
-    }
-
-    public static bool FieldsEquals(this IShopServicesSettingsModel source, IShopImportSettings? other, bool withServices = true)
-    {
-        return other != null && source.ShopSettingType == other.ShopSettingType
-            && ((string.IsNullOrEmpty(source.Name) && string.IsNullOrEmpty(other.Name))
-                || string.Equals(source.Name, other.Name, StringComparison.InvariantCultureIgnoreCase))
-                && (!withServices || 
-            ( source.ImportService.FieldsEquals(other.ImportService) != false
-            && source.WebLoader.FieldsEquals(other.WebLoader) != false
-            && source.BrowserDataLoader.FieldsEquals(other.BrowserDataLoader) != false
-            && source.RequestHeaders.FieldsEquals(other.RequestHeaders) != false))
-            && ((source.ShopSettingType == ShopSettingType.Product && EqualsProductShopSettings(source as IProductShopSettingsModel, other as IProductShopImportSettings))
-            || (source.ShopSettingType == ShopSettingType.Category && EqualsCategoryShopSettings(source as ICategoryShopSettingsModel, other as ICategoryShopImportSettings)));
-    }
-
-    private static bool EqualsProductShopSettings(this IProductShopSettingsModel source, IProductShopImportSettings? other)
-    {
-        return other != null
-            && ((string.IsNullOrEmpty(source.ProductUrlFormat) && string.IsNullOrEmpty(other.ProductUrlFormat))
-                || string.Equals(source.ProductUrlFormat, other.ProductUrlFormat, StringComparison.InvariantCultureIgnoreCase))
-            && ((string.IsNullOrEmpty(source.CategoryUrlFormat) && string.IsNullOrEmpty(other.CategoryUrlFormat))
-                || string.Equals(source.CategoryUrlFormat, other.CategoryUrlFormat, StringComparison.InvariantCultureIgnoreCase))
-                && (source.RootCategories.Count == other.RootCategories.Length
-                      && source.RootCategories.OfType<ICategoryUrlModel>().All(c => other.RootCategories.Any(r => r.Item == c.Item && r.Url == c.Url)));
-    }
-
-    private static bool EqualsCategoryShopSettings(this ICategoryShopSettingsModel source, ICategoryShopImportSettings? other)
-    {
-        return other != null
-            && ((string.IsNullOrEmpty(source.CategorySourceUrl) && string.IsNullOrEmpty(other.CategorySourceUrl))
-                || string.Equals(source.CategorySourceUrl, other.CategorySourceUrl, StringComparison.InvariantCultureIgnoreCase));
-    }    
+ 
+ 
 }

@@ -69,7 +69,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     public async Task SaveActionIsBadRequestWhenShopIsNullAsync()
     {
         var shopController = CreateShopController();
-        Assert.IsType<BadRequestObjectResult>(await shopController.Save(null));
+        Assert.IsType<BadRequestObjectResult>(await shopController.SaveAsync(null));
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
 
         var shopController = CreateShopController();
         var shop = new ShopModel(_importFacade.GetShops().First().Shop.Id);
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(await shopController.Save(shop));
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(await shopController.SaveAsync(shop));
         var notFoundShop = Assert.IsType<ShopModel>(notFoundResult.Value);
         Assert.Equal(shop.Id, notFoundShop.Id);
         Assert.Equal(shop.Guid, notFoundShop.Guid);
@@ -93,7 +93,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
         _shopDataServiceMock.Setup(s => s.CreateShop(It.IsAny<IShop>())).
             Returns(CreateShopThrowsExceptionAsync);
 
-        var internalServerErrorResult = Assert.IsType<ObjectResult>(await shopController.Save(shop));
+        var internalServerErrorResult = Assert.IsType<ObjectResult>(await shopController.SaveAsync(shop));
         Assert.Equal(StatusCodes.Status500InternalServerError, internalServerErrorResult.StatusCode);       
     }
 
@@ -113,7 +113,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
             Returns(CreateShopAsync);
         var prevShopCount = _importFacade.GetShops().Count;
 
-        var okResult = Assert.IsType<OkObjectResult>(await shopController.Save(shop));
+        var okResult = Assert.IsType<OkObjectResult>(await shopController.SaveAsync(shop));
         Assert.IsType<ShopModel>(okResult.Value);       
         Assert.Equal(prevShopCount + 1, _importFacade.GetShops().Count);
         Assert.Contains(_importFacade.GetShops(), s => s.Shop.Name == shop.Name);
@@ -136,7 +136,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
             Returns(UpdateShopAsync);
         var prevShopCount = _importFacade.GetShops().Count;
 
-        var okResult = Assert.IsType<OkObjectResult>(await shopController.Save(shop as ShopModel));
+        var okResult = Assert.IsType<OkObjectResult>(await shopController.SaveAsync(shop as ShopModel));
         Assert.Equal(shop.Guid, Assert.IsType<ShopModel>(okResult.Value).Guid);
         Assert.Equal(prevShopCount, _importFacade.GetShops().Count);
         Assert.Contains(_importFacade.GetShops(), s => s.Shop.Name == shop.Name);

@@ -115,9 +115,20 @@ public class HomeController : Controller
         };
     }
 
+    private static ISettingsModel GetLastSelectedSettings(ShopImportModel shopImport, TabType tab)
+    {
+        return tab switch
+        {
+            TabType.Shop => shopImport.ShopSettingTabs.GetShopSettingsByType((shopImport.ShopSettingTabs  as ShopSettingTabsModel).SelectedSettingsTab),
+            TabType.Products => shopImport.ImportProducts,
+            TabType.Categories => shopImport.ImportCategories,
+            _ => throw new InvalidOperationException($"No tab type with value {tab}"),
+        };
+    }
+
     [ProducesResponseType<ViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
         var shopGuid = GetCurrentShopGuid();
         var tab = GetCurrentTabOrDefault();
@@ -126,10 +137,10 @@ public class HomeController : Controller
             ? GetIndexViewModel((Guid)shopGuid, tab)
             : GetDefaultIndexViewModel();
 
-        if (viewModel.SelectedShopImport != null)        
-            SetCurrentShopGuid(viewModel.SelectedShopImport.ShopGuid);          
-        else        
-            viewModel.SelectedShopImport = _importFacade.CreateDefaultShopImport();        
+        if (viewModel.SelectedShopImport != null)
+            SetCurrentShopGuid(viewModel.SelectedShopImport.ShopGuid);
+        else
+            viewModel.SelectedShopImport = _importFacade.CreateDefaultShopImport();
 
         viewModel.SelectedTabModel = viewModel.SelectedShopImport.GetTab(viewModel.SelectedTab);
 
@@ -142,9 +153,9 @@ public class HomeController : Controller
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ActionName("Index")]
-    public async Task<IActionResult> IndexRouteAsync(Guid shopGuid, int tab)
+    public IActionResult IndexRoute(Guid shopGuid, int tab)
     {
-        return await IndexAsync(shopGuid, tab);
+        return Index(shopGuid, tab);
     }
 
     [Route("Home/Index")]
@@ -153,16 +164,16 @@ public class HomeController : Controller
     [ProducesResponseType<BadRequestResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ActionName("Index")]
-    public async Task<IActionResult> IndexFromQueryAsync([FromQuery] Guid shopGuid, [FromQuery] int tab)
+    public IActionResult IndexFromQuery([FromQuery] Guid shopGuid, [FromQuery] int tab)
     {
-        return await IndexAsync(shopGuid, tab);
+        return Index(shopGuid, tab);
     }
 
-    private async Task<IActionResult> IndexAsync(Guid shopGuid, int tab)
+    private IActionResult Index(Guid shopGuid, int tab)
     {
         try
         {
-            if (shopGuid == Guid.Empty || tab <0 || tab > (int)Enum.GetValues<TabType>().Max())
+            if (shopGuid == Guid.Empty || tab < 0 || tab > (int)Enum.GetValues<TabType>().Max())
                 return BadRequest();
 
             var viewModel = GetIndexViewModel(shopGuid, (TabType)tab);
@@ -179,11 +190,12 @@ public class HomeController : Controller
         }
     }
 
+    [Route("Home/IsTabChanged")]
     [HttpPost]
     [ProducesResponseType<OkResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]    
-    public async Task<IActionResult> IsTabChanged(Guid shopGuid, int tab, string json)
+    public async Task<IActionResult> IsTabChangedAsync(Guid shopGuid, int tab, string json)
     {
         if (string.IsNullOrEmpty(json)) return BadRequest(json);
 
@@ -193,7 +205,7 @@ public class HomeController : Controller
         ISettingsModel settings;
         try
         {
-            settings = shopImport.GetLastSelectedSettings((TabType)tab);
+            settings = GetLastSelectedSettings(shopImport, (TabType)tab);
         }
         catch(InvalidOperationException e)
         {
@@ -201,10 +213,10 @@ public class HomeController : Controller
             return BadRequest(tab);
         }
 
-        IShopServicesSettingsModel modelFromJson;
+        ISettingsModel modelFromJson;
         try
         {
-            modelFromJson = ModelHelper.DeserializeWithNumberHandling(json, settings.GetType()) as IShopServicesSettingsModel;
+            modelFromJson = ModelHelper.DeserializeWithNumberHandling(json, settings.GetType()) as ISettingsModel;
         }
         catch(Exception e)
         {
@@ -214,21 +226,24 @@ public class HomeController : Controller
         if (modelFromJson == null) return Ok(false);
 
         if ((TabType)tab != TabType.Shop)
+            //todo
             return Ok(!settings.Equals(modelFromJson));
 
         var originalSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
         if (originalSettings == null)
-            //todo
+           //todo
             return Ok(true);
 
-        //todo
-        return Ok(!modelFromJson.FieldsEquals(originalSettings, false));
+        var shopSettings = settings as ShopSettingsModel;
+        return Ok(!((ShopSettingsModel)modelFromJson).FieldsEquals(originalSettings)
+            && shopSettings.InnersEquals(originalSettings));
     }
 
+    [Route("Home/UpdateShops")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateShops()
+    public async Task<IActionResult> UpdateShopsAsync()
     {
         try
         {
@@ -265,10 +280,11 @@ public class HomeController : Controller
         return PartialView("~/Views/Home/_TabsMenuPartial.cshtml", shopImport.GetTab((TabType)tab));
     }
 
+    [Route("Home/LoadTab")]
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> LoadTab(Guid? shopGuid, int tab, string tabView)
+    public async Task<IActionResult> LoadTabAsync(Guid? shopGuid, int tab, string tabView)
     {
         try
         {
@@ -286,13 +302,15 @@ public class HomeController : Controller
 
             if((TabType)tab == TabType.Shop)
             {
-                IShopServicesSettingsModel selectedSettings = shopImport.ShopSettingTabs.SelectedSettingsTab == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
-                    ? shopImport.ShopSettingTabs.ShopProductsSettings
-                    : shopImport.ShopSettingTabs.ShopCategoriesSettings;
+                var shopSettingsTab = shopImport.ShopSettingTabs as ShopSettingTabsModel;
+
+                IShopServicesSettingsModel selectedSettings = shopSettingsTab.SelectedSettingsTab == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
+                    ? shopSettingsTab.ShopProductsSettings
+                    : shopSettingsTab.ShopCategoriesSettings;
 
                 if(selectedSettings.IsEmpty())
                 {
-                    var shopImportSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopImport.ShopSettingTabs.SelectedSettingsTab);
+                    var shopImportSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopSettingsTab.SelectedSettingsTab);
                     
                     if(shopImportSettings != null)
                         _modelFactory.Update(selectedSettings, shopImportSettings);

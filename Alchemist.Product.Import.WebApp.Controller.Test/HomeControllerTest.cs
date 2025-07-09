@@ -17,7 +17,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     private async Task<ViewResult> IndexActionIsTypeViewResultAsync()
     {
         var homeController = CreateHomeController();
-        var actionResult = await homeController.Index();
+        var actionResult = homeController.Index();
         Assert.NotNull(actionResult);
         return Assert.IsType<ViewResult>(actionResult);
     }
@@ -41,7 +41,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     public async Task ShopListNotEmptyAfterUpdateShopsActionAndIndexActionAsync()
     {
         var homeController = CreateHomeController();
-        var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShopsAsync());
         Assert.Equal(_shops.Count, Assert.IsAssignableFrom<List<IShopModel>>(actionResult.Value).Count);
     }
 
@@ -50,7 +50,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     {
         var homeController = CreateHomeController();
 
-        var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShopsAsync());
         Assert.IsAssignableFrom<List<IShopModel>>(actionResult.Value);       
     }
 
@@ -63,7 +63,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
 
         var homeController = CreateHomeController();
         
-        var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShops());
+        var actionResult = Assert.IsType<OkObjectResult>(await homeController.UpdateShopsAsync());
         var model = Assert.IsAssignableFrom<List<IShopModel>>(actionResult.Value);
         Assert.True(model.All(s => shops.Any(s1 => s1.Guid == s.Guid)));
     }
@@ -75,7 +75,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
         _shopDataServiceMock.Setup(s => s.GetShops()).Throws(exception);
         
-        var actionResult = Assert.IsType<ObjectResult>(await homeController.UpdateShops());
+        var actionResult = Assert.IsType<ObjectResult>(await homeController.UpdateShopsAsync());
         Assert.Equal(exception.Message, Assert.IsType<InvalidOperationException>(actionResult.Value).Message);        
     }    
 
@@ -89,7 +89,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var nextShopGuid = _importFacade.GetShops().Last().ShopGuid;
         var selectedTab = TabType.Shop;
 
-        var nextIndexView = Assert.IsType<ViewResult>(await homeController.IndexFromQueryAsync(nextShopGuid, (int)selectedTab));
+        var nextIndexView = Assert.IsType<ViewResult>(homeController.IndexFromQuery(nextShopGuid, (int)selectedTab));
         var nextIndexViewModel = Assert.IsType<IndexViewModel>(nextIndexView.Model);
         Assert.Equal(selectedTab, nextIndexViewModel.SelectedTab);
         Assert.Equal(nextShopGuid, nextIndexViewModel.SelectedShopImport.ShopGuid);
@@ -105,7 +105,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
         var nextTab = TabType.Products;
 
-        var nextIndexView = Assert.IsType<ViewResult>(await homeController.IndexFromQueryAsync(shopGuid, (int)nextTab));
+        var nextIndexView = Assert.IsType<ViewResult>(homeController.IndexFromQuery(shopGuid, (int)nextTab));
         var nextIndexViewModel = Assert.IsType<IndexViewModel>(nextIndexView.Model);        
         Assert.Equal(nextTab, nextIndexViewModel.SelectedTab);
         Assert.Equal(shopGuid, nextIndexViewModel.SelectedShopImport.ShopGuid);
@@ -123,7 +123,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var nextShopGuid = Guid.NewGuid();
 
         Assert.Equal(nextShopGuid,
-            Assert.IsType<Guid>(Assert.IsType<NotFoundObjectResult>(await homeController.IndexFromQueryAsync(nextShopGuid, (int)tab)).Value));
+            Assert.IsType<Guid>(Assert.IsType<NotFoundObjectResult>(homeController.IndexFromQuery(nextShopGuid, (int)tab)).Value));
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
 
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
         var nextTab = (int)Enum.GetValues<TabType>().Max() + 1;
-        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(shopGuid, nextTab));
+        Assert.IsType<BadRequestResult>(homeController.IndexFromQuery(shopGuid, nextTab));
     }
 
     [Fact]
@@ -142,14 +142,14 @@ public class HomeControllerTest : ControllerTest<HomeController>
     {
         var homeController = CreateHomeController();
         await LoadShopsAsync();
-        Assert.IsType<BadRequestResult>(await homeController.IndexFromQueryAsync(Guid.Empty, (int)TabType.Shop));
+        Assert.IsType<BadRequestResult>(homeController.IndexFromQuery(Guid.Empty, (int)TabType.Shop));
     }
 
     [Fact]
     public async Task IsTabChangedBadRequestWhenJsonIsEmpty()
     {
         var homeController = CreateHomeController();
-        var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChanged(Guid.NewGuid(), 1, string.Empty));
+        var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChangedAsync(Guid.NewGuid(), 1, string.Empty));
         Assert.Equal(string.Empty, Assert.IsType<string>(result.Value));
     }
 
@@ -160,7 +160,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
         var guid = Guid.NewGuid();
         string json = Guid.NewGuid().ToString();
-        var result = Assert.IsType<NotFoundObjectResult>(await homeController.IsTabChanged(guid, 1, json));
+        var result = Assert.IsType<NotFoundObjectResult>(await homeController.IsTabChangedAsync(guid, 1, json));
         Assert.Equal(guid, Assert.IsType<Guid>(result.Value));
     }
 
@@ -173,7 +173,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         string json = Guid.NewGuid().ToString();
 
         var tab = Enum.GetValues(typeof(TabType)).Length + 1;
-        var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChanged(guid, tab, json));
+        var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChangedAsync(guid, tab, json));
         Assert.Equal(tab, Assert.IsType<int>(result.Value));
     }
 
@@ -188,7 +188,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
 
         //await SetShopSettingAsync(guid, shopSettingsType);
 
-        var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChanged(guid, (int)TabType.Shop, json));
+        var result = Assert.IsType<BadRequestObjectResult>(await homeController.IsTabChangedAsync(guid, (int)TabType.Shop, json));
         Assert.Equal(json, Assert.IsType<string>(result.Value));
     }
 
@@ -209,7 +209,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true, 
                 NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString });
 
-        var result = Assert.IsType<OkObjectResult>(await homeController.IsTabChanged(guid, (int)TabType.Shop, json));
+        var result = Assert.IsType<OkObjectResult>(await homeController.IsTabChangedAsync(guid, (int)TabType.Shop, json));
         Assert.False(Assert.IsType<bool>(result.Value));
     }
 
@@ -293,8 +293,8 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
         var view = Assert.IsType<PartialViewResult>(homeController.TabsMenu(shopGuid, (int)TabType.Shop));
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
-        Assert.True(model.ShopProductsSettings?.Equals(productShopSettings));
-        Assert.True(model.ShopCategoriesSettings?.Equals(categoryShopSettings));
+        Assert.True(model.ShopProductsSettings?.AllEquals(productShopSettings));
+        Assert.True(model.ShopCategoriesSettings?.AllEquals(categoryShopSettings));
     }
 
     [Fact]
@@ -319,7 +319,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
     private async Task LoadTabActionResultViewNameAsync(TabType tabType, string viewName)
     {
         var homeController = CreateHomeController();
-        var view = Assert.IsType<PartialViewResult>(await homeController.LoadTab(Guid.NewGuid(), (int)tabType, viewName));
+        var view = Assert.IsType<PartialViewResult>(await homeController.LoadTabAsync(Guid.NewGuid(), (int)tabType, viewName));
         Assert.Equal(view.ViewName, $"~/Views/Home/{viewName}.cshtml");
     }
 
@@ -330,7 +330,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var homeController = CreateHomeController();
         var tabType = TabType.Shop;
         var tabView = TabHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType).Value;
-        var view = Assert.IsType<PartialViewResult>(await homeController.LoadTab(Guid.NewGuid(), (int)tabType, tabView));
+        var view = Assert.IsType<PartialViewResult>(await homeController.LoadTabAsync(Guid.NewGuid(), (int)tabType, tabView));
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
         Assert.True(model.ShopProductsSettings.IsEmpty());
         Assert.True(model.ShopCategoriesSettings.IsEmpty());
@@ -349,7 +349,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
         var tabType = TabType.Shop;
         var tabView = TabHelper.TabViewNames.FirstOrDefault(d => d.Key == tabType).Value;
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
-        var result = Assert.IsType<ObjectResult>(await homeController.LoadTab(shopGuid, (int)tabType, tabView));
+        var result = Assert.IsType<ObjectResult>(await homeController.LoadTabAsync(shopGuid, (int)tabType, tabView));
         Assert.Equal(StatusCodes.Status500InternalServerError, result.StatusCode);
         Assert.Equal(exception, Assert.IsType<InvalidOperationException>(result.Value));
     }
@@ -368,7 +368,7 @@ public class HomeControllerTest : ControllerTest<HomeController>
 
         var tabType = TabType.Shop;
         var tabView = "ShopSettings.cshtml";
-        var view = Assert.IsType<PartialViewResult>(await homeController.LoadTab(shopImport.ShopGuid, (int)tabType, tabView));
+        var view = Assert.IsType<PartialViewResult>(await homeController.LoadTabAsync(shopImport.ShopGuid, (int)tabType, tabView));
         Assert.Equal(view.ViewName, $"~/Views/Home/{tabView}.cshtml");
         var model = Assert.IsType<ShopSettingTabsModel>(view.Model);
         Assert.Equal(shopImport.ShopSettingTabs.Guid, model.Guid);

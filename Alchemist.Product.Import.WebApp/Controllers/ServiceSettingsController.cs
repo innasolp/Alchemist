@@ -142,17 +142,14 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
                 return NotFound(data.Name);
 
             if (data.IsEmpty() && serviceSettingsModel.IsEmpty())
-                return Ok(false);       
-            
+                return Ok(false);
         }
         else
         {
             if (!_importFacade.TryGetServiceSettings(data.ShopGuid, data.ShopSettingsGuid, data.Guid, out serviceSettingsModel))
                 return Ok(true);
-        }
-        
+        }        
 
-        return Ok(!serviceSettingsModel.FieldsEquals(data));
+        return Ok(!((ServiceSettingsModel)serviceSettingsModel).FieldsEquals(data));
     }
-
 }

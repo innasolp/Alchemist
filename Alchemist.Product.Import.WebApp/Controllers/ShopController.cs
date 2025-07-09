@@ -34,12 +34,13 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
         return PartialView("~/Views/Home/Shop.cshtml", shopImport.Shop);
     }
 
+    [Route("Shop/Save")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Save([ModelBinder(typeof(ModelJsonBinder))] ShopModel shop)
+    public async Task<IActionResult> SaveAsync([ModelBinder(typeof(ModelJsonBinder))] ShopModel shop)
     {
         if (shop == null)
             return BadRequest(shop);

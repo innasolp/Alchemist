@@ -10,7 +10,7 @@ using DependencyInjection.Interfaces;
 namespace Alchemist.Product.Import.WebApp.Models;
 
 [method: JsonConstructor]
-public class ServiceSettingsModel(int shopId, int id, int parentSettingsId, Guid shopSettingsGuid, Guid shopGuid) 
+public partial class ServiceSettingsModel(int shopId, int id, int parentSettingsId, Guid shopSettingsGuid, Guid shopGuid) 
     : SettingsModelBase(shopId, shopGuid), IServiceSettingsModel
 { 
     string? ISettings.Name { get => Name; set=> Name = value; }

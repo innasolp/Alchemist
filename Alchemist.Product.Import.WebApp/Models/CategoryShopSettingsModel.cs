@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace Alchemist.Product.Import.WebApp.Models;
 
 [method: JsonConstructor]
-public class CategoryShopSettingsModel(int shopId, int id, Guid shopGuid) : 
+public partial class CategoryShopSettingsModel(int shopId, int id, Guid shopGuid) : 
     ShopSettingsModel(shopId, id, shopGuid), ICategoryShopSettingsModel
 {
     public override ShopSettingType ShopSettingType => ShopSettingType.Category;

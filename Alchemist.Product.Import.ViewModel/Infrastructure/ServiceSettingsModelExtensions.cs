@@ -51,24 +51,4 @@ public static class ServiceSettingsModelExtensions
             _ => null,
         };
     }
-
-    public static bool IsEqual(this IServiceSettingsModel source, IServiceSettingsModel target)
-    {
-        return target.Guid == source.Guid
-        || (!string.IsNullOrEmpty(source.Name) && !string.IsNullOrEmpty(target.Name) && target.Name == source.Name)
-        || (!string.IsNullOrEmpty(source.ServiceTypeName) && !string.IsNullOrEmpty(target.ServiceTypeName) &&
-                    target.ServiceTypeName == source.ServiceTypeName);
-    }
-    public static bool FieldsEquals(this IServiceSettingsModel source, IImportServiceSettings other)
-    {
-        return other != null && source.Name == other.Name
-           && ((string.IsNullOrEmpty(source.ServiceTypeName) && string.IsNullOrEmpty(other.ServiceTypeName))
-             || string.Equals(source.ServiceTypeName, other.ServiceTypeName, StringComparison.CurrentCultureIgnoreCase))
-            && ((string.IsNullOrEmpty(source.AssemblyPath) && string.IsNullOrEmpty(other.AssemblyPath))
-             || string.Equals(source.AssemblyPath, other.AssemblyPath, StringComparison.CurrentCultureIgnoreCase))
-            && ((string.IsNullOrEmpty(source.ServiceProviderPath) && string.IsNullOrEmpty(other.ServiceProviderPath))
-             || string.Equals(source.ServiceProviderPath, other.ServiceProviderPath, StringComparison.CurrentCultureIgnoreCase))
-             && ((string.IsNullOrEmpty(source.ImplementationTypeName) && string.IsNullOrEmpty(other.ImplementationTypeName))
-             || string.Equals(source.ImplementationTypeName, other.ImplementationTypeName, StringComparison.CurrentCultureIgnoreCase));
-    }
 }

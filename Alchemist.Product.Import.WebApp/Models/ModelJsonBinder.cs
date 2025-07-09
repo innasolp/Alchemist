@@ -17,10 +17,7 @@ public class ModelJsonBinder(ILogger<ModelJsonBinder> logger) : IModelBinder
 
     public async Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        if (bindingContext == null)
-        {
-            throw new ArgumentNullException(nameof(bindingContext));
-        }
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
         if (!typeof(IModel).IsAssignableFrom(bindingContext.ModelType))
         {

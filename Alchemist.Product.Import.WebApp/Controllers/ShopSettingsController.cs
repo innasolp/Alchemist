@@ -54,7 +54,8 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
             }
         }
 
-        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
+        if(shopImport.ShopSettingTabs is  ShopSettingTabsModel shopSettingsTab)
+            shopSettingsTab.SelectedSettingsTab = (ShopSettingType)shopSettingType;
 
         return PartialView("~/Views/Home/ShopSettings.cshtml", shopSettingsModel);
     }

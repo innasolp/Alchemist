@@ -31,9 +31,9 @@ public class FileUploadController(IImportFacade importFacade, IModelFactory mode
         return await Task.FromResult(default(T));
     }
 
-
+    [Route("FileUpload/UploadJson")]
     [HttpPost]
-    public async Task<string?> UploadJson(IFormFile file)
+    public async Task<string?> UploadJsonAsync(IFormFile file)
     {
         if (file != null && file.Length > 0)
         {
@@ -44,11 +44,12 @@ public class FileUploadController(IImportFacade importFacade, IModelFactory mode
         return "";
     }
 
+    [Route("FileUpload/UploadShopSettings")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadShopSettings(Guid shopGuid, int shopSettingsType, IFormFile file)
+    public async Task<IActionResult> UploadShopSettingsAsync(Guid shopGuid, int shopSettingsType, IFormFile file)
     {
         if (file == null || file.Length == 0)
             return BadRequest(nameof(file));
@@ -75,11 +76,13 @@ public class FileUploadController(IImportFacade importFacade, IModelFactory mode
         return NotFound(shopGuid);
     }
 
+
+    [Route("FileUpload/UploadServiceSettings")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadServiceSettings(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
+    public async Task<IActionResult> UploadServiceSettingsAsync(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
     {
         //todo for net.9
         //JsonSerializerOptions options = new()

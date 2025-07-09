@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
-public abstract class ShopSettingsModel : SettingsModelBase, IShopServicesSettingsModel
+public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServicesSettingsModel
 {
     public int Id { get; set; }
 

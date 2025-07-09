@@ -24,8 +24,8 @@ public class CategoryUrlModel(Guid shopSettingsGuid) : ICategoryUrlModel
 }
 
 [method: JsonConstructor]
-public class ProductShopSettingsModel(int shopId, int id, Guid shopGuid) 
-    : ShopSettingsModel(shopId, id, shopGuid), IProductShopSettingsModel, IJsonOnDeserialized
+public partial class ProductShopSettingsModel(int shopId, int id, Guid shopGuid) 
+    : ShopSettingsModel(shopId, id, shopGuid), IProductShopSettingsModel
 {
     [Required]
     public string? ProductUrlFormat { get; set; }
@@ -52,12 +52,5 @@ public class ProductShopSettingsModel(int shopId, int id, Guid shopGuid)
     {
         return @$"{nameof(ProductShopSettingsModel)}:{base.ToString()};
                 {nameof(ProductUrlFormat)}:{ProductUrlFormat};{nameof(CategoryUrlFormat)}:{CategoryUrlFormat};{nameof(PageProductCount)}:{PageProductCount}";
-    }
-
-    public void OnDeserialized()
-    {
-        //todo
-        //foreach (var rootCategory in RootCategories)
-        //    rootCategory.ShopSettingsGuid = Guid;
     }
 }
