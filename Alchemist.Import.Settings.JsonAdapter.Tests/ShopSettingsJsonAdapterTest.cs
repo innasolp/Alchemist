@@ -1,5 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Import.Settings.Model;
+using Alchemist.Import.Settings.Test.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -12,10 +12,10 @@ public class ShopSettingsJsonAdapterTest
     public ShopSettingsJsonAdapterTest()
     {
         var builder = new HostApplicationBuilder();
-        builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
+        builder.Services.AddSettingsJsonAdapter<TestProductShopImportSettings, TestCategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
         var host = builder.Build();
 
-        _shopSettingsJsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>() as ShopSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>;
+        _shopSettingsJsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>() as ShopSettingsJsonAdapter<TestProductShopImportSettings, TestCategoryShopImportSettings>;
     }
 
     [Fact]

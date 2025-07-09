@@ -24,8 +24,8 @@ function closeShopModal() {
 
 function saveShop(newShopGuidSelector) {
     save($('#shopForm'),
-        '/Shop/Save',       
-        getFormData($('#shopForm')),
+        '/Shop/Save',
+        { 'shop': JSON.stringify(getFormData($('#shopForm'))) },
         null,
         (data) => {
             if ($('#Id').val() == 0) {
@@ -35,16 +35,24 @@ function saveShop(newShopGuidSelector) {
                 $('#shop_li_' + data.guid.toString()).find("a").text(data.name);
             }
             closeShopModal();
-    }, null)
+        },
+        null);
 }
 
 async function updateShops(divPartialShops, tabData = null, settingsPartialDiv = null) {
-    postData('/Home/UpdateShops', null,
+    postData(
+        '/Home/UpdateShops',
+        null,
         (result) => {
-            divPartialShops.load('/Home/ShopList', { 'shops': result },
-                function (response, status, xhr)
-                {
-                    if (tabData == null) return;                     
+            divPartialShops.load('/Home/ShopList', { 'shops': JSON.stringify(result) },
+                function (response, status, xhr) {
+                    if (status == "error") {
+                        console.error("/Home/ShopList error: " + xhr.status + ": " + xhr.statusText);
+                        console.trace(response);
+                        return;
+                    }
+
+                    if (tabData == null) return;
 
                     if (tabData.shopGuid == '' && result.length > 0)
                         tabData.shopGuid = result[0].guid.toString();
@@ -52,20 +60,20 @@ async function updateShops(divPartialShops, tabData = null, settingsPartialDiv =
                     if (tabData.shopGuid != null) {
 
                         var shopLi = $('#shop_li_' + tabData.shopGuid);
-                        shopLi.addClass('selected');            
+                        shopLi.addClass('selected');
 
                         var editButton = $("<i class='fa fa-edit' style='font-size:24px'></i>");
                         var editData = { "shopGuid": tabData.shopGuid.toString() };
                         editButton.on("click", function () { showShopModal('/Shop/Edit', editData); });
 
                         shopLi.children('div').children('form').append(editButton);
-                    } 
+                    }
 
                     $('#menuDiv').load('/Home/TabsMenu', tabData,
                         function (response, status, xhr) {
                             settingsPartialDiv.load('/Home/LoadTab', tabData);
-                    });                   
+                        });
                 }
             );
-        });
+        }    );
 }

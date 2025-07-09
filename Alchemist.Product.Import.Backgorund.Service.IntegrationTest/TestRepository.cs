@@ -1,10 +1,10 @@
-﻿using Alchemist.Import.Settings.Model;
-using Alchemist.Product.Entities;
+﻿using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Alchemist.Import.Settings.Extensions;
 using System.Reflection;
+using Alchemist.Product.Import.Background.Settings;
 
 namespace Alchemist.Product.Import.WebApp.IntegrationTest;
 

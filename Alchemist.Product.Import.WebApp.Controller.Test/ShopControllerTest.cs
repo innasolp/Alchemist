@@ -1,5 +1,5 @@
-﻿using Alchemist.Product.Import.Model;
-using Alchemist.Product.Import.WebApp.Controllers;
+﻿using Alchemist.Product.Import.WebApp.Controllers;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +48,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task EditActionIsPartialViewAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
         var shopController = CreateShopController();
         Assert.IsType<PartialViewResult>(shopController.Edit(_importFacade.GetShops().First().ShopGuid));
     }
@@ -56,7 +56,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task EditActionModelIsShopModelAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopController = CreateShopController();
         var shopGuid = _importFacade.GetShops().First().ShopGuid;
@@ -69,17 +69,17 @@ public class ShopControllerTest : ControllerTest<ShopController>
     public async Task SaveActionIsBadRequestWhenShopIsNullAsync()
     {
         var shopController = CreateShopController();
-        Assert.IsType<BadRequestObjectResult>(await shopController.Save(null));
+        Assert.IsType<BadRequestObjectResult>(await shopController.SaveAsync(null));
     }
 
     [Fact]
     public async Task SaveActionIsNotFoundWhenShopWithNonexistsGuidAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopController = CreateShopController();
-        var shop = new ShopModel { Id = _importFacade.GetShops().First().Shop.Id, Guid = Guid.NewGuid() };
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(await shopController.Save(shop));
+        var shop = new ShopModel(_importFacade.GetShops().First().Shop.Id);
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(await shopController.SaveAsync(shop));
         var notFoundShop = Assert.IsType<ShopModel>(notFoundResult.Value);
         Assert.Equal(shop.Id, notFoundShop.Id);
         Assert.Equal(shop.Guid, notFoundShop.Guid);
@@ -89,11 +89,11 @@ public class ShopControllerTest : ControllerTest<ShopController>
     public async Task SaveActionInternalServerErrorResultWhenShopDataServiceExceptionThrowsAsync()
     {
         var shopController = CreateShopController();
-        var shop = new ShopModel();
+        var shop = new ShopModel(0);
         _shopDataServiceMock.Setup(s => s.CreateShop(It.IsAny<IShop>())).
             Returns(CreateShopThrowsExceptionAsync);
 
-        var internalServerErrorResult = Assert.IsType<ObjectResult>(await shopController.Save(shop));
+        var internalServerErrorResult = Assert.IsType<ObjectResult>(await shopController.SaveAsync(shop));
         Assert.Equal(StatusCodes.Status500InternalServerError, internalServerErrorResult.StatusCode);       
     }
 
@@ -105,15 +105,15 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task SaveActionIsOkShopGuidWhenNewShopAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopController = CreateShopController();
-        var shop = new ShopModel() { Name = nameof(SaveActionIsOkShopGuidWhenNewShopAsync), Url="https://test" };
+        var shop = new ShopModel(0) { Name = nameof(SaveActionIsOkShopGuidWhenNewShopAsync), Url="https://test" };
         _shopDataServiceMock.Setup(s => s.CreateShop(It.IsAny<IShop>())).
             Returns(CreateShopAsync);
         var prevShopCount = _importFacade.GetShops().Count;
 
-        var okResult = Assert.IsType<OkObjectResult>(await shopController.Save(shop));
+        var okResult = Assert.IsType<OkObjectResult>(await shopController.SaveAsync(shop));
         Assert.IsType<ShopModel>(okResult.Value);       
         Assert.Equal(prevShopCount + 1, _importFacade.GetShops().Count);
         Assert.Contains(_importFacade.GetShops(), s => s.Shop.Name == shop.Name);
@@ -127,7 +127,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
     [Fact]
     public async Task SaveActionIsOkShopGuidWhenShopUpdatedAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopController = CreateShopController();
         var index = new Random().Next(_shops.Count);
@@ -136,7 +136,7 @@ public class ShopControllerTest : ControllerTest<ShopController>
             Returns(UpdateShopAsync);
         var prevShopCount = _importFacade.GetShops().Count;
 
-        var okResult = Assert.IsType<OkObjectResult>(await shopController.Save(shop));
+        var okResult = Assert.IsType<OkObjectResult>(await shopController.SaveAsync(shop as ShopModel));
         Assert.Equal(shop.Guid, Assert.IsType<ShopModel>(okResult.Value).Guid);
         Assert.Equal(prevShopCount, _importFacade.GetShops().Count);
         Assert.Contains(_importFacade.GetShops(), s => s.Shop.Name == shop.Name);

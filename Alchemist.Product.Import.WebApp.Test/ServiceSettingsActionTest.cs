@@ -1,8 +1,10 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using Microsoft.Playwright;
 using System.Reflection;
 using Xunit.Abstractions;
+using Alchemist.Import.Settings.Extensions;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -45,9 +47,7 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
 
         var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, async (page) => await this.ExpectShowServiceSettingsButtonAsync(page, nameof(IShopImportSettings.ImportService)));
 
-        var saveButton = serviceForm.Locator("button[class='btn btn-primary']");
-        await Expect(saveButton).ToHaveCountAsync(1);
-
+        var saveButton = await this.ExpectSingleElementAsync(serviceForm,"button[class='btn btn-primary']");   
         await saveButton.ClickAsync();
 
         await Expect(serviceForm).ToBeVisibleAsync();
@@ -66,7 +66,7 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
         var newPage = await Context.NewPageAsync();
         var shopImportSettings = await ExpectLoadIndexPageAsync(newPage);
         var importService = await this.ExpectSetServiceSettingsAsync(newPage, _shopSettings, nameof(IShopImportSettings.ImportService), shopImportSettings);
-        await this.ExpectCheckServiceSettingsAsync(newPage, importService);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, importService);
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
         var newPage = await Context.NewPageAsync();
         var shopImportSettings = await ExpectLoadIndexPageAsync(newPage);
         var service = await this.ExpectSetServiceSettingsAsync(newPage, _shopSettings, nameof(IShopImportSettings.WebLoader), shopImportSettings);
-        await this.ExpectCheckServiceSettingsAsync(newPage, service);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, service);
     }
 
 
@@ -125,7 +125,7 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
         var newPage = await Context.NewPageAsync();
         var shopImportSettings = await ExpectLoadIndexPageAsync(newPage);
         var service = await this.ExpectSetServiceSettingsAsync(newPage, _shopSettings, nameof(IShopImportSettings.BrowserDataLoader), shopImportSettings);
-        await this.ExpectCheckServiceSettingsAsync(newPage, service);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, service);
         await newPage.CloseAsync();
     }
 
@@ -179,10 +179,15 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
 
         var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, async (page) => await this.ExpectShowServiceSettingsButtonAsync(page, nameof(IShopImportSettings.ImportService)));
 
-        await this.ExpectWithNullValueAsync(serviceForm.Locator("#ServiceTypeName"), shopImportSettings.ImportService?.ServiceTypeName);
-        await this.ExpectWithNullValueAsync(serviceForm.Locator("#AssemblyPath"), shopImportSettings.ImportService?.AssemblyPath);
+        await this.ExpectCheckServiceSettingsFieldsAsync(serviceForm, shopImportSettings.ImportService);
 
-        var serviceSettings = await serviceForm.FillServiceSettingsInputsAsync(_shopSettings, nameof(IShopImportSettings.ImportService), shopImportSettings);
+        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
+            .ToImportServiceSettings<ServiceSettingsModel>()
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
+           {
+               Name = Guid.NewGuid().ToString()
+           };
+        serviceSettings = await serviceForm.FillServiceSettingsInputsAsync(serviceSettings, nameof(IShopImportSettings.ImportService));
         var resetConfirmationLocator = await GetConfirmationLocatorAsync(newPage);
 
         await this.ExpectCloseServiceSettingsButtonClickAsync(newPage);
@@ -210,7 +215,13 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
 
         var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, async (page) => await this.ExpectShowServiceSettingsButtonAsync(page, nameof(IShopImportSettings.ImportService)));
 
-        var serviceSettings = await serviceForm.FillServiceSettingsInputsAsync(_shopSettings, nameof(IShopImportSettings.ImportService), shopImportSettings);
+        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
+            .ToImportServiceSettings<ServiceSettingsModel>()
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
+           {
+               Name = Guid.NewGuid().ToString()
+           };
+        serviceSettings = await serviceForm.FillServiceSettingsInputsAsync(serviceSettings, nameof(IShopImportSettings.ImportService));
         var confirmationLocator = await GetConfirmationLocatorAsync(newPage);
 
         await this.ExpectCloseServiceSettingsButtonClickAsync(newPage);

@@ -1,21 +1,35 @@
-﻿using Alchemist.Import.Settings.Model;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using Alchemist.Import.Settings.Extensions;
 using Microsoft.Playwright.Xunit;
 using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.WebApp.Models;
 
 namespace Alchemist.Product.Import.WebApp.Test.Infrastructure;
 
 internal static class PageTestExtensions
 {
-    public static async Task<ImportServiceSettings> FillServiceSettingsInputsAsync(this ILocator serviceForm, List<Interfaces.IShopSettings> shopSettings,  string serviceName, ShopImportSettings shopImportSettings)
-    {
-        var serviceSettings = shopSettings.FirstOrDefault(s => s.Name == serviceName && s.ParentSettingsId == shopImportSettings.Id)?.ToImportServiceSettings<ImportServiceSettings>()
-            ?? new ImportServiceSettings
-            {
-                Name = serviceName
-            };
 
+    public static async Task<ILocator> ExpectSingleElementAsync(this PageTest pageTest, ILocator parent, string expression)
+    {
+        var element = parent.Locator(expression);
+        await pageTest.Expect(element).ToHaveCountAsync(1);
+        await pageTest.Expect(element).ToBeVisibleAsync();
+
+        return element;
+    }
+
+    public static async Task<ILocator> ExpectSingleElementAsync(this PageTest pageTest, IPage page, string expression)
+    {
+        var element = page.Locator(expression);
+        await pageTest.Expect(element).ToHaveCountAsync(1);
+        await pageTest.Expect(element).ToBeVisibleAsync();
+
+        return element;
+    }
+
+    public static async Task<ServiceSettingsModel> FillServiceSettingsInputsAsync(this ILocator serviceForm, ServiceSettingsModel serviceSettings,  string serviceName)
+    {   
         serviceSettings.ServiceTypeName = Guid.NewGuid().ToString();
         serviceSettings.AssemblyPath = Guid.NewGuid().ToString();
 
@@ -81,28 +95,41 @@ internal static class PageTestExtensions
         return modalButton;
     }
 
-    public static async Task ExpectCheckServiceSettingsAsync(this PageTest pageTest, IPage page, ImportServiceSettings serviceSettings)
+    public static async Task ExpectShowCheckAndCloseServiceSettingsAsync(this PageTest pageTest, IPage page, ServiceSettingsModel serviceSettings)
     {
         var serviceForm = await pageTest.ExpectShowServiceModalFormAsync(page, async (page) => await pageTest.ExpectShowServiceSettingsButtonAsync(page, serviceSettings.Name));
 
-        await pageTest.ExpectWithNullValueAsync(serviceForm.Locator("#ServiceTypeName"), serviceSettings.ServiceTypeName);
-        await pageTest.ExpectWithNullValueAsync(serviceForm.Locator("#AssemblyPath"), serviceSettings.AssemblyPath);
-        await pageTest.ExpectWithNullValueAsync(serviceForm.Locator("#ServiceProviderPath"), serviceSettings.ServiceProviderPath);
+        await pageTest.ExpectCheckServiceSettingsFieldsAsync(serviceForm, serviceSettings);
 
         var closeModal = page.Locator("#divModal").Locator("a[class='close']");
         await closeModal.ClickAsync();
         await pageTest.Expect(serviceForm).Not.ToBeVisibleAsync();
     }
 
-    public static async Task<ImportServiceSettings> ExpectSetServiceSettingsAsync(this PageTest pageTest, IPage page, List<IShopSettings> shopSettings,  string serviceName, ShopImportSettings shopImportSettings)
+    public static async Task ExpectCheckServiceSettingsFieldsAsync(this PageTest pageTest, ILocator serviceForm, ServiceSettingsModel serviceSettings)
+    {
+        await pageTest.ExpectWithNullValueAsync(serviceForm.Locator("#ServiceTypeName"), serviceSettings.ServiceTypeName);
+        await pageTest.ExpectWithNullValueAsync(serviceForm.Locator("#AssemblyPath"), serviceSettings.AssemblyPath);
+        await pageTest.ExpectWithNullValueAsync(serviceForm.Locator("#ServiceProviderPath"), serviceSettings.ServiceProviderPath);
+    }
+
+    public static async Task<ServiceSettingsModel> ExpectSetServiceSettingsAsync(this PageTest pageTest, IPage page, List<IShopSettings> shopSettings,  string serviceName, IShopImportSettings shopImportSettings)
     {
         var serviceForm = await pageTest.ExpectShowServiceModalFormAsync(page, async (page) => await pageTest.ExpectShowServiceSettingsButtonAsync(page, serviceName));
 
-        var serviceSettings = await serviceForm.FillServiceSettingsInputsAsync(shopSettings, serviceName, shopImportSettings);
+        var serviceSettings = shopSettings.FirstOrDefault(s => s.Name == serviceName && s.ParentSettingsId == shopImportSettings.Id)?.ToImportServiceSettings<ServiceSettingsModel>()
+           ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, Guid.NewGuid(), Guid.NewGuid())
+           {
+               Name = serviceName
+           };
+        serviceSettings = await serviceForm.FillServiceSettingsInputsAsync(serviceSettings, serviceName);
 
-        var saveButton = serviceForm.Locator("button[class='btn btn-primary']");
-        await pageTest.Expect(saveButton).ToHaveCountAsync(1);
+        var saveButton = await pageTest.ExpectSingleElementAsync(serviceForm, "button[class='btn btn-primary']");        
         await saveButton.ClickAsync();
+
+        await pageTest.Expect(serviceForm.Locator("#AssemblyPath-error")).Not.ToBeVisibleAsync();
+
+        await Task.Delay(500);
 
         await pageTest.Expect(serviceForm).Not.ToBeVisibleAsync();
 

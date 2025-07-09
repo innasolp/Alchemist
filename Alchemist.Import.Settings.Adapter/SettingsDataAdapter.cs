@@ -8,7 +8,7 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
     : ISettingsDataAdapter
     where TProductShopImportSettings : class, IProductShopImportSettings
     where TCategoryShopImportSettings : class, ICategoryShopImportSettings
-    where TImportServiceSettings : class, IImportServiceSettings, new()
+    where TImportServiceSettings : class, IImportServiceSettings
 {
     private readonly IShopSettingsDataService _shopSettingsDataService = shopSettingsDataService;    
 
@@ -49,6 +49,7 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
         var services = (from serviceModel in shopSettingsModel.Services.OfType<IImportServiceSettings>()
                         let service = serviceModel.ToEntity()
                         select service).ToList();
+        //todo add primary services if need
         await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
     }
 

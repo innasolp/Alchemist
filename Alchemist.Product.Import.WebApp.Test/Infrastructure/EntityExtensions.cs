@@ -1,4 +1,5 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Test.Infrastructure;
 
@@ -17,5 +18,5 @@ public static class EntityExtensions
             var index = shopSettings.IndexOf(existingItem);
             shopSettings[index] = serviceSettings;
         }
-    }
+    }    
 }

@@ -1,4 +1,4 @@
-using Alchemist.Import.Settings.Model;
+using Alchemist.Import.Settings.Test.Model;
 using Json.FileExtensions;
 using System.Text.Json;
 using WebLoader.Common;
@@ -12,7 +12,7 @@ public class SerializationTests
     [Fact]
     public async Task TestLoadProductSettings()
     {
-        var shopProductsSettings = await _productsJsonFileName.ReadFromJsonFileAsync<ProductShopImportSettings[]>();
+        var shopProductsSettings = await _productsJsonFileName.ReadFromJsonFileAsync<TestProductShopImportSettings[]>();
 
         Assert.NotNull(shopProductsSettings);
         Assert.Equal(2, shopProductsSettings.Length);

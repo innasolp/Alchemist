@@ -1,5 +1,5 @@
-using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.IntegrationTest.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Test.Server.Fixtures;
 using System.Net.Http.Json;
 using Xunit.Abstractions;

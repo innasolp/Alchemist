@@ -2,6 +2,7 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.Import.Model;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using Message.SignalR.DependencyInjection;
@@ -11,13 +12,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
 builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient), out IHttpClientBuilder settingsHttpClientBuilder);
 builder.Services.AddSettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>();
+builder.Services.AddSingleton<IModelFactory, ModelFactory>();
 builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 
 var signalRUrl = builder.Configuration.GetHostSectionValue("ShopMessageReceiver");
 builder.Services.AddSignalRMessageReceiver(signalRUrl);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options=>
+{
+    options.JsonSerializerOptions.IgnoreReadOnlyProperties = false;
+    options.JsonSerializerOptions.IgnoreReadOnlyFields = true;
+    options.JsonSerializerOptions.RespectRequiredConstructorParameters = true;
+});
 
 var app = builder.Build();
 

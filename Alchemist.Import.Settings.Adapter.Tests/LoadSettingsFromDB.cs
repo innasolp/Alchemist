@@ -1,6 +1,5 @@
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Import.Settings.Model;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +10,7 @@ using Alchemist.Import.Settings.Extensions;
 
 
 using ShopSettingType = Alchemist.Product.Interfaces.ShopSettingType;
+using Alchemist.Import.Settings.Test.Model;
 
 namespace Alchemist.Import.Settings.DataAdapter.Tests;
 
@@ -41,7 +41,7 @@ public class LoadSettingsFromDB
     {
         var builder = new HostApplicationBuilder();
         builder.Services.AddSingleton(_shopSettingsDataServiceMock.Object);
-        builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
+        builder.Services.AddSettingsDataAdapter<TestProductShopImportSettings, TestCategoryShopImportSettings, TestImportServiceSettings>();
         var host = builder.Build();
         _adapter = host.Services.GetRequiredService<ISettingsDataAdapter>();
 
@@ -58,19 +58,26 @@ public class LoadSettingsFromDB
     {
         foreach (var shopSetting in _shopSettings.Where(s => s.Type == ShopSettingType.Product))
         {
-            var importSettings = new ProductShopImportSettings() { ShopUrl = $"https://url{shopSetting.Id}" };
+            var importSettings = new TestProductShopImportSettings() { ShopUrl = $"https://url{shopSetting.Id}" };
             shopSetting.JsonValue = JsonSerializer.Serialize(importSettings);
         }        
         
         foreach (var shopSetting in _shopSettings.Where(s => s.Type == ShopSettingType.Category))
         {
-            var importSettings = new CategoryShopImportSettings() { ShopUrl = $"https://url{shopSetting.Id}" };
+            var importSettings = new TestCategoryShopImportSettings() { ShopUrl = $"https://url{shopSetting.Id}" };
             shopSetting.JsonValue = JsonSerializer.Serialize(importSettings);
         }
 
         foreach (var shopServiceSetting in _shopSettings.Where(s => s.Type == ShopSettingType.Service))
         {
-            var serviceSettings = shopServiceSetting.ToImportServiceSettings<ImportServiceSettings>();
+            var serviceSettings = shopServiceSetting.ToImportServiceSettings<TestImportServiceSettings>()
+                ?? new TestImportServiceSettings
+                {
+                    Name = shopServiceSetting.Name,
+                    ParentSettingsId = shopServiceSetting.ParentSettingsId,
+                    Id = shopServiceSetting.Id,
+                    ShopId = shopServiceSetting.ShopId
+                };
             serviceSettings.AssemblyPath = $"C:\\Folder{shopServiceSetting.Id}";
             serviceSettings.ImplementationTypeName = $"ServiceImplementation_{serviceSettings.Name}_{shopServiceSetting.ParentSettingsId}";
             serviceSettings.ServiceTypeName = $"ServiceType_{serviceSettings.Name}_{shopServiceSetting.ParentSettingsId}";
@@ -155,6 +162,6 @@ public class LoadSettingsFromDB
     {
         var allSettings = await _adapter.GetAllShopImportSettings();
         Assert.Equal(5, allSettings.Count);
-        Assert.Equal(8, allSettings.SelectMany(s => s.Services.OfType<ImportServiceSettings>()).Count());
+        Assert.Equal(8, allSettings.SelectMany(s => s.Services.OfType<TestImportServiceSettings>()).Count());
     }
 }

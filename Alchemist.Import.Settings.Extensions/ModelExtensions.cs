@@ -7,7 +7,7 @@ namespace Alchemist.Import.Settings.Extensions;
 public static class ModelExtensions
 {
     public static T GetImportServiceSettings<T>(this IShopSettings shopSettings)
-        where T : IImportServiceSettings, new()
+        where T : IImportServiceSettings
     {
         var serviceSettings = JsonSerializer.Deserialize<T>(shopSettings.JsonValue);
         serviceSettings.Id = shopSettings.Id;
@@ -42,8 +42,8 @@ public static class ModelExtensions
 
     public static async  Task<TShopImportSettings> GetShopImportSettings<TShopImportSettings, TImportServiceSettings>(this IShopSettings shopSettings,
         Func<int, Task<List<IShopSettings>>> getServiceSettings)
-        where TShopImportSettings : IShopImportSettings, new()
-        where TImportServiceSettings : IImportServiceSettings, new()
+        where TShopImportSettings : IShopImportSettings
+        where TImportServiceSettings : IImportServiceSettings
     {
         var shopImportSettings = JsonSerializer.Deserialize<TShopImportSettings>(shopSettings.JsonValue);
 
@@ -86,10 +86,10 @@ public static class ModelExtensions
         string serviceName,
         IList<IShopSettings> services,
         Action<IImportServiceSettings> setNew)
-        where TImportServiceSettings : IImportServiceSettings, new()
+        where TImportServiceSettings : IImportServiceSettings
     {
         var serviceSettings = get(shopImportSettings);
-        if (serviceSettings?.Id == null)
+        if (serviceSettings?.Id == null || serviceSettings.Id == 0)
         {
             var service = services.FirstOrDefault(s => s.Name == serviceName);
             if (service == null) return;
@@ -109,15 +109,15 @@ public static class ModelExtensions
         }
     }
 
-    public static bool UpdateServiceSettings<TImportServiceSettings>(this IShopImportSettings shopSettings, IImportServiceSettings? serviceSettings)
-         where TImportServiceSettings : class, IImportServiceSettings, new()
+    public static bool UpdateServiceSettings<TImportServiceSettings>(this IShopImportSettings shopSettings, TImportServiceSettings? serviceSettings)
+         where TImportServiceSettings : class, IImportServiceSettings
     {
         if (serviceSettings == null) return false;
         switch (serviceSettings?.Name)
         {
             case nameof(IShopImportSettings.ImportService):
                 {
-                    shopSettings.UpdateShopServiceSettings<TImportServiceSettings>(nameof(IShopImportSettings.ImportService),
+                    shopSettings.UpdateShopServiceSettings(nameof(IShopImportSettings.ImportService),
                         serviceSettings,
                         s => s.ImportService,
                         (s, sm) => s.ImportService = sm);
@@ -127,7 +127,7 @@ public static class ModelExtensions
 
             case nameof(IShopImportSettings.WebLoader):
                 {
-                    shopSettings.UpdateShopServiceSettings<TImportServiceSettings>(nameof(IShopImportSettings.WebLoader), 
+                    shopSettings.UpdateShopServiceSettings(nameof(IShopImportSettings.WebLoader), 
                         serviceSettings,
                         s => s.WebLoader,
                         (s, sm) => s.WebLoader = sm);
@@ -136,7 +136,7 @@ public static class ModelExtensions
 
             case nameof(IShopImportSettings.BrowserDataLoader):
                 {
-                    shopSettings.UpdateShopServiceSettings<TImportServiceSettings>(nameof(IShopImportSettings.BrowserDataLoader), 
+                    shopSettings.UpdateShopServiceSettings(nameof(IShopImportSettings.BrowserDataLoader), 
                         serviceSettings,
                         s => s.BrowserDataLoader,
                         (s, sm) => s.BrowserDataLoader = sm);
@@ -162,22 +162,20 @@ public static class ModelExtensions
         }
     }
 
-    private static void UpdateShopServiceSettings<TImportServiceSettings>(this IShopImportSettings shopSettings, string serviceName, IImportServiceSettings? serviceSettings,
+    private static void UpdateShopServiceSettings<TImportServiceSettings>(this IShopImportSettings shopSettings,
+        string serviceName,
+        TImportServiceSettings? serviceSettings,
         Func<IShopImportSettings, IImportServiceSettings> get,
         Action<IShopImportSettings, TImportServiceSettings> set)
-        where TImportServiceSettings: class, IImportServiceSettings, new()
+        where TImportServiceSettings: class, IImportServiceSettings
     {
         if (get(shopSettings) == null)
-            set(shopSettings, new TImportServiceSettings
-            {
-                ParentSettingsId = shopSettings.Id,
-                Id = serviceSettings.Id,
-                ShopId = serviceSettings.ShopId,
-                Name = serviceName
-            });
-        get(shopSettings).Update(serviceSettings);
+        {
+            set(shopSettings, serviceSettings);
+        }
+        else get(shopSettings).Update(serviceSettings);
 
-        if (!shopSettings.Services.OfType<IImportServiceSettings>().Any(s => s.Guid == serviceSettings?.Guid))
+        if (!shopSettings.Services.OfType<IImportServiceSettings>().Any(s => s.Id == serviceSettings?.Id))
             shopSettings.Services.Add(get(shopSettings));
     }
 }

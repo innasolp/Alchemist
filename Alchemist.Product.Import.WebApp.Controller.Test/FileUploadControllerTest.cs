@@ -1,26 +1,63 @@
-using Alchemist.Product.Import.Model;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Controllers;
+using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Reflection;
-using Alchemist.Product.Import.Model.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public class FileUploadControllerTest : ControllerTest<FileUploadController>
 {
+    private readonly ModelJsonConverter<IServiceSettingsModel> _serviceSettingsModelConverter;
+
+    private readonly ModelJsonConverter<IShopServicesSettingsModel> _shopImportSettingsJsonConverter;
+    public FileUploadControllerTest()
+    {
+        var defaultServiceProperties = new Dictionary<string, object>()
+        {
+            { nameof(IServiceSettingsModel.Id), 0 },
+            { nameof(IServiceSettingsModel.ParentSettingsId), 0 },
+            { nameof(IServiceSettingsModel.ShopId), 0 },
+            { nameof(IServiceSettingsModel.ShopGuid), Guid.Empty },
+            { nameof(IServiceSettingsModel.ShopSettingsGuid), Guid.Empty },
+        };
+        _serviceSettingsModelConverter = new ModelJsonConverter<IServiceSettingsModel>(defaultServiceProperties);
+
+        var defaultShopSettingsProperties = new Dictionary<string, object>()
+        {
+            { nameof(IShopServicesSettingsModel.Id), 0 },
+            { nameof(IShopServicesSettingsModel.ShopId), 0 },
+            { nameof(IShopServicesSettingsModel.ShopGuid), Guid.Empty }
+        };
+        _shopImportSettingsJsonConverter = new ModelJsonConverter<IShopServicesSettingsModel>(defaultShopSettingsProperties);
+    }
+
     private FileUploadController CreateFileUploadController()
     {
-        return new FileUploadController(_importFacade);
+        return new FileUploadController(_importFacade, ModelFactory);
     }
+
+    private static async Task<T> ReadFromFileAsync<T>(string fileName, JsonSerializerOptions options )
+        where T : class
+    {
+        var filePath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/{fileName}";
+        using FileStream s = File.OpenRead(filePath);
+        T result = await JsonSerializer.DeserializeAsync<T>(s, options);
+        s.Close();
+        return await Task.FromResult(result);
+    }
+
 
     [Fact]
     public async Task UploadShopSettingsBadRequestWhenFileIsNull()
     {
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettings(Guid.Empty, (int)ShopSettingType.Product, null));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettingsAsync(Guid.Empty, (int)ShopSettingType.Product, null));
         Assert.Equal("file", Assert.IsType<string>(actionResult.Value));
     }
     
@@ -29,7 +66,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadServiceSettingsBadRequestWhenFileIsNull()
     {
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.Empty, Guid.Empty, "", null));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.Empty, Guid.Empty, "", null));
         Assert.Equal("file", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -39,7 +76,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.Empty, Guid.Empty, "", formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.Empty, Guid.Empty, "", formFile));
         Assert.Equal("shopGuid", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -49,7 +86,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettings(Guid.Empty, (int)ShopSettingType.Product, formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadShopSettingsAsync(Guid.Empty, (int)ShopSettingType.Product, formFile));
         Assert.Equal("shopGuid", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -59,7 +96,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.NewGuid(), Guid.Empty, "", formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.NewGuid(), Guid.Empty, "", formFile));
         Assert.Equal("shopSettingsGuid", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -69,7 +106,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileName = "importservice.json";
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettings(Guid.NewGuid(), Guid.NewGuid(), "", formFile));
+        var actionResult = Assert.IsType<BadRequestObjectResult>(await fileUploadController.UploadServiceSettingsAsync(Guid.NewGuid(), Guid.NewGuid(), "", formFile));
         Assert.Equal("serviceSettingsName", Assert.IsType<string>(actionResult.Value));
     }
 
@@ -80,7 +117,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var formFile = GetFormFile(fileName);
         var fileUploadController = CreateFileUploadController();
         var shopGuid = Guid.NewGuid();
-        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadServiceSettings(shopGuid, Guid.NewGuid(), "importservice", formFile));
+        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadServiceSettingsAsync(shopGuid, Guid.NewGuid(), "importservice", formFile));
         Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
@@ -91,7 +128,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var formFile = GetFormFile(fileName);
         var shopGuid = Guid.NewGuid();
         var fileUploadController = CreateFileUploadController();
-        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadShopSettings(shopGuid, (int)ShopSettingType.Product, formFile));
+        var actionResult = Assert.IsType<NotFoundObjectResult>(await fileUploadController.UploadShopSettingsAsync(shopGuid, (int)ShopSettingType.Product, formFile));
         Assert.Equal(shopGuid, Assert.IsType<Guid>(actionResult.Value));
     }
 
@@ -123,42 +160,52 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     [Fact]
     public async Task UploadProductShopSettingsActionAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
         Assert.True(_importFacade.TryGetShopImport(shopGuid, out var shopImport));
 
-        SetShopSettings(shopImport, ShopSettingType.Product);
-        var shopSettings = shopImport.ShopSettingTabs.ShopProductsSettings;
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var shopSettings));
 
-        await UploadShopSettingsActionAsync(shopSettings, "OzonProductSettings.json");
+        FillShopSettingsFields(shopSettings);
+
+        await AssertUploadShopSettingsActionAsync(shopSettings as ProductShopSettingsModel,
+            "OzonProductSettings.json");
     }
 
     [Fact]
     public async Task UploadCategoryShopSettingsActionAsync()
     {
-        await SetShopsAsync();
+        await LoadShopsAsync();
 
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
         Assert.True(_importFacade.TryGetShopImport(shopGuid, out var shopImport));
 
-        SetShopSettings(shopImport, ShopSettingType.Category);
-        var categorySettings = shopImport.ShopSettingTabs.ShopCategoriesSettings;
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Category, out var categorySettings));
 
-        await UploadShopSettingsActionAsync(categorySettings, "ozoncategories.json");
-    }
+        FillShopSettingsFields(categorySettings);
 
-    private async Task UploadShopSettingsActionAsync<T>(T shopSettings, string fileName)
-        where T:ShopSettingsModel, new()
+        await AssertUploadShopSettingsActionAsync(categorySettings as CategoryShopSettingsModel,
+            "ozoncategories.json");//,
+            //[nameof(ICategoryShopSettingsModel.CategorySourceUrl)]);
+    }    
+
+    private async Task AssertUploadShopSettingsActionAsync<T>(T shopSettings, string fileName)
+        where T: class, IShopServicesSettingsModel
     {
-        var prevShopSettings = shopSettings.GetCopy();
-        
-        var fileShopSettings = await fileName.ReadFromFileAsync<T>();
+        var prevShopSettings = ModelFactory.GetCopy(shopSettings);
+
+        var option = new JsonSerializerOptions
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
+
+        var fileShopSettings = await ReadFromFileAsync<T>(fileName, option);
 
         var fileUploadController = CreateFileUploadController();
         var formFile = GetFormFile(fileName);
 
-        var uploadedShopSettingsResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadShopSettings(shopSettings.ShopGuid, (int)shopSettings.ShopSettingType, formFile));
+        var uploadedShopSettingsResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadShopSettingsAsync(shopSettings.ShopGuid, (int)shopSettings.ShopSettingType, formFile));
         var uploadedShopSettings = Assert.IsType<T>(uploadedShopSettingsResult.Value);
         Assert.Equal(fileName, uploadedShopSettings.FileName);
 
@@ -202,32 +249,33 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     }
 
     private async Task UploadServiceOnUploadServiceSettingsActionAsync(string serviceName,
-        Func<ShopSettingsModel, ServiceSettingsModel> getSetvice,
+        Func<IShopServicesSettingsModel, IServiceSettingsModel> getSetvice,
         string fileName)
     {
-        await SetShopsAsync();        
+        await LoadShopsAsync();        
 
         var shopGuid = _importFacade.GetShops().Last().ShopGuid;
         Assert.True(_importFacade.TryGetShopImport(shopGuid, out var shopImport));
 
-        SetShopSettings(shopImport, ShopSettingType.Product);
-        var shopSettings = shopImport.ShopSettingTabs.ShopProductsSettings;
+        Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var shopSettings));
 
-        var prevService = shopSettings.CreateServiceSettingsModel(serviceName);
-        prevService.Update(getSetvice(shopSettings));
+        FillShopSettingsFields(shopSettings);
 
-        var fileService = await fileName.ReadFromFileAsync<ServiceSettingsModel>();
+        Assert.True(_importFacade.TryGetServiceSettings(shopGuid, shopSettings.Guid, serviceName, out var prevService));
+        var copy = ModelFactory.GetCopy(prevService);
+
+        var fileService = await fileName.ReadFromFileAsync<ServiceSettingsModel>([_serviceSettingsModelConverter]);
 
         var formFile = GetFormFile(fileName);
 
         var fileUploadController = CreateFileUploadController();
 
-        var uploadedServiceResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, serviceName, formFile));
+        var uploadedServiceResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadServiceSettingsAsync(shopSettings.ShopGuid, shopSettings.Guid, serviceName, formFile));
         var uploadedService = Assert.IsType<ServiceSettingsModel>(uploadedServiceResult.Value);
         Assert.NotNull(uploadedService);
         Assert.Equal(fileName, uploadedService.FileName);
 
         ModelAssert.EqualFields(fileService, getSetvice(shopSettings));
-        ModelAssert.NotEqualFields(prevService, getSetvice(shopSettings));
+        ModelAssert.NotEqualFields(copy, getSetvice(shopSettings));
     }
 }

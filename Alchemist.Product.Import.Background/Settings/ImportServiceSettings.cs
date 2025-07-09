@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Import.Settings.Model;
+namespace Alchemist.Product.Import.Background.Settings;
 
 public class ImportServiceSettings : IImportServiceSettings, IJsonOnDeserialized, IJsonValue
 {   

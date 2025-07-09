@@ -2,16 +2,23 @@
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
-public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImportFacade importFacade, ISettingsDataAdapter settingsDataAdapter) : Controller
+public class ShopSettingsController(ILogger<ShopSettingsController> logger,
+    IImportFacade importFacade,
+    IModelFactory modelFactory,
+    ISettingsDataAdapter settingsDataAdapter) : Controller
 {
     private readonly ILogger<ShopSettingsController> _logger = logger;
 
     private readonly IImportFacade _importFacade = importFacade;
+
+    private readonly IModelFactory _modelFactory = modelFactory;
 
     private readonly ISettingsDataAdapter _settingsDataAdapter = settingsDataAdapter;
 
@@ -32,24 +39,25 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
             return NotFound(shopGuid);
 
-        var shopSettings = shopImport.ShopSettingTabs?.GetShopSettingsByType((ShopSettingType)shopSettingType);
-        if (shopSettings == null)
+        var shopSettingsModel = shopImport.ShopSettingTabs.GetShopSettingsByType((ShopSettingType)shopSettingType);
+        if (shopSettingsModel.IsEmpty())
         {
             try
             {
-                shopSettings = (await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (ShopSettingType)shopSettingType) as ShopSettingsModel)
-                    ?? shopImport.CreateShopSettings((ShopSettingType)shopSettingType);
+                var shopSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (ShopSettingType)shopSettingType);
+                if(shopSettings != null)
+                    _modelFactory.Update(shopSettingsModel, shopSettings);
             }
             catch (Exception e)
             {
                 return new ObjectResult(e) { StatusCode = StatusCodes.Status500InternalServerError };
             }
-            shopImport.SetSettings(TabType.Shop, shopSettings);
         }
 
-        shopImport.ShopSettingTabs.SelectedSettingsTab = (ShopSettingType)shopSettingType;
+        if(shopImport.ShopSettingTabs is  ShopSettingTabsModel shopSettingsTab)
+            shopSettingsTab.SelectedSettingsTab = (ShopSettingType)shopSettingType;
 
-        return PartialView("~/Views/Home/ShopSettings.cshtml", shopSettings);
+        return PartialView("~/Views/Home/ShopSettings.cshtml", shopSettingsModel);
     }
 
     [Route("ShopSettings/Save")]
@@ -61,50 +69,48 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     {
         if (string.IsNullOrEmpty(json)) return BadRequest(json);
 
-        ShopSettingsModel shopSettings;
+        ShopSettingsModel shopSettingsFromJson;
         try
         {
-            shopSettings = ModelHelper.GetShopSettingsFromJson(json, (ShopSettingType)shopSettingType);
+            shopSettingsFromJson = ModelHelper.GetShopSettingsFromJson(json, (ShopSettingType)shopSettingType);
         }
         catch (JsonException)
         {
             return BadRequest(json);
         }
-        if (shopSettings == null)
+        if (shopSettingsFromJson == null)
             return BadRequest(json);
 
-        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport))
-            return NotFound(shopGuid);
+        if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport)
+            || !_importFacade.TryGetShopSettings(shopGuid, shopSettingsFromJson.ShopSettingType, out var shopSettingsModel))
+            return NotFound(shopGuid);        
 
-        if (!_importFacade.TryGetShopSettings(shopGuid, shopSettings.ShopSettingType, out var shopSettingsModel))
-            shopSettingsModel = ModelHelper.CreateShopSettings(shopGuid, shopSettings.ShopId, shopSettings.ShopSettingType);
-
-        shopSettingsModel?.Update(shopSettings);
+        _modelFactory.Update(shopSettingsModel, shopSettingsFromJson);
 
         return Ok(true);
     }
 
 
-    [Route("ShopSettings/Save/Products")]
+    [Route("ShopSettings/Save/Product")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SaveProductShopSettingsToDb(ProductShopSettingsModel productShopSettings)
+    public async Task<IActionResult> SaveProductShopSettingsToDb([ModelBinder(typeof(ModelJsonBinder))] ProductShopSettingsModel data)
     {
-        if (productShopSettings == null) return BadRequest(nameof(productShopSettings));
+        if (data == null) return BadRequest(nameof(data));
 
-        if (!_importFacade.TryGetShopImport(productShopSettings.ShopGuid, out var shopImport) || shopImport == null)
-            return NotFound(productShopSettings.ShopGuid);
+        if (!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport) || shopImport == null)
+            return NotFound(data.ShopGuid);
 
         try
         {
-            shopImport.ShopSettingTabs?.ShopProductsSettings?.Update(productShopSettings);
+            shopImport.ShopSettingTabs?.ShopProductsSettings?.UpdateProductShopSettingsWithoutServices(data);            
 
             await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopProductsSettings);
 
-            return Ok(productShopSettings);
+            return Ok(data);
         }
         catch (Exception e)
         {
@@ -118,20 +124,20 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SaveCategoryShopSettingsToDb(CategoryShopSettingsModel categoryShopSettings)
+    public async Task<IActionResult> SaveCategoryShopSettingsToDb([ModelBinder(typeof(ModelJsonBinder))] CategoryShopSettingsModel data)
     {
-        if (categoryShopSettings == null) return BadRequest(nameof(categoryShopSettings));
+        if (data == null) return BadRequest(nameof(data));
 
-        if (!_importFacade.TryGetShopImport(categoryShopSettings.ShopGuid, out var shopImport) || shopImport == null)
-            return NotFound(categoryShopSettings.ShopGuid);
+        if (!_importFacade.TryGetShopImport(data.ShopGuid, out var shopImport) || shopImport == null)
+            return NotFound(data.ShopGuid);
 
         try
         {
-            shopImport.ShopSettingTabs.ShopCategoriesSettings.Update(categoryShopSettings);
+            shopImport.ShopSettingTabs.ShopCategoriesSettings.UpdateCategoryShopSettingsWithoutServices(data);
 
             await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopCategoriesSettings);
 
-            return Ok(categoryShopSettings);
+            return Ok(data);
         }
         catch (Exception e)
         {
@@ -139,21 +145,38 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
         }
     }
 
+    [Route("ShopSettings/RootCategory/Edit")]
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult RootCategory(CategoryUrlModel data)
+    public IActionResult RootCategory([ModelBinder(typeof(ModelJsonBinder))] CategoryUrlModel data)
     {
         if (data == null)
             return BadRequest("category url is null");
         
         if (data.ShopSettingsGuid == Guid.Empty)
+            return BadRequest("category shopSettingsGuid is empty");        
+
+        return PartialView("~/Views/Home/RootCategoryUrl.cshtml",data);
+    }
+
+    [Route("ShopSettings/RootCategory/New")]
+    [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    public IActionResult AddRootCategory(Guid shopSettingsGuid)
+    {     
+        if (shopSettingsGuid == Guid.Empty)
             return BadRequest("category shopSettingsGuid is empty");
 
-        if (data.Guid == Guid.Empty)
-            data.Guid = Guid.NewGuid();
+        if (!_importFacade.TryGetShopSettings(shopSettingsGuid, out var shopSettingsModel)
+            || shopSettingsModel is not IProductShopSettingsModel productShopSettingsModel )
+            return NotFound(shopSettingsGuid);
 
-        return PartialView("~/Views/Home/RootCategoryUrl.cshtml",data );
+        var rootCategory = new CategoryUrlModel(shopSettingsGuid);
+
+        return PartialView("~/Views/Home/RootCategoryUrl.cshtml", rootCategory);
     }
 
     [Route("ShopSettings/RootCategory/Set")]
@@ -161,7 +184,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger, IImp
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult SetRootCategory(CategoryUrlModel data)
+    public IActionResult SetRootCategory([ModelBinder(typeof(ModelJsonBinder))] CategoryUrlModel data)
     {
         if (data == null)
             return BadRequest(data);

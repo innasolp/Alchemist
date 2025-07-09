@@ -1,4 +1,4 @@
-using Alchemist.Import.Settings.Model;
+using Alchemist.Import.Settings.Test.Model;
 using Json.FileExtensions;
 
 namespace Alchemist.Import.CategoriesSettings.Tests;
@@ -10,7 +10,7 @@ public class CategoriesSerializationTests
     [Fact]
     public async Task TestJsonDeserialization()
     {
-        var settings = await _categoriesJsonFileName.ReadFromJsonFileAsync<CategoryShopImportSettings[]>();
+        var settings = await _categoriesJsonFileName.ReadFromJsonFileAsync<TestCategoryShopImportSettings[]>();
 
         Assert.NotNull(settings);
         Assert.Equal(2, settings.Length);

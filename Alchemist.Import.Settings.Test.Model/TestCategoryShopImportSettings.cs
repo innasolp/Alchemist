@@ -1,8 +1,8 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 
-namespace Alchemist.Import.Settings.Model;
+namespace Alchemist.Import.Settings.Test.Model;
 
-public class CategoryShopImportSettings : ShopImportSettings, ICategoryShopImportSettings
+public class TestCategoryShopImportSettings : TestShopImportSettings, ICategoryShopImportSettings
 {
     public string CategorySourceUrl { get; set; }
 

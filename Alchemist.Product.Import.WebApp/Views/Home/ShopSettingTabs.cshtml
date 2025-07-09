@@ -2,7 +2,7 @@
 @using Alchemist.Import.Settings.Interfaces
 @using Alchemist.Product.Import.Model
 @using System.Text.Json
-@model Alchemist.Product.Import.Model.ShopSettingTabsModel
+@model ShopSettingTabsModel
 
 @functions {
     public object GetServiceData(ShopSettingType shopSettingType) => JsonSerializer.Serialize(new { shopGuid = Model.ShopGuid, shopSettingType = (int)shopSettingType });
@@ -14,7 +14,7 @@
 }
 
 @{
-    var selectedShopSettings = Model.GetShopSettingsByType(Model.SelectedSettingsTab) ?? new ProductShopSettingsModel();
+    var selectedShopSettings = Model.GetShopSettingsByType(Model.SelectedSettingsTab);
 }
 <hr />
 <div class="tabs">

@@ -3,13 +3,17 @@ using Alchemist.Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.Model.Infrastructure;
+using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
+
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
-public class FileUploadController(IImportFacade importFacade) : Controller
+public class FileUploadController(IImportFacade importFacade, IModelFactory modelFactory) : Controller
 {
     private readonly IImportFacade _importFacade = importFacade;
+    private readonly IModelFactory _modelFactory = modelFactory;
     
     public ActionResult FileUpload()
     {
@@ -27,9 +31,9 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         return await Task.FromResult(default(T));
     }
 
-
+    [Route("FileUpload/UploadJson")]
     [HttpPost]
-    public async Task<string?> UploadJson(IFormFile file)
+    public async Task<string?> UploadJsonAsync(IFormFile file)
     {
         if (file != null && file.Length > 0)
         {
@@ -40,11 +44,12 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         return "";
     }
 
+    [Route("FileUpload/UploadShopSettings")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadShopSettings(Guid shopGuid, int shopSettingsType, IFormFile file)
+    public async Task<IActionResult> UploadShopSettingsAsync(Guid shopGuid, int shopSettingsType, IFormFile file)
     {
         if (file == null || file.Length == 0)
             return BadRequest(nameof(file));
@@ -62,7 +67,7 @@ public class FileUploadController(IImportFacade importFacade) : Controller
 
         if (_importFacade.TryGetShopSettings(shopGuid, (ShopSettingType)shopSettingsType, out var shopSettings))         
         {
-            shopSettings?.Update(uploadedShopSettings, true);
+            _modelFactory.Update(shopSettings, uploadedShopSettings);
             shopSettings.FileName = file.FileName;
 
             return Ok(shopSettings);
@@ -71,11 +76,13 @@ public class FileUploadController(IImportFacade importFacade) : Controller
         return NotFound(shopGuid);
     }
 
+
+    [Route("FileUpload/UploadServiceSettings")]
     [HttpPost]
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadServiceSettings(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
+    public async Task<IActionResult> UploadServiceSettingsAsync(Guid shopGuid, Guid  shopSettingsGuid, string serviceSettingsName, IFormFile file)
     {
         //todo for net.9
         //JsonSerializerOptions options = new()
@@ -92,7 +99,10 @@ public class FileUploadController(IImportFacade importFacade) : Controller
             return BadRequest(nameof(shopSettingsGuid));
 
         if (string.IsNullOrEmpty(serviceSettingsName))
-            return BadRequest(nameof(serviceSettingsName)); 
+            return BadRequest(nameof(serviceSettingsName));
+
+        if (!_importFacade.TryGetShopImport(shopGuid, out var shop))
+            return NotFound(shopGuid);
 
         var uplodedServiceSettings = await GetFromJsonAsync<ServiceSettingsModel>(file);
         if (uplodedServiceSettings == null)
@@ -103,11 +113,13 @@ public class FileUploadController(IImportFacade importFacade) : Controller
             uplodedServiceSettings.Name = serviceSettingsName;
             uplodedServiceSettings.FileName = file.FileName;
 
-            if (shopSettings.GetServiceSettings(uplodedServiceSettings.Name) == null)
-                shopSettings.SetServiceSettings(shopSettings.CreateServiceSettingsModel(uplodedServiceSettings.Name), serviceSettingsName);
-
-
-            shopSettings?.UpdateServiceSettings(uplodedServiceSettings);
+            if (_importFacade.TryGetServiceSettings(shopGuid, shopSettingsGuid, uplodedServiceSettings.Name, out var serviceSettingsModel) )
+                serviceSettingsModel.Update(uplodedServiceSettings);
+            else
+            {
+                _importFacade.AddNewServiceSettings(shopSettings, uplodedServiceSettings.Name, out serviceSettingsModel);
+                    serviceSettingsModel.Update(uplodedServiceSettings);
+            }            
 
             return Ok(uplodedServiceSettings);
         }

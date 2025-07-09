@@ -46,7 +46,6 @@
   </ItemGroup>  
   
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.WebApp\Alchemist.Product.Import.WebApp.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 
-namespace Alchemist.Import.Settings.Model;
+namespace Alchemist.Product.Import.Background.Settings;
 
 public class CategoryUrl : ICategoryUrl
 {

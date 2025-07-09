@@ -12,7 +12,8 @@ function onCloseWithConfirm(event) {
 
     var data = getFormData($('#serviceSettingsForm'));
 
-    postData('/ServiceSettings/IsChanged', data,
+    postData('/ServiceSettings/IsChanged', 
+        { data: JSON.stringify(data) },
         (result) => {
 
             if (!result) {
@@ -59,7 +60,7 @@ function closeServiceSettingsModal(success = true) {
     $('#settingsForm').off('submit', submitPreventDefault);
 }
 
-async function saveShopSettings(formSelector, callback = null) {
+async function setShopSettings(formSelector, callback = null) {
     var formData = new FormData(formSelector[0]);
 
     var json = formDataToJson(formData);
@@ -69,7 +70,7 @@ async function saveShopSettings(formSelector, callback = null) {
 }
 
 async function redirectToShopSettings(data, currentTab) {
-    await saveShopSettings($('#settingsForm'),
+    await setShopSettings($('#settingsForm'),
         (result) => {
             $('#shopSettingsPartialDiv').load(
                 '/ShopSettings/',
@@ -106,7 +107,10 @@ function showRootCategory(data) {
             setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
     });
 
-    showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory', data);
+    if (data.hasOwnProperty('guid'))
+        showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory/Edit', { data: JSON.stringify(data) });
+    else
+        showItemModal($("#divRootCategoryModal"), $("#categoryModalBodyDiv"), '/ShopSettings/RootCategory/New', data);
 }
 
 function setRootCategoryLi(rootCategory, ulRootCategories) {
@@ -166,4 +170,48 @@ function setServiceSettingsLi(service, ulServices) {
         li.append(divFlex);
         items.last().after(li);
     }
+}
+
+function saveServiceSettings(serviceFormSelector, serviceName, isPrimaryService) {
+    var formData = getFormData(serviceFormSelector);
+    save(
+        serviceFormSelector,
+        '/ServiceSettings/Save',
+        { data: JSON.stringify(formData) },
+        null,
+        (data) => {
+            if (data == null) return;
+
+            if (isPrimaryService)
+                setValIfValid('#' + serviceName, $('#ServiceTypeName').val());
+            else
+                setServiceSettingsLi(data, $('#servicesUl'));
+
+            closeServiceSettingsModal();
+        });
+}
+
+function saveShopSettings(shopSettingsFromSelector, type, submitter) {
+    var url = `/ShopSettings/Save/${type}`;
+    var data = JSON.stringify(getFormData(shopSettingsFromSelector));
+    save(shopSettingsFromSelector,
+        url,
+        { data: data } ,
+        () => { submitter.disabled = false; },
+        (result) => { submitter.disabled = false; },
+        (error) => { submitter.disabled = false; });
+}
+
+function saveRootCategory(formSelector, divModal, categoriesUL) {
+    var data = getFormData(formSelector);
+    save(formSelector,
+        '/ShopSettings/RootCategory/Set',
+        { data: JSON.stringify(data) },
+        null,
+        (data) =>
+        {
+            if (data == null) return;
+            divModal.modal('hide');
+            setRootCategoryLi(data, categoriesUL);
+        });
 }

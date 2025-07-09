@@ -9,9 +9,12 @@ namespace Alchemist.Import.Settings.Extensions;
 
 public static class EntityExtensions
 {
-    public static T ToShopImportSettings<T>(this Product.Interfaces.IShopSettings shopSettings)
+    public static T ToShopImportSettings<T>(this Product.Interfaces.IShopSettings shopSettings, params JsonConverter[] jsonConverters)
         where T : IShopImportSettings
     {
+        var option = new JsonSerializerOptions();
+        jsonConverters.ToList().ForEach(option.Converters.Add);
+
         var model = JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString());
 
         model.Id = shopSettings.Id;
@@ -21,15 +24,23 @@ public static class EntityExtensions
         return model;
     }
 
-    public static T ToImportServiceSettings<T>(this Product.Interfaces.IShopSettings shopSettings)
-        where T : IImportServiceSettings, new()
+    public static T? ToImportServiceSettings<T>(this Product.Interfaces.IShopSettings shopSettings, params JsonConverter[] jsonConverters)
+        where T : IImportServiceSettings
     {
-        var model = shopSettings.JsonValue != null ? JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString()) : new T();
+        var option = new JsonSerializerOptions();
+        jsonConverters.ToList().ForEach(option.Converters.Add);
 
-        model.Id = shopSettings.Id;
-        model.Name = shopSettings.Name;
-        model.ParentSettingsId = shopSettings.ParentSettingsId;
-        model.ShopId = shopSettings.ShopId;
+        var model = shopSettings.JsonValue != null 
+            ? JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString(), option) 
+            : default(T);
+
+        if (model != null)
+        {
+            model.Id = shopSettings.Id;
+            model.Name = shopSettings.Name;
+            model.ParentSettingsId = shopSettings.ParentSettingsId;
+            model.ShopId = shopSettings.ShopId;
+        }
 
         return model;
     }

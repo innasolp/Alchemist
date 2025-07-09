@@ -11,5 +11,5 @@ public class IndexViewModel
 
     public TabType SelectedTab { get; set; }
 
-    public SettingsModelBase? SelectedTabModel { get; set; }
+    public ITabModel SelectedTabModel { get; set; }
 }

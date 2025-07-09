@@ -1,4 +1,5 @@
 ﻿using Alchemist.Product.Entities;
+using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using Alchemist.Product.Interfaces;
 using Moq;
 using Xunit.Abstractions;
@@ -63,12 +64,10 @@ public class ShopActionsTest : ImportWebAppTest
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
 
-        var editShopLocator = Page.Locator("i[class='fa fa-edit']");
-        await Expect(editShopLocator).ToHaveCountAsync(1);
+        var editShopLocator = await this.ExpectSingleElementAsync(Page,"i[class='fa fa-edit']");
         await editShopLocator.ClickAsync();
 
-        var shopFormLocator = Page.Locator("#shopForm");
-        await Expect(shopFormLocator).ToBeVisibleAsync();
+        var shopFormLocator = await this.ExpectSingleElementAsync(Page,"#shopForm");       
 
         var shop = _shops.FirstOrDefault(s => s.Id == startShopImportSettings.ShopId);
         var copy = shop.To<Shop>();

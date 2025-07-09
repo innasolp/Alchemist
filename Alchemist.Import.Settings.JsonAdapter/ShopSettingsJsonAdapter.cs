@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 namespace Alchemist.Import.Settings.JsonAdapter;
 
 public class ShopSettingsJsonAdapter<TProductShopImportSettings, TCategoryShopImportSettings> : ISettingsAdapter
-    where TProductShopImportSettings : class, IProductShopImportSettings, new()
-    where TCategoryShopImportSettings : class, ICategoryShopImportSettings, new()
+    where TProductShopImportSettings : class, IProductShopImportSettings
+    where TCategoryShopImportSettings : class, ICategoryShopImportSettings
 {
     private readonly string _shopProductsJsonFile;
     private readonly string _shopCategoriesJsonFile;

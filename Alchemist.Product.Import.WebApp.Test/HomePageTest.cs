@@ -1,6 +1,7 @@
-using Alchemist.Import.Settings.Model;
-using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using System.Text.Json;
 using Xunit.Abstractions;
 
@@ -15,14 +16,11 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         var response = await Page.GotoAsync(_webAppFactory.ServerAddress);
         Assert.True(response?.Ok);
 
-        var menudiv = Page.Locator("#menuDiv");
-        await Expect(menudiv).ToHaveCountAsync(1);
+        var menudiv = await this.ExpectSingleElementAsync(Page, "#menuDiv");       
 
-        var shopListPartialDiv = Page.Locator("#shopListPartialDiv");
-        await Expect(shopListPartialDiv).ToHaveCountAsync(1);
+        var shopListPartialDiv = await this.ExpectSingleElementAsync(Page, "#shopListPartialDiv");        
 
-        var shopTabsLocator = Page.Locator("#tabsMenuDiv");
-        await Expect(shopTabsLocator).ToHaveCountAsync(1);
+        var shopTabsLocator = await this.ExpectSingleElementAsync(Page, "#tabsMenuDiv");        
     }
 
     [Fact]
@@ -33,7 +31,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
 
         var shop = _shops.First();
         var shopSetting = _shopSettings.First(s => s.ShopId == shop.Id && s.Type == Interfaces.ShopSettingType.Product);
-        var productShopSettings = JsonSerializer.Deserialize<ProductShopImportSettings>(shopSetting.JsonValue);
+        var productShopSettings = JsonSerializer.Deserialize<ProductShopSettingsModel>(shopSetting.JsonValue);
 
         await Expect(Page.Locator("#menuDiv").Locator("div[class = 'menu_item selected']").GetByText(TabHelper.TabNames[TabType.Shop]))
            .ToHaveCountAsync(1);
@@ -42,18 +40,16 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
         await Expect(tabsLocator.Locator("div[class = 'shopTab menu_item-a selected-a']").GetByText(TabHelper.ShopSettingTypeNames[ShopSettingType.Product]))
             .ToHaveCountAsync(1);
 
-        await Expect(Page.Locator("form[name='itemShopForm']")).ToHaveCountAsync(3);
+        await Expect(Page.Locator("form[name='itemShopForm']")).ToHaveCountAsync(_shops.Count);
 
         await Expect(Page.Locator("li[class='left-menu-ul selected']").GetByText(shop.Name)).ToHaveCountAsync(1);
 
         await Task.Delay(1000);
 
-        var shopSettingsNameLocator = Page.Locator("#ShopSettingsName");
-        await Expect(shopSettingsNameLocator).ToHaveCountAsync(1);
+        var shopSettingsNameLocator = await this.ExpectSingleElementAsync(Page, "#ShopSettingsName");        
         await Expect(shopSettingsNameLocator).ToHaveValueAsync(productShopSettings.Name);
 
-        var urlLocator = Page.Locator("#ProductUrlFormat");
-        await Expect(urlLocator).ToHaveCountAsync(1);
+        var urlLocator = await this.ExpectSingleElementAsync(Page, "#ProductUrlFormat");       
         await Expect(urlLocator).ToHaveValueAsync(productShopSettings.ProductUrlFormat);
     }
 
@@ -61,7 +57,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectShop()
     {
         var startShopSettings =  await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopSettings);
 
         var nextShop = _shops.FirstOrDefault(s => s.Id != productShopSettings.ShopId);
 
@@ -90,7 +86,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task ShowConfirmationWindowWhenSelectOtherTabAfterDataEditing()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
         await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
@@ -109,7 +105,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task ShowConfirmationWindowWhenSelectOtherShopAfterDataEditing()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
         await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
@@ -130,7 +126,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectedItemNotChangedAfterConfirmationCancel()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         productShopSettings.ProductUrlFormat = Guid.NewGuid().ToString();
         await Page.Locator("#ProductUrlFormat").FillAsync(productShopSettings.ProductUrlFormat);
@@ -155,7 +151,7 @@ public class HomePageTest(TestImportWebAppFactory testImportWebAppFactory, ITest
     public async Task SelectedItemResetAndChangedAfterConfirmationYes()
     {
         var startShopImportSettings = await ExpectLoadIndexPageAsync(Page);
-        var productShopSettings = Assert.IsType<ProductShopImportSettings>(startShopImportSettings);
+        var productShopSettings = Assert.IsType<ProductShopSettingsModel>(startShopImportSettings);
 
         var newName = Guid.NewGuid().ToString();
         var newUrl = Guid.NewGuid().ToString();

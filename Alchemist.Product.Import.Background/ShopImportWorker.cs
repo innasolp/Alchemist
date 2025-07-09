@@ -9,10 +9,10 @@ using Alchemist.Import.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Settings.Model;
-using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Interfaces;
 using Alchemist.Import.Factory.Interfaces;
+using Alchemist.Import.Settings.Extensions;
+using Alchemist.Product.Import.Background.Settings;
 
 
 namespace Alchemist.Product.Import.Background;
