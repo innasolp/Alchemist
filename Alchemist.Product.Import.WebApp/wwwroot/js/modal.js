@@ -52,7 +52,7 @@ class ModalForm {
         return this.#SetSuccessResult;
     }
 
-    constructor(modalDiv, modalBodyDiv, modalCloseBtn, parentForm, inputConfirmationSettings = null, setSuccessResult = false, modalResultInput = 'modalResult') {
+    constructor(modalDiv, modalBodyDiv, modalCloseBtn, parentForm = null, inputConfirmationSettings = null, setSuccessResult = false, modalResultInput = 'modalResult') {
         this.#ModalCloseBtn = modalCloseBtn;
         this.#ModalDiv = modalDiv;
         this.#ModalBodyDiv = modalBodyDiv;
@@ -71,7 +71,8 @@ class ModalForm {
             $(this.ModalDiv).append(`<input type='hidden' id='${this.ModalResultInput}' value='success'/>`);
         $(this.ModalDiv).modal("hide");
         $(this.ModalCloseBtn).off('click', this.onModalClose);
-        $(this.ParentForm).off('submit', this.submitPreventDefault);
+        if (this.ParentForm != null)
+            $(this.ParentForm).off('submit', this.submitPreventDefault);
     }
 
     onModalClose(event) {
@@ -101,9 +102,9 @@ class ModalForm {
     }
 
     hide(onHide) {
-        var result = $(this.ModalResultInput).val();
+        var result = $(`#${this.ModalResultInput}`).val();
         if (result == 'success' || result == 1 || result == true) {
-            $(this.ModalResultInput).remove();
+            $(`#${this.ModalResultInput}`).remove();
             onHide(true);
         }
         else
@@ -112,7 +113,8 @@ class ModalForm {
 
     show(url, data, onHide = null) {
 
-        $(this.ParentForm).on('submit', this.submitPreventDefault);
+        if (this.ParentForm != null)
+            $(this.ParentForm).on('submit', this.submitPreventDefault);
 
         $(this.ModalCloseBtn).on('click', this, this.onModalClose);
 

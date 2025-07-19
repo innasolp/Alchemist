@@ -16,17 +16,7 @@
             <input type="hidden" name="shopGuid" id="newShopGuid"  />
             <input type="hidden" name="tab" value="@((int)selectedTabViewName.Key)" />
         </form>
-        <div class="modal fade shopModal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <a href="#" class="close" data-bs-dismiss="modal">&times;</a>
-                    </div>
-                    <div class="modal-body shopModalBody">
-                    </div>
-                </div>
-            </div>
-        </div>
+        @await Html.PartialAsync($"~/Views/ShowModal.cshtml", new ShowModalModel { ModalDivClass = "shopModal", ModalBodyDivClass = "shopModalBody", ModalCloseBtn = "shopCloseBtn" })        
     </div>
     <div class="shopListPartialDiv">        
         @await Html.PartialAsync($"~/Views/Home/_ShopListPartial.cshtml", Model)
