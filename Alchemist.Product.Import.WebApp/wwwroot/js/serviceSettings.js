@@ -1,4 +1,4 @@
-﻿const serviceModalSettings = new ModalForm(".serviceSettingsModal", ".serviceSettingsModalBody", '#serviceSettingsCloseBtn', '#settingsForm', new InputConfirmationSettings('#serviceSettingsForm', onServiceSettingsChanged), true);
+﻿const serviceModalSettings = new ModalForm(".serviceSettingsModal", ".serviceSettingsModalBody", '#serviceSettingsCloseBtn', null, '#settingsForm', new InputConfirmationSettings('#serviceSettingsForm', onServiceSettingsChanged));
 
 function setServiceSettingsFromJson(form, fileInputName, shopGuid, shopSettingsGuid, serviceSettingsName, onSuccess = null) {
     uploadFromJson('/FileUpload/UploadServiceSettings',
@@ -69,6 +69,6 @@ function saveServiceSettings(serviceForm, serviceName, isPrimaryService) {
             else
                 setServiceSettingsLi(data, $('.services'));
 
-            serviceModalSettings.closeModal();
+            serviceModalSettings.closeModal(true);
         });
 }

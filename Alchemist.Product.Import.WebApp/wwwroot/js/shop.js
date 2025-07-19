@@ -1,4 +1,4 @@
-﻿const shopModalSettings = new ModalForm(".shopModal", ".shopModalBody", '#shopCloseBtn', null, null, true, 'shopModalResult' );
+﻿const shopModalSettings = new ModalForm(".shopModal", ".shopModalBody", '#shopCloseBtn', null, null, null, 'shopModalResult' );
 
 function showShopModal(url, data, onHide = null) {   
 
@@ -17,7 +17,7 @@ function saveShop(newShopGuidSelector) {
             else {
                 $('#shop_li_' + data.guid.toString()).find("a").text(data.name);
             }
-            shopModalSettings.closeModal();
+            shopModalSettings.closeModal(true);
         },
         null);
 }

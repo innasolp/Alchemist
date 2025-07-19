@@ -45,20 +45,20 @@ class ModalForm {
     #InputConfirmationSettings = null;
     get InputConfirmationSettings() {
         return this.#InputConfirmationSettings;
+    }    
+
+    #OnShow = null;
+    get OnShow() {
+        return this.#OnShow;
     }
 
-    #SetSuccessResult = false;
-    get SetSuccessResult() {
-        return this.#SetSuccessResult;
-    }
-
-    constructor(modalDiv, modalBodyDiv, modalCloseBtn, parentForm = null, inputConfirmationSettings = null, setSuccessResult = false, modalResultInput = 'modalResult') {
+    constructor(modalDiv, modalBodyDiv, modalCloseBtn, onShow = null, parentForm = null, inputConfirmationSettings = null, modalResultInput = 'modalResult') {
         this.#ModalCloseBtn = modalCloseBtn;
         this.#ModalDiv = modalDiv;
         this.#ModalBodyDiv = modalBodyDiv;
+        this.#OnShow = onShow;
         this.#ParentForm = parentForm;
         this.#InputConfirmationSettings = inputConfirmationSettings;
-        this.#SetSuccessResult = setSuccessResult;
         this.#ModalResultInput = modalResultInput;
     }
 
@@ -66,13 +66,17 @@ class ModalForm {
         event.preventDefault();
     }
 
-    closeModal() {
-        if (this.SetSuccessResult)
+    closeModal(setSuccess = false) {
+        if (this.ModalResultInput != null && setSuccess == true)
             $(this.ModalDiv).append(`<input type='hidden' id='${this.ModalResultInput}' value='success'/>`);
+
         $(this.ModalDiv).modal("hide");
         $(this.ModalCloseBtn).off('click', this.onModalClose);
         if (this.ParentForm != null)
             $(this.ParentForm).off('submit', this.submitPreventDefault);
+
+        if (this.OnShow != null)
+            $(this.ModalDiv).off("show.bs.modal", this.OnShow);
     }
 
     onModalClose(event) {
@@ -90,13 +94,13 @@ class ModalForm {
 
         modalForm.InputConfirmationSettings.OnInputDataChanged(data, changed => {
             if (!changed) {
-                modalForm.closeModal();
+                modalForm.closeModal(true);
                 return;
             }
 
             confirm('Reseting', 'Input values will be reset. Are you sure?',
                 function () {
-                    modalForm.closeModal();
+                    modalForm.closeModal(false);
                 });
         });
     }
@@ -123,6 +127,9 @@ class ModalForm {
             console.trace(event);
         });
 
+        if (this.OnShow != null)
+            $(this.ModalDiv).on("show.bs.modal", this.OnShow);
+
         showItemModal($(this.ModalDiv), $(this.ModalBodyDiv), url, data, () => { if (onHide != null) this.hide(onHide); })
     }
 }
@@ -130,7 +137,7 @@ class ModalForm {
 function showItemModal(modalDiv, modalBodyDiv, url, data, onHide = null) {
     if (onHide != null)
         modalDiv.on('hide.bs.modal', function () {
-            onHide();
+            onHide(true);
         });
 
     if (data != null)

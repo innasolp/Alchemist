@@ -1,19 +1,15 @@
-﻿function showRootCategory(data) {
+﻿const rootCategoryModalSettings = new ModalForm('.rootCategoryModal', ".categoryModalBody", '#rootCategoryCloseBtn', setRootCategoryFormToDiv);
 
-    $(".categoryModalBody").on('load', function (event) {
-        console.log(event);
-        console.trace(event);
-    });
-
-    $('.rootCategoryModal').on("show.bs.modal", function () {
-        if ($('#rootCategoryForm').length == 0)
-            setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
-    });
+function setRootCategoryFormToDiv() {
+    if ($('#rootCategoryForm').length == 0)
+       setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
+}
+function showRootCategory(data) {
 
     if (data.hasOwnProperty('guid'))
-        showItemModal($(".rootCategoryModal"), $(".categoryModalBody"), '/ShopSettings/RootCategory/Edit', { data: JSON.stringify(data) });
+        rootCategoryModalSettings.show('/ShopSettings/RootCategory/Edit', { data: JSON.stringify(data) });
     else
-        showItemModal($(".rootCategoryModal"), $(".categoryModalBody"), '/ShopSettings/RootCategory/New', data);
+        rootCategoryModalSettings.show('/ShopSettings/RootCategory/New', data);
 }
 function setRootCategoryLi(rootCategory, ulRootCategories) {
 
@@ -47,7 +43,7 @@ function setRootCategoryLi(rootCategory, ulRootCategories) {
     }
 }
 
-function saveRootCategory(formSelector, divModal, categoriesUL) {
+function saveRootCategory(formSelector, categoriesUL) {
     var data = getFormData(formSelector);
     save(formSelector,
         '/ShopSettings/RootCategory/Set',
@@ -55,7 +51,7 @@ function saveRootCategory(formSelector, divModal, categoriesUL) {
         null,
         (data) => {
             if (data == null) return;
-            divModal.modal('hide');
+            rootCategoryModalSettings.closeModal();
             setRootCategoryLi(data, categoriesUL);
         });
 }
