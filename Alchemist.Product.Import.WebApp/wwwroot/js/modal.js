@@ -1,4 +1,21 @@
-﻿class ModalForm {
+﻿class InputConfirmationSettings {
+    #Form;
+    get Form() {
+        return this.#Form;
+    }
+
+    #OnInputDataChanged = null;
+    get OnInputDataChanged() {
+        return this.#OnInputDataChanged;
+    }
+
+    constructor(form, onInputDataChanged) {
+        this.#Form = form;
+        this.#OnInputDataChanged = onInputDataChanged;
+    }
+}
+
+class ModalForm {
 
     #ModalCloseBtn = '#modalCloseBtn';
     get ModalCloseBtn() {
@@ -25,9 +42,9 @@
         return this.#ModalResultInput;
     }
 
-    #OnInputDataChanged = null;
-    get OnInputDataChanged() {
-        return this.#OnInputDataChanged;
+    #InputConfirmationSettings = null;
+    get InputConfirmationSettings() {
+        return this.#InputConfirmationSettings;
     }
 
     #SetSuccessResult = false;
@@ -35,12 +52,12 @@
         return this.#SetSuccessResult;
     }
 
-    constructor(modalDiv, modalBodyDiv, modalCloseBtn, parentForm, onInputDataChanged = null, setSuccessResult = false, modalResultInput = 'modalResult') {
+    constructor(modalDiv, modalBodyDiv, modalCloseBtn, parentForm, inputConfirmationSettings = null, setSuccessResult = false, modalResultInput = 'modalResult') {
         this.#ModalCloseBtn = modalCloseBtn;
         this.#ModalDiv = modalDiv;
         this.#ModalBodyDiv = modalBodyDiv;
         this.#ParentForm = parentForm;
-        this.#OnInputDataChanged = onInputDataChanged;
+        this.#InputConfirmationSettings = inputConfirmationSettings;
         this.#SetSuccessResult = setSuccessResult;
         this.#ModalResultInput = modalResultInput;
     }
@@ -49,7 +66,7 @@
         event.preventDefault();
     }
 
-    close() {
+    closeModal() {
         if (this.SetSuccessResult)
             $(this.ModalDiv).append(`<input type='hidden' id='${this.ModalResultInput}' value='success'/>`);
         $(this.ModalDiv).modal("hide");
@@ -58,21 +75,27 @@
     }
 
     onModalClose(event) {
+
         event.preventDefault();
 
-        if (event.data.OnInputDataChanged == null) return;
+        const modalForm = event.data;
 
-        var data = getFormData($(event.data.ParentForm));
+        if (modalForm.InputConfirmationSettings == null) {
+            modalForm.closeModal();
+            return;
+        }
 
-        event.data.OnInputDataChanged(data, changed => {
+        var data = getFormData($(modalForm.InputConfirmationSettings.Form));
+
+        modalForm.InputConfirmationSettings.OnInputDataChanged(data, changed => {
             if (!changed) {
-                close(event.data.SetSuccessResult);
+                modalForm.closeModal();
                 return;
             }
 
             confirm('Reseting', 'Input values will be reset. Are you sure?',
                 function () {
-                    close(event.data.SetSuccessResult);
+                    modalForm.closeModal();
                 });
         });
     }
@@ -98,7 +121,7 @@
             console.trace(event);
         });
 
-        showItemModal($(this.ModalDiv), $(this.ModalBodyDiv), url, data, () => { if (onHide != null) hide(onHide); })
+        showItemModal($(this.ModalDiv), $(this.ModalBodyDiv), url, data, () => { if (onHide != null) this.hide(onHide); })
     }
 }
 
