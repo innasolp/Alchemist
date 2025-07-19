@@ -48,17 +48,7 @@
             </div>         
         </li>
         <li class="table-ul">
-            <div class="modal fade rootCategoryModal" role="dialog">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <div class="modal-body categoryModalBody">
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync($"~/Views/ShowModal.cshtml", new ShowModalModel { ModalDivClass = "rootCategoryModal", ModalBodyDivClass = "categoryModalBody", ModalCloseBtn = "rootCategoryCloseBtn" })            
         </li>
     </ul>
 </div>

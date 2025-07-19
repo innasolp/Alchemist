@@ -67,22 +67,7 @@ function sendFormData(url, data, onSuccess = null) {
     });
 }
 
-function showItemModal(divModelSelector, modalBodyDivSelector, url, data, onHide = null)
-{
-    if (onHide != null)
-        divModelSelector.on('hide.bs.modal', function () {
-            onHide();
-        });
 
-    if (data != null)
-        modalBodyDivSelector.load(url, data, function (response, status, xhr) {
-            onLoadCallback(url, response, status, xhr, () => { divModelSelector.modal("show"); })
-        });
-    else
-        modalBodyDivSelector.load(url, function (response, status, xhr) {
-            onLoadCallback(url, response, status, xhr, () => { divModelSelector.modal("show"); })
-        }); 
-}
 
 function onLoadCallback(url, response, status, xhr, onSuccess) {
     if (status == "error") {
@@ -94,10 +79,6 @@ function onLoadCallback(url, response, status, xhr, onSuccess) {
         console.log('url ' + url + ' load');
         onSuccess();
     }
-}
-
-function submitPreventDefault(event) {
-    event.preventDefault();
 }
 
 function postData(url, data = null, onSuccess = null, onError = null, contentType = "application/x-www-form-urlencoded; charset=UTF-8") {

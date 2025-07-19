@@ -1,25 +1,8 @@
-﻿function showShopModal(url, data, onHide = null) {   
+﻿const shopModalSettings = new ModalForm(".shopModal", ".shopModalBody", '#shopCloseBtn', null, null, null, 'shopModalResult' );
 
-    $(".shopModalBody").on('load', function (event) {
-        console.log(event);
-        console.trace(event);
-    });    
+function showShopModal(url, data, onHide = null) {   
 
-    showItemModal($(".shopModal"), $(".shopModalBody"), url, data, () => { if (onHide != null) onSaveShop(onHide); })
-}
-
-function onSaveShop(onHide = null) {
-    if ($('#shopModalResult').val() == 'success' || $('#shopModalResult').val() == 1 || $('#shopModalResult').val() == true) {
-        $('#shopModalResult').remove();
-        onHide(true);
-    }
-    else
-        onHide(false);
-}
-
-function closeShopModal() {
-    $(".shopModal").append("<input type='hidden' id='shopModalResult' value='success'/>");
-    $(".shopModal").modal("hide");    
+    shopModalSettings.show(url, data, onHide);
 }
 
 function saveShop(newShopGuidSelector) {
@@ -34,7 +17,7 @@ function saveShop(newShopGuidSelector) {
             else {
                 $('#shop_li_' + data.guid.toString()).find("a").text(data.name);
             }
-            closeShopModal();
+            shopModalSettings.closeModal(true);
         },
         null);
 }

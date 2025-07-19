@@ -1,4 +1,6 @@
-﻿function setServiceSettingsFromJson(form, fileInputName, shopGuid, shopSettingsGuid, serviceSettingsName, onSuccess = null) {
+﻿const serviceModalSettings = new ModalForm(".serviceSettingsModal", ".serviceSettingsModalBody", '#serviceSettingsCloseBtn', null, '#settingsForm', new InputConfirmationSettings('#serviceSettingsForm', onServiceSettingsChanged));
+
+function setServiceSettingsFromJson(form, fileInputName, shopGuid, shopSettingsGuid, serviceSettingsName, onSuccess = null) {
     uploadFromJson('/FileUpload/UploadServiceSettings',
         form,
         fileInputName,
@@ -7,56 +9,15 @@
     );
 }
 
-function onCloseServiceSettingsWithConfirm(event) {
-    event.preventDefault();
-
-    var data = getFormData($('#serviceSettingsForm'));
-
+function onServiceSettingsChanged(data, onChanged) {
     postData('/ServiceSettings/IsChanged',
         { data: JSON.stringify(data) },
-        (result) => {
-
-            if (!result) {
-                closeServiceSettingsModal(false);
-                return;
-            }
-
-            confirm('Reseting', 'Input values will be reset. Are you sure?',
-                function () {
-                    closeServiceSettingsModal(false);
-                });
-        }
+        (result) => onChanged(result)
     );
 }
+
 function showServiceSettingsModal(url, data, onHide = null) {
-
-    $('#settingsForm').on('submit', submitPreventDefault);
-
-    $('#serviceSettingsCloseBtn').on('click', onCloseServiceSettingsWithConfirm);
-
-    $(".serviceSettingsModalBody").on('load', function (event) {
-        console.log(event);
-        console.trace(event);
-    });
-
-    showItemModal($(".serviceSettingsModal"), $(".serviceSettingsModalBody"), url, data, () => { if (onHide != null) onSaveServiceSettings(onHide); })
-}
-
-function onSaveServiceSettings(onHide) {
-    if ($('#modalResult').val() == 'success' || $('#modalResult').val() == 1 || $('#modalResult').val() == true) {
-        $('#modalResult').remove();
-        onHide(true);
-    }
-    else
-        onHide(false);
-}
-
-function closeServiceSettingsModal(success = true) {
-    if (success)
-        $(".serviceSettingsModal").append("<input type='hidden' id='modalResult' value='success'/>");
-    $(".serviceSettingsModal").modal("hide");
-    $('#serviceSettingsCloseBtn').off('click', onCloseServiceSettingsWithConfirm);
-    $('#settingsForm').off('submit', submitPreventDefault);
+        serviceModalSettings.show(url, data, onHide);
 }
 
 function setServiceSettingsLi(service, ulServices) {
@@ -93,10 +54,10 @@ function setServiceSettingsLi(service, ulServices) {
     }
 }
 
-function saveServiceSettings(serviceFormSelector, serviceName, isPrimaryService) {
-    var formData = getFormData(serviceFormSelector);
+function saveServiceSettings(serviceForm, serviceName, isPrimaryService) {
+    var formData = getFormData(serviceForm);
     save(
-        serviceFormSelector,
+        serviceForm,
         '/ServiceSettings/Save',
         { data: JSON.stringify(formData) },
         null,
@@ -108,6 +69,6 @@ function saveServiceSettings(serviceFormSelector, serviceName, isPrimaryService)
             else
                 setServiceSettingsLi(data, $('.services'));
 
-            closeServiceSettingsModal();
+            serviceModalSettings.closeModal(true);
         });
 }
