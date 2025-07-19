@@ -7,56 +7,19 @@
     );
 }
 
-function onCloseServiceSettingsWithConfirm(event) {
-    event.preventDefault();
 
-    var data = getFormData($('#serviceSettingsForm'));
-
+function onServiceSettingsChanged(data, onChanged) {
     postData('/ServiceSettings/IsChanged',
         { data: JSON.stringify(data) },
-        (result) => {
-
-            if (!result) {
-                closeServiceSettingsModal(false);
-                return;
-            }
-
-            confirm('Reseting', 'Input values will be reset. Are you sure?',
-                function () {
-                    closeServiceSettingsModal(false);
-                });
-        }
+        (result) => onChanged(result)
     );
 }
+
 function showServiceSettingsModal(url, data, onHide = null) {
 
-    $('#settingsForm').on('submit', submitPreventDefault);
+    const serviceModalSettings = new ModalForm(".serviceSettingsModal", ".serviceSettingsModalBody", '#serviceSettingsCloseBtn', '#settingsForm', onServiceSettingsChanged, true);
 
-    $('#serviceSettingsCloseBtn').on('click', onCloseServiceSettingsWithConfirm);
-
-    $(".serviceSettingsModalBody").on('load', function (event) {
-        console.log(event);
-        console.trace(event);
-    });
-
-    showItemModal($(".serviceSettingsModal"), $(".serviceSettingsModalBody"), url, data, () => { if (onHide != null) onSaveServiceSettings(onHide); })
-}
-
-function onSaveServiceSettings(onHide) {
-    if ($('#modalResult').val() == 'success' || $('#modalResult').val() == 1 || $('#modalResult').val() == true) {
-        $('#modalResult').remove();
-        onHide(true);
-    }
-    else
-        onHide(false);
-}
-
-function closeServiceSettingsModal(success = true) {
-    if (success)
-        $(".serviceSettingsModal").append("<input type='hidden' id='modalResult' value='success'/>");
-    $(".serviceSettingsModal").modal("hide");
-    $('#serviceSettingsCloseBtn').off('click', onCloseServiceSettingsWithConfirm);
-    $('#settingsForm').off('submit', submitPreventDefault);
+    serviceModalSettings.show(url, data, onHide);
 }
 
 function setServiceSettingsLi(service, ulServices) {

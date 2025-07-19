@@ -1,7 +1,10 @@
 ﻿namespace Alchemist.Product.Import.WebApp.Models;
 
-public class ShowModalModel(string modalDivClass, string modalBodyDivClass)
+public class ShowModalModel
 {
-    public string ModalDivClass { get; } = modalDivClass;
-    public string ModalBodyDivClass { get; } = modalBodyDivClass;
+    public required string ModalDivClass { get; set; } 
+
+    public required string ModalBodyDivClass { get; set; }
+
+    public string ModalCloseBtn { get; set; } = "#modalCloseBtn";
 }
