@@ -1,4 +1,5 @@
 ﻿using Alchemist.Common;
+using Grpc.Client.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -58,5 +59,29 @@ public static class DependencyInjectionExtensions
         httpClientBuilder.AddHttpMessageHandler(serviceProvider => messageHandler);
 
         return services;
+    }
+
+    public static IServiceCollection AddGrpcServiceClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string grpcApiSectionName)
+        where TService : class
+        where TImplementation : class, TService
+    {
+        var grpcApiHost = configuration.GetSection(grpcApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        services.AddGrpcChannelWithoutCertificateCheck(grpcApiHost);
+        return services.AddSingleton<TService, TImplementation>();
+    }
+
+    public static IServiceCollection ConfigureDefaultHttps(this IServiceCollection services)
+    {
+        return services.ConfigureHttpClientDefaults(builder =>
+        {
+            builder.ConfigurePrimaryHttpMessageHandler(
+                () => new HttpClientHandler()
+                {
+                    ServerCertificateCustomValidationCallback = (req, cert, chain, errors) =>
+                    {
+                        return true;
+                    }
+                });
+        });
     }
 }

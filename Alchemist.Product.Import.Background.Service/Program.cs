@@ -38,7 +38,7 @@ builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoaderFactory), $"
 builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl", ShopImportWorkerKeys.ShopsMessageSenderKey);
 builder.Services.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl");
 
-builder.Services.AddGrpcServiceClient<Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
+builder.Services.AddGrpcServiceClient<IProductDataService, Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
 builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
 builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
 

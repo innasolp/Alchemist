@@ -2,7 +2,7 @@
 using Alchemist.Product.Interfaces;
 using System.ComponentModel;
 
-namespace Alchemist.Product.Import.Background;
+namespace Alchemist.Product.Import.Background.Models;
 
 internal abstract class ShopModel : IShopModel, IShop
 {
