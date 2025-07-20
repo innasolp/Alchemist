@@ -39,29 +39,6 @@ public static class ImportBackgroundDependencyInjectionExtensions
         return services.AddKeyedSignalRMessageReceiver(signalRUrl, ShopImportWorkerKeys.DataMessageReceiverKey);
     }
 
-    public static IServiceCollection AddGrpcServiceClient<T>(this IServiceCollection services, IConfiguration configuration, string grpcApiSectionName)
-        where T : class, IProductDataService
-    {
-        var grpcApiHost = configuration.GetSection(grpcApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
-        services.AddGrpcChannelWithoutCertificateCheck(grpcApiHost);
-        return services.AddSingleton<IProductDataService, T>();
-    }
-
-    public static IServiceCollection ConfigureDefaultHttps(this IServiceCollection services)
-    {
-        return services.ConfigureHttpClientDefaults(builder =>
-        {
-            builder.ConfigurePrimaryHttpMessageHandler(
-                () => new HttpClientHandler()
-                {
-                    ServerCertificateCustomValidationCallback = (req, cert, chain, errors) =>
-                    {
-                        return true;
-                    }
-                });
-        });
-    } 
-
     public static IServiceCollection AddShopImportMessageSender(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)
     {
         var signalRUrl = configuration.GetHostSectionValue(signalRUrlSectionName);

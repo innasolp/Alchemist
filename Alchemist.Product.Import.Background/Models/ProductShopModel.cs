@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using System.Collections.ObjectModel;
 
-namespace Alchemist.Product.Import.Background;
+namespace Alchemist.Product.Import.Background.Models;
 
 internal class ProductShopModel : ShopModel, IProductShopModel
 {

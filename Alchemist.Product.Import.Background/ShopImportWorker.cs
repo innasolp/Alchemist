@@ -13,6 +13,7 @@ using Alchemist.Product.Interfaces;
 using Alchemist.Import.Factory.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Background.Settings;
+using Alchemist.Product.Import.Background.Models;
 
 
 namespace Alchemist.Product.Import.Background;

@@ -6,7 +6,7 @@ using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.Import.Background;
+namespace Alchemist.Product.Import.Background.Models;
 
 internal static class ShopModelHelpers
 {
