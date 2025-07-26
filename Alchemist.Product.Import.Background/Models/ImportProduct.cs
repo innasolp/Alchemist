@@ -10,5 +10,5 @@ internal class ImportProduct : IImportProduct
     public string Url { get; set; }
     public bool Success { get; set; }
 
-    public ItemProcessStatus Status { get; set; }
+    public ResultStatus Status { get; set; }
 }

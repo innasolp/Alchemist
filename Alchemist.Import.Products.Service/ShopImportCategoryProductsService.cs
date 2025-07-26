@@ -240,7 +240,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             {
                 productCount++;
                 Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, [productItem.Value.Name, productItem.Value.ApiUrl]);
-                if (await HandleProductItemAsync(productItem.Value) == ItemProcessStatus.Error)
+                if (await HandleProductItemAsync(productItem.Value) == ResultStatus.Error)
                     _unhandledProductItems.Enqueue(productItem.Value);
             }
             else if (productItem.Status == ResultStatus.Warning)
@@ -274,7 +274,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
                 if (productItem.Status == ResultStatus.Warning)
                     _unhandledCategoryProductItems.Enqueue(unprocessedItem);
-                else if (productItem.Value != null && await HandleProductItemAsync(productItem.Value) == ItemProcessStatus.Warning)
+                else if (productItem.Value != null && await HandleProductItemAsync(productItem.Value) == ResultStatus.Warning)
                     _unhandledProductItems.Enqueue(productItem.Value);
             }
         }
@@ -289,13 +289,13 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 if (!_unhandledProductItems.TryDequeue(out var unhandledItem))
                     continue;
 
-                if (await HandleProductItemAsync(unhandledItem) == ItemProcessStatus.Error)
+                if (await HandleProductItemAsync(unhandledItem) == ResultStatus.Error)
                     _unhandledProductItems.Enqueue(unhandledItem);
             }
         }
     }
 
-    protected async Task<ItemProcessStatus> HandleProductItemAsync(TProductItem productItem)
+    protected async Task<ResultStatus> HandleProductItemAsync(TProductItem productItem)
     {
         var result = await ProcessUrlTaskAsync((i) => _itemHandler.HandleItem(i, ProductShopModel), i => i.ApiUrl, productItem);
 
@@ -319,7 +319,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         if (productItem == null)
             throw new Exception(string.Format(ImportProductLogMessages.ProductFromUrlIsNullError, apiUrl));
 
-        productItem.ItemUrl = categoryProductItem.ItemUrl;
+        productItem.Url = categoryProductItem.ItemUrl;
         productItem.Price = categoryProductItem.Price;
         productItem.Currency = categoryProductItem.Currency;
         productItem.ApiUrl = apiUrl;

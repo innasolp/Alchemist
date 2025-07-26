@@ -51,7 +51,7 @@ public class TestProductItem : IProductItem
 
     public string Currency { get; set; }
     public double Price { get; set; }
-    public string ItemUrl { get; set; }
+    public string Url { get; set; }
     public string ApiUrl { get; set; }
     public int CategoryId { get; set; }
 }

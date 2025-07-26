@@ -5,6 +5,8 @@ using Alchemist.Import.Interfaces;
 using Alchemist.Import.Product.Test.Infrastructure;
 using Alchemist.Test.Import.Service.Infrastructure;
 using Xunit.Abstractions;
+using Alchemist.Common;
+using Alchemist.Import.Products.Interfaces;
 using Alchemist.Exceptions;
 
 namespace Alchemist.Import.Product.Test;
@@ -83,7 +85,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
         WebLoaderMock.SetupLoadItemsSuccessfull(productItems, RequestHeaders);
 
-        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<It.IsAnyType>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(Common.ItemProcessStatus.AlreadyExists));
+        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IProductItem>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(ResultStatus.Success));
 
         testCategory = categoryProducts;
         url = categoryUrl;

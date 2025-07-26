@@ -7,6 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Alchemist.DependencyInjection.Common;
 using Message.SignalR.DependencyInjection;
 using Grpc.Client.Extensions;
+using Message.Interfaces;
+using Alchemist.Product.Import.Background.ImportItems;
+using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Category.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -44,5 +48,23 @@ public static class ImportBackgroundDependencyInjectionExtensions
         var signalRUrl = configuration.GetHostSectionValue(signalRUrlSectionName);
 
         return services.AddKeyedSignalRMessageSender(signalRUrl, key);
+    }
+
+    public static IServiceCollection AddProductItemHandler(this IServiceCollection services, object messageSenderKey, string methodName)
+    {
+        return services.AddSingleton<IProductItemHandler>((serviceProvider) =>
+        {
+            var messageSender = serviceProvider.GetRequiredKeyedService<IMessageSender>(messageSenderKey);
+            return new ProductItemHandler(messageSender, methodName);
+        });
+    }
+
+    public static IServiceCollection AddCategoryItemHandler(this IServiceCollection services, object messageSenderKey, string methodName)
+    {
+        return services.AddSingleton<ICategoryItemHandler>((serviceProvider) =>
+        {
+            var messageSender = serviceProvider.GetRequiredKeyedService<IMessageSender>(messageSenderKey);
+            return new CategoryItemHandler(messageSender, methodName);
+        });
     }
 }

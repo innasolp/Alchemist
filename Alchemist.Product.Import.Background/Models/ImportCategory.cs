@@ -34,7 +34,7 @@ internal class ImportCategory : IImportCategory
 
     public int? ParentId { get; set; }
 
-    public ItemProcessStatus Status { get; set; }
+    public ResultStatus Status { get; set; }
 
     [JsonIgnore]
     public ObservableCollection<ICategory> Children { get; } = [];
@@ -52,7 +52,7 @@ internal class ImportCategory : IImportCategory
 
     public ImportCategory(IShopCategory shopCategory,
                           ICategory itemCategory,
-                          ItemProcessStatus status)
+                          ResultStatus status)
     {
         Id = shopCategory.Id;
         ItemId = shopCategory.ItemId;
