@@ -2,7 +2,6 @@ using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.Shop.GoldApple.Model;
 using BrowserDataLoader.Firefox.Standart.Windows;
 using BrowserDataLoader.Interfaces;
-using Json.FileExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;

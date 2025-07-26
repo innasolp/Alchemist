@@ -1,11 +1,12 @@
-﻿using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Interfaces;
+using Alchemist.Import.Products.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Shop.Ozon.Model;
 
-public class Category : IJsonOnDeserialized, ICategoryProducts
+public class Category : IJsonOnDeserialized, ICategoryProducts, IPaginatorItem
 {
     [JsonPropertyName("widgetStates")]
     public JsonObject? WidgetStates { get; set; }
@@ -28,6 +29,15 @@ public class Category : IJsonOnDeserialized, ICategoryProducts
     [JsonPropertyName("layout")]
     public LayoutItem[] LayoutItems { get; set; } = [];
 
+    [JsonIgnore]
+    public InfiniteVirtualPaginator? InfiniteVirtualPaginator { get; private set; }
+
+    [JsonPropertyName("prevPage")]
+    public string? PrevPage { get; set; }
+
+    [JsonPropertyName("nextPage")]
+    public string? NextPage { get; set; }
+
     public void OnDeserialized()
     {
         var searchResultsV2 = WidgetStates?.FirstOrDefault(ws => ws.Key.Contains("searchResultsV2"));
@@ -49,11 +59,39 @@ public class Category : IJsonOnDeserialized, ICategoryProducts
                 CategoryContent = JsonSerializer.Deserialize<CategoryContent>(tileGridDesktop.Value.Value.ToString());
         }
 
+        if(string.IsNullOrEmpty(PrevPage) && string.IsNullOrEmpty(NextPage))
+        {
+            var infiniteVirtualPaginatorJson = WidgetStates?.FirstOrDefault(ws => ws.Key.Contains("InfiniteVirtualPaginator"));
+            if(infiniteVirtualPaginatorJson?.Value != null)
+            {
+                InfiniteVirtualPaginator = JsonSerializer.Deserialize<InfiniteVirtualPaginator>(infiniteVirtualPaginatorJson.Value.Value.ToString());
+            }
+        }
+
 
         if (!string.IsNullOrWhiteSpace(SharedContent))
         {
             Shared = JsonSerializer.Deserialize<Shared>(SharedContent);
         }
+    }
+
+    //todo category in urlformat
+    string IPaginatorItem.GetPageUrl(string urlFormat, int page)
+    {
+        return !string.IsNullOrEmpty(PrevPage)
+            ? PrevPage
+            : (!string.IsNullOrEmpty(InfiniteVirtualPaginator?.PrevPage)
+                            ? InfiniteVirtualPaginator.PrevPage
+                            : string.Format(urlFormat, page));
+    }
+
+    string IPaginatorItem.GetNextPageUrl(string urlFormat, int page)
+    {
+        return !string.IsNullOrEmpty(NextPage)
+             ? NextPage
+             : (!string.IsNullOrEmpty(InfiniteVirtualPaginator?.NextPage)
+                             ? InfiniteVirtualPaginator.NextPage
+                             : string.Format(urlFormat, page + 1));
     }
 }
 

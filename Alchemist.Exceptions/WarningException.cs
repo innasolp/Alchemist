@@ -6,7 +6,7 @@ public class WarningException : Exception
 
     public WarningException(object? result) : base() { Result = result; }
 
-    public WarningException(string message, object? result) : base(message) { Result = result; }
+    public WarningException(string message, object? result = null) : base(message) { Result = result; }
 
     public WarningException(string? message, Exception? innerException, object? result) : base(message, innerException)
     {

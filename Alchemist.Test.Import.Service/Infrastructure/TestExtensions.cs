@@ -22,11 +22,19 @@ public static class TestExtensions
         webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl, requestHeaders)).Returns((string url, RequestHeaders headers) => LoadItemAsync(item));
     }
 
-    public static void SetupLoadItems<T>(this Mock<IWebLoader> webLoaderMock, Dictionary<string,T> itemUrls, RequestHeaders requestHeaders)
+    public static void SetupLoadItemsSuccessfull<T>(this Mock<IWebLoader> webLoaderMock, Dictionary<string,T> itemUrls, RequestHeaders requestHeaders)
         where T : class
     {
         foreach(var itemUrl in itemUrls)
         webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl.Key, requestHeaders)).Returns(LoadItemAsync(itemUrl.Value));
+    }
+
+    public static void SetupLoadItemsThrowsExceptions<T>(this Mock<IWebLoader> webLoaderMock, Dictionary<string, T> itemUrls, Func<string, Exception> getItemException, RequestHeaders requestHeaders)
+        where T : class
+    {
+        foreach (var itemUrl in itemUrls)
+            webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl.Key, requestHeaders))
+                .Throws(getItemException(itemUrl.Key));
     }
 
     private static async Task<Stream> LoadItemAsync<T>(T item)
