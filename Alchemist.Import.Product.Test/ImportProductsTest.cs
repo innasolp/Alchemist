@@ -1,6 +1,7 @@
 ﻿using Alchemist.Import.Product.Test.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
+using Alchemist.Test.Import.Service;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Collections.ObjectModel;

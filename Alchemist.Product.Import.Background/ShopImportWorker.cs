@@ -79,7 +79,7 @@ public class ShopImportWorker : BackgroundService
         _categoryDataHandler.ItemProcessed += CategoryHandledAsync;
     }
 
-    private async Task CategoryHandledAsync(object sender, ICategory item, IShopModel shopModel, ItemProcessStatus processStatus)
+    private async Task CategoryHandledAsync(object sender, ICategory item, IShopModel shopModel, ResultStatus processStatus)
     {
         var categoryModel = new ImportCategory { Category = item.Name, ItemId = item.Id, Status = processStatus };
 
@@ -89,9 +89,9 @@ public class ShopImportWorker : BackgroundService
     }
 
 
-    private async Task ProductItemHandledAsync(object sender, IProductItem item, IShopModel shopModel, ItemProcessStatus processStatus)
+    private async Task ProductItemHandledAsync(object sender, IProductItem item, IShopModel shopModel, ResultStatus status)
     {        
-        var productItemModel = new ImportProduct { Name = item.Name, ShopName = shopModel.ShopName, Url = item.ItemUrl, Status = processStatus }; 
+        var productItemModel = new ImportProduct { Name = item.Name, ShopName = shopModel.ShopName, Url = item.Url, Status = status }; 
 
         await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
     }

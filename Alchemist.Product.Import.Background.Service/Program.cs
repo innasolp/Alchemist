@@ -1,10 +1,8 @@
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
-using Alchemist.Import.Categories.Data;
 using Alchemist.Import.Factory.Interfaces;
 using Alchemist.Import.Logging;
-using Alchemist.Import.Products.Data;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.JsonAdapter;
@@ -22,6 +20,8 @@ using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
+using Message.RabbitMQ;
+using Message.RabbitMQ.DependencyInjection;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
@@ -57,8 +57,12 @@ builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new 
 
 builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopProductImportPath").Value}");
 builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
-builder.Services.AddProductDataHandler();
-builder.Services.AddCategoriesDataHandler();
+
+//todo rabbitmqpublisher
+builder.AddRabbitMQMessageSender("importqueue", "RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
+builder.Services.AddProductItemHandler("importqueue", builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
+builder.Services.AddCategoryItemHandler("importqueue", builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
+
 builder.Services.AddImportServiceLogFactory((logger, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{ 
     { "ShopImportService", settings.Name },
     { "ShopSettingsType", settings.ShopSettingType.ToString() } }));

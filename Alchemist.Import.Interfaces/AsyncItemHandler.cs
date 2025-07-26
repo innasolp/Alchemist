@@ -3,7 +3,7 @@
 namespace Alchemist.Import.Interfaces;
 
 
-public delegate Task AsyncItemHandler<T>(object sender, T item, IShopModel shop, ItemProcessStatus itemProcessStatus);
+public delegate Task AsyncItemHandler<T>(object sender, T item, IShopModel shop, ResultStatus itemProcessStatus);
 
 
 

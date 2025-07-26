@@ -1,4 +1,5 @@
-﻿using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Interfaces;
+using Alchemist.Import.Products.Interfaces;
 using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Shop.GoldApple.Model;
@@ -94,7 +95,7 @@ public class ProductData : IProductItem
 
     string IProductItem.ItemId => Data.ItemId;
 
-    string IProductItem.Name => Data.Name;
+    string IItem.Name => Data.Name;
 
     string[] IProductItem.Components => Data.Components;
 
@@ -108,7 +109,10 @@ public class ProductData : IProductItem
 
     string IProductItem.Currency { get; set; }
     double IProductItem.Price { get; set; }
-    string IProductItem.ItemUrl { get; set; }
+    string IProductItem.Url { get; set; }
+
+    string IItem.Url => (this as IProductItem).Url;
+
     string IProductItem.ApiUrl { get; set; }
     int IProductItem.CategoryId { get; set; }
 }

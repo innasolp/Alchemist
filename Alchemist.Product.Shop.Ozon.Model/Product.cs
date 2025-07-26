@@ -1,4 +1,5 @@
-﻿using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Interfaces;
+using Alchemist.Import.Products.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -12,6 +13,8 @@ public class Product : IJsonOnDeserialized, IProductItem
 
     [JsonIgnore]
     public string Name { get; set; }
+
+    string IItem.Name => Name;
     
     [JsonIgnore]
     public WebDescription? WebDescription { get; set; }
@@ -45,7 +48,9 @@ public class Product : IJsonOnDeserialized, IProductItem
 
     string IProductItem.Currency { get; set; }
     double IProductItem.Price { get; set; }
-    string IProductItem.ItemUrl { get; set; }
+    string IProductItem.Url { get; set; }
+
+    string IItem.Url => (this as IProductItem).Url;
     string IProductItem.ApiUrl { get ; set; }
 
     int IProductItem.CategoryId { get; set; }

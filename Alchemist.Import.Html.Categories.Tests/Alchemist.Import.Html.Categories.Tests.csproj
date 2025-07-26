@@ -41,8 +41,7 @@
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
-    <PackageReference Include="WebLoader.HttpClient" Version="1.0.0" />
-    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.4" />
+    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.5" />
   </ItemGroup>
 
   <ItemGroup>

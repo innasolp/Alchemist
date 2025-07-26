@@ -6,7 +6,7 @@ using WebLoader.Common;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
 
-namespace Alchemist.Import.Product.Test;
+namespace Alchemist.Test.Import.Service;
 
 public abstract class ImportServiceTest<TService, TLogger>
     where TService:ShopImportService
