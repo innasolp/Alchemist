@@ -120,11 +120,20 @@
   <data name="CategoryCompletedInfo" xml:space="preserve">
     <value>Category {0} completed. {1} products handled. {2} unhandled.</value>
   </data>
-  <data name="CategoryProcessFault" xml:space="preserve">
-    <value>Category {0} load with fatal error {1}.</value>
+  <data name="CategoryLoadingFault" xml:space="preserve">
+    <value>Category {0} loaded with fatal error {1}.</value>
   </data>
-  <data name="CategoryProcessWarning" xml:space="preserve">
-    <value>Category {0} was loaded with not fatal error {1}.</value>
+  <data name="CategoryNotLoadedFromUrlWarning" xml:space="preserve">
+    <value>Category not loaded from url {0}.</value>
+  </data>
+  <data name="CategoryNotReloadedFromUrlWarning" xml:space="preserve">
+    <value>Category not reloaded from url {0}.</value>
+  </data>
+  <data name="CategoryProcessFault" xml:space="preserve">
+    <value>Category {0} processed with fatal error {1}.</value>
+  </data>
+  <data name="NotAllCategoryProductsForUrlWereProcessedWarning" xml:space="preserve">
+    <value>Category from url {0} was processed: {1} products from {2} were loaded. </value>
   </data>
   <data name="CategoryRecompletedInfo" xml:space="preserve">
     <value>Category {0} recompleted succsessfully. {1} product items handled.</value>
@@ -134,6 +143,9 @@
   </data>
   <data name="CategoryRehandlingFailed" xml:space="preserve">
     <value>Category {0} rehandling was failed. Error {1}.</value>
+  </data>
+  <data name="CategoryUrlIsInvalidWarning" xml:space="preserve">
+    <value>Category url {0} is invalid : no product items.</value>
   </data>
   <data name="NewCategoryIsEnqueued" xml:space="preserve">
     <value>New category {0} is enqueued.</value>
@@ -147,7 +159,25 @@
   <data name="ProductHasBeenSuccessfullyLoadedFromUrl" xml:space="preserve">
     <value>Product {0} has been successfully loaded from url {1}.</value>
   </data>
+  <data name="ProductWasNotLoadedFromUrlWithError" xml:space="preserve">
+    <value>Product was not loaded from url {0} , error: {1}.</value>
+  </data>
   <data name="ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded" xml:space="preserve">
     <value>Product {0} was not loaded from url {1} with not fatal error {2} and would be reload.</value>
+  </data>
+  <data name="CategoryProductsWereNotLoadedError" xml:space="preserve">
+    <value>All products in category url {0} were not loaded.</value>
+  </data>
+  <data name="CategoryReloadingFailed" xml:space="preserve">
+    <value>Category {0} reloading was failed. Error {1}.</value>
+  </data>
+  <data name="NotAllCategoryProductsForUrlWereReprocessedWarning" xml:space="preserve">
+    <value>Category from url {0} was reprocessed: {1} products from {2} were loaded. </value>
+  </data>
+  <data name="CategoryProductsForUrlWereProcessedSuccesfullInfo" xml:space="preserve">
+    <value>Category Url {0} were processed successfull : {1} products were loaded</value>
+  </data>
+  <data name="CategoryProductsForUrlWereReprocessedSuccesfullInfo" xml:space="preserve">
+    <value>Category url {0} were reprocessed successfull : {1} products were loaded</value>
   </data>
 </root>

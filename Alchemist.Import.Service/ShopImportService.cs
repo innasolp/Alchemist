@@ -1,7 +1,7 @@
 ﻿using Alchemist.Common;
+using Alchemist.Exceptions;
 using Alchemist.Import.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
@@ -176,69 +176,70 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         }
     }
 
-    protected async Task<TaskResult<T>> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
+    protected async Task<UrlTaskResult<T>> ProcessUrlTaskAsync<T>(Func<string, Task<T?>> task, string url)
     {
         try
         {
-            return TaskResult<T>.Success(await task(url));
+            return UrlTaskResult<T>.Success(await task(url), url);
         }
         catch (HttpRequestException e)
         {
             await HandleHttpExceptionAsync(e, url);
-            return await Task.FromResult(TaskResult<T>.Warning(default, e));
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, e));
         }
         catch (WebLoaderException wle)
         {
             await HandleWebLoaderExceptionAsync(wle, url);
-            return await Task.FromResult(TaskResult<T>.Warning(default, wle));
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, wle));
         }
         catch (WarningException warning)
         {
             HandleWarningException(warning, url);
-            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, warning));
         }
         catch(OperationCanceledException operationCancelledException)
         {
             await HandleCancelling(operationCancelledException, url);
-            return await Task.FromResult(TaskResult<T>.Cancelled());
+            return await Task.FromResult(UrlTaskResult<T>.Cancelled(url));
         }
         catch (Exception e)
         {
             await HandleException(e, url);
-            return await Task.FromResult(TaskResult<T>.Failed(default, e));
+            return await Task.FromResult(UrlTaskResult<T>.Failed(default,url, e));
         }
     }
 
-    protected async Task<TaskResult<T>> ProcessUrlTaskAsync<TUrl, T>(Func<TUrl, Task<T?>> task, Func<TUrl, string> getUrl, TUrl itemUrl)
+    protected async Task<UrlTaskResult<T>> ProcessUrlTaskAsync<TUrl, T>(Func<TUrl, Task<T?>> task, Func<TUrl, string> getUrl, TUrl itemUrl)
     {
+        var url = getUrl(itemUrl);
         try
         {
-            return TaskResult<T>.Success(await task(itemUrl));
+            return UrlTaskResult<T>.Success(await task(itemUrl), url);
         }
         catch (HttpRequestException e)
         {
-            await HandleHttpExceptionAsync(e, getUrl(itemUrl));
-            return await Task.FromResult(TaskResult<T>.Warning(default, e));
+            await HandleHttpExceptionAsync(e, url);
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, e));
         }
         catch (WebLoaderException wle)
         {
-            await HandleWebLoaderExceptionAsync(wle, getUrl(itemUrl));
-            return await Task.FromResult(TaskResult<T>.Warning(default, wle));
+            await HandleWebLoaderExceptionAsync(wle, url);
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, wle));
         }
         catch (WarningException warning)
         {
-            HandleWarningException(warning, getUrl(itemUrl));
-            return await Task.FromResult(TaskResult<T>.Warning(default, warning));
+            HandleWarningException(warning, url);
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, warning));
         }
         catch (OperationCanceledException operationCancelledException)
         {
-            await HandleCancelling(operationCancelledException, getUrl(itemUrl));
-            return await Task.FromResult(TaskResult<T>.Cancelled());
+            await HandleCancelling(operationCancelledException, url);
+            return await Task.FromResult(UrlTaskResult<T>.Cancelled(url));
         }
         catch (Exception e)
         {
-            await HandleException(e, getUrl(itemUrl));
-            return await Task.FromResult(TaskResult<T>.Failed(default, e));
+            await HandleException(e, url);
+            return await Task.FromResult(UrlTaskResult<T>.Failed(default, url, e));
         }
     }
 

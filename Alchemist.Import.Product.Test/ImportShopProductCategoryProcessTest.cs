@@ -1,11 +1,11 @@
 ﻿using Moq;
-using System.ComponentModel;
 using WebLoader.Common;
 using Alchemist.Import.Products.Service;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Product.Test.Infrastructure;
 using Alchemist.Test.Import.Service.Infrastructure;
 using Xunit.Abstractions;
+using Alchemist.Exceptions;
 
 namespace Alchemist.Import.Product.Test;
 
@@ -17,7 +17,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         ProductShopModelMock.Setup(s => s.CategoryUrl).Returns("Category_{0}_page{1}");
     }
 
-    private void SetupServiceWithCategoryException(string name, Exception exception, out string categoryUrl )
+    private void SetupServiceWithCategoryLoadException(string name, Exception exception, out string categoryUrl )
     {
         Service.SetName(name);
 
@@ -33,6 +33,33 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         WebLoaderMock.Setup(w => w.LoadFromUrl(url, RequestHeaders)).Throws(exception);
 
         categoryUrl = url;
+    }
+
+    private void SetupServiceWithCategoryProcessException(string name, Func<string, Exception> getItemException, int pageCount, out TestCategory testCategory, out string url)
+    {
+        Service.SetName(name);
+        Service.SetPageProductCount(pageCount);
+
+        WebLoaderMock.Reset();
+        WebLoaderMock.SetupStartSuccess();
+
+        var categoryMock = TestHelper.CreateCategoryMock();
+        ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
+
+        ProductShopModelMock.Setup(s => s.CategoryUrl).Returns(Guid.NewGuid().ToString());
+
+        var categoryUrl = ProductShopModelMock.Object.GetCategoryPageUrl(categoryMock.Object, 1);
+        var categoryProducts = TestHelper.CreateCategoryWithProducts();
+
+        WebLoaderMock.SetupLoadItem(categoryUrl, RequestHeaders, categoryProducts);
+
+        var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
+        WebLoaderMock.SetupLoadItemsThrowsExceptions(productItems, getItemException, RequestHeaders);
+
+        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<It.IsAnyType>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(Common.ItemProcessStatus.AlreadyExists));
+
+        testCategory = categoryProducts;
+        url = categoryUrl;
     }
 
     private void SetupServiceWithCategoryLoadSuccessfull(string name, int pageCount, out TestCategory testCategory, out string url)
@@ -54,7 +81,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         WebLoaderMock.SetupLoadItem(categoryUrl, RequestHeaders, categoryProducts);
 
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
-        WebLoaderMock.SetupLoadItems(productItems, RequestHeaders);
+        WebLoaderMock.SetupLoadItemsSuccessfull(productItems, RequestHeaders);
 
         ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<It.IsAnyType>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(Common.ItemProcessStatus.AlreadyExists));
 
@@ -67,7 +94,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     public async Task ImportLogWarningWhenCategoryLoadThrowsHttpException()
     {
         var exception = new HttpRequestException(HttpRequestError.InvalidResponse, "request forbidden", statusCode:System.Net.HttpStatusCode.Forbidden);
-        SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
+        SetupServiceWithCategoryLoadException(Guid.NewGuid().ToString(), exception, out var url);
 
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token); ;
@@ -76,7 +103,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), It.IsAny<RequestHeaders>()));
 
-        LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryProcessWarning"), url, exception.Message);        
+        LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);        
 
         LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("HttpRequestErrorAndWebLoaderRestart"), 
             System.Net.HttpStatusCode.Forbidden, url, WebLoaderMock.Object.GetType().Name);
@@ -88,7 +115,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     public async Task ImportLogWarningWhenCategoryLoadThrowsWebLoaderException()
     {
         var exception = new WebLoaderException(NsError.NS_ERROR_REDIRECT_LOOP, "error redirect loop");
-        SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
+        SetupServiceWithCategoryLoadException(Guid.NewGuid().ToString(), exception, out var url);
 
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token); 
@@ -103,7 +130,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         LoggerMock.VerifyInfo(ServiceResourceManager.GetString("WebLoaderResetSuccessfully"));
         
-        LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryProcessWarning"), url, exception.Message);
+        LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);
 
         await token.CancelAsync();
     }
@@ -112,7 +139,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     public async Task ImportLogWarningWhenCategoryLoadThrowsWarningException()
     {
         var exception = new WarningException("warning");        
-        SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
+        SetupServiceWithCategoryLoadException(Guid.NewGuid().ToString(), exception, out var url);
         Service.SetPageProductCount(10);
 
         var token = new CancellationTokenSource();
@@ -126,14 +153,14 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("ProcessUrlNotCompleteWarning"), url, exception.Message);       
 
-        LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryProcessWarning"), url, exception.Message);        
+        LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);        
     }
 
     [Fact]
     public async Task ImportLogErrorWhenCategoryLoadThrowsNotWarningException()
     {
         var exception = new InvalidOperationException("error");
-        SetupServiceWithCategoryException(Guid.NewGuid().ToString(), exception, out var url);
+        SetupServiceWithCategoryLoadException(Guid.NewGuid().ToString(), exception, out var url);
 
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token);
@@ -144,7 +171,36 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ProcessUrlFailedError"), url);
 
-        LoggerMock.VerifyError(ImportProductsResourceManager.GetString("CategoryProcessFault"), url, exception.Message);
+        LoggerMock.VerifyError(ImportProductsResourceManager.GetString("CategoryLoadingFault"), url, exception.Message);
+    }
+
+    [Fact]
+    public async Task ImportLogWhenAllCategoryProductsNotProcessedError()
+    {
+        var exceptionFormat = "test exception {0}";
+        SetupServiceWithCategoryProcessException(Guid.NewGuid().ToString(), 
+            item=>new WarningException(string.Format(exceptionFormat, item)), 
+            10, 
+            out var categoryProducts,
+            out var categoryUrl);
+
+        var token = new CancellationTokenSource();
+        var task = Service.StartServiceInFactoryAsync(token.Token);
+
+        await Task.Delay(3000);
+
+        await token.CancelAsync();
+
+        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == categoryUrl), It.IsAny<RequestHeaders>()));
+
+        foreach (var item in categoryProducts.CategoryProductItems)
+        {
+            LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded"), 
+                item.Name, Service.GetTestApiUrl(item), string.Format(exceptionFormat, Service.GetTestApiUrl(item)));
+        }
+
+        LoggerMock.VerifyError(ImportProductsResourceManager.GetString("CategoryProductsWereNotLoadedError"),
+            categoryUrl);
     }
 
     [Fact]
