@@ -58,7 +58,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
         WebLoaderMock.SetupLoadItemsThrowsExceptions(productItems, getItemException, RequestHeaders);
 
-        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<It.IsAnyType>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(Common.ItemProcessStatus.AlreadyExists));
+        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IProductItem>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(ResultStatus.Success));
 
         testCategory = categoryProducts;
         url = categoryUrl;
