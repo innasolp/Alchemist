@@ -4,32 +4,25 @@ using Message.Interfaces;
 
 namespace Alchemist.Product.Import.DBService;
 
-public class ImportItemHandlerService : BackgroundService
+public class ImportItemHandlerService(ILogger<ImportItemHandlerService> logger,
+    [FromKeyedServices(ItemHaldlerKeys.ProductRoutingKey)] string productRoutingKey,
+    [FromKeyedServices(ItemHaldlerKeys.CategoryRoutingKey)] string categoryRoutingKey,
+    IMessageReceiver messageReceiver,
+    IItemHandler<IImportProductItem> productItemHandler,
+    IItemHandler<IImportCategoryItem> categoryItemHandler
+    ) : BackgroundService
 {
-    private readonly ILogger<ImportItemHandlerService> _logger;
+    private readonly ILogger<ImportItemHandlerService> _logger = logger;
 
-    private readonly IMessageReceiver _messageReceiver;
+    private readonly IMessageReceiver _messageReceiver = messageReceiver;
 
-    private readonly  IItemHandler<IImportProductItem> _productItemHandler;
+    private readonly  IItemHandler<IImportProductItem> _productItemHandler = productItemHandler;
 
-    private readonly  IItemHandler<IImportCategoryItem> _categoryItemHandler;
+    private readonly  IItemHandler<IImportCategoryItem> _categoryItemHandler = categoryItemHandler;
 
-    public ImportItemHandlerService(ILogger<ImportItemHandlerService> logger,
-        [FromKeyedServices(ItemHaldlerKeys.ProductRoutingKey)] string productRoutingKey,
-        [FromKeyedServices(ItemHaldlerKeys.CategoryRoutingKey)] string categoryRoutingKey,
-        IMessageReceiver messageReceiver,
-        IItemHandler<IImportProductItem> productItemHandler,
-        IItemHandler<IImportCategoryItem> categoryItemHandler
-    )
-    {
-        _logger = logger;
-        _messageReceiver = messageReceiver;
-        _productItemHandler = productItemHandler;
-        _categoryItemHandler = categoryItemHandler;
+    private readonly string _productRoutingKey = productRoutingKey;
 
-        _messageReceiver.On<IImportProductItem>(productRoutingKey, OnHandleProductItem);
-        _messageReceiver.On<IImportCategoryItem>(categoryRoutingKey, OnHandleCategoryItem);
-    }
+    private readonly string _categoryRoutingKey = categoryRoutingKey;
 
     private async Task OnHandleCategoryItem(IImportCategoryItem item)
     {
@@ -48,6 +41,9 @@ public class ImportItemHandlerService : BackgroundService
             await _messageReceiver.Start();
 
             _logger.LogInformation("Import service connected to messaging host.");
+
+            _messageReceiver.On<IImportProductItem>(_productRoutingKey, OnHandleProductItem);
+            _messageReceiver.On<IImportCategoryItem>(_categoryRoutingKey, OnHandleCategoryItem);
         }
         catch (Exception ex)
         {

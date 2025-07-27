@@ -31,6 +31,8 @@ builder.Services.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(shopH
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
 builder.AddRabbitMQMessageReceiver("RabbitMqQueueOptions", "RabbitMqServiceOptions", "RabbitMqExchangeOptions");
+builder.Services.AddKeyedSingleton(ItemHaldlerKeys.ProductRoutingKey, builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
+builder.Services.AddKeyedSingleton(ItemHaldlerKeys.CategoryRoutingKey, builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 
 builder.Services.AddProductItemHandler();
 builder.Services.AddCategoryItemHandler();

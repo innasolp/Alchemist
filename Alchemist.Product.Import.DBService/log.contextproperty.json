@@ -1,0 +1,167 @@
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning",
+        "System.Net.Http.HttpClient": "Information",
+        "Microsoft.AspNetCore": "Information"
+      },
+      "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId", "WithThreadName" ],
+      "Properties": {
+        "Application": "Alchemist.Product.Import.Background.Service"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Fatal' and $[PropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Fatal/fatal_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Day",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Fatal/fatal_.json",
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter",
+                  "rollingInterval": "Day",
+                  "retainedFileCountLimit": 7
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Error'  and $[PropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Error/error_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Error/error_.json",
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Warning'  and $[PropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Warning/warning_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] ({$[PropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Warning/warning_.json",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7,
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "@l='Information'  and $[PropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Info/info_.log",
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {EventId} ({$[PropertyName]}) {Message}{NewLine}{Exception}",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              },
+              {
+                "Name": "ContextPropertyFile",
+                "Args": {
+                  "propertyName": "$[PropertyName]",
+                  "pathFormat": "$[LoggerPath]/{$[PropertyName]}/Info/info_.json",
+                  "formatter": "Serilog.Formatting.Json.JsonFormatter",
+                  "rollingInterval": "Hour",
+                  "retainedFileCountLimit": 7
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+  }
