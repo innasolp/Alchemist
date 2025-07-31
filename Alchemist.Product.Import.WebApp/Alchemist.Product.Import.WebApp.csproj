@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
+    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="WebLoader.Common" Version="1.0.0" />

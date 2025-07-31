@@ -30,8 +30,6 @@ public class Product : IJsonOnDeserialized, IProductItem
 
     string IProductItem.ItemId => WebCharacteristics.Sku;   
 
-    string IProductItem.Shop => "ozon.ru";
-
     string[]? IProductItem.Components => WebDescription?.Components ?? WebCharacteristics?.Components;
 
     string IProductItem.Brand => WebCharacteristics.Brand ?? WebSeller?.Name;

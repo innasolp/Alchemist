@@ -7,7 +7,7 @@ namespace Alchemist.Import.Logging;
 
 public static class FactoryLoggingDependencyInjectionExtensions
 {
-    public static IServiceCollection AddImportServiceLogFactory(this IServiceCollection services, Func<ILogger, IShopModel, IShopImportSettings, ILogger> getLoggerForShop)
+    public static IServiceCollection AddImportServiceLogFactory(this IServiceCollection services, Func<ILogger, IShopItem, IShopImportSettings, ILogger> getLoggerForShop)
     {
         return services.AddSingleton<IImportServiceLogFactory>(new ImportServiceLogFactoryImpl(getLoggerForShop));
     }

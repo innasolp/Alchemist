@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.Background.Models;
 
-internal class ImportCategory : IImportCategory
+internal class ImportCategory : IImportCategoryItem
 {
     public int Id { get; set; }
     public int ItemId { get; set; }

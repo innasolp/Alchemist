@@ -30,12 +30,12 @@ builder.Services.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(shopH
 
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
-builder.AddRabbitMQMessageReceiver("RabbitMqQueueOptions", "RabbitMqServiceOptions", "RabbitMqExchangeOptions");
-builder.Services.AddKeyedSingleton(ItemHaldlerKeys.ProductRoutingKey, builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
-builder.Services.AddKeyedSingleton(ItemHaldlerKeys.CategoryRoutingKey, builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
+var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
+rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
+builder.Services.AddRabbitMQMessageReceiver(rabbitMQOptions);
 
-builder.Services.AddProductItemHandler();
-builder.Services.AddCategoryItemHandler();
+builder.Services.AddProductItemHandler(builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
+builder.Services.AddCategoryItemHandler(builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 
 var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
 var appLogConfBuilder = new SerilogConfigurationBuilder(builder.Configuration);

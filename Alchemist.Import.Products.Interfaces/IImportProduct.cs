@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Import.Products.Interfaces;
 
-public interface IImportProduct 
+public interface IImportProductItem 
 {
     string Name { get; }
 

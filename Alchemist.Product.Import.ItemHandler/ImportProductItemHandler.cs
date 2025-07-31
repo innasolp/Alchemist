@@ -7,35 +7,49 @@ using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.ImportItem.Handler;
 
-internal class ImportProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService) 
-    : IItemHandler<IImportProductItem>
+internal class ImportProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName) 
+    : IImportItemHandler
 {
     private readonly IProductDataService _productDataService = productDataService;
 
     private readonly IShopDataService _shopDataService = shopDataService;
 
-    public async Task<ItemProcessStatus> HandleItem(IImportProductItem  productItem)
-    {        
+    public string EventName { get; private set; } = eventName;
+
+    Type IImportItemHandler.ItemType => typeof(ProductData);
+
+    private event AsyncItemHandler<object, ItemProcessStatus>? _itemProcessed;
+    public event AsyncItemHandler<object, ItemProcessStatus> ItemProcessed
+    {
+        add => _itemProcessed += value;
+        remove => _itemProcessed -= value;
+    }
+
+    public async Task<ItemProcessStatus> HandleItem(object item)
+    {
+        if (item is not IProductData productData)
+            throw new InvalidDataException($"Item type {item.GetType().Name} is invalid. Expected type must implement {nameof(IProductData)}");
+        
         try
         {
-            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(productItem.ShopId, productItem.ShopProduct.ItemId)
+            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(productData.ShopId, productData.ShopProduct.ItemId)
                 ??
                 new ShopProduct
                 {
-                    ShopId = productItem.ShopId,
-                    ItemId = productItem.ShopProduct.ItemId,
-                    ApiUrl = productItem.ShopProduct.ApiUrl,
-                    ItemUrl = productItem.ShopProduct.ItemUrl
+                    ShopId = productData.ShopId,
+                    ItemId = productData.ShopProduct.ItemId,
+                    ApiUrl = productData.ShopProduct.ApiUrl,
+                    ItemUrl = productData.ShopProduct.ItemUrl
                 };
 
             if (shopProduct.ProductId != 0)
             {
-                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(productItem.ShopId, shopProduct.Id, productItem.ShopCategory.ItemId);
+                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(productData.ShopId, shopProduct.Id, productData.ShopCategory.ItemId);
                 //todo
                 //if(!categoryResult)
                 //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
 
-                var setPriceResult = await SetShopProductPriceForItemAsync(productItem, shopProduct.Id);
+                var setPriceResult = await SetShopProductPriceForItemAsync(productData, shopProduct.Id);
                 //todo
                 //if (!result)
                 //    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");            
@@ -45,36 +59,48 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
                 return result;
             }
 
-            var product = await _productDataService.FindProductByNameAndBrand(productItem?.Product.Name, productItem?.Brand.Name)
-                                ?? await _productDataService.FindProductByName(productItem?.Product.Name);
+            var product = await _productDataService.FindProductByNameAndBrand(productData?.Product.Name, productData?.Brand.Name)
+                                ?? await _productDataService.FindProductByName(productData?.Product.Name);
 
             if (product != null)
             {
-                if (await _productDataService.GetShopProductByShopAndProductId(productItem.ShopId, product.Id) != null)
+                if (await _productDataService.GetShopProductByShopAndProductId(productData.ShopId, product.Id) != null)
+                {
+                    await InvokeItemProcessedAsync(productData, ItemProcessStatus.AlreadyExists);
                     return ItemProcessStatus.AlreadyExists;
+                }
             }
             else
-                product = await CreateProductFromModelAsync(productItem, productItem.ShopId);
+                product = await CreateProductFromModelAsync(productData, productData.ShopId);
 
             shopProduct.ProductId = product.Id;
             shopProduct.IsActual = true;
 
             var newShopProduct = await _productDataService.CreateShopProduct(shopProduct);
 
-            if (!await SetShopProductPriceForItemAsync(productItem, newShopProduct.Id) ||
-                    !await SetShopProductCategoryIfNeedAsync(productItem.ShopId, newShopProduct.Id, productItem.ShopCategory.ItemId))
+            if (!await SetShopProductPriceForItemAsync(productData, newShopProduct.Id) ||
+                    !await SetShopProductCategoryIfNeedAsync(productData.ShopId, newShopProduct.Id, productData.ShopCategory.ItemId))
+            {
+                await InvokeItemProcessedAsync(productData, ItemProcessStatus.Error);
                 return await Task.FromResult(ItemProcessStatus.Error);
+            }
 
             //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
-            
 
+
+            await InvokeItemProcessedAsync(productData, ItemProcessStatus.New);
             return ItemProcessStatus.New;
         }
         catch (Exception e)
         {           
 
-            throw new WarningException($"Product {productItem.ShopProduct.ItemUrl} proccessed with error.", e);
+            throw new WarningException($"Product {productData.ShopProduct.ItemUrl} proccessed with error.", e);
         }
+    }
+
+    private Task InvokeItemProcessedAsync(IProductData item, ItemProcessStatus itemProcessStatus)
+    {
+        return _itemProcessed?.Invoke(this, item, itemProcessStatus) ?? Task.FromResult(false);
     }
 
     private async Task<bool> SetShopProductCategoryIfNeedAsync(int shopId, long shopProductId, int categoryItemId)
@@ -90,7 +116,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         return await Task.FromResult(true);
     }
 
-    private async Task<bool> SetShopProductPriceForItemAsync(IImportProductItem item, long shopProductId)
+    private async Task<bool> SetShopProductPriceForItemAsync(IProductData item, long shopProductId)
     {
         var shopProductPrice = await _productDataService.GetShopProductPrice(shopProductId);
         if (shopProductPrice == null)
@@ -114,7 +140,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         }
     }
 
-    private async Task<IProduct> CreateProductFromModelAsync(IImportProductItem productItem, int shopId)
+    private async Task<IProduct> CreateProductFromModelAsync(IProductData productItem, int shopId)
     {
         var brand = !string.IsNullOrWhiteSpace(productItem.Brand.Name) ? await GetBrandAsync(productItem) : null;
 
@@ -170,7 +196,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         }
     }
 
-    private async Task<IBrand?> GetBrandAsync(IImportProductItem productItem)
+    private async Task<IBrand?> GetBrandAsync(IProductData productItem)
     {
         var brand = await _productDataService.FindBrandByName(productItem.Brand.Name);
         if (brand == null)
@@ -184,13 +210,5 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         }
 
         return brand;
-    }
-
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item)
-    {
-        if (item is not IImportProductItem productItem)
-            throw new InvalidOperationException($"Invalid item type {item.GetType().Name}. Must be {nameof(IImportProductItem)}.");
-
-        return await HandleItem(productItem);
     }
 }

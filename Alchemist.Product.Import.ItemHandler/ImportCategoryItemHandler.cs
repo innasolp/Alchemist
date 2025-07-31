@@ -1,48 +1,69 @@
 ﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Exceptions;
+using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Entities;
-using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.ImportItem.Handler;
 
-internal class ImportCategoryItemHandler(IShopDataService shopDataService) : IItemHandler<IImportCategoryItem>
+internal class ImportCategoryItemHandler(IShopDataService shopDataService, string eventName) : IImportItemHandler
 {
     private readonly IShopDataService _shopDataService = shopDataService;
 
-    public async Task<ItemProcessStatus> HandleItem(IImportCategoryItem categoryItem)
+    Type IImportItemHandler.ItemType => typeof(CategoryData);
+
+    public string EventName { get; private set; } = eventName;
+
+    private event AsyncItemHandler<object, ItemProcessStatus>? _itemProcessed;
+    public event AsyncItemHandler<object, ItemProcessStatus> ItemProcessed
     {
-        var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(categoryItem.ShopId, categoryItem.ShopCategory.ItemId);
+        add => _itemProcessed += value;
+        remove => _itemProcessed -= value;
+    }
+
+    public async Task<ItemProcessStatus> HandleItem(object item)
+    {
+        if (item is not ICategoryData categoryData)
+            throw new InvalidDataException($"Item type {item.GetType().Name} is invalid. Expected type must implement {nameof(ICategoryData)}");
+
+        var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(categoryData.ShopId, categoryData.ShopCategory.ItemId);
 
         if (shopCategory == null)
         {
             try
             {
-                shopCategory = await AddShopCategoryAsync(categoryItem);
+                shopCategory = await AddShopCategoryAsync(categoryData);
+                await InvokeItemProcessedAsync(categoryData, ItemProcessStatus.New);
                 return ItemProcessStatus.New;
             }
             catch (Exception ex)
             {
-                throw new WarningException($"Category {categoryItem.ShopCategory.Category} proccessed with error.", ex);
+                throw new WarningException($"Category {categoryData.ShopCategory.Category} proccessed with error.", ex);
             }
         }
-        else        
-            return ItemProcessStatus.AlreadyExists;        
+        else
+        {
+            await InvokeItemProcessedAsync(categoryData, ItemProcessStatus.AlreadyExists);
+            return ItemProcessStatus.AlreadyExists;
+        }
     }
 
-    private async Task<IShopCategory?> AddShopCategoryAsync(IImportCategoryItem categoryItem)
+    private Task InvokeItemProcessedAsync(ICategoryData item, ItemProcessStatus itemProcessStatus)
     {
-        var parentCategory = categoryItem.ParentCategory.ItemId > 0 ? await _shopDataService.GetShopCategoryByShopIdAndItemId(categoryItem.ShopId, categoryItem.ParentCategory.ItemId) : null;
-        var shopCatergory = new ShopCategory { ShopId = categoryItem.ShopId, Category = categoryItem.ShopCategory.Category, ItemId = categoryItem.ShopCategory.ItemId, ParentId = parentCategory?.Id };
+        return _itemProcessed?.Invoke(this, item, itemProcessStatus) ?? Task.FromResult(false);
+    }
+
+    private async Task<IShopCategory?> AddShopCategoryAsync(ICategoryData categoryItem)
+    {
+        var parentCategory = categoryItem.ParentCategory?.ItemId > 0 
+            ? await _shopDataService.GetShopCategoryByShopIdAndItemId(categoryItem.ShopId, categoryItem.ParentCategory.ItemId) 
+            : null;
+        var shopCatergory = new ShopCategory { 
+            ShopId = categoryItem.ShopId,
+            Category = categoryItem.ShopCategory.Category,
+            ItemId = categoryItem.ShopCategory.ItemId,
+            ParentId = parentCategory?.Id };
         return await _shopDataService.AddShopCategory(shopCatergory);
-    }
-
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item)
-    {
-        if (item is not IImportCategoryItem categoryItem)
-            throw new InvalidOperationException($"Invalid item type {item.GetType().Name}. Must be {nameof(IImportCategoryItem)}.");
-
-        return await HandleItem(categoryItem);
     }
 }

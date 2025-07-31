@@ -2,7 +2,7 @@
 
 namespace Alchemist.Product.ImportItem.Interfaces;
 
-public interface IImportProductItem
+public interface IProductData
 {
     IShopProduct ShopProduct { get; }
 
@@ -12,7 +12,7 @@ public interface IImportProductItem
 
     IBrand Brand { get; }
 
-    ICountry Country { get; }
+    ICountry? Country { get; }
 
     ICurrency Currency { get; }
 

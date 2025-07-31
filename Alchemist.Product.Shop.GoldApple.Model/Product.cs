@@ -87,8 +87,6 @@ public class ProductData : IProductItem
     [JsonPropertyName("data")]
     public Product Data { get; set; }
 
-    string IProductItem.Shop => "goldapple.ru";
-
     string IProductItem.Comment => Data.Description;
 
     string IProductItem.Articul => Data.ItemId;

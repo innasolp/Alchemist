@@ -1,57 +1,54 @@
-﻿using Alchemist.Product.ImportItem.Handler;
-using Alchemist.Product.ImportItem.Interfaces;
+﻿using Alchemist.Common;
+using Alchemist.Product.ImportItem.Handler;
 using Message.Interfaces;
+using System.Collections.Concurrent;
 
 namespace Alchemist.Product.Import.DBService;
 
 public class ImportItemHandlerService(ILogger<ImportItemHandlerService> logger,
-    [FromKeyedServices(ItemHaldlerKeys.ProductRoutingKey)] string productRoutingKey,
-    [FromKeyedServices(ItemHaldlerKeys.CategoryRoutingKey)] string categoryRoutingKey,
-    IMessageReceiver messageReceiver,
-    IItemHandler<IImportProductItem> productItemHandler,
-    IItemHandler<IImportCategoryItem> categoryItemHandler
+    IMessageReceiver messageReceiver, IEnumerable<IImportItemHandler> importItemHandlers
     ) : BackgroundService
 {
     private readonly ILogger<ImportItemHandlerService> _logger = logger;
 
     private readonly IMessageReceiver _messageReceiver = messageReceiver;
 
-    private readonly  IItemHandler<IImportProductItem> _productItemHandler = productItemHandler;
+    private readonly IEnumerable<IImportItemHandler> _importItemHandlers = importItemHandlers;
 
-    private readonly  IItemHandler<IImportCategoryItem> _categoryItemHandler = categoryItemHandler;
+    private readonly ConcurrentDictionary<Type, IImportItemHandler> _typedItemHandlers = new();
 
-    private readonly string _productRoutingKey = productRoutingKey;
-
-    private readonly string _categoryRoutingKey = categoryRoutingKey;
-
-    private async Task OnHandleCategoryItem(IImportCategoryItem item)
+    private async Task OnHandleItem<T>(T item)
     {
-        await _categoryItemHandler.HandleItem(item);
-    }
-
-    private async Task OnHandleProductItem(IImportProductItem item)
-    {
-        await _productItemHandler.HandleItem(item);
+        if (!_typedItemHandlers.TryGetValue(item.GetType(), out var handler))
+        {
+            handler = _importItemHandlers.FirstOrDefault(h=>h.ItemType == item.GetType() || item.GetType().IsImplementation(h.ItemType));
+            if(handler != null)
+                _typedItemHandlers.TryAdd(item.GetType(), handler);
+        }
+        
+        if (handler != null)
+            await handler.HandleItem(item);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        try
-        {
-            await _messageReceiver.Start();
-
-            _logger.LogInformation("Import service connected to messaging host.");
-
-            _messageReceiver.On<IImportProductItem>(_productRoutingKey, OnHandleProductItem);
-            _messageReceiver.On<IImportCategoryItem>(_categoryRoutingKey, OnHandleCategoryItem);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message, ex);
-        }
-
+    {   
         while (!stoppingToken.IsCancellationRequested)
         {
+            try
+            {
+                if (_messageReceiver.IsConnected) continue;
+
+                await _messageReceiver.Start();
+
+                _logger.LogInformation("Import service connected to messaging host.");
+
+                foreach(var itemHandler in _importItemHandlers)
+                    _messageReceiver.On(itemHandler.EventName, OnHandleItem, itemHandler.ItemType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+            }
         }
     }
 }

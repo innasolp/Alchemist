@@ -2,7 +2,7 @@
 
   "Headers": {
 
-    "Accept": "application/json",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 
     "Accept-encoding": "gzip, deflate, br, zstd",
 
@@ -10,7 +10,7 @@
 
     "Connection": "keep-alive",
 
-    "Content-Type": "application/json",
+    
 
     "host": "www.ozon.ru",
 
@@ -18,7 +18,7 @@
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-Site": "none",
 
-    "Sec-Fetch-User" :"?1",
+    "Sec-Fetch-User": "?1",
     "Upgrade-Insecure-Requests": "1",
 
 

@@ -13,14 +13,11 @@ using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using BrowserDataLoader.Interfaces;
 using DependencyInjection.AssemblyExtensions;
-using Grpc.Client.RequestInterceptor;
-using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
-using Message.RabbitMQ;
 using Message.RabbitMQ.DependencyInjection;
 
 var appPath = Utils.GetAppPath();
@@ -37,10 +34,6 @@ builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoaderFactory), $"
 
 builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl", ShopImportWorkerKeys.ShopsMessageSenderKey);
 builder.Services.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl");
-
-builder.Services.AddGrpcServiceClient<IProductDataService, Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
-builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
-builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
 
 
 builder.Services.ConfigureDefaultHttps();
@@ -59,7 +52,9 @@ builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFact
 builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
 
 //todo rabbitmqpublisher
-builder.AddRabbitMQMessageSender("importqueue", "RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
+var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
+rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
+builder.Services.AddRabbitMQMessageSender("importqueue", rabbitMQOptions);
 builder.Services.AddProductItemHandler("importqueue", builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
 builder.Services.AddCategoryItemHandler("importqueue", builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 
@@ -102,9 +97,6 @@ appLogConfBuilder.SetSerilog(builder.Logging);
 builder.Services.AddHostedService<ShopImportWorker>();
 
 builder.Services.AddAuthentication("https");
-
-builder.WebHost.UseUrls("http://localhost:8130", "https://localhost:8131");
-
 var app = builder.Build();
 
 app.UseAuthentication();

@@ -16,6 +16,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 {
     protected record CategoryPage(IProductShopCategory Category, string Url, int Page); 
 
+    protected sealed record ImportProduct(IProductItem ProductItem, IShopItem Shop) : IImportProduct
+    {
+    }
+
     protected readonly ConcurrentQueue<CategoryPage> _unhandledCategoryPages = new();
 
     protected readonly ConcurrentQueue<ICategoryProductItem> _unhandledCategoryProductItems = new();
@@ -297,7 +301,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected async Task<ResultStatus> HandleProductItemAsync(TProductItem productItem)
     {
-        var result = await ProcessUrlTaskAsync((i) => _itemHandler.HandleItem(i, ProductShopModel), i => i.ApiUrl, productItem);
+        var result = await ProcessUrlTaskAsync((i) => _itemHandler.HandleItem(new ImportProduct(i, ProductShopModel)), i => i.ApiUrl, productItem);
 
         Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, [productItem.Name, productItem.ApiUrl, result.Value]);
 

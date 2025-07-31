@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Alchemist.Product.Import.Background.Models;
 
-internal abstract class ShopModel : IShopModel, IShop
+internal abstract class ShopModel : IShopItem, IShop
 {
     private int _Id;
     public int Id

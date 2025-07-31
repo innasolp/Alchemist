@@ -3,7 +3,7 @@ using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Background.ImportItems;
 
-internal class ImportProductItem : IImportProductItem
+internal class ProductData : IProductData
 {
     public IShopProduct ShopProduct { get; set; }
 
@@ -13,7 +13,7 @@ internal class ImportProductItem : IImportProductItem
 
     public IBrand Brand { get; set; }
 
-    public ICountry Country { get; set; }
+    public ICountry? Country { get; set; }
 
     public ICurrency Currency { get; set; }
 

@@ -7,7 +7,7 @@ namespace Alchemist.Product.SignalR;
 
 public class ImportHub : Hub
 {
-    public async Task SendProductItem(IImportProduct productItemModel)
+    public async Task SendProductItem(IImportProductItem productItemModel)
     {
         await Clients.All.SendAsync(Messages.ReceiveProductItem, productItemModel);
     }

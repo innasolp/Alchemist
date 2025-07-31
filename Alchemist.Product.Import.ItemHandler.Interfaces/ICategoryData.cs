@@ -1,8 +1,8 @@
 ﻿using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.ImportItem.Interfaces;
+namespace Alchemist.Product.DataItem.Interfaces;
 
-public interface IImportCategoryItem
+public interface ICategoryData
 {
     IShopCategory ShopCategory { get; }
 

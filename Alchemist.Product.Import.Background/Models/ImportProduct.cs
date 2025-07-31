@@ -3,7 +3,7 @@ using Alchemist.Import.Products.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Models;
 
-internal class ImportProduct : IImportProduct
+internal class ImportProduct : IImportProductItem
 {
     public string Name { get; set; }
     public string ShopName { get; set; }

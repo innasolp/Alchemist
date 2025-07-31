@@ -67,13 +67,18 @@ public static class HostBuilderExtensions
     {
         var server = host.Services.GetRequiredService<IServer>();
         return server.GetBaseAddress();
+    }    
+
+    public static void SetLocalhostPortsConfig(this WebHostBuilderContext context, string httpPortSection, int httpPort, string httpsPortSection, int httpsPort)
+    {
+        var http = context.Configuration.GetSection(httpPortSection);
+        http.Value = $"https://localhost:{httpPort}";
+        var https = context.Configuration.GetSection(httpsPortSection);
+        https.Value = $"https://localhost:{httpsPort}";
     }
 
     public static void SetKestrelLocalhostPortsConfig(this WebHostBuilderContext context, int httpPort, int httpsPort)
     {
-        var http = context.Configuration.GetSection("Kestrel:EndPoints:Http:Url");
-        http.Value = $"https://localhost:{httpPort}";
-        var https = context.Configuration.GetSection("Kestrel:EndPoints:Https:Url");
-        https.Value = $"https://localhost:{httpsPort}";
+        context.SetLocalhostPortsConfig("Kestrel:EndPoints:Http:Url", httpPort, "Kestrel:EndPoints:Https:Url", httpsPort);
     }
 }

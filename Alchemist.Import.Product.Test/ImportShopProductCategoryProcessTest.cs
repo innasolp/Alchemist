@@ -58,7 +58,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
         WebLoaderMock.SetupLoadItemsThrowsExceptions(productItems, getItemException, RequestHeaders);
 
-        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IProductItem>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(ResultStatus.Success));
+        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>())).Returns(Task.FromResult(ResultStatus.Success));
 
         testCategory = categoryProducts;
         url = categoryUrl;
@@ -85,7 +85,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
         WebLoaderMock.SetupLoadItemsSuccessfull(productItems, RequestHeaders);
 
-        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IProductItem>(), It.IsAny<IShopModel>())).Returns(Task.FromResult(ResultStatus.Success));
+        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>())).Returns(Task.FromResult(ResultStatus.Success));
 
         testCategory = categoryProducts;
         url = categoryUrl;

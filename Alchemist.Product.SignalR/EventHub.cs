@@ -17,7 +17,7 @@ public class EventHub : Hub
         await Clients.All.SendAsync(Messages.ReceiveCategoryAdded, shopCategory);
     }    
 
-    public async Task SendProductItem(IImportProduct importProduct)
+    public async Task SendProductItem(IImportProductItem importProduct)
     {
         await Clients.All.SendAsync(Messages.ReceiveProductItem, importProduct);
     }

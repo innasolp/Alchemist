@@ -13,7 +13,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.29.1" />
     <PackageReference Include="Grpc.Client.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />    
-    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
+    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
@@ -30,7 +30,7 @@
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Import.ItemHandler.Interfaces\Alchemist.Product.ImportItem.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.ItemHandler.Interfaces\Alchemist.Product.DataItem.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

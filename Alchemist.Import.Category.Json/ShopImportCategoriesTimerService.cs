@@ -1,17 +1,21 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using WebLoader.Interfaces;
-using Microsoft.VisualStudio.Threading;
-using Alchemist.Import.Service;
-using System.Collections.ObjectModel;
+﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
+using Alchemist.Import.Service;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Threading;
+using System.Collections.ObjectModel;
+using System.Text.Json;
 using WebLoader.Common;
-using Alchemist.Import.Category.Interfaces;
+using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Category.Json;
 
 public class ShopImportCategoriesTimerService : ShopImportService
 {
+    protected sealed record ImportCategory(ICategory Category, ICategoryShopModel CategoryShopModel) : IImportCategory
+    {
+    }
+
     protected IHtmlSearcher? HtmlSearcher { get; }
 
     protected CategoryLoadOptions CategoryLoadOptions { get; }
@@ -216,7 +220,7 @@ public class ShopImportCategoriesTimerService : ShopImportService
 
                     joinableTaskFactory.Run(async () =>
                     {
-                        await _itemHandler.HandleItem(category, ShopModel);
+                        await _itemHandler.HandleItem(new ImportCategory(category, ShopModel));
                     });
 
                     Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,

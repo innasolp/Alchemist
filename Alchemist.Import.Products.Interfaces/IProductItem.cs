@@ -4,9 +4,7 @@ namespace Alchemist.Import.Products.Interfaces;
 
 public interface IProductItem : IItem
 {
-    string ItemId { get; }    
-
-    string Shop { get; }
+    string ItemId { get; }   
 
     string[]? Components { get; }
 

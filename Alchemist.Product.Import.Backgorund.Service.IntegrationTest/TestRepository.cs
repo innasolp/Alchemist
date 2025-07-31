@@ -6,7 +6,7 @@ using Alchemist.Import.Settings.Extensions;
 using System.Reflection;
 using Alchemist.Product.Import.Background.Settings;
 
-namespace Alchemist.Product.Import.WebApp.IntegrationTest;
+namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
 public static class TestRepository
 {
