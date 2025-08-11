@@ -1,6 +1,5 @@
 ﻿using Alchemist.Common;
 using Alchemist.Exceptions;
-using Alchemist.Import.Interfaces;
 using Message.Interfaces;
 
 namespace Alchemist.Product.Import.Background.ImportItems;

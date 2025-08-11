@@ -81,6 +81,17 @@ public class ShopImportWorker : BackgroundService
 
     private async Task CategoryHandledAsync(object sender, IImportCategory item, ResultStatus processStatus)
     {
+        try
+        {
+            if (!_itemMessageSender.IsConnected)
+                await _itemMessageSender.Start();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return;
+        }
+
         var categoryModel = new ImportCategory { Category = item.Category.Name, ItemId = item.Category.Id, Status = processStatus };
 
         if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
@@ -90,7 +101,18 @@ public class ShopImportWorker : BackgroundService
 
 
     private async Task ProductItemHandledAsync(object sender, IImportProduct item, ResultStatus status)
-    {        
+    {
+        try
+        {
+            if (!_itemMessageSender.IsConnected)
+                await _itemMessageSender.Start();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return;
+        }
+
         var productItemModel = new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status }; 
 
         await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
