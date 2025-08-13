@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.SignalR;
-using Alchemist.Test.EventBus.Interfaces;
 using Alchemist.Test.RabbitMQ;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Alchemist.Test.SignalRWebAppFactory;
 using Alchemist.Product.Import.Background;
+using Alchemist.Test.Host.Interfaces;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 

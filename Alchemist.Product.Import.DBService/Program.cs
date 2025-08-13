@@ -75,9 +75,9 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 
-app.MapGet("/", () => "Hello ImportItemHandlerService!");
+app.MapGet("/", () => "Hello ImportDBService!");
 
 await app.RunAsync();
 
-public class ImportItemHandlerServiceProgram
+public class ImportDbServiceProgram
 { }

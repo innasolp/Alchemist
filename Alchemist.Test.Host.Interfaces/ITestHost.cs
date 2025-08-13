@@ -1,6 +1,6 @@
 ﻿using Message.Interfaces;
 
-namespace Alchemist.Test.EventBus.Interfaces;
+namespace Alchemist.Test.Host.Interfaces;
 
 public interface ITestHost : IDisposable, IAsyncDisposable
 {

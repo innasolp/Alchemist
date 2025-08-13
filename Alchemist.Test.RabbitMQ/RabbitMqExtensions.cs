@@ -23,6 +23,7 @@ public static class RabbitMqExtensions
 
         return services;
     }
+
     public static IServiceCollection SetRabbitMqSender(this IServiceCollection services, object key, Uri uri, string exchangeName)
     {
         var rabbitMqSenderDescriptors = services.Where(sd => sd.ServiceKey == key &&  sd.ServiceType == typeof(RabbitMQPublisher)).ToList();
@@ -36,4 +37,21 @@ public static class RabbitMqExtensions
         return services;
     }
 
+    public static IServiceCollection SetRabbitMqReceiver(this IServiceCollection services, Uri uri, string exchangeName, string queueName)
+    {
+        var rabbitMqSenderDescriptors = services.Where(sd => sd.ServiceType == typeof(RabbitMQMessageReceiver)).ToList();
+        rabbitMqSenderDescriptors.ForEach(d => services.Remove(d));
+
+        var messageSenderDescriptors = services.Where(sd => sd.ServiceType == typeof(IMessageReceiver) 
+                && sd.ImplementationType == typeof(RabbitMQMessageReceiver)).ToList();
+        messageSenderDescriptors.ForEach(d => services.Remove(d));
+
+        var messageSenderFactoryDescriptors = services.Where(sd => sd.ServiceType == typeof(IMessageReceiver)
+        && sd.ImplementationFactory?.Method.ReturnType == typeof(RabbitMQMessageReceiver)).ToList();
+        messageSenderFactoryDescriptors.ForEach(d => services.Remove(d));
+
+        services.AddRabbitMQMessageReceiver(uri, exchangeName, queueName);
+
+        return services;
+    }
 }

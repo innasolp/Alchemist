@@ -1,4 +1,5 @@
 ﻿using Alchemist.Product.Data;
+using Alchemist.Test.DBApiWebAppFactory;
 using Alchemist.Test.Server.Fixtures;
 using Xunit.Abstractions;
 

@@ -5,6 +5,7 @@ using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Alchemist.Test.DBApiWebAppFactory;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 

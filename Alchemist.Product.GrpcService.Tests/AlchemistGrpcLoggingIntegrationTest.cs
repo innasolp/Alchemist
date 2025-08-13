@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLoggingWebAppFactory, Program>, IDisposable
+public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLoggingWebAppFactory, GrpcServiceProgramm>, IDisposable
 {
     record TestLogMessage (LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 

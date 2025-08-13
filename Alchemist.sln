@@ -346,6 +346,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.RabbitMQ", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.Host.Interfaces", "Alchemist.Test.Host.Interfaces\Alchemist.Test.Host.Interfaces.csproj", "{480D356A-7C70-48B5-B105-C9F2A909D765}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.DBService.Test", "Alchemist.Product.Import.DBService.Test\Alchemist.Product.Import.DBService.Test.csproj", "{35144709-CF09-4653-9B9A-1417A75D992C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.DBApiWebAppFactory", "Alchemist.Test.DBApiWebAppFactory\Alchemist.Test.DBApiWebAppFactory.csproj", "{FB516FE2-6513-484D-B4C8-C945DDBE3A40}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		build import|Any CPU = build import|Any CPU
@@ -1102,6 +1106,22 @@ Global
 		{480D356A-7C70-48B5-B105-C9F2A909D765}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{480D356A-7C70-48B5-B105-C9F2A909D765}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{480D356A-7C70-48B5-B105-C9F2A909D765}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.build import|Any CPU.ActiveCfg = Release|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.build import|Any CPU.Build.0 = Release|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35144709-CF09-4653-9B9A-1417A75D992C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.build import|Any CPU.ActiveCfg = Release|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.build import|Any CPU.Build.0 = Release|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1227,6 +1247,8 @@ Global
 		{B9529332-D6A9-4131-959C-404F384C7680} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
 		{076EDD0D-0733-44C0-9A1B-D726456981B1} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
 		{480D356A-7C70-48B5-B105-C9F2A909D765} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
+		{35144709-CF09-4653-9B9A-1417A75D992C} = {29F409A8-DE7C-43BE-916A-920352B78953}
+		{FB516FE2-6513-484D-B4C8-C945DDBE3A40} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

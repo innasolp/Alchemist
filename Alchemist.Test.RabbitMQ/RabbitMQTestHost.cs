@@ -1,4 +1,4 @@
-﻿using Alchemist.Test.EventBus.Interfaces;
+﻿using Alchemist.Test.Host.Interfaces;
 using Message.Interfaces;
 using Message.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;

@@ -32,7 +32,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         
         try
         {
-            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(productData.ShopId, productData.ShopProduct.ItemId)
+            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(productData.ShopId, productData.ShopProduct?.ItemId ?? string.Empty)
                 ??
                 new ShopProduct
                 {
@@ -59,8 +59,8 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
                 return result;
             }
 
-            var product = await _productDataService.FindProductByNameAndBrand(productData?.Product.Name, productData?.Brand.Name)
-                                ?? await _productDataService.FindProductByName(productData?.Product.Name);
+            var product = await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand?.Name)
+                                ?? await _productDataService.FindProductByName(productData.Product.Name);
 
             if (product != null)
             {
@@ -92,8 +92,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
             return ItemProcessStatus.New;
         }
         catch (Exception e)
-        {           
-
+        { 
             throw new WarningException($"Product {productData.ShopProduct.ItemUrl} proccessed with error.", e);
         }
     }

@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebAppFactory, Program>
+public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebAppFactory, GrpcServiceProgramm>
 {
     private readonly AlchemyGrpcService.AlchemyGrpcServiceClient _client;
 

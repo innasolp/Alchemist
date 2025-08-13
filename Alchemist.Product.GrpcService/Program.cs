@@ -73,6 +73,6 @@ app.MapGet("/", () => "Communication with gRPC endpoints must be made through a 
 
 app.Run();
 
-public partial class Program
+public partial class GrpcServiceProgramm
 {
 }

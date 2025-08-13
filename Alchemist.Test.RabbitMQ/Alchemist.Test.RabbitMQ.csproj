@@ -15,7 +15,7 @@
 		<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.5" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Alchemist.Test.EventBus.Interfaces\Alchemist.Test.Host.Interfaces.csproj" />
+	  <ProjectReference Include="..\Alchemist.Test.Host.Interfaces\Alchemist.Test.Host.Interfaces.csproj" />
 	</ItemGroup>
 
 

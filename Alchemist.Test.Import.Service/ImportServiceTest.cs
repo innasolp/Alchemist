@@ -8,27 +8,20 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Test.Import.Service;
 
-public abstract class ImportServiceTest<TService, TLogger>
+public abstract class ImportServiceTest<TService, TLogger>(ITestOutputHelper outputHelper)
     where TService:ShopImportService
     where TLogger:class, ILogger
 {
-    protected readonly ITestOutputHelper _outputHelper;
+    protected readonly ITestOutputHelper _outputHelper = outputHelper;
 
-    protected ResourceManager ServiceResourceManager { get; }
-   
+    protected ResourceManager ServiceResourceManager { get; } = new ResourceManager("Alchemist.Import.Service.LogMessages",
+                               typeof(ShopImportService).Assembly);
+
     protected Mock<TLogger> LoggerMock { get; } = new Mock<TLogger>();
 
     protected Mock<IWebLoader> WebLoaderMock { get; } = new Mock<IWebLoader>();    
 
     protected RequestHeaders RequestHeaders { get; } = new RequestHeaders();    
 
-    protected abstract TService Service { get; }        
-
-    protected ImportServiceTest(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-
-        ServiceResourceManager = new ResourceManager("Alchemist.Import.Service.LogMessages",
-                               typeof(ShopImportService).Assembly);
-    }
+    protected abstract TService Service { get; }
 }

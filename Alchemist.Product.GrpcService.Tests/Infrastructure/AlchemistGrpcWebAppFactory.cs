@@ -1,12 +1,12 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.DBApiWebAppFactory;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.GrpcService.Tests.Infrastructure;
 
-public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<Program, AlchemyContext>
+public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<GrpcServiceProgramm, AlchemyContext>
 {
     public string DataBase { get; set; } = "test_ci_db";
 
