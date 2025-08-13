@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.DBApiWebAppFactory;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -32,7 +32,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
                     ShopId = shopId,
                     ItemId = productItem.ItemId,
                     ApiUrl = productItem.ApiUrl,
-                    ItemUrl = productItem.ItemUrl
+                    ItemUrl = productItem.Url
                 };
 
             if (shopProduct.ProductId != 0)
@@ -83,7 +83,7 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
         {
             await InvokeItemProcessedAsync(productItem, shopModel, ItemProcessStatus.Warning);
 
-            throw new WarningException($"Product {productItem.ItemUrl} proccessed with error.", e);
+            throw new WarningException($"Product {productItem.Url} proccessed with error.", e);
         }
     }
 

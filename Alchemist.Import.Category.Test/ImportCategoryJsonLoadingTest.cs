@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Category.Json;
 using Alchemist.Import.Category.Test.Infrastructure;
-using Alchemist.Import.Product.Test;
+using Alchemist.Test.Import.Service;
 using Alchemist.Test.Import.Service.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;

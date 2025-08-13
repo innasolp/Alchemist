@@ -1,12 +1,10 @@
-﻿namespace Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Interfaces;
 
-public interface IProductItem
+namespace Alchemist.Import.Products.Interfaces;
+
+public interface IProductItem : IItem
 {
-    string ItemId { get; }
-
-    string Name { get; }
-
-    string Shop { get; }
+    string ItemId { get; }   
 
     string[]? Components { get; }
 
@@ -26,7 +24,7 @@ public interface IProductItem
 
     double Price { get; set; }
 
-    string ItemUrl { get; set; }
+    new string Url { get; set; }
 
     string ApiUrl { get; set; }
 

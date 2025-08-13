@@ -1,6 +1,7 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.Interfaces;
+using Alchemist.Test.DBApiWebAppFactory;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.Hosting;

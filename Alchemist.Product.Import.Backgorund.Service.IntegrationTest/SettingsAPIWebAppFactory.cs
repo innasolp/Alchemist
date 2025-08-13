@@ -1,13 +1,15 @@
 ﻿using Alchemist.Product.Data;
+using Alchemist.Product.Interfaces;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Alchemist.Test.DBApiWebAppFactory;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
-public class SettingsAPIWebAppFactory (string connectionString) : DbAPIWebAppFactory<SettingsAPIProgram, AlchemyContext>(false)
+public class SettingsAPIWebAppFactory (string connectionString) : DbAPIWebAppFactory<SettingsAPIProgram, AlchemyContext>(true)
 {
     private readonly string _connectionString = connectionString;    
 
@@ -18,6 +20,12 @@ public class SettingsAPIWebAppFactory (string connectionString) : DbAPIWebAppFac
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
+        var shopSettings = TestRepository.GetShopSettingsImportTestData(dbContext.Shops);
+        shopSettings.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
+        dbContext.SaveChanges();
+
+        var serviceSettings = TestRepository.GetShopSettingsServicesTestData(dbContext.ShopSettings);
+        serviceSettings.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

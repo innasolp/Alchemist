@@ -8,8 +8,8 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
+  <ItemGroup>    
+    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup>   

@@ -5,9 +5,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.Background;
+namespace Alchemist.Product.Import.Background.Models;
 
-internal class ImportCategory : IImportCategory
+internal class ImportCategory : IImportCategoryItem
 {
     public int Id { get; set; }
     public int ItemId { get; set; }
@@ -34,7 +34,7 @@ internal class ImportCategory : IImportCategory
 
     public int? ParentId { get; set; }
 
-    public ItemProcessStatus Status { get; set; }
+    public ResultStatus Status { get; set; }
 
     [JsonIgnore]
     public ObservableCollection<ICategory> Children { get; } = [];
@@ -52,7 +52,7 @@ internal class ImportCategory : IImportCategory
 
     public ImportCategory(IShopCategory shopCategory,
                           ICategory itemCategory,
-                          ItemProcessStatus status)
+                          ResultStatus status)
     {
         Id = shopCategory.Id;
         ItemId = shopCategory.ItemId;

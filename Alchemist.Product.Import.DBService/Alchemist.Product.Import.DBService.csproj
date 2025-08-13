@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Message.Interfaces" Version="1.0.0.1" />
+    <PackageReference Include="Message.RabbitMQ" Version="1.0.0.3" />
+    <PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.5" />
+	  <PackageReference Include="Grpc.Client.RequestInterceptor" Version="1.0.0" />
+	  <PackageReference Include="Http.DelegatingRequestSender" Version="1.0.0" />
+	  <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
+	  <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
+	  <PackageReference Include="Serilog.Loggers" Version="1.0.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.ItemHandler.Interfaces\Alchemist.Product.DataItem.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.ItemHandler\Alchemist.Product.ImportItem.Handler.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,7 +1,5 @@
-﻿using Alchemist.Import.Interfaces;
+﻿namespace Alchemist.Import.Category.Interfaces;
 
-namespace Alchemist.Import.Category.Interfaces;
-
-public interface IImportCategory : ICategory, IProcessedItem
+public interface IImportCategoryItem : ICategory
 {
 }

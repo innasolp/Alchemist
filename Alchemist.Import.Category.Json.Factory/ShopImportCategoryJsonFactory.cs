@@ -17,16 +17,16 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
     ICategoryItemHandler itemHandler, 
     IImportServiceLogFactory? logFactory = null,
     IPerfomanceCounter? perfomanceCounter = null) 
-    : ShopImportFactory(logger, webLoaderFactories, itemHandler, logFactory, perfomanceCounter)
+    : ShopImportFactory(logger, webLoaderFactories, logFactory, perfomanceCounter)
 {
+    private readonly ICategoryItemHandler _itemHandler = itemHandler;
 
     public override Type ServiceImplementationType => typeof(ShopImportCategoriesTimerService);    
 
     protected override IImportService Create(ILogger logger, 
-        IShopModel shopModel,
+        IShopItem shopModel,
         IShopImportSettings shopImportSettings,
-        IWebLoader webLoader, 
-        IItemHandler itemHandler,
+        IWebLoader webLoader,
         RequestHeaders requestHeaders)
     {
         var loadOptionsService = (shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value) 
@@ -40,10 +40,10 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)
             : null;
 
-        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, htmlSearcher, webLoader, shopModel as ICategoryShopModel, requestHeaders, categoryLoadOptions, itemHandler as ICategoryItemHandler);
+        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, htmlSearcher, webLoader, shopModel as ICategoryShopModel, requestHeaders, categoryLoadOptions, _itemHandler);
     }
 
-    protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopModel shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
     {
         if (logger is ILogger<ShopImportCategoriesTimerService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, shopModel, shopImportSettings) ?? serviceLogger;

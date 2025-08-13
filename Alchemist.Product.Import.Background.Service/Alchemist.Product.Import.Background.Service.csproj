@@ -11,22 +11,20 @@
 
   <ItemGroup>
     <PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.2" />
-    <PackageReference Include="Google.Protobuf" Version="3.29.2" />
-    <PackageReference Include="Grpc.Client.RequestInterceptor" Version="1.0.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
-    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
-    <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
     <PackageReference Include="Http.DelegatingRequestSender" Version="1.0.0" />
     <PackageReference Include="Log.Interceptors.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
-    <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.3" />
     <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0.2" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
     <PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0.1" />
     <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.3" />
+	<PackageReference Include="Message.Interfaces" Version="1.0.0.1" />
+	<PackageReference Include="Message.RabbitMQ" Version="1.0.0.3" />
+	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,7 +32,6 @@
     <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />

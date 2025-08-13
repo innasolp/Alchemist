@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>
+public abstract class TestHostServerWebAppFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>
     where TEntryPoint : class
 {
 

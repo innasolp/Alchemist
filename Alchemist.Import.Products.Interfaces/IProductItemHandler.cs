@@ -1,7 +1,15 @@
-﻿using Alchemist.Import.Interfaces;
+﻿using Alchemist.Common;
+using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Import.Products.Interfaces;
 
-public interface IProductItemHandler : IItemHandler<IProductItem>
+public interface IImportProduct
+{
+    IProductItem ProductItem { get; }
+
+    IShopItem Shop { get; }
+}
+
+public interface IProductItemHandler : IItemHandler<IImportProduct, ResultStatus>
 {
 }

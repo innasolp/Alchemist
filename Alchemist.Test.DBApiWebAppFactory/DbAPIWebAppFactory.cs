@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Alchemist.Test.Server.Fixtures;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Alchemist.Test.Server.Fixtures;
+namespace Alchemist.Test.DBApiWebAppFactory;
 
 public abstract class DbAPIWebAppFactory<TEntryPoint, TDbContext>(bool ensureDeleted) : DbContextWebAppFactory<TEntryPoint, TDbContext>
      where TEntryPoint : class

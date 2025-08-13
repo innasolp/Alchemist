@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Alchemist.Import.Products.Interfaces;
 
-public interface IProductShopModel : IShopModel
+public interface IProductShopModel : IShopItem
 {
     string ProductUrl { get; set; }
 

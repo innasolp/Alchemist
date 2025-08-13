@@ -21,7 +21,7 @@
 
         "Headers": {
 
-          "Accept": "application/json",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 
           "Accept-encoding": "gzip, deflate, br, zstd",
 
@@ -29,15 +29,19 @@
 
           "Connection": "keep-alive",
 
-          "Content-Type": "application/json",
+
+
+          "host": "www.ozon.ru",
 
           "Sec-Fetch-Dest": "document",
           "Sec-Fetch-Mode": "navigate",
           "Sec-Fetch-Site": "none",
+
           "Sec-Fetch-User": "?1",
           "Upgrade-Insecure-Requests": "1",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"
 
+
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
         },
 
         "Cookies": [
@@ -49,13 +53,15 @@
           "__Secure-user-id",
           "abt_data",
           "ADDRESSBOOKBAR_WEB_CLARIFICATION",
+          "is_cookies_accepted",
           "rfuid"
         ],
 
         "DefaultCookies": {
           "guest": "true",
-          "__Secure-ab-group": "20",
-          "is_cookies_accepted": "true",
+          "__Secure-ab-group": "49",
+          "__Secure-user-id": "0",
+          "is_cookies_accepted": "1",
           "x-o3-app-name": "dweb_client",
           "x-o3-app-version": "release_12-11-2024_e50d834c",
           "x-o3-manifest-version": "e50d834cbd00d3f5a18cfc32f4f848c27cca4e72",
@@ -64,6 +70,7 @@
 
         "CookieIndex": 5,
         "CookiePrefixLength": 0
+
       }
 
     },
@@ -132,7 +139,7 @@
           "Sec-Fetch-User": "?1",
           "TE": "trailers",
           "Upgrade-Insecure-Requests": "1",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
         },
 
         "Cookies": [

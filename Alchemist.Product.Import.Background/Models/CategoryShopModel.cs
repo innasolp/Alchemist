@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 
 
-namespace Alchemist.Product.Import.Background;
+namespace Alchemist.Product.Import.Background.Models;
 
 internal class CategoryShopModel : ShopModel, ICategoryShopModel
 {

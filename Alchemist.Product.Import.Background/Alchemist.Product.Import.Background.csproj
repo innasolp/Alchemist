@@ -13,7 +13,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.29.1" />
     <PackageReference Include="Grpc.Client.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />    
-    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
+    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
@@ -23,13 +23,14 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Categories.Data\Alchemist.Import.Categories.Data.csproj" />
+    <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory.Interfaces\Alchemist.Import.Factory.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Products.Data\Alchemist.Import.Products.Data.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.ItemHandler.Interfaces\Alchemist.Product.DataItem.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

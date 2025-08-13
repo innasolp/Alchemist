@@ -2,7 +2,7 @@
 
 namespace Alchemist.Import.Category.Interfaces;
 
-public interface ICategoryShopModel : IShopModel
+public interface ICategoryShopModel : IShopItem
 {
     string CategorySourceUrl { get; set; }
 }

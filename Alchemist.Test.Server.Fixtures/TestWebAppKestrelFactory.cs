@@ -2,7 +2,7 @@
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) : TestWebAppFactory<TEntryPoint>
+public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) : TestHostServerWebAppFactory<TEntryPoint>
      where TEntryPoint : class
 {
     public int HttpPort { get; set; } = httpPort;

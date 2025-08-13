@@ -14,7 +14,7 @@
     <PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
     <PackageReference Include="Http.Info" Version="1.0.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
-    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0" />
+    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />

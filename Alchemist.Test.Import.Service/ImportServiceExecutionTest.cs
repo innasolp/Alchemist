@@ -1,5 +1,4 @@
-﻿using Alchemist.Import.Product.Test;
-using Alchemist.Import.Service;
+﻿using Alchemist.Import.Service;
 using Alchemist.Test.Import.Service.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;

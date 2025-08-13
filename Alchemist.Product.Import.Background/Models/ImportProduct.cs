@@ -1,14 +1,14 @@
 ﻿using Alchemist.Common;
 using Alchemist.Import.Products.Interfaces;
 
-namespace Alchemist.Product.Import.Background;
+namespace Alchemist.Product.Import.Background.Models;
 
-internal class ImportProduct : IImportProduct
+internal class ImportProduct : IImportProductItem
 {
     public string Name { get; set; }
     public string ShopName { get; set; }
     public string Url { get; set; }
     public bool Success { get; set; }
 
-    public ItemProcessStatus Status { get; set; }
+    public ResultStatus Status { get; set; }
 }

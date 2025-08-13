@@ -7,6 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Alchemist.DependencyInjection.Common;
 using Message.SignalR.DependencyInjection;
 using Grpc.Client.Extensions;
+using Message.Interfaces;
+using Alchemist.Product.Import.Background.ImportItems;
+using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Category.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -39,33 +43,28 @@ public static class ImportBackgroundDependencyInjectionExtensions
         return services.AddKeyedSignalRMessageReceiver(signalRUrl, ShopImportWorkerKeys.DataMessageReceiverKey);
     }
 
-    public static IServiceCollection AddGrpcServiceClient<T>(this IServiceCollection services, IConfiguration configuration, string grpcApiSectionName)
-        where T : class, IProductDataService
-    {
-        var grpcApiHost = configuration.GetSection(grpcApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
-        services.AddGrpcChannelWithoutCertificateCheck(grpcApiHost);
-        return services.AddSingleton<IProductDataService, T>();
-    }
-
-    public static IServiceCollection ConfigureDefaultHttps(this IServiceCollection services)
-    {
-        return services.ConfigureHttpClientDefaults(builder =>
-        {
-            builder.ConfigurePrimaryHttpMessageHandler(
-                () => new HttpClientHandler()
-                {
-                    ServerCertificateCustomValidationCallback = (req, cert, chain, errors) =>
-                    {
-                        return true;
-                    }
-                });
-        });
-    } 
-
     public static IServiceCollection AddShopImportMessageSender(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)
     {
         var signalRUrl = configuration.GetHostSectionValue(signalRUrlSectionName);
 
         return services.AddKeyedSignalRMessageSender(signalRUrl, key);
+    }
+
+    public static IServiceCollection AddProductItemHandler(this IServiceCollection services, object messageSenderKey, string methodName)
+    {
+        return services.AddSingleton<IProductItemHandler>((serviceProvider) =>
+        {
+            var messageSender = serviceProvider.GetRequiredKeyedService<IMessageSender>(messageSenderKey);
+            return new ProductItemHandler(messageSender, methodName);
+        });
+    }
+
+    public static IServiceCollection AddCategoryItemHandler(this IServiceCollection services, object messageSenderKey, string methodName)
+    {
+        return services.AddSingleton<ICategoryItemHandler>((serviceProvider) =>
+        {
+            var messageSender = serviceProvider.GetRequiredKeyedService<IMessageSender>(messageSenderKey);
+            return new CategoryItemHandler(messageSender, methodName);
+        });
     }
 }
