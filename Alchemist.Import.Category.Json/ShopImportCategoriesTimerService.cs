@@ -1,6 +1,7 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
 using Alchemist.Import.Service;
+using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.ObjectModel;
@@ -35,10 +36,11 @@ public class ShopImportCategoriesTimerService : ShopImportService
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
         IHtmlSearcher? htmlSearcher,
         IWebLoader webLoader,
+        IBrowserDataLoader browserDataLoader,
         ICategoryShopModel shop,
         RequestHeaders? requestHeaders,
         CategoryLoadOptions categoryLoadOptions,
-       ICategoryItemHandler itemHandler) : base(logger, webLoader, requestHeaders)
+       ICategoryItemHandler itemHandler) : base(logger, webLoader, browserDataLoader, requestHeaders)
     {
         HtmlSearcher = htmlSearcher;
         CategoryLoadOptions = categoryLoadOptions;
@@ -51,11 +53,12 @@ public class ShopImportCategoriesTimerService : ShopImportService
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
    IWebLoader webLoader,
+   IBrowserDataLoader browserDataLoader,
    ICategoryShopModel shopUrlModel,
    RequestHeaders? requestHeaders,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
-        : this(logger, null, webLoader, shopUrlModel, requestHeaders, categoryLoadOptions, itemHandler)
+        : this(logger, null, webLoader, browserDataLoader, shopUrlModel, requestHeaders, categoryLoadOptions, itemHandler)
     {
     }
 

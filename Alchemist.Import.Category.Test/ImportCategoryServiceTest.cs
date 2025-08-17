@@ -29,6 +29,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
             null,
             WebLoaderMock.Object,
+            BrowserDataLoaderMock.Object,
             _categoryShopModelMock.Object,
             RequestHeaders,
             _loadOptions,
@@ -56,7 +57,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         WebLoaderMock.Reset();
 
         var category = Helper.CreateCategoryWithChildren();
-        WebLoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, RequestHeaders, category);
+        WebLoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, RequestHeaders, Cookies, category);
         _loadOptions.CategoryPropertyPaths = new Dictionary<string, PropertyPath>() { { "Url", new PropertyPath("Url", "Url") },
             { "Description",new PropertyPath("Description", "Description") },
             { "Children",new PropertyPath("Children", "Children") }, 

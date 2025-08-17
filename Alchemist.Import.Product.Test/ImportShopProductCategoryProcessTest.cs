@@ -1,13 +1,13 @@
 ﻿using Moq;
 using WebLoader.Common;
 using Alchemist.Import.Products.Service;
-using Alchemist.Import.Interfaces;
 using Alchemist.Import.Product.Test.Infrastructure;
 using Alchemist.Test.Import.Service.Infrastructure;
 using Xunit.Abstractions;
 using Alchemist.Common;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Exceptions;
+using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Product.Test;
 
@@ -15,6 +15,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 {
     public ImportShopProductCategoryProcessTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
+        BrowserDataLoaderMock.SetupLoadCookies();
         ProductShopModelMock.Setup(s => s.ProductUrl).Returns("Product_{0}");
         ProductShopModelMock.Setup(s => s.CategoryUrl).Returns("Category_{0}_page{1}");
     }
@@ -32,7 +33,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         ProductShopModelMock.Setup(s => s.CategoryUrl).Returns(Guid.NewGuid().ToString());
 
         var url = ProductShopModelMock.Object.GetCategoryPageUrl(categoryMock.Object, 1);
-        WebLoaderMock.Setup(w => w.LoadFromUrl(url, RequestHeaders)).Throws(exception);
+        WebLoaderMock.Setup(w => w.LoadFromUrl(url, RequestHeaders, Cookies)).Throws(exception);
 
         categoryUrl = url;
     }
@@ -53,10 +54,10 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var categoryUrl = ProductShopModelMock.Object.GetCategoryPageUrl(categoryMock.Object, 1);
         var categoryProducts = TestHelper.CreateCategoryWithProducts();
 
-        WebLoaderMock.SetupLoadItem(categoryUrl, RequestHeaders, categoryProducts);
+        WebLoaderMock.SetupLoadItem(categoryUrl, RequestHeaders, Cookies, categoryProducts);
 
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
-        WebLoaderMock.SetupLoadItemsThrowsExceptions(productItems, getItemException, RequestHeaders);
+        WebLoaderMock.SetupLoadItemsThrowsExceptions(productItems, getItemException, RequestHeaders, Cookies);
 
         ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>())).Returns(Task.FromResult(ResultStatus.Success));
 
@@ -80,10 +81,10 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var categoryUrl = ProductShopModelMock.Object.GetCategoryPageUrl(categoryMock.Object, 1);
         var categoryProducts = TestHelper.CreateCategoryWithProducts();
 
-        WebLoaderMock.SetupLoadItem(categoryUrl, RequestHeaders, categoryProducts);
+        WebLoaderMock.SetupLoadItem(categoryUrl, RequestHeaders, Cookies, categoryProducts);
 
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
-        WebLoaderMock.SetupLoadItemsSuccessfull(productItems, RequestHeaders);
+        WebLoaderMock.SetupLoadItemsSuccessfull(productItems, RequestHeaders, Cookies);
 
         ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>())).Returns(Task.FromResult(ResultStatus.Success));
 
@@ -103,7 +104,9 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await Task.Delay(1000);
 
-        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), It.IsAny<RequestHeaders>()));
+        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), 
+            It.IsAny<RequestHeaders>(),
+            It.IsAny<IEnumerable<ICookieData>>()));
 
         LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);        
 
@@ -124,7 +127,9 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await Task.Delay(3000);
 
-        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), It.IsAny<RequestHeaders>()));
+        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), 
+            It.IsAny<RequestHeaders>(),
+            It.IsAny<IEnumerable<ICookieData>>()));
 
         LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("WebLoaderThrowsNsRedirectLoopAndWillBeReseted"), url);
 
@@ -142,16 +147,18 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     {
         var exception = new WarningException("warning");        
         SetupServiceWithCategoryLoadException(Guid.NewGuid().ToString(), exception, out var url);
-        Service.SetPageProductCount(10);
+        Service.SetPageProductCount(10);        
 
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token);
 
-        await Task.Delay(500);       
+        await Task.Delay(1000);       
 
         await token.CancelAsync();
 
-        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), It.IsAny<RequestHeaders>()));
+        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url),
+            It.IsAny<RequestHeaders>(),
+            It.IsAny<IEnumerable<ICookieData>>()));
 
         LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("ProcessUrlNotCompleteWarning"), url, exception.Message);       
 
@@ -169,7 +176,8 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await Task.Delay(1000);
 
-        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), It.IsAny<RequestHeaders>()));
+        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), 
+            It.IsAny<RequestHeaders>(), It.IsAny<IEnumerable<ICookieData>>()));
 
         LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ProcessUrlFailedError"), url);
 
@@ -193,7 +201,8 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await token.CancelAsync();
 
-        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == categoryUrl), It.IsAny<RequestHeaders>()));
+        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == categoryUrl),
+            It.IsAny<RequestHeaders>(), It.IsAny<IEnumerable<ICookieData>>()));
 
         foreach (var item in categoryProducts.CategoryProductItems)
         {
@@ -217,7 +226,8 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         
         await token.CancelAsync();
 
-        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == categoryUrl), It.IsAny<RequestHeaders>()));
+        WebLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == categoryUrl), 
+            It.IsAny<RequestHeaders>(), It.IsAny<IEnumerable<ICookieData>>()));
 
         foreach (var item in categoryProducts.CategoryProductItems)
         {

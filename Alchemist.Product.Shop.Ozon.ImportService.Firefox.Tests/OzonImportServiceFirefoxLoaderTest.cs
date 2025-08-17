@@ -1,4 +1,5 @@
 using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Service;
 using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -26,7 +27,7 @@ public class OzonImportServiceFirefoxLoaderTest
     {
         _testOutputHelper = testOutputHelper;
         _shopUrlModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategory>());
-        _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader(_dataLoader);
+        _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader();
 
         using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{_requestHeadersFireFoxFileName}");
 
@@ -35,7 +36,7 @@ public class OzonImportServiceFirefoxLoaderTest
         s.Close();
 
         //todo
-        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, _requestHeaders, _productItemHandler.Object);
+        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, _dataLoader,  _requestHeaders, _productItemHandler.Object);
     }
 
     private async Task InitializeAsync()
@@ -54,7 +55,9 @@ public class OzonImportServiceFirefoxLoaderTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var stream = await _webLoader.LoadFromUrl(_productUrl, _requestHeaders);
+        var cookies = (await _dataLoader.LoadCookies()).Select(c => c.Convert());
+
+        var stream = await _webLoader.LoadFromUrl(_productUrl, _requestHeaders, cookies);
         var product = await JsonSerializer.DeserializeAsync<Model.Product>(stream);
         stream.Close();
 
@@ -71,7 +74,8 @@ public class OzonImportServiceFirefoxLoaderTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var stream = await _webLoader.LoadFromUrl(_categoryUrl, _requestHeaders);
+        var cookies = (await _dataLoader.LoadCookies()).Select(c => c.Convert());
+        var stream = await _webLoader.LoadFromUrl(_categoryUrl, _requestHeaders, cookies);
         var category = await JsonSerializer.DeserializeAsync<Model.Category>(stream);
         stream.Close();
 

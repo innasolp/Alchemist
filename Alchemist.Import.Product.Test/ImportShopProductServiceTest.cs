@@ -17,6 +17,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
              LoggerMock.Object,
              ProductShopModelMock.Object,
              WebLoaderMock.Object,
+             BrowserDataLoaderMock.Object,
              RequestHeaders,
              ProductItemHandlerMock.Object);
     }

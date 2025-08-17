@@ -1,4 +1,5 @@
 using Alchemist.Import.Category.Json;
+using Alchemist.Import.Service;
 using BrowserDataLoader.Interfaces;
 using Json.FileExtensions;
 using System.Collections.ObjectModel;
@@ -39,7 +40,7 @@ public class GoldAppleCategoriesLoadTest
         _testOutputHelper = testOutputHelper;
 
         _dataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
-        _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader(_dataLoader);
+        _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader();
 
         _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}";
     }
@@ -65,7 +66,7 @@ public class GoldAppleCategoriesLoadTest
         Assert.True(cookies.Count > 0);
         Assert.True(cookies.All(c => c.Value != null));
 
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders);
+        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders, cookies.Select(c=>c.Convert()));
         var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
         stream.Close();       
 
@@ -102,7 +103,7 @@ public class GoldAppleCategoriesLoadTest
         Assert.True(cookies.Count > 0);
         Assert.True(cookies.All(c => c.Value != null));
 
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders);
+        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders, cookies.Select(c => c.Convert()));
         var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
         stream.Close();
 

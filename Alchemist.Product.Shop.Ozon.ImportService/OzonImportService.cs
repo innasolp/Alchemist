@@ -5,14 +5,17 @@ using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
 using WebLoader.Common;
+using BrowserDataLoader.Interfaces;
 namespace Alchemist.Product.Shop.Ozon.ImportService;
 
 public class OzonImportService(ILogger<OzonImportService> logger,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductShopModel shopUrlModel,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IWebLoader shopImporter,
+    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IBrowserDataLoader browserDataLoader,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] RequestHeaders requestHeaders,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler
-        ) : ShopImportCategoryProductsService<Category, Model.Product>(logger, shopUrlModel, shopImporter, requestHeaders, itemHandler)
+        ) : ShopImportCategoryProductsService<Category, Model.Product>(logger, shopUrlModel, shopImporter, browserDataLoader,
+            requestHeaders, itemHandler)
 {
     public override string Name => "OzonImport";
 

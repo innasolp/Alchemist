@@ -1,14 +1,20 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
 using Alchemist.Test.Import.Service.Infrastructure;
+using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Product.Test.Infrastructure;
 
-public class TestImportProductService<TCategory, TProductItem>(ILogger logger, IProductShopModel shopUrlModel, IWebLoader webLoader, RequestHeaders requestHeaders, IProductItemHandler itemHandler) 
-    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopUrlModel, webLoader, requestHeaders, itemHandler), ITestService
+public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
+    IProductShopModel shopUrlModel, 
+    IWebLoader webLoader,
+    IBrowserDataLoader browserDataLoader,
+    RequestHeaders requestHeaders,
+    IProductItemHandler itemHandler) 
+    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopUrlModel, webLoader, browserDataLoader, requestHeaders, itemHandler), ITestService
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {

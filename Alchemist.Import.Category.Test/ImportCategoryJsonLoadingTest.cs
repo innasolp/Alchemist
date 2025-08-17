@@ -27,12 +27,14 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         ImportCategoriesResourceManager = new ResourceManager("Alchemist.Import.Category.Json.ImportCategoryLogMessages",
                                typeof(ShopImportCategoriesTimerService).Assembly);
 
+        BrowserDataLoaderMock.SetupLoadCookies();
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
         _categoryShopModelMock.Setup(s => s.ShopName).Returns(Guid.NewGuid().ToString());
 
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
             null,
             WebLoaderMock.Object,
+            BrowserDataLoaderMock.Object,
             _categoryShopModelMock.Object,
             RequestHeaders,
             _loadOptions,
@@ -69,7 +71,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
             { "Name",new PropertyPath("Name", "Name") },
             { "Id",new PropertyPath("Id", "Id") } };
         
-        WebLoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, RequestHeaders, category);        
+        WebLoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, RequestHeaders, Cookies, category);        
         
         var name = Guid.NewGuid().ToString();
 
@@ -86,7 +88,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         WebLoaderMock.SetupStartSuccess();       
 
         var exception = new Exception("Json loading failed");
-        WebLoaderMock.Setup(w=>w.LoadFromUrl(_categoryShopModelMock.Object.CategorySourceUrl, RequestHeaders)).Throws(exception);
+        WebLoaderMock.Setup(w=>w.LoadFromUrl(_categoryShopModelMock.Object.CategorySourceUrl, RequestHeaders, Cookies)).Throws(exception);
 
         var name = Guid.NewGuid().ToString();
 
