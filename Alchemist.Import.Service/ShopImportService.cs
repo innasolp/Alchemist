@@ -1,24 +1,29 @@
 ﻿using Alchemist.Common;
 using Alchemist.Exceptions;
 using Alchemist.Import.Interfaces;
+using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Service;
 
-public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, RequestHeaders? requestHeaders)
+public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IBrowserDataLoader browserDataLoader, RequestHeaders? requestHeaders)
     : IImportService, IAsyncDisposable
 {
     public abstract string Name { get; }
 
     protected IWebLoader WebLoader { get; } = webLoader;
 
+    protected IBrowserDataLoader _browserDataLoader = browserDataLoader;
+
     private readonly SemaphoreSlim _webLoaderSemaphoreSlim = new(1,1);
 
     protected RequestHeaders? RequestHeaders { get; } = requestHeaders;
 
     protected ILogger Logger { get; } = logger;
+
+    protected List<BrowserDataLoader.Interfaces.ICookieData> _cookies;
 
     public virtual async Task Start(CancellationToken stoppingToken)
     {
@@ -51,7 +56,10 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
             try
             {
                 if (!WebLoader.IsStarted)
+                {
                     await WebLoader.Start();
+                    _cookies = await _browserDataLoader.LoadCookies();
+                }
             }
             catch (WarningException warning)
             {
@@ -76,6 +84,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
                     Logger.LogWarning(wle, LogMessages.WebLoaderThrowsNsRedirectLoopAndWillBeReseted, url);
                     Logger.LogInformation(LogMessages.WebLoaderIsReseting);
                     await WebLoader.Reset();
+                    _cookies = await _browserDataLoader.LoadCookies();
                     await Task.Delay(1000);
                     Logger.LogInformation(LogMessages.WebLoaderResetSuccessfully);
                 }
@@ -99,6 +108,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         {
             Logger.LogWarning(e, LogMessages.HttpRequestErrorAndWebLoaderRestart, [e.StatusCode, url, WebLoader.GetType().Name]);
             await Task.Delay(500);
+            //todo
             await WebLoader.Start();
         }
         else
@@ -291,7 +301,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, Re
         await _webLoaderSemaphoreSlim.WaitAsync();
         try
         {
-            var stream = await WebLoader.LoadFromUrl(url, RequestHeaders);
+            var stream = await WebLoader.LoadFromUrl(url, RequestHeaders, _cookies.Select(c=>c.Convert()));
             return await Task.FromResult(stream);
         }
         catch { throw; }

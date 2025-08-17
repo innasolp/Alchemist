@@ -1,4 +1,5 @@
 using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Service;
 using Alchemist.Product.Shop.GoldApple.Model;
 using BrowserDataLoader.Firefox.Standart.Windows;
 using BrowserDataLoader.Interfaces;
@@ -35,7 +36,7 @@ public class GoldAppleImportServiceFirefoxTest
 
         _testOutputHelper = testOutputHelper;
         _browserDataLoader = new FirefoxStandartDataLoader();
-        _webLoader = new PlaywrightFirefoxLoader(_browserDataLoader);  
+        _webLoader = new PlaywrightFirefoxLoader();  
         _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{_requestHeadersFileName}";       
     }
     private static RequestHeaders GetRequestHeaders(string requestHeadersFileName)
@@ -67,7 +68,8 @@ public class GoldAppleImportServiceFirefoxTest
 
         var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
 
-        var stream = await _webLoader.LoadFromUrl(_categoryUrl, requestHeaders);
+        var cookies = (await _browserDataLoader.LoadCookies()).Select(c => c.Convert());
+        var stream = await _webLoader.LoadFromUrl(_categoryUrl, requestHeaders, cookies);
         var category = await JsonSerializer.DeserializeAsync<CategoryProducts>(stream);
         stream.Close();
 
@@ -85,7 +87,8 @@ public class GoldAppleImportServiceFirefoxTest
 
         var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
 
-        var stream = await _webLoader.LoadFromUrl(_productUrl, requestHeaders);
+        var cookies = (await _browserDataLoader.LoadCookies()).Select(c => c.Convert());
+        var stream = await _webLoader.LoadFromUrl(_productUrl, requestHeaders, cookies);
         var productData = await JsonSerializer.DeserializeAsync<ProductData>(stream);
         stream.Close();
 

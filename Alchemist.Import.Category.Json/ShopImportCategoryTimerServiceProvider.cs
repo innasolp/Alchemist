@@ -1,5 +1,6 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html;
+using BrowserDataLoader.Interfaces;
 using DependencyInjection.ImplementationFactory;
 using Log.Interceptors.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,9 +20,10 @@ public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFact
         var requestHeaders = serviceProvider.GetKeyedService<RequestHeaders>(key);
         var loadOptions = serviceProvider.GetRequiredKeyedService<CategoryLoadOptions>(key);
         var webLoader = serviceProvider.GetRequiredKeyedService<IWebLoader>(key);
+        var browserDataLoader = serviceProvider.GetRequiredKeyedService<IBrowserDataLoader>(key);
         var itemHandler = serviceProvider.GetRequiredKeyedService<ICategoryItemHandler>(key);
 
-        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, shopUrl, requestHeaders, loadOptions, itemHandler);
+        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, browserDataLoader, shopUrl, requestHeaders, loadOptions, itemHandler);
     }
 
     private static ShopImportCategoriesTimerService GetCategoriesService(IServiceProvider serviceProvider)
@@ -32,9 +34,10 @@ public class ShopImportCategoryTimerServiceProvider : IServiceImplementationFact
         var requestHeaders = serviceProvider.GetService<RequestHeaders>();
         var loadOptions = serviceProvider.GetRequiredService<CategoryLoadOptions>();
         var webLoader = serviceProvider.GetRequiredService<IWebLoader>();
+        var browserDataLoader = serviceProvider.GetRequiredService<IBrowserDataLoader>();
         var itemHandler = serviceProvider.GetRequiredService<ICategoryItemHandler>();
 
-        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, shopUrl, requestHeaders, loadOptions, itemHandler);
+        return new ShopImportCategoriesTimerService(logger, htmlSearcher, webLoader, browserDataLoader, shopUrl, requestHeaders, loadOptions, itemHandler);
     }
 
     public ShopImportCategoriesTimerService GetService(IServiceProvider serviceProvider, object? key)

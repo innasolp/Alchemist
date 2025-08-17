@@ -5,7 +5,8 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Test.Import.Service;
 
-public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputHelper outputHelper) : ImportServiceTest<TService, TLogger>(outputHelper)
+public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputHelper outputHelper) 
+    : ImportServiceTest<TService, TLogger>(outputHelper)
     where TService : ShopImportService, ITestService
     where TLogger : class, ILogger
 {
