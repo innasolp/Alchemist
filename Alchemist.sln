@@ -1136,7 +1136,6 @@ Global
 		{9068C743-747E-49D6-BA86-8196E555B744}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9068C743-747E-49D6-BA86-8196E555B744}.Release|Any CPU.Build.0 = Release|Any CPU
 		{00D15449-1568-2732-0C04-8B8D960C5D53}.build import|Any CPU.ActiveCfg = Release|Any CPU
-		{00D15449-1568-2732-0C04-8B8D960C5D53}.build import|Any CPU.Build.0 = Release|Any CPU
 		{00D15449-1568-2732-0C04-8B8D960C5D53}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
 		{00D15449-1568-2732-0C04-8B8D960C5D53}.debug libs|Any CPU.Build.0 = Debug|Any CPU
 		{00D15449-1568-2732-0C04-8B8D960C5D53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

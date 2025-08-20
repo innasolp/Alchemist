@@ -47,6 +47,7 @@ public static class ServiceSettingsModelExtensions
             nameof(IShopServicesSettingsModel.ImportService) => shopSettings.ImportService,
             nameof(IShopServicesSettingsModel.WebLoader) => shopSettings.WebLoader,
             nameof(IShopServicesSettingsModel.BrowserDataLoader) => shopSettings.BrowserDataLoader,
+            nameof(IShopServicesSettingsModel.BrowserLauncher) => shopSettings.BrowserLauncher,
             nameof(IShopServicesSettingsModel.RequestHeaders) => shopSettings.RequestHeaders,
             _ => null,
         };

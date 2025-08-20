@@ -69,6 +69,10 @@ public static class ModelAssert
             (result.BrowserDataLoader == null && expected.BrowserDataLoader == null));
         EqualFields(expected.BrowserDataLoader, result.BrowserDataLoader);
 
+        Assert.True((result.BrowserLauncher != null && expected.BrowserLauncher != null) ||
+            (result.BrowserLauncher == null && expected.BrowserLauncher == null));
+        EqualFields(expected.BrowserLauncher, result.BrowserLauncher);
+
         Assert.True((result.RequestHeaders != null && expected.RequestHeaders != null) ||
             (result.RequestHeaders == null && expected.RequestHeaders == null));
         EqualFields(expected.RequestHeaders, result.RequestHeaders);
@@ -85,6 +89,9 @@ public static class ModelAssert
 
         if (expected.BrowserDataLoader != null)
             NotEqualFields(expected.BrowserDataLoader, result.BrowserDataLoader);
+
+        if (expected.BrowserLauncher != null)
+            NotEqualFields(expected.BrowserLauncher, result.BrowserLauncher);
 
         if (expected.RequestHeaders != null)
             NotEqualFields(expected.RequestHeaders, result.RequestHeaders);

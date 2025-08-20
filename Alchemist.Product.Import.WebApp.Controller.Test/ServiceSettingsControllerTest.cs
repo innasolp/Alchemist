@@ -95,6 +95,13 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
     }
 
     [Fact]
+    public async Task SetShopSettingsBrowserLauncherActionAsync()
+    {
+        await SetServiceSettingsActionAsync((shopSettingController, shopGuid, shopSettingsGuid) => shopSettingController.BrowserLauncherSettings(shopGuid, shopSettingsGuid),
+           nameof(ShopSettingsModel.BrowserLauncher));
+    }
+
+    [Fact]
     public async Task SetSecondaryServiceSettings()
     {
         var guid = Guid.NewGuid();

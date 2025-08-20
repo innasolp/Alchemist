@@ -4,6 +4,7 @@ public static class Common
 {
     public static string[] BaseServiceNames = [nameof(IShopImportSettings.ImportService),
         nameof(IShopImportSettings.BrowserDataLoader),
+        nameof(IShopImportSettings.BrowserLauncher),
         nameof(IShopImportSettings.RequestHeaders),
         nameof(IShopImportSettings.WebLoader)];
 }

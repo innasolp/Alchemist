@@ -10,6 +10,7 @@ public static class ShopSettingsAsserts
         Assert.NotNull(shopSettings.RequestHeaders);
         Assert.NotNull(shopSettings.RequestHeaders.Value);
         Assert.NotNull(shopSettings.BrowserDataLoader);
+        Assert.NotNull(shopSettings.BrowserLauncher);
         Assert.NotNull(shopSettings.ImportService);
         Assert.Equal(serviceCount, shopSettings.Services.Count);
     }
@@ -19,6 +20,7 @@ public static class ShopSettingsAsserts
         Assert.NotNull(shopSettings.WebLoader);
         Assert.Null(shopSettings.RequestHeaders);
         Assert.Null(shopSettings.BrowserDataLoader);
+        Assert.Null(shopSettings.BrowserLauncher);
         Assert.NotNull(shopSettings.ImportService);
         Assert.Equal(serviceCount, shopSettings.Services.Count);
     }

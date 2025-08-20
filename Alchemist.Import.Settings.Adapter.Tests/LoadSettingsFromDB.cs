@@ -34,6 +34,7 @@ public class LoadSettingsFromDB
             new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.RequestHeaders) },
             new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
             new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.WebLoader) },
+            new ShopSettings { Id = 14, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.BrowserLauncher) },
             new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product },
         ];
 
@@ -119,6 +120,7 @@ public class LoadSettingsFromDB
         Assert.Equal(2, shopSettings.Services.Count);
         Assert.NotNull(shopSettings.ImportService);
         Assert.Null(shopSettings.BrowserDataLoader);
+        Assert.Null(shopSettings.BrowserLauncher);
         Assert.NotNull(shopSettings.WebLoader);
         Assert.Null(shopSettings.RequestHeaders);
         
@@ -136,6 +138,7 @@ public class LoadSettingsFromDB
         Assert.NotNull(shopSettings.RequestHeaders);
         Assert.Null(shopSettings.WebLoader);
         Assert.Null(shopSettings.BrowserDataLoader);
+        Assert.Null(shopSettings.BrowserLauncher);
 
         Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.ImportService.ServiceTypeName);
         Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.ImportService.ImplementationTypeName);
@@ -152,6 +155,7 @@ public class LoadSettingsFromDB
         Assert.NotNull(shopSettings.RequestHeaders);
         Assert.Null(shopSettings.WebLoader);
         Assert.Null(shopSettings.BrowserDataLoader);
+        Assert.Null(shopSettings.BrowserLauncher);
 
         Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.ImportService.ServiceTypeName);
         Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.ImportService.ImplementationTypeName);
@@ -162,6 +166,6 @@ public class LoadSettingsFromDB
     {
         var allSettings = await _adapter.GetAllShopImportSettings();
         Assert.Equal(5, allSettings.Count);
-        Assert.Equal(8, allSettings.SelectMany(s => s.Services.OfType<TestImportServiceSettings>()).Count());
+        Assert.Equal(9, allSettings.SelectMany(s => s.Services.OfType<TestImportServiceSettings>()).Count());
     }
 }

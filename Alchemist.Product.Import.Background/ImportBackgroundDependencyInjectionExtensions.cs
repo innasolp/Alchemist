@@ -19,6 +19,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
     public static void SetAppPath(this IShopImportSettings shopImportSettings, string appPath)
     {
         shopImportSettings.BrowserDataLoader?.SetAppPath(appPath);
+        shopImportSettings.BrowserLauncher?.SetAppPath(appPath);
         shopImportSettings.WebLoader?.SetAppPath(appPath);
         shopImportSettings.ImportService.SetAppPath(appPath);
         shopImportSettings.RequestHeaders?.SetAppPath(appPath);

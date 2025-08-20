@@ -16,6 +16,7 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServic
         return  @$"{base.ToString()};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
                   {nameof(ImportService)}:{GetServiceValueString(ImportService)};
                   {nameof(BrowserDataLoader)}:{GetServiceValueString(BrowserDataLoader)};
+                  {nameof(BrowserLauncher)}:{GetServiceValueString(BrowserLauncher)};
                   {nameof(RequestHeaders)}:{GetServiceValueString(RequestHeaders)};
                   {nameof(WebLoader)}:{GetServiceValueString(WebLoader)}";
     }
@@ -91,6 +92,11 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServic
         BrowserDataLoader = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
         {
             Name = nameof(IShopServicesSettingsModel.BrowserDataLoader)
+        };
+
+        BrowserLauncher = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
+        {
+            Name = nameof(IShopServicesSettingsModel.BrowserLauncher)
         };
 
         RequestHeaders = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)

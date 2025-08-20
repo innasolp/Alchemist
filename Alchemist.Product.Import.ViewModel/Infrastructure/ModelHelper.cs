@@ -8,6 +8,7 @@ public static class ModelHelper
     {
         return name == nameof(IShopImportSettings.ImportService)
             || name == nameof(IShopImportSettings.BrowserDataLoader)
+            || name == nameof(IShopImportSettings.BrowserLauncher)
             || name == nameof(IShopImportSettings.WebLoader)
             || name == nameof(IShopImportSettings.RequestHeaders);
     }

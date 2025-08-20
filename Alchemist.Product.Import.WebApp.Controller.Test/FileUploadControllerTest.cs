@@ -233,6 +233,14 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     }
 
     [Fact]
+    public async Task UploadBrowserLauncherOnUploadServiceSettingsActionAsync()
+    {
+        await UploadServiceOnUploadServiceSettingsActionAsync(nameof(ShopSettingsModel.BrowserLauncher),
+            (shopSettings) => shopSettings.BrowserLauncher,
+            "browserlauncher.firefox.json");
+    }
+
+    [Fact]
     public async Task UploadWebLoaderOnUploadServiceSettingsActionAsync()
     {
         await UploadServiceOnUploadServiceSettingsActionAsync(nameof(ShopSettingsModel.WebLoader),

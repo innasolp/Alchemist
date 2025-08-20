@@ -130,6 +130,16 @@ public class ServiceSettingsActionTest(TestImportWebAppFactory webAppFactory, IT
     }
 
     [Fact]
+    public async Task BrowserLauncherSet()
+    {
+        var newPage = await Context.NewPageAsync();
+        var shopImportSettings = await ExpectLoadIndexPageAsync(newPage);
+        var service = await this.ExpectSetServiceSettingsAsync(newPage, _shopSettings, nameof(IShopImportSettings.BrowserLauncher), shopImportSettings);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, service);
+        await newPage.CloseAsync();
+    }
+
+    [Fact]
     public async Task WebLoaderUploadFromFile()
     {
         var newPage = await Context.NewPageAsync();

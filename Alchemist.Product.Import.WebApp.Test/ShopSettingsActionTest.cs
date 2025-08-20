@@ -93,6 +93,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         var importService = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.ImportService), startShopImportSettings);
         var webLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.WebLoader), startShopImportSettings);
         var browserDataLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.BrowserDataLoader), startShopImportSettings);
+        var browserLauncher = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.BrowserLauncher), startShopImportSettings);
         
         var settingsForm = page.Locator("#settingsForm");
 
@@ -105,6 +106,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         shopProductSettings.UpdateServiceSettings(importService);
         shopProductSettings.UpdateServiceSettings(webLoader);
         shopProductSettings.UpdateServiceSettings(browserDataLoader);
+        shopProductSettings.UpdateServiceSettings(browserLauncher);
 
         await settingsForm.Locator("#ShopSettingsName").FillAsync(shopProductSettings.Name);
         await settingsForm.Locator("#ProductUrlFormat").FillAsync(shopProductSettings.ProductUrlFormat);
@@ -135,6 +137,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, importService);
         await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, browserDataLoader);
+        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, browserLauncher);
         await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, webLoader);
 
         await newPage.CloseAsync();

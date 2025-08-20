@@ -8,6 +8,7 @@ public static class ShopSettingsModelExtensions
     {
         return string.IsNullOrEmpty(shopServicesSettingsModel.Name)
             && shopServicesSettingsModel.BrowserDataLoader.IsEmpty()
+            && shopServicesSettingsModel.BrowserLauncher.IsEmpty()
             && shopServicesSettingsModel.WebLoader.IsEmpty()
             && shopServicesSettingsModel.ImportService.IsEmpty()
             && shopServicesSettingsModel.RequestHeaders.IsEmpty();
@@ -34,6 +35,13 @@ public static class ShopSettingsModelExtensions
                 {
                     shopSettings.BrowserDataLoader.Update(serviceSettings);
                     shopSettings.AddOrUpdateService(shopSettings.BrowserDataLoader);
+                    return;
+                }
+
+            case nameof(IShopServicesSettingsModel.BrowserLauncher):
+                {
+                    shopSettings.BrowserLauncher.Update(serviceSettings);
+                    shopSettings.AddOrUpdateService(shopSettings.BrowserLauncher);
                     return;
                 }
 
@@ -69,6 +77,7 @@ public static class ShopSettingsModelExtensions
 
         target.ImportService.Update(source.ImportService);
         target.BrowserDataLoader.Update(source.BrowserDataLoader);
+        target.BrowserLauncher.Update(source.BrowserLauncher);
         target.RequestHeaders.Update(source.RequestHeaders);
         target.WebLoader.Update(source.WebLoader);
 

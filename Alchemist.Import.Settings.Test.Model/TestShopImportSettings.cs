@@ -14,6 +14,8 @@ public abstract class TestShopImportSettings : IShopImportSettings
 
     public TestImportServiceSettings? BrowserDataLoader { get; set; }
 
+    public TestImportServiceSettings? BrowserLauncher { get; set; }
+
     public bool? Perfomance { get; set; }
 
     [JsonIgnore]
@@ -41,6 +43,11 @@ public abstract class TestShopImportSettings : IShopImportSettings
         get => BrowserDataLoader; set => BrowserDataLoader = (TestImportServiceSettings?)value;
     }
 
+    IImportServiceSettings? IShopImportSettings.BrowserLauncher
+    {
+        get => BrowserLauncher; set => BrowserLauncher = (TestImportServiceSettings?)value;
+    }
+
     IImportServiceSettings? IShopImportSettings.RequestHeaders
     {
         get => RequestHeaders; set => RequestHeaders = (TestImportServiceSettings?)value;
@@ -60,5 +67,4 @@ public abstract class TestShopImportSettings : IShopImportSettings
 
     public string ShopName { get; set; }
     public string ShopUrl { get; set; }
-    public IImportServiceSettings? BrowserLauncher { get ; set; }
 }

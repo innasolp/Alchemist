@@ -64,6 +64,7 @@ public class ImportFacadeTest
 
         shopProductSettingsMock.Setup(s => s.ImportService).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.ImportService)));
         shopProductSettingsMock.Setup(s => s.BrowserDataLoader).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.BrowserDataLoader)));
+        shopProductSettingsMock.Setup(s => s.BrowserLauncher).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.BrowserLauncher)));
         shopProductSettingsMock.Setup(s => s.RequestHeaders).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.RequestHeaders)));
         shopProductSettingsMock.Setup(s => s.WebLoader).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.WebLoader)));
 
@@ -199,6 +200,7 @@ public class ImportFacadeTest
         Assert.True(shopSettings.RequestHeaders.IsEmpty());
         Assert.True(shopSettings.WebLoader.IsEmpty());
         Assert.True(shopSettings.BrowserDataLoader.IsEmpty());
+        Assert.True(shopSettings.BrowserLauncher.IsEmpty());
 
         var name = Guid.NewGuid().ToString();
 
@@ -230,6 +232,7 @@ public class ImportFacadeTest
         Assert.True(shopSettings.RequestHeaders.IsEmpty());
         Assert.True(shopSettings.WebLoader.IsEmpty());
         Assert.True(shopSettings.BrowserDataLoader.IsEmpty());
+        Assert.True(shopSettings.BrowserLauncher.IsEmpty());
 
         Assert.False(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid,
             shopSettings.Guid,

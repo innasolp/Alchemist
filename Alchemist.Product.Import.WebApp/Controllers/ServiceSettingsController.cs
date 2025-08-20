@@ -63,6 +63,16 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
         return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.BrowserDataLoader));
     }
 
+    [Route("ServiceSettings/BrowserLauncher")]
+    [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult BrowserLauncherSettings(Guid shopGuid, Guid shopSettingsGuid)
+    {
+        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.BrowserLauncher));
+    }
+
     [Route("ServiceSettings/WebLoader")]
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]

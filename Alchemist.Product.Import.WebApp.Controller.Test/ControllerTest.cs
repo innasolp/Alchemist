@@ -122,6 +122,9 @@ public abstract class ControllerTest<T>
 
         if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.BrowserDataLoader), out var browserDataLoader))
             browserDataLoader.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.BrowserDataLoader)}Type{shopSettings.Id}_{Guid.NewGuid()}";
+        
+        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.BrowserLauncher), out var browserLauncher))
+            browserLauncher.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.BrowserLauncher)}Type{shopSettings.Id}_{Guid.NewGuid()}";
 
         if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.RequestHeaders), out var requestHeaders))
             requestHeaders.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.RequestHeaders)}Type{shopSettings.Id}_{Guid.NewGuid()}";

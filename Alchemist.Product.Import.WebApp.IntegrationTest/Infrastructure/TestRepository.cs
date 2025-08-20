@@ -56,6 +56,9 @@ public static class TestRepository
             
             var browserDataLoader = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id, nameof(IShopServicesSettingsModel.BrowserDataLoader));
             serviceSettings.Add(browserDataLoader);
+
+            var browserLauncher = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id, nameof(IShopServicesSettingsModel.BrowserLauncher));
+            serviceSettings.Add(browserLauncher);
             
             var webLoader = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id, nameof(IShopServicesSettingsModel.WebLoader));
             serviceSettings.Add(webLoader);

@@ -62,6 +62,11 @@
     "ImplementationTypeName": "Firefox.Standart",
     "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
   },
+  "BrowserLauncher": {
+    "ServiceTypeName": "IBrowserLauncher",
+    "ImplementationTypeName": "Firefox.Standart",
+    "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+  },
   "WebLoader": {
     "ServiceTypeName": "IWebLoader",
     "ImplementationTypeName": "Firefox",

@@ -2,7 +2,7 @@
 
 namespace Alchemist.Import.Settings.Test.Model;
 
-public class TestProductShopImportSettings:TestShopImportSettings, IProductShopImportSettings
+public class TestProductShopImportSettings : TestShopImportSettings, IProductShopImportSettings
 {
     public class TestCategoryUrl : ICategoryUrl
     {

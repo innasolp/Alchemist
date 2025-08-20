@@ -63,6 +63,10 @@
       "ImplementationTypeName": "Firefox.Standart",
       "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
     },
+    "BrowserLauncher": {
+      "ImplementationTypeName": "Firefox.Standart",
+      "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+    },
     "WebLoader": {
       "ImplementationTypeName": "Firefox",
       "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",

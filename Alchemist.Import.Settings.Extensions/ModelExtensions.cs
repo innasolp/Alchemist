@@ -68,6 +68,12 @@ public static class ModelExtensions
             services,
             s => {shopImportSettings.BrowserDataLoader = s; excludedServices.Add(s); });
 
+
+        shopImportSettings.SetServiceSettingsIfAvailable<TImportServiceSettings>(s => s.BrowserLauncher,
+            nameof(IShopImportSettings.BrowserLauncher),
+            services,
+            s => {shopImportSettings.BrowserLauncher = s; excludedServices.Add(s); });
+
         shopImportSettings.SetServiceSettingsIfAvailable<TImportServiceSettings>(s => s.WebLoader,
             nameof(IShopImportSettings.WebLoader),
             services,
@@ -140,6 +146,16 @@ public static class ModelExtensions
                         serviceSettings,
                         s => s.BrowserDataLoader,
                         (s, sm) => s.BrowserDataLoader = sm);
+
+                    return true;
+                }
+
+            case nameof(IShopImportSettings.BrowserLauncher):
+                {
+                    shopSettings.UpdateShopServiceSettings(nameof(IShopImportSettings.BrowserLauncher), 
+                        serviceSettings,
+                        s => s.BrowserLauncher,
+                        (s, sm) => s.BrowserLauncher = sm);
 
                     return true;
                 }

@@ -27,6 +27,7 @@ public partial class ShopSettingsModel : IModelCompare
 
         return ((ImportService == null && shopSettings.ImportService == null) || ImportService?.AllEquals(shopSettings.ImportService) == true)
                       && ((BrowserDataLoader == null && shopSettings.BrowserDataLoader == null) || BrowserDataLoader?.AllEquals(shopSettings.BrowserDataLoader) == true)
+                      && ((BrowserLauncher == null && shopSettings.BrowserLauncher == null) || BrowserLauncher?.AllEquals(shopSettings.BrowserLauncher) == true)
                       && ((RequestHeaders == null && shopSettings.RequestHeaders == null) || RequestHeaders?.AllEquals(shopSettings.RequestHeaders) == true)
                       && ((WebLoader == null && shopSettings.WebLoader == null) || WebLoader?.AllEquals(shopSettings.WebLoader) == true)
                       && Services.Where(s => !ModelHelper.IsServiceSettingsPrimary(s.Name)).All(s => shopSettings.Services.Any(s1 => s1.AllEquals(s)));

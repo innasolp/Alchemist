@@ -40,6 +40,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
             new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.WebLoader) },
             new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
             new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.BrowserDataLoader) },
+            new ShopSettings { Id = 14, ShopId = 1, ParentSettingsId = 2, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.BrowserLauncher) },
             new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
             new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.RequestHeaders) },
             new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },

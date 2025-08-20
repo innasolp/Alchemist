@@ -301,10 +301,12 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         shopSettings.ImportService.Name = nameof(IShopImportSettings.ImportService);
         shopSettings.RequestHeaders.Name = nameof(IShopImportSettings.RequestHeaders);
         shopSettings.BrowserDataLoader.Name = nameof(IShopImportSettings.BrowserDataLoader);
+        shopSettings.BrowserLauncher.Name = nameof(IShopImportSettings.BrowserLauncher);
         shopSettings.WebLoader.Name = nameof(IShopImportSettings.WebLoader);
         shopSettings.Services.Add(shopSettings.ImportService);
         shopSettings.Services.Add(shopSettings.RequestHeaders);
         shopSettings.Services.Add(shopSettings.BrowserDataLoader);
+        shopSettings.Services.Add(shopSettings.BrowserLauncher);
         shopSettings.Services.Add(shopSettings.WebLoader);
 
         _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
