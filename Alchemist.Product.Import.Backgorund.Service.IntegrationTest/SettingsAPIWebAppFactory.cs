@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.Interfaces;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
@@ -20,12 +19,6 @@ public class SettingsAPIWebAppFactory (string connectionString) : DbAPIWebAppFac
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        var shopSettings = TestRepository.GetShopSettingsImportTestData(dbContext.Shops);
-        shopSettings.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
-        dbContext.SaveChanges();
-
-        var serviceSettings = TestRepository.GetShopSettingsServicesTestData(dbContext.ShopSettings);
-        serviceSettings.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
