@@ -353,6 +353,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.Product.Shop
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BrowserService.UnitTest", "Alchemist.BrowserService.UnitTest\Alchemist.BrowserService.UnitTest.csproj", "{00D15449-1568-2732-0C04-8B8D960C5D53}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BrowserService.IntegrationTest", "Alchemist.BrowserService.IntegrationTest\Alchemist.BrowserService.IntegrationTest.csproj", "{2256F407-785E-E942-AB70-FD310E0E8165}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		build import|Any CPU = build import|Any CPU
@@ -1143,6 +1145,14 @@ Global
 		{00D15449-1568-2732-0C04-8B8D960C5D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00D15449-1568-2732-0C04-8B8D960C5D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00D15449-1568-2732-0C04-8B8D960C5D53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.build import|Any CPU.ActiveCfg = Release|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.build import|Any CPU.Build.0 = Release|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2256F407-785E-E942-AB70-FD310E0E8165}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1282,6 +1292,7 @@ Global
 		{49D04C39-8584-41BD-ABAF-863F98B184D2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{9068C743-747E-49D6-BA86-8196E555B744} = {62440E5D-9EA4-4636-A8A1-C7EE8D8E9EF6}
 		{00D15449-1568-2732-0C04-8B8D960C5D53} = {8DD0CA95-E6CF-4919-8F23-00B6929081FC}
+		{2256F407-785E-E942-AB70-FD310E0E8165} = {29F409A8-DE7C-43BE-916A-920352B78953}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
