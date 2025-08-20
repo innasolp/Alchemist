@@ -22,6 +22,7 @@ internal abstract class ShopModel : IShopItem, IShop
 
     public string ShopName { get; set; }
     public string ShopUrl { get; set; }
+    public string Host { get; set; }
     public string? Caption { get; set; }
     string IShop.Name { get => ShopName; set => ShopName = value; }
     string IShop.Url { get => ShopUrl; set => ShopUrl = value; }

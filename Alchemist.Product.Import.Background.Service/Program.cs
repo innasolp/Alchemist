@@ -1,9 +1,6 @@
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
-using Alchemist.Import.Factory.Interfaces;
-using Alchemist.Import.Logging;
-using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Log.Extensions;
@@ -11,7 +8,6 @@ using Alchemist.Product.Import.Background;
 using Alchemist.Product.Import.Background.Settings;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
-using BrowserDataLoader.Interfaces;
 using DependencyInjection.AssemblyExtensions;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
@@ -19,6 +15,11 @@ using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
 using Message.RabbitMQ.DependencyInjection;
+using Alchemist.Import.Logging.Factory;
+using Alchemist.Import.Service.Factory.Interfaces;
+using Alchemist.Import.BrowserService.Factory;
+using Alchemist.BrowserService.Client;
+using Alchemist.Import.Settings.DataAdapter;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
@@ -29,7 +30,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
 builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
 
-builder.Services.AddServiceImplementationsFromPath(typeof(IBrowserDataLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("BrowserDataLoaderPath").Value}");
+builder.Services.AddKeyedSingleton(nameof(BrowserServiceClientFactory),
+       builder.Configuration.GetHostSectionValue("BrowserServiceHost").SetEnvironmentLocalHostIfNeed());
+builder.Services.AddSingleton<IBrowserServiceFactory, BrowserServiceClientFactory>();
+
 builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("WebLoaderPath").Value}");
 
 builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl", ShopImportWorkerKeys.ShopsMessageSenderKey);

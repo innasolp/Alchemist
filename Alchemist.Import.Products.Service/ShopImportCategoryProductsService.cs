@@ -7,7 +7,6 @@ using WebLoader.Common;
 using Alchemist.Common;
 using System.Collections.Concurrent;
 using Alchemist.Import.Interfaces;
-using BrowserDataLoader.Interfaces;
 
 namespace Alchemist.Import.Products.Service;
 
@@ -40,10 +39,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     public ShopImportCategoryProductsService(ILogger logger,
         IProductShopModel shopUrlModel,
         IWebLoader webLoader,
-        IBrowserDataLoader browserDataLoader,
+        IBrowserService browserService,
         RequestHeaders requestHeaders,
         IProductItemHandler itemHandler)
-        : base(logger, webLoader, browserDataLoader, requestHeaders)
+        : base(logger, webLoader, browserService, requestHeaders, shopUrlModel.Host)
     {
         ProductShopModel = shopUrlModel;
         _itemHandler = itemHandler;

@@ -10,10 +10,10 @@ using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.Interfaces;
-using Alchemist.Import.Factory.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Background.Settings;
 using Alchemist.Product.Import.Background.Models;
+using Alchemist.Import.Service.Factory.Interfaces;
 
 
 namespace Alchemist.Product.Import.Background;

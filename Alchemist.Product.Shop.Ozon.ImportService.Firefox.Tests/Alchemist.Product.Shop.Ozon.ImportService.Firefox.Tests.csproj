@@ -26,10 +26,12 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.6" />
+    <PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Shop.Ozon.ImportService\Alchemist.Product.Shop.Ozon.ImportService.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.Product.Shop\Alchemist.Test.Product.Shop.csproj" />
   </ItemGroup> 
 
   <ItemGroup>

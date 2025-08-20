@@ -27,14 +27,14 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         ImportCategoriesResourceManager = new ResourceManager("Alchemist.Import.Category.Json.ImportCategoryLogMessages",
                                typeof(ShopImportCategoriesTimerService).Assembly);
 
-        BrowserDataLoaderMock.SetupLoadCookies();
+        BrowserServiceMock.SetupLoadCookies();
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
         _categoryShopModelMock.Setup(s => s.ShopName).Returns(Guid.NewGuid().ToString());
 
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
             null,
             WebLoaderMock.Object,
-            BrowserDataLoaderMock.Object,
+            BrowserServiceMock.Object,
             _categoryShopModelMock.Object,
             RequestHeaders,
             _loadOptions,

@@ -3,7 +3,7 @@ using Alchemist.Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Import.Logging;
+namespace Alchemist.Import.Logging.Factory;
 
 public static class FactoryLoggingDependencyInjectionExtensions
 {

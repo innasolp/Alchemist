@@ -1,6 +1,8 @@
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Service;
+using Alchemist.Test.Product.Shop;
 using BrowserDataLoader.Interfaces;
+using BrowserLauncher.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text.Json;
@@ -10,11 +12,12 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.Shop.Ozon.ImportService.Firefox.Tests;
 
-public class OzonImportServiceFirefoxLoaderTest
+public class OzonImportServiceFirefoxLoaderTest : ProductShopTest
 {
     private readonly ILogger<OzonImportService> _logger = Moq.Mock.Of<ILogger<OzonImportService>>();
     private readonly Moq.Mock<IProductShopModel> _shopUrlModelMock = new();
     private readonly IBrowserDataLoader _dataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
+    private readonly IBrowserLauncher _launcher = new BrowserLauncher.Firefox.Windows.Standart.FirefoxStandartBrowserLauncher();
     private readonly IWebLoader _webLoader;
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly OzonImportService _ozonImportService;
@@ -22,7 +25,12 @@ public class OzonImportServiceFirefoxLoaderTest
     private readonly string _categoryUrl = "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2Fantivozrastnoy-uhod-38000%2F%3Flayout_page_index%3D2%26page%3D2";
     private readonly string _requestHeadersFireFoxFileName = "Ozon.Headers.Firefox.json";
     private readonly RequestHeaders _requestHeaders;
-    private readonly Moq.Mock<IProductItemHandler> _productItemHandler = new(); 
+    private readonly Moq.Mock<IProductItemHandler> _productItemHandler = new();
+
+    protected override IBrowserDataLoader BrowserDataLoader => _dataLoader;
+
+    protected override IBrowserLauncher BrowserLauncher => _launcher;
+
     public OzonImportServiceFirefoxLoaderTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
@@ -36,7 +44,7 @@ public class OzonImportServiceFirefoxLoaderTest
         s.Close();
 
         //todo
-        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, _dataLoader,  _requestHeaders, _productItemHandler.Object);
+        _ozonImportService = new OzonImportService(_logger, _shopUrlModelMock.Object, _webLoader, _browserServiceMock.Object,  _requestHeaders, _productItemHandler.Object);
     }
 
     private async Task InitializeAsync()
@@ -55,7 +63,7 @@ public class OzonImportServiceFirefoxLoaderTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var cookies = (await _dataLoader.LoadCookies()).Select(c => c.Convert());
+        var cookies = (await _browserServiceMock.Object.LoadCookies("ozon.ru")).Select(c => c.Convert());
 
         var stream = await _webLoader.LoadFromUrl(_productUrl, _requestHeaders, cookies);
         var product = await JsonSerializer.DeserializeAsync<Model.Product>(stream);
@@ -74,7 +82,7 @@ public class OzonImportServiceFirefoxLoaderTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var cookies = (await _dataLoader.LoadCookies()).Select(c => c.Convert());
+        var cookies = (await _browserServiceMock.Object.LoadCookies("ozon.ru")).Select(c => c.Convert());
         var stream = await _webLoader.LoadFromUrl(_categoryUrl, _requestHeaders, cookies);
         var category = await JsonSerializer.DeserializeAsync<Model.Category>(stream);
         stream.Close();

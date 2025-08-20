@@ -9,7 +9,7 @@
     "RootCategories": [
       {
         "Item": 6500,
-        "Url" : "/category/krasota-i-zdorove-6500/"
+        "Url": "/category/krasota-i-zdorove-6500/"
       }
     ],
     "ImportService": {
@@ -79,6 +79,10 @@
       "ImplementationTypeName": "FirefoxStandart",
       "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
     },
+    "BrowserLauncher": {
+      "ImplementationTypeName": "FirefoxStandart",
+      "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+    },
     "WebLoader": {
       "ImplementationTypeName": "Firefox",
       "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
@@ -112,6 +116,10 @@
       "ImplementationTypeName": "FirefoxStandart",
       "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
     },
+    "BrowserLauncher": {
+      "ImplementationTypeName": "FirefoxStandart",
+      "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+    },
     "WebLoader": {
       "ImplementationTypeName": "Firefox",
       "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
@@ -132,7 +140,7 @@
           "plaid-language-id": "ru_RU",
           "plaid-platform": "web",
           "plaid-store-id": "ru",
-          "plaid-version" : "1.0.0",
+          "plaid-version": "1.0.0",
           "Sec-Fetch-Dest": "document",
           "Sec-Fetch-Mode": "navigate",
           "Sec-Fetch-Site": "none",
@@ -169,7 +177,7 @@
           "ga-gun-init",
           "ga-lang",
           "ga-session-id",
-          "gsscw-goldapple-ru",          
+          "gsscw-goldapple-ru",
           "mage-cache-sessid",
           "mindboxDeviceUUID",
           "section_data_ids",

@@ -12,8 +12,8 @@ internal static class ShopModelHelpers
 {
     internal static async Task<IProductShopModel> CreateProductShopModelAsync(this IShopDataService shopDataService, IProductShopImportSettings shopImportSettings)
     {
-        var productShopModel = await shopDataService.CreateShopModelAsync<ProductShopModel>(shopImportSettings
-            , (shopName, shopUrl) => new ProductShopModel() { ShopName = shopName, ShopUrl = shopUrl });
+        var productShopModel = await shopDataService.CreateShopModelAsync(shopImportSettings
+            , (shopName, shopUrl) => new ProductShopModel() { ShopName = shopName, ShopUrl = shopUrl, Host = new Uri(shopUrl).Host });
 
         productShopModel.ProductUrl = shopImportSettings.ProductUrlFormat;
         productShopModel.CategoryUrl = shopImportSettings.CategoryUrlFormat;        
@@ -74,7 +74,7 @@ internal static class ShopModelHelpers
     internal static async Task<ICategoryShopModel> CreateCategoryShopModelAsync(this IShopDataService shopDataService, ICategoryShopImportSettings shopImportSettings)
     {
         var categoryShopModel = await shopDataService.CreateShopModelAsync(shopImportSettings,
-        (shopName, shopUrl) => new CategoryShopModel() { ShopName = shopName, ShopUrl = shopUrl });
+        (shopName, shopUrl) => new CategoryShopModel() { ShopName = shopName, ShopUrl = shopUrl, Host = new Uri(shopUrl).Host });
 
         categoryShopModel.CategorySourceUrl = shopImportSettings.CategorySourceUrl;            
 

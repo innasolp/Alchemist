@@ -46,6 +46,10 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServic
     [JsonInclude]
     public ServiceSettingsModel? BrowserDataLoader { get; private set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonInclude]
+    public ServiceSettingsModel? BrowserLauncher { get; private set; }
+
     [Required]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
     [JsonInclude]
@@ -59,11 +63,13 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServic
     IServiceSettingsModel? IShopServicesSettingsModel.RequestHeaders { get => RequestHeaders; }
     IServiceSettingsModel IShopServicesSettingsModel.WebLoader { get => WebLoader;  }
     IServiceSettingsModel? IShopServicesSettingsModel.BrowserDataLoader { get => BrowserDataLoader;  }
+    IServiceSettingsModel? IShopServicesSettingsModel.BrowserLauncher { get => BrowserLauncher;  }
 
     IImportServiceSettings IShopImportSettings.ImportService { get => ImportService; set { } }
     IImportServiceSettings? IShopImportSettings.RequestHeaders { get => RequestHeaders; set { } }
     IImportServiceSettings IShopImportSettings.WebLoader { get => WebLoader; set { } }
     IImportServiceSettings? IShopImportSettings.BrowserDataLoader { get => BrowserDataLoader; set { } }
+    IImportServiceSettings? IShopImportSettings.BrowserLauncher { get => BrowserLauncher; set { } }
 
     IList IShopImportSettings.Services => Services;
 

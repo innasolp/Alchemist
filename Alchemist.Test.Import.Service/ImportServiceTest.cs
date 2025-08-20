@@ -1,4 +1,5 @@
-﻿using Alchemist.Import.Service;
+﻿using Alchemist.Import.Interfaces;
+using Alchemist.Import.Service;
 using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -22,7 +23,7 @@ public abstract class ImportServiceTest<TService, TLogger>(ITestOutputHelper out
 
     protected Mock<IWebLoader> WebLoaderMock { get; } = new Mock<IWebLoader>(); 
     
-    protected Mock<IBrowserDataLoader> BrowserDataLoaderMock { get; } = new Mock<IBrowserDataLoader>();    
+    protected Mock<IBrowserService> BrowserServiceMock { get; } = new Mock<IBrowserService>();    
 
     protected RequestHeaders RequestHeaders { get; } = new RequestHeaders();
 

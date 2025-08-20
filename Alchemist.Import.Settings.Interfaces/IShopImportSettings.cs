@@ -12,6 +12,8 @@ public interface IShopImportSettings: ISettings
 
     IImportServiceSettings? BrowserDataLoader { get; set; }
 
+    IImportServiceSettings? BrowserLauncher { get; set; }
+
     public bool? Perfomance { get; set; }
 
     IList Services { get; }

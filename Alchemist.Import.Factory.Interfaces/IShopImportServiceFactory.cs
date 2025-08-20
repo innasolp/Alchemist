@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 
-namespace Alchemist.Import.Factory.Interfaces;
+namespace Alchemist.Import.Service.Factory.Interfaces;
 
 public interface IShopImportServiceFactory
 {
