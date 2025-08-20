@@ -13,7 +13,7 @@ internal class CookieData(string name, byte[] value, string host) : ICookieData
 
 public static class CookieDataExtensions
 {
-    public static ICookieData Convert(this BrowserDataLoader.Interfaces.ICookieData cookieData)
+    public static ICookieData Convert(this Interfaces.ICookieData cookieData)
     {
         return new CookieData(cookieData.Name,cookieData.Value, cookieData.Host);
     }

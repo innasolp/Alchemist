@@ -10,6 +10,8 @@ public interface IShopServicesSettingsModel : IShopSettingsModel, IShopImportSet
 
     new IServiceSettingsModel BrowserDataLoader { get; }
 
+    new IServiceSettingsModel BrowserLauncher { get; }
+
     new IServiceSettingsModel WebLoader { get; }    
 
     string? FileName { get; set; }

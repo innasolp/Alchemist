@@ -29,7 +29,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
             null,
             WebLoaderMock.Object,
-            BrowserDataLoaderMock.Object,
+            BrowserServiceMock.Object,
             _categoryShopModelMock.Object,
             RequestHeaders,
             _loadOptions,

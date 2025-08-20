@@ -60,4 +60,5 @@ public abstract class TestShopImportSettings : IShopImportSettings
 
     public string ShopName { get; set; }
     public string ShopUrl { get; set; }
+    public IImportServiceSettings? BrowserLauncher { get ; set; }
 }

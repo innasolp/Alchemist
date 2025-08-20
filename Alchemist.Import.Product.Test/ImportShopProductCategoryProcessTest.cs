@@ -15,7 +15,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 {
     public ImportShopProductCategoryProcessTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
-        BrowserDataLoaderMock.SetupLoadCookies();
+        BrowserServiceMock.SetupLoadCookies();
         ProductShopModelMock.Setup(s => s.ProductUrl).Returns("Product_{0}");
         ProductShopModelMock.Setup(s => s.CategoryUrl).Returns("Category_{0}_page{1}");
     }

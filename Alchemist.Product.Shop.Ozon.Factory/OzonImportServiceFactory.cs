@@ -1,10 +1,10 @@
-﻿using Alchemist.Import.Interfaces;
-using Alchemist.Import.Logging;
+﻿using Alchemist.Import.BrowserService.Factory;
+using Alchemist.Import.Interfaces;
+using Alchemist.Import.Logging.Factory;
 using Alchemist.Import.Products.Factory;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Shop.Ozon.ImportService;
-using BrowserDataLoader.Interfaces;
 using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.Extensions.Logging;
 using WebLoader.Common;
@@ -14,21 +14,21 @@ namespace Alchemist.Product.Shop.Ozon.Factory;
 
 public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
     IEnumerable<IWebLoader> webLoaders,
-    IEnumerable<IBrowserDataLoader> browserDataLoaders,
+   IBrowserServiceFactory browserServiceFactory,
     IProductItemHandler itemHandler,
     IImportServiceLogFactory? logFactory = null,
     IPerfomanceCounter? perfomanceCounter = null)
-        : ShopProductImportServiceFactory(logger, webLoaders, browserDataLoaders, itemHandler, logFactory, perfomanceCounter)
+        : ShopProductImportServiceFactory(logger, webLoaders, browserServiceFactory, itemHandler, logFactory, perfomanceCounter)
 {
     public override Type ServiceImplementationType => typeof(OzonImportService);
 
     protected override IImportService Create(ILogger logger, IProductShopModel shopModel, IShopImportSettings shopImportSettings,
-        IProductItemHandler itemHandler, IWebLoader webLoader, IBrowserDataLoader browserDataLoader, RequestHeaders? requestHeaders)
+        IProductItemHandler itemHandler, IWebLoader webLoader, IBrowserService browserService, RequestHeaders? requestHeaders)
     {
         return new OzonImportService(logger as ILogger<OzonImportService>,
             shopModel,
             webLoader,
-            browserDataLoader,
+            browserService,
             requestHeaders, 
             itemHandler);
     }

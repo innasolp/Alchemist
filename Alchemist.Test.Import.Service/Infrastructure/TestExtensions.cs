@@ -3,15 +3,16 @@ using WebLoader.Interfaces;
 using WebLoader.Common;
 using System.Text.Json;
 using Alchemist.Import.Interfaces;
+using ICookieData = WebLoader.Interfaces.ICookieData;
 
 namespace Alchemist.Test.Import.Service.Infrastructure;
 
 public static class TestExtensions
 {
-    public static void SetupLoadCookies(this Mock<BrowserDataLoader.Interfaces.IBrowserDataLoader> browserDataLoaderMock)
+    public static void SetupLoadCookies(this Mock<IBrowserService> browserDataLoaderMock)
     {
-        browserDataLoaderMock.Setup(w => w.LoadCookies())
-            .Returns(Task.FromResult(new List<BrowserDataLoader.Interfaces.ICookieData>()));
+        browserDataLoaderMock.Setup(w => w.LoadCookies(It.IsAny<string>()))
+            .Returns(async (string host) => await Task.FromResult(new List<Alchemist.Import.Interfaces.ICookieData>()));
     }
 
     public static void SetupStartSuccess(this Mock<IWebLoader> webLoaderMock)
@@ -29,7 +30,8 @@ public static class TestExtensions
         T item)
         where T:class
     {
-        webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl, requestHeaders, cookies)).Returns((string url, RequestHeaders headers, IEnumerable<ICookieData> cookieData) => LoadItemAsync(item));
+        webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl, requestHeaders, cookies)).Returns(
+            (string url, RequestHeaders headers, IEnumerable<ICookieData> cookieData) => LoadItemAsync(item));
     }
 
     public static void SetupLoadItemsSuccessfull<T>(this Mock<IWebLoader> webLoaderMock,

@@ -1,10 +1,10 @@
-﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Factory.Abstractions;
+﻿using Alchemist.Import.BrowserService.Factory;
+using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Html.Factory;
 using Alchemist.Import.Interfaces;
-using Alchemist.Import.Logging;
+using Alchemist.Import.Logging.Factory;
+using Alchemist.Import.Service.Factory.Abstractions;
 using Alchemist.Import.Settings.Interfaces;
-using BrowserDataLoader.Interfaces;
 using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
@@ -15,11 +15,11 @@ namespace Alchemist.Import.Category.Json.Factory;
 
 public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerService> logger,
     IEnumerable<IWebLoader> webLoaders,
-    IEnumerable<IBrowserDataLoader> browserDataLoaders,
+    IBrowserServiceFactory browserServiceFactory,
     ICategoryItemHandler itemHandler, 
     IImportServiceLogFactory? logFactory = null,
     IPerfomanceCounter? perfomanceCounter = null) 
-    : ShopImportFactory(logger, webLoaders, browserDataLoaders, logFactory, perfomanceCounter)
+    : ShopImportServiceFactory(logger, webLoaders, browserServiceFactory, logFactory, perfomanceCounter)
 {
     private readonly ICategoryItemHandler _itemHandler = itemHandler;
 
@@ -29,7 +29,7 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
         IShopItem shopModel,
         IShopImportSettings shopImportSettings,
         IWebLoader webLoader,
-        IBrowserDataLoader browserDataLoader,
+        IBrowserService browserService,
         RequestHeaders requestHeaders)
     {
         var loadOptionsService = (shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value) 
@@ -43,7 +43,7 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)
             : null;
 
-        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, htmlSearcher, webLoader, browserDataLoader, shopModel as ICategoryShopModel, requestHeaders, categoryLoadOptions, _itemHandler);
+        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, htmlSearcher, webLoader, browserService, shopModel as ICategoryShopModel, requestHeaders, categoryLoadOptions, _itemHandler);
     }
 
     protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
