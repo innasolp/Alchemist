@@ -1,7 +1,6 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Test.Server.Fixtures;
-using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,9 +18,6 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        var shops = TestRepository.GetShopsTestData(4);
-        shops.ForEach(s => dbContext.Shops.Add(s.To<Shop>()));
-        dbContext.SaveChanges();
     }
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
