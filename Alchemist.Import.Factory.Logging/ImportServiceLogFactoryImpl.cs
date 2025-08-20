@@ -2,7 +2,7 @@
 using Alchemist.Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Import.Logging;
+namespace Alchemist.Import.Logging.Factory;
 
 internal class ImportServiceLogFactoryImpl(Func<ILogger, IShopItem, IShopImportSettings, ILogger> loggerInterception) : IImportServiceLogFactory
 {

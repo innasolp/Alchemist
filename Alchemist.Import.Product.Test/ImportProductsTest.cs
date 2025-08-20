@@ -33,7 +33,7 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
             LoggerMock.Object,
              ProductShopModelMock.Object,
              WebLoaderMock.Object,
-             BrowserDataLoaderMock.Object,
+             BrowserServiceMock.Object,
              RequestHeaders,
              ProductItemHandlerMock.Object);        
     }

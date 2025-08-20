@@ -2,7 +2,7 @@
 using Alchemist.Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Import.Logging;
+namespace Alchemist.Import.Logging.Factory;
 
 public interface IImportServiceLogFactory
 {

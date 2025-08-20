@@ -14,6 +14,8 @@ public abstract class ShopImportSettings : IShopImportSettings
 
     public ImportServiceSettings? BrowserDataLoader { get; set; }
 
+    public ImportServiceSettings? BrowserLauncher { get; set; }
+
     public bool? Perfomance { get; set; }
 
     [JsonIgnore]
@@ -39,6 +41,10 @@ public abstract class ShopImportSettings : IShopImportSettings
     IImportServiceSettings? IShopImportSettings.BrowserDataLoader
     {
         get => BrowserDataLoader; set => BrowserDataLoader = (ImportServiceSettings?)value;
+    }
+    IImportServiceSettings? IShopImportSettings.BrowserLauncher 
+    {
+        get => BrowserLauncher; set => BrowserLauncher = (ImportServiceSettings?)value;
     }
 
     IImportServiceSettings? IShopImportSettings.RequestHeaders

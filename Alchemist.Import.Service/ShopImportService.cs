@@ -1,21 +1,20 @@
 ﻿using Alchemist.Common;
 using Alchemist.Exceptions;
 using Alchemist.Import.Interfaces;
-using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Service;
 
-public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IBrowserDataLoader browserDataLoader, RequestHeaders? requestHeaders)
+public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IBrowserService browserService, RequestHeaders? requestHeaders, string host)
     : IImportService, IAsyncDisposable
 {
     public abstract string Name { get; }
 
     protected IWebLoader WebLoader { get; } = webLoader;
 
-    protected IBrowserDataLoader _browserDataLoader = browserDataLoader;
+    protected IBrowserService _browserService = browserService;
 
     private readonly SemaphoreSlim _webLoaderSemaphoreSlim = new(1,1);
 
@@ -23,13 +22,15 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
 
     protected ILogger Logger { get; } = logger;
 
-    protected List<BrowserDataLoader.Interfaces.ICookieData> _cookies;
+    protected IEnumerable<Interfaces.ICookieData> _cookies;
+
+    private readonly string _host = host;
 
     public virtual async Task Start(CancellationToken stoppingToken)
     {
         bool? isStarted = null;
         while (!stoppingToken.IsCancellationRequested)
-        {
+        {            
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
             if (!WebLoader.IsStarted) break;
@@ -45,7 +46,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
         }
 
         Logger.LogInformation(LogMessages.ServiceWasStopped, Name);
-    }    
+    }      
 
     protected abstract Task ProcessAsync(CancellationToken stoppingToken);
 
@@ -57,8 +58,9 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
             {
                 if (!WebLoader.IsStarted)
                 {
-                    await WebLoader.Start();
-                    _cookies = await _browserDataLoader.LoadCookies();
+                    _cookies = await _browserService.LoadCookies(_host);
+
+                    await WebLoader.Start();                    
                 }
             }
             catch (WarningException warning)
@@ -84,7 +86,8 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
                     Logger.LogWarning(wle, LogMessages.WebLoaderThrowsNsRedirectLoopAndWillBeReseted, url);
                     Logger.LogInformation(LogMessages.WebLoaderIsReseting);
                     await WebLoader.Reset();
-                    _cookies = await _browserDataLoader.LoadCookies();
+                    await _browserService.UpdateCookiesForUrl(url);
+                    _cookies = await _browserService.LoadCookies(_host);
                     await Task.Delay(1000);
                     Logger.LogInformation(LogMessages.WebLoaderResetSuccessfully);
                 }

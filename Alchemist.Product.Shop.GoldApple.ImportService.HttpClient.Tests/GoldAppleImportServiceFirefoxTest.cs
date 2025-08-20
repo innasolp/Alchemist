@@ -1,8 +1,11 @@
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Service;
 using Alchemist.Product.Shop.GoldApple.Model;
+using Alchemist.Test.Product.Shop;
 using BrowserDataLoader.Firefox.Standart.Windows;
 using BrowserDataLoader.Interfaces;
+using BrowserLauncher.Firefox.Windows.Standart;
+using BrowserLauncher.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
@@ -14,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Shop.GoldenApple.ImportService.HttpClient.Tests;
 
-public class GoldAppleImportServiceFirefoxTest
+public class GoldAppleImportServiceFirefoxTest : ProductShopTest
 {
     private readonly string _categoryUrl = "https://goldapple.ru/front/api/catalog/products?categoryId=1000000252&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber=3";
     private readonly string _productUrl = "https://goldapple.ru/front/api/catalog/product-card/base?itemId=99730300001&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0";
@@ -26,7 +29,13 @@ public class GoldAppleImportServiceFirefoxTest
 
     private readonly string _requestHeadersPath;
 
-    private readonly IBrowserDataLoader _browserDataLoader;
+    private readonly IBrowserDataLoader _browserDataLoader = new FirefoxStandartDataLoader();
+
+    protected override IBrowserDataLoader BrowserDataLoader => _browserDataLoader;
+
+    private readonly IBrowserLauncher _browserLauncher = new FirefoxStandartBrowserLauncher();
+
+    protected override IBrowserLauncher BrowserLauncher => _browserLauncher;
 
     public GoldAppleImportServiceFirefoxTest(ITestOutputHelper testOutputHelper)
     {
@@ -35,7 +44,6 @@ public class GoldAppleImportServiceFirefoxTest
         var host = builder.Build();        
 
         _testOutputHelper = testOutputHelper;
-        _browserDataLoader = new FirefoxStandartDataLoader();
         _webLoader = new PlaywrightFirefoxLoader();  
         _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{_requestHeadersFileName}";       
     }
@@ -68,7 +76,7 @@ public class GoldAppleImportServiceFirefoxTest
 
         var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
 
-        var cookies = (await _browserDataLoader.LoadCookies()).Select(c => c.Convert());
+        var cookies = (await _browserServiceMock.Object.LoadCookies("goldapple.ru")).Select(c => c.Convert());
         var stream = await _webLoader.LoadFromUrl(_categoryUrl, requestHeaders, cookies);
         var category = await JsonSerializer.DeserializeAsync<CategoryProducts>(stream);
         stream.Close();
@@ -87,7 +95,7 @@ public class GoldAppleImportServiceFirefoxTest
 
         var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
 
-        var cookies = (await _browserDataLoader.LoadCookies()).Select(c => c.Convert());
+        var cookies = (await _browserServiceMock.Object.LoadCookies("goldapple.ru")).Select(c => c.Convert());
         var stream = await _webLoader.LoadFromUrl(_productUrl, requestHeaders, cookies);
         var productData = await JsonSerializer.DeserializeAsync<ProductData>(stream);
         stream.Close();

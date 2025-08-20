@@ -1,9 +1,9 @@
-﻿using Alchemist.Import.Factory.Abstractions;
+﻿using Alchemist.Import.BrowserService.Factory;
 using Alchemist.Import.Interfaces;
-using Alchemist.Import.Logging;
+using Alchemist.Import.Logging.Factory;
 using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Service.Factory.Abstractions;
 using Alchemist.Import.Settings.Interfaces;
-using BrowserDataLoader.Interfaces;
 using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.Extensions.Logging;
 using WebLoader.Common;
@@ -13,21 +13,22 @@ namespace Alchemist.Import.Products.Factory;
 
 public abstract class ShopProductImportServiceFactory(ILogger logger,
     IEnumerable<IWebLoader> webLoaders,
-    IEnumerable<IBrowserDataLoader> browserDataLoaders,
+    IBrowserServiceFactory browserServiceFactory,
     IProductItemHandler itemHandler,
     IImportServiceLogFactory? logFactory = null,
-    IPerfomanceCounter? perfomanceCounter = null) : ShopImportFactory(logger, webLoaders, browserDataLoaders, logFactory, perfomanceCounter)
+    IPerfomanceCounter? perfomanceCounter = null) : ShopImportServiceFactory(logger, webLoaders, browserServiceFactory, logFactory, perfomanceCounter)
 {
-    private readonly IProductItemHandler _itemHandler = itemHandler;    
+    private readonly IProductItemHandler _itemHandler = itemHandler;
+
 
     protected override IImportService Create(ILogger logger, 
         IShopItem shopModel, 
         IShopImportSettings shopImportSettings,
         IWebLoader webLoader,
-        IBrowserDataLoader browserDataLoader,
+        IBrowserService browserService,
         RequestHeaders? requestHeaders)
     {
-        return Create(logger, shopModel as IProductShopModel, shopImportSettings, _itemHandler, webLoader, browserDataLoader, requestHeaders);
+        return Create(logger, shopModel as IProductShopModel, shopImportSettings, _itemHandler, webLoader, browserService, requestHeaders);
     }
 
     protected abstract IImportService Create(ILogger logger,
@@ -35,6 +36,6 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
         IShopImportSettings shopImportSettings,
         IProductItemHandler productItemHandler, 
         IWebLoader webLoader,
-        IBrowserDataLoader browserDataLoader,
+        IBrowserService browserService,
         RequestHeaders? requestHeaders);
 }
