@@ -32,7 +32,7 @@ public class SerializationTests
 
         var goldAppleSettings = shopProductsSettings.FirstOrDefault(s => s.Name == "GoldApple");
         Assert.NotNull(goldAppleSettings);
-        Assert.Null(goldAppleSettings.GetRequestHeaders);
+        Assert.Null(goldAppleSettings.GetRequestHeaders());
         Assert.NotNull(goldAppleSettings.GetWebLoader().AssemblyPath);
         Assert.NotNull(goldAppleSettings.GetWebLoader().ImplementationTypeName);
     }
