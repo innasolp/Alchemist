@@ -8,6 +8,7 @@ using Alchemist.Product.Interfaces;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using Moq;
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using Xunit.Abstractions;
 
@@ -19,38 +20,42 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
     protected readonly ITestOutputHelper _testOutputHelper;
 
+    private readonly ObservableCollection<string> _errorMessages = [];
+
     protected readonly ModelJsonConverter<IServiceSettingsModel> _serviceSettingsModelConverter;
 
-    protected readonly ModelJsonConverter<IShopServicesSettingsModel> _shopImportSettingsJsonConverter;
+    protected readonly ModelJsonConverter<IShopImportSettingsModel> _shopImportSettingsJsonConverter;
 
-    protected readonly List<Interfaces.IShop> _shops =
+    protected readonly List<IShop> _shops =
     [
            new Shop { Id = 1, Name = "TestShop1", Url = "https://testshop1" } ,
            new Shop { Id = 2, Name = "TestShop2", Url = "https://testshop2" },
            new Shop { Id = 3, Name = "TestShop3", Url = "https://testshop3" },
     ];
 
-    protected readonly List<Interfaces.IShopSettings> _shopSettings =
+    protected readonly List<IShopSettings> _shopSettings =
     [
             new ShopSettings { Id = 1, ShopId = 1, Type = ShopSettingType.Product, Name=Guid.NewGuid().ToString() },
             new ShopSettings { Id = 2, ShopId = 2, Type = ShopSettingType.Product, Name=Guid.NewGuid().ToString() },
             new ShopSettings { Id = 3, ShopId = 1, Type = ShopSettingType.Category, Name=Guid.NewGuid().ToString() },
             new ShopSettings { Id = 4, ShopId = 2, Type = ShopSettingType.Category, Name=Guid.NewGuid().ToString() },
-            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.WebLoader) },
-            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.BrowserDataLoader) },
-            new ShopSettings { Id = 14, ShopId = 1, ParentSettingsId = 2, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.BrowserLauncher) },
-            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.RequestHeaders) },
-            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = Interfaces.ShopSettingType.Service, Name = nameof(Alchemist.Import.Settings.Interfaces.IShopImportSettings.WebLoader) },
+            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.WebLoader) },
+            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.BrowserDataLoader) },
+            new ShopSettings { Id = 14, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.BrowserLauncher) },
+            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.RequestHeaders) },
+            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.WebLoader) },
             new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product },
         ];
 
     protected ImportWebAppTest(TestImportWebAppFactory webAppFactory, ITestOutputHelper testOutputHelper, int? httpPort = null, int? httpsPort = null)
     {
         _testOutputHelper = testOutputHelper;
+
+        _errorMessages.CollectionChanged += ErrorMessagesCollectionChanged;      
 
 
         var defaultServiceProperties = new Dictionary<string, object>()
@@ -65,11 +70,11 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
         var defaultShopSettingsProperties = new Dictionary<string, object>()
         {
-            { nameof(IShopServicesSettingsModel.Id), 0 },
-            { nameof(IShopServicesSettingsModel.ShopId), 0 },
-            { nameof(IShopServicesSettingsModel.ShopGuid), Guid.Empty }
+            { nameof(IShopImportSettingsModel.Id), 0 },
+            { nameof(IShopImportSettingsModel.ShopId), 0 },
+            { nameof(IShopImportSettingsModel.ShopGuid), Guid.Empty }
         };
-        _shopImportSettingsJsonConverter = new ModelJsonConverter<IShopServicesSettingsModel>(defaultShopSettingsProperties);
+        _shopImportSettingsJsonConverter = new ModelJsonConverter<IShopImportSettingsModel>(defaultShopSettingsProperties);
 
         _webAppFactory = webAppFactory;
         if (httpPort != null) _webAppFactory.HttpPort = httpPort.Value;
@@ -81,7 +86,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
         _webAppFactory.ShopAPIClient.Setup(s => s.GetShops()).Returns(Task.FromResult(_shops));
 
-        _webAppFactory.SettingsAPIClient.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<Interfaces.ShopSettingType>()))
+        _webAppFactory.SettingsAPIClient.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>()))
            .Returns((int shopId, ShopSettingType shopSettingType) =>
            {
                return Task.FromResult(_shopSettings.FirstOrDefault(s => s.ShopId == shopId && s.Type == shopSettingType));
@@ -90,14 +95,42 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
         _webAppFactory.SettingsAPIClient.Setup(s => s.GetChildSettings(It.IsAny<int>()))
             .Returns((int parentSettingsId) =>
             {
-                return Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId && s.Type == Interfaces.ShopSettingType.Service).ToList());
+                return Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId && s.Type == ShopSettingType.Service).ToList());
             });
 
+        InitializeShopSettings();
+    }
+
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+        Page.Console += OnPageConsole;
+    }
+
+    private void OnPageConsole(object? sender, IConsoleMessage e)
+    {
+        if(e.Type == "error")
+           _errorMessages.Add(e.Text);
+    }
+
+    private void ErrorMessagesCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+        {
+            e.NewItems?.OfType<string>().ToList().ForEach(_testOutputHelper.WriteLine);
+        }      
+    }
+
+    private void InitializeShopSettings()
+    {
         foreach (var shopSetting in _shopSettings.Where(s => s.Type == ShopSettingType.Product))
         {
-            var productShopImportSettings = new ProductShopSettingsModel(shopSetting.ShopId, shopSetting.Id, Guid.NewGuid()) { Name = shopSetting.Name, 
-                ProductUrlFormat = $"https://url{shopSetting.Id}_product", 
-                CategoryUrlFormat = $"https://url{shopSetting.Id}_category" };
+            var productShopImportSettings = new ProductShopSettingsModel(shopSetting.ShopId, shopSetting.Id, Guid.NewGuid())
+            {
+                Name = shopSetting.Name,
+                ProductUrlFormat = $"https://url{shopSetting.Id}_product",
+                CategoryUrlFormat = $"https://url{shopSetting.Id}_category"
+            };
             shopSetting.JsonValue = JsonSerializer.Serialize(productShopImportSettings);
         }
 
@@ -121,7 +154,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
             shopSetting.JsonValue = JsonSerializer.Serialize(serviceSettings);
         }
-    } 
+    }
     
     protected static IShopSettings CreateServiceSettings(int shopId, int shopSettingId, int id)
     {
@@ -144,10 +177,10 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
     {
         var shopSetting = _shopSettings.First(s => s.ShopId == shopId && s.Type == shopSettingType);
 
-        ShopSettingsModel shopImportSettings = shopSetting.Type == ShopSettingType.Product 
-            ? await shopSetting.GetShopImportSettings<ProductShopSettingsModel, ServiceSettingsModel>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()))
-            : await shopSetting.GetShopImportSettings<CategoryShopSettingsModel, ServiceSettingsModel>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()));
+        var children = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id);
 
+        ShopSettingsModel shopImportSettings = await shopSetting.GetShopImportSettingsAsync(children);
+            
         return shopImportSettings;
     }
 

@@ -1,4 +1,5 @@
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
@@ -14,8 +15,6 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test;
 public class FileUploadControllerTest : ControllerTest<FileUploadController>
 {
     private readonly ModelJsonConverter<IServiceSettingsModel> _serviceSettingsModelConverter;
-
-    private readonly ModelJsonConverter<IShopServicesSettingsModel> _shopImportSettingsJsonConverter;
     public FileUploadControllerTest()
     {
         var defaultServiceProperties = new Dictionary<string, object>()
@@ -30,11 +29,10 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
 
         var defaultShopSettingsProperties = new Dictionary<string, object>()
         {
-            { nameof(IShopServicesSettingsModel.Id), 0 },
-            { nameof(IShopServicesSettingsModel.ShopId), 0 },
-            { nameof(IShopServicesSettingsModel.ShopGuid), Guid.Empty }
-        };
-        _shopImportSettingsJsonConverter = new ModelJsonConverter<IShopServicesSettingsModel>(defaultShopSettingsProperties);
+            { nameof(IShopImportSettingsModel.Id), 0 },
+            { nameof(IShopImportSettingsModel.ShopId), 0 },
+            { nameof(IShopImportSettingsModel.ShopGuid), Guid.Empty }
+        };        
     }
 
     private FileUploadController CreateFileUploadController()
@@ -185,13 +183,11 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
 
         FillShopSettingsFields(categorySettings);
 
-        await AssertUploadShopSettingsActionAsync(categorySettings as CategoryShopSettingsModel,
-            "ozoncategories.json");//,
-            //[nameof(ICategoryShopSettingsModel.CategorySourceUrl)]);
+        await AssertUploadShopSettingsActionAsync(categorySettings as CategoryShopSettingsModel, "ozoncategories.json");
     }    
 
     private async Task AssertUploadShopSettingsActionAsync<T>(T shopSettings, string fileName)
-        where T: class, IShopServicesSettingsModel
+        where T: class, IShopImportSettingsModel
     {
         var prevShopSettings = ModelFactory.GetCopy(shopSettings);
 
@@ -220,7 +216,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadImportServiceOnUploadServiceSettingsActionAsync()
     {
         await UploadServiceOnUploadServiceSettingsActionAsync(nameof(ShopSettingsModel.ImportService),
-            (shopSettings) => shopSettings.ImportService,
+            (shopSettings) => shopSettings.GetImportService() as  ServiceSettingsModel,
             "importservice.json");
     }
 
@@ -228,7 +224,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadBrowserDataLoaderOnUploadServiceSettingsActionAsync()
     {
         await UploadServiceOnUploadServiceSettingsActionAsync(nameof(ShopSettingsModel.BrowserDataLoader),
-            (shopSettings) => shopSettings.BrowserDataLoader,
+            (shopSettings) => shopSettings.GetBrowserDataLoader() as IServiceSettingsModel,
             "browserloader.firefox.json");
     }
 
@@ -236,7 +232,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadBrowserLauncherOnUploadServiceSettingsActionAsync()
     {
         await UploadServiceOnUploadServiceSettingsActionAsync(nameof(ShopSettingsModel.BrowserLauncher),
-            (shopSettings) => shopSettings.BrowserLauncher,
+            (shopSettings) => shopSettings.GetBrowserLauncher() as ServiceSettingsModel,
             "browserlauncher.firefox.json");
     }
 
@@ -244,7 +240,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadWebLoaderOnUploadServiceSettingsActionAsync()
     {
         await UploadServiceOnUploadServiceSettingsActionAsync(nameof(ShopSettingsModel.WebLoader),
-            (shopSettings) => shopSettings.WebLoader,
+            (shopSettings) => shopSettings.GetWebLoader() as ServiceSettingsModel,
             "webloader.firefox.json");
     }
 
@@ -252,12 +248,12 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
     public async Task UploadRequestHeadersOnUploadServiceSettingsActionAsync()
     {
         await UploadServiceOnUploadServiceSettingsActionAsync(nameof(ShopSettingsModel.RequestHeaders),
-            (shopSettings) => shopSettings.RequestHeaders,
+            (shopSettings) => shopSettings.GetRequestHeaders() as ServiceSettingsModel,
             "Ozon.Headers.Firefox.json");
     }
 
     private async Task UploadServiceOnUploadServiceSettingsActionAsync(string serviceName,
-        Func<IShopServicesSettingsModel, IServiceSettingsModel> getSetvice,
+        Func<IShopImportSettingsModel, IServiceSettingsModel> getSetvice,
         string fileName)
     {
         await LoadShopsAsync();        
@@ -283,7 +279,9 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         Assert.NotNull(uploadedService);
         Assert.Equal(fileName, uploadedService.FileName);
 
-        ModelAssert.EqualFields(fileService, getSetvice(shopSettings));
-        ModelAssert.NotEqualFields(copy, getSetvice(shopSettings));
+        var service = getSetvice(shopSettings);
+
+        ModelAssert.EqualFields(fileService, service);
+        ModelAssert.NotEqualFields(copy, service);
     }
 }

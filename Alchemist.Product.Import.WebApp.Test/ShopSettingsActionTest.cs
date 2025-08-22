@@ -1,11 +1,12 @@
 ﻿using Alchemist.Import.Settings.Extensions;
-using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using Alchemist.Product.Interfaces;
 using Microsoft.Playwright;
 using Moq;
 using Xunit.Abstractions;
+
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -30,11 +31,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
             }
 
             var savingSettings = existingSettings ?? shopSettings;
+            var children = _shopSettings.Where(s => s.ParentSettingsId == savingSettings.Id);
 
-            IShopImportSettings shopSettingsModel = savingSettings.Type == Interfaces.ShopSettingType.Product
-                    ? await savingSettings.GetShopImportSettings<ProductShopSettingsModel, ServiceSettingsModel>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()))
-                    : await savingSettings.GetShopImportSettings<CategoryShopSettingsModel, ServiceSettingsModel>((parentSettingsId) => Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToList()));
-
+            var shopSettingsModel = await savingSettings.GetShopImportSettingsAsync(children);  
 
             if (shopSettingsModel.Id == 0)
             {
@@ -90,11 +89,16 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var startShopImportSettings = await ExpectLoadIndexPageAsync(page) as ProductShopSettingsModel;
 
-        var importService = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.ImportService), startShopImportSettings);
-        var webLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.WebLoader), startShopImportSettings);
-        var browserDataLoader = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.BrowserDataLoader), startShopImportSettings);
-        var browserLauncher = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, nameof(IShopImportSettings.BrowserLauncher), startShopImportSettings);
-        
+        var serviceNames = SettingsCommon.GetPrimaryServiceNames().ToList();
+        serviceNames.RemoveAll(s => s == nameof(PrimaryServiceName.RequestHeaders));
+
+        var servicesByName = new Dictionary<string, ServiceSettingsModel>();
+        foreach(var serviceName in serviceNames)
+        {
+            var service = await this.ExpectSetServiceSettingsAsync(page, _shopSettings, serviceName, startShopImportSettings);
+            servicesByName.Add(serviceName, service);
+        }
+
         var settingsForm = page.Locator("#settingsForm");
 
         var shopProductSettings = new ProductShopSettingsModel(startShopImportSettings.ShopId, startShopImportSettings.Id, startShopImportSettings.ShopGuid)
@@ -103,10 +107,9 @@ public class ShopSettingsActionTest : ImportWebAppTest
             ProductUrlFormat = Guid.NewGuid().ToString(),
             CategoryUrlFormat = Guid.NewGuid().ToString()
         };
-        shopProductSettings.UpdateServiceSettings(importService);
-        shopProductSettings.UpdateServiceSettings(webLoader);
-        shopProductSettings.UpdateServiceSettings(browserDataLoader);
-        shopProductSettings.UpdateServiceSettings(browserLauncher);
+
+        foreach(var serviceName in serviceNames)
+            shopProductSettings.UpdateServiceSettings(serviceName, servicesByName[serviceName]);       
 
         await settingsForm.Locator("#ShopSettingsName").FillAsync(shopProductSettings.Name);
         await settingsForm.Locator("#ProductUrlFormat").FillAsync(shopProductSettings.ProductUrlFormat);
@@ -135,10 +138,8 @@ public class ShopSettingsActionTest : ImportWebAppTest
         await Expect(newSettingsForm.Locator("#ProductUrlFormat")).ToHaveValueAsync(shopProductSettings.ProductUrlFormat);
         await Expect(newSettingsForm.Locator("#CategoryUrlFormat")).ToHaveValueAsync(shopProductSettings.CategoryUrlFormat);
 
-        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, importService);
-        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, browserDataLoader);
-        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, browserLauncher);
-        await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, webLoader);
+        foreach(var service in servicesByName)
+            await this.ExpectShowCheckAndCloseServiceSettingsAsync(newPage, service.Value);
 
         await newPage.CloseAsync();
 
@@ -152,15 +153,16 @@ public class ShopSettingsActionTest : ImportWebAppTest
 
         var shopImportSettings = await ExpectLoadIndexPageAsync(newPage);
 
-        var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, async (page) => await this.ExpectShowServiceSettingsButtonAsync(page, nameof(IShopImportSettings.ImportService)));
+        var serviceForm = await this.ExpectShowServiceModalFormAsync(newPage, 
+            async (page) => await this.ExpectShowServiceSettingsButtonAsync(page, nameof(PrimaryServiceName.ImportService)));
 
-        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
+        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && s.Name.IsPrimaryServiceName())?
             .ToImportServiceSettings<ServiceSettingsModel>()
            ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
            {
                Name = Guid.NewGuid().ToString()
            };
-        serviceSettings  = await serviceForm.FillServiceSettingsInputsAsync(serviceSettings, nameof(IShopImportSettings.ImportService));
+        serviceSettings  = await serviceForm.FillServiceSettingsInputsAsync(serviceSettings, nameof(PrimaryServiceName.ImportService));
 
         var confirmationLocator = await GetConfirmationLocatorAsync(newPage);
 

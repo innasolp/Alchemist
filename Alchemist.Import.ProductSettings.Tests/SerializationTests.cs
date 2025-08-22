@@ -1,3 +1,4 @@
+using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Test.Model;
 using Json.FileExtensions;
 using System.Text.Json;
@@ -19,20 +20,20 @@ public class SerializationTests
 
         var ozonSettings = shopProductsSettings.FirstOrDefault(s => s.Name == "Ozon");
         Assert.NotNull(ozonSettings);
-        Assert.NotNull(ozonSettings.RequestHeaders);
-        Assert.NotNull(ozonSettings.RequestHeaders.Value);
-        Assert.NotNull(ozonSettings.WebLoader.AssemblyPath);
-        Assert.NotNull(ozonSettings.WebLoader.ImplementationTypeName);
+        Assert.NotNull(ozonSettings.GetRequestHeaders());
+        Assert.NotNull(ozonSettings.GetRequestHeaders().Value);
+        Assert.NotNull(ozonSettings.GetWebLoader().AssemblyPath);
+        Assert.NotNull(ozonSettings.GetWebLoader().ImplementationTypeName);
 
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(ozonSettings.RequestHeaders.Value);
+        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(ozonSettings.GetRequestHeaders().Value);
         Assert.NotNull(requestHeaders);
         Assert.NotNull(requestHeaders.Headers);
 
 
         var goldAppleSettings = shopProductsSettings.FirstOrDefault(s => s.Name == "GoldApple");
         Assert.NotNull(goldAppleSettings);
-        Assert.Null(goldAppleSettings.RequestHeaders);
-        Assert.NotNull(goldAppleSettings.WebLoader.AssemblyPath);
-        Assert.NotNull(goldAppleSettings.WebLoader.ImplementationTypeName);
+        Assert.Null(goldAppleSettings.GetRequestHeaders);
+        Assert.NotNull(goldAppleSettings.GetWebLoader().AssemblyPath);
+        Assert.NotNull(goldAppleSettings.GetWebLoader().ImplementationTypeName);
     }
 }
