@@ -304,7 +304,7 @@ public class HomeController : Controller
             {
                 var shopSettingsTab = shopImport.ShopSettingTabs as ShopSettingTabsModel;
 
-                IShopServicesSettingsModel selectedSettings = shopSettingsTab.SelectedSettingsTab == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
+                IShopImportSettingsModel selectedSettings = shopSettingsTab.SelectedSettingsTab == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
                     ? shopSettingsTab.ShopProductsSettings
                     : shopSettingsTab.ShopCategoriesSettings;
 

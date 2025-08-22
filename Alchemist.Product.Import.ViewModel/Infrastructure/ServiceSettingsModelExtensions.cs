@@ -1,5 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
-using DependencyInjection.Interfaces;
+﻿using Alchemist.Import.Settings.Extensions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -17,7 +16,7 @@ public static class ServiceSettingsModelExtensions
 
     public static void Update(this IServiceSettingsModel target, IServiceSettingsModel source)
     {
-        if (!ModelHelper.IsServiceSettingsPrimary(source.Name))
+        if (!source.IsPrimary())
             target.Name = source.Name;
 
         target.ServiceProviderPath = source.ServiceProviderPath;
@@ -40,15 +39,27 @@ public static class ServiceSettingsModelExtensions
         serviceSettingsModel.ImplementationTypeName = null;
     }
 
-    internal static IServiceSettingsModel? GetServiceSettings(this IShopServicesSettingsModel shopSettings, string serviceName)
+    internal static IServiceSettingsModel? GetPrimaryServiceSettings(this IShopImportSettingsModel shopSettings, string serviceName)
     {
-        return serviceName switch
-        {
-            nameof(IShopServicesSettingsModel.ImportService) => shopSettings.ImportService,
-            nameof(IShopServicesSettingsModel.WebLoader) => shopSettings.WebLoader,
-            nameof(IShopServicesSettingsModel.BrowserDataLoader) => shopSettings.BrowserDataLoader,
-            nameof(IShopServicesSettingsModel.RequestHeaders) => shopSettings.RequestHeaders,
-            _ => null,
-        };
+        var serviceSettings = shopSettings.GetPrimaryService(serviceName);
+        if(serviceSettings is IServiceSettingsModel serviceSettingsModel)
+            return serviceSettingsModel;
+        
+        if(serviceSettings != null)
+            throw new InvalidOperationException($"Invalid service type {serviceSettings?.GetType().Name}");
+
+        return default;
+    }
+
+    internal static IServiceSettingsModel? GetServiceSettings(this IShopImportSettingsModel shopSettings, string serviceName)
+    {
+        var serviceSettings = shopSettings.GetService(serviceName);
+        if(serviceSettings is IServiceSettingsModel serviceSettingsModel)
+            return serviceSettingsModel;
+
+        if (serviceSettings != null)
+            throw new InvalidOperationException($"Invalid service type {serviceSettings?.GetType().Name}");
+
+        return default;
     }
 }

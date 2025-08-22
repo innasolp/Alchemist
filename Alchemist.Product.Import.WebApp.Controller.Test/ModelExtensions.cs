@@ -19,7 +19,7 @@ internal static class ModelExtensions
         serviceSettings.ImplementationTypeName = $"ImplementationType_{serviceSettings.Name ?? ""}_{serviceSettings.ShopSettingsGuid}";
     }
 
-    internal static IShopServicesSettingsModel GetCopy(this IModelFactory modelFactory, IShopServicesSettingsModel shopSettings)
+    internal static IShopImportSettingsModel GetCopy(this IModelFactory modelFactory, IShopImportSettingsModel shopSettings)
     {
         ShopSettingsModel newShopSettings = shopSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
             ? new ProductShopSettingsModel(shopSettings.ShopId, shopSettings.Id, shopSettings.ShopGuid)

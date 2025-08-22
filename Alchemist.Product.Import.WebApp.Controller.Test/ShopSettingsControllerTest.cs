@@ -15,7 +15,9 @@ using Microsoft.Extensions.Hosting;
 using Moq;
 using System.Reflection;
 using System.Text.Json;
+
 using ShopSettingType = Alchemist.Import.Settings.Interfaces.ShopSettingType;
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
@@ -289,23 +291,23 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         
         var defaultShopSettingsProperties = new Dictionary<string, object>()
         {
-            { nameof(IShopServicesSettingsModel.Id), 0 },
-            { nameof(IShopServicesSettingsModel.ShopId), 0 },
-            { nameof(IShopServicesSettingsModel.ShopGuid), Guid.Empty }
+            { nameof(IShopImportSettingsModel.Id), 0 },
+            { nameof(IShopImportSettingsModel.ShopId), 0 },
+            { nameof(IShopImportSettingsModel.ShopGuid), Guid.Empty }
         };
-        var shopImportSettingsJsonConverter = new ModelJsonConverter<IShopServicesSettingsModel>(defaultShopSettingsProperties);
+        var shopImportSettingsJsonConverter = new ModelJsonConverter<IShopImportSettingsModel>(defaultShopSettingsProperties);
 
         var shopSettingsModel = await fileName.ReadFromFileAsync<T>([serviceSettingsModelConverter,shopImportSettingsJsonConverter]);
         ModelFactory.Update(shopSettings, shopSettingsModel);
 
-        shopSettings.ImportService.Name = nameof(IShopImportSettings.ImportService);
-        shopSettings.RequestHeaders.Name = nameof(IShopImportSettings.RequestHeaders);
-        shopSettings.BrowserDataLoader.Name = nameof(IShopImportSettings.BrowserDataLoader);
-        shopSettings.WebLoader.Name = nameof(IShopImportSettings.WebLoader);
-        shopSettings.Services.Add(shopSettings.ImportService);
-        shopSettings.Services.Add(shopSettings.RequestHeaders);
-        shopSettings.Services.Add(shopSettings.BrowserDataLoader);
-        shopSettings.Services.Add(shopSettings.WebLoader);
+        foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            var service = shopSettings.GetService(primaryServiceName) ??
+                ModelFactory.CreateServiceSettingsModel(shopSettings.ShopId, 0, shopSettings.Id, shopSettingsModel.ShopGuid, shopSettingsModel.Guid);
+
+            service.Name = primaryServiceName;
+            shopSettings.Services.Add(service as ServiceSettingsModel);
+        }
 
         _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
             .Returns<IShopSettings, IEnumerable<IShopSettings>>((settings, services) =>

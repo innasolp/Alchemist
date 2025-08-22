@@ -7,7 +7,5 @@ public interface IServiceSettingsModel: IShopSettingsModel, IImportServiceSettin
 {
     JsonObject? JsonValue { get; set; }
 
-    string? FileName { get; set; }    
-
     Guid ShopSettingsGuid { get; }
 }

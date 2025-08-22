@@ -1,4 +1,5 @@
 ﻿@using Alchemist.Product.Import.WebApp.Models
+@using Alchemist.Import.Settings.Extensions
 @model ServiceSettingsModel
 
 @functions{
@@ -13,7 +14,7 @@
     <input type="hidden" name="ShopSettingType" value="@((int)Model.ShopSettingType)" />
     <input type="hidden" name="Guid" value="@Model.Guid" />
     <input type="hidden" name="ShopSettingsGuid" value="@Model.ShopSettingsGuid" />
-    @if (ModelHelper.IsServiceSettingsPrimary(Model.Name))
+    @if (Model.IsPrimary())
     {
         <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
     }
@@ -21,13 +22,13 @@
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
             <div class="form-group"> 
-                @if (ModelHelper.IsServiceSettingsPrimary(Model.Name))
+                @if (Model.IsPrimary())
                 {
                     <input type="hidden" asp-for="StringValue" id="StringValue" />
                 }
                 @await Html.PartialAsync($"~/Views/UploadFromFile.cshtml", new UploadFromFileModel { Id = "uploadValueFromJson", OnChange = GetUploadOnChange("uploadValueFromJson"), FileName = Model.FileName })
             </div>
-            @if(!ModelHelper.IsServiceSettingsPrimary(Model.Name))
+            @if(!Model.IsPrimary())
             {
                 <div class="form-group">
                     <label asp-for="Name" class="control-label"></label>
@@ -55,7 +56,7 @@
                 <input asp-for="ServiceProviderPath" class="form-control form-input" />
                 <span asp-validation-for="ServiceProviderPath" class="text-danger"></span>                
             </div>
-            @if(!ModelHelper.IsServiceSettingsPrimary(Model.Name))
+            @if(!Model.IsPrimary())
             {
                 <div class="form-group">
                     <label asp-for="StringValue" class="control-label"></label>
@@ -65,7 +66,7 @@
             }
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary"
-                        onclick="saveServiceSettings($('#serviceSettingsForm'),'@Model.Name', '@ModelHelper.IsServiceSettingsPrimary(Model.Name)' == 'True')">
+                        onclick="saveServiceSettings($('#serviceSettingsForm'),'@Model.Name', '@Model.IsPrimary()' == 'True')">
                     Save
                 </button>
             </div>

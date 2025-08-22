@@ -1,13 +1,16 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
+
 namespace Alchemist.Product.Import.WebApp.Models;
 
-public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServicesSettingsModel
+public abstract partial class ShopSettingsModel : SettingsModelBase, IShopImportSettingsModel
 {
     public int Id { get; set; }
 
@@ -16,6 +19,7 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServic
         return  @$"{base.ToString()};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
                   {nameof(ImportService)}:{GetServiceValueString(ImportService)};
                   {nameof(BrowserDataLoader)}:{GetServiceValueString(BrowserDataLoader)};
+                  {nameof(BrowserLauncher)}:{GetServiceValueString(BrowserLauncher)};
                   {nameof(RequestHeaders)}:{GetServiceValueString(RequestHeaders)};
                   {nameof(WebLoader)}:{GetServiceValueString(WebLoader)}";
     }
@@ -26,50 +30,34 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServic
     }
 
     [JsonInclude]
-    public List<ServiceSettingsModel> Services { get; private set; } = [];
+    public SuppressibleObservableCollection<ServiceSettingsModel> Services { get; private set; } = [];
 
     [JsonIgnore]
     public override TabType Tab => TabType.Shop;
 
     public abstract ShopSettingType ShopSettingType { get; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
-    [JsonInclude]
-    public ServiceSettingsModel? RequestHeaders { get; private set; }
+    [JsonIgnore]
+    public ServiceSettingsModel? RequestHeaders => this.GetRequestHeaders() as ServiceSettingsModel;
 
     [Required]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
-    [JsonInclude]
-    public ServiceSettingsModel ImportService { get; private set; }
+    [JsonIgnore]
+    public ServiceSettingsModel ImportService => this.GetImportService() as ServiceSettingsModel;
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
-    [JsonInclude]
-    public ServiceSettingsModel? BrowserDataLoader { get; private set; }
+    [JsonIgnore]
+    public ServiceSettingsModel? BrowserDataLoader => this.GetBrowserDataLoader() as ServiceSettingsModel;
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
-    [JsonInclude]
-    public ServiceSettingsModel? BrowserLauncher { get; private set; }
+    [JsonIgnore]
+    public ServiceSettingsModel? BrowserLauncher => this.GetBrowserLauncher() as ServiceSettingsModel;
 
     [Required]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault)]
-    [JsonInclude]
-    public ServiceSettingsModel WebLoader { get; private set; }
+    [JsonIgnore]
+    public ServiceSettingsModel WebLoader => this.GetWebLoader() as ServiceSettingsModel;
 
     public bool? Perfomance { get; set; }
 
-    public string? FileName { get; set; }
-   
-    IServiceSettingsModel IShopServicesSettingsModel.ImportService { get => ImportService;  }
-    IServiceSettingsModel? IShopServicesSettingsModel.RequestHeaders { get => RequestHeaders; }
-    IServiceSettingsModel IShopServicesSettingsModel.WebLoader { get => WebLoader;  }
-    IServiceSettingsModel? IShopServicesSettingsModel.BrowserDataLoader { get => BrowserDataLoader;  }
-    IServiceSettingsModel? IShopServicesSettingsModel.BrowserLauncher { get => BrowserLauncher;  }
+    public string? FileName { get; set; }  
 
-    IImportServiceSettings IShopImportSettings.ImportService { get => ImportService; set { } }
-    IImportServiceSettings? IShopImportSettings.RequestHeaders { get => RequestHeaders; set { } }
-    IImportServiceSettings IShopImportSettings.WebLoader { get => WebLoader; set { } }
-    IImportServiceSettings? IShopImportSettings.BrowserDataLoader { get => BrowserDataLoader; set { } }
-    IImportServiceSettings? IShopImportSettings.BrowserLauncher { get => BrowserLauncher; set { } }
 
     IList IShopImportSettings.Services => Services;
 
@@ -83,24 +71,12 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopServic
     {
         Id = id;
 
-        ImportService = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
+        Services.SuspendNotifications();
+        foreach(var serviceName in SettingsCommon.GetPrimaryServiceNames())
         {
-            Name = nameof(IShopServicesSettingsModel.ImportService)
-        };
-
-        BrowserDataLoader = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
-        {
-            Name = nameof(IShopServicesSettingsModel.BrowserDataLoader)
-        };
-
-        RequestHeaders = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
-        {
-            Name = nameof(IShopServicesSettingsModel.RequestHeaders)
-        };
-
-        WebLoader = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid)
-        {
-            Name = nameof(IShopServicesSettingsModel.WebLoader)
-        };
+            var service = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid) { Name = serviceName };
+            Services.Add(service);
+        }
+        Services.ResumeNotifications();
     }    
 }
