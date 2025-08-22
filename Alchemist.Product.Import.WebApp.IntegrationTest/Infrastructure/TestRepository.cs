@@ -5,7 +5,8 @@ using System.Text.Json.Nodes;
 using Alchemist.Import.Settings.Extensions;
 using System.Reflection;
 using Alchemist.Product.Import.WebApp.Models;
-using Alchemist.Product.Import.Model;
+
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.IntegrationTest.Infrastructure;
 
@@ -51,19 +52,15 @@ public static class TestRepository
         var serviceSettings = new List<IShopSettings>();
         foreach (var shopSetting in shopSettings)
         {
-            var importService = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id, nameof(IShopServicesSettingsModel.ImportService));
-            serviceSettings.Add(importService);
-            
-            var browserDataLoader = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id, nameof(IShopServicesSettingsModel.BrowserDataLoader));
-            serviceSettings.Add(browserDataLoader);
+            var primaryServiceNames = SettingsCommon.GetPrimaryServiceNames().ToList();
+            primaryServiceNames.RemoveAll(n => n == nameof(PrimaryServiceName.RequestHeaders));
+            foreach(var primaryServiceName in primaryServiceNames)
+            {
+                var primaryService = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id,primaryServiceName);
+                serviceSettings.Add(primaryService);
+            }
 
-            var browserLauncher = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id, nameof(IShopServicesSettingsModel.BrowserLauncher));
-            serviceSettings.Add(browserLauncher);
-            
-            var webLoader = GetShopSettingsServices(shopSetting.ShopId, shopSetting.Id, nameof(IShopServicesSettingsModel.WebLoader));
-            serviceSettings.Add(webLoader);
-
-            var requestHeaders = new ShopSettings { ShopId = shopSetting.ShopId, ParentSettingsId = shopSetting.Id, Name = nameof(IShopServicesSettingsModel.RequestHeaders) };
+            var requestHeaders = new ShopSettings { ShopId = shopSetting.ShopId, ParentSettingsId = shopSetting.Id, Name = nameof(PrimaryServiceName.RequestHeaders) };
             var fileName = "Ozon.Headers.Firefox.json";
             var filePath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/{fileName}";
 

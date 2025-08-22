@@ -8,7 +8,7 @@ public interface ICategoryUrlModel : ICategoryUrl, IModel
     Guid ShopSettingsGuid { get; }
 }
 
-public interface IProductShopSettingsModel : IShopServicesSettingsModel, IProductShopImportSettings
+public interface IProductShopSettingsModel : IShopImportSettingsModel, IProductShopImportSettings
 {
     new IList RootCategories { get; }
 }

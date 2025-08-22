@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Test.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,19 +30,23 @@ public class ShopSettingsJsonAdapterTest
 
         var ozonProducts = shopSettings.Where(s=>s.ShopSettingType == ShopSettingType.Product && s.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(ozonProducts);
-        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonProducts, 0);
+        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonProducts);
+        Assert.Equal(0, ozonProducts.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
 
         var ozonCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(ozonCategories);
-        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonCategories, 3);
+        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonCategories);
+        Assert.Equal(3, ozonCategories.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
 
         var goldAppleProducts = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Product && s.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleProducts); 
-        ShopSettingsAsserts.AssertHttpRequestLoaderShopSettings(goldAppleProducts, 0);
+        ShopSettingsAsserts.AssertHttpRequestLoaderShopSettings(goldAppleProducts);
+        Assert.Equal(0, goldAppleProducts.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
 
         var goldAppleCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleCategories);
-        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(goldAppleCategories, 3);
+        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(goldAppleCategories);
+        Assert.Equal(3, goldAppleCategories.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
     }
 
     [Fact]

@@ -124,6 +124,7 @@ public class ShopImportWorker : BackgroundService
         shop?.Categories.Add(new ProductShopCategoryModel { Category = shopCategory.Category, ItemId = shopCategory.ItemId });
     }    
 
+    //todo change in future to OnShopSettingsCreate
     private async Task OnShopCreatedAsync(Shop newShop)
     {        
         var shopModel = ShopModels.FirstOrDefault(s => s.ShopName.Equals(newShop.Name, StringComparison.CurrentCultureIgnoreCase));
@@ -133,42 +134,37 @@ public class ShopImportWorker : BackgroundService
             return;
         }
 
+        ShopModels.Add(shopModel);
+
         var productShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, Interfaces.ShopSettingType.Product);
         var categoryShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, Interfaces.ShopSettingType.Category);
 
-        if(productShopSettings != null)
-            await CreateShopImportServiceAsync(productShopSettings);
+        if (productShopSettings != null)
+        {
+            var service = await CreateShopImportServiceAsync(productShopSettings);
+            Services.Add(service);            
+        }
 
-        if(categoryShopSettings != null)
-            await CreateShopImportServiceAsync(categoryShopSettings);
+        if (categoryShopSettings != null)
+        {
+            var service = await CreateShopImportServiceAsync(categoryShopSettings);
+            Services.Add(service);
+        }        
     }
 
-    private async Task CreateShopImportServiceAsync(IShopSettings shopSettings)
+    private async Task<IImportService?> CreateShopImportServiceAsync(IShopSettings shopSettings)
     {
-        IShopImportSettings shopImportSettings = shopSettings.Type == Interfaces.ShopSettingType.Product
-             ? await shopSettings.GetShopImportSettings<ProductShopImportSettings, ImportServiceSettings>(_settingsDataService.GetChildSettings)
-             : await shopSettings.GetShopImportSettings<CategoryShopImportSettings, ImportServiceSettings>(_settingsDataService.GetChildSettings); 
+        var children = await _settingsDataService.GetChildSettings(shopSettings.Id);
+        var shopImportSettings = await shopSettings.GetShopImportSettingsAsync(children);        
+
+        var importServiceSettings = shopImportSettings.GetImportService();
+        if (importServiceSettings == null) await Task.FromResult(default(IImportService));
         
-        var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
+        var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
 
-        IShopItem shopModel = shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
-            ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
-            : await _shopDataService.CreateCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
+        IShopItem shopModel = await _shopDataService.CreateShopModelAsync(shopImportSettings);
 
-        var service = await CreateServiceForShopImportSettingsAsync(shopImportSettings, shopModel);
-
-        Services.Add(service); 
-        
-        ShopModels.Add(shopModel);        
-    }
-
-    private async Task<IImportService> CreateServiceForShopImportSettingsAsync(IShopImportSettings shopImportSettings, IShopItem shopModel)
-    {
-        var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
-        if (serviceFactory == null) 
-            return await Task.FromResult(default(IImportService));        
-
-        return await Task.FromResult(serviceFactory.Create(shopModel, shopImportSettings));
+        return serviceFactory.Create(shopModel, shopImportSettings);        
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -198,13 +194,14 @@ public class ShopImportWorker : BackgroundService
 
             foreach (var shopImportSettings in allShopImportSettings)
             {
-                var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == shopImportSettings.ImportService.ImplementationTypeName);
+                var importServiceSettings = shopImportSettings.GetImportService();
+                if (importServiceSettings == null)
+                    continue;
+                
+                var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
                 if (serviceFactory == null) continue;
 
-                IShopItem shopModel = shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
-                    ? await _shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
-                    : await _shopDataService.CreateCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
-
+                var shopModel = await _shopDataService.CreateShopModelAsync(shopImportSettings);
                 ShopModels.Add(shopModel);
 
                 var shopImportService = serviceFactory.Create(shopModel, shopImportSettings);

@@ -6,16 +6,6 @@ namespace Alchemist.Product.Import.Background.Settings;
 
 public abstract class ShopImportSettings : IShopImportSettings
 {
-    public ImportServiceSettings ImportService { get; set; }
-
-    public ImportServiceSettings? RequestHeaders { get; set; }
-
-    public ImportServiceSettings WebLoader { get; set; }
-
-    public ImportServiceSettings? BrowserDataLoader { get; set; }
-
-    public ImportServiceSettings? BrowserLauncher { get; set; }
-
     public bool? Perfomance { get; set; }
 
     [JsonIgnore]
@@ -28,30 +18,6 @@ public abstract class ShopImportSettings : IShopImportSettings
     
     public List<ImportServiceSettings> Services { get; set; } = [];
 
-    IImportServiceSettings IShopImportSettings.WebLoader
-    {
-        get => WebLoader; set => WebLoader = (ImportServiceSettings)value;
-    }
-
-    IImportServiceSettings IShopImportSettings.ImportService
-    {
-        get => ImportService; set => ImportService = (ImportServiceSettings)value;
-    }
-
-    IImportServiceSettings? IShopImportSettings.BrowserDataLoader
-    {
-        get => BrowserDataLoader; set => BrowserDataLoader = (ImportServiceSettings?)value;
-    }
-    IImportServiceSettings? IShopImportSettings.BrowserLauncher 
-    {
-        get => BrowserLauncher; set => BrowserLauncher = (ImportServiceSettings?)value;
-    }
-
-    IImportServiceSettings? IShopImportSettings.RequestHeaders
-    {
-        get => RequestHeaders; set => RequestHeaders = (ImportServiceSettings?)value;
-    }
-
     IList IShopImportSettings.Services => Services;
 
     int? ISettings.ParentSettingsId 
@@ -59,7 +25,6 @@ public abstract class ShopImportSettings : IShopImportSettings
         get { return null; }
         set {; }
     }
-
     protected abstract ShopSettingType ShopSettingType { get; }
 
     ShopSettingType ISettings.ShopSettingType => ShopSettingType;

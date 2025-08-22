@@ -37,7 +37,7 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
         var serviceModels = services.Select(s => s.ToImportServiceSettings<TImportServiceSettings>()).ToList();
 
         foreach (var serviceModel in serviceModels)
-            shopSettingsModel.UpdateServiceSettings<TImportServiceSettings>(serviceModel);
+            shopSettingsModel.UpdateServiceSettings(serviceModel.Name, serviceModel);
 
         return shopSettingsModel;
     }

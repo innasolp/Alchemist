@@ -1,12 +1,14 @@
-﻿using Alchemist.Product.Import.Model;
-using Alchemist.Product.Import.Model.Infrastructure;
+﻿using Alchemist.Import.Settings.Extensions;
+using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Models;
+
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public static class ModelAssert
 {
-    internal static void EqualFields(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
+    internal static void EqualFields(IShopImportSettingsModel expected, IShopImportSettingsModel result)
     {
         Assert.Equal(expected.ShopSettingType, result.ShopSettingType);
         Assert.Equal(expected.Name, result.Name);
@@ -34,7 +36,7 @@ public static class ModelAssert
     }
 
 
-    internal static void NotEqualFields(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
+    internal static void NotEqualFields(IShopImportSettingsModel expected, IShopImportSettingsModel result)
     {
         Assert.NotEqual(expected.Name, result.Name);        
 
@@ -59,45 +61,32 @@ public static class ModelAssert
         Assert.NotEqual(expected.CategorySourceUrl, result.CategorySourceUrl);
     }
 
-    internal static void EqualServices(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
+    internal static void EqualServices(IShopImportSettingsModel expected, IShopImportSettingsModel result)
     {
-        Assert.True((result.ImportService != null && expected.ImportService != null) ||
-            (result.ImportService == null && expected.ImportService == null));
-        EqualFields(expected.ImportService, result.ImportService);
+        foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            var resultService = result.GetService(primaryServiceName) as IServiceSettingsModel;
+            var expectedService = expected.GetService(primaryServiceName) as IServiceSettingsModel;
 
-        Assert.True((result.BrowserDataLoader != null && expected.BrowserDataLoader != null) ||
-            (result.BrowserDataLoader == null && expected.BrowserDataLoader == null));
-        EqualFields(expected.BrowserDataLoader, result.BrowserDataLoader);
-
-        Assert.True((result.BrowserLauncher != null && expected.BrowserLauncher != null) ||
-            (result.BrowserLauncher == null && expected.BrowserLauncher == null));
-        EqualFields(expected.BrowserLauncher, result.BrowserLauncher);
-
-        Assert.True((result.RequestHeaders != null && expected.RequestHeaders != null) ||
-            (result.RequestHeaders == null && expected.RequestHeaders == null));
-        EqualFields(expected.RequestHeaders, result.RequestHeaders);
-
-        Assert.True((result.WebLoader != null && expected.WebLoader != null) ||
-            (result.WebLoader == null && expected.WebLoader == null));
-        EqualFields(expected.WebLoader, result.WebLoader);
+            Assert.True((resultService != null && expectedService != null) || (resultService == null && expectedService == null));
+            
+            if (resultService != null && expectedService != null)
+                EqualFields(expectedService, resultService);
+        }
     }
 
-    internal static void NotEqualServices(IShopServicesSettingsModel expected, IShopServicesSettingsModel result)
+    internal static void NotEqualServices(IShopImportSettingsModel expected, IShopImportSettingsModel result)
     {
-        if (expected.ImportService != null)
-            NotEqualFields(expected.ImportService, result.ImportService);
+        foreach (var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            var expectedService = expected.GetService(primaryServiceName) as IServiceSettingsModel;
+            if (expectedService == null)
+                continue;
 
-        if (expected.BrowserDataLoader != null)
-            NotEqualFields(expected.BrowserDataLoader, result.BrowserDataLoader);
-
-        if (expected.BrowserLauncher != null)
-            NotEqualFields(expected.BrowserLauncher, result.BrowserLauncher);
-
-        if (expected.RequestHeaders != null)
-            NotEqualFields(expected.RequestHeaders, result.RequestHeaders);
-
-        if (expected.WebLoader != null)
-            NotEqualFields(expected.WebLoader, result.WebLoader);
+            var resultService = result.GetService(primaryServiceName) as IServiceSettingsModel;
+            
+            NotEqualFields(expectedService, resultService);
+        }
     }
 
     internal static void EqualFields(IServiceSettingsModel expected, IServiceSettingsModel result)

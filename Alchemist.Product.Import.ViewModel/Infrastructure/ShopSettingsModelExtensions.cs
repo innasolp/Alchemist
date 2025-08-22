@@ -1,114 +1,51 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings.Interfaces;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 
 public static class ShopSettingsModelExtensions
 {
-    public static bool IsEmpty(this IShopServicesSettingsModel shopServicesSettingsModel)
+    public static bool IsEmpty(this IShopImportSettingsModel shopServicesSettingsModel)
     {
-        return string.IsNullOrEmpty(shopServicesSettingsModel.Name)
-            && shopServicesSettingsModel.BrowserDataLoader.IsEmpty()
-            && shopServicesSettingsModel.BrowserLauncher.IsEmpty()
-            && shopServicesSettingsModel.WebLoader.IsEmpty()
-            && shopServicesSettingsModel.ImportService.IsEmpty()
-            && shopServicesSettingsModel.RequestHeaders.IsEmpty();
-    }
-    public static void UpdateServiceSettings(this IShopServicesSettingsModel shopSettings, string serviceName, IServiceSettingsModel serviceSettings)
-    {
-        switch (serviceName)
-        {
-            case nameof(IShopServicesSettingsModel.ImportService):
-                {
-                    shopSettings.ImportService.Update(serviceSettings);
-                    shopSettings.AddOrUpdateService(shopSettings.ImportService);
-                    return;
-                }
+        return string.IsNullOrEmpty(shopServicesSettingsModel.Name) &&
+            shopServicesSettingsModel.GetPrimaryServices<IServiceSettingsModel>().All(s => s.IsEmpty());
+    }    
 
-            case nameof(IShopServicesSettingsModel.WebLoader):
-                {
-                    shopSettings.WebLoader.Update(serviceSettings);
-                    shopSettings.AddOrUpdateService(shopSettings.WebLoader);
-                    return;
-                }
-
-            case nameof(IShopServicesSettingsModel.BrowserDataLoader):
-                {
-                    shopSettings.BrowserDataLoader.Update(serviceSettings);
-                    shopSettings.AddOrUpdateService(shopSettings.BrowserDataLoader);
-                    return;
-                }
-
-            case nameof(IShopServicesSettingsModel.BrowserLauncher):
-                {
-                    shopSettings.BrowserLauncher.Update(serviceSettings);
-                    shopSettings.AddOrUpdateService(shopSettings.BrowserLauncher);
-                    return;
-                }
-
-            case nameof(IShopServicesSettingsModel.RequestHeaders):
-                {
-                    shopSettings.RequestHeaders.Update(serviceSettings);
-                    shopSettings.AddOrUpdateService(shopSettings.RequestHeaders);
-                    return;
-                }
-
-            default:
-                {
-                    shopSettings.AddOrUpdateService(serviceSettings);
-                    return;
-                }
-        }
-    }
-
-    private static void AddOrUpdateService(this IShopServicesSettingsModel shopSettings, IServiceSettingsModel service)
-    {
-        var existingService = shopSettings.Services.OfType<IServiceSettingsModel>().FirstOrDefault(s => s.Guid == service.Guid);
-        if (existingService != null)
-            existingService.Update(service);
-        else
-            shopSettings.Services.Add(service);
-    }
-
-    private static void UpdateShopSettingsCore(this IModelFactory modelFactory, IShopServicesSettingsModel target, IShopServicesSettingsModel source)
+    private static void UpdateShopSettingsCore(this IModelFactory modelFactory, IShopImportSettingsModel target, IShopImportSettingsModel source)
     {
         target.Name = source.Name;
         target.FileName = source.FileName;
         target.Perfomance = source.Perfomance;
 
-        target.ImportService.Update(source.ImportService);
-        target.BrowserDataLoader.Update(source.BrowserDataLoader);
-        target.BrowserLauncher.Update(source.BrowserLauncher);
-        target.RequestHeaders.Update(source.RequestHeaders);
-        target.WebLoader.Update(source.WebLoader);
-
         var sourceServices = source.Services.OfType<IServiceSettingsModel>().ToList();
 
-        var servicesForRemove = new List<IServiceSettingsModel>(target.Services.OfType<IServiceSettingsModel>().Where(r =>
+        var targetServicesForRemove = new List<IServiceSettingsModel>(target.Services.OfType<IServiceSettingsModel>().Where(r =>
                     !sourceServices.Any(s => s.Guid == r.Guid) || sourceServices.First(s => s.Guid == r.Guid).IsEmpty()));
 
-        foreach (var service in servicesForRemove)
+        foreach (var service in targetServicesForRemove)
             target.Services.Remove(service);
 
-        foreach (var service in sourceServices)
+        foreach (var sourceService in sourceServices)
         {
-            var targetService = target.Services.OfType<IServiceSettingsModel>().FirstOrDefault(s => s.Guid == service.Guid);
+            //todo name or guid ???
+            var targetService = target.GetService(sourceService.Name ?? sourceService.ServiceTypeName);
             if (targetService == null)
             {                
                 targetService = modelFactory.CreateServiceSettingsModel( shopId: target.ShopId, 
-                    id: service.Id,
+                    id: sourceService.Id,
                     parentId: target.Id,
                     shopGuid: target.ShopGuid, 
                     shopSettingsGuid: target.Guid);
-                targetService.Name = service.Name;
-                targetService.Update(service);
+                targetService.Name = sourceService.Name;
+                targetService.Update(sourceService);
                 target.Services.Add(targetService);
             }
             else
-                targetService.Update(service);
+                targetService.Update(sourceService);
         }
     }
 
-    private static void UpdateShopSettingsWithoutServices(this IShopServicesSettingsModel target, IShopServicesSettingsModel source)
+    private static void UpdateShopSettingsWithoutServices(this IShopImportSettingsModel target, IShopImportSettingsModel source)
     {
         target.Name = source.Name;
         target.FileName = source.FileName;
@@ -169,7 +106,7 @@ public static class ShopSettingsModelExtensions
         target.CategorySourceUrl = source.CategorySourceUrl;
     }
 
-    public static void Update(this IModelFactory modelFactory, IShopServicesSettingsModel target, IShopImportSettings source)
+    public static void Update(this IModelFactory modelFactory, IShopImportSettingsModel target, IShopImportSettings source)
     {
         if (target.ShopSettingType != source.ShopSettingType)
             throw new InvalidOperationException("different shop settings types");
@@ -187,7 +124,7 @@ public static class ShopSettingsModelExtensions
             throw new InvalidOperationException("different source and target types");
     }
 
-    public static IShopServicesSettingsModel? GetShopSettingsByType(this IShopSettingTabsModel shopSettingTabs, ShopSettingType shopSettingType)
+    public static IShopImportSettingsModel? GetShopSettingsByType(this IShopSettingTabsModel shopSettingTabs, ShopSettingType shopSettingType)
     {
         if (shopSettingType == ShopSettingType.Service)
             throw new InvalidOperationException("Service tab not available for shop settings.");
@@ -200,7 +137,7 @@ public static class ShopSettingsModelExtensions
         };
     }
 
-    internal static IShopServicesSettingsModel? GetShopSettingsByGuid(this IShopSettingTabsModel shopSettingTabs, Guid shopSettingsGuid)
+    internal static IShopImportSettingsModel? GetShopSettingsByGuid(this IShopSettingTabsModel shopSettingTabs, Guid shopSettingsGuid)
     {
         return shopSettingTabs?.ShopProductsSettings?.Guid == shopSettingsGuid
             ? shopSettingTabs.ShopProductsSettings

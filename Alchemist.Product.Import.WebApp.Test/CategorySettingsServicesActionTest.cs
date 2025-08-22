@@ -6,7 +6,6 @@ using System.Text.Json;
 using Xunit.Abstractions;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
-using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 
@@ -131,7 +130,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         await Task.Delay(500);
 
-        var services = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id && !ModelHelper.IsServiceSettingsPrimary(s.Name))
+        var services = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id && !s.Name.IsPrimaryServiceName())
                 .Select(s => s.ToImportServiceSettings<ServiceSettingsModel>()).ToArray();
         await ExpectRowsInServiceTableAsync(serviceTable, services);
     }
@@ -154,7 +153,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         var serviceSettingsForm = await ExpectShowServiceFormWhenAddServiceButtonClickAsync(newPage, serviceTable);
 
-        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && Helper.IsServiceSettingsPrimary(s.Name))?
+        var serviceSettings = _shopSettings.FirstOrDefault(s => s.ParentSettingsId == shopImportSettings.Id && s.Name.IsPrimaryServiceName())?
             .ToImportServiceSettings<ServiceSettingsModel>()
            ?? new ServiceSettingsModel(shopImportSettings.ShopId, 0, shopImportSettings.Id, shopImportSettings.Guid, shopImportSettings.ShopGuid)
            {
@@ -187,7 +186,7 @@ public class CategorySettingsServicesActionTest(TestImportWebAppFactory webAppFa
 
         var rows = await serviceTable.Locator(".serviceRow").AllAsync();
 
-        var services = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id && !Helper.IsServiceSettingsPrimary(s.Name)).ToList();
+        var services = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id && !s.Name.IsPrimaryServiceName()).ToList();
         var service = services.Last().ToImportServiceSettings<ServiceSettingsModel>();
         
         ILocator? serviceRow = null;

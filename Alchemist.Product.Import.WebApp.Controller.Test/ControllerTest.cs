@@ -1,6 +1,7 @@
 ﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
+using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 
 using ShopSettingType = Alchemist.Import.Settings.Interfaces.ShopSettingType;
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
@@ -108,30 +110,20 @@ public abstract class ControllerTest<T>
     }
     
 
-    protected void FillShopSettingsFields(IShopServicesSettingsModel shopSettings)
+    protected void FillShopSettingsFields(IShopImportSettingsModel shopSettings)
     {
         shopSettings.Name = Guid.NewGuid().ToString();
 
         if (shopSettings is IProductShopSettingsModel productShopSettings)
             SetProductShopSettingsFields(productShopSettings);
         else if (shopSettings is ICategoryShopSettingsModel categoryShopSettings)
-            SetCategoryShopSettingsFields(categoryShopSettings);        
-
-        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.ImportService), out var importService))
-            importService.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.ImportService)}Type{shopSettings.Id}_{Guid.NewGuid()}";
-
-        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.BrowserDataLoader), out var browserDataLoader))
-            browserDataLoader.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.BrowserDataLoader)}Type{shopSettings.Id}_{Guid.NewGuid()}";
+            SetCategoryShopSettingsFields(categoryShopSettings);
         
-        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.BrowserLauncher), out var browserLauncher))
-            browserLauncher.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.BrowserLauncher)}Type{shopSettings.Id}_{Guid.NewGuid()}";
-
-        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.RequestHeaders), out var requestHeaders))
-            requestHeaders.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.RequestHeaders)}Type{shopSettings.Id}_{Guid.NewGuid()}";
-
-        if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, nameof(ShopSettingsModel.WebLoader), out var webLoader))
-            webLoader.ServiceTypeName = $"{shopSettings.ShopSettingType}{nameof(ShopSettingsModel.WebLoader)}Type{shopSettings.Id}_{Guid.NewGuid()}";
-
+        foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, primaryServiceName, out var service))
+                service.ServiceTypeName = $"{shopSettings.ShopSettingType}{primaryServiceName}Type{shopSettings.Id}_{Guid.NewGuid()}";
+        }
     }
 
     private void SetProductShopSettingsFields(IProductShopSettingsModel shopSettingsModel)
