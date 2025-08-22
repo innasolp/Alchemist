@@ -1,12 +1,11 @@
 using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using System.Text.Json;
-using Alchemist.Import.Settings.Extensions; 
+using Alchemist.Import.Settings.Extensions;
 
 
 using ShopSettingType = Alchemist.Product.Interfaces.ShopSettingType;
@@ -26,14 +25,15 @@ public class LoadSettingsFromDB
             new ShopSettings { Id = 2, ShopId = 2, Type = ShopSettingType.Product, Name="Shop2Products" },
             new ShopSettings { Id = 3, ShopId = 1, Type = ShopSettingType.Category, Name= "shop1Category" },
             new ShopSettings { Id = 4, ShopId = 2, Type = ShopSettingType.Category, Name="shop2Category" },
-            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.WebLoader) },
-            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.BrowserDataLoader) },
-            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.RequestHeaders) },
-            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.ImportService) },
-            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(IShopImportSettings.WebLoader) },
+            new ShopSettings { Id = 5, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 6, ShopId = 1, ParentSettingsId = 1, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.WebLoader) },
+            new ShopSettings { Id = 7, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 8, ShopId = 1, ParentSettingsId = 2, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.BrowserDataLoader) },
+            new ShopSettings { Id = 9, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 10, ShopId = 2, ParentSettingsId = 3, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.RequestHeaders) },
+            new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
+            new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.WebLoader) },
+            new ShopSettings { Id = 14, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.BrowserLauncher) },
             new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product },
         ];
 
@@ -117,13 +117,14 @@ public class LoadSettingsFromDB
         var shopSettings = await _adapter.GetShopImportSettings(1, Interfaces.ShopSettingType.Product);
         Assert.NotNull(shopSettings);
         Assert.Equal(2, shopSettings.Services.Count);
-        Assert.NotNull(shopSettings.ImportService);
-        Assert.Null(shopSettings.BrowserDataLoader);
-        Assert.NotNull(shopSettings.WebLoader);
-        Assert.Null(shopSettings.RequestHeaders);
+        Assert.NotNull(shopSettings.GetImportService());
+        Assert.Null(shopSettings.GetBrowserDataLoader());
+        Assert.Null(shopSettings.GetBrowserLauncher());
+        Assert.NotNull(shopSettings.GetWebLoader());
+        Assert.Null(shopSettings.GetRequestHeaders());
         
-        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.ImportService.ServiceTypeName);
-        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.ImportService.ImplementationTypeName);
+        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ServiceTypeName);
+        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ImplementationTypeName);
     }
 
     [Fact]
@@ -132,13 +133,14 @@ public class LoadSettingsFromDB
         var shopSettings = await _adapter.GetShopImportSettings(1, Interfaces.ShopSettingType.Category);
         Assert.NotNull(shopSettings);
         Assert.NotEmpty(shopSettings.Services);
-        Assert.NotNull(shopSettings.ImportService);
-        Assert.NotNull(shopSettings.RequestHeaders);
-        Assert.Null(shopSettings.WebLoader);
-        Assert.Null(shopSettings.BrowserDataLoader);
+        Assert.NotNull(shopSettings.GetImportService());
+        Assert.NotNull(shopSettings.GetRequestHeaders());
+        Assert.Null(shopSettings.GetWebLoader());
+        Assert.Null(shopSettings.GetBrowserDataLoader());
+        Assert.Null(shopSettings.GetBrowserLauncher());
 
-        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.ImportService.ServiceTypeName);
-        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.ImportService.ImplementationTypeName);
+        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ServiceTypeName);
+        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ImplementationTypeName);
     }
 
     [Fact]
@@ -148,13 +150,14 @@ public class LoadSettingsFromDB
         Assert.NotNull(shopSettings);
         Assert.Equal(Interfaces.ShopSettingType.Category, shopSettings.ShopSettingType);
         Assert.NotEmpty(shopSettings.Services);
-        Assert.NotNull(shopSettings.ImportService);
-        Assert.NotNull(shopSettings.RequestHeaders);
-        Assert.Null(shopSettings.WebLoader);
-        Assert.Null(shopSettings.BrowserDataLoader);
+        Assert.NotNull(shopSettings.GetImportService());
+        Assert.NotNull(shopSettings.GetRequestHeaders());
+        Assert.Null(shopSettings.GetWebLoader());
+        Assert.Null(shopSettings.GetBrowserDataLoader());
+        Assert.Null(shopSettings.GetBrowserLauncher());
 
-        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.ImportService.ServiceTypeName);
-        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.ImportService.ImplementationTypeName);
+        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ServiceTypeName);
+        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ImplementationTypeName);
     }
 
     [Fact]
@@ -162,6 +165,6 @@ public class LoadSettingsFromDB
     {
         var allSettings = await _adapter.GetAllShopImportSettings();
         Assert.Equal(5, allSettings.Count);
-        Assert.Equal(8, allSettings.SelectMany(s => s.Services.OfType<TestImportServiceSettings>()).Count());
+        Assert.Equal(9, allSettings.SelectMany(s => s.Services.OfType<TestImportServiceSettings>()).Count());
     }
 }

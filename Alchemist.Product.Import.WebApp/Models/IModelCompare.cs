@@ -1,4 +1,8 @@
-﻿using Alchemist.Product.Import.Model;
+﻿using Alchemist.Import.Settings.Extensions;
+using Alchemist.Product.Import.Model;
+using Alchemist.Product.Import.Model.Infrastructure;
+
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
@@ -25,11 +29,15 @@ public partial class ShopSettingsModel : IModelCompare
         if (model is not ShopSettingsModel shopSettings)
             return false;
 
-        return ((ImportService == null && shopSettings.ImportService == null) || ImportService?.AllEquals(shopSettings.ImportService) == true)
-                      && ((BrowserDataLoader == null && shopSettings.BrowserDataLoader == null) || BrowserDataLoader?.AllEquals(shopSettings.BrowserDataLoader) == true)
-                      && ((RequestHeaders == null && shopSettings.RequestHeaders == null) || RequestHeaders?.AllEquals(shopSettings.RequestHeaders) == true)
-                      && ((WebLoader == null && shopSettings.WebLoader == null) || WebLoader?.AllEquals(shopSettings.WebLoader) == true)
-                      && Services.Where(s => !ModelHelper.IsServiceSettingsPrimary(s.Name)).All(s => shopSettings.Services.Any(s1 => s1.AllEquals(s)));
+        foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            var currentService = this.GetService(primaryServiceName);
+            var otherService = shopSettings.GetService(primaryServiceName);
+            if (!((currentService == null && otherService == null) || currentService?.FieldsEquals(otherService) == true))
+                return false;
+        }
+
+        return Services.Where(s => !s.IsPrimary()).All(s => shopSettings.Services.Any(s1 => s1.FieldsEquals(s)));
     }
 }
 

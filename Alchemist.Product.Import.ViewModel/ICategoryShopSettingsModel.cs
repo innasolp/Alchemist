@@ -2,6 +2,6 @@
 
 namespace Alchemist.Product.Import.Model;
 
-public interface ICategoryShopSettingsModel : IShopServicesSettingsModel, ICategoryShopImportSettings
+public interface ICategoryShopSettingsModel : IShopImportSettingsModel, ICategoryShopImportSettings
 {
 }

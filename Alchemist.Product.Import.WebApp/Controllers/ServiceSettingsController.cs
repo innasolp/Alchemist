@@ -1,4 +1,5 @@
-﻿using Alchemist.Product.Import.Model;
+﻿using Alchemist.Import.Settings.Extensions;
+using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
         if (shopGuid == Guid.Empty)
             return BadRequest(nameof(shopGuid));
 
-        if ((string.IsNullOrEmpty(serviceSettingsName) || !ModelHelper.IsServiceSettingsPrimary(serviceSettingsName))
+        if ((string.IsNullOrEmpty(serviceSettingsName) || !serviceSettingsName.IsPrimaryServiceName())
             && (guid == null || guid == Guid.Empty))
             return BadRequest(nameof(serviceSettingsName));
 
@@ -29,7 +30,7 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
             return NotFound(shopSettingsGuid);
 
         IServiceSettingsModel? serviceSettingsModel;
-        if (!string.IsNullOrEmpty(serviceSettingsName) && ModelHelper.IsServiceSettingsPrimary(serviceSettingsName))
+        if (!string.IsNullOrEmpty(serviceSettingsName) && serviceSettingsName.IsPrimaryServiceName())
         {
             if (!_importFacade.TryGetServiceSettings(shopGuid, shopSettingsGuid, serviceSettingsName, out serviceSettingsModel))
                 return NotFound(serviceSettingsName);
@@ -61,6 +62,16 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
     public IActionResult BrowserDataLoaderSettings(Guid shopGuid, Guid shopSettingsGuid)
     {
         return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.BrowserDataLoader));
+    }
+
+    [Route("ServiceSettings/BrowserLauncher")]
+    [HttpPost]
+    [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
+    public IActionResult BrowserLauncherSettings(Guid shopGuid, Guid shopSettingsGuid)
+    {
+        return ServiceSettings(shopGuid, shopSettingsGuid, nameof(ShopSettingsModel.BrowserLauncher));
     }
 
     [Route("ServiceSettings/WebLoader")]
@@ -99,7 +110,7 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
         if (!_importFacade.TryGetShopSettings(data.ShopSettingsGuid, out var shopSettings))
             return NotFound(data.ShopSettingsGuid);         
 
-        if (ModelHelper.IsServiceSettingsPrimary(data.Name))
+        if (data.IsPrimary())
         {
             if (!_importFacade.TryGetServiceSettings(data.ShopGuid, data.ShopSettingsGuid, data.Name, out var serviceSettings))
                 return NotFound(data.Name);
@@ -136,7 +147,7 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
             return NotFound(data.ShopSettingsGuid);
 
         IServiceSettingsModel? serviceSettingsModel;
-        if (ModelHelper.IsServiceSettingsPrimary(data.Name))
+        if (data.IsPrimary())
         {
             if (!_importFacade.TryGetServiceSettings(data.ShopGuid, data.ShopSettingsGuid, data.Name, out serviceSettingsModel))
                 return NotFound(data.Name);

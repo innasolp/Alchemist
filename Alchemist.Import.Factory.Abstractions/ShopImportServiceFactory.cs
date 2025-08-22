@@ -3,6 +3,7 @@ using Alchemist.Import.Interfaces;
 using Alchemist.Import.Logging.Factory;
 using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.Extensions;
 using Http.RequestHandling.Interfaces;
 using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.Extensions.Logging;
@@ -32,16 +33,20 @@ public abstract class ShopImportServiceFactory(ILogger logger,
 
     IImportService IShopImportServiceFactory.Create(IShopItem shopModel, IShopImportSettings shopImportSettings)
     {
-        var webLoader = _webLoaders.FirstOrDefault(f => f.GetType().Name == shopImportSettings.WebLoader.ImplementationTypeName
-            || f.GetType().Name.Contains(shopImportSettings.WebLoader.ImplementationTypeName, StringComparison.InvariantCultureIgnoreCase))
-            ?? throw new InvalidDataException($"Web loader of type {shopImportSettings.WebLoader.ImplementationTypeName} not found");
+        var webLoaderSettings = shopImportSettings.GetWebLoader();
+        var webLoader = _webLoaders.FirstOrDefault(f => f.GetType().Name == webLoaderSettings.ImplementationTypeName
+            || f.GetType().Name.Contains(webLoaderSettings.ImplementationTypeName, StringComparison.InvariantCultureIgnoreCase))
+            ?? throw new InvalidDataException($"Web loader of type {webLoaderSettings.ImplementationTypeName} not found");
 
-        var browserService = _browserServiceFactory.Create(shopImportSettings.BrowserDataLoader.ImplementationTypeName, 
-            shopImportSettings.BrowserLauncher.ImplementationTypeName);        
+        var browserDataLoaderSettings = shopImportSettings.GetBrowserDataLoader();
+        var browserLauncherSettings = shopImportSettings.GetBrowserLauncher();
+        var browserService = _browserServiceFactory.Create(browserDataLoaderSettings.ImplementationTypeName,
+            browserLauncherSettings.ImplementationTypeName);
 
-        var requestHeaders = shopImportSettings.RequestHeaders == null ?
+        var requstHeadersSettings = shopImportSettings.GetRequestHeaders();
+        var requestHeaders = requstHeadersSettings == null ?
             null
-            : JsonSerializer.Deserialize<RequestHeaders>(shopImportSettings.RequestHeaders.Value);
+            : JsonSerializer.Deserialize<RequestHeaders>(requstHeadersSettings.Value);
 
         if (_perfomanceCounter != null && shopImportSettings.Perfomance == true && webLoader is IRequestSender requestSender)
             _perfomanceCounter.Subscribe(requestSender);

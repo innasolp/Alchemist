@@ -9,11 +9,11 @@ public interface IImportFacade
 
     Task<List<ShopImportModel>> LoadShops(IEnumerable<Interfaces.IShop> shops);  
 
-    bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out IShopServicesSettingsModel shopSettings);
+    bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out IShopImportSettingsModel shopSettings);
 
-    bool TryGetShopSettings(Guid shopGuid, Guid shopSettingsGuid, out IShopServicesSettingsModel shopSettings);
+    bool TryGetShopSettings(Guid shopGuid, Guid shopSettingsGuid, out IShopImportSettingsModel shopSettings);
 
-    bool TryGetShopSettings(Guid shopSettingsGuid, out IShopServicesSettingsModel? shopSettings);
+    bool TryGetShopSettings(Guid shopSettingsGuid, out IShopImportSettingsModel? shopSettings);
 
     bool TryGetServiceSettings(Guid shopGuid, Guid shopSettingsGuid, string serviceSettingsName, out IServiceSettingsModel serviceSettings);
 
@@ -29,7 +29,7 @@ public interface IImportFacade
 
     ShopImportModel CreateDefaultShopImport();
 
-    void AddNewServiceSettings(IShopServicesSettingsModel shopServicesSettingsModel, string serviceName, out IServiceSettingsModel serviceSettingsModel );
+    void AddNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel, string serviceName, out IServiceSettingsModel serviceSettingsModel );
 
-    IServiceSettingsModel CreateNewServiceSettings(IShopServicesSettingsModel shopServicesSettingsModel, string serviceName);
+    IServiceSettingsModel CreateNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel, string serviceName);
 }

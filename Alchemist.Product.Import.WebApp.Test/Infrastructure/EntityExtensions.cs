@@ -1,5 +1,6 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Interfaces;
+using Alchemist.Import.Settings.Extensions;
 
 namespace Alchemist.Product.Import.WebApp.Test.Infrastructure;
 
@@ -18,5 +19,13 @@ public static class EntityExtensions
             var index = shopSettings.IndexOf(existingItem);
             shopSettings[index] = serviceSettings;
         }
-    }    
+    }
+    public static async Task<ShopSettingsModel> GetShopImportSettingsAsync(this IShopSettings shopSettings, IEnumerable<IShopSettings> children)
+    {
+        return shopSettings.Type == ShopSettingType.Product
+             ? await shopSettings.GetShopImportSettings<ProductShopSettingsModel, ServiceSettingsModel>(children)
+            : await shopSettings.GetShopImportSettings<CategoryShopSettingsModel, ServiceSettingsModel>(children);
+
+    }
+
 }

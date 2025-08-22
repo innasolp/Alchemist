@@ -2,6 +2,9 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Import.Settings.Interfaces;
 using Moq;
+using Alchemist.Import.Settings.Extensions;
+
+using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.Model.Test;
 
@@ -53,7 +56,7 @@ public class ImportFacadeTest
     }
 
     private static T CreateShopSettingsModel<T>(int shopId, Guid shopGuid, ShopSettingType shopSettingType)
-        where T: class, IShopServicesSettingsModel
+        where T: class, IShopImportSettingsModel
     {
         var guid = Guid.NewGuid();
         var shopProductSettingsMock = new Mock<T>();
@@ -62,13 +65,14 @@ public class ImportFacadeTest
         shopProductSettingsMock.Setup(s => s.ShopGuid).Returns(shopGuid);
         shopProductSettingsMock.Setup(s => s.ShopId).Returns(shopId);
 
-        shopProductSettingsMock.Setup(s => s.ImportService).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.ImportService)));
-        shopProductSettingsMock.Setup(s => s.BrowserDataLoader).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.BrowserDataLoader)));
-        shopProductSettingsMock.Setup(s => s.RequestHeaders).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.RequestHeaders)));
-        shopProductSettingsMock.Setup(s => s.WebLoader).Returns(CreateService(shopId, shopGuid, guid, nameof(IShopServicesSettingsModel.WebLoader)));
-
         var services = new List<IServiceSettingsModel>();
         shopProductSettingsMock.Setup(s => s.Services).Returns(services);
+
+        foreach (var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            var service = CreateService(shopId, shopGuid, guid, primaryServiceName);
+            shopProductSettingsMock.Object.Services.Add(service);
+        }        
 
         return shopProductSettingsMock.Object;
     }
@@ -195,10 +199,11 @@ public class ImportFacadeTest
         
         Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, shopImport.ShopSettingTabs.ShopProductsSettings.Guid, out var shopSettings));
 
-        Assert.True(shopSettings.ImportService.IsEmpty());
-        Assert.True(shopSettings.RequestHeaders.IsEmpty());
-        Assert.True(shopSettings.WebLoader.IsEmpty());
-        Assert.True(shopSettings.BrowserDataLoader.IsEmpty());
+        foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            if(shopSettings.GetService(primaryServiceName) is IServiceSettingsModel primaryService)
+              Assert.True(primaryService?.IsEmpty());
+        }        
 
         var name = Guid.NewGuid().ToString();
 
@@ -225,21 +230,22 @@ public class ImportFacadeTest
         Assert.True(_importFacade.TryGetShopImport(shopImports[1].ShopGuid, out var shopImport));
 
         Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, shopImport.ShopSettingTabs.ShopProductsSettings.Guid, out var shopSettings));
-
-        Assert.True(shopSettings.ImportService.IsEmpty());
-        Assert.True(shopSettings.RequestHeaders.IsEmpty());
-        Assert.True(shopSettings.WebLoader.IsEmpty());
-        Assert.True(shopSettings.BrowserDataLoader.IsEmpty());
-
+        
+        foreach (var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
+        {
+            if (shopSettings.GetService(primaryServiceName) is IServiceSettingsModel primaryService)
+                Assert.True(primaryService?.IsEmpty());
+        }
+        
         Assert.False(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid,
             shopSettings.Guid,
             Guid.NewGuid().ToString(),
             out var serviceSettings));
 
-        Assert.True(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, shopSettings.Guid, nameof(IShopServicesSettingsModel.WebLoader), out serviceSettings));
+        Assert.True(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, shopSettings.Guid, nameof(PrimaryServiceName.WebLoader), out serviceSettings));
         serviceSettings.ServiceTypeName = "ServiceType1";
         
-        Assert.True(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, shopSettings.Guid, nameof(IShopServicesSettingsModel.WebLoader), out var result));
+        Assert.True(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid, shopSettings.Guid, nameof(PrimaryServiceName.WebLoader), out var result));
         Assert.Equal(serviceSettings.ServiceTypeName, result.ServiceTypeName);
     }
 }

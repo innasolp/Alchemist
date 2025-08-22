@@ -1,12 +1,10 @@
 ﻿using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using DependencyInjection.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.DependencyInjection.Common;
 using Message.SignalR.DependencyInjection;
-using Grpc.Client.Extensions;
 using Message.Interfaces;
 using Alchemist.Product.Import.Background.ImportItems;
 using Alchemist.Import.Products.Interfaces;
@@ -18,12 +16,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
 {
     public static void SetAppPath(this IShopImportSettings shopImportSettings, string appPath)
     {
-        shopImportSettings.BrowserDataLoader?.SetAppPath(appPath);
-        shopImportSettings.WebLoader?.SetAppPath(appPath);
-        shopImportSettings.ImportService.SetAppPath(appPath);
-        shopImportSettings.RequestHeaders?.SetAppPath(appPath);
-
-        foreach(var serviceSettings in shopImportSettings.Services.OfType<IImportServiceSettings>().Where(s=>!Alchemist.Import.Settings.Interfaces.Common.BaseServiceNames.Contains(s.Name)))
+        foreach(var serviceSettings in shopImportSettings.Services.OfType<IImportServiceSettings>())
             serviceSettings.SetAppPath(appPath);
     }
 

@@ -78,6 +78,22 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label asp-for="BrowserLauncher" class="control-label"></label>
+                            <div class="flex">
+                                <div>
+                                    <input class="form-control form-input" id="BrowserLauncher" readonly="readonly" value="@Model.BrowserLauncher?.ServiceTypeName" />
+                                    <span asp-validation-for="BrowserLauncher" class="text-danger"></span>
+                                </div>
+                                <div class="flex control-group">
+                                    <button onclick="showServiceSettingsModal('/ServiceSettings/BrowserLauncher', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('browserLauncherJson'); }  )"
+                                            class="btn btn-primary btn-sm form-button">
+                                        Set
+                                    </button>
+                                    @await Html.PartialAsync($"~/Views/UploadFromFile.cshtml", new UploadFromFileModel { Id = "browserLauncherJson", OnChange = GetServiceUploadOnChange("BrowserLauncher"), FileName = Model.BrowserLauncher?.FileName })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label asp-for="RequestHeaders" class="control-label"></label>
                             <span asp-validation-for="RequestHeaders" class="text-danger"></span>
                             @await Html.PartialAsync($"~/Views/UploadFromFile.cshtml", new UploadFromFileModel { Id = "requestHeadersJson", OnChange = GetUploadServiceValueOnChange("RequestHeaders"), FileName = Model.RequestHeaders?.FileName })

@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Test.Model\Alchemist.Import.Settings.Test.Model.csproj" />
   </ItemGroup>

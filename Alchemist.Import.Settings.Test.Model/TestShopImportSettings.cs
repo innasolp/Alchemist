@@ -6,14 +6,6 @@ namespace Alchemist.Import.Settings.Test.Model;
 
 public abstract class TestShopImportSettings : IShopImportSettings
 {
-    public TestImportServiceSettings ImportService { get; set; }
-
-    public TestImportServiceSettings? RequestHeaders { get; set; }
-
-    public TestImportServiceSettings WebLoader { get; set; }
-
-    public TestImportServiceSettings? BrowserDataLoader { get; set; }
-
     public bool? Perfomance { get; set; }
 
     [JsonIgnore]
@@ -24,27 +16,7 @@ public abstract class TestShopImportSettings : IShopImportSettings
     [JsonIgnore]
     public int ShopId { get; set; }
 
-    public List<TestImportServiceSettings> Services { get; set; } = [];
-
-    IImportServiceSettings IShopImportSettings.WebLoader
-    {
-        get => WebLoader; set => WebLoader = (TestImportServiceSettings)value;
-    }
-
-    IImportServiceSettings IShopImportSettings.ImportService
-    {
-        get => ImportService; set => ImportService = (TestImportServiceSettings)value;
-    }
-
-    IImportServiceSettings? IShopImportSettings.BrowserDataLoader
-    {
-        get => BrowserDataLoader; set => BrowserDataLoader = (TestImportServiceSettings?)value;
-    }
-
-    IImportServiceSettings? IShopImportSettings.RequestHeaders
-    {
-        get => RequestHeaders; set => RequestHeaders = (TestImportServiceSettings?)value;
-    }
+    public List<TestImportServiceSettings> Services { get; set; } = [];    
 
     IList IShopImportSettings.Services => Services;
 
@@ -60,5 +32,4 @@ public abstract class TestShopImportSettings : IShopImportSettings
 
     public string ShopName { get; set; }
     public string ShopUrl { get; set; }
-    public IImportServiceSettings? BrowserLauncher { get ; set; }
 }

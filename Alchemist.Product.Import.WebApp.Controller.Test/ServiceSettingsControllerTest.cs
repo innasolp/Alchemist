@@ -1,7 +1,9 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.JsonAdapter;
+using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -95,6 +97,13 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
     }
 
     [Fact]
+    public async Task SetShopSettingsBrowserLauncherActionAsync()
+    {
+        await SetServiceSettingsActionAsync((shopSettingController, shopGuid, shopSettingsGuid) => shopSettingController.BrowserLauncherSettings(shopGuid, shopSettingsGuid),
+           nameof(ShopSettingsModel.BrowserLauncher));
+    }
+
+    [Fact]
     public async Task SetSecondaryServiceSettings()
     {
         var guid = Guid.NewGuid();
@@ -154,9 +163,9 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
 
         var controller = CreateServiceSettingsController();
 
-        var oldService =  ModelFactory.GetCopy(shopSettings.BrowserDataLoader);
+        var oldService =  ModelFactory.GetCopy(shopSettings.GetBrowserDataLoader() as IServiceSettingsModel);
 
-        var changedService = ModelFactory.GetCopy(shopSettings.BrowserDataLoader);
+        var changedService = ModelFactory.GetCopy(shopSettings.GetBrowserDataLoader() as IServiceSettingsModel);
         changedService.FillServiceSettingsFields();
 
         var actionResult = Assert.IsType<OkObjectResult>(controller.SaveServiceSettings(changedService as ServiceSettingsModel));
@@ -239,7 +248,7 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
         Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Category, out var shopSettings));
         FillShopSettingsFields(shopSettings);
 
-        var data = ModelFactory.GetCopy(shopSettings.ImportService);
+        var data = ModelFactory.GetCopy(shopSettings.GetImportService() as IServiceSettingsModel);
         data.ServiceTypeName = Guid.NewGuid().ToString();
 
         var controller = CreateServiceSettingsController();
@@ -256,7 +265,7 @@ public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsControl
         Assert.True(_importFacade.TryGetShopSettings(shopGuid, ShopSettingType.Product, out var shopSettings));
         FillShopSettingsFields(shopSettings);
         
-        var data = ModelFactory.GetCopy(shopSettings.ImportService);
+        var data = ModelFactory.GetCopy(shopSettings.GetImportService() as IServiceSettingsModel);
 
         var controller = CreateServiceSettingsController();
         var actionResult = Assert.IsType<OkObjectResult>(controller.IsServiceSettingsChanged(data as ServiceSettingsModel));

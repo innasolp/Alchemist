@@ -1,0 +1,5 @@
+{
+		  "ServiceTypeName":"IBrowserLauncher",
+        "ImplementationTypeName": "Firefox.Standart",
+        "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+      }
