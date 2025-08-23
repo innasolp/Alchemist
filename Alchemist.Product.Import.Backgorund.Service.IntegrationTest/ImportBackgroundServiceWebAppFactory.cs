@@ -84,8 +84,8 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
     private static void RemoveDBJsonAdapter(IServiceCollection services)
     {
-        var desscriptors = services.Where(s => s.ServiceType == typeof(ISettingsAdapter) && s.ImplementationType == typeof(SettingsDataAdapter<,,>));
-        desscriptors.ToList().ForEach(sd => services.Remove(sd));
+        var descriptors = services.Where(s => s.ServiceType == typeof(ISettingsAdapter) && s.ImplementationType == typeof(SettingsDataAdapter<,>));
+        descriptors.ToList().ForEach(sd => services.Remove(sd));
     }
 
     private static void SetBrowserServiceClient(IServiceCollection services, string url)

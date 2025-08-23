@@ -2,6 +2,7 @@ using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
@@ -21,14 +22,15 @@ public class HomeController : Controller
 
     private readonly IMessageReceiver _shopEventReceiver;
 
-    private readonly ISettingsDataAdapter _settingsDataAdapter;
+    private readonly SettingsDataAdapterContainer _settingsDataAdapterContainer;
 
     private readonly IShopDataService _shopDataService;
 
     private readonly IModelFactory _modelFactory;
     public HomeController(ILogger<HomeController> logger, 
         IShopDataService shopDataService,
-        ISettingsDataAdapter settingsDataAdapter,
+        [FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
+        [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter,
         IImportFacade importFacade,
         IModelFactory modelFactory,
         IMessageReceiver shopEventReceiver)
@@ -37,7 +39,7 @@ public class HomeController : Controller
         _shopDataService = shopDataService;
         _importFacade = importFacade;
         _shopEventReceiver = shopEventReceiver;
-        _settingsDataAdapter = settingsDataAdapter;
+        _settingsDataAdapterContainer = new SettingsDataAdapterContainer(productSettingsDataAdapter, categorySettingsDataAdapter);
         _modelFactory = modelFactory;
 
         _shopEventReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);
@@ -229,7 +231,7 @@ public class HomeController : Controller
             //todo
             return Ok(!settings.Equals(modelFromJson));
 
-        var originalSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
+        var originalSettings = await _settingsDataAdapterContainer.GetShopImportSettingsAsync(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
         if (originalSettings == null)
            //todo
             return Ok(true);
@@ -310,7 +312,7 @@ public class HomeController : Controller
 
                 if(selectedSettings.IsEmpty())
                 {
-                    var shopImportSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, shopSettingsTab.SelectedSettingsTab);
+                    var shopImportSettings = await _settingsDataAdapterContainer.GetShopImportSettingsAsync(shopImport.Shop.Id, shopSettingsTab.SelectedSettingsTab);
                     
                     if(shopImportSettings != null)
                         _modelFactory.Update(selectedSettings, shopImportSettings);

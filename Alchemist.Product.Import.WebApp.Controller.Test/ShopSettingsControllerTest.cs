@@ -23,28 +23,33 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 { 
-    private readonly ISettingsDataAdapter _settingsDataAdapter;
+    private readonly ISettingsDataAdapter _productSettingsDataAdapter;
+    private readonly ISettingsDataAdapter _categorySettingsDataAdapter;
 
     private readonly Mock<IShopSettingsDataService> _shopSettingsDataServiceMock = new();
 
-    private readonly ISettingsAdapter _jsonAdapter;
+    private readonly ISettingsAdapter _productJsonAdapter;
+    private readonly ISettingsAdapter _categoryJsonAdapter;
 
     public ShopSettingsControllerTest()
     {
-        _settingsDataAdapter = new SettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>(_shopSettingsDataServiceMock.Object);
+        _productSettingsDataAdapter = new SettingsDataAdapter<ProductShopSettingsModel, ServiceSettingsModel>(_shopSettingsDataServiceMock.Object, Interfaces.ShopSettingType.Product);
+        _categorySettingsDataAdapter = new SettingsDataAdapter<CategoryShopSettingsModel, ServiceSettingsModel>(_shopSettingsDataServiceMock.Object, Interfaces.ShopSettingType.Category);
 
         var builder = new HostApplicationBuilder();
-        builder.Services.AddSettingsJsonAdapter<ProductShopSettingsModel, CategoryShopSettingsModel>(
-            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/OzonProductSettings.json",
-            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/ozoncategories.json");
+        builder.Services.AddKeyedSettingsJsonAdapter<ProductShopSettingsModel>(
+            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/OzonProductSettings.json", ShopSettingType.Product);
+        builder.Services.AddKeyedSettingsJsonAdapter<CategoryShopSettingsModel>(
+            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/ozoncategories.json", ShopSettingType.Category);
         var host = builder.Build();
 
-        _jsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>();       
+        _productJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>(ShopSettingType.Product);       
+        _categoryJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>(ShopSettingType.Category);       
     }
 
     private ShopSettingsController CreateShopSettingsController()
     {
-        return new ShopSettingsController(_loggerMock.Object, _importFacade, ModelFactory, _settingsDataAdapter);
+        return new ShopSettingsController(_loggerMock.Object, _importFacade, ModelFactory, _productSettingsDataAdapter, _categorySettingsDataAdapter);
     }    
 
     [Fact]
@@ -58,28 +63,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
     {
         await AssertSaveShopSettingsAsync(ShopSettingType.Category);
     }
-
-    //[Fact]
-    //public void DeserializeService()
-    //{
-    //    //var json = "{\"Id\":0,\r\n\"ServiceTypeName\":\"CategoryImportServiceType0_d5246a67-edb1-493f-b9c1-c16526604420\",\r\n\"ImplementationTypeName\":null,\r\n\"AssemblyPath\":null,\r\n\"ServiceProviderPath\":null,\r\n\"FileName\":null,\r\n\"StringValue\":null,\r\n\"Tab\":0,\r\n\"ParentSettingsId\":0,\r\n\"ShopSettingsGuid\":\"247a4b67-20a1-4855-b659-4e99036f3c05\",\r\n\"Guid\":\"9d98ad48-ec0b-47f9-888d-f49b428b5ecf\",\r\n\"ShopGuid\":\"09f7193f-476d-4a7b-a62f-a00046d0f0d7\",\r\n\"ShopId\":3,\r\n\"Name\":\"ImportService\"}";
-    //    //var json = "{\"Id\":0,\r\n\"ParentSettingsId\":0,\r\n\"ShopSettingsGuid\":\"247a4b67-20a1-4855-b659-4e99036f3c05\",\r\n\"ShopGuid\":\"09f7193f-476d-4a7b-a62f-a00046d0f0d7\",\r\n\"ShopId\":3,\r\n\"Name\":\"ImportService\"}";
-    //    var json = "{\"id\":0,\r\n\"parentSettingsId\":0,\r\n\"shopSettingsGuid\":\"247a4b67-20a1-4855-b659-4e99036f3c05\",\r\n\"shopGuid\":\"09f7193f-476d-4a7b-a62f-a00046d0f0d7\",\r\n\"shopId\":3,\r\n\"name\":\"ImportService\"}";
-
-    //    //var source = new ServiceSettingsModel(0, 0, 0, Guid.NewGuid(), Guid.NewGuid());
-    //    //var json = JsonSerializer.Serialize(source);
-
-    //    var option = new JsonSerializerOptions
-    //    {
-    //        NumberHandling = JsonNumberHandling.AllowReadingFromString,
-    //        IgnoreReadOnlyProperties = false,
-    //        RespectRequiredConstructorParameters = true,
-    //        PropertyNameCaseInsensitive = true,
-    //        IgnoreReadOnlyFields = true,
-    //        //PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    //    };
-    //    var service = JsonSerializer.Deserialize<ServiceSettingsModel>(json);//, option);
-    //}
+    
 
     private async Task AssertSaveShopSettingsAsync(ShopSettingType shopSettingType)
     {

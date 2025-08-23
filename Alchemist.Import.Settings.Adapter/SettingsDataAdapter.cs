@@ -4,17 +4,18 @@ using Alchemist.Import.Settings.Extensions;
 
 namespace Alchemist.Import.Settings.DataAdapter;
 
-public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImportSettings, TImportServiceSettings>(IShopSettingsDataService shopSettingsDataService)
+public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IShopSettingsDataService shopSettingsDataService, Product.Interfaces.ShopSettingType shopSettingType)
     : ISettingsDataAdapter
-    where TProductShopImportSettings : class, IProductShopImportSettings
-    where TCategoryShopImportSettings : class, ICategoryShopImportSettings
+    where TShopImportSettings : class, IShopImportSettings
     where TImportServiceSettings : class, IImportServiceSettings
 {
-    private readonly IShopSettingsDataService _shopSettingsDataService = shopSettingsDataService;    
+    private readonly IShopSettingsDataService _shopSettingsDataService = shopSettingsDataService;
 
-    public async Task<IShopImportSettings?> GetShopImportSettings(int shopId, ShopSettingType shopSettingType)
+    private readonly Product.Interfaces.ShopSettingType _shopSettingType = shopSettingType;
+
+    public async Task<IShopImportSettings?> GetShopImportSettings(int shopId)
     {
-        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, (Product.Interfaces.ShopSettingType) (int)shopSettingType);
+        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, _shopSettingType);
         if (shopSettings == null) return null;
 
         return await GetShopImportSettings(shopSettings);
@@ -29,9 +30,7 @@ public class SettingsDataAdapter<TProductShopImportSettings, TCategoryShopImport
 
     private async Task<IShopImportSettings?> GetShopImportSettings(Product.Interfaces.IShopSettings shopSettings)
     {
-        IShopImportSettings shopSettingsModel = shopSettings.Type == Product.Interfaces.ShopSettingType.Product
-           ? shopSettings.ToShopImportSettings<TProductShopImportSettings>()
-           : shopSettings.ToShopImportSettings<TCategoryShopImportSettings>();
+        var shopSettingsModel = shopSettings.ToShopImportSettings<TShopImportSettings>();
 
         var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
         var serviceModels = services.Select(s => s.ToImportServiceSettings<TImportServiceSettings>()).ToList();

@@ -340,7 +340,10 @@ public class HomeControllerTest : ControllerTest<HomeController>
     public async Task LoadTabActionResultIsInternalServerErrorWhenGetShopImportSettingsThrowsException()
     {
         var exception = new InvalidOperationException("test error");
-        _settingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>())).Throws(exception);
+        _productSettingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>()))
+            .Throws(exception);
+        _categorySettingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>()))
+            .Throws(exception);
 
         await LoadShopsAsync();
 
