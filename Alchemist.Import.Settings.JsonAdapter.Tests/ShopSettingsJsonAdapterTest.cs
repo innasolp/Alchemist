@@ -8,40 +8,53 @@ namespace Alchemist.Import.Settings.JsonAdapter.Tests;
 
 public class ShopSettingsJsonAdapterTest
 {
-    private readonly ISettingsAdapter _shopSettingsJsonAdapter;
+    private readonly ISettingsAdapter _productShopSettingsJsonAdapter;
+    private readonly ISettingsAdapter _categoryShopSettingsJsonAdapter;
 
     public ShopSettingsJsonAdapterTest()
     {
         var builder = new HostApplicationBuilder();
-        builder.Services.AddSettingsJsonAdapter<TestProductShopImportSettings, TestCategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
+        builder.Services.AddKeyedSettingsJsonAdapter<TestProductShopImportSettings>("shopProducts.json", "shopProducts");
+        builder.Services.AddKeyedSettingsJsonAdapter<TestCategoryShopImportSettings>("shopCategories.json", "shopCategories");
         var host = builder.Build();
 
-        _shopSettingsJsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>() as ShopSettingsJsonAdapter<TestProductShopImportSettings, TestCategoryShopImportSettings>;
+        _productShopSettingsJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>("shopProducts");
+        _categoryShopSettingsJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>("shopCategories");
     }
 
     [Fact]
-    public async Task GetAllShopImportSettingsSuccessWhenJsonFileIsValid()
+    public async Task GetAllProductShopImportSettingsSuccessWhenJsonFileIsValid()
     {
-        var shopSettings = await _shopSettingsJsonAdapter.GetAllShopImportSettings();
+        var shopSettings = await _productShopSettingsJsonAdapter.GetAllShopImportSettings();
         Assert.NotNull(shopSettings);
-        Assert.Equal(4, shopSettings.Count);
+        Assert.Equal(2, shopSettings.Count);
         Assert.Equal(2, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Product));
-        Assert.Equal(2, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Category));
+        Assert.Equal(0, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Category));
 
         var ozonProducts = shopSettings.Where(s=>s.ShopSettingType == ShopSettingType.Product && s.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(ozonProducts);
         ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonProducts);
         Assert.Equal(0, ozonProducts.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
 
-        var ozonCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
-        Assert.NotNull(ozonCategories);
-        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonCategories);
-        Assert.Equal(3, ozonCategories.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
-
         var goldAppleProducts = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Product && s.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleProducts); 
         ShopSettingsAsserts.AssertHttpRequestLoaderShopSettings(goldAppleProducts);
         Assert.Equal(0, goldAppleProducts.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
+    }
+
+    [Fact]
+    public async Task GetAllCategoryShopImportSettingsSuccessWhenJsonFileIsValid()
+    {
+        var shopSettings = await _categoryShopSettingsJsonAdapter.GetAllShopImportSettings();
+        Assert.NotNull(shopSettings);
+        Assert.Equal(2, shopSettings.Count);
+        Assert.Equal(0, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Product));
+        Assert.Equal(2, shopSettings.Count(s => s.ShopSettingType == ShopSettingType.Category));
+
+        var ozonCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+        Assert.NotNull(ozonCategories);
+        ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings(ozonCategories);
+        Assert.Equal(3, ozonCategories.Services.OfType<IImportServiceSettings>().Where(s => !s.IsPrimary()).Count());
 
         var goldAppleCategories = shopSettings.Where(s => s.ShopSettingType == ShopSettingType.Category && s.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleCategories);
@@ -52,7 +65,7 @@ public class ShopSettingsJsonAdapterTest
     [Fact]
     public async Task GetShopImportSettingsProductsSuccessWhenLoadingFromJsonByValidNames()
     {
-        var shopSettings = await _shopSettingsJsonAdapter.GetShopImportSettings("Ozon", ShopSettingType.Product);
+        var shopSettings = await _productShopSettingsJsonAdapter.GetShopImportSettings("Ozon");
         Assert.NotNull(shopSettings);
         Assert.Contains("ozon", shopSettings.ShopUrl);
     }
@@ -60,7 +73,7 @@ public class ShopSettingsJsonAdapterTest
     [Fact]
     public async Task GetShopImportSettingsCategoriessSuccessWhenLoadingFromJsonByValidNames()
     {
-        var shopSettings = await _shopSettingsJsonAdapter.GetShopImportSettings("GoldAppleCategories", ShopSettingType.Category);
+        var shopSettings = await _categoryShopSettingsJsonAdapter.GetShopImportSettings("GoldAppleCategories");
         Assert.NotNull(shopSettings);
         Assert.Contains("goldapple", shopSettings.ShopUrl);
     }

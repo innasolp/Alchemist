@@ -12,7 +12,8 @@ namespace Alchemist.Product.Import.WebApp.Controllers;
 public class ShopSettingsController(ILogger<ShopSettingsController> logger,
     IImportFacade importFacade,
     IModelFactory modelFactory,
-    ISettingsDataAdapter settingsDataAdapter) : Controller
+    [FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
+    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) : Controller
 {
     private readonly ILogger<ShopSettingsController> _logger = logger;
 
@@ -20,7 +21,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
 
     private readonly IModelFactory _modelFactory = modelFactory;
 
-    private readonly ISettingsDataAdapter _settingsDataAdapter = settingsDataAdapter;
+    private readonly SettingsDataAdapterContainer _settingsDataAdapter = new(productSettingsDataAdapter, categorySettingsDataAdapter);
 
     [Route("ShopSettings/")]
     [HttpPost]
@@ -44,7 +45,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
         {
             try
             {
-                var shopSettings = await _settingsDataAdapter.GetShopImportSettings(shopImport.Shop.Id, (ShopSettingType)shopSettingType);
+                var shopSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(shopImport.Shop.Id, (ShopSettingType)shopSettingType);
                 if(shopSettings != null)
                     _modelFactory.Update(shopSettingsModel, shopSettings);
             }
@@ -108,7 +109,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
         {
             shopImport.ShopSettingTabs?.ShopProductsSettings?.UpdateProductShopSettingsWithoutServices(data);            
 
-            await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopProductsSettings);
+            await _settingsDataAdapter.SaveAsync(shopImport.ShopSettingTabs.ShopProductsSettings);
 
             return Ok(data);
         }
@@ -135,7 +136,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
         {
             shopImport.ShopSettingTabs.ShopCategoriesSettings.UpdateCategoryShopSettingsWithoutServices(data);
 
-            await _settingsDataAdapter.Save(shopImport.ShopSettingTabs.ShopCategoriesSettings);
+            await _settingsDataAdapter.SaveAsync(shopImport.ShopSettingTabs.ShopCategoriesSettings);
 
             return Ok(data);
         }

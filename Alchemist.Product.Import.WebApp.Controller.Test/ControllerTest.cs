@@ -28,7 +28,8 @@ public abstract class ControllerTest<T>
 
     protected readonly IImportFacade _importFacade;
 
-    protected readonly Mock<ISettingsDataAdapter> _settingsDataAdapterMock = new();
+    protected readonly Mock<ISettingsDataAdapter> _productSettingsDataAdapterMock = new();
+    protected readonly Mock<ISettingsDataAdapter> _categorySettingsDataAdapterMock = new();
 
     protected readonly List<IShop> _shops = [
         new Shop { Id = 1, Name = "Shop1", Url = "https://shop1" },
@@ -48,8 +49,10 @@ public abstract class ControllerTest<T>
         
         _shopDataServiceMock.Setup(s => s.GetShops()).Returns(async () => { return _shops; });
 
-        _settingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>()))
-            .Returns(GetShopSettingsModelAsync);
+        _productSettingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>()))
+            .Returns(async (int shopId) => await GetShopSettingsModelAsync(shopId, ShopSettingType.Product));
+        _categorySettingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>()))
+            .Returns(async (int shopId) => await GetShopSettingsModelAsync(shopId, ShopSettingType.Category));
 
         _messageReceiverMock.Setup(m => m.On(Messages.ReceiveShopCreated, It.IsAny<Action<Shop>>())).Callback(() => { });
 
@@ -78,7 +81,8 @@ public abstract class ControllerTest<T>
     {
         return new HomeController(_loggerHomeControllerMock.Object,
             _shopDataServiceMock.Object,
-            _settingsDataAdapterMock.Object,
+            _productSettingsDataAdapterMock.Object,
+            _categorySettingsDataAdapterMock.Object,
             _importFacade,
             ModelFactory,
             _messageReceiverMock.Object);

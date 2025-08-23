@@ -16,23 +16,29 @@ namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
 public class ServiceSettingsControllerTest:ControllerTest<ServiceSettingsController>
 {
-    private readonly ISettingsDataAdapter _settingsDataAdapter;
+    private readonly ISettingsDataAdapter _productSettingsDataAdapter;
+    private readonly ISettingsDataAdapter _categorySettingsDataAdapter;
 
     private readonly Mock<IShopSettingsDataService> _shopSettingsDataServiceMock = new();
 
-    private readonly ISettingsAdapter _jsonAdapter;
+    private readonly ISettingsAdapter _productJsonAdapter;
+    private readonly ISettingsAdapter _categoryJsonAdapter;
 
     public ServiceSettingsControllerTest()
     {
-        _settingsDataAdapter = new SettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>(_shopSettingsDataServiceMock.Object);
+        _productSettingsDataAdapter = new SettingsDataAdapter<ProductShopSettingsModel, ServiceSettingsModel>(_shopSettingsDataServiceMock.Object, Interfaces.ShopSettingType.Product);
+        _categorySettingsDataAdapter = new SettingsDataAdapter<CategoryShopSettingsModel, ServiceSettingsModel>(_shopSettingsDataServiceMock.Object, Interfaces.ShopSettingType.Category);
 
         var builder = new HostApplicationBuilder();
-        builder.Services.AddSettingsJsonAdapter<ProductShopSettingsModel, CategoryShopSettingsModel>(
-            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/OzonProductSettings.json",
-            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/ozoncategories.json");
+        builder.Services.AddKeyedSettingsJsonAdapter<ProductShopSettingsModel>(
+            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/OzonProductSettings.json", ShopSettingType.Product);
+        builder.Services.AddKeyedSettingsJsonAdapter<CategoryShopSettingsModel>(
+            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/ozoncategories.json", ShopSettingType.Category);
+        
         var host = builder.Build();
 
-        _jsonAdapter = host.Services.GetRequiredService<ISettingsAdapter>();
+        _productJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>(ShopSettingType.Product);
+        _categoryJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>(ShopSettingType.Category);
     }
 
     private ServiceSettingsController CreateServiceSettingsController()

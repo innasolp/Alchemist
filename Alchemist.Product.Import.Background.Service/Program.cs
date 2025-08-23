@@ -27,8 +27,10 @@ var logPath = $"{appPath}/Logs";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, CategoryShopImportSettings, ImportServiceSettings>();
-builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings, CategoryShopImportSettings>("shopProducts.json", "shopCategories.json");
+builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Product);
+builder.Services.AddSettingsDataAdapter<CategoryShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Category);
+builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings>("shopProducts.json");
+builder.Services.AddSettingsJsonAdapter<CategoryShopImportSettings>("shopCategories.json");
 
 builder.Services.AddKeyedSingleton(nameof(BrowserServiceClientFactory),
        builder.Configuration.GetHostSectionValue("BrowserServiceHost").SetEnvironmentLocalHostIfNeed());

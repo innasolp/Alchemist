@@ -11,7 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
 builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient), out IHttpClientBuilder settingsHttpClientBuilder);
-builder.Services.AddSettingsDataAdapter<ProductShopSettingsModel, CategoryShopSettingsModel, ServiceSettingsModel>();
+builder.Services.AddKeyedTypedSettingsDataAdapter<ProductShopSettingsModel,  ServiceSettingsModel>(Alchemist.Product.Interfaces.ShopSettingType.Product, Alchemist.Import.Settings.Interfaces.ShopSettingType.Product);
+builder.Services.AddKeyedTypedSettingsDataAdapter<CategoryShopSettingsModel, ServiceSettingsModel>(Alchemist.Product.Interfaces.ShopSettingType.Category, Alchemist.Import.Settings.Interfaces.ShopSettingType.Category);
 builder.Services.AddSingleton<IModelFactory, ModelFactory>();
 builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 
