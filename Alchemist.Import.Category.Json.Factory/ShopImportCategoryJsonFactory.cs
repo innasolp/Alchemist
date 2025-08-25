@@ -1,8 +1,9 @@
-﻿using Alchemist.Import.BrowserService.Factory;
-using Alchemist.Import.Category.Interfaces;
+﻿using Alchemist.Import.Category.Interfaces;
+using Alchemist.Import.Category.Json;
+using Alchemist.Import.Factory.BrowserService;
+using Alchemist.Import.Factory.Logging;
 using Alchemist.Import.Html.Factory;
 using Alchemist.Import.Interfaces;
-using Alchemist.Import.Logging.Factory;
 using Alchemist.Import.Service.Factory.Abstractions;
 using Alchemist.Import.Settings.Interfaces;
 using Http.RequestHandling.PerfomanceCounter;
@@ -11,7 +12,7 @@ using System.Text.Json;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
-namespace Alchemist.Import.Category.Json.Factory;
+namespace Alchemist.Import.Factory.Category.Json;
 
 public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerService> logger,
     IEnumerable<IWebLoader> webLoaders,

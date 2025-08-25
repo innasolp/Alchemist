@@ -15,11 +15,11 @@ using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
 using Message.RabbitMQ.DependencyInjection;
-using Alchemist.Import.Logging.Factory;
 using Alchemist.Import.Service.Factory.Interfaces;
-using Alchemist.Import.BrowserService.Factory;
 using Alchemist.BrowserService.Client;
 using Alchemist.Import.Settings.DataAdapter;
+using Alchemist.Import.Factory.BrowserService;
+using Alchemist.Import.Factory.Logging;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";

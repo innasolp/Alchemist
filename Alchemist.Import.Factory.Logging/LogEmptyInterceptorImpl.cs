@@ -1,7 +1,7 @@
 ﻿using Log.Interceptors;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Import.Logging.Factory;
+namespace Alchemist.Import.Factory.Logging;
 
 internal class LogEmptyInterceptorImpl<T>(ILogger logger) : LogInterceptor(logger), ILogger<T>
 {

@@ -250,9 +250,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GoldApple", "GoldApple", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ozon", "Ozon", "{53BFEBDC-CEC7-4C24-9928-C9E09AE129A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Category.Json.Factory", "Alchemist.Import.Category.Json.Factory\Alchemist.Import.Category.Json.Factory.csproj", "{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory.Category.Json", "Alchemist.Import.Category.Json.Factory\Alchemist.Import.Factory.Category.Json.csproj", "{E7D1C3A8-190A-4659-B85B-A05E243D1AE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Logging.Factory", "Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.Factory.csproj", "{84318E71-1F40-4CCD-AC64-D962E8963382}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory.Logging", "Alchemist.Import.Factory.Logging\Alchemist.Import.Factory.Logging.csproj", "{84318E71-1F40-4CCD-AC64-D962E8963382}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.AssemblyExtensions", "..\DependencyInjection\DependencyInjections.AssemblyExtensions\DependencyInjection.AssemblyExtensions.csproj", "{C463F9DC-A250-4170-A792-689831E8AA12}"
 EndProject
@@ -282,7 +282,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.DataItem.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.ImportItem.Handler", "Alchemist.Product.Import.ItemHandler\Alchemist.Product.ImportItem.Handler.csproj", "{CC4D1630-EE50-A506-6288-F4FC0C95144A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Products.Factory", "Alchemist.Import.Products.Factory\Alchemist.Import.Products.Factory.csproj", "{FD69EC7D-07C2-41F5-9757-77920AF0340B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory.Products", "Alchemist.Import.Products.Factory\Alchemist.Import.Factory.Products.csproj", "{FD69EC7D-07C2-41F5-9757-77920AF0340B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{FC30B593-2D65-4A85-ABF6-20EFD0542BF3}"
 EndProject
@@ -322,7 +322,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BrowserService", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BrowserService.Client", "Alchemist.BrowserService.Client\Alchemist.BrowserService.Client.csproj", "{7F1F3056-28D7-4081-90CE-6B388143F471}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.BrowserService.Factory", "Alchemist.Import.BrowserService.Factory\Alchemist.Import.BrowserService.Factory.csproj", "{49D04C39-8584-41BD-ABAF-863F98B184D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory.BrowserService", "Alchemist.Import.BrowserService.Factory\Alchemist.Import.Factory.BrowserService.csproj", "{49D04C39-8584-41BD-ABAF-863F98B184D2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.Product.Shop", "Alchemist.Test.Product.Shop\Alchemist.Test.Product.Shop.csproj", "{9068C743-747E-49D6-BA86-8196E555B744}"
 EndProject

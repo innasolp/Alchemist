@@ -29,8 +29,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.BrowserService.Client\Alchemist.BrowserService.Client.csproj" />
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.BrowserService.Factory\Alchemist.Import.BrowserService.Factory.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.Factory.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.BrowserService.Factory\Alchemist.Import.Factory.BrowserService.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Factory.Logging.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />

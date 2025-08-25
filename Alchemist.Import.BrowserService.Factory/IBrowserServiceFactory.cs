@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Interfaces;
 
-namespace Alchemist.Import.BrowserService.Factory;
+namespace Alchemist.Import.Factory.BrowserService;
 
 public interface IBrowserServiceFactory
 {

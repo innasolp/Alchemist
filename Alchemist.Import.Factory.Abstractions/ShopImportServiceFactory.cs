@@ -1,6 +1,4 @@
-﻿using Alchemist.Import.BrowserService.Factory;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Logging.Factory;
+﻿using Alchemist.Import.Interfaces;
 using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
@@ -10,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using WebLoader.Common;
 using WebLoader.Interfaces;
+using Alchemist.Import.Factory.BrowserService;
+using Alchemist.Import.Factory.Logging;
 
 namespace Alchemist.Import.Service.Factory.Abstractions;
 
