@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.BrowserService.Factory;
+﻿using Alchemist.Import.Factory.BrowserService;
 using Alchemist.Import.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

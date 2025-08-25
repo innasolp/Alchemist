@@ -1,5 +1,5 @@
 ﻿using Alchemist.BrowserService.Client;
-using Alchemist.Import.BrowserService.Factory;
+using Alchemist.Import.Factory.BrowserService;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Background;

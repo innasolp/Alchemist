@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.BrowserService.Factory\Alchemist.Import.BrowserService.Factory.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.BrowserService.Factory\Alchemist.Import.Factory.BrowserService.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
   </ItemGroup>
 

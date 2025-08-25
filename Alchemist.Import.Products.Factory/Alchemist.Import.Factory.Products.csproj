@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Factory.Abstractions\Alchemist.Import.Service.Factory.Abstractions.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.Factory.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Factory.Logging.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
   </ItemGroup>
 

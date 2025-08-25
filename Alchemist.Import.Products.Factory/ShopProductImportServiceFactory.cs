@@ -1,6 +1,6 @@
-﻿using Alchemist.Import.BrowserService.Factory;
+﻿using Alchemist.Import.Factory.BrowserService;
+using Alchemist.Import.Factory.Logging;
 using Alchemist.Import.Interfaces;
-using Alchemist.Import.Logging.Factory;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Service.Factory.Abstractions;
 using Alchemist.Import.Settings.Interfaces;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
-namespace Alchemist.Import.Products.Factory;
+namespace Alchemist.Import.Factory.Products;
 
 public abstract class ShopProductImportServiceFactory(ILogger logger,
     IEnumerable<IWebLoader> webLoaders,

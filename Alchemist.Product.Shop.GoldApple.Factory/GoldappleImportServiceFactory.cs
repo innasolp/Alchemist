@@ -1,7 +1,7 @@
-﻿using Alchemist.Import.BrowserService.Factory;
+﻿using Alchemist.Import.Factory.BrowserService;
+using Alchemist.Import.Factory.Logging;
+using Alchemist.Import.Factory.Products;
 using Alchemist.Import.Interfaces;
-using Alchemist.Import.Logging.Factory;
-using Alchemist.Import.Products.Factory;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Shop.GoldApple.ImportService;

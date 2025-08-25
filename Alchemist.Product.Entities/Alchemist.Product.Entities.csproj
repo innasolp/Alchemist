@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;debug libs</Configurations>
+    <Configurations>Debug;Release;import_settings;import_shops;import_shops</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
