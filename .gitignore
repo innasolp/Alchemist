@@ -22,17 +22,21 @@
 */bin/debug all
 */bin/Debug
 */bin/Release
-*/bin/build import
+*/bin/import_core
 */obj/debug
 */obj/debug libs
 */obj/debug all
 */obj/Debug
 */obj/Release
-*/obj/build import
+*/obj/import_core
 */obj/*.json
 */obj/*.props
 */obj/*.targets
 */obj/*.cache
+*/bin/import_settings
+*/obj/import_settings
+*/bin/import_shops
+*/obj/import_shops
 
 # Playwright
 node_modules/

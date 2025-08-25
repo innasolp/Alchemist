@@ -16,10 +16,6 @@
     <ProjectReference Include="..\Alchemist.Import.Factory.Abstractions\Alchemist.Import.Service.Factory.Abstractions.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Logging.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Factory\Alchemist.Import.Products.Factory.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Shop.Ozon.ImportService\Alchemist.Product.Shop.Ozon.ImportService.csproj" />
   </ItemGroup>
 
