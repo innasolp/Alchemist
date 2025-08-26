@@ -334,6 +334,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{BC92E450-B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Import.DBService", "Alchemist.Product.Import.DBService\Alchemist.Product.Import.DBService.csproj", "{B6314BE0-77AB-542E-A1DB-7BEE64268F81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Settings.RestAPI.Test", "Alchemist.Settings.RestAPI.Test\Alchemist.Settings.RestAPI.Test.csproj", "{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -1436,6 +1438,18 @@ Global
 		{B6314BE0-77AB-542E-A1DB-7BEE64268F81}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
 		{B6314BE0-77AB-542E-A1DB-7BEE64268F81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6314BE0-77AB-542E-A1DB-7BEE64268F81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1577,6 +1591,7 @@ Global
 		{2256F407-785E-E942-AB70-FD310E0E8165} = {29F409A8-DE7C-43BE-916A-920352B78953}
 		{BC92E450-B7A7-4F96-9B6B-27CCF4ECCFF7} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B6314BE0-77AB-542E-A1DB-7BEE64268F81} = {4E0CD101-2CB2-49B9-A8B8-1A7D4E86467C}
+		{44F3F2E8-3845-4D1A-BA8A-D4A876B224AB} = {29F409A8-DE7C-43BE-916A-920352B78953}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
