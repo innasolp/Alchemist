@@ -23,7 +23,7 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
     private readonly ShopAPIWebAppFactory _shopAPIWebAppFactory;
 
-    private readonly WebApplicationFactory<Startup> _signalRApplicationFactory;
+    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
     private readonly TestWebAppKestrelFactory<BrowserServiceProgramm> _browserServiceFactory;
     
@@ -33,6 +33,14 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
+    public FixtureLoggerFactoryContext SettingsApiFixtureLoggingContext => _settingsAPIWebAppFactory.FixtureLoggingContext;
+
+    public FixtureLoggerFactoryContext ShopApiFixtureLoggingContext => _shopAPIWebAppFactory.FixtureLoggingContext;
+
+    public HttpClient ShopSettingsApiClient { get; }
+
+    public HttpClient ShopApiClient { get; }
+
     public ImportBackgroundServiceWebAppFactory()
     {
         var settings = new ConfigurationBuilder()
@@ -41,14 +49,14 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
         var alchemyDbConnectionString = settings.GetConnectionString("alchemydb");
 
-        _signalRApplicationFactory = new WebApplicationFactory<Startup>();
+        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
         _signalRApplicationFactory.CreateClient();
 
         _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
-        _shopAPIWebAppFactory.CreateClient();
+        ShopApiClient = _shopAPIWebAppFactory.CreateClient();
 
-        _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString);
-        _settingsAPIWebAppFactory.CreateClient();
+        _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
+        ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
 
         _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(8302, 8303);
     }

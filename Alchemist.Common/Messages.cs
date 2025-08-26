@@ -17,4 +17,7 @@ public static class Messages
     public static string ReceiveCategoryItem => "ReceiveCategoryItem";
 
     public static string ReceiveProductItem => "ReceiveProductItem";
+
+    public static string SendShopSettingsCreated => "SendShopSettingsCreated";
+    public static string ReceiveShopSettingsCreated => "ReceiveShopSettingsCreated";
 }

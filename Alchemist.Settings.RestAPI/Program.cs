@@ -7,6 +7,7 @@ using Alchemist.Settings.Data.Repository;
 using Alchemist.Settings.RestAPI.Controllers;
 using Http.ErrorHandling;
 using Http.Info;
+using Message.SignalR.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Serilog.Configuration.Extensions;
 
@@ -18,6 +19,9 @@ builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFacto
     .SetEnvironmentLocalHostIfNeed()));
 
 builder.Services.AddScoped<ISettingsRepository,SettingsRepository>();
+
+var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>()?.SetEnvironmentLocalHostIfNeed();
+builder.Services.AddSignalRMessageSender(signalRUrl);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

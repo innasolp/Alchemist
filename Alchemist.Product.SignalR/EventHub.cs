@@ -21,4 +21,9 @@ public class EventHub : Hub
     {
         await Clients.All.SendAsync(Messages.ReceiveProductItem, importProduct);
     }
+
+    public async Task SendShopSettingsCreated(ShopSettings shopSettings)
+    {
+        await Clients.All.SendAsync(Messages.ReceiveShopSettingsCreated, shopSettings);
+    }
 }

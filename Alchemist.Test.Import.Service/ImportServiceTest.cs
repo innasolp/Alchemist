@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Interfaces;
 using Alchemist.Import.Service;
-using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Resources;

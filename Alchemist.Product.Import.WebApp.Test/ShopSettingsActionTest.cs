@@ -33,7 +33,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
             var savingSettings = existingSettings ?? shopSettings;
             var children = _shopSettings.Where(s => s.ParentSettingsId == savingSettings.Id);
 
-            var shopSettingsModel = await savingSettings.GetShopImportSettingsAsync(children);  
+            var shopSettingsModel = savingSettings.GetShopImportSettings(children);  
 
             if (shopSettingsModel.Id == 0)
             {

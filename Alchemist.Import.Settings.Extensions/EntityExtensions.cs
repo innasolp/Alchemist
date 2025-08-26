@@ -84,7 +84,7 @@ public static class EntityExtensions
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
-                Modifiers = { JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
+                Modifiers = { Alchemist.Common.JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
             }
         };
 
@@ -102,7 +102,7 @@ public static class EntityExtensions
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
-                Modifiers = { JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
+                Modifiers = { Alchemist.Common.JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
             }
         };
 
@@ -117,7 +117,7 @@ public static class EntityExtensions
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
-                Modifiers = { JsonExtensions.SetPropertiesForSerialize(typeof(T),
+                Modifiers = { Alchemist.Common.JsonExtensions.SetPropertiesForSerialize(typeof(T),
                 nameof(IImportServiceSettings.AssemblyPath),
                 nameof(IImportServiceSettings.ImplementationTypeName),
                 nameof(IImportServiceSettings.ServiceTypeName),

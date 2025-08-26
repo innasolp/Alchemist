@@ -10,20 +10,19 @@ namespace Alchemist.Product.Import.Background.Models;
 
 internal static class ShopModelExtensions
 {
-    internal static async Task<IShopItem> CreateShopModelAsync(this IShopDataService shopDataService, IShopImportSettings shopImportSettings)
+    internal static async Task<IShopItem> GetShopModelAsync(this IShopDataService shopDataService, IShopImportSettings shopImportSettings)
     {
         return shopImportSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
-            ? await shopDataService.CreateProductShopModelAsync(shopImportSettings as IProductShopImportSettings) as IShopItem
-            : await shopDataService.CreateCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
+            ? await shopDataService.GetProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
+            : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
     }
 
-    private static async Task<IProductShopModel> CreateProductShopModelAsync(this IShopDataService shopDataService, IProductShopImportSettings shopImportSettings)
+    private static async Task<IProductShopModel> GetProductShopModelAsync(this IShopDataService shopDataService, IProductShopImportSettings shopImportSettings)
     {
-        var productShopModel = await shopDataService.CreateShopModelCoreAsync(shopImportSettings
-            , (shopName, shopUrl) => new ProductShopModel() { ShopName = shopName, ShopUrl = shopUrl, Host = new Uri(shopUrl).Host });
+        var productShopModel = await shopDataService.GetShopModelCoreAsync<ProductShopModel>(shopImportSettings);
 
         productShopModel.ProductUrl = shopImportSettings.ProductUrlFormat;
-        productShopModel.CategoryUrl = shopImportSettings.CategoryUrlFormat;        
+        productShopModel.CategoryUrl = shopImportSettings.CategoryUrlFormat;
 
         if (productShopModel.Id != 0)
         {
@@ -31,7 +30,7 @@ internal static class ShopModelExtensions
             {
                 var shopCategories = new List<IShopCategory>();
 
-                foreach(var c in shopImportSettings.RootCategories)
+                foreach (var c in shopImportSettings.RootCategories)
                 {
                     var shopCategory = await shopDataService.GetShopCategoryByShopIdAndItemId(productShopModel.Id, c.Item);
                     if (shopCategory != null)
@@ -40,7 +39,7 @@ internal static class ShopModelExtensions
                         var children2 = new List<IShopCategory>(children);
                         shopCategories.AddRange(children.Where(child => !children2.Any(c2 => c2.ParentId == child.Id)));
                     }
-                }                
+                }
 
                 if (shopCategories.Count > 0)
                     shopCategories?.ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId }));
@@ -55,14 +54,14 @@ internal static class ShopModelExtensions
                 lastShopCategories.ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId }));
             }
         }
-        else 
+        else
             shopImportSettings.RootCategories?.ToList().ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Url, ItemId = c.Item }));
 
         return productShopModel;
     }
 
-    private static async Task<T> CreateShopModelCoreAsync<T>(this IShopDataService shopDataService, IShopImportSettings shopImportSettings, Func<string, string, T> createShopModel)
-        where T: class, IShop, IShopItem
+    private static async Task<T> GetShopModelCoreAsync<T>(this IShopDataService shopDataService, IShopImportSettings shopImportSettings)
+        where T : class, IShopModel, new()
     {
         var shop = (shopImportSettings.Id != 0
                 ? await shopDataService.GetShop(shopImportSettings.ShopId)
@@ -70,21 +69,29 @@ internal static class ShopModelExtensions
                 ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl))
                 ?? await shopDataService.CreateShop(new Shop { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl });
 
-        var shopModel = createShopModel(shop?.Name ?? shopImportSettings.ShopName ?? shopImportSettings.Name,
-            shop?.Url ?? shopImportSettings.ShopUrl);
-        if (shop != null)
-            shopModel.Id = shop.Id;
+        var shopModel = CreateShopModelCore<T>(shop, shopImportSettings);
 
         return await Task.FromResult(shopModel);
     }
 
-    private static async Task<ICategoryShopModel> CreateCategoryShopModelAsync(this IShopDataService shopDataService, ICategoryShopImportSettings shopImportSettings)
+    private static async Task<ICategoryShopModel> GetCategoryShopModelAsync(this IShopDataService shopDataService, ICategoryShopImportSettings shopImportSettings)
     {
-        var categoryShopModel = await shopDataService.CreateShopModelCoreAsync(shopImportSettings,
-        (shopName, shopUrl) => new CategoryShopModel() { ShopName = shopName, ShopUrl = shopUrl, Host = new Uri(shopUrl).Host });
+        var categoryShopModel = await shopDataService.GetShopModelCoreAsync<CategoryShopModel>(shopImportSettings);
 
-        categoryShopModel.CategorySourceUrl = shopImportSettings.CategorySourceUrl;            
+        categoryShopModel.CategorySourceUrl = shopImportSettings.CategorySourceUrl;
 
         return categoryShopModel;
+    }    
+
+    private static T CreateShopModelCore<T>(IShop shop, IShopImportSettings shopImportSettings)
+        where T : class, IShopModel, new()
+    {
+        return new T
+        {
+            ShopName = shop?.Name ?? shopImportSettings.ShopName ?? shopImportSettings.Name,
+            ShopUrl = shop?.Url ?? shopImportSettings.ShopUrl,
+            Id = shop.Id,
+            Host = new Uri(shop?.Url ?? shopImportSettings.ShopUrl).Host
+        };
     }
 }
