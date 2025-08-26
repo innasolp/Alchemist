@@ -71,7 +71,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
     }
 
     [HttpPost(Name = nameof(SaveShopSettings))]
-    public async Task<Results<BadRequest,BadRequest<ShopSettings>, Created<ShopSettings>>> SaveShopSettings(ShopSettings shopSettings)
+    public async Task<Results<BadRequest,BadRequest<ShopSettings>, Created<ShopSettings>, Accepted<ShopSettings>>> SaveShopSettings(ShopSettings shopSettings)
     {
         if (shopSettings == null)
             return TypedResults.BadRequest();
@@ -79,10 +79,15 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         if (shopSettings.ShopId <= 0 || shopSettings.JsonValue == null)
             return TypedResults.BadRequest(shopSettings);
 
-        var newShopSettings = (await _settingsRepository.SaveShopSettings(shopSettings)).To<ShopSettings>();
+        var savedShopSettings = (await _settingsRepository.SaveShopSettings(shopSettings)).To<ShopSettings>();
 
-        var location = Url.Action(nameof(SaveShopSettings), new { id = newShopSettings.Id }) ?? $"/{newShopSettings.Id}";
-        return TypedResults.Created(location, newShopSettings);
+        if (shopSettings.Id == 0)
+            await SendMessage(savedShopSettings, Messages.SendShopSettingsCreated);
+
+        var location = Url.Action(nameof(SaveShopSettings), new { id = savedShopSettings.Id }) ?? $"/{savedShopSettings.Id}";
+        return  shopSettings.Id == 0 
+            ? TypedResults.Created(location, savedShopSettings)
+            : TypedResults.Accepted(location, savedShopSettings);
     }
 
     [HttpPost("save", Name = nameof(SaveShopSettingsWithServices))]
