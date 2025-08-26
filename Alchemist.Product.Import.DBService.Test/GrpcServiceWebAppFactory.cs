@@ -4,23 +4,13 @@ using Alchemist.Test.DBApiWebAppFactory;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class GrpcServiceWebAppFactory : DbAPIWebAppFactory<GrpcServiceProgramm, AlchemyContext>
+public class GrpcServiceWebAppFactory(string connectionString) : DbAPIWebAppFactory<GrpcServiceProgramm, AlchemyContext>(false)
 {
-    private readonly string _connectionString;
-
-    public GrpcServiceWebAppFactory() : base(false)
-    {
-        var settings = new ConfigurationBuilder()
-              .AddJsonFile("appsettings.json")
-              .Build();
-
-        _connectionString = settings.GetConnectionString("alchemydb");
-    }
+    private readonly string _connectionString = connectionString;
 
     public event Action<IServiceCollection> ConfigureServices;
 

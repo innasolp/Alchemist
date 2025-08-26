@@ -9,24 +9,17 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class ImportDBServiceTest(GrpcServiceWebAppFactory grpcServiceWebAppFactory, ITestOutputHelper outputHelper) 
-    : TestFixture<GrpcServiceWebAppFactory, GrpcServiceProgramm>(grpcServiceWebAppFactory, outputHelper)
+public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    : TestFixture<ImportDBServiceWebAppFactory, ImportDbServiceProgram>(webAppFactory, outputHelper)
 {
 
     private readonly Mock<IAlchemyRepository> _alchemyRepositoryMock = new();
 
-    private ImportDBServiceWebAppFactory CreateImportDBServiceWebAppFactory()
-    {
-        WebAppFactory.CreateClient();
-
-        return new ImportDBServiceWebAppFactory(WebAppFactory);
-    }
-
     [Fact]
     public async Task HelloResponseWhenStartingSuccess()
     {
-        var importDBServiceWebAppFactory = CreateImportDBServiceWebAppFactory();
-        var httpClient = importDBServiceWebAppFactory.CreateClient();
+        WebAppFactory.StartHttpClients();
+        var httpClient = WebAppFactory.CreateClient();
 
         var response = await httpClient.GetAsync("/");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -38,22 +31,22 @@ public class ImportDBServiceTest(GrpcServiceWebAppFactory grpcServiceWebAppFacto
     [Fact]
     public async Task WaitForImportItemReceiveByGrpcService()
     {
-        WebAppFactory.ConfigureServices += SetTestRepository;
+        WebAppFactory.GrpcWebAppFactory.ConfigureServices += SetTestRepository;
 
-        var importDBServiceWebAppFactory = CreateImportDBServiceWebAppFactory();
+        WebAppFactory.StartHttpClients();
 
         var productMessageMock = new Mock<IProductData>();
         FillTestProductData(productMessageMock);
 
-        var testSender = importDBServiceWebAppFactory.CreateTestSender();
+        var testSender = WebAppFactory.CreateTestSender();
         await testSender.Start();
-        testSender.Send(productMessageMock.Object, importDBServiceWebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
+        testSender.Send(productMessageMock.Object, WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
 
         await Task.Delay(5000);
 
         _alchemyRepositoryMock.Verify(r => r.GetShopProductByShopAndItemId(productMessageMock.Object.ShopId, productMessageMock.Object.ShopProduct.ItemId));
 
-        importDBServiceWebAppFactory.GrpcWebAppFactory.ConfigureServices -= SetTestRepository;
+        WebAppFactory.GrpcWebAppFactory.ConfigureServices -= SetTestRepository;
     }
 
     private void SetTestRepository(IServiceCollection services)    
