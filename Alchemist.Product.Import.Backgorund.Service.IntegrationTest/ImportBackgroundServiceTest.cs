@@ -1,11 +1,20 @@
+using Alchemist.Common;
 using Alchemist.Product.DataItem.Interfaces;
+using Alchemist.Product.Import.Background;
 using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Test.Server.Fixtures;
+using Message.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using Moq;
+using System.Collections;
 using System.Net;
+using System.Net.Http.Json;
+using System.Text.Json;
 using Xunit.Abstractions;
+using Shop = Alchemist.Product.Entities.Shop;
+using ShopSettings = Alchemist.Product.Entities.ShopSettings;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
@@ -22,6 +31,8 @@ public class ImportBackgroundServiceTest : TestFixture<ImportBackgroundServiceWe
     public ImportBackgroundServiceTest(ImportBackgroundServiceWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : base(webAppFactory, outputHelper)
     {
         WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
+        WebAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
+        WebAppFactory.SettingsApiFixtureLoggingContext.LoggedMessage += Log;
 
         _httpClient = WebAppFactory.CreateClient();
     }
@@ -79,5 +90,67 @@ public class ImportBackgroundServiceTest : TestFixture<ImportBackgroundServiceWe
     private async Task OnHandleProductMessageAsync(object t)
     {
         _asyncAutoResetEvent.Set();
+    }
+
+    [Fact]
+    public async Task NewShopSettingsHandlingWhenNewShopSettingsSaved()
+    {
+        var messageReceiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>(ShopImportWorkerKeys.DataMessageReceiverKey);
+        messageReceiver.On<ShopSettings>(Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);
+
+        var shop = await CreateNewShop();
+
+        var shopSettings = await CreateNewShopSettings(shop.Id);
+
+
+        await Task.Delay(1000);
+
+        var token = new CancellationToken();
+        var task = _asyncAutoResetEvent.WaitAsync(token);
+
+        try
+        {
+            await task.WaitAsync(TimeSpan.FromMilliseconds(30000), token);
+
+            Assert.True(_messages.Any(m=>m.Message == $"Handling of settings {shopSettings.Name} for shop id={shopSettings.ShopId} started."));
+
+            OutputHelper.WriteLine("Event set");
+        }
+        catch
+        {
+            foreach (var errorMessage in _messages.Where(m => m.LogLevel == LogLevel.Error))
+            {
+                OutputHelper.WriteLine($"{errorMessage.Message} : {errorMessage.Exception?.Message ?? ""}");
+            }
+
+            throw;
+        }
+    }
+
+    private async Task<Shop> CreateNewShop()
+    {
+        var shop = new Shop { Name = "Test", Url = $"https://{Guid.NewGuid().ToString()}" };
+        var response = await WebAppFactory.ShopApiClient.PutAsJsonAsync($"api/Shop", shop);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<Shop>();
+    }
+
+    private async Task<ShopSettings> CreateNewShopSettings(int shopId)
+    {
+        var shopSettings = TestRepository.CreateProductShopSettings(shopId);
+        var services = TestRepository.CreateShopSettingsServicesTestData(shopSettings);
+        var settingsData = new ArrayList() { shopSettings, services.ToArray() };
+        var settingsPutResponse = await WebAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData);
+        settingsPutResponse.EnsureSuccessStatusCode();
+
+        var result = await settingsPutResponse.Content.ReadFromJsonAsync<ArrayList>();
+        return JsonSerializer.Deserialize<ShopSettings>(result[0].ToString(),
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+    }
+
+    private async Task OnShopSettingsCreatedAsync(ShopSettings settings)
+    {
+        _asyncAutoResetEvent.Set();
+        await Task.FromResult(true);
     }
 }

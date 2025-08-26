@@ -179,7 +179,7 @@ public abstract class ImportWebAppTest : PageTest, IClassFixture<TestImportWebAp
 
         var children = _shopSettings.Where(s => s.ParentSettingsId == shopSetting.Id);
 
-        ShopSettingsModel shopImportSettings = await shopSetting.GetShopImportSettingsAsync(children);
+        ShopSettingsModel shopImportSettings = shopSetting.GetShopImportSettings(children);
             
         return shopImportSettings;
     }

@@ -1,10 +1,9 @@
-﻿using Alchemist.Import.Interfaces;
-using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.Interfaces;
 using System.ComponentModel;
 
 namespace Alchemist.Product.Import.Background.Models;
 
-internal abstract class ShopModel : IShopItem, IShop
+internal abstract class ShopModel : IShopModel
 {
     private int _Id;
     public int Id

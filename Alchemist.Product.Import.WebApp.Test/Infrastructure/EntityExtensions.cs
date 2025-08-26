@@ -20,11 +20,11 @@ public static class EntityExtensions
             shopSettings[index] = serviceSettings;
         }
     }
-    public static async Task<ShopSettingsModel> GetShopImportSettingsAsync(this IShopSettings shopSettings, IEnumerable<IShopSettings> children)
+    public static ShopSettingsModel GetShopImportSettings(this IShopSettings shopSettings, IEnumerable<IShopSettings> children)
     {
         return shopSettings.Type == ShopSettingType.Product
-             ? await shopSettings.GetShopImportSettings<ProductShopSettingsModel, ServiceSettingsModel>(children)
-            : await shopSettings.GetShopImportSettings<CategoryShopSettingsModel, ServiceSettingsModel>(children);
+             ? shopSettings.GetShopImportSettings<ProductShopSettingsModel, ServiceSettingsModel>(children)
+            : shopSettings.GetShopImportSettings<CategoryShopSettingsModel, ServiceSettingsModel>(children);
 
     }
 

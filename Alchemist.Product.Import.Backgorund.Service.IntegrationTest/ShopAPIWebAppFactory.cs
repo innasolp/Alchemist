@@ -16,6 +16,8 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
 
     private readonly string _connectionString = connectionString;
 
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+
     protected override void FillTestData(AlchemyContext dbContext)
     {
     }
@@ -25,13 +27,6 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
         return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
     }
 
-    protected override void ConfigureServices(IServiceCollection services)
-    {
-        base.ConfigureServices(services);
-
-        services.SetSignalRTestSender(_signalRServer, ["events"]);
-    }
-
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
@@ -39,6 +34,10 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
         builder.ConfigureServices((context, services) =>
         {
             context.SetKestrelLocalhostPortsConfig(8050, 8051);
+
+            services.SetSignalRTestSender(_signalRServer, ["events"]);
+
+            FixtureLoggingContext.ConfigureServices(services);
         });
     }
 }

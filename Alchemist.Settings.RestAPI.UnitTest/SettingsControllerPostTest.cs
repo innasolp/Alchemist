@@ -11,12 +11,15 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using System.Collections;
+using Message.Interfaces;
 
 namespace Alchemist.Settings.RestAPI.UnitTest;
 
 public class SettingsControllerPostTest
 {
     private readonly Mock<ISettingsRepository> _settingsRepository = new();
+
+    private readonly Mock<IMessageSender> _messageSender = new();
 
     private readonly ILogger<SettingsController> _logger = new Logger<SettingsController>(new LoggerFactory());
 
@@ -41,7 +44,7 @@ public class SettingsControllerPostTest
 
     public SettingsControllerPostTest()
     {
-        _settingsController = new SettingsController(_logger, _settingsRepository.Object);
+        _settingsController = new SettingsController(_logger, _settingsRepository.Object, _messageSender.Object);
 
         Mock<IUrlHelper> _urlHelper = new();
         _settingsController.Url = _urlHelper.Object;

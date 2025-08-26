@@ -2,7 +2,6 @@
 using Alchemist.Import.Html;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Service;
-using BrowserDataLoader.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.ObjectModel;

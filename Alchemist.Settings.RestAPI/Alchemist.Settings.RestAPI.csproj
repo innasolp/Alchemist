@@ -10,6 +10,7 @@
     <PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
     <PackageReference Include="Http.Info" Version="1.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+	<PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0.1" />
   </ItemGroup>
 
   <ItemGroup>

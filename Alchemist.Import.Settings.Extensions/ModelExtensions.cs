@@ -31,7 +31,7 @@ public static class ModelExtensions
         serviceSettings.Value = source.Value;
     }
 
-    public static async  Task<TShopImportSettings> GetShopImportSettings<TShopImportSettings, TImportServiceSettings>(this IShopSettings shopSettings,
+    public static TShopImportSettings GetShopImportSettings<TShopImportSettings, TImportServiceSettings>(this IShopSettings shopSettings,
         IEnumerable<IShopSettings> services)
         where TShopImportSettings : IShopImportSettings
         where TImportServiceSettings : IImportServiceSettings

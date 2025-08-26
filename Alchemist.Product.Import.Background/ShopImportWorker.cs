@@ -32,7 +32,7 @@ public class ShopImportWorker : BackgroundService
 
     protected List<IImportService> Services { get; } = [];
 
-    protected List<IShopItem> ShopModels { get; } = [];
+    private List<IShopItem> ShopModels { get; } = [];
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
         [FromKeyedServices(ShopImportWorkerKeys.DataMessageReceiverKey)]
@@ -56,7 +56,7 @@ public class ShopImportWorker : BackgroundService
 
         _productDataHandler.ItemProcessed += ProductItemHandledAsync;
 
-        _messageReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreatedAsync);
+        _messageReceiver.On<ShopSettings>(Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);       
 
         _messageReceiver.On<ShopCategory>(Messages.ReceiveCategoryAdded, OnShopCategoryAdded);
         _settingsDataService = settingsDataService;
@@ -123,48 +123,31 @@ public class ShopImportWorker : BackgroundService
         var shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
         shop?.Categories.Add(new ProductShopCategoryModel { Category = shopCategory.Category, ItemId = shopCategory.ItemId });
     }    
+    
 
-    //todo change in future to OnShopSettingsCreate
-    private async Task OnShopCreatedAsync(Shop newShop)
-    {        
-        var shopModel = ShopModels.FirstOrDefault(s => s.ShopName.Equals(newShop.Name, StringComparison.CurrentCultureIgnoreCase));
-        if (shopModel != null)
-        {
-            if (shopModel is IShop shop) shop.Id = newShop.Id;
-            return;
-        }
-
-        ShopModels.Add(shopModel);
-
-        var productShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, Interfaces.ShopSettingType.Product);
-        var categoryShopSettings = await _settingsDataService.GetShopSettings(newShop.Id, Interfaces.ShopSettingType.Category);
-
-        if (productShopSettings != null)
-        {
-            var service = await CreateShopImportServiceAsync(productShopSettings);
-            Services.Add(service);            
-        }
-
-        if (categoryShopSettings != null)
-        {
-            var service = await CreateShopImportServiceAsync(categoryShopSettings);
-            Services.Add(service);
-        }        
-    }
-
-    private async Task<IImportService?> CreateShopImportServiceAsync(IShopSettings shopSettings)
+    private async Task OnShopSettingsCreatedAsync(ShopSettings newShopSettings)
     {
-        var children = await _settingsDataService.GetChildSettings(shopSettings.Id);
-        var shopImportSettings = await shopSettings.GetShopImportSettingsAsync(children);        
+        if (ShopModels.OfType<IShopModel>().Any(s => s.Id == newShopSettings.ShopId))
+            return;
+
+        _logger.LogInformation($"Handling of settings {newShopSettings.Name} for shop id={newShopSettings.ShopId} started.");
+
+        var serviceSettings = await _settingsDataService.GetChildSettings(newShopSettings.Id);
+        var shopImportSettings = newShopSettings.GetShopImportSettings(serviceSettings);
+        
+        var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
 
         var importServiceSettings = shopImportSettings.GetImportService();
-        if (importServiceSettings == null) await Task.FromResult(default(IImportService));
-        
+        if (importServiceSettings == null) return;
+
         var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
+        var service = serviceFactory.Create(shopModel, shopImportSettings);
+        
+        ShopModels.Add(shopModel);
 
-        IShopItem shopModel = await _shopDataService.CreateShopModelAsync(shopImportSettings);
+        Services.Add(service);
 
-        return serviceFactory.Create(shopModel, shopImportSettings);        
+        _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -201,7 +184,7 @@ public class ShopImportWorker : BackgroundService
                 var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
                 if (serviceFactory == null) continue;
 
-                var shopModel = await _shopDataService.CreateShopModelAsync(shopImportSettings);
+                var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
                 ShopModels.Add(shopModel);
 
                 var shopImportService = serviceFactory.Create(shopModel, shopImportSettings);

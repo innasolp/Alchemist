@@ -50,7 +50,7 @@ public class OzonImportServiceFirefoxLoaderTest : ProductShopTest
     private async Task InitializeAsync()
     {
         var cookies = await _dataLoader.LoadCookies();
-        Assert.True(cookies.Count > 0);
+        Assert.True(cookies.Count() > 0);
         Assert.True(cookies.All(c=>c.Value != null));
 
         var result = await _webLoader.Start();

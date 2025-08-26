@@ -2,6 +2,7 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Alchemist.Settings.RestAPI.Controllers;
+using Message.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,8 @@ namespace Alchemist.Settings.RestAPI.UnitTest;
 public class SettingsControllerGetTest
 {
     private readonly Mock<ISettingsRepository> _settingsRepository = new();
+
+    private readonly Mock<IMessageSender> _messageSender = new();
 
     private readonly ILogger<SettingsController> _logger = new Logger<SettingsController>(new LoggerFactory());
 
@@ -36,7 +39,7 @@ public class SettingsControllerGetTest
 
     public SettingsControllerGetTest()
     {
-        _settingsController = new SettingsController(_logger, _settingsRepository.Object);
+        _settingsController = new SettingsController(_logger, _settingsRepository.Object, _messageSender.Object);
 
         _settingsRepository.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>()))
             .Returns((int shopId, ShopSettingType shopSettingType) =>
