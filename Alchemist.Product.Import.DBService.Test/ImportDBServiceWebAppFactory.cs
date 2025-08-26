@@ -29,21 +29,26 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
 
     public event Action<IServiceCollection> ConfigureServices;
 
-    public ImportDBServiceWebAppFactory(GrpcServiceWebAppFactory grpcWebAppFactory)
-    {
-        _grpcWebAppFactory = grpcWebAppFactory;       
-
+    public ImportDBServiceWebAppFactory()
+    {   
         var settings = new ConfigurationBuilder()
               .AddJsonFile("appsettings.json")
               .Build();
 
         var alchemyDbConnectionString = settings.GetConnectionString("alchemydb");
 
+        _grpcWebAppFactory = new GrpcServiceWebAppFactory(alchemyDbConnectionString);       
+
         _signalRApplicationFactory = new WebApplicationFactory<Startup>();
         _signalRApplicationFactory.CreateClient();
 
-
         _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
+        
+    }
+
+    public void StartHttpClients()
+    {
+        _grpcWebAppFactory.CreateClient();
         _shopAPIWebAppFactory.CreateClient();
     }
 
