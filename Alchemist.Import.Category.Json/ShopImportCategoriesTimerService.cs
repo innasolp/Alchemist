@@ -6,9 +6,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using WebLoader.Common;
-using WebLoader.Interfaces;
-
 namespace Alchemist.Import.Category.Json;
 
 public class ShopImportCategoriesTimerService : ShopImportService
@@ -35,12 +32,10 @@ public class ShopImportCategoriesTimerService : ShopImportService
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
         IHtmlSearcher? htmlSearcher,
-        IWebLoader webLoader,
-        IBrowserService browserService,
+        ILoaderService loader,
         ICategoryShopModel shop,
-        RequestHeaders? requestHeaders,
         CategoryLoadOptions categoryLoadOptions,
-       ICategoryItemHandler itemHandler) : base(logger, webLoader, browserService, requestHeaders, shop.Host)
+       ICategoryItemHandler itemHandler) : base(logger, loader,  shop.Host)
     {
         HtmlSearcher = htmlSearcher;
         CategoryLoadOptions = categoryLoadOptions;
@@ -52,13 +47,11 @@ public class ShopImportCategoriesTimerService : ShopImportService
     }
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
-   IWebLoader webLoader,
-   IBrowserService browserService,
+   ILoaderService loader,
    ICategoryShopModel shopUrlModel,
-   RequestHeaders? requestHeaders,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
-        : this(logger, null, webLoader, browserService, shopUrlModel, requestHeaders, categoryLoadOptions, itemHandler)
+        : this(logger, null, loader, shopUrlModel, categoryLoadOptions, itemHandler)
     {
     }
 

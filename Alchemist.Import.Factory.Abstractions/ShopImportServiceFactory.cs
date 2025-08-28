@@ -62,6 +62,6 @@ public abstract class ShopImportServiceFactory(ILogger logger,
         IShopItem shopModel, 
         IShopImportSettings shopImportSettings,  
         IWebLoader webLoader, 
-        IBrowserService browserService, 
+        ILoaderService browserService, 
         RequestHeaders? requestHeaders);
 }

@@ -3,18 +3,14 @@ using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
 using Alchemist.Test.Import.Service.Infrastructure;
 using Microsoft.Extensions.Logging;
-using WebLoader.Common;
-using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Product.Test.Infrastructure;
 
 public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
     IProductShopModel shopUrlModel, 
-    IWebLoader webLoader,
-    IBrowserService browserService,
-    RequestHeaders requestHeaders,
+    ILoaderService loader,
     IProductItemHandler itemHandler) 
-    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopUrlModel, webLoader, browserService, requestHeaders, itemHandler), ITestService
+    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopUrlModel, loader, itemHandler), ITestService
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {

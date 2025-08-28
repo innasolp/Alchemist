@@ -1,9 +1,7 @@
 ﻿using Alchemist.Import.Service;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
-using WebLoader.Common;
 using Alchemist.Common;
 using System.Collections.Concurrent;
 using Alchemist.Import.Interfaces;
@@ -34,15 +32,13 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected abstract int PageProductCount { get; }
 
-    protected virtual int MaxUnsuccessRequestCount => 20;
+    protected virtual int MaxUnsuccessRequestCount => 10;
 
     public ShopImportCategoryProductsService(ILogger logger,
         IProductShopModel shopUrlModel,
-        IWebLoader webLoader,
-        IBrowserService browserService,
-        RequestHeaders requestHeaders,
+        ILoaderService loader,
         IProductItemHandler itemHandler)
-        : base(logger, webLoader, browserService, requestHeaders, shopUrlModel.Host)
+        : base(logger, loader, shopUrlModel.Host)
     {
         ProductShopModel = shopUrlModel;
         _itemHandler = itemHandler;
@@ -112,9 +108,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 {
                     _unhandledCategoryPages.Enqueue(new CategoryPage(category, categoryResult.Url, page));
                     Logger.LogWarning(ImportProductLogMessages.CategoryNotLoadedFromUrlWarning, [categoryPageUrl, categoryResult.Exception.Message]);
-                    unsuccessRequestCount++;                    
+                    unsuccessRequestCount++;
 
-                    if (unsuccessRequestCount > MaxUnsuccessRequestCount) break;
+                    if (unsuccessRequestCount > MaxUnsuccessRequestCount)                   
+                        break;                    
 
                     categoryPageUrl = nextCategoryPageUrl;
                     page++;
@@ -169,7 +166,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            while (_unhandledCategoryPages.Count > 0 && !stoppingToken.IsCancellationRequested && WebLoader.IsStarted)
+            while (_unhandledCategoryPages.Count > 0 && !stoppingToken.IsCancellationRequested && LoaderService.IsStarted)
             {
                 if (!_unhandledCategoryPages.TryDequeue(out var unhandledCategory))
                     continue;
@@ -263,7 +260,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            while (_unhandledCategoryProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && WebLoader.IsStarted)
+            while (_unhandledCategoryProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && LoaderService.IsStarted)
             {
                 if (!_unhandledCategoryProductItems.TryDequeue(out var unprocessedItem))
                     continue;
@@ -289,7 +286,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            while (_unhandledProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && WebLoader.IsStarted)
+            while (_unhandledProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && LoaderService.IsStarted)
             {
                 if (!_unhandledProductItems.TryDequeue(out var unhandledItem))
                     continue;

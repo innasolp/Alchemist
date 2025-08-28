@@ -16,9 +16,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         Service = new TestImportProductService<TestCategory, TestProductItem>(
              LoggerMock.Object,
              ProductShopModelMock.Object,
-             WebLoaderMock.Object,
-             BrowserServiceMock.Object,
-             RequestHeaders,
+             LoaderMock.Object,
              ProductItemHandlerMock.Object);
     }
 
@@ -31,21 +29,21 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     [Fact]
     public async Task StoppedWhenWebLoaderNotExecutedAsync()
     {
-        WebLoaderMock.Reset();
+        LoaderMock.Reset();        
         await ImportWasStoppedWhenWebLoaderNotExecutedAsync();
     }
 
     [Fact]
     public async Task StartedWhenWebLoaderExecutedSuccessfullAsync()
     {
-        WebLoaderMock.Reset();
+        LoaderMock.Reset();
         await ImportStartedWhenWebLoaderExecutedSuccessfullAsync();
     }
 
     [Fact]
     public async Task StoppedWhenCancellationRequestedAsync()
     {
-        WebLoaderMock.Reset();
+        LoaderMock.Reset();
         await ImportStoppedWhenCancellationRequestedAsync();
     }
 }

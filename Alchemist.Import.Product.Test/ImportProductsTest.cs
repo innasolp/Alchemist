@@ -32,9 +32,7 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
         Service = new TestImportProductService<TestCategory, TestProductItem>( 
             LoggerMock.Object,
              ProductShopModelMock.Object,
-             WebLoaderMock.Object,
-             BrowserServiceMock.Object,
-             RequestHeaders,
+             LoaderMock.Object,
              ProductItemHandlerMock.Object);        
     }
 }
