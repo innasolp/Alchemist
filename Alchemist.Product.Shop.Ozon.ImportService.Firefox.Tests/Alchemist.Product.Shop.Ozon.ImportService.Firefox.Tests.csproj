@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.1" />
+    <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.3" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Http.RequestHandling.Interfaces" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
@@ -25,8 +25,8 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
-    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.6" />
-    <PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.0" />
+    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.8" />
+    <PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.1" />
   </ItemGroup>
 
   <ItemGroup>

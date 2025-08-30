@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />    
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Category.Json\Alchemist.Import.Category.Json.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory.Abstractions\Alchemist.Import.Service.Factory.Abstractions.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Factory.Logging.csproj" />

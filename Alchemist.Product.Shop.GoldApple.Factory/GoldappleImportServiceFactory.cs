@@ -5,31 +5,27 @@ using Alchemist.Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Shop.GoldApple.ImportService;
-using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.Extensions.Logging;
-using WebLoader.Common;
-using WebLoader.Interfaces;
 
 namespace Alchemist.Product.Shop.GoldApple.Factory;
 
 public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logger,
-    IEnumerable<IWebLoader> webLoaders,
-    IBrowserServiceFactory browserServiceFactory,
+    ILoaderServiceFactory browserServiceFactory,
     IProductItemHandler itemHandler, 
-    IImportServiceLogFactory? logFactory = null, 
-    IPerfomanceCounter? perfomanceCounter = null)
-        : ShopProductImportServiceFactory(logger, webLoaders, browserServiceFactory, itemHandler, logFactory, perfomanceCounter)
+    IImportServiceLogFactory? logFactory = null)
+        : ShopProductImportServiceFactory(logger, browserServiceFactory, itemHandler, logFactory)
 {  
     public override Type ServiceImplementationType => typeof(GoldAppleImportService);    
 
-    protected override IImportService Create(ILogger logger, IProductShopModel shopModel, IShopImportSettings shopImportSettings, IProductItemHandler itemHandler, 
-        IWebLoader webLoader, IBrowserService browserService, RequestHeaders? requestHeaders)
+    protected override IImportService Create(ILogger logger,
+        IProductShopModel shopModel,
+        IShopImportSettings shopImportSettings, 
+        IProductItemHandler itemHandler, 
+        ILoaderService loaderService)
     {
         return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>, 
-            shopModel,
-            webLoader,
-            browserService,
-            requestHeaders, 
+            shopModel,           
+            loaderService,             
             itemHandler);
     }
 

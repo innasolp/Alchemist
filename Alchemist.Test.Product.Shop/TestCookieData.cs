@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Interfaces;
+﻿using BrowserDataLoader.Interfaces;
 
 namespace Alchemist.Test.Product.Shop;
 
@@ -13,7 +13,7 @@ internal class TestCookieData : ICookieData
 
 internal static class CookieDataExtensions
 {
-    public static TestCookieData Convert(this BrowserDataLoader.Interfaces.ICookieData cookieData)
+    public static TestCookieData Convert(this ICookieData cookieData)
     {
         return new TestCookieData
         {

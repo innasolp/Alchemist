@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Interfaces;
+﻿using BrowserDataLoader.Interfaces;
 
 namespace Alchemist.BrowserService.Client;
 

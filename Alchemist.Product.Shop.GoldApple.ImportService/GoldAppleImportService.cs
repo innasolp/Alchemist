@@ -1,21 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Alchemist.Product.Shop.GoldApple.Model;
-using WebLoader.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
-using WebLoader.Common;
 using Alchemist.Import.Interfaces;
 
 namespace Alchemist.Product.Shop.GoldApple.ImportService;
 
 public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductShopModel shopUrlModel,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IWebLoader shopImporter,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IBrowserService browserService,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] RequestHeaders requestHeaders,
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] ILoaderService loader,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductItemHandler productDataHandler)
-    : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger, shopUrlModel, shopImporter, browserService, requestHeaders, productDataHandler)
+    : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger, shopUrlModel, loader, productDataHandler)
 {
     public override string Name => "GoldAppleImport";
 

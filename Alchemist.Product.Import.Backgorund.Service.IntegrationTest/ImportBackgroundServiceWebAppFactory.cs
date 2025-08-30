@@ -98,7 +98,7 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
     private static void SetBrowserServiceClient(IServiceCollection services, string url)
     {
-        var descriptors = services.Where(sd => sd.ServiceType == typeof(IBrowserServiceFactory)
+        var descriptors = services.Where(sd => sd.ServiceType == typeof(ILoaderServiceFactory)
            && sd.ImplementationType == typeof(BrowserServiceClientFactory));
         descriptors.ToList().ForEach(sd=>services.Remove(sd));
 

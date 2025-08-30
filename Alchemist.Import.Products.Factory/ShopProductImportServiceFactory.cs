@@ -4,19 +4,14 @@ using Alchemist.Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Service.Factory.Abstractions;
 using Alchemist.Import.Settings.Interfaces;
-using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.Extensions.Logging;
-using WebLoader.Common;
-using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Factory.Products;
 
 public abstract class ShopProductImportServiceFactory(ILogger logger,
-    IEnumerable<IWebLoader> webLoaders,
-    IBrowserServiceFactory browserServiceFactory,
+    ILoaderServiceFactory browserServiceFactory,
     IProductItemHandler itemHandler,
-    IImportServiceLogFactory? logFactory = null,
-    IPerfomanceCounter? perfomanceCounter = null) : ShopImportServiceFactory(logger, webLoaders, browserServiceFactory, logFactory, perfomanceCounter)
+    IImportServiceLogFactory? logFactory = null) : ShopImportServiceFactory(logger, browserServiceFactory, logFactory)
 {
     private readonly IProductItemHandler _itemHandler = itemHandler;
 
@@ -24,18 +19,14 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
     protected override IImportService Create(ILogger logger, 
         IShopItem shopModel, 
         IShopImportSettings shopImportSettings,
-        IWebLoader webLoader,
-        IBrowserService browserService,
-        RequestHeaders? requestHeaders)
+        ILoaderService browserService)
     {
-        return Create(logger, shopModel as IProductShopModel, shopImportSettings, _itemHandler, webLoader, browserService, requestHeaders);
+        return Create(logger, shopModel as IProductShopModel, shopImportSettings, _itemHandler, browserService);
     }
 
     protected abstract IImportService Create(ILogger logger,
         IProductShopModel shopModel,
         IShopImportSettings shopImportSettings,
         IProductItemHandler productItemHandler, 
-        IWebLoader webLoader,
-        IBrowserService browserService,
-        RequestHeaders? requestHeaders);
+        ILoaderService browserService);
 }
