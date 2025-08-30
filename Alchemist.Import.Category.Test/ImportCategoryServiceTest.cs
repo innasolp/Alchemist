@@ -28,10 +28,8 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
             null,
-            WebLoaderMock.Object,
-            BrowserServiceMock.Object,
-            _categoryShopModelMock.Object,
-            RequestHeaders,
+            LoaderMock.Object,
+            _categoryShopModelMock.Object,            
             _loadOptions,
             _categoryItemHandlerMock.Object
             );
@@ -40,24 +38,25 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     [Fact]
     public async Task StoppedWhenWebLoaderNotExecutedAsync()
     {
-        WebLoaderMock.Reset();
+        LoaderMock.Reset();
         await ImportWasStoppedWhenWebLoaderNotExecutedAsync();
     }
 
     [Fact]
     public async Task StartedWhenWebLoaderExecutedSuccessfullAsync()
     {
-        WebLoaderMock.Reset();
+        LoaderMock.Reset();
         await ImportStartedWhenWebLoaderExecutedSuccessfullAsync();
     }
 
     [Fact]
     public async Task StoppedWhenCancellationRequestedAsync()
     {
-        WebLoaderMock.Reset();
+        LoaderMock.Reset();
 
         var category = Helper.CreateCategoryWithChildren();
-        WebLoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, RequestHeaders, Cookies, category);
+        var requestData = new object();
+        LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
         _loadOptions.CategoryPropertyPaths = new Dictionary<string, PropertyPath>() { { "Url", new PropertyPath("Url", "Url") },
             { "Description",new PropertyPath("Description", "Description") },
             { "Children",new PropertyPath("Children", "Children") }, 

@@ -47,19 +47,7 @@ public class GoldAppleImportServiceFirefoxTest : ProductShopTest
         _webLoader = new PlaywrightFirefoxLoader();  
         _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{_requestHeadersFileName}";       
     }
-    private static RequestHeaders GetRequestHeaders(string requestHeadersFileName)
-    {
-        using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}");
 
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(s);
-
-        s.Close();
-
-        if (requestHeaders == null)
-            Assert.Fail("request header not loaded");
-
-        return requestHeaders;
-    }
 
     private async Task InitWebLoaderIfNeedAsync()
     {
@@ -73,11 +61,14 @@ public class GoldAppleImportServiceFirefoxTest : ProductShopTest
     public async Task LoadGoldAppleCategoryPageTestAsync()
     {
         await InitWebLoaderIfNeedAsync();
+        
+        var data = await _browserServiceMock.Object.GetData("goldapple.ru");
+        if (data is not IEnumerable<ICookieData> cookies)
+            throw new InvalidDataException(data.GetType().Name);
 
-        var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
+        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersPath, cookies);
 
-        var cookies = (await _browserServiceMock.Object.LoadCookies("goldapple.ru")).Select(c => c.Convert());
-        var stream = await _webLoader.LoadFromUrl(_categoryUrl, requestHeaders, cookies);
+        var stream = await _webLoader.LoadFromUrl(_categoryUrl, requestHeaders);
         var category = await JsonSerializer.DeserializeAsync<CategoryProducts>(stream);
         stream.Close();
 
@@ -93,10 +84,13 @@ public class GoldAppleImportServiceFirefoxTest : ProductShopTest
     {
         await InitWebLoaderIfNeedAsync();
 
-        var requestHeaders = GetRequestHeaders(_requestHeadersFileName);
+        var data = await _browserServiceMock.Object.GetData("goldapple.ru");
+        if (data is not IEnumerable<ICookieData> cookies)
+            throw new InvalidDataException(data.GetType().Name);
 
-        var cookies = (await _browserServiceMock.Object.LoadCookies("goldapple.ru")).Select(c => c.Convert());
-        var stream = await _webLoader.LoadFromUrl(_productUrl, requestHeaders, cookies);
+        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersPath, cookies);
+
+        var stream = await _webLoader.LoadFromUrl(_productUrl, requestHeaders);
         var productData = await JsonSerializer.DeserializeAsync<ProductData>(stream);
         stream.Close();
 

@@ -25,6 +25,8 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
 
     private readonly SemaphoreSlim _semaphoreSlim = new(1);
 
+    private readonly SemaphoreSlim _launcherSemaphoreSlim = new(1);
+
     private IBrowserDataLoader? GetBrowserDataLoader(string browser)
     {
         if (!_browserDataLoadersByName.TryGetValue(browser, out var dataLoader))
@@ -112,13 +114,16 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
 
         try
         {
-            await _semaphoreSlim.WaitAsync();
+            await _launcherSemaphoreSlim.WaitAsync();
 
             var handle = await browserLauncher.OpenUrl(url);
 
-            await Task.Delay(500);
+            await Task.Delay(1000);
 
-            await browserLauncher.Close(handle);
+            var errorCode = await browserLauncher.Close(handle);
+
+            if (errorCode != 0)
+                throw new InvalidOperationException($"error code = {errorCode}");
 
             await Task.Delay(1000);
 
@@ -126,7 +131,37 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
         }
         finally 
         {
-            _semaphoreSlim.Release();
+            _launcherSemaphoreSlim.Release();
         }    
+    }
+
+    [HttpPost("clearCookies", Name = nameof(ClearCookiesForHost))]
+    public async Task<Results<BadRequest<string>,
+        NotFound<string>,
+        NotFound,
+        Ok<int>>>
+        ClearCookiesForHost([FromQuery] string browser, [FromQuery] string host)
+    {
+        if (string.IsNullOrEmpty(browser))
+            return TypedResults.BadRequest("browser is empty");
+
+        if (string.IsNullOrEmpty(host))
+            return TypedResults.BadRequest("host is empty");
+
+        var browserDataLoader = GetBrowserDataLoader(browser);
+        if (browserDataLoader == null)
+            return TypedResults.NotFound(browser);
+
+        try
+        {
+            await _semaphoreSlim.WaitAsync();
+
+            var deleted = await browserDataLoader.ClearCookiesForHost(host);
+            return TypedResults.Ok(deleted);
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 }

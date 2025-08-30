@@ -34,7 +34,7 @@ builder.Services.AddSettingsJsonAdapter<CategoryShopImportSettings>("shopCategor
 
 builder.Services.AddKeyedSingleton(nameof(BrowserServiceClientFactory),
        builder.Configuration.GetHostSectionValue("BrowserServiceHost").SetEnvironmentLocalHostIfNeed());
-builder.Services.AddSingleton<IBrowserServiceFactory, BrowserServiceClientFactory>();
+builder.Services.AddSingleton<ILoaderServiceFactory, BrowserServiceClientFactory>();
 
 builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("WebLoaderPath").Value}");
 

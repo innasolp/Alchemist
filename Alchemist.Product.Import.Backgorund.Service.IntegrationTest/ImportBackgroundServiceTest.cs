@@ -75,7 +75,15 @@ public class ImportBackgroundServiceTest : TestFixture<ImportBackgroundServiceWe
         {
             foreach (var errorMessage in _messages.Where(m => m.LogLevel == LogLevel.Error))
             {
-                OutputHelper.WriteLine($"{errorMessage.Message} : {errorMessage.Exception?.Message ?? ""}");                
+                OutputHelper.WriteLine($"{errorMessage.Message} : {errorMessage.Exception?.Message ?? ""}");
+                OutputHelper.WriteLine(errorMessage.Exception.StackTrace);
+            }
+
+            OutputHelper.WriteLine("Warnings:");
+            foreach (var errorMessage in _messages.Where(m => m.LogLevel == LogLevel.Error))
+            {
+                OutputHelper.WriteLine($"{errorMessage.Message} : {errorMessage.Exception?.Message ?? ""}");
+                if(errorMessage.Exception != null) OutputHelper.WriteLine(errorMessage.Exception.StackTrace);
             }
 
             throw;            

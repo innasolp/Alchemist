@@ -7,7 +7,7 @@ namespace Alchemist.Test.Product.Shop;
 
 public abstract class ProductShopTest
 {
-    protected readonly Mock<IBrowserService> _browserServiceMock = new();
+    protected readonly Mock<ILoaderService> _browserServiceMock = new();
 
     protected abstract IBrowserDataLoader BrowserDataLoader { get;}
 
@@ -15,10 +15,10 @@ public abstract class ProductShopTest
 
     public ProductShopTest()
     {
-        _browserServiceMock.Setup(s => s.LoadCookies(It.IsAny<string>())).
-            Returns(async (string host) => (await BrowserDataLoader.LoadCookies()).Select(c => c.Convert()));
+        _browserServiceMock.Setup(s => s.GetData(It.IsAny<string>())).
+            Returns(async (string host) => await BrowserDataLoader.LoadCookies());
 
-        _browserServiceMock.Setup(s=>s.UpdateCookiesForUrl(It.IsAny<string>())).
+        _browserServiceMock.Setup(s=>s.UpdateData(It.IsAny<string>())).
             Returns(async (string url) => await BrowserLauncher.OpenUrl(url));
     }
 }

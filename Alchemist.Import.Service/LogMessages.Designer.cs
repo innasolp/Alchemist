@@ -61,20 +61,47 @@ namespace Alchemist.Import.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Response status code {0} for url {1}. Web loader {2} will be restarted..
-        /// </summary>
-        internal static string HttpRequestErrorAndWebLoaderRestart {
-            get {
-                return ResourceManager.GetString("HttpRequestErrorAndWebLoaderRestart", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to WebLoader {0} was not executed. Import was stopped..
         /// </summary>
         internal static string ImportWasStoppedWebLoaderNotExecute {
             get {
                 return ResourceManager.GetString("ImportWasStoppedWebLoaderNotExecute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loader is reseting....
+        /// </summary>
+        internal static string LoaderIsReseting {
+            get {
+                return ResourceManager.GetString("LoaderIsReseting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Importer {0} not started.Warning : {1}..
+        /// </summary>
+        internal static string LoaderNotStartedWarning {
+            get {
+                return ResourceManager.GetString("LoaderNotStartedWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loader reset successfully..
+        /// </summary>
+        internal static string LoaderResetSuccessfully {
+            get {
+                return ResourceManager.GetString("LoaderResetSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading from url {0} completed with error {1} and need in reseting..
+        /// </summary>
+        internal static string LoadFromUrlCompletedWithErrorAndNeedReset {
+            get {
+                return ResourceManager.GetString("LoadFromUrlCompletedWithErrorAndNeedReset", resourceCulture);
             }
         }
         
@@ -97,11 +124,20 @@ namespace Alchemist.Import.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Request url {0} failed with error {1} and status code {2}.
+        ///   Looks up a localized string similar to Request url {0} failed with error {1}. Loader will be paused on {2} milliseconds..
         /// </summary>
-        internal static string RequestUrlFailedWithErrorAndStatusCode {
+        internal static string RequestFailedAndLoaderWillBePaused {
             get {
-                return ResourceManager.GetString("RequestUrlFailedWithErrorAndStatusCode", resourceCulture);
+                return ResourceManager.GetString("RequestFailedAndLoaderWillBePaused", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request url {0} failed with error :  {1}.
+        /// </summary>
+        internal static string RequestUrlFailedWithError {
+            get {
+                return ResourceManager.GetString("RequestUrlFailedWithError", resourceCulture);
             }
         }
         
@@ -156,51 +192,6 @@ namespace Alchemist.Import.Service {
         internal static string ServiceWasStopped {
             get {
                 return ResourceManager.GetString("ServiceWasStopped", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Too many request. Thread would be sleeped 10 sec..
-        /// </summary>
-        internal static string TooManyRequestsError {
-            get {
-                return ResourceManager.GetString("TooManyRequestsError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Web loader is reseting....
-        /// </summary>
-        internal static string WebLoaderIsReseting {
-            get {
-                return ResourceManager.GetString("WebLoaderIsReseting", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Importer {0} not started.Warning : {1}..
-        /// </summary>
-        internal static string WebLoaderNotStartedWarning {
-            get {
-                return ResourceManager.GetString("WebLoaderNotStartedWarning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Web loader reset successfully..
-        /// </summary>
-        internal static string WebLoaderResetSuccessfully {
-            get {
-                return ResourceManager.GetString("WebLoaderResetSuccessfully", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Web loader throws redirect loop exception and will be reseted. {0}.
-        /// </summary>
-        internal static string WebLoaderThrowsNsRedirectLoopAndWillBeReseted {
-            get {
-                return ResourceManager.GetString("WebLoaderThrowsNsRedirectLoopAndWillBeReseted", resourceCulture);
             }
         }
     }

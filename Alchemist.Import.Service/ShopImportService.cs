@@ -2,27 +2,21 @@
 using Alchemist.Exceptions;
 using Alchemist.Import.Interfaces;
 using Microsoft.Extensions.Logging;
-using WebLoader.Common;
-using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Service;
 
-public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IBrowserService browserService, RequestHeaders? requestHeaders, string host)
+public abstract class ShopImportService(ILogger logger, ILoaderService loaderService, string host)
     : IImportService, IAsyncDisposable
 {
     public abstract string Name { get; }
 
-    protected IWebLoader WebLoader { get; } = webLoader;
-
-    protected IBrowserService _browserService = browserService;
+    protected ILoaderService LoaderService { get; } = loaderService;
 
     private readonly SemaphoreSlim _webLoaderSemaphoreSlim = new(1,1);
 
-    protected RequestHeaders? RequestHeaders { get; } = requestHeaders;
-
     protected ILogger Logger { get; } = logger;
 
-    protected IEnumerable<Interfaces.ICookieData> _cookies;
+    protected object? _loadData;
 
     private readonly string _host = host;
 
@@ -33,7 +27,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
         {            
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
-            if (!WebLoader.IsStarted) break;
+            if (!LoaderService.IsStarted) break;
             else if (isStarted == null)
             {
                 isStarted = true;
@@ -52,73 +46,29 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
 
     protected virtual async Task StartWebLoaderIfNeedAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested && !WebLoader.IsStarted)
+        while (!stoppingToken.IsCancellationRequested && !LoaderService.IsStarted)
         {
             try
             {
-                if (!WebLoader.IsStarted)
+                if (!LoaderService.IsStarted)
                 {
-                    _cookies = await _browserService.LoadCookies(_host);
+                    _loadData = await LoaderService.GetData(_host);
 
-                    await WebLoader.Start();                    
+                    await LoaderService.Start();                    
                 }
             }
             catch (WarningException warning)
             {
-                Logger.LogWarning(warning, LogMessages.WebLoaderNotStartedWarning, [WebLoader.GetType().Name, warning.Message]);
+                Logger.LogWarning(warning, LogMessages.LoaderNotStartedWarning, [LoaderService.Name, warning.Message]);
                 await Task.Delay(1000, stoppingToken);
             }
             catch (Exception e)
             {
-                Logger.LogError(e, LogMessages.ImportWasStoppedWebLoaderNotExecute, WebLoader.GetType().Name);
+                Logger.LogError(e, LogMessages.ImportWasStoppedWebLoaderNotExecute, LoaderService.Name);
                 return;
             }            
         }
-    }
-
-    protected virtual async Task HandleWebLoaderExceptionAsync(WebLoaderException wle, string url)
-    {
-        switch (wle.NsError)
-        {
-            case NsError.NS_ERROR_REDIRECT_LOOP:
-                if (WebLoader.IsStarted)
-                {
-                    Logger.LogWarning(wle, LogMessages.WebLoaderThrowsNsRedirectLoopAndWillBeReseted, url);
-                    Logger.LogInformation(LogMessages.WebLoaderIsReseting);
-                    await WebLoader.Reset();
-                    await _browserService.UpdateCookiesForUrl(url);
-                    _cookies = await _browserService.LoadCookies(_host);
-                    await Task.Delay(1000);
-                    Logger.LogInformation(LogMessages.WebLoaderResetSuccessfully);
-                }
-                return;
-
-
-            default:
-                throw wle;
-        }
-    }
-
-    protected virtual async Task HandleHttpExceptionAsync(HttpRequestException e, string url)
-    {
-        if (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-        {
-            Logger.LogWarning(e, LogMessages.TooManyRequestsError);
-            await Task.Delay(10000);
-        }
-        else if (RequestHeaders != null &&
-            (e.StatusCode == System.Net.HttpStatusCode.Forbidden || e.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable))
-        {
-            Logger.LogWarning(e, LogMessages.HttpRequestErrorAndWebLoaderRestart, [e.StatusCode, url, WebLoader.GetType().Name]);
-            await Task.Delay(500);
-            //todo
-            await WebLoader.Start();
-        }
-        else
-        {
-            Logger.LogError(e, LogMessages.RequestUrlFailedWithErrorAndStatusCode, [url, e.HttpRequestError, e.StatusCode]);
-        }
-    }
+    }    
 
     protected virtual void HandleWarningException(WarningException warning, string url)
     {
@@ -131,13 +81,9 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
         {
             await task(url);
         }
-        catch (HttpRequestException e)
+        catch (LoaderServiceException loaderServiceEx)
         {
-            await HandleHttpExceptionAsync(e, url);
-        }
-        catch (WebLoaderException wle)
-        {
-            await HandleWebLoaderExceptionAsync(wle, url);
+            await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
         }
         catch (WarningException warning)
         {
@@ -151,6 +97,42 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
         {
             await HandleException(e, url);            
         }
+    }
+        
+    //todo return error or warning
+    private async Task HandleLoaderServiceExceptionAsync(LoaderServiceException e, string url)
+    {
+        if(e.NeedAction != null )
+        {
+            switch (e.NeedAction)
+            {
+                case LoaderServiceAction.Reset:
+                    Logger.LogWarning(e, LogMessages.LoadFromUrlCompletedWithErrorAndNeedReset, [url, e.Message]);
+                    await ResetLoaderAsync(url);
+                    await Task.Delay(100);
+                    break;
+
+                case LoaderServiceAction.Wait:
+                    Logger.LogWarning(e, LogMessages.RequestFailedAndLoaderWillBePaused, [url, e.Message, 500]);
+                    await Task.Delay(500);
+                    break;
+            }
+        }
+        else
+        {
+            Logger.LogWarning(e.InnerException ?? e, LogMessages.RequestUrlFailedWithError, [url, e.Message]);            
+        }
+    }
+
+
+    private async Task ResetLoaderAsync(string url)
+    {
+        Logger.LogInformation(LogMessages.LoaderIsReseting);
+        await LoaderService.Reset();
+        await LoaderService.UpdateData(url);
+        _loadData = await LoaderService.GetData(_host);
+        Logger.LogInformation(LogMessages.LoaderResetSuccessfully);
+        return;
     }
 
     protected virtual async Task HandleException(Exception e, string url)
@@ -195,15 +177,10 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
         {
             return UrlTaskResult<T>.Success(await task(url), url);
         }
-        catch (HttpRequestException e)
+        catch (LoaderServiceException loaderServiceEx)
         {
-            await HandleHttpExceptionAsync(e, url);
-            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, e));
-        }
-        catch (WebLoaderException wle)
-        {
-            await HandleWebLoaderExceptionAsync(wle, url);
-            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, wle));
+            await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, loaderServiceEx));
         }
         catch (WarningException warning)
         {
@@ -229,16 +206,11 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
         {
             return UrlTaskResult<T>.Success(await task(itemUrl), url);
         }
-        catch (HttpRequestException e)
+        catch (LoaderServiceException loaderServiceEx)
         {
-            await HandleHttpExceptionAsync(e, url);
-            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, e));
-        }
-        catch (WebLoaderException wle)
-        {
-            await HandleWebLoaderExceptionAsync(wle, url);
-            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, wle));
-        }
+            await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, loaderServiceEx));
+        }        
         catch (WarningException warning)
         {
             HandleWarningException(warning, url);
@@ -304,7 +276,7 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
         await _webLoaderSemaphoreSlim.WaitAsync();
         try
         {
-            var stream = await WebLoader.LoadFromUrl(url, RequestHeaders, _cookies.Select(c=>c.Convert()));
+            var stream = await LoaderService.Load(url, _loadData);
             return await Task.FromResult(stream);
         }
         catch { throw; }
@@ -316,12 +288,12 @@ public abstract class ShopImportService(ILogger logger, IWebLoader webLoader, IB
 
     public virtual async ValueTask DisposeAsync()
     {
-        if (WebLoader == null)
+        if (LoaderService == null)
             return;
 
-        if (WebLoader.IsStarted)
-            await WebLoader.Close();
+        if (LoaderService.IsStarted)
+            await LoaderService.Close();
 
-        await WebLoader.DisposeAsync();
+        await LoaderService.DisposeAsync();
     }
 }

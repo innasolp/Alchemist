@@ -1,11 +1,17 @@
 ﻿using Alchemist.Import.Interfaces;
+using BrowserDataLoader.Interfaces;
 using System.Collections;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Web;
+using WebLoader.Common;
+using WebLoader.Interfaces;
 
 namespace Alchemist.BrowserService.Client;
 
-internal class BrowserServiceClient : IBrowserService
+internal class BrowserServiceClient : ILoaderService
 {
     private readonly HttpClient _httpClient;
 
@@ -13,7 +19,14 @@ internal class BrowserServiceClient : IBrowserService
 
     private readonly string _browserDataLauncher;
 
-    public BrowserServiceClient(IHttpClientFactory httpClientFactory, string apiHost, string browserDataLoader, string browserDataLauncher)
+    private readonly IWebLoader _webLoader;
+
+    private readonly RequestHeaders? _requestHeaders;
+
+    private readonly string _host;
+
+    public BrowserServiceClient(IHttpClientFactory httpClientFactory, string name, string apiHost, string host, IWebLoader webLoader, 
+        string browserDataLoader, string browserDataLauncher, JsonObject requestHeaders)
     {
         _httpClient = httpClientFactory.CreateClient(apiHost);
         _httpClient.BaseAddress = new Uri(apiHost);
@@ -21,9 +34,18 @@ internal class BrowserServiceClient : IBrowserService
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
 
+        _requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(requestHeaders.ToString());
+
+        Name = name;
+        _host = host;
+        _webLoader = webLoader;
         _browserDataLoader = browserDataLoader;
         _browserDataLauncher = browserDataLauncher;
     }
+
+    public string Name { get; }
+
+    bool ILoaderService.IsStarted => _webLoader?.IsStarted ?? false;
 
     public async Task<IEnumerable<ICookieData>> LoadCookies(string host)
     {
@@ -37,9 +59,74 @@ internal class BrowserServiceClient : IBrowserService
         return await response.Content.ReadFromJsonAsync<List<CookieData>>();
     }
 
-    public async Task UpdateCookiesForUrl(string url)
+    public async Task UpdateData(string url)
     {
         var response = await _httpClient.PostAsJsonAsync($"browserdata/launch", new ArrayList() { _browserDataLauncher, url });
         response.EnsureSuccessStatusCode();       
+    }    
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        await _webLoader.DisposeAsync();
+    }
+
+    async Task<object> ILoaderService.GetData(string host)
+    {
+        return await LoadCookies(host);        
+    }
+
+    public async Task<Stream> Load(string url, object? data)
+    {
+        if (data is not IEnumerable<ICookieData> cookies)
+            throw new InvalidOperationException($"Invalid type of {data}");
+
+        var headers= HeadersHelper.GetHeadersForRequest(_requestHeaders, cookies);
+
+        try
+        {
+            return await _webLoader.LoadFromUrl(url, headers);
+        }
+        catch(WebLoaderException e)
+        {
+            if (e.NsError == NsError.NS_ERROR_REDIRECT_LOOP)
+                throw new LoaderServiceException(e.Message, e, LoaderServiceAction.Reset);
+            else 
+                throw new LoaderServiceException(e.Message, e);
+        }
+        catch(HttpRequestException e)
+        {
+            if(e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                throw new LoaderServiceException(e.Message, e, LoaderServiceAction.Wait);
+            else
+                throw new LoaderServiceException(e.Message, e);
+        }
+    }
+
+    private async Task<int> ClearCookiesForHost(string host)
+    {
+        var encodedBrowserDataLoader = HttpUtility.UrlEncode(_browserDataLoader);
+        var encodedHost = HttpUtility.UrlEncode(host);
+        var url = $"browserdata/clearCookies?browser={encodedBrowserDataLoader}&host={encodedHost}";
+
+        var response = await _httpClient.PostAsync(url, null);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadAsStringAsync();
+        return int.TryParse(result, out var deleted) ? deleted : 0;    
+    }
+
+    public async Task Reset()
+    {
+        await _webLoader.Reset(_host);
+        await ClearCookiesForHost(_host);
+    }
+
+    public async Task Start()
+    {
+        await _webLoader.Start();
+    }
+
+    public async Task Close()
+    {
+        await _webLoader.Close();
     }
 }

@@ -1,58 +1,56 @@
 ﻿using Moq;
-using WebLoader.Interfaces;
-using WebLoader.Common;
 using System.Text.Json;
 using Alchemist.Import.Interfaces;
-using ICookieData = WebLoader.Interfaces.ICookieData;
 
 namespace Alchemist.Test.Import.Service.Infrastructure;
 
 public static class TestExtensions
 {
-    public static void SetupLoadCookies(this Mock<IBrowserService> browserDataLoaderMock)
+    public static void SetupLoadCookies(this Mock<ILoaderService> loaderMock)
     {
-        browserDataLoaderMock.Setup(w => w.LoadCookies(It.IsAny<string>()))
-            .Returns(async (string host) => await Task.FromResult(new List<Alchemist.Import.Interfaces.ICookieData>()));
+        loaderMock.Setup(w => w.GetData(It.IsAny<string>()))
+            .Returns(async (string host) => await Task.FromResult(new object()));
     }
 
-    public static void SetupStartSuccess(this Mock<IWebLoader> webLoaderMock)
+    public static void SetupStartSuccess(this Mock<ILoaderService> loaderMock)
     {
-        webLoaderMock.Setup(w => w.Start())
+        loaderMock.Setup(w => w.Start())
             .Returns(Task.FromResult(true))
-            .Callback(() => webLoaderMock.Setup(w => w.IsStarted).Returns(true));
+            .Callback(() => loaderMock.Setup(w => w.IsStarted).Returns(true));
     }
-      
 
-    public static void SetupLoadItem<T>(this Mock<IWebLoader> webLoaderMock,
+    public static void SetupGetRequestData(this Mock<ILoaderService> loaderMock,
+        object requestData)
+    {
+        loaderMock.Setup(l => l.GetData(It.IsAny<string>())).Returns(Task.FromResult(requestData));
+    }
+
+    public static void SetupLoadItem<T>(this Mock<ILoaderService> loaderMock,
         string itemUrl, 
-        RequestHeaders requestHeaders,
-        IEnumerable<ICookieData> cookies,
+        object requestData,
         T item)
         where T:class
     {
-        webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl, requestHeaders, cookies)).Returns(
-            (string url, RequestHeaders headers, IEnumerable<ICookieData> cookieData) => LoadItemAsync(item));
+        loaderMock.Setup(w => w.Load(itemUrl, requestData)).Returns(
+            (string url, object requestData) => LoadItemAsync(item));
     }
 
-    public static void SetupLoadItemsSuccessfull<T>(this Mock<IWebLoader> webLoaderMock,
-        Dictionary<string,T> itemUrls,
-        RequestHeaders requestHeaders,
-        IEnumerable<ICookieData> cookies)
+    public static void SetupLoadItemsSuccessfull<T>(this Mock<ILoaderService> loaderMock,
+        Dictionary<string,T> itemUrls,object requestData)
         where T : class
     {
         foreach(var itemUrl in itemUrls)
-        webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl.Key, requestHeaders, cookies)).Returns(LoadItemAsync(itemUrl.Value));
+        loaderMock.Setup(w => w.Load(itemUrl.Key, requestData)).Returns(LoadItemAsync(itemUrl.Value));
     }
 
-    public static void SetupLoadItemsThrowsExceptions<T>(this Mock<IWebLoader> webLoaderMock,
+    public static void SetupLoadItemsThrowsExceptions<T>(this Mock<ILoaderService> webLoaderMock,
         Dictionary<string, T> itemUrls, 
         Func<string, Exception> getItemException,
-        RequestHeaders requestHeaders,
-        IEnumerable<ICookieData> cookies)
+        object requestData)
         where T : class
     {
         foreach (var itemUrl in itemUrls)
-            webLoaderMock.Setup(w => w.LoadFromUrl(itemUrl.Key, requestHeaders, cookies))
+            webLoaderMock.Setup(w => w.Load(itemUrl.Key, requestData))
                 .Throws(getItemException(itemUrl.Key));
     }
 
@@ -71,13 +69,11 @@ public static class TestExtensions
            TaskScheduler.Current);
     }
 
-    public static void VerifyLoadUrlAndRequestHeaders(this Mock<IWebLoader> webLoaderMock, 
+    public static void VerifyLoadUrlAndRequestHeaders(this Mock<ILoaderService> loaderMock, 
         string url, 
-        RequestHeaders requestHeaders,
-        IEnumerable<ICookieData> cookies)
+        object requestData)
     {
-        webLoaderMock.Verify(l => l.LoadFromUrl(It.Is<string>(v => v == url), 
-            It.Is<RequestHeaders>(r=>r == requestHeaders),
-            It.Is<IEnumerable<ICookieData>>(c=>c == cookies)));
+        loaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), 
+            It.Is<object>(r=>r == requestData)));
     }
 }

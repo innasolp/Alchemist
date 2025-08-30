@@ -1,5 +1,4 @@
 using Alchemist.Import.Category.Json;
-using Alchemist.Import.Service;
 using BrowserDataLoader.Interfaces;
 using Json.FileExtensions;
 using System.Collections.ObjectModel;
@@ -63,7 +62,7 @@ public class GoldAppleCategoriesLoadTest
         Assert.NotNull(requestHeaders.Headers);
 
         var cookies = await _dataLoader.LoadCookies();
-        Assert.True(cookies.Count > 0);
+        Assert.True(cookies.Count() > 0);
         Assert.True(cookies.All(c => c.Value != null));
 
         using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders, cookies.Select(c=>c.Convert()));
@@ -100,7 +99,7 @@ public class GoldAppleCategoriesLoadTest
         Assert.NotNull(requestHeaders.Headers);
 
         var cookies = await _dataLoader.LoadCookies();
-        Assert.True(cookies.Count > 0);
+        Assert.True(cookies.Count() > 0);
         Assert.True(cookies.All(c => c.Value != null));
 
         using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders, cookies.Select(c => c.Convert()));

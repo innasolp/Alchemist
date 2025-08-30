@@ -16,14 +16,15 @@ public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputH
         var name = Guid.NewGuid().ToString();
         Service.SetName(name);
 
-        WebLoaderMock.Setup(w => w.Start()).Throws(exception);
+        LoaderMock.Setup(l => l.Name).Returns(Guid.NewGuid().ToString());
+        LoaderMock.Setup(w => w.Start()).Throws(exception);
 
         var token = new CancellationTokenSource();
         await Service.Start(token.Token);
 
         LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceWasStopped"), name);
 
-        LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ImportWasStoppedWebLoaderNotExecute"), WebLoaderMock.Object.GetType().Name);
+        LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ImportWasStoppedWebLoaderNotExecute"), LoaderMock.Object.Name);
     }
 
     protected async Task ImportStartedWhenWebLoaderExecutedSuccessfullAsync()
@@ -31,7 +32,7 @@ public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputH
         var name = Guid.NewGuid().ToString();
         Service.SetName(name);
 
-        WebLoaderMock.SetupStartSuccess();
+        LoaderMock.SetupStartSuccess();
 
         var token = new CancellationTokenSource();
 
@@ -47,7 +48,7 @@ public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputH
         var name = Guid.NewGuid().ToString();
         Service.SetName(name);
 
-        WebLoaderMock.SetupStartSuccess();
+        LoaderMock.SetupStartSuccess();
 
         var token = new CancellationTokenSource();      
 

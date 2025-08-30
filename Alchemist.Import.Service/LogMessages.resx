@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="HttpRequestErrorAndWebLoaderRestart" xml:space="preserve">
-    <value>Response status code {0} for url {1}. Web loader {2} will be restarted.</value>
+  <data name="RequestFailedAndLoaderWillBePaused" xml:space="preserve">
+    <value>Request url {0} failed with error {1}. Loader will be paused on {2} milliseconds.</value>
   </data>
   <data name="ImportWasStoppedWebLoaderNotExecute" xml:space="preserve">
     <value>WebLoader {0} was not executed. Import was stopped.</value>
@@ -129,8 +129,8 @@
   <data name="ProcessUrlNotCompleteWarning" xml:space="preserve">
     <value>Process url {0} not complete. Warning : {1}.</value>
   </data>
-  <data name="RequestUrlFailedWithErrorAndStatusCode" xml:space="preserve">
-    <value>Request url {0} failed with error {1} and status code {2}</value>
+  <data name="RequestUrlFailedWithError" xml:space="preserve">
+    <value>Request url {0} failed with error :  {1}</value>
   </data>
   <data name="ServiceStarted" xml:space="preserve">
     <value>Service {0} started.</value>
@@ -150,19 +150,16 @@
   <data name="ServiceWasStopped" xml:space="preserve">
     <value>Service {0} was stopped.</value>
   </data>
-  <data name="TooManyRequestsError" xml:space="preserve">
-    <value>Too many request. Thread would be sleeped 10 sec.</value>
+  <data name="LoaderIsReseting" xml:space="preserve">
+    <value>Loader is reseting...</value>
   </data>
-  <data name="WebLoaderIsReseting" xml:space="preserve">
-    <value>Web loader is reseting...</value>
-  </data>
-  <data name="WebLoaderNotStartedWarning" xml:space="preserve">
+  <data name="LoaderNotStartedWarning" xml:space="preserve">
     <value>Importer {0} not started.Warning : {1}.</value>
   </data>
-  <data name="WebLoaderResetSuccessfully" xml:space="preserve">
-    <value>Web loader reset successfully.</value>
+  <data name="LoaderResetSuccessfully" xml:space="preserve">
+    <value>Loader reset successfully.</value>
   </data>
-  <data name="WebLoaderThrowsNsRedirectLoopAndWillBeReseted" xml:space="preserve">
-    <value>Web loader throws redirect loop exception and will be reseted. {0}</value>
+  <data name="LoadFromUrlCompletedWithErrorAndNeedReset" xml:space="preserve">
+    <value>Loading from url {0} completed with error {1} and need in reseting.</value>
   </data>
 </root>

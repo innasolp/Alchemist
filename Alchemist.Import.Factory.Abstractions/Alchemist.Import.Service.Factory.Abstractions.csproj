@@ -12,10 +12,5 @@
     <ProjectReference Include="..\Alchemist.Import.Factory.Interfaces\Alchemist.Import.Service.Factory.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.4" />
-    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
-  </ItemGroup>
-
+	
 </Project>

@@ -12,8 +12,4 @@
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
   </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="WebLoader.Interfaces" Version="1.0.0.4" />
-	</ItemGroup>
-
 </Project>

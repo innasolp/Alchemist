@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Common;
+﻿namespace Alchemist.Import.Category.Json;
 
 public static class Utils
 {

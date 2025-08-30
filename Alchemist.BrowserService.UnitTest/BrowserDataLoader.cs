@@ -5,9 +5,14 @@ namespace Alchemist.BrowserService.UnitTest;
 
 internal class BrowserDataLoaderMock : Mock<IBrowserDataLoader>, IBrowserDataLoader
 {
-    public bool CheckStatus()
+    public async Task<int> ClearAllCookies()
     {
-        return Object.CheckStatus();
+        return await Object.ClearAllCookies();
+    }
+
+    public async Task<int> ClearCookiesForHost(string host)
+    {
+        return await Object.ClearCookiesForHost(host);
     }
 
     public async Task<IEnumerable<ICookieData>> LoadCookies(string host, bool distinct = true)
