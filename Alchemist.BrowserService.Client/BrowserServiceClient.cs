@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Web;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
@@ -101,9 +102,22 @@ internal class BrowserServiceClient : ILoaderService
         }
     }
 
+    private async Task<int> ClearCookiesForHost(string host)
+    {
+        var encodedBrowserDataLoader = HttpUtility.UrlEncode(_browserDataLoader);
+        var encodedHost = HttpUtility.UrlEncode(host);
+        var url = $"browserdata/clearCookies?browser={encodedBrowserDataLoader}&host={encodedHost}";
+
+        var response = await _httpClient.PostAsync(url, null);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadAsStringAsync();
+        return int.TryParse(result, out var deleted) ? deleted : 0;    
+    }
+
     public async Task Reset()
     {
         await _webLoader.Reset(_host);
+        await ClearCookiesForHost(_host);
     }
 
     public async Task Start()

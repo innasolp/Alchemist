@@ -5,7 +5,7 @@ namespace Alchemist.BrowserService.UnitTest;
 
 internal class BrowserLauncherMock :  Mock<IBrowserLauncher>, IBrowserLauncher
 {
-    public async Task<bool> Close(nint handle)
+    public async Task<int> Close(nint handle)
     {
         return await Object.Close(handle);
     }

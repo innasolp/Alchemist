@@ -69,4 +69,43 @@ public class BrowserDataLoadingControllerTest
         var okResult = Assert.IsAssignableFrom<Ok<IEnumerable<ICookieData>>>(result.Result);
         Assert.Equal(2, okResult.Value?.Count());
     }
+
+    [Fact]
+    public async Task ClearCookiesForHostBadRequestWhenBrowserIsEmpty()
+    {
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.ClearCookiesForHost("", ""));
+        var badRequest = Assert.IsType<BadRequest<string>>(result.Result);
+        Assert.Equal("browser is empty", badRequest.Value);
+    }
+
+    [Fact]
+    public async Task ClearCookiesForHostBadRequestWhenUrlIsEmpty()
+    {
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.ClearCookiesForHost("browser", ""));
+        var badRequest = Assert.IsType<BadRequest<string>>(result.Result);
+        Assert.Equal("host is empty", badRequest.Value);
+    }
+
+    [Fact]
+    public async Task ClearCookiesForHostNotFoundWhenBrowserNotExists()
+    {
+        var browser = Guid.NewGuid().ToString();
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.ClearCookiesForHost(browser, "url"));
+        var notFound = Assert.IsType<NotFound<string>>(result.Result);
+        Assert.Equal(browser, notFound.Value);
+    }
+
+    [Fact]
+    public async Task ClearCookiesForHostSuccessWhenBrowserAndUrlAreValid()
+    {
+        if (_browserDataLoaders.FirstOrDefault(b => b is BrowserDataLoaderMock1) is not BrowserDataLoaderMock1 browserDataLoader)
+            throw new InvalidOperationException();
+
+        var cookieCount = new Random().Next();
+        browserDataLoader.Setup(b => b.ClearCookiesForHost("url")).Returns(Task.FromResult(cookieCount));
+
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.ClearCookiesForHost(nameof(BrowserDataLoaderMock1), "url"));
+        var okResult = Assert.IsAssignableFrom<Ok<int>>(result.Result);
+        Assert.Equal(cookieCount, okResult.Value);
+    }
 }
