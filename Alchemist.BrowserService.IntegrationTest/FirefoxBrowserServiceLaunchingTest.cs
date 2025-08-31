@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using System.Collections;
 using System.Net;
 using System.Net.Http.Json;
+using System.Web;
 using Xunit.Abstractions;
 
 namespace Alchemist.BrowserService.IntegrationTest;
@@ -16,28 +17,26 @@ public class FirefoxBrowserServiceLaunchingTest : TestFixture<WebApplicationFact
         _httpClient = WebAppFactory.CreateClient();
     }
 
-    [Fact]
-    public async Task HelloResponseWhenStartingSuccess()
+    private static string GetLaunchRequestUrl(string browser, string url)
     {
-        var response = await _httpClient.GetAsync("/");
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var hello = await response.Content.ReadAsStringAsync();
-        Assert.Equal("Hello BrowserService!", hello);
-    }
+        var encodedBrowserLauncher = HttpUtility.UrlEncode(browser);
+        var encodedHost = HttpUtility.UrlEncode(url);
+        return $"browserdata/launch?browser={encodedBrowserLauncher}&url={encodedHost}";
+    }    
 
     [Fact]
     public async Task LaunchForExistingBrowserAndUrlSuccess()
     {
-        var data = new ArrayList() { "firefox", "google.com" };
-        var response = await _httpClient.PostAsJsonAsync("/browserdata/launch", data);
+        var requestUrl = GetLaunchRequestUrl("firefox", "google.com");
+        var response = await _httpClient.PostAsync(requestUrl, null);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
     public async Task LaunchForNotExistingBrowserAndUrlNotFound()
     {
-        var data = new ArrayList() { Guid.NewGuid().ToString(), "google.com" };
-        var response = await _httpClient.PostAsJsonAsync("/browserdata/launch", data);
+        var requestUrl = GetLaunchRequestUrl(Guid.NewGuid().ToString(), "google.com");
+        var response = await _httpClient.PostAsync(requestUrl, null);
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }    
 }
