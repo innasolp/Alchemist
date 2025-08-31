@@ -39,4 +39,9 @@ public readonly struct UrlTaskResult<T>
     {
         return new UrlTaskResult<T>(default(T), url, ResultStatus.Cancelled, null);
     }
+
+    public static UrlTaskResult<T> FromStatus(ResultStatus status, string url, Exception exception)
+    {
+        return new UrlTaskResult<T>(default(T), url, status, exception);
+    }
 }

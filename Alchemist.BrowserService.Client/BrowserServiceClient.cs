@@ -61,7 +61,11 @@ internal class BrowserServiceClient : ILoaderService
 
     public async Task UpdateData(string url)
     {
-        var response = await _httpClient.PostAsJsonAsync($"browserdata/launch", new ArrayList() { _browserDataLauncher, url });
+        var encodedBrowserLauncher = HttpUtility.UrlEncode(_browserDataLauncher);
+        var encodedHost = HttpUtility.UrlEncode(url);
+        var requestUrl = $"browserdata/launch?browser={encodedBrowserLauncher}&url={encodedHost}";
+
+        var response = await _httpClient.PostAsync(requestUrl, null);
         response.EnsureSuccessStatusCode();       
     }    
 

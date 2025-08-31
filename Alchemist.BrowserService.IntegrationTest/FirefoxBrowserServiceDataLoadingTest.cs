@@ -19,16 +19,21 @@ public class FirefoxBrowserServiceDataLoadingTest : TestFixture<WebApplicationFa
         _httpClient = WebAppFactory.CreateClient();
     }
 
-    private async Task Launch(string browser, string url)
+    private async Task Launch(string browser, string url, int? milliSeconds = null)
     {
-        var data = new ArrayList() { browser, url };
-        var response = await _httpClient.PostAsJsonAsync("/browserdata/launch", data);
+        var encodedBrowserLauncher = HttpUtility.UrlEncode(browser);
+        var encodedHost = HttpUtility.UrlEncode(url);
+        var requstUrl = $"browserdata/launch?{nameof(browser)}={encodedBrowserLauncher}&{nameof(url)}={encodedHost}";
+        if (milliSeconds != null)
+            requstUrl += $"&{nameof(milliSeconds)}={milliSeconds}";
+
+        var response = await _httpClient.PostAsync(requstUrl, null);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task InitializeAsync()
     {
-        await Launch("firefox", "www.google.com");
+        await Launch("firefox", "www.google.com", 2000);
     }
 
     private async Task Pause() => await Task.Delay(1000);
@@ -42,7 +47,7 @@ public class FirefoxBrowserServiceDataLoadingTest : TestFixture<WebApplicationFa
     }
 
     [Fact]
-    public async Task CookiesFromExistingHostNotEmpty()
+    public async Task LoadCookiesFromExistingHostNotEmpty()
     {
         var response = await _httpClient.GetAsync("/browserdata/getCookies/firefox/www.google.com");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

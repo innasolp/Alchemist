@@ -162,4 +162,10 @@
   <data name="LoadFromUrlCompletedWithErrorAndNeedReset" xml:space="preserve">
     <value>Loading from url {0} completed with error {1} and need in reseting.</value>
   </data>
+  <data name="ImportWasStoppedLoaderServiceAlreadyReseted" xml:space="preserve">
+    <value>Loader service {0} need reset, but it was already reset. Import {1} was stopped.</value>
+  </data>
+  <data name="LoaderServiceResetingFailed" xml:space="preserve">
+    <value>Loader service {0} was reset with error {1}.</value>
+  </data>
 </root>

@@ -74,8 +74,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         await base.Start(stoppingToken);        
     }
 
-    protected override async Task ProcessAsync(CancellationToken stoppingToken)
+    protected override async Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceStoppingToken)
     {
+        bool isEndOfProcess = false;
         while (Categories.Count > 0 && !stoppingToken.IsCancellationRequested)
         {
             var category = Categories.Dequeue();
@@ -84,12 +85,12 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             int page = 1;
             var unsuccessRequestCount = 0;            
 
-            bool? isEnd = null;
+            bool? isEndOfCategory = null;
 
             var categoryUrl = category.GetCategoryUrl();
             var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, categoryUrl, page); 
             
-            while (isEnd != true)
+            while (isEndOfCategory != true)
             {
                 var categoryResult = await GetCategoryAsync(categoryPageUrl, page, stoppingToken);
                 
@@ -99,6 +100,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 if (categoryResult.Status == ResultStatus.Error)
                 {
                     Logger.LogError(ImportProductLogMessages.CategoryLoadingFault, [categoryPageUrl, categoryResult.Exception.Message]);
+                    isEndOfProcess = true;
+                    //todo stop import
                     break;
                 }
 
@@ -142,13 +145,19 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                         break;
                 }
 
-                isEnd = IsEndOfCategory(categoryResult.Value);
+                isEndOfCategory = IsEndOfCategory(categoryResult.Value);
 
                 categoryPageUrl = nextCategoryPageUrl;
                 page++;
-            }                
+            }
 
-            Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, [categoryUrl, productCount, _unhandledCategoryProductItems.Count]);
+            if (!isEndOfProcess)
+                Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, [categoryUrl, productCount, _unhandledCategoryProductItems.Count]);
+            else
+            {
+                await serviceStoppingToken.CancelAsync();
+                break;
+            }
         }
     }
 

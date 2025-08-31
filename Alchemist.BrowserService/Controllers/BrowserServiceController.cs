@@ -2,7 +2,6 @@ using BrowserDataLoader.Interfaces;
 using BrowserLauncher.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
 
 namespace Alchemist.BrowserService.Controllers;
 
@@ -63,10 +62,10 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
         GetCookies(string browser, string host)
     {
         if (string.IsNullOrEmpty(browser))
-            return TypedResults.BadRequest("browser is empty");
+            return TypedResults.BadRequest($"{nameof(browser)} is empty");
 
         if (string.IsNullOrEmpty(host))
-            return TypedResults.BadRequest("host is empty");
+            return TypedResults.BadRequest($"{nameof(host)} is empty");
 
         var browserDataLoader = GetBrowserDataLoader(browser);
         if (browserDataLoader == null)
@@ -92,21 +91,17 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
     public async Task<Results<BadRequest<string>,
         NotFound<string>,
         Ok>>
-        LaunchBrowser(ArrayList data)
-    {
-        if (data == null || data.Count == 0)
-            return TypedResults.BadRequest("empty parameters list");
+        LaunchBrowser([FromQuery] string browser, [FromQuery] string url, [FromQuery]int? milliSeconds = null)
+    {       
 
-        if (data.Count < 2)
-            return TypedResults.BadRequest("no second parameter");
-
-        var browser = data[0]?.ToString();
         if (string.IsNullOrEmpty(browser))
-            return TypedResults.BadRequest("browser is empty");
+            return TypedResults.BadRequest($"{nameof(browser)} is empty");
 
-        var url = data[1]?.ToString();
         if (string.IsNullOrEmpty(url))
-            return TypedResults.BadRequest("url is empty");
+            return TypedResults.BadRequest($"{nameof(url)} is empty");
+
+        if (milliSeconds < 0)
+            return TypedResults.BadRequest($"{nameof(milliSeconds)} is negative");
 
         var browserLauncher = GetBrowserLauncher(browser);
         if (browserLauncher == null)
@@ -118,7 +113,7 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
 
             var handle = await browserLauncher.OpenUrl(url);
 
-            await Task.Delay(1000);
+            await Task.Delay(milliSeconds ?? 1000);
 
             var errorCode = await browserLauncher.Close(handle);
 
@@ -143,10 +138,10 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
         ClearCookiesForHost([FromQuery] string browser, [FromQuery] string host)
     {
         if (string.IsNullOrEmpty(browser))
-            return TypedResults.BadRequest("browser is empty");
+            return TypedResults.BadRequest($"{nameof(browser)} is empty");
 
         if (string.IsNullOrEmpty(host))
-            return TypedResults.BadRequest("host is empty");
+            return TypedResults.BadRequest($"{nameof(host)} is empty");
 
         var browserDataLoader = GetBrowserDataLoader(browser);
         if (browserDataLoader == null)

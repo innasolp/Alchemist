@@ -147,6 +147,31 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await token.CancelAsync();
     }
+    [Fact]
+    public async Task ImportStopedWhenLoaderThrowsMultipleExceptionWithNeedReseting()
+    {
+        var exception = new LoaderServiceException("error redirect loop", LoaderServiceAction.Reset);
+        var serviceName = Guid.NewGuid().ToString();
+        SetupServiceWithCategoryLoadException(serviceName, exception, out var url);
+        LoaderMock.Setup(s => s.Reset()).Returns(Task.FromResult(true));
+        LoaderMock.Setup(s => s.UpdateData(url)).Returns(Task.FromResult(true));
+        LoaderMock.Setup(s => s.GetData(It.IsAny<string>())).Returns(Task.FromResult(new object()));
+
+        var token = new CancellationTokenSource();
+        var task = Service.StartServiceInFactoryAsync(token.Token);
+
+        await Task.Delay(1000);
+
+        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url),
+            It.IsAny<object>()));
+
+        LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("LoadFromUrlCompletedWithErrorAndNeedReset"), [url, exception.Message]);
+        
+        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceWasStopped"), serviceName);
+
+        await token.CancelAsync();
+    }
+
 
     [Fact]
     public async Task ImportLogWarningWhenCategoryLoadThrowsWarningException()
