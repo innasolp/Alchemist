@@ -20,10 +20,17 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
 
     private readonly string _host = host;
 
+    private readonly SemaphoreSlim _resetSemaphorSlim = new (1,1);
+
+    private bool _browserIsReseted = false;
+
     public virtual async Task Start(CancellationToken stoppingToken)
     {
         bool? isStarted = null;
-        while (!stoppingToken.IsCancellationRequested)
+        var innerTokenSource = new CancellationTokenSource();
+        var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, innerTokenSource.Token);
+
+        while (!tokenSource.IsCancellationRequested)
         {            
             await StartWebLoaderIfNeedAsync(stoppingToken);
 
@@ -34,7 +41,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
                 Logger.LogInformation(LogMessages.ServiceStarted, Name);
             }
 
-            await ProcessAsync(stoppingToken);
+            await ProcessAsync(stoppingToken, innerTokenSource);
 
             await Task.Delay(100);
         }
@@ -42,7 +49,8 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         Logger.LogInformation(LogMessages.ServiceWasStopped, Name);
     }      
 
-    protected abstract Task ProcessAsync(CancellationToken stoppingToken);
+
+    protected abstract Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceStoppingToken);
 
     protected virtual async Task StartWebLoaderIfNeedAsync(CancellationToken stoppingToken)
     {
@@ -91,57 +99,96 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (OperationCanceledException operationCancelledException)
         {
-             await HandleCancelling(operationCancelledException, url);            
+             await HandleCancellingAsync(operationCancelledException, url);            
         }
         catch (Exception e)
         {
-            await HandleException(e, url);            
+            await HandleExceptionAsync(e, url);            
         }
     }
-        
-    //todo return error or warning
-    private async Task HandleLoaderServiceExceptionAsync(LoaderServiceException e, string url)
+            
+    private async Task<ResultStatus> HandleLoaderServiceExceptionAsync(LoaderServiceException e, string url)
     {
         if(e.NeedAction != null )
         {
             switch (e.NeedAction)
             {
                 case LoaderServiceAction.Reset:
-                    Logger.LogWarning(e, LogMessages.LoadFromUrlCompletedWithErrorAndNeedReset, [url, e.Message]);
-                    await ResetLoaderAsync(url);
-                    await Task.Delay(100);
-                    break;
+                    return await HandleResetingAsync(e, url);
 
                 case LoaderServiceAction.Wait:
                     Logger.LogWarning(e, LogMessages.RequestFailedAndLoaderWillBePaused, [url, e.Message, 500]);
                     await Task.Delay(500);
-                    break;
+                    return await Task.FromResult(ResultStatus.Warning);
+
+                default:
+                    Logger.LogWarning(e, LogMessages.RequestUrlFailedWithError, [url, e.Message]);
+                    return await Task.FromResult(ResultStatus.Warning);
             }
         }
         else
         {
-            Logger.LogWarning(e.InnerException ?? e, LogMessages.RequestUrlFailedWithError, [url, e.Message]);            
+            Logger.LogWarning(e.InnerException ?? e, LogMessages.RequestUrlFailedWithError, [url, e.Message]);
+            return await Task.FromResult(ResultStatus.Warning);
         }
     }
 
+    private async Task<ResultStatus> HandleResetingAsync(LoaderServiceException e, string url)
+    {
+        if (_browserIsReseted)
+        {
+            Logger.LogError(e, LogMessages.ImportWasStoppedLoaderServiceAlreadyReseted, [LoaderService.Name, Name]);
+            return await Task.FromResult(ResultStatus.Error);
+        }
+
+        Logger.LogWarning(e, LogMessages.LoadFromUrlCompletedWithErrorAndNeedReset, [url, e.Message]);
+
+        try
+        {
+            await ResetLoaderAsync(url);
+
+            Logger.LogInformation(LogMessages.LoaderResetSuccessfully);
+
+            return await Task.FromResult(ResultStatus.Warning);
+        }
+        catch (Exception resetException)
+        {
+            Logger.LogError(resetException, LogMessages.LoaderServiceResetingFailed,
+                [LoaderService.Name, resetException.Message]);
+
+            return await Task.FromResult(ResultStatus.Error);
+        }
+        finally
+        {
+            await Task.Delay(100);
+        }
+    }
 
     private async Task ResetLoaderAsync(string url)
     {
-        Logger.LogInformation(LogMessages.LoaderIsReseting);
-        await LoaderService.Reset();
-        await LoaderService.UpdateData(url);
-        _loadData = await LoaderService.GetData(_host);
-        Logger.LogInformation(LogMessages.LoaderResetSuccessfully);
-        return;
+        try
+        {
+            await _resetSemaphorSlim.WaitAsync();
+
+            Logger.LogInformation(LogMessages.LoaderIsReseting);
+            await LoaderService.Reset();
+            await LoaderService.UpdateData(url);
+            _loadData = await LoaderService.GetData(_host);
+            _browserIsReseted = true;            
+        }        
+        finally
+        {
+            _resetSemaphorSlim.Release();
+        }
     }
 
-    protected virtual async Task HandleException(Exception e, string url)
+    protected virtual async Task HandleExceptionAsync(Exception e, string url)
     {
         Logger.LogError(e, LogMessages.ProcessUrlFailedError, url);
         await Task.FromResult(true);
     }
 
-    protected virtual async Task HandleCancelling(OperationCanceledException operationCancelledException, string url)
+    protected virtual async Task HandleCancellingAsync(OperationCanceledException operationCancelledException, string url)
     {
         if (operationCancelledException.InnerException != null)
         {
@@ -156,7 +203,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
     }
 
-    protected virtual async Task HandleCancelling(OperationCanceledException operationCancelledException)
+    protected virtual async Task HandleCancellingAsync(OperationCanceledException operationCancelledException)
     {
         if (operationCancelledException.InnerException != null)
         {
@@ -179,8 +226,8 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (LoaderServiceException loaderServiceEx)
         {
-            await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
-            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, loaderServiceEx));
+            var resultStatus = await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);            
+            return await Task.FromResult(UrlTaskResult<T>.FromStatus(resultStatus, url, loaderServiceEx));
         }
         catch (WarningException warning)
         {
@@ -189,12 +236,12 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch(OperationCanceledException operationCancelledException)
         {
-            await HandleCancelling(operationCancelledException, url);
+            await HandleCancellingAsync(operationCancelledException, url);
             return await Task.FromResult(UrlTaskResult<T>.Cancelled(url));
         }
         catch (Exception e)
         {
-            await HandleException(e, url);
+            await HandleExceptionAsync(e, url);
             return await Task.FromResult(UrlTaskResult<T>.Failed(default,url, e));
         }
     }
@@ -208,8 +255,8 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (LoaderServiceException loaderServiceEx)
         {
-            await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
-            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, loaderServiceEx));
+            var resultStatus = await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
+            return await Task.FromResult(UrlTaskResult<T>.FromStatus(resultStatus, url, loaderServiceEx));
         }        
         catch (WarningException warning)
         {
@@ -218,12 +265,12 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (OperationCanceledException operationCancelledException)
         {
-            await HandleCancelling(operationCancelledException, url);
+            await HandleCancellingAsync(operationCancelledException, url);
             return await Task.FromResult(UrlTaskResult<T>.Cancelled(url));
         }
         catch (Exception e)
         {
-            await HandleException(e, url);
+            await HandleExceptionAsync(e, url);
             return await Task.FromResult(UrlTaskResult<T>.Failed(default, url, e));
         }
     }
@@ -241,7 +288,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (OperationCanceledException operationCancelledException)
         {
-            await HandleCancelling(operationCancelledException);
+            await HandleCancellingAsync(operationCancelledException);
             return await Task.FromResult(TaskResult.Cancelled());
         }
         catch (Exception e)
@@ -262,7 +309,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (OperationCanceledException operationCancelledException)
         {
-            await HandleCancelling(operationCancelledException);
+            await HandleCancellingAsync(operationCancelledException);
             return await Task.FromResult(TaskResult<T>.Cancelled());
         }
         catch (Exception e)

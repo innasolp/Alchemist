@@ -61,6 +61,15 @@ namespace Alchemist.Import.Service {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Loader service {0} need reset, but it was already reset. Import {1} was stopped..
+        /// </summary>
+        internal static string ImportWasStoppedLoaderServiceAlreadyReseted {
+            get {
+                return ResourceManager.GetString("ImportWasStoppedLoaderServiceAlreadyReseted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to WebLoader {0} was not executed. Import was stopped..
         /// </summary>
         internal static string ImportWasStoppedWebLoaderNotExecute {
@@ -93,6 +102,15 @@ namespace Alchemist.Import.Service {
         internal static string LoaderResetSuccessfully {
             get {
                 return ResourceManager.GetString("LoaderResetSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loader service {0} was reset with error {1}..
+        /// </summary>
+        internal static string LoaderServiceResetingFailed {
+            get {
+                return ResourceManager.GetString("LoaderServiceResetingFailed", resourceCulture);
             }
         }
         
