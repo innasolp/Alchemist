@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Service;
 
-public abstract class ShopImportService(ILogger logger, ILoaderService loaderService, string host)
+public abstract class ImportService(ILogger logger, ILoaderService loaderService, string host)
     : IImportService, IAsyncDisposable
 {
     public abstract string Name { get; }
@@ -16,6 +16,10 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
 
     protected ILogger Logger { get; } = logger;
 
+    private bool? _isStarted = null;
+
+    public bool IsStarted => _isStarted == true;
+
     protected object? _loadData;
 
     private readonly string _host = host;
@@ -24,33 +28,49 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
 
     private bool _browserIsReseted = false;
 
-    public virtual async Task Start(CancellationToken stoppingToken)
-    {
-        bool? isStarted = null;
+    public async Task Start(CancellationToken stoppingToken)
+    {        
         var innerTokenSource = new CancellationTokenSource();
-        var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, innerTokenSource.Token);
+        
+        await StartAsync(stoppingToken, innerTokenSource);        
+    }
+
+    protected virtual async Task StartAsync(CancellationToken stoppingToken, CancellationTokenSource serviceToken)
+    {
+        var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceToken.Token);
+
+        _browserIsReseted = false;
 
         while (!tokenSource.IsCancellationRequested)
-        {            
-            await StartWebLoaderIfNeedAsync(stoppingToken);
+        {
+            await StartWebLoaderIfNeedAsync(tokenSource.Token);
 
             if (!LoaderService.IsStarted) break;
-            else if (isStarted == null)
+            else if (_isStarted == null)
             {
-                isStarted = true;
+                _isStarted = true;
+                _loadData = await LoaderService.GetData(_host);
                 Logger.LogInformation(LogMessages.ServiceStarted, Name);
             }
 
-            await ProcessAsync(stoppingToken, innerTokenSource);
-
-            await Task.Delay(100);
+            try
+            {
+                await ProcessAsync(stoppingToken, serviceToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            finally
+            {
+                await Task.Delay(100);
+            }
         }
 
         Logger.LogInformation(LogMessages.ServiceWasStopped, Name);
-    }      
+    }
 
-
-    protected abstract Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceStoppingToken);
+    protected abstract Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceToken);
 
     protected virtual async Task StartWebLoaderIfNeedAsync(CancellationToken stoppingToken)
     {
@@ -58,12 +78,8 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         {
             try
             {
-                if (!LoaderService.IsStarted)
-                {
-                    _loadData = await LoaderService.GetData(_host);
-
-                    await LoaderService.Start();                    
-                }
+                if (!LoaderService.IsStarted)  
+                    await LoaderService.Start();
             }
             catch (WarningException warning)
             {
@@ -138,7 +154,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         if (_browserIsReseted)
         {
             Logger.LogError(e, LogMessages.ImportWasStoppedLoaderServiceAlreadyReseted, [LoaderService.Name, Name]);
-            return await Task.FromResult(ResultStatus.Error);
+            throw new OperationCanceledException();
         }
 
         Logger.LogWarning(e, LogMessages.LoadFromUrlCompletedWithErrorAndNeedReset, [url, e.Message]);
@@ -199,7 +215,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         else
         {
             Logger.LogInformation(LogMessages.ServiceWasCancelledOnLoadingFromUrl, Name, url);
-            await Task.FromResult(true);
+            throw operationCancelledException;
         }
     }
 
@@ -214,7 +230,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         else
         {
             Logger.LogInformation(LogMessages.ServiceWasCancelled, Name);
-            await Task.FromResult(true);
+            throw operationCancelledException;
         }
     }
 
@@ -342,5 +358,5 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
             await LoaderService.Close();
 
         await LoaderService.DisposeAsync();
-    }
+    }    
 }

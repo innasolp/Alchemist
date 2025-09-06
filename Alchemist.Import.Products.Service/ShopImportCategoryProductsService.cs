@@ -1,32 +1,26 @@
-﻿using Alchemist.Import.Service;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using Alchemist.Import.Products.Interfaces;
-using Alchemist.Common;
-using System.Collections.Concurrent;
+﻿using Alchemist.Common;
 using Alchemist.Import.Interfaces;
+using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Service;
+using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using System.Text.Json;
 
 namespace Alchemist.Import.Products.Service;
 
-public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ShopImportService
+public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ImportService
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
-    protected record CategoryPage(IProductShopCategory Category, string Url, int Page); 
+    protected record CategoryResult(TCategory Category, int SuccessProductCount, int UnsuccessProductCount);
 
     protected sealed record ImportProduct(IProductItem ProductItem, IShopItem Shop) : IImportProduct
     {
     }
 
-    protected readonly ConcurrentQueue<CategoryPage> _unhandledCategoryPages = new();
-
-    protected readonly ConcurrentQueue<ICategoryProductItem> _unhandledCategoryProductItems = new();
-
-    protected readonly ConcurrentQueue<TProductItem> _unhandledProductItems = new();
-
     private readonly IProductItemHandler _itemHandler;
 
-    protected Queue<IProductShopCategory> Categories { get; }
+    protected ConcurrentQueue<IProductShopCategory> Categories { get; }
 
     protected IProductShopModel ProductShopModel { get; }
 
@@ -54,256 +48,149 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             var newItems = e.NewItems.OfType<IProductShopCategory>().ToList();
             newItems.ForEach(Categories.Enqueue);
-            foreach (var item in newItems)            
-                Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, item.GetCategoryUrl());            
+            foreach (var item in newItems)
+                Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, item.GetCategoryUrl());
         }
-    }
-
-    public override async Task Start(CancellationToken stoppingToken)
-    {
-        var unprocessedCategoriesTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoriesAsync(stoppingToken),
-            stoppingToken, 
-            TaskCreationOptions.None,
-            TaskScheduler.Default);
-
-        var unprocessedProductsTask = Task.Factory.StartNew(async () => await ProcessUnhandledCategoryProductsAsync(stoppingToken), 
-            stoppingToken, 
-            TaskCreationOptions.None,
-            TaskScheduler.Default);
-
-        await base.Start(stoppingToken);        
     }
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceStoppingToken)
     {
-        bool isEndOfProcess = false;
-        while (Categories.Count > 0 && !stoppingToken.IsCancellationRequested)
+        while (!Categories.IsEmpty && !stoppingToken.IsCancellationRequested)
         {
-            var category = Categories.Dequeue();
+            if (!Categories.TryDequeue(out var category))
+                continue;
 
-            int productCount = 0;
+            int successProductCount = 0;
+            int unsuccessProductCount = 0;
             int page = 1;
-            var unsuccessRequestCount = 0;            
-
             bool? isEndOfCategory = null;
+            var attemptsCount = 0;
 
             var categoryUrl = category.GetCategoryUrl();
-            var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, categoryUrl, page); 
-            
+            var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, categoryUrl, page);
+
             while (isEndOfCategory != true)
             {
-                var categoryResult = await GetCategoryAsync(categoryPageUrl, page, stoppingToken);
-                
-                if (categoryResult.Status == ResultStatus.Cancelled)
-                    return;
+                var categoryPageResult = await ProcessCategoryAsync(categoryPageUrl, page, category.ItemId, stoppingToken);
 
-                if (categoryResult.Status == ResultStatus.Error)
-                {
-                    Logger.LogError(ImportProductLogMessages.CategoryLoadingFault, [categoryPageUrl, categoryResult.Exception.Message]);
-                    isEndOfProcess = true;
-                    //todo stop import
+                if (categoryPageResult.Status == ResultStatus.Error)
                     break;
-                }
 
-                var nextCategoryPageUrl = categoryResult.Value.GetNextCategoryPage(ProductShopModel.CategoryUrl, categoryUrl, page);
-
-                if (categoryResult.Status == ResultStatus.Warning)
+                if (categoryPageResult.Status == ResultStatus.Warning && categoryPageResult.Value?.Category == null)
                 {
-                    _unhandledCategoryPages.Enqueue(new CategoryPage(category, categoryResult.Url, page));
-                    Logger.LogWarning(ImportProductLogMessages.CategoryNotLoadedFromUrlWarning, [categoryPageUrl, categoryResult.Exception.Message]);
-                    unsuccessRequestCount++;
+                    attemptsCount++;
 
-                    if (unsuccessRequestCount > MaxUnsuccessRequestCount)                   
-                        break;                    
-
-                    categoryPageUrl = nextCategoryPageUrl;
-                    page++;
+                    if (attemptsCount == MaxUnsuccessRequestCount)
+                        break;
 
                     continue;
-                }                
-
-                var processCategoryProductsResult = await ProcessUrlTaskAsync((c) => ProcessCategoryProductsAsync(categoryResult.Value.CategoryProductItems, category.ItemId, stoppingToken), categoryResult.Url);
-
-                if (processCategoryProductsResult.Status == ResultStatus.Cancelled)
-                    return;
-
-                LogCategoryProductsResult(processCategoryProductsResult.Value, categoryResult.Value.CategoryProductItems.Length, categoryPageUrl,
-                    ImportProductLogMessages.CategoryProductsWereNotLoadedError,
-                    ImportProductLogMessages.NotAllCategoryProductsForUrlWereProcessedWarning,
-                    ImportProductLogMessages.CategoryProductsForUrlWereProcessedSuccesfullInfo);
-
-                productCount += processCategoryProductsResult.Value;                        
-
-                var currentTotalCount = categoryResult.Value?.TotalCount;
-                if (currentTotalCount != null)
-                {
-                    var totalPageCount = currentTotalCount % PageProductCount > 0
-                        ? currentTotalCount / PageProductCount + 1
-                        : currentTotalCount / PageProductCount;
-
-                    if (page >= totalPageCount)
-                        break;
                 }
+                else
+                    attemptsCount = 0;
 
-                isEndOfCategory = IsEndOfCategory(categoryResult.Value);
+                var nextCategoryPageUrl = CategoryPaging.GetNextPage(categoryPageResult.Value.Category, ProductShopModel.CategoryUrl, categoryUrl, page);
+
+                successProductCount += categoryPageResult.Value.SuccessProductCount;
+                unsuccessProductCount += categoryPageResult.Value.UnsuccessProductCount;
+
+                isEndOfCategory = IsLastPage(categoryPageResult.Value.Category, page) == true || IsEndOfCategory(categoryPageResult.Value.Category);
 
                 categoryPageUrl = nextCategoryPageUrl;
                 page++;
             }
 
-            if (!isEndOfProcess)
-                Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, [categoryUrl, productCount, _unhandledCategoryProductItems.Count]);
-            else
-            {
-                await serviceStoppingToken.CancelAsync();
-                break;
-            }
+            Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, [categoryUrl, successProductCount, unsuccessProductCount]);
         }
     }
 
-    protected virtual void LogCategoryProductsResult(int processedCount, int totalCount, string url, string errorFormat, string warningFormat, string successFormat)
+    protected bool? IsLastPage(TCategory category, int page)
     {
-        if (processedCount == 0)
-            Logger.LogError(errorFormat, url);
-        else if (processedCount < totalCount)
-            Logger.LogWarning(warningFormat,
-                [url, processedCount, totalCount]);
-        else Logger.LogInformation(successFormat, url, processedCount);
-    }
-
-    protected async Task ProcessUnhandledCategoriesAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
+        var totalCount = category.TotalCount;
+        if (totalCount > 0)
         {
-            while (_unhandledCategoryPages.Count > 0 && !stoppingToken.IsCancellationRequested && LoaderService.IsStarted)
-            {
-                if (!_unhandledCategoryPages.TryDequeue(out var unhandledCategory))
-                    continue;
-                
-                var categoryResult = await GetCategoryAsync(unhandledCategory.Url, unhandledCategory.Page, stoppingToken);
+            var totalPageCount = totalCount % PageProductCount > 0
+                ? totalCount / PageProductCount + 1
+                : totalCount / PageProductCount;
 
-                if (categoryResult.Status != ResultStatus.Success)
-                {
-                    if (categoryResult.Status == ResultStatus.Cancelled)
-                        return;
-
-                    if (categoryResult.Status == ResultStatus.Warning)
-                    {
-                        _unhandledCategoryPages.Enqueue(unhandledCategory);
-                        Logger.LogWarning(ImportProductLogMessages.CategoryNotReloadedFromUrlWarning, [categoryResult.Url, categoryResult.Exception.Message]);
-                    }
-                    else if (categoryResult.Status == ResultStatus.Error)
-                        Logger.LogError(ImportProductLogMessages.CategoryReloadingFailed, [categoryResult.Url, categoryResult.Exception.Message]);
-                    
-                    continue;
-                }
-
-                var result = await ProcessUrlTaskAsync((c) => ProcessCategoryProductsAsync(categoryResult.Value.CategoryProductItems,
-                    unhandledCategory.Category.ItemId, stoppingToken), categoryResult.Url);
-
-                if (result.Status == ResultStatus.Cancelled)
-                    return;
-
-                LogCategoryProductsResult(result.Value, categoryResult.Value.CategoryProductItems.Length, categoryResult.Url,
-                    ImportProductLogMessages.CategoryProductsWereNotLoadedError,
-                    ImportProductLogMessages.NotAllCategoryProductsForUrlWereReprocessedWarning,
-                    ImportProductLogMessages.CategoryProductsForUrlWereReprocessedSuccesfullInfo);                
-            }
+            return page >= totalPageCount;
         }
+
+        return null;
     }
 
-    protected virtual async Task<UrlTaskResult<TCategory>> GetCategoryAsync(string categoryPageUrl, int page, CancellationToken token)
+    //todo
+    protected virtual async Task<TaskResult<CategoryResult>> ProcessCategoryAsync(string categoryPageUrl, int page, int categoryItemId, CancellationToken stoppingToken)
     {
-        var categoryResult = await ProcessUrlTaskAsync(url=> GetFromApiUrlAsync<TCategory>(url, token), categoryPageUrl);
+        var categoryResult = await ProcessGetCategoryAsync(categoryPageUrl, page, stoppingToken);
+
+        if (categoryResult.Status == ResultStatus.Success)
+        {
+            var successCount = 0;
+            foreach (var categoryProductItem in categoryResult.Value.CategoryProductItems)
+            {
+                categoryProductItem.CategoryItemId = categoryItemId;
+
+                var status = await ProcessCategoryProductAsync(categoryProductItem, stoppingToken);
+                if (status == ResultStatus.Success)
+                    successCount++;
+            }
+
+            if (successCount == categoryResult.Value.CategoryProductItems.Length)
+                Logger.LogInformation(ImportProductLogMessages.CategoryProductsForUrlWereProcessedSuccesfullInfo, [categoryPageUrl, successCount]);
+            else if (successCount == 0)
+                Logger.LogError(ImportProductLogMessages.CategoryProductsWereNotLoadedError, [categoryPageUrl]);
+            else if (successCount < categoryResult.Value.CategoryProductItems.Length)
+                Logger.LogWarning(ImportProductLogMessages.NotAllCategoryProductsForUrlWereProcessedWarning, [categoryPageUrl]);
+
+            return TaskResult<CategoryResult>.Success(new CategoryResult(categoryResult.Value,
+                successCount,
+                categoryResult.Value.CategoryProductItems.Length - successCount));
+        }
+
+        if (categoryResult.Status == ResultStatus.Error)
+            Logger.LogError(ImportProductLogMessages.CategoryLoadingFault, [categoryPageUrl, categoryResult.Exception.Message]);
+        if (categoryResult.Status == ResultStatus.Warning)
+            Logger.LogWarning(ImportProductLogMessages.CategoryNotLoadedFromUrlWarning, [categoryPageUrl, categoryResult.Exception.Message]);
+
+        return TaskResult<CategoryResult>.FromStatus(categoryResult.Status);
+    }
+
+    protected async Task<ResultStatus> ProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken token)
+    {
+        var url = GetApiUrl(categoryProductItem);
+        var productItem = await ProcessUrlTaskAsync(url => GetProductItemFromCategoryItemAsync(categoryProductItem, url, token), url);
+
+        if (productItem.Status == ResultStatus.Error)
+        {
+            Logger.LogError(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError,
+                [categoryProductItem.Name, url, productItem.Exception?.Message ?? ""]);
+        }
+        else if (productItem.Status == ResultStatus.Success)
+        {
+            Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, [productItem.Value.Name, productItem.Value.ApiUrl]);
+            await HandleProductItemAsync(productItem.Value);
+        }
+        else if (productItem.Status == ResultStatus.Warning)
+        {
+            Logger.LogWarning(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded,
+                [categoryProductItem.Name, url, productItem.Exception?.Message ?? ""]);
+        }
+
+        return productItem.Status;
+    }
+
+    protected virtual async Task<UrlTaskResult<TCategory>> ProcessGetCategoryAsync(string categoryPageUrl, int page, CancellationToken token)
+    {
+        var categoryResult = await ProcessUrlTaskAsync(url => GetFromApiUrlAsync<TCategory>(url, token), categoryPageUrl);
 
         if (categoryResult.Status == ResultStatus.Success && categoryResult.Value != null
             && categoryResult.Value.CategoryProductItems == null && categoryResult is IPaginatorItem tokenCategory)
         {
             var urlWithPageToken = tokenCategory.GetPageUrl(ProductShopModel.CategoryUrl, page);
-            categoryResult = await ProcessUrlTaskAsync(url => GetFromApiUrlAsync<TCategory>(url, token), urlWithPageToken);            
+            categoryResult = await ProcessUrlTaskAsync(url => GetFromApiUrlAsync<TCategory>(url, token), urlWithPageToken);
         }
 
         return categoryResult;
-    }
-
-    protected virtual async Task<int> ProcessCategoryProductsAsync(IEnumerable<ICategoryProductItem> categoryProductItems, int categoryItemId, CancellationToken token)
-    {
-        int productCount = 0;
-        var unprocessedProductItems = new List<ICategoryProductItem>();
-        foreach (var item in categoryProductItems)
-        {
-            //todo
-            item.CategoryItemId = categoryItemId;
-
-            var url = GetApiUrl(item);
-            var productItem = await ProcessUrlTaskAsync(url => GetProductItemFromCategoryItemAsync(item, url, token), url);
-           
-            if(productItem.Status == ResultStatus.Cancelled)
-                token.ThrowIfCancellationRequested();
-
-            if(productItem.Status == ResultStatus.Error)
-            {
-                Logger.LogError(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, [item.Name, url, productItem.Exception?.Message ?? ""]);
-                continue;
-            }
-
-            if (productItem.Value != null && productItem.Status == ResultStatus.Success)
-            {
-                productCount++;
-                Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, [productItem.Value.Name, productItem.Value.ApiUrl]);
-                if (await HandleProductItemAsync(productItem.Value) == ResultStatus.Error)
-                    _unhandledProductItems.Enqueue(productItem.Value);
-            }
-            else if (productItem.Status == ResultStatus.Warning)
-            {
-                _unhandledCategoryProductItems.Enqueue(item);
-                Logger.LogWarning(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded,
-                    [item.Name, url, productItem.Exception?.Message ?? ""]);
-            }
-        }
-
-        return await Task.FromResult(productCount);
-    }
-
-    protected async Task ProcessUnhandledCategoryProductsAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            while (_unhandledCategoryProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && LoaderService.IsStarted)
-            {
-                if (!_unhandledCategoryProductItems.TryDequeue(out var unprocessedItem))
-                    continue;
-
-                var productItem = await ProcessUrlTaskAsync(url => GetProductItemFromCategoryItemAsync(unprocessedItem, url, stoppingToken), 
-                                                                    GetApiUrl(unprocessedItem));
-
-                if (productItem.Status == ResultStatus.Cancelled)
-                    return;
-
-                if (productItem.Status == ResultStatus.Error)
-                    continue;
-
-                if (productItem.Status == ResultStatus.Warning)
-                    _unhandledCategoryProductItems.Enqueue(unprocessedItem);
-                else if (productItem.Value != null && await HandleProductItemAsync(productItem.Value) == ResultStatus.Warning)
-                    _unhandledProductItems.Enqueue(productItem.Value);
-            }
-        }
-    }
-
-    protected async Task ProcessUnhandledProductItemsAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            while (_unhandledProductItems.Count > 0 && !stoppingToken.IsCancellationRequested && LoaderService.IsStarted)
-            {
-                if (!_unhandledProductItems.TryDequeue(out var unhandledItem))
-                    continue;
-
-                if (await HandleProductItemAsync(unhandledItem) == ResultStatus.Error)
-                    _unhandledProductItems.Enqueue(unhandledItem);
-            }
-        }
     }
 
     protected async Task<ResultStatus> HandleProductItemAsync(TProductItem productItem)

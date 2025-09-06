@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 namespace Alchemist.Import.Category.Json;
 
-public class ShopImportCategoriesTimerService : ShopImportService
+public class ShopImportCategoriesTimerService : ImportService
 {
     protected sealed record ImportCategory(ICategory Category, ICategoryShopModel CategoryShopModel) : IImportCategory
     {
@@ -75,10 +75,7 @@ public class ShopImportCategoriesTimerService : ShopImportService
         }
         else if (!stoppingToken.IsCancellationRequested)
         {            
-            var nextTickResult = await ProcessTaskAsync(() => _timer.WaitForNextTickAsync(stoppingToken).AsTask());
-            
-            if (nextTickResult.Status == Common.ResultStatus.Cancelled)
-                return;
+            var nextTickResult = await ProcessTaskAsync(() => _timer.WaitForNextTickAsync(stoppingToken).AsTask());  
 
             if(nextTickResult.Status == Common.ResultStatus.Success && nextTickResult.Value)
              await LoadCategoriesAsync(stoppingToken);

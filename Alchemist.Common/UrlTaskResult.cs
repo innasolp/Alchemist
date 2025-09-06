@@ -1,14 +1,12 @@
 ﻿namespace Alchemist.Common;
 
-public readonly struct UrlTaskResult<T> 
+public readonly struct UrlTaskResult<T>
 {
     public ResultStatus Status { get; }
 
     public T? Value { get; }
 
     public Exception? Exception { get; }
-
-    public UrlTaskResult() { Status = ResultStatus.Error; }
 
     public string Url { get; }
 
