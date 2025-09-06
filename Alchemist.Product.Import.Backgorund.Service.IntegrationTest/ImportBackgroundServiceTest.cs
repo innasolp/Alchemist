@@ -106,8 +106,8 @@ public class ImportBackgroundServiceTest : TestFixture<ImportBackgroundServiceWe
     [Fact]
     public async Task NewShopSettingsHandlingWhenNewShopSettingsSaved()
     {
-        var messageReceiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>(ShopImportWorkerKeys.DataMessageReceiverKey);
-        messageReceiver.On<ShopSettings>(Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);
+        var messageReceiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>(ShopImportWorkerKeys.EventMessageReceiverKey);
+        messageReceiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);
 
         var shop = await CreateNewShop();
 

@@ -1,5 +1,6 @@
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
+using Alchemist.Messages.Common;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Message.Interfaces;
@@ -82,7 +83,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         var savedShopSettings = (await _settingsRepository.SaveShopSettings(shopSettings)).To<ShopSettings>();
 
         if (shopSettings.Id == 0)
-            await SendMessage(savedShopSettings, Messages.SendShopSettingsCreated);
+            await SendMessage(savedShopSettings, Messages.Common.Messages.SendShopSettingsCreated);
 
         var location = Url.Action(nameof(SaveShopSettings), new { id = savedShopSettings.Id }) ?? $"/{savedShopSettings.Id}";
         return  shopSettings.Id == 0 
@@ -126,7 +127,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
             return TypedResults.StatusCode((int)HttpStatusCode.InternalServerError);
 
         if(initId == 0)
-            await SendMessage(shopSettingResult, Messages.SendShopSettingsCreated);
+            await SendMessage(shopSettingResult, Messages.Common.Messages.SendShopSettingsCreated);
 
         var location = Url.Action(nameof(SaveShopSettingsWithServices), new { id = shopSettingResult.Id }) ?? $"/{shopSettingResult.Id}";
         var result = new ArrayList { shopSettingResult, allData.Where(d => d.Type == ShopSettingType.Service).ToArray() };

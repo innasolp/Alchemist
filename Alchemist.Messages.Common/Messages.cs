@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Common;
+﻿namespace Alchemist.Messages.Common;
 
 public static class Messages
 {
@@ -20,4 +20,13 @@ public static class Messages
 
     public static string SendShopSettingsCreated => "SendShopSettingsCreated";
     public static string ReceiveShopSettingsCreated => "ReceiveShopSettingsCreated";
+
+    public static string SendServiceStart => "SendServiceStart";
+    public static string ReceiveServiceStart => "ReceiveServiceStart";
+
+    public static string SendServiceStop => "SendServiceStop";
+    public static string ReceiveServiceStop => "ReceiveServiceStop";
+
+    public static string SendServiceCreated => "SendServiceCreated";
+    public static string ReceiveServiceCreated => "ReceiveServiceCreated";
 }

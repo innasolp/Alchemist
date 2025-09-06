@@ -39,7 +39,8 @@ builder.Services.AddSingleton<ILoaderServiceFactory, BrowserServiceClientFactory
 builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("WebLoaderPath").Value}");
 
 builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl", ShopImportWorkerKeys.ShopsMessageSenderKey);
-builder.Services.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl");
+builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageSenderKey);
+builder.Services.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageReceiverKey);
 
 
 builder.Services.ConfigureDefaultHttps();

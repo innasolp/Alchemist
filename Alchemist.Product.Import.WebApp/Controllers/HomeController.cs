@@ -3,6 +3,7 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Messages.Common;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
@@ -42,7 +43,7 @@ public class HomeController : Controller
         _settingsDataAdapterContainer = new SettingsDataAdapterContainer(productSettingsDataAdapter, categorySettingsDataAdapter);
         _modelFactory = modelFactory;
 
-        _shopEventReceiver.On<Shop>(Messages.ReceiveShopCreated, OnShopCreated);
+        _shopEventReceiver.On<Shop>(Messages.Common.Messages.ReceiveShopCreated, OnShopCreated);
     }
 
     private void OnShopCreated(Shop shop)

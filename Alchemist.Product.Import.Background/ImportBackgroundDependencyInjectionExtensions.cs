@@ -29,11 +29,11 @@ public static class ImportBackgroundDependencyInjectionExtensions
             serviceSettings.AssemblyPath = Utils.CombinePath(appPath, serviceSettings.AssemblyPath); 
     }
 
-    public static IServiceCollection AddShopImportDataReceiver(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName)
+    public static IServiceCollection AddShopImportDataReceiver(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)
     {
         var signalRUrl = configuration.GetHostSectionValue(signalRUrlSectionName);
 
-        return services.AddKeyedSignalRMessageReceiver(signalRUrl, ShopImportWorkerKeys.DataMessageReceiverKey);
+        return services.AddKeyedSignalRMessageReceiver(signalRUrl, key);
     }
 
     public static IServiceCollection AddShopImportMessageSender(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)

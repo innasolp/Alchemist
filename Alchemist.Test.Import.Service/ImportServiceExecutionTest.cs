@@ -7,7 +7,7 @@ namespace Alchemist.Test.Import.Service;
 
 public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputHelper outputHelper) 
     : ImportServiceTest<TService, TLogger>(outputHelper)
-    where TService : ShopImportService, ITestService
+    where TService : ImportService, ITestService
     where TLogger : class, ILogger
 {
     protected async Task ImportWasStoppedWhenWebLoaderNotExecutedAsync()

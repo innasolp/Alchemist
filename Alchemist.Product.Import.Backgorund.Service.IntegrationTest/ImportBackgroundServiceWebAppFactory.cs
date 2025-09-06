@@ -86,7 +86,8 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
                 context.Configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>());
 
             services.SetSignalRTestSender(ShopImportWorkerKeys.ShopsMessageSenderKey, _signalRApplicationFactory.Server, "import");
-            services.SetSignalRTestReceiver(ShopImportWorkerKeys.DataMessageReceiverKey, _signalRApplicationFactory.Server, "events");
+            services.SetSignalRTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
+            services.SetSignalRTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
         });
     }
 

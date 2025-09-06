@@ -22,7 +22,8 @@ public class ShopImportWorker : BackgroundService
 {
     private readonly ILogger<ShopImportWorker> _logger;
     private readonly IEnumerable<IShopImportServiceFactory> _shopServiceFactories;
-    private readonly IMessageReceiver _messageReceiver;
+    private readonly IMessageReceiver _eventMessageReceiver;
+    private readonly IMessageSender _eventMessageSender;
     private readonly IShopDataService _shopDataService;
     private readonly IEnumerable<ISettingsAdapter> _settingsAdapters;
     private readonly IMessageSender _itemMessageSender;
@@ -30,13 +31,19 @@ public class ShopImportWorker : BackgroundService
     private readonly ICategoryItemHandler? _categoryDataHandler;
     private readonly IShopSettingsDataService _settingsDataService;
 
-    protected List<IImportService> Services { get; } = [];
+    private record ServiceWithToken(IImportService Service, CancellationTokenSource InnerTokenSource);
+
+    //protected List<IImportService> Services { get; } = [];
 
     private List<IShopItem> ShopModels { get; } = [];
 
+    private readonly Dictionary<Guid, ServiceWithToken> _servicesWithTokens = [];
+
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
-        [FromKeyedServices(ShopImportWorkerKeys.DataMessageReceiverKey)]
-        IMessageReceiver messageReceiver,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)]
+        IMessageReceiver eventMessageReceiver,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)]
+        IMessageSender eventMessageSender,
         IShopDataService shopDataService,
         IEnumerable<ISettingsAdapter> settingsAdapters,
         IEnumerable<IShopImportServiceFactory> shopImportFactories,
@@ -46,7 +53,8 @@ public class ShopImportWorker : BackgroundService
         IShopSettingsDataService settingsDataService)
     {
         _logger = logger;
-        _messageReceiver = messageReceiver;
+        _eventMessageReceiver = eventMessageReceiver;
+        _eventMessageSender = eventMessageSender;
         _shopDataService = shopDataService;
         _itemMessageSender = itemMessageSender;
         _productDataHandler = productDataHandler;
@@ -56,15 +64,32 @@ public class ShopImportWorker : BackgroundService
 
         _productDataHandler.ItemProcessed += ProductItemHandledAsync;
 
-        _messageReceiver.On<ShopSettings>(Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        _eventMessageReceiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);       
 
-        _messageReceiver.On<ShopCategory>(Messages.ReceiveCategoryAdded, OnShopCategoryAdded);
+        _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.ReceiveCategoryAdded, OnShopCategoryAdded);       
+
+        _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ReceiveServiceStop, StopServiceAsync);
+
         _settingsDataService = settingsDataService;
     }
 
+    private async Task StopServiceAsync(Guid guid)
+    {
+        if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
+          await  serviceWithToken.InnerTokenSource.CancelAsync();
+    }
+
+    private async Task StartServiceAsync(Guid guid, CancellationToken stoppingToken)
+    {
+        if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
+            await serviceWithToken.Service.Start(CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceWithToken.InnerTokenSource.Token).Token);
+    }
+
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
-        [FromKeyedServices(ShopImportWorkerKeys.DataMessageReceiverKey)]
-        IMessageReceiver messageReceiver,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)]
+        IMessageReceiver eventMessageReceiver,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)]
+        IMessageSender eventMessageSender,
         IShopDataService shopDataService,
         IEnumerable<ISettingsAdapter> settingsAdapters,
         IEnumerable<IShopImportServiceFactory> shopImportFactories,
@@ -73,7 +98,7 @@ public class ShopImportWorker : BackgroundService
         IProductItemHandler productDataHandler,
         ICategoryItemHandler categoryDataHandler,
         IShopSettingsDataService settingsDataService)
-        : this(logger, messageReceiver, shopDataService, settingsAdapters, shopImportFactories, itemMessageSender, productDataHandler, settingsDataService)
+        : this(logger, eventMessageReceiver, eventMessageSender, shopDataService, settingsAdapters, shopImportFactories, itemMessageSender, productDataHandler, settingsDataService)
     {
         _categoryDataHandler = categoryDataHandler;
         _categoryDataHandler.ItemProcessed += CategoryHandledAsync;
@@ -96,7 +121,7 @@ public class ShopImportWorker : BackgroundService
 
         if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
 
-        await _itemMessageSender.Send(categoryModel, Messages.SendCategoryItem);
+        await _itemMessageSender.Send(categoryModel, Messages.Common.Messages.SendCategoryItem);
     }
 
 
@@ -115,7 +140,7 @@ public class ShopImportWorker : BackgroundService
 
         var productItemModel = new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status }; 
 
-        await _itemMessageSender.Send(productItemModel, Messages.SendProductItem);
+        await _itemMessageSender.Send(productItemModel, Messages.Common.Messages.SendProductItem);
     }
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
@@ -145,18 +170,25 @@ public class ShopImportWorker : BackgroundService
         
         ShopModels.Add(shopModel);
 
-        Services.Add(service);
+        _servicesWithTokens.Add(Guid.NewGuid(), new ServiceWithToken(service, new CancellationTokenSource()));
 
         _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        Func<Guid,Task> startService = async (guid)=>await StartServiceAsync(guid, stoppingToken);
         try
         {
-            await _messageReceiver.Start();
+            _eventMessageReceiver.On(Messages.Common.Messages.ReceiveServiceStart, startService);
 
-            await _itemMessageSender.Start();
+            await _eventMessageReceiver.Start();
+
+            if (!_eventMessageSender.IsConnected)
+                await _eventMessageSender.Start();
+
+            if(!_itemMessageSender.IsConnected)
+                await _itemMessageSender.Start();
             
             _logger.LogInformation("Import service connected to messaging host.");
         }
@@ -188,7 +220,11 @@ public class ShopImportWorker : BackgroundService
                 ShopModels.Add(shopModel);
 
                 var shopImportService = serviceFactory.Create(shopModel, shopImportSettings);
-                Services.Add(shopImportService);
+                
+                var guid = Guid.NewGuid();
+                _servicesWithTokens.Add(guid, new ServiceWithToken(shopImportService, new CancellationTokenSource()));
+                
+                await _eventMessageSender.Send(guid, Messages.Common.Messages.SendServiceCreated);
             }
             
             _logger.LogInformation("Import services initialized.");
@@ -200,7 +236,8 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            await Parallel.ForEachAsync(Services, (s, t) => new ValueTask(s.Start(stoppingToken)));
+            await Parallel.ForEachAsync(_servicesWithTokens, (s, t) => 
+                new ValueTask(s.Value.Service.Start(CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, s.Value.InnerTokenSource.Token).Token)));
         }
         catch (Exception e)
         {
@@ -210,7 +247,7 @@ public class ShopImportWorker : BackgroundService
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _messageReceiver.Stop();
+        await _eventMessageReceiver.Stop();
         await _itemMessageSender.Stop();
         await base.StopAsync(cancellationToken);
     }
