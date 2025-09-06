@@ -74,9 +74,24 @@ public readonly struct TaskResult<T>
     {
         return new TaskResult<T>(value, ResultStatus.Error, exception);
     }
+
+    public static TaskResult<T> Failed(Exception exception)
+    {
+        return new TaskResult<T>(default(T), ResultStatus.Error, exception);
+    }
     
     public static TaskResult<T> Cancelled()
     {
         return new TaskResult<T>(default(T), ResultStatus.Cancelled, null);
+    }
+
+    public static TaskResult<T> FromStatus(ResultStatus status, Exception exception)
+    {
+        return new TaskResult<T>(default(T), status, exception);
+    }
+
+    public static TaskResult<T> FromStatus(ResultStatus status)
+    {
+        return new TaskResult<T>(default(T), status, null);
     }
 }

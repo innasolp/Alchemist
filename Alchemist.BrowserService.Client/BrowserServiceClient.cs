@@ -101,6 +101,8 @@ internal class BrowserServiceClient : ILoaderService
         {
             if(e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                 throw new LoaderServiceException(e.Message, e, LoaderServiceAction.Wait);
+            else if(e.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                throw new LoaderServiceException(e.Message, e, LoaderServiceAction.Wait);
             else
                 throw new LoaderServiceException(e.Message, e);
         }
