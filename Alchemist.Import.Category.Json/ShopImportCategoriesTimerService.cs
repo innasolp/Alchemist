@@ -187,11 +187,16 @@ public class ShopImportCategoriesTimerService : ImportService
 
         using var stream = await LoadFromUrlAsync(url);
 
-        var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
-
-        stream.Close();
-
-        return await Task.FromResult(categoriesJson);
+        try
+        {
+            var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
+            return await Task.FromResult(categoriesJson);
+        }
+        catch { throw; }
+        finally
+        {
+            stream.Close();
+        }       
     }
 
     private readonly object _categoryCollectionChangedLock = new();

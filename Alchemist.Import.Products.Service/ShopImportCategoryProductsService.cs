@@ -205,9 +205,19 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     protected virtual async Task<T?> GetFromApiUrlAsync<T>(string apiUrl, CancellationToken token)
     {
         using var stream = await LoadFromUrlAsync(apiUrl);
-        var product = await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: token);
-        stream.Close();
-        return await Task.FromResult(product);
+        try
+        {
+            var product = await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: token);
+            return await Task.FromResult(product);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            stream.Close();
+        }        
     }
 
     protected async Task<TProductItem?> GetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)

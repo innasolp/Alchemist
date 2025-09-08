@@ -249,7 +249,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token);
 
-        await Task.Delay(3000);
+        await Task.Delay(1000);
         
         await token.CancelAsync();
 
