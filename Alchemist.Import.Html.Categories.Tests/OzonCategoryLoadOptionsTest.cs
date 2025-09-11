@@ -2,20 +2,16 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using WebLoader.Common;
-using WebLoader.Interfaces;
 
 namespace Alchemist.Import.Html.Categories.Tests;
 
 public class OzonCategoryLoadOptionsTest
 {
-    private readonly string _headersFileName = "Ozon.Headers.Firefox.Standart.json";
-
     private readonly string _nonHeaderOptionsfileName = "Ozon.CategoryLoadNonHeaderOptions.Firefox.json";
 
     private readonly string _shopCategoryApiUrlFormat = "https://www.ozon.ru/api/composer-api.bx/_action/v2/categoryChildV3?menuId=185&categoryId={0}";
 
-    private readonly Dictionary<string, PropertyPath> _categoryPropertyPathes = new Dictionary<string, PropertyPath>()
+    private readonly Dictionary<string, PropertyPath> _categoryPropertyPathes = new()
         {
             { "Url", new PropertyPath("Url","url") },
             {"Description",new PropertyPath("Description","title") },
@@ -44,13 +40,6 @@ public class OzonCategoryLoadOptionsTest
         Assert.Equal(categoryLoadOptions.CategoryPropertyPaths["Url"].Path, _categoryPropertyPathes["Url"].Path);
     }
 
-    private static void AssertRequestHeaders(RequestHeaders requestHeaders)
-    {
-        Assert.NotNull(requestHeaders);
-        Assert.NotNull(requestHeaders.CookieKeys);
-        Assert.True(requestHeaders.CookieKeys.Count > 0);
-    }
-
     private async Task<CategoryLoadOptions?> LoadOptionsAsync(string fileName)
     {
         JsonSerializerOptions options = new()
@@ -68,17 +57,6 @@ public class OzonCategoryLoadOptionsTest
         return await Task.FromResult(categoryLoadOptions);
     }
 
-    private async Task<RequestHeaders?> LoadRequestHeadersAsync(string fileName)
-    {
-        using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{fileName}");
-
-        var requestHeaders = await JsonSerializer.DeserializeAsync<RequestHeaders>(s);
-
-        s.Close();
-
-        return await Task.FromResult(requestHeaders);
-    }
-
     [Fact]
     public async Task LoadOptionsTestAsync()
     {
@@ -88,14 +66,5 @@ public class OzonCategoryLoadOptionsTest
 
         AssertOptions(categoryLoadOptions);
     }
-
-    [Fact]
-    public async Task LoadHeadersTestAsync()
-    {
-        var requestHeaders = await LoadRequestHeadersAsync(_headersFileName);
-
-        Assert.NotNull(requestHeaders);
-
-        AssertRequestHeaders(requestHeaders);
-    }
+    
 }

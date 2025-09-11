@@ -11,7 +11,7 @@ namespace Alchemist.Product.Shop.Ozon.ImportService.Firefox.Tests;
 public class OzonImportServiceFirefoxLoaderTest : ProductShopTest
 {
     private readonly Moq.Mock<IProductShopModel> _shopUrlModelMock = new();
-    private readonly IBrowserDataLoader _dataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
+    private readonly IBrowserDataLoader _dataLoader = new BrowserDataLoader.Firefox.DevEdition.Windows.FirefoxDevEditionDataLoader();
     private readonly IBrowserLauncher _launcher = new BrowserLauncher.Firefox.Windows.Standart.FirefoxStandartBrowserLauncher();
     private readonly IWebLoader _webLoader;
     private readonly ITestOutputHelper _testOutputHelper;

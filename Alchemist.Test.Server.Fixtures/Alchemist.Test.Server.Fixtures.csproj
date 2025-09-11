@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.Server.Log\Alchemist.Test.Log.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.RestAPI.Test.Infrastructure;
 using Alchemist.Product.SignalR;
+using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.Extensions.Logging;

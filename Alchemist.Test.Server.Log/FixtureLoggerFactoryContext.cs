@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Test.Server.Fixtures;
+namespace Alchemist.Test.Log;
 
 public class FixtureLoggerFactoryContext : FixtureLogContext, IDisposable
 { 

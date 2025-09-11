@@ -7,8 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
 using Alchemist.Test.DBApiWebAppFactory;
+using Alchemist.Test.Log;
 
-namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
+namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
 public class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer) : DbAPIWebAppFactory<ShopAPIProgram, AlchemyContext>(true)
 {
@@ -16,7 +17,7 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
 
     private readonly string _connectionString = connectionString;
 
-    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+    public FixtureLoggerFactoryContext FixtureLoggingContext   { get; } = new FixtureLoggerFactoryContext();
 
     protected override void FillTestData(AlchemyContext dbContext)
     {

@@ -8,7 +8,7 @@ using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 using Shop = Alchemist.Product.Entities.Shop;
 using ShopSettings = Alchemist.Product.Entities.ShopSettings;
 
-namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
+namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
 internal class TestRepository
 {
@@ -36,7 +36,7 @@ internal class TestRepository
         var shopSettings = new ShopSettings
         {
             ShopId = shopId,
-            Type = Interfaces.ShopSettingType.Product,
+            Type = ShopSettingType.Product,
             Name = Guid.NewGuid().ToString(),
             JsonValue = jsonValue
         };
@@ -51,7 +51,7 @@ internal class TestRepository
         var productShopSettings = new ShopSettings
         {
             ShopId = shopId,
-            Type = Interfaces.ShopSettingType.Category,
+            Type = ShopSettingType.Category,
             Name = Guid.NewGuid().ToString(),
             JsonValue = jsonValue
         };
@@ -94,7 +94,7 @@ internal class TestRepository
         var shopSetting = new ShopSettings 
         {            
             Name = serviceName,
-            Type = Interfaces.ShopSettingType.Service,
+            Type = ShopSettingType.Service,
             JsonValue = jsonValue
         };
 

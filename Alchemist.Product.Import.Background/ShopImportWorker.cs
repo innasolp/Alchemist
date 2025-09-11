@@ -31,9 +31,7 @@ public class ShopImportWorker : BackgroundService
     private readonly ICategoryItemHandler? _categoryDataHandler;
     private readonly IShopSettingsDataService _settingsDataService;
 
-    private record ServiceWithToken(IImportService Service, CancellationTokenSource InnerTokenSource);
-
-    //protected List<IImportService> Services { get; } = [];
+    private record ServiceWithToken(IImportService Service, CancellationTokenSource InnerTokenSource);   
 
     private List<IShopItem> ShopModels { get; } = [];
 

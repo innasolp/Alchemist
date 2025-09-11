@@ -1,4 +1,4 @@
-﻿using Alchemist.Test.Server.Fixtures;
+﻿using Alchemist.Test.Log;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.GrpcService.Tests.Infrastructure;

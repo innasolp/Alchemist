@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.4" />
+    <PackageReference Include="BrowserDataLoader.Firefox.DevEdition.Windows" Version="1.0.0.4" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Http.RequestHandling.Interfaces" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />

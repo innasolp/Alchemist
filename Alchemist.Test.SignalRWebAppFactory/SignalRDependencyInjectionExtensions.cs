@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Test.SignalRWebAppFactory;
 
-public static class SignalRServicesExtensions
+public static class SignalRDependencyInjectionExtensions
 {
     public static IServiceCollection SetSignalRTestSender(this IServiceCollection services, TestServer signalRServer, string[] hubs)
     {

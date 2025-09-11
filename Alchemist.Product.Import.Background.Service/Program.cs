@@ -58,7 +58,6 @@ builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new 
 builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopProductImportPath").Value}");
 builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
 
-//todo rabbitmqpublisher
 var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
 rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
 builder.Services.AddRabbitMQMessageSender("importqueue", rabbitMQOptions);

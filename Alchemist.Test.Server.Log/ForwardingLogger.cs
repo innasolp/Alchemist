@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Test.Server.Fixtures;
+namespace Alchemist.Test.Log;
 
 public class ForwardingLogger(string categoryName, LogMessage logAction) : ILogger
 {
