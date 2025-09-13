@@ -13,7 +13,9 @@ public abstract class ImportServiceTest<TService, TLogger>(ITestOutputHelper out
 {
     protected readonly ITestOutputHelper _outputHelper = outputHelper;
 
-    protected ResourceManager ServiceResourceManager { get; } = new ResourceManager("Alchemist.Import.Service.LogMessages",
+    protected ResourceManager LogResourceManager { get; } = new ResourceManager("Alchemist.Import.Service.LogMessages",
+                               typeof(ImportService).Assembly);
+    protected ResourceManager MessagesResourceManager { get; } = new ResourceManager("Alchemist.Import.Service.Messages",
                                typeof(ImportService).Assembly);
 
     protected Mock<TLogger> LoggerMock { get; } = new Mock<TLogger>();

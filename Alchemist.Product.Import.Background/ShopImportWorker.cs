@@ -15,7 +15,6 @@ using Alchemist.Product.Import.Background.Settings;
 using Alchemist.Product.Import.Background.Models;
 using Alchemist.Import.Service.Factory.Interfaces;
 
-
 namespace Alchemist.Product.Import.Background;
 
 public class ShopImportWorker : BackgroundService
@@ -73,14 +72,21 @@ public class ShopImportWorker : BackgroundService
 
     private async Task StopServiceAsync(Guid guid)
     {
+        _logger.LogInformation($"Stopping service with guid {guid} started.");
         if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
-          await  serviceWithToken.InnerTokenSource.CancelAsync();
+        {
+            await serviceWithToken.InnerTokenSource.CancelAsync();
+            _logger.LogInformation($"Service {serviceWithToken.Service.Name} stopped");
+        }
+        else
+            _logger.LogWarning($"Stopping service is not available. Service with guid {guid} not found");
     }
 
     private async Task StartServiceAsync(Guid guid, CancellationToken stoppingToken)
     {
-        if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
-            await serviceWithToken.Service.Start(CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceWithToken.InnerTokenSource.Token).Token);
+        _logger.LogInformation($"Starting service with guid {guid}.");
+        if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))        
+            await StartServiceAsync(serviceWithToken.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceWithToken.InnerTokenSource.Token).Token);        
     }
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
@@ -108,18 +114,17 @@ public class ShopImportWorker : BackgroundService
         {
             if (!_itemMessageSender.IsConnected)
                 await _itemMessageSender.Start();
+
+            var categoryModel = new ImportCategory { Category = item.Category.Name, ItemId = item.Category.Id, Status = processStatus };
+
+            if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
+
+            await _itemMessageSender.Send(categoryModel, Messages.Common.Messages.SendCategoryItem);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message, ex);
-            return;
+            _logger.LogError(ex, $"Category item {item.Category.Name} handling failed.");            
         }
-
-        var categoryModel = new ImportCategory { Category = item.Category.Name, ItemId = item.Category.Id, Status = processStatus };
-
-        if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
-
-        await _itemMessageSender.Send(categoryModel, Messages.Common.Messages.SendCategoryItem);
     }
 
 
@@ -129,16 +134,15 @@ public class ShopImportWorker : BackgroundService
         {
             if (!_itemMessageSender.IsConnected)
                 await _itemMessageSender.Start();
+
+            var productItemModel = new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status };
+
+            await _itemMessageSender.Send(productItemModel, Messages.Common.Messages.SendProductItem);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message, ex);
-            return;
+            _logger.LogError(ex, $"Product item {item.ProductItem.Name} handling failed.");
         }
-
-        var productItemModel = new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status }; 
-
-        await _itemMessageSender.Send(productItemModel, Messages.Common.Messages.SendProductItem);
     }
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
@@ -155,98 +159,153 @@ public class ShopImportWorker : BackgroundService
 
         _logger.LogInformation($"Handling of settings {newShopSettings.Name} for shop id={newShopSettings.ShopId} started.");
 
-        var serviceSettings = await _settingsDataService.GetChildSettings(newShopSettings.Id);
-        var shopImportSettings = newShopSettings.GetShopImportSettings(serviceSettings);
-        
-        var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
+        try
+        {
+            var serviceSettings = await _settingsDataService.GetChildSettings(newShopSettings.Id);
+            var shopImportSettings = newShopSettings.GetShopImportSettings(serviceSettings);
 
-        var importServiceSettings = shopImportSettings.GetImportService();
-        if (importServiceSettings == null) return;
+            var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
+            if (!ShopModels.Any(s => s.ShopName == shopModel.ShopName))
+                ShopModels.Add(shopModel);
 
-        var serviceFactory = _shopServiceFactories.First(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
-        var service = serviceFactory.Create(shopModel, shopImportSettings);
-        
-        ShopModels.Add(shopModel);
+            if (!TryGetImportService(shopImportSettings, shopModel, out var service)) return;
 
-        _servicesWithTokens.Add(Guid.NewGuid(), new ServiceWithToken(service, new CancellationTokenSource()));
+            _servicesWithTokens.Add(Guid.NewGuid(), new ServiceWithToken(service, new CancellationTokenSource()));
 
-        _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
+            _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Service creation for shop settings {newShopSettings.Name} failed.");
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Func<Guid,Task> startService = async (guid)=>await StartServiceAsync(guid, stoppingToken);
+        await StartEventMessageReceiverAsync(stoppingToken);
+
         try
         {
-            _eventMessageReceiver.On(Messages.Common.Messages.ReceiveServiceStart, startService);
+            List<IShopImportSettings> allShopImportSettings = await GetAllShopImportSettingsAsync();
 
-            await _eventMessageReceiver.Start();
+            await CreateServicesFromImportSettingsAsync(allShopImportSettings);           
+
+            _logger.LogInformation("Import services initialized.");
 
             if (!_eventMessageSender.IsConnected)
                 await _eventMessageSender.Start();
 
-            if(!_itemMessageSender.IsConnected)
-                await _itemMessageSender.Start();
+            foreach (var guid in _servicesWithTokens.Keys)
+                await _eventMessageSender.Send(guid, Messages.Common.Messages.SendServiceCreated);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+        }
+
+        try
+        {
+            await Parallel.ForEachAsync(_servicesWithTokens, (s, t) =>
+                new ValueTask(StartServiceAsync(s.Value.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, s.Value.InnerTokenSource.Token).Token)));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+        }
+    }
+
+    private async Task CreateServicesFromImportSettingsAsync(IEnumerable<IShopImportSettings> allShopImportSettings)
+    {
+        foreach (var shopImportSettings in allShopImportSettings)
+        {
+            var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
+            ShopModels.Add(shopModel);
+
+            if(!TryGetImportService(shopImportSettings, shopModel, out var shopImportService))
+                continue;
+
+            var guid = Guid.NewGuid();
+            _servicesWithTokens.Add(guid, new ServiceWithToken(shopImportService, new CancellationTokenSource()));            
+        }
+    }
+
+    private async Task StartEventMessageReceiverAsync(CancellationToken stoppingToken)
+    {
+        async Task startServiceAsync(Guid guid) => await StartServiceAsync(guid, stoppingToken);
+        try
+        {
+            await _eventMessageReceiver.Start();
+
+            _eventMessageReceiver.On(Messages.Common.Messages.ReceiveServiceStart, (Func<Guid, Task>)startServiceAsync);
             
             _logger.LogInformation("Import service connected to messaging host.");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-        }        
+        }
+    }
 
+    private async Task<List<IShopImportSettings>> GetAllShopImportSettingsAsync()
+    {
+        var allShopImportSettings = new List<IShopImportSettings>();
+        foreach (var adapter in _settingsAdapters)
+        {
+            var shopImportSettings = await adapter.GetAllShopImportSettings();
+            var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Name == s.Name));
+            allShopImportSettings.AddRange(newSettings);
+        }
+
+        return allShopImportSettings;
+    }
+
+    private bool TryGetImportService(IShopImportSettings shopImportSettings, IShopItem shopModel, out IImportService service)
+    {
+        service = default;
+
+        var importServiceSettings = shopImportSettings.GetImportService();
+        if (importServiceSettings == null)
+            return false;
+
+        var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
+        if (serviceFactory == null) return false;
+
+        service = serviceFactory.Create(shopModel, shopImportSettings);
+        return true;
+    }
+
+    private async Task StartServiceAsync(IImportService service, CancellationToken stoppingToken)
+    {
         try
         {
-            var allShopImportSettings = new List<IShopImportSettings>();
-            foreach (var adapter in _settingsAdapters)
+            await service.Start(stoppingToken);
+        }
+        catch (AggregateException ae)
+        {
+            foreach (Exception e in ae.InnerExceptions)
             {
-                var shopImportSettings = await adapter.GetAllShopImportSettings();
-                var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Name == s.Name));
-                allShopImportSettings.AddRange(newSettings);
+                if (e is TaskCanceledException)
+                {
+                    //todo send message
+                    if (e.InnerException != null)
+                        _logger.LogError(e.InnerException, $"Service {service.Name} was canceled with errror.");
+                    else
+                        _logger.LogInformation($"Service {service.Name} was canceled");
+                }
+                else
+                {
+                    //todo send message
+                    _logger.LogError(e, $"Service {service.Name} was failed.");
+                } 
             }
-
-            foreach (var shopImportSettings in allShopImportSettings)
-            {
-                var importServiceSettings = shopImportSettings.GetImportService();
-                if (importServiceSettings == null)
-                    continue;
-                
-                var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
-                if (serviceFactory == null) continue;
-
-                var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
-                ShopModels.Add(shopModel);
-
-                var shopImportService = serviceFactory.Create(shopModel, shopImportSettings);
-                
-                var guid = Guid.NewGuid();
-                _servicesWithTokens.Add(guid, new ServiceWithToken(shopImportService, new CancellationTokenSource()));
-                
-                await _eventMessageSender.Send(guid, Messages.Common.Messages.SendServiceCreated);
-            }
-            
-            _logger.LogInformation("Import services initialized.");
         }
-        catch(Exception ex)
-        {
-            _logger.LogError(ex.Message, ex);
-        }        
-
-        try
-        {
-            await Parallel.ForEachAsync(_servicesWithTokens, (s, t) => 
-                new ValueTask(s.Value.Service.Start(CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, s.Value.InnerTokenSource.Token).Token)));
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-        }
-    }    
+    }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await _eventMessageReceiver.Stop();
         await _itemMessageSender.Stop();
+        await _eventMessageSender.Stop();
         await base.StopAsync(cancellationToken);
     }
 

@@ -4,6 +4,7 @@ using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Service;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Alchemist.Import.Products.Service;
@@ -19,6 +20,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     }
 
     private readonly IProductItemHandler _itemHandler;
+
+    private readonly SemaphoreSlim _loaderSemaphoreSlim = new(1, 1);
 
     protected ConcurrentQueue<IProductShopCategory> Categories { get; }
 
@@ -118,7 +121,6 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return null;
     }
 
-    //todo
     protected virtual async Task<TaskResult<CategoryResult>> ProcessCategoryAsync(string categoryPageUrl, int page, int categoryItemId, CancellationToken stoppingToken)
     {
         var categoryResult = await ProcessGetCategoryAsync(categoryPageUrl, page, stoppingToken);
@@ -204,20 +206,26 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task<T?> GetFromApiUrlAsync<T>(string apiUrl, CancellationToken token)
     {
-        using var stream = await LoadFromUrlAsync(apiUrl);
+        await _loaderSemaphoreSlim.WaitAsync(token);
+       
         try
         {
-            var product = await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: token);
-            return await Task.FromResult(product);
+            using var stream = await LoadFromUrlAsync(apiUrl);
+            var item = await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: token);
+            return await Task.FromResult(item);
         }
-        catch
+#if DEBUG
+        catch (Exception ex)    
         {
-            throw;
+            Debug.WriteLine(ex.Message);
+            Debug.WriteLine(ex.StackTrace);
+            throw ex;
         }
+#endif  
         finally
         {
-            stream.Close();
-        }        
+            _loaderSemaphoreSlim.Release();
+        }
     }
 
     protected async Task<TProductItem?> GetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)
