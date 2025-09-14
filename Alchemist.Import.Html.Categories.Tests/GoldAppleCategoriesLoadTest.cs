@@ -4,7 +4,6 @@ using Json.FileExtensions;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
-using WebLoader.Common;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
 
@@ -19,8 +18,6 @@ public class GoldAppleCategoriesLoadTest
     private readonly string _shopCategoriesUrl = "https://goldapple.ru/front/api/catalog/navigation";    
 
     private readonly string requestHeadersFileName = "GoldApple.Headers.Firefox.json";
-
-    private readonly string _requestHeadersPath;
     string[] _nodePath = ["data"];
 
     private readonly ITestOutputHelper _testOutputHelper;
@@ -40,8 +37,6 @@ public class GoldAppleCategoriesLoadTest
 
         _dataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
         _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader();
-
-        _requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}";
     }
 
     private async Task InitializeAsync()
@@ -56,16 +51,11 @@ public class GoldAppleCategoriesLoadTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var requestHeaders = await _requestHeadersPath.ReadFromJsonFileAsync<RequestHeaders>();
-
-        Assert.NotNull(requestHeaders);
-        Assert.NotNull(requestHeaders.Headers);
-
+        
         var cookies = await _dataLoader.LoadCookies();
-        Assert.True(cookies.Count() > 0);
-        Assert.True(cookies.All(c => c.Value != null));
+        var requestHeaders = HeadersHelper.LoadHeadersForRequest(requestHeadersFileName, cookies);
 
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders, cookies.Select(c=>c.Convert()));
+        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders);
         var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
         stream.Close();       
 
@@ -86,6 +76,8 @@ public class GoldAppleCategoriesLoadTest
 
         _testOutputHelper.WriteLine($"parent categories {categories.Count(c => c.ParentId == null)}");
         _testOutputHelper.WriteLine($"all categories {categories.Count}");
+
+        await Task.Delay(1000);
     }
     [Fact]
     public async Task LoadCategoriesSync()
@@ -93,16 +85,10 @@ public class GoldAppleCategoriesLoadTest
         if (!_webLoader.IsStarted)
             await InitializeAsync();
 
-        var requestHeaders = await _requestHeadersPath.ReadFromJsonFileAsync<RequestHeaders>();
-
-        Assert.NotNull(requestHeaders);
-        Assert.NotNull(requestHeaders.Headers);
-
         var cookies = await _dataLoader.LoadCookies();
-        Assert.True(cookies.Count() > 0);
-        Assert.True(cookies.All(c => c.Value != null));
+        var requestHeaders = HeadersHelper.LoadHeadersForRequest(requestHeadersFileName, cookies);
 
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders, cookies.Select(c => c.Convert()));
+        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders);
         var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
         stream.Close();
 
@@ -121,6 +107,8 @@ public class GoldAppleCategoriesLoadTest
 
         _testOutputHelper.WriteLine($"parent categories {categories.Count(c => c.ParentId == null)}");
         _testOutputHelper.WriteLine($"all categories {categories.Count}");
+
+        await Task.Delay(1000);
     }
 
 }

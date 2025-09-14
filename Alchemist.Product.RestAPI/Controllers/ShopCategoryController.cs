@@ -5,6 +5,7 @@ using Message.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Alchemist.Product.Interfaces;
+using Alchemist.Messages.Common;
 
 namespace Alchemist.Product.RestAPI.Controllers;
 
@@ -41,7 +42,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
 
         var newShopCategory = (await _alchemyRepository.AddShopCategory(shopCategory)).To<ShopCategory>();
 
-        await SendMessage(newShopCategory, Messages.SendCategoryAdded);
+        await SendMessage(newShopCategory, Messages.Common.Messages.SendCategoryAdded);
 
         var location = Url.Action(nameof(AddShopCategory), new { id = newShopCategory.Id }) ?? $"/{newShopCategory.Id}";
         return TypedResults.Created(location, newShopCategory);

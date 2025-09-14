@@ -5,52 +5,75 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Service;
 
-public abstract class ShopImportService(ILogger logger, ILoaderService loaderService, string host)
+public abstract class ImportService(ILogger logger, ILoaderService loaderService, string host)
     : IImportService, IAsyncDisposable
 {
     public abstract string Name { get; }
 
     protected ILoaderService LoaderService { get; } = loaderService;
 
-    private readonly SemaphoreSlim _webLoaderSemaphoreSlim = new(1,1);
-
     protected ILogger Logger { get; } = logger;
+
+    private bool? _isStarted = null;
+
+    public bool IsStarted => _isStarted == true;
 
     protected object? _loadData;
 
     private readonly string _host = host;
 
-    private readonly SemaphoreSlim _resetSemaphorSlim = new (1,1);
+    private readonly SemaphoreSlim _resetSemaphorSlim = new(1, 1);
 
-    private bool _browserIsReseted = false;
+    private bool _loaderIsReseted = false;
 
-    public virtual async Task Start(CancellationToken stoppingToken)
+    public async Task Start(CancellationToken stoppingToken)
     {
-        bool? isStarted = null;
         var innerTokenSource = new CancellationTokenSource();
-        var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, innerTokenSource.Token);
+
+        await StartAsync(stoppingToken, innerTokenSource);
+    }
+
+    protected virtual async Task StartAsync(CancellationToken stoppingToken, CancellationTokenSource serviceToken)
+    {
+        var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceToken.Token);
+
+        _loaderIsReseted = false;
 
         while (!tokenSource.IsCancellationRequested)
-        {            
-            await StartWebLoaderIfNeedAsync(stoppingToken);
+        {
+            await StartWebLoaderIfNeedAsync(tokenSource.Token);
 
             if (!LoaderService.IsStarted) break;
-            else if (isStarted == null)
+            else if (_isStarted == null)
             {
-                isStarted = true;
+                _isStarted = true;
+                _loadData = await LoaderService.GetData(_host);
                 Logger.LogInformation(LogMessages.ServiceStarted, Name);
             }
 
-            await ProcessAsync(stoppingToken, innerTokenSource);
-
-            await Task.Delay(100);
+            try
+            {
+                await ProcessAsync(stoppingToken, serviceToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception)
+            {
+                _isStarted = false;
+                throw;
+            }
+            finally
+            {
+                await Task.Delay(100);
+            }
         }
 
         Logger.LogInformation(LogMessages.ServiceWasStopped, Name);
-    }      
+    }
 
-
-    protected abstract Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceStoppingToken);
+    protected abstract Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceToken);
 
     protected virtual async Task StartWebLoaderIfNeedAsync(CancellationToken stoppingToken)
     {
@@ -59,11 +82,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
             try
             {
                 if (!LoaderService.IsStarted)
-                {
-                    _loadData = await LoaderService.GetData(_host);
-
-                    await LoaderService.Start();                    
-                }
+                    await LoaderService.Start();
             }
             catch (WarningException warning)
             {
@@ -74,9 +93,9 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
             {
                 Logger.LogError(e, LogMessages.ImportWasStoppedWebLoaderNotExecute, LoaderService.Name);
                 return;
-            }            
+            }
         }
-    }    
+    }
 
     protected virtual void HandleWarningException(WarningException warning, string url)
     {
@@ -99,17 +118,17 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (OperationCanceledException operationCancelledException)
         {
-             await HandleCancellingAsync(operationCancelledException, url);            
+            await HandleCancellingAsync(operationCancelledException, url);
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not ImportCanceledException)
         {
-            await HandleExceptionAsync(e, url);            
+            await HandleExceptionAsync(e, url);
         }
     }
-            
+
     private async Task<ResultStatus> HandleLoaderServiceExceptionAsync(LoaderServiceException e, string url)
     {
-        if(e.NeedAction != null )
+        if (e.NeedAction != null)
         {
             switch (e.NeedAction)
             {
@@ -135,10 +154,11 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
 
     private async Task<ResultStatus> HandleResetingAsync(LoaderServiceException e, string url)
     {
-        if (_browserIsReseted)
+        if (_loaderIsReseted)
         {
             Logger.LogError(e, LogMessages.ImportWasStoppedLoaderServiceAlreadyReseted, [LoaderService.Name, Name]);
-            return await Task.FromResult(ResultStatus.Error);
+            var message = string.Format(Messages.ImportWasCancelledOnUrlBecauseLoaderFailed, [Name, url, LoaderService.Name]);
+            throw new ImportCanceledException(message, e);
         }
 
         Logger.LogWarning(e, LogMessages.LoadFromUrlCompletedWithErrorAndNeedReset, [url, e.Message]);
@@ -174,8 +194,8 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
             await LoaderService.Reset();
             await LoaderService.UpdateData(url);
             _loadData = await LoaderService.GetData(_host);
-            _browserIsReseted = true;            
-        }        
+            _loaderIsReseted = true;
+        }
         finally
         {
             _resetSemaphorSlim.Release();
@@ -199,7 +219,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         else
         {
             Logger.LogInformation(LogMessages.ServiceWasCancelledOnLoadingFromUrl, Name, url);
-            await Task.FromResult(true);
+            throw operationCancelledException;
         }
     }
 
@@ -214,7 +234,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         else
         {
             Logger.LogInformation(LogMessages.ServiceWasCancelled, Name);
-            await Task.FromResult(true);
+            throw operationCancelledException;
         }
     }
 
@@ -226,7 +246,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         }
         catch (LoaderServiceException loaderServiceEx)
         {
-            var resultStatus = await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);            
+            var resultStatus = await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
             return await Task.FromResult(UrlTaskResult<T>.FromStatus(resultStatus, url, loaderServiceEx));
         }
         catch (WarningException warning)
@@ -234,15 +254,15 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
             HandleWarningException(warning, url);
             return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, warning));
         }
-        catch(OperationCanceledException operationCancelledException)
+        catch (OperationCanceledException operationCancelledException)
         {
             await HandleCancellingAsync(operationCancelledException, url);
             return await Task.FromResult(UrlTaskResult<T>.Cancelled(url));
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not ImportCanceledException)
         {
             await HandleExceptionAsync(e, url);
-            return await Task.FromResult(UrlTaskResult<T>.Failed(default,url, e));
+            return await Task.FromResult(UrlTaskResult<T>.Failed(default, url, e));
         }
     }
 
@@ -257,18 +277,18 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         {
             var resultStatus = await HandleLoaderServiceExceptionAsync(loaderServiceEx, url);
             return await Task.FromResult(UrlTaskResult<T>.FromStatus(resultStatus, url, loaderServiceEx));
-        }        
+        }
         catch (WarningException warning)
         {
             HandleWarningException(warning, url);
-            return await Task.FromResult(UrlTaskResult<T>.Warning(default,url, warning));
+            return await Task.FromResult(UrlTaskResult<T>.Warning(default, url, warning));
         }
         catch (OperationCanceledException operationCancelledException)
         {
             await HandleCancellingAsync(operationCancelledException, url);
             return await Task.FromResult(UrlTaskResult<T>.Cancelled(url));
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not ImportCanceledException)
         {
             await HandleExceptionAsync(e, url);
             return await Task.FromResult(UrlTaskResult<T>.Failed(default, url, e));
@@ -291,7 +311,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
             await HandleCancellingAsync(operationCancelledException);
             return await Task.FromResult(TaskResult.Cancelled());
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not ImportCanceledException)
         {
             return await Task.FromResult(TaskResult.Failed(e));
         }
@@ -302,7 +322,7 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
         try
         {
             return TaskResult<T>.Success(await task());
-        }        
+        }
         catch (WarningException warning)
         {
             return await Task.FromResult(TaskResult<T>.Warning(default, warning));
@@ -320,17 +340,8 @@ public abstract class ShopImportService(ILogger logger, ILoaderService loaderSer
 
     protected virtual async Task<Stream> LoadFromUrlAsync(string url)
     {
-        await _webLoaderSemaphoreSlim.WaitAsync();
-        try
-        {
-            var stream = await LoaderService.Load(url, _loadData);
-            return await Task.FromResult(stream);
-        }
-        catch { throw; }
-        finally
-        {
-            _webLoaderSemaphoreSlim.Release();
-        }        
+        var stream = await LoaderService.Load(url, _loadData);
+        return await Task.FromResult(stream);
     }
 
     public virtual async ValueTask DisposeAsync()

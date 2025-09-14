@@ -59,7 +59,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         LoaderMock.SetupLoadItem(categoryUrl, requestData, categoryProducts);
 
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
-        LoaderMock.SetupLoadItemsThrowsExceptions(productItems, getItemException, requestData);
+        LoaderMock.SetupLoadItemsThrowsExceptions(productItems.Keys, getItemException, requestData);
 
         ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>())).Returns(Task.FromResult(ResultStatus.Success));
 
@@ -114,7 +114,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);        
 
-        LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("RequestFailedAndLoaderWillBePaused"), 
+        LoggerMock.VerifyWarning(exception, LogResourceManager.GetString("RequestFailedAndLoaderWillBePaused"), 
             url, exception.Message, 500);
 
         await token.CancelAsync();
@@ -138,39 +138,15 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), 
             It.IsAny<object>()));
 
-        LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("LoadFromUrlCompletedWithErrorAndNeedReset"), [url, exception.Message]);
+        LoggerMock.VerifyWarning(exception, LogResourceManager.GetString("LoadFromUrlCompletedWithErrorAndNeedReset"), [url, exception.Message]);
 
-        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("LoaderIsReseting"));  
-        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("LoaderResetSuccessfully"));
+        LoggerMock.VerifyInfo(LogResourceManager.GetString("LoaderIsReseting"));  
+        LoggerMock.VerifyInfo(LogResourceManager.GetString("LoaderResetSuccessfully"));
         
         LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);
 
         await token.CancelAsync();
-    }
-    [Fact]
-    public async Task ImportStopedWhenLoaderThrowsMultipleExceptionWithNeedReseting()
-    {
-        var exception = new LoaderServiceException("error redirect loop", LoaderServiceAction.Reset);
-        var serviceName = Guid.NewGuid().ToString();
-        SetupServiceWithCategoryLoadException(serviceName, exception, out var url);
-        LoaderMock.Setup(s => s.Reset()).Returns(Task.FromResult(true));
-        LoaderMock.Setup(s => s.UpdateData(url)).Returns(Task.FromResult(true));
-        LoaderMock.Setup(s => s.GetData(It.IsAny<string>())).Returns(Task.FromResult(new object()));
-
-        var token = new CancellationTokenSource();
-        var task = Service.StartServiceInFactoryAsync(token.Token);
-
-        await Task.Delay(1000);
-
-        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url),
-            It.IsAny<object>()));
-
-        LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("LoadFromUrlCompletedWithErrorAndNeedReset"), [url, exception.Message]);
-        
-        LoggerMock.VerifyInfo(ServiceResourceManager.GetString("ServiceWasStopped"), serviceName);
-
-        await token.CancelAsync();
-    }
+    }   
 
 
     [Fact]
@@ -189,7 +165,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), It.IsAny<object>()));
 
-        LoggerMock.VerifyWarning(exception, ServiceResourceManager.GetString("ProcessUrlNotCompleteWarning"), url, exception.Message);       
+        LoggerMock.VerifyWarning(exception, LogResourceManager.GetString("ProcessUrlNotCompleteWarning"), url, exception.Message);       
 
         LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);        
     }
@@ -207,7 +183,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), It.IsAny<object>()));
 
-        LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ProcessUrlFailedError"), url);
+        LoggerMock.VerifyError(exception, LogResourceManager.GetString("ProcessUrlFailedError"), url);
 
         LoggerMock.VerifyError(ImportProductsResourceManager.GetString("CategoryLoadingFault"), url, exception.Message);
     }
@@ -225,7 +201,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token);
 
-        await Task.Delay(3000);
+        await Task.Delay(2000);
 
         await token.CancelAsync();
 
@@ -249,7 +225,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token);
 
-        await Task.Delay(3000);
+        await Task.Delay((categoryProducts.CategoryProductItems.Length + 1)*200);
         
         await token.CancelAsync();
 

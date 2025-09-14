@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.DependencyInjection.Common;
 
-public static class DependencyInjectionExtensions
+public static class HttpDependencyInjectionExtensions
 {
     public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string key, out IHttpClientBuilder httpClientBuilder)
         where TService:class

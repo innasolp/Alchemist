@@ -12,6 +12,8 @@
 		<PackageReference Include="WebLoader.HttpClient" Version="1.0.0.6" />
 		<PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.8" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.2" GeneratePathProperty="true" />
+		<PackageReference Include="BrowserLauncher.Firefox.Windows.DevEdition" Version="1.0.0.2" GeneratePathProperty="true" />
+		<PackageReference Include="BrowserDataLoader.Firefox.DevEdition.Windows" Version="1.0.0.4" GeneratePathProperty="true" />
 	</ItemGroup>
 
 	<Target Name="RemoveBrowserDataLoaderDir" BeforeTargets="Build">
@@ -20,15 +22,20 @@
 
 	<Target Name="RemoveBrowserDataLoaderFirefoxDir" BeforeTargets="Build">
 		<RemoveDir Directories="$(SolutionDir)Libs\BrowserDataLoader\Firefox\Standart" />
-	</Target>
-
+		<RemoveDir Directories="$(SolutionDir)Libs\BrowserDataLoader\Firefox\DevEdition" />
+	</Target>	
+	
 	<Target Name="CopyBrowserDataLoaderFirefox" AfterTargets="Build">
 		<ItemGroup>
 			<BrowserDataLoaderFirefoxFiles Include="$(PkgBrowserDataLoader_Firefox_Standart_Windows)\lib\dependencies\*.dll"></BrowserDataLoaderFirefoxFiles>
 			<CopyBrowserDataLoaderNativeFiles Include="$(PkgBrowserDataLoader_Firefox_Standart_Windows)\lib\dependencies\**\*.*"></CopyBrowserDataLoaderNativeFiles>
+			<BrowserDataLoaderFirefoxDevEditionFiles Include="$(PkgBrowserDataLoader_Firefox_DevEdition_Windows)\lib\dependencies\*.dll"></BrowserDataLoaderFirefoxDevEditionFiles>
+			<CopyBrowserFirefoxDevEditionNativeFiles Include="$(PkgBrowserDataLoader_Firefox_DevEdition_Windows)\lib\dependencies\**\*.*"></CopyBrowserFirefoxDevEditionNativeFiles>
 		</ItemGroup>
 		<Copy SourceFiles="@(BrowserDataLoaderFirefoxFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserDataLoader\Firefox\Standart"></Copy>
+		<Copy SourceFiles="@(BrowserDataLoaderFirefoxDevEditionFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserDataLoader\Firefox\DevEdition"></Copy>
 		<Copy SourceFiles="@(CopyBrowserDataLoaderNativeFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserDataLoader\Firefox\Standart\%(RecursiveDir)"></Copy>
+		<Copy SourceFiles="@(CopyBrowserFirefoxDevEditionNativeFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserDataLoader\Firefox\DevEdition\%(RecursiveDir)"></Copy>
 	</Target>
 
 	<Target Name="RemoveBrowserLauncherDir" BeforeTargets="Build">
@@ -37,13 +44,16 @@
 
 	<Target Name="RemoveBrowserLauncherFirefoxDir" BeforeTargets="Build">
 		<RemoveDir Directories="$(SolutionDir)Libs\BrowserLauncher\Firefox\Standart" />
+		<RemoveDir Directories="$(SolutionDir)Libs\BrowserLauncher\Firefox\DevEdition" />
 	</Target>
 
 	<Target Name="CopyBrowserLauncherFirefox" AfterTargets="Build">
 		<ItemGroup>
-			<BrowserLauncherFirefoxFiles Include="$(PkgBrowserLauncher_Firefox_Windows_Standart)\lib\dependencies\*.dll"></BrowserLauncherFirefoxFiles>
+			<BrowserLauncherFirefoxStandartFiles Include="$(PkgBrowserLauncher_Firefox_Windows_Standart)\lib\dependencies\*.dll"></BrowserLauncherFirefoxStandartFiles>
+			<BrowserLauncherFirefoxDevEditionFiles Include="$(PkgBrowserLauncher_Firefox_Windows_DevEdition)\lib\dependencies\*.dll"></BrowserLauncherFirefoxDevEditionFiles>
 		</ItemGroup>
-		<Copy SourceFiles="@(BrowserLauncherFirefoxFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserLauncher\Firefox\Standart"></Copy>
+		<Copy SourceFiles="@(BrowserLauncherFirefoxStandartFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserLauncher\Firefox\Standart"></Copy>
+		<Copy SourceFiles="@(BrowserLauncherFirefoxDevEditionFiles)" DestinationFolder="$(SolutionDir)Libs\BrowserLauncher\Firefox\DevEdition"></Copy>
 	</Target>
 
 	<Target Name="RemoveWebLoaderDir" BeforeTargets="Build">

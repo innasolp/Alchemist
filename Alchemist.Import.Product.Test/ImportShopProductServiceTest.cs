@@ -30,14 +30,14 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     public async Task StoppedWhenWebLoaderNotExecutedAsync()
     {
         LoaderMock.Reset();        
-        await ImportWasStoppedWhenWebLoaderNotExecutedAsync();
+        await ImportWasStoppedWhenLoaderNotExecutedAsync();
     }
 
     [Fact]
     public async Task StartedWhenWebLoaderExecutedSuccessfullAsync()
     {
         LoaderMock.Reset();
-        await ImportStartedWhenWebLoaderExecutedSuccessfullAsync();
+        await ImportStartedWhenLoaderExecutedSuccessfullAsync();
     }
 
     [Fact]
@@ -45,5 +45,18 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     {
         LoaderMock.Reset();
         await ImportStoppedWhenCancellationRequestedAsync();
+    }
+
+    [Fact]
+    public async Task ImportFailedWhenLoaderAlwaysNeedReseting()
+    {
+        LoaderMock.Reset();
+
+        ProductShopModelMock.Setup(s => s.CategoryUrl).Returns("Category_{0}_page{1}");
+
+        var categoryMock = TestHelper.CreateCategoryMock();
+        ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
+
+        await ImportFailedWhenLoaderAlwaysNeedResetingAsync();
     }
 }

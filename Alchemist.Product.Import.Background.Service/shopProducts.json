@@ -45,7 +45,7 @@
               "Upgrade-Insecure-Requests": "1",
 
 
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0"
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0"
             },
 
             "Cookies": [
@@ -80,13 +80,13 @@
         },
       {
         "Name": "BrowserDataLoader",
-          "ImplementationTypeName": "FirefoxStandart",
-          "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
-        },
+        "ImplementationTypeName": "FirefoxDevEdition",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\DevEdition"
+      },
       {
         "Name": "BrowserLauncher",
-          "ImplementationTypeName": "FirefoxStandart",
-          "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+          "ImplementationTypeName": "FirefoxDevEdition",
+          "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\DevEdition"
         },
       {
         "Name": "WebLoader",
@@ -159,7 +159,8 @@
               "_ga",
               "_ga_QE5MQ8XJJK",
               "_gcl_au",
-              "_gid",
+              "_sp_id.925f",
+              "_sp_ses.925f",
               "_spx",
               "_ym_d",
               "_ym_isad",
@@ -178,13 +179,12 @@
               "domain_sid",
               "fgsscw-goldapple-ru",
               "ga-device-id",
-              "ga-gun-init",
               "ga-lang",
-              "ga-session-id",
+              "isAddressConfirmed",
+              "ga-session-assets",
               "gsscw-goldapple-ru",
               "mage-cache-sessid",
               "mindboxDeviceUUID",
-              "section_data_ids",
               "tmr_detect",
               "tmr_lvid",
               "tmr_lvidTS"

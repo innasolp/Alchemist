@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
+using Alchemist.Test.Log;
 
-namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
+namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
 public class SettingsAPIWebAppFactory (string connectionString, TestServer signalRServer) : DbAPIWebAppFactory<SettingsAPIProgram, AlchemyContext>(true)
 {

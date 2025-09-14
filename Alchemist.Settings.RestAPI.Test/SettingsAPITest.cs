@@ -53,7 +53,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
 
         var receiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>("testReceiver");
         await receiver.Start();
-        receiver.On<ShopSettings>(Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        receiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);       
 
         var productShopSettings = TestRepository.CreateProductShopSettings(WebAppFactory.Shops[1].Id, WebAppFactory.Shops[1].Name); 
 

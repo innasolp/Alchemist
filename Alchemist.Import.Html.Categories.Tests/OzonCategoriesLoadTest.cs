@@ -1,6 +1,5 @@
 using Alchemist.Import.Category.Json;
 using Alchemist.Import.Html.Factory;
-using Alchemist.Import.Service;
 using BrowserDataLoader.Interfaces;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -29,7 +28,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
 
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
-    private readonly IBrowserDataLoader _browserDataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
+    private readonly IBrowserDataLoader _browserDataLoader = new BrowserDataLoader.Firefox.DevEdition.Windows.FirefoxDevEditionDataLoader();
 
     private static async Task<IWebLoader> CreateWebLoaderAsync()
     {
@@ -41,14 +40,13 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
     }
 
     private async Task<JsonDocument?> GetJsonDocumentAsync(IWebLoader webLoader, 
-        RequestHeaders requestHeaders,
-        IEnumerable<WebLoader.Interfaces.ICookieData> cookies)
+        Dictionary<string,string> requestHeaders)
     {
         var htmlSearcher = HtmlSearchFactory.CreateSearcher(SearchMatchType.Like);
 
         var token = new CancellationTokenSource();
 
-        using var stream = await webLoader.LoadFromUrl(_shopUrl, requestHeaders, cookies);
+        using var stream = await webLoader.LoadFromUrl(_shopUrl, requestHeaders);
         var values = await htmlSearcher.GetValues(stream, new HtmlSearchOptions
         {
             Tag = "div",
@@ -63,30 +61,16 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
 
         return await Task.FromResult(document);
     }
-
-    private static RequestHeaders GetRequestHeaders(string requestHeadersFileName)
-    {
-        using var s = File.OpenRead($"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{requestHeadersFileName}");
-
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(s);
-
-        s.Close();
-
-        if (requestHeaders == null)
-            Assert.Fail("request header not loaded");
-
-        return requestHeaders;
-    }
+    
 
     [Fact]
     public async Task StandartLoadCategoriesListTest()
     {        
-        var webLoader = await CreateWebLoaderAsync();
-
-        var requestHeaders = GetRequestHeaders(_requestHeadersStandartFileName);
+        var webLoader = await CreateWebLoaderAsync();        
 
         var cookies = await _browserDataLoader.LoadCookies();
-        var document = await GetJsonDocumentAsync(webLoader, requestHeaders, cookies.Select(c=>c.Convert()));
+        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
+        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
 
         Assert.NotNull(document);
         
@@ -100,7 +84,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
         foreach(var parentCategory in parentCategories)
         {
             var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders, cookies.Select(c=>c.Convert()));
+            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
             
             var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
 
@@ -120,11 +104,9 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
     {
         var webLoader = await CreateWebLoaderAsync();
 
-        var requestHeaders = GetRequestHeaders(_requestHeadersStandartFileName);
-
         var cookies = await _browserDataLoader.LoadCookies();
-
-        var document = await GetJsonDocumentAsync(webLoader, requestHeaders, cookies.Select(c => c.Convert()));
+        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
+        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
 
         Assert.NotNull(document);
 
@@ -143,7 +125,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
         foreach (var parentCategory in parentCategories)
         {
             var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders, cookies.Select(c => c.Convert()));
+            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
 
             var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
 
@@ -161,13 +143,11 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
     [Fact]
     public async Task LoadCategoriesToCollectionTestSync()
     {
-        var webLoader = await CreateWebLoaderAsync();
+        var webLoader = await CreateWebLoaderAsync();        
 
-        var requestHeaders = GetRequestHeaders(_requestHeadersStandartFileName);
-
-        var cookies = (await _browserDataLoader.LoadCookies()).Select(c=>c.Convert());
-
-        var document = await GetJsonDocumentAsync(webLoader, requestHeaders, cookies);
+        var cookies = await _browserDataLoader.LoadCookies();
+        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
+        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
 
         Assert.NotNull(document);
 
@@ -183,7 +163,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
         foreach (var parentCategory in parentCategories)
         {
             var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders, cookies);
+            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
 
             var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
 

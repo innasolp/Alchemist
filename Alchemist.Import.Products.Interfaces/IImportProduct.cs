@@ -1,10 +1,8 @@
-﻿namespace Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Interfaces;
 
-public interface IImportProductItem 
+namespace Alchemist.Import.Products.Interfaces;
+
+public interface IImportProductItem : IItem
 {
-    string Name { get; }
-
-    string Url { get; }
-
     string ShopName { get; }    
 }

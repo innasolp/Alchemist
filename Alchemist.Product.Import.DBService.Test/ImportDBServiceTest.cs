@@ -40,7 +40,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
 
         var testSender = WebAppFactory.CreateTestSender();
         await testSender.Start();
-        testSender.Send(productMessageMock.Object, WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
+        await testSender.Send(productMessageMock.Object, WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
 
         await Task.Delay(5000);
 

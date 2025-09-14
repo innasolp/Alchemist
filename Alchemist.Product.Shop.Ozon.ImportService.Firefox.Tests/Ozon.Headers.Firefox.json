@@ -10,8 +10,6 @@
 
     "Connection": "keep-alive",
 
-
-
     "host": "www.ozon.ru",
 
     "Sec-Fetch-Dest": "document",
@@ -22,7 +20,7 @@
     "Upgrade-Insecure-Requests": "1",
 
 
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0"
   },
 
   "Cookies": [

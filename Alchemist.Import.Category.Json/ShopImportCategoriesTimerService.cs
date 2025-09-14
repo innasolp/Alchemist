@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 namespace Alchemist.Import.Category.Json;
 
-public class ShopImportCategoriesTimerService : ShopImportService
+public class ShopImportCategoriesTimerService : ImportService
 {
     protected sealed record ImportCategory(ICategory Category, ICategoryShopModel CategoryShopModel) : IImportCategory
     {
@@ -30,7 +30,12 @@ public class ShopImportCategoriesTimerService : ShopImportService
 
     private bool? _isStarted;
 
+    private readonly SemaphoreSlim _htmlLoaderSemaphoreSlim = new(1, 1);
+
+    private readonly SemaphoreSlim _jsonLoaderSemaphoreSlim = new(1, 1);
+
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+        string name,
         IHtmlSearcher? htmlSearcher,
         ILoaderService loader,
         ICategoryShopModel shop,
@@ -39,7 +44,7 @@ public class ShopImportCategoriesTimerService : ShopImportService
     {
         HtmlSearcher = htmlSearcher;
         CategoryLoadOptions = categoryLoadOptions;
-        Name = categoryLoadOptions.Name;
+        Name = name;
         ShopModel = shop;
         _itemHandler = itemHandler;
 
@@ -47,11 +52,12 @@ public class ShopImportCategoriesTimerService : ShopImportService
     }
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+        string name,
    ILoaderService loader,
    ICategoryShopModel shopUrlModel,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
-        : this(logger, null, loader, shopUrlModel, categoryLoadOptions, itemHandler)
+        : this(logger,name, null, loader, shopUrlModel, categoryLoadOptions, itemHandler)
     {
     }
 
@@ -75,10 +81,7 @@ public class ShopImportCategoriesTimerService : ShopImportService
         }
         else if (!stoppingToken.IsCancellationRequested)
         {            
-            var nextTickResult = await ProcessTaskAsync(() => _timer.WaitForNextTickAsync(stoppingToken).AsTask());
-            
-            if (nextTickResult.Status == Common.ResultStatus.Cancelled)
-                return;
+            var nextTickResult = await ProcessTaskAsync(() => _timer.WaitForNextTickAsync(stoppingToken).AsTask());  
 
             if(nextTickResult.Status == Common.ResultStatus.Success && nextTickResult.Value)
              await LoadCategoriesAsync(stoppingToken);
@@ -176,25 +179,49 @@ public class ShopImportCategoriesTimerService : ShopImportService
 
     private async Task<List<string>?> LoadHtmlFromUrlAsync(string url, CancellationToken token)
     {
-        token.ThrowIfCancellationRequested();       
-
-        using var stream = await LoadFromUrlAsync(url); 
-        var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
-        stream.Close();
-        return await Task.FromResult(values);
+        token.ThrowIfCancellationRequested();
+        await _htmlLoaderSemaphoreSlim.WaitAsync(token);
+        try
+        {
+            using var stream = await LoadFromUrlAsync(url);
+            var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
+            stream.Close();
+            return await Task.FromResult(values);
+        }
+#if DEBUG
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+#endif  
+        finally
+        {
+            _htmlLoaderSemaphoreSlim.Release();
+        }
     }
 
     private async Task<JsonDocument?> LoadJsonFromUrlAsync(string url, CancellationToken stoppingToken)
     {
-        stoppingToken.ThrowIfCancellationRequested();       
+        stoppingToken.ThrowIfCancellationRequested();
 
-        using var stream = await LoadFromUrlAsync(url);
+        await _jsonLoaderSemaphoreSlim.WaitAsync(stoppingToken);
 
-        var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
-
-        stream.Close();
-
-        return await Task.FromResult(categoriesJson);
+        try
+        { 
+            using var stream = await LoadFromUrlAsync(url);
+            var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
+            return await Task.FromResult(categoriesJson);
+        }
+#if DEBUG
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+#endif  
+        finally
+        {
+            _jsonLoaderSemaphoreSlim.Release();
+        }       
     }
 
     private readonly object _categoryCollectionChangedLock = new();

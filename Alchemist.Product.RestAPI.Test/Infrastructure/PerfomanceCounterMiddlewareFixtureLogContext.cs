@@ -1,4 +1,4 @@
-﻿using Alchemist.Test.Server.Fixtures;
+﻿using Alchemist.Test.Log;
 using Http.Info;
 using Http.RequestHandling.PerfomanceCounter;
 

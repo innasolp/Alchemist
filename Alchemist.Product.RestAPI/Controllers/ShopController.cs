@@ -88,7 +88,7 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
 
         var newShop = (await _alchemyRepository.CreateShop(shop)).To<Shop>();
 
-        await SendMessage(newShop, Messages.SendShopCreated);
+        await SendMessage(newShop, Messages.Common.Messages.SendShopCreated);
 
         var location = Url.Action(nameof(CreateShop), new { id = newShop.Id }) ?? $"/{newShop.Id}";
         return TypedResults.Created(location, newShop);

@@ -29,7 +29,7 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
         var loadOptionsService = (shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value) 
             ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopImportSettings.Name}");
         var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
-
+        
         var htmlSearchOptionsService = shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(HtmlSearchFactoryOptions))?.Value;
         var htmlSearchFactoryOptions = htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
 
@@ -37,7 +37,12 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)
             : null;
 
-        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, htmlSearcher, browserService, shopModel as ICategoryShopModel, categoryLoadOptions, _itemHandler);
+        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, 
+            shopImportSettings.Name,
+            htmlSearcher,
+            browserService,
+            shopModel as ICategoryShopModel,
+            categoryLoadOptions, _itemHandler);
     }
 
     protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)

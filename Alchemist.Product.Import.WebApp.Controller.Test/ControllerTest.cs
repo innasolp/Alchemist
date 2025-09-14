@@ -54,7 +54,7 @@ public abstract class ControllerTest<T>
         _categorySettingsDataAdapterMock.Setup(s => s.GetShopImportSettings(It.IsAny<int>()))
             .Returns(async (int shopId) => await GetShopSettingsModelAsync(shopId, ShopSettingType.Category));
 
-        _messageReceiverMock.Setup(m => m.On(Messages.ReceiveShopCreated, It.IsAny<Action<Shop>>())).Callback(() => { });
+        _messageReceiverMock.Setup(m => m.On(Messages.Common.Messages.ReceiveShopCreated, It.IsAny<Action<Shop>>())).Callback(() => { });
 
         //todo
         _loggerHomeControllerMock.Setup(l => l.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>())).

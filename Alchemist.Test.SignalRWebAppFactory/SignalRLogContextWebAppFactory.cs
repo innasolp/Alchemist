@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.SignalR;
-using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.Log;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;

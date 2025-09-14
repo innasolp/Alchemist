@@ -3,8 +3,8 @@ using Alchemist.Import.Factory.BrowserService;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Background;
-using Alchemist.Product.SignalR;
 using Alchemist.Test.Host.Interfaces;
+using Alchemist.Test.Log;
 using Alchemist.Test.RabbitMQ;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
@@ -15,9 +15,9 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
+namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<ImportBackgroundServiceProgram>
+public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<ImportBackgroundServiceProgram>, ILoggedContext
 {
     private readonly SettingsAPIWebAppFactory _settingsAPIWebAppFactory;
 
@@ -37,9 +37,13 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
     public FixtureLoggerFactoryContext ShopApiFixtureLoggingContext => _shopAPIWebAppFactory.FixtureLoggingContext;
 
+    public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
+
     public HttpClient ShopSettingsApiClient { get; }
 
     public HttpClient ShopApiClient { get; }
+
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
     public ImportBackgroundServiceWebAppFactory()
     {
@@ -49,7 +53,7 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
         var alchemyDbConnectionString = settings.GetConnectionString("alchemydb");
 
-        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
+        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<Test.Log.FixtureLoggerFactoryContext>();
         _signalRApplicationFactory.CreateClient();
 
         _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
@@ -73,7 +77,7 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
             SetBrowserServiceClient(services, _browserServiceFactory.ServerAddress);
 
-            RemoveDBJsonAdapter(services);
+            RemoveDBJsonAdapters(services);
 
             var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
             joinableTaskFactory.Run(async () =>
@@ -86,11 +90,12 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
                 context.Configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>());
 
             services.SetSignalRTestSender(ShopImportWorkerKeys.ShopsMessageSenderKey, _signalRApplicationFactory.Server, "import");
-            services.SetSignalRTestReceiver(ShopImportWorkerKeys.DataMessageReceiverKey, _signalRApplicationFactory.Server, "events");
+            services.SetSignalRTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
+            services.SetSignalRTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
         });
     }
 
-    private static void RemoveDBJsonAdapter(IServiceCollection services)
+    private static void RemoveDBJsonAdapters(IServiceCollection services)
     {
         var descriptors = services.Where(s => s.ServiceType == typeof(ISettingsAdapter) && s.ImplementationType == typeof(SettingsDataAdapter<,>));
         descriptors.ToList().ForEach(sd => services.Remove(sd));

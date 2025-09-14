@@ -27,6 +27,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
         
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
+            Guid.NewGuid().ToString(),
             null,
             LoaderMock.Object,
             _categoryShopModelMock.Object,            
@@ -39,14 +40,14 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     public async Task StoppedWhenWebLoaderNotExecutedAsync()
     {
         LoaderMock.Reset();
-        await ImportWasStoppedWhenWebLoaderNotExecutedAsync();
+        await ImportWasStoppedWhenLoaderNotExecutedAsync();
     }
 
     [Fact]
     public async Task StartedWhenWebLoaderExecutedSuccessfullAsync()
     {
         LoaderMock.Reset();
-        await ImportStartedWhenWebLoaderExecutedSuccessfullAsync();
+        await ImportStartedWhenLoaderExecutedSuccessfullAsync();
     }
 
     [Fact]
@@ -63,5 +64,13 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
             { "Id",new PropertyPath("Id", "Id") } };
 
         await ImportStoppedWhenCancellationRequestedAsync();
+    }
+
+    [Fact]
+    public async Task ImportFailedWhenLoaderAlwaysNeedReseting()
+    {
+        LoaderMock.Reset();       
+
+        await ImportFailedWhenLoaderAlwaysNeedResetingAsync();
     }
 }

@@ -8,12 +8,13 @@ using Microsoft.Extensions.Logging;
 namespace Alchemist.Import.Category.Test.Infrastructure;
 
 public class ShopImportCategoriesTimerServiceTest(ILogger<ShopImportCategoriesTimerService> logger,
+    string name,
     IHtmlSearcher? htmlSearcher, 
     ILoaderService loader,
     ICategoryShopModel shop, 
     CategoryLoadOptions categoryLoadOptions,
     ICategoryItemHandler itemHandler)
-    : ShopImportCategoriesTimerService(logger, htmlSearcher, loader, shop,  categoryLoadOptions, itemHandler), ITestService
+    : ShopImportCategoriesTimerService(logger, name, htmlSearcher, loader, shop,  categoryLoadOptions, itemHandler), ITestService
 {
     private string _name;
     public override string Name => _name;
