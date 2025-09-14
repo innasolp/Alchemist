@@ -35,6 +35,7 @@ public class ShopImportCategoriesTimerService : ImportService
     private readonly SemaphoreSlim _jsonLoaderSemaphoreSlim = new(1, 1);
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+        string name,
         IHtmlSearcher? htmlSearcher,
         ILoaderService loader,
         ICategoryShopModel shop,
@@ -43,7 +44,7 @@ public class ShopImportCategoriesTimerService : ImportService
     {
         HtmlSearcher = htmlSearcher;
         CategoryLoadOptions = categoryLoadOptions;
-        Name = categoryLoadOptions.Name;
+        Name = name;
         ShopModel = shop;
         _itemHandler = itemHandler;
 
@@ -51,11 +52,12 @@ public class ShopImportCategoriesTimerService : ImportService
     }
 
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+        string name,
    ILoaderService loader,
    ICategoryShopModel shopUrlModel,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
-        : this(logger, null, loader, shopUrlModel, categoryLoadOptions, itemHandler)
+        : this(logger,name, null, loader, shopUrlModel, categoryLoadOptions, itemHandler)
     {
     }
 

@@ -19,9 +19,7 @@ using ShopSettings = Alchemist.Product.Entities.ShopSettings;
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
 public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroundServiceWebAppFactory, ImportBackgroundServiceProgram>
-{ 
-    private readonly AsyncAutoResetEvent _asyncAutoResetEvent = new();
-
+{     
     public ImportBackgroundServiceTest(ImportBackgroundServiceWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : base(webAppFactory, outputHelper)
     {       
         WebAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
@@ -41,10 +39,14 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
     [Fact]
     public async Task WaitForImportMessageAsync()
     {
-        var receiver = WebAppFactory.CreateImportItemReceiver();
-        await receiver.Start();
-        receiver.On("product", OnHandleProductMessage, typeof(Mock<IProductData>));
-        receiver.On("category", OnHandleCategoryMessage, typeof(Mock<ICategoryData>));
+        var importReceiver = WebAppFactory.CreateImportItemReceiver();
+        AsyncAutoResetEvent asyncAutoResetEvent = new();
+        void onHandleProductMessage(object obj) => asyncAutoResetEvent.Set();
+        void onHandleCategoryMessage(object obj) => asyncAutoResetEvent.Set();
+
+        await importReceiver.Start();
+        importReceiver.On("product", onHandleProductMessage, typeof(Mock<IProductData>));
+        importReceiver.On("category", onHandleCategoryMessage, typeof(Mock<ICategoryData>));
 
         var httpClient = WebAppFactory.CreateClient();
 
@@ -52,7 +54,7 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var token = new CancellationToken();
-        var task = _asyncAutoResetEvent.WaitAsync(token);
+        var task = asyncAutoResetEvent.WaitAsync(token);
 
         try
         {
@@ -67,23 +69,21 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
 
             throw;            
         }
+        finally
+        {
+            await importReceiver.Stop();
+        }
     }
 
-    private void OnHandleCategoryMessage(object t)
-    {
-        _asyncAutoResetEvent.Set();
-    }
-
-    private void OnHandleProductMessage(object t)
-    {
-        _asyncAutoResetEvent.Set();
-    }
 
     [Fact]
     public async Task NewShopSettingsHandlingWhenNewShopSettingsSavedAsync()
     {
+        AsyncAutoResetEvent asyncAutoResetEvent = new();
+        Action<ShopSettings> onShopSettingsCreated = (settings) => asyncAutoResetEvent.Set();
+
         var messageReceiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>(ShopImportWorkerKeys.EventMessageReceiverKey);
-        messageReceiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);
+        messageReceiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, onShopSettingsCreated);
 
         var httpClient = WebAppFactory.CreateClient();
 
@@ -95,7 +95,7 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
         await Task.Delay(1000);
 
         var token = new CancellationToken();
-        var task = _asyncAutoResetEvent.WaitAsync(token);
+        var task = asyncAutoResetEvent.WaitAsync(token);
 
         try
         {
@@ -136,12 +136,6 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
         return settings;
     }
 
-    private async Task OnShopSettingsCreatedAsync(ShopSettings settings)
-    {
-        _asyncAutoResetEvent.Set();
-        await Task.FromResult(true);
-    }
-
     [Fact]
 
     public async Task ServiceCreatedCommandSendSuccessAsync()
@@ -150,16 +144,13 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
         var serviceCreatedAutoResetEvent = new AsyncAutoResetEvent();
         var guids = new List<Guid>();
         var semaphoreSlim = new SemaphoreSlim(1, 1);
-        Func<Guid, Task> onServiceCreated = async (guid) =>
-        {
-            await semaphoreSlim.WaitAsync();
-            guids.Add(guid);
-            OutputHelper.WriteLine(guid.ToString());
-            semaphoreSlim.Release();
 
+        Func<object[], Task> serviceCreatedAsync = async (parameters) =>
+        {
+            await OnServiceCreatedAsync(parameters, semaphoreSlim, guids);
             serviceCreatedAutoResetEvent.Set();
         };
-        messageReceiver.On(Messages.Common.Messages.ReceiveServiceCreated, onServiceCreated);
+        messageReceiver.On(Messages.Common.Messages.ReceiveServiceCreated, serviceCreatedAsync);
         await messageReceiver.Start();
 
         try
@@ -173,7 +164,8 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
 
             if (guids.Count == 0)
             {
-                await serviceCreatedAutoResetEvent.WaitAsync();
+                var waitServiceCreationTask = serviceCreatedAutoResetEvent.WaitAsync();
+                await waitServiceCreationTask.WaitAsync(TimeSpan.FromMilliseconds(3000));
                 Assert.NotEmpty(guids);
             }
         }
@@ -189,28 +181,33 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
             await messageReceiver.Stop();
         }
     }
+    private async Task OnServiceCreatedAsync(object[] parameters, SemaphoreSlim semaphoreSlim, List<Guid> guids)
+    {
+        await semaphoreSlim.WaitAsync();
+        if (parameters.Length > 0 && Guid.TryParse(parameters[0].ToString(), out var guid))
+        {
+            guids.Add(guid);
+            OutputHelper.WriteLine(guid.ToString());
+        }
+        semaphoreSlim.Release();
+    }
+
 
     [Fact]
 
     public async Task ServiceCancelledWhenStopCommandSendAsync()
     {        
-        var serviceGuids = new List<Guid>();
-        
+        var serviceGuids = new List<Guid>();        
         var firstServiceCreatedAutoResetEvent = new AsyncAutoResetEvent(false);
         var semaphoreSlim = new SemaphoreSlim(1,1);
-        async Task onServiceCreatedAsync(Guid guid)
+        Func<object[], Task> serviceCreatedAsync = async (parameters) =>
         {
-            await semaphoreSlim.WaitAsync();
-            serviceGuids.Add(guid);
-            OutputHelper.WriteLine($"Service {guid} created");
-            semaphoreSlim.Release();           
-            
+            await OnServiceCreatedAsync(parameters, semaphoreSlim, serviceGuids);
             firstServiceCreatedAutoResetEvent.Set();
-            
-        }
+        };
 
         var testMessageReceiver = SignalRHelper.CreateSignalRTestReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
-        testMessageReceiver.On(Messages.Common.Messages.ReceiveServiceCreated, (Func<Guid, Task>)onServiceCreatedAsync);        
+        testMessageReceiver.On(Messages.Common.Messages.ReceiveServiceCreated, serviceCreatedAsync);        
         await testMessageReceiver.Start();
 
         var testMessageSender = SignalRHelper.CreateSignalRTestSender(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
@@ -226,7 +223,8 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
 
             if (serviceGuids.Count == 0)
             {
-                await firstServiceCreatedAutoResetEvent.WaitAsync();
+                var waitServiceCreationTask = firstServiceCreatedAutoResetEvent.WaitAsync();
+                await waitServiceCreationTask.WaitAsync(TimeSpan.FromMilliseconds(30000));
 
                 Assert.NotEmpty(serviceGuids);
             }
@@ -252,5 +250,5 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
             await testMessageReceiver.Stop();
             await testMessageSender.Stop();
         }
-    }
+    }   
 }

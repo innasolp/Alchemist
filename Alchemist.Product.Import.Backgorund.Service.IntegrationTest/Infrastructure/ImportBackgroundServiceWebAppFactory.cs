@@ -77,7 +77,7 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
             SetBrowserServiceClient(services, _browserServiceFactory.ServerAddress);
 
-            RemoveDBJsonAdapter(services);
+            RemoveDBJsonAdapters(services);
 
             var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
             joinableTaskFactory.Run(async () =>
@@ -95,7 +95,7 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
         });
     }
 
-    private static void RemoveDBJsonAdapter(IServiceCollection services)
+    private static void RemoveDBJsonAdapters(IServiceCollection services)
     {
         var descriptors = services.Where(s => s.ServiceType == typeof(ISettingsAdapter) && s.ImplementationType == typeof(SettingsDataAdapter<,>));
         descriptors.ToList().ForEach(sd => services.Remove(sd));

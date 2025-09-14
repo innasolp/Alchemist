@@ -24,9 +24,18 @@ public static class Messages
     public static string SendServiceStart => "SendServiceStart";
     public static string ReceiveServiceStart => "ReceiveServiceStart";
 
+    public static string SendServiceStarted => "SendServiceStarted";
+    public static string ReceiveServiceStarted => "ReceiveServiceStarted";
+
     public static string SendServiceStop => "SendServiceStop";
     public static string ReceiveServiceStop => "ReceiveServiceStop";
 
     public static string SendServiceCreated => "SendServiceCreated";
     public static string ReceiveServiceCreated => "ReceiveServiceCreated";
+
+    public static string SendServiceStopped => "SendServiceStopped";
+    public static string ReceiveServiceStopped => "ReceiveServiceStopped";
+
+    public static string SendServiceEventError => "SendServiceEventError";
+    public static string ReceiveServiceEventError => "ReceiveServiceEventError";
 }

@@ -27,6 +27,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
         
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
+            Guid.NewGuid().ToString(),
             null,
             LoaderMock.Object,
             _categoryShopModelMock.Object,            

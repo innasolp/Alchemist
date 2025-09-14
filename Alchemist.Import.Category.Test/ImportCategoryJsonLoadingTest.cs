@@ -32,6 +32,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         _categoryShopModelMock.Setup(s => s.ShopName).Returns(Guid.NewGuid().ToString());
 
         Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
+            Guid.NewGuid().ToString(),
             null,
             LoaderMock.Object,
             _categoryShopModelMock.Object,            

@@ -25,7 +25,7 @@ public class ShopImportWorker : BackgroundService
     private readonly IMessageSender _eventMessageSender;
     private readonly IShopDataService _shopDataService;
     private readonly IEnumerable<ISettingsAdapter> _settingsAdapters;
-    private readonly IMessageSender _itemMessageSender;
+    private readonly IEnumerable<IMessageSender> _itemMessageSenders;
     private readonly IProductItemHandler _productDataHandler;
     private readonly ICategoryItemHandler? _categoryDataHandler;
     private readonly IShopSettingsDataService _settingsDataService;
@@ -45,7 +45,7 @@ public class ShopImportWorker : BackgroundService
         IEnumerable<ISettingsAdapter> settingsAdapters,
         IEnumerable<IShopImportServiceFactory> shopImportFactories,
         [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)]
-        IMessageSender itemMessageSender,
+        IEnumerable<IMessageSender> itemMessageSenders,
         IProductItemHandler productDataHandler,
         IShopSettingsDataService settingsDataService)
     {
@@ -53,7 +53,7 @@ public class ShopImportWorker : BackgroundService
         _eventMessageReceiver = eventMessageReceiver;
         _eventMessageSender = eventMessageSender;
         _shopDataService = shopDataService;
-        _itemMessageSender = itemMessageSender;
+        _itemMessageSenders = itemMessageSenders;
         _productDataHandler = productDataHandler;
         _settingsAdapters = settingsAdapters;
 
@@ -76,17 +76,31 @@ public class ShopImportWorker : BackgroundService
         if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
         {
             await serviceWithToken.InnerTokenSource.CancelAsync();
+
             _logger.LogInformation($"Service {serviceWithToken.Service.Name} stopped");
+
+            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceStopped, guid);
         }
         else
+        {
             _logger.LogWarning($"Stopping service is not available. Service with guid {guid} not found");
+
+            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceEventError, 
+                guid, 
+                null,
+                Messages.Common.Messages.ReceiveServiceStop, 
+                $"Service with guid {guid} not found");
+        }
     }
 
-    private async Task StartServiceAsync(Guid guid, CancellationToken stoppingToken)
+    private async Task OnStartServiceAsync(Guid guid, CancellationToken stoppingToken)
     {
         _logger.LogInformation($"Starting service with guid {guid}.");
-        if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))        
-            await StartServiceAsync(serviceWithToken.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceWithToken.InnerTokenSource.Token).Token);        
+        if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
+            await StartServiceAsync(guid, serviceWithToken.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceWithToken.InnerTokenSource.Token).Token);
+        else
+            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceEventError,
+                guid, null, Messages.Common.Messages.ReceiveServiceStart,  $"Service for guid {guid}  not found");
     }
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
@@ -98,11 +112,11 @@ public class ShopImportWorker : BackgroundService
         IEnumerable<ISettingsAdapter> settingsAdapters,
         IEnumerable<IShopImportServiceFactory> shopImportFactories,
         [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)]
-        IMessageSender itemMessageSender,
+        IEnumerable<IMessageSender> itemMessageSenders,
         IProductItemHandler productDataHandler,
         ICategoryItemHandler categoryDataHandler,
         IShopSettingsDataService settingsDataService)
-        : this(logger, eventMessageReceiver, eventMessageSender, shopDataService, settingsAdapters, shopImportFactories, itemMessageSender, productDataHandler, settingsDataService)
+        : this(logger, eventMessageReceiver, eventMessageSender, shopDataService, settingsAdapters, shopImportFactories, itemMessageSenders, productDataHandler, settingsDataService)
     {
         _categoryDataHandler = categoryDataHandler;
         _categoryDataHandler.ItemProcessed += CategoryHandledAsync;
@@ -110,47 +124,43 @@ public class ShopImportWorker : BackgroundService
 
     private async Task CategoryHandledAsync(object sender, IImportCategory item, ResultStatus processStatus)
     {
-        try
+        var categoryModel = new ImportCategory { Category = item.Category.Name, ItemId = item.Category.Id, Status = processStatus };
+
+        if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
+        await SendItemMessagesAsync(categoryModel, Messages.Common.Messages.SendCategoryItem);
+    }
+
+    private async Task SendItemMessagesAsync<T>(T item, string eventName)
+        where T:class, IItem
+    {
+        foreach (var itemMessageSender in _itemMessageSenders)
         {
-            if (!_itemMessageSender.IsConnected)
-                await _itemMessageSender.Start();
+            try
+            {
+                if (!itemMessageSender.IsConnected)
+                    await itemMessageSender.Start();
 
-            var categoryModel = new ImportCategory { Category = item.Category.Name, ItemId = item.Category.Id, Status = processStatus };
-
-            if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
-
-            await _itemMessageSender.Send(categoryModel, Messages.Common.Messages.SendCategoryItem);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Category item {item.Category.Name} handling failed.");            
+                await itemMessageSender.Send(item, eventName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Category item {item.Name} handling for event {eventName} failed in message sender {itemMessageSender.GetType()}.");
+            }
         }
     }
 
 
     private async Task ProductItemHandledAsync(object sender, IImportProduct item, ResultStatus status)
     {
-        try
-        {
-            if (!_itemMessageSender.IsConnected)
-                await _itemMessageSender.Start();
-
-            var productItemModel = new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status };
-
-            await _itemMessageSender.Send(productItemModel, Messages.Common.Messages.SendProductItem);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Product item {item.ProductItem.Name} handling failed.");
-        }
+        var productItemModel = new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status };
+        await SendItemMessagesAsync(productItemModel, Messages.Common.Messages.SendProductItem);
     }
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
     {
         var shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
         shop?.Categories.Add(new ProductShopCategoryModel { Category = shopCategory.Category, ItemId = shopCategory.ItemId });
-    }    
-    
+    }
 
     private async Task OnShopSettingsCreatedAsync(ShopSettings newShopSettings)
     {
@@ -170,9 +180,12 @@ public class ShopImportWorker : BackgroundService
 
             if (!TryGetImportService(shopImportSettings, shopModel, out var service)) return;
 
-            _servicesWithTokens.Add(Guid.NewGuid(), new ServiceWithToken(service, new CancellationTokenSource()));
+            var guid = Guid.NewGuid();
+            _servicesWithTokens.Add(guid, new ServiceWithToken(service, new CancellationTokenSource()));
 
             _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
+
+            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceCreated, guid, service.Name);
         }
         catch (Exception ex)
         {
@@ -191,12 +204,11 @@ public class ShopImportWorker : BackgroundService
             await CreateServicesFromImportSettingsAsync(allShopImportSettings);           
 
             _logger.LogInformation("Import services initialized.");
-
-            if (!_eventMessageSender.IsConnected)
-                await _eventMessageSender.Start();
-
-            foreach (var guid in _servicesWithTokens.Keys)
-                await _eventMessageSender.Send(guid, Messages.Common.Messages.SendServiceCreated);
+            
+            foreach (var service in _servicesWithTokens)
+            {
+                await SendServiceMessageAsync(Messages.Common.Messages.SendServiceCreated, service.Key, service.Value.Service.Name);
+            }
         }
         catch (Exception ex)
         {
@@ -206,7 +218,7 @@ public class ShopImportWorker : BackgroundService
         try
         {
             await Parallel.ForEachAsync(_servicesWithTokens, (s, t) =>
-                new ValueTask(StartServiceAsync(s.Value.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, s.Value.InnerTokenSource.Token).Token)));
+                new ValueTask(StartServiceAsync(s.Key, s.Value.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, s.Value.InnerTokenSource.Token).Token)));
         }
         catch (Exception e)
         {
@@ -231,7 +243,7 @@ public class ShopImportWorker : BackgroundService
 
     private async Task StartEventMessageReceiverAsync(CancellationToken stoppingToken)
     {
-        async Task startServiceAsync(Guid guid) => await StartServiceAsync(guid, stoppingToken);
+        async Task startServiceAsync(Guid guid) => await OnStartServiceAsync(guid, stoppingToken);
         try
         {
             await _eventMessageReceiver.Start();
@@ -274,11 +286,15 @@ public class ShopImportWorker : BackgroundService
         return true;
     }
 
-    private async Task StartServiceAsync(IImportService service, CancellationToken stoppingToken)
+    private async Task StartServiceAsync(Guid guid, IImportService service, CancellationToken stoppingToken)
     {
         try
         {
-            await service.Start(stoppingToken);
+            var serviceStartTask = service.Start(stoppingToken);
+
+            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceStarted, guid);
+
+            await serviceStartTask.WaitAsync(stoppingToken);
         }
         catch (AggregateException ae)
         {
@@ -301,11 +317,38 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
+    private async Task SendServiceMessageAsync(string eventName, Guid guid, string? serviceName  = null, params object[]? parameters)
+    {
+        try
+        {
+            if (!_eventMessageSender.IsConnected)
+                await _eventMessageSender.Start();
+
+            if(serviceName == null)
+                await _eventMessageSender.Send(guid, eventName);
+            else
+            {
+                var messageParameters = new List<object>() { guid, serviceName };
+                if (parameters != null) messageParameters.AddRange(parameters);
+
+                await _eventMessageSender.Send(messageParameters.ToArray(), eventName);
+            }            
+        }
+        catch(Exception e)
+        {
+            _logger.LogError(e, $"Sending service {serviceName} message for event {eventName} failed.");
+        }
+    }
+
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _eventMessageReceiver.Stop();
-        await _itemMessageSender.Stop();
+        await _eventMessageReceiver.Stop();   
+        
         await _eventMessageSender.Stop();
+
+        foreach (var itemMessageSender in _itemMessageSenders)
+            await itemMessageSender.Stop();
+
         await base.StopAsync(cancellationToken);
     }
 
