@@ -71,20 +71,14 @@ static void AddMessages(WebApplicationBuilder builder)
     builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl", "monitorItemSender");
     builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageSenderKey);
     builder.Services.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageReceiverKey);
-
-    var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
-    rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
-    builder.Services.AddRabbitMQMessageSender("importqueue", rabbitMQOptions);
-    builder.Services.AddProductItemHandler("importqueue", builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
-    builder.Services.AddCategoryItemHandler("importqueue", builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
-
-    builder.Services.CollectServicesToEnumerable<IMessageSender>(["monitorItemSender", "importqueue"], ShopImportWorkerKeys.ShopsMessageSenderKey);
+    
+    builder.Services.CollectServicesToEnumerable<IMessageSender>(["monitorItemSender"], ShopImportWorkerKeys.ShopsMessageSenderKey);
 }
 
 static void AddSettingsAdapters(WebApplicationBuilder builder)
 {
-    //builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Product);
-    //builder.Services.AddSettingsDataAdapter<CategoryShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Category);
+    builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Product);
+    builder.Services.AddSettingsDataAdapter<CategoryShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Category);
     builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings>("shopProducts.json");
     builder.Services.AddSettingsJsonAdapter<CategoryShopImportSettings>("shopCategories.json");
 }
@@ -120,7 +114,19 @@ static void AddShopImporters(WebApplicationBuilder builder)
     builder.Services.AddImportServiceLogFactory((logger, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
     { "ShopImportService", settings.Name },
     { "ShopSettingsType", settings.ShopSettingType.ToString() } }));
+
     builder.Services.AddPerfomanceCounter((logger) => new SerilogUrlLogger<IPerfomanceCounter>(logger));
+
+    AddShopImportItemHandlers(builder.Services, builder.Configuration);
+}
+
+static void AddShopImportItemHandlers(IServiceCollection services, IConfiguration configuration)
+{
+    var rabbitMQOptions = configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
+    rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
+    services.AddRabbitMQMessageSender("importqueue", rabbitMQOptions);
+    services.AddProductItemHandler("importqueue", configuration.GetSection("RabbitMQProductEvent").Get<string>());
+    services.AddCategoryItemHandler("importqueue", configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 }
 
 static void AddShopImportLogging(string logPath, IWebHostEnvironment environment, SerilogConfigurationBuilder appLogConfBuilder)
