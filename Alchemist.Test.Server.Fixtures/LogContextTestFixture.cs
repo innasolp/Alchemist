@@ -18,10 +18,13 @@ public abstract class LogContextTestFixture<TWebAppFactory, TEntryPoint> : TestF
     }
 
     protected IEnumerable<TestLogMessage> LogMessages => _logMessages;
+    private readonly Semaphore _semaphore = new(1, 1);
 
     protected void Log(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception)
     {
+        _semaphore.WaitOne();
         _logMessages.Add(new TestLogMessage(logLevel, categoryName, eventId, message, exception));
+        _semaphore.Release();
     }
 
     protected void OutputErrors()

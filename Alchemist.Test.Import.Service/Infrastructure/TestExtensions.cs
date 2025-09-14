@@ -43,15 +43,21 @@ public static class TestExtensions
         loaderMock.Setup(w => w.Load(itemUrl.Key, requestData)).Returns(LoadItemAsync(itemUrl.Value));
     }
 
-    public static void SetupLoadItemsThrowsExceptions<T>(this Mock<ILoaderService> webLoaderMock,
-        Dictionary<string, T> itemUrls, 
+    public static void SetupLoadItemsThrowsExceptions(this Mock<ILoaderService> webLoaderMock,
+        IEnumerable<string> itemUrls, 
         Func<string, Exception> getItemException,
         object requestData)
-        where T : class
     {
         foreach (var itemUrl in itemUrls)
-            webLoaderMock.Setup(w => w.Load(itemUrl.Key, requestData))
-                .Throws(getItemException(itemUrl.Key));
+            webLoaderMock.SetupLoadItemThrowsException(itemUrl, getItemException(itemUrl), requestData);
+    }
+
+    public static void SetupLoadItemThrowsException(this Mock<ILoaderService> webLoaderMock,
+        string itemUrl,
+        Exception exception,
+        object requestData)
+    {
+        webLoaderMock.Setup(w => w.Load(itemUrl, requestData)).Throws(exception);
     }
 
     private static async Task<Stream> LoadItemAsync<T>(T item)

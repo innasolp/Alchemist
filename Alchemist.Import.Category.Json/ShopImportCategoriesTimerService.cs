@@ -30,6 +30,10 @@ public class ShopImportCategoriesTimerService : ImportService
 
     private bool? _isStarted;
 
+    private readonly SemaphoreSlim _htmlLoaderSemaphoreSlim = new(1, 1);
+
+    private readonly SemaphoreSlim _jsonLoaderSemaphoreSlim = new(1, 1);
+
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
         IHtmlSearcher? htmlSearcher,
         ILoaderService loader,
@@ -173,29 +177,48 @@ public class ShopImportCategoriesTimerService : ImportService
 
     private async Task<List<string>?> LoadHtmlFromUrlAsync(string url, CancellationToken token)
     {
-        token.ThrowIfCancellationRequested();       
-
-        using var stream = await LoadFromUrlAsync(url); 
-        var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
-        stream.Close();
-        return await Task.FromResult(values);
+        token.ThrowIfCancellationRequested();
+        await _htmlLoaderSemaphoreSlim.WaitAsync(token);
+        try
+        {
+            using var stream = await LoadFromUrlAsync(url);
+            var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
+            stream.Close();
+            return await Task.FromResult(values);
+        }
+#if DEBUG
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+#endif  
+        finally
+        {
+            _htmlLoaderSemaphoreSlim.Release();
+        }
     }
 
     private async Task<JsonDocument?> LoadJsonFromUrlAsync(string url, CancellationToken stoppingToken)
     {
-        stoppingToken.ThrowIfCancellationRequested();       
+        stoppingToken.ThrowIfCancellationRequested();
 
-        using var stream = await LoadFromUrlAsync(url);
+        await _jsonLoaderSemaphoreSlim.WaitAsync(stoppingToken);
 
         try
-        {
+        { 
+            using var stream = await LoadFromUrlAsync(url);
             var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
             return await Task.FromResult(categoriesJson);
         }
-        catch { throw; }
+#if DEBUG
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+#endif  
         finally
         {
-            stream.Close();
+            _jsonLoaderSemaphoreSlim.Release();
         }       
     }
 

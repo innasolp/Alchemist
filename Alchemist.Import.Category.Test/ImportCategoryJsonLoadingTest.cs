@@ -96,7 +96,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
         await ExecuteServiceAsync(name, 1000, 1000);
 
-        LoggerMock.VerifyError(exception, ServiceResourceManager.GetString("ProcessUrlFailedError"),
+        LoggerMock.VerifyError(exception, LogResourceManager.GetString("ProcessUrlFailedError"),
             _categoryShopModelMock.Object.CategorySourceUrl);
 
         LoggerMock.VerifyError(ImportCategoriesResourceManager.GetString("JsonLoadFromUrlFailed"),
