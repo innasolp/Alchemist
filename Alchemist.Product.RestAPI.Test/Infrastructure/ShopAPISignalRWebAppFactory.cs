@@ -12,6 +12,6 @@ public class ShopAPISignalRWebAppFactory(TestServer signalRServer) : ShopAPIWebA
     {
         base.ConfigureServices(services);
 
-        services.SetSignalRTestSender(_signalRServer, ["events"]);
+        services.SetSignalRHubTestSender(_signalRServer, ["events"]);
     }
 }

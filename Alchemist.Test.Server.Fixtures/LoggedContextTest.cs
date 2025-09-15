@@ -1,23 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Alchemist.Test.Server.Fixtures;
 
 public record TestLogMessage(LogLevel LogLevel, string CategoryName, EventId EventId, string Message, Exception? Exception);
 
-public abstract class LogContextTestFixture<TWebAppFactory, TEntryPoint> : TestFixture<TWebAppFactory, TEntryPoint>
-     where TEntryPoint : class
-    where TWebAppFactory : WebApplicationFactory<TEntryPoint>, ILoggedContext
+public abstract class LoggedContextTest(ITestOutputHelper outputHelper)
 {
+    protected ITestOutputHelper OutputHelper { get; private set; } = outputHelper;
+
     private readonly List<TestLogMessage> _logMessages = [];
 
-    public LogContextTestFixture(TWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : base(webAppFactory, outputHelper)
-    {
-        WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
-    }
-
     protected IEnumerable<TestLogMessage> LogMessages => _logMessages;
+
     private readonly Semaphore _semaphore = new(1, 1);
 
     protected void Log(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception)

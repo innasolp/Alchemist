@@ -20,7 +20,7 @@ public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) 
 
         builder.ConfigureServices((context, services) =>
         {
-            context.SetKestrelLocalhostPortsConfig(HttpPort, HttpsPort);
+            context.Configuration.SetKestrelLocalhostPortsConfig(HttpPort, HttpsPort);
         });
     }    
 }

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Alchemist.Common;
 
 namespace Alchemist.Test.Server.Fixtures;
 
@@ -68,18 +67,5 @@ public static class HostBuilderExtensions
     {
         var server = host.Services.GetRequiredService<IServer>();
         return server.GetBaseAddress();
-    }    
-
-    public static void SetLocalhostPortsConfig(this WebHostBuilderContext context, string httpPortSection, int httpPort, string httpsPortSection, int httpsPort)
-    {
-        var http = context.Configuration.GetSection(httpPortSection);
-        http.Value = $"https://{Utils.GetEnvironmentLocalhost()}:{httpPort}";
-        var https = context.Configuration.GetSection(httpsPortSection);
-        https.Value = $"https://{Utils.GetEnvironmentLocalhost()}:{httpsPort}";
-    }
-
-    public static void SetKestrelLocalhostPortsConfig(this WebHostBuilderContext context, int httpPort, int httpsPort)
-    {
-        context.SetLocalhostPortsConfig("Kestrel:EndPoints:Http:Url", httpPort, "Kestrel:EndPoints:Https:Url", httpsPort);
     }
 }

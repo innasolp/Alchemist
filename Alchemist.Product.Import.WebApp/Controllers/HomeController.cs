@@ -43,7 +43,7 @@ public class HomeController : Controller
         _settingsDataAdapterContainer = new SettingsDataAdapterContainer(productSettingsDataAdapter, categorySettingsDataAdapter);
         _modelFactory = modelFactory;
 
-        _shopEventReceiver.On<Shop>(Messages.Common.Messages.ReceiveShopCreated, OnShopCreated);
+        _shopEventReceiver.On<Shop>(Messages.Common.Messages.ShopCreated, OnShopCreated);
     }
 
     private void OnShopCreated(Shop shop)

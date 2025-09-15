@@ -1,6 +1,5 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,11 +10,15 @@ using Alchemist.Test.Log;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-public class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer) : DbAPIWebAppFactory<ShopAPIProgram, AlchemyContext>(true)
+public class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort) 
+    : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, httpPort, httpsPort)
 {
     private readonly TestServer _signalRServer = signalRServer;
 
     private readonly string _connectionString = connectionString;
+
+    public ShopAPIWebAppFactory(string connectionString, TestServer signalRServer)
+        : this(connectionString, signalRServer, 8050, 8051) { }
 
     public FixtureLoggerFactoryContext FixtureLoggingContext   { get; } = new FixtureLoggerFactoryContext();
 
@@ -28,18 +31,14 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
         return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
     }
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        base.ConfigureWebHost(builder);
+        base.ConfigureWebHostBuilderContext(context, services);
 
-        builder.ConfigureServices((context, services) =>
-        {
-            context.SetKestrelLocalhostPortsConfig(8050, 8051);
+        services.SetSignalRHubTestSender(_signalRServer, ["events"]);
 
-            services.SetSignalRTestSender(_signalRServer, ["events"]);
+        FixtureLoggingContext.ConfigureServices(services);
 
-            FixtureLoggingContext.ConfigureServices(services);
-        });
     }
 }
 

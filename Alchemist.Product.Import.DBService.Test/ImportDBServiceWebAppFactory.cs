@@ -1,15 +1,14 @@
-﻿using Alchemist.Product.GrpcService.Services;
+﻿using Alchemist.DataService.Interfaces;
+using Alchemist.Test.Server.Fixtures;
+using Alchemist.Product.RestAPIClient;
 using Alchemist.Product.SignalR;
 using Alchemist.Test.Host.Interfaces;
 using Alchemist.Test.RabbitMQ;
-using Grpc.AspNetCore.Server;
-using Grpc.Core.Interceptors;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
@@ -29,6 +28,8 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
 
     public event Action<IServiceCollection> ConfigureServices;
 
+    private readonly HttpClient _shopAPIClient;
+
     public ImportDBServiceWebAppFactory()
     {   
         var settings = new ConfigurationBuilder()
@@ -43,13 +44,13 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
         _signalRApplicationFactory.CreateClient();
 
         _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
-        
+        _shopAPIClient = _shopAPIWebAppFactory.CreateClient();
+
     }
 
-    public void StartHttpClients()
+    public void StartGrpc()
     {
-        _grpcWebAppFactory.CreateClient();
-        _shopAPIWebAppFactory.CreateClient();
+        _grpcWebAppFactory.CreateClient();            
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -65,6 +66,8 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
             {
                 await _importItemsHost.Start();
             });
+
+            services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(_shopAPIClient));
 
             SetReceiver(services);  
             

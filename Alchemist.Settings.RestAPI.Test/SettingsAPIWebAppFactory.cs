@@ -3,6 +3,7 @@ using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.Interfaces;
 using Alchemist.Test.DBApiWebAppFactory;
 using Alchemist.Test.Log;
+using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -13,11 +14,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Settings.RestAPI.Test;
 
-public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgram, AlchemyContext>
+public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgram, AlchemyContext>, ILoggedContext
 {
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
     public event Action<WebHostBuilderContext, IServiceCollection> ConfigureContextServices;
 
@@ -63,7 +65,7 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
 
         builder.ConfigureServices((context, services) =>
         {
-            services.SetSignalRTestSender(_signalRApplicationFactory.Server, ["events"]);
+            services.SetSignalRHubTestSender(_signalRApplicationFactory.Server, ["events"]);
             
             FixtureLoggingContext.ConfigureServices(services);
 

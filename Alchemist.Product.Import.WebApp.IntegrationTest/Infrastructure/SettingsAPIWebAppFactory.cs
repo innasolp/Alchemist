@@ -38,7 +38,7 @@ public class SettingsAPIWebAppFactory : DbAPIWebAppFactory<SettingsAPIProgram, A
 
         builder.ConfigureServices((context, services) =>
         {
-            context.SetKestrelLocalhostPortsConfig(8200, 8201);
+            context.Configuration.SetKestrelLocalhostPortsConfig(8200, 8201);
         });
     }
 }

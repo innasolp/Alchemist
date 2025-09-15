@@ -1,7 +1,6 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Test.DBApiWebAppFactory;
-using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +10,15 @@ using Alchemist.Test.Log;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-public class SettingsAPIWebAppFactory (string connectionString, TestServer signalRServer) : DbAPIWebAppFactory<SettingsAPIProgram, AlchemyContext>(true)
+public class SettingsAPIWebAppFactory (string connectionString, TestServer signalRServer, int httpPort, int httpsPort) 
+    : DBAPIKestrelWebAppFactory<SettingsAPIProgram, AlchemyContext>(true, httpPort, httpsPort)
 {
     private readonly string _connectionString = connectionString;
 
     private readonly TestServer _signalRServer = signalRServer;
+    
+    public SettingsAPIWebAppFactory(string connectionString, TestServer signalRServer)
+        :this(connectionString, signalRServer, 8200, 8201) { }
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();    
 
@@ -28,17 +31,12 @@ public class SettingsAPIWebAppFactory (string connectionString, TestServer signa
     {
     }
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        base.ConfigureWebHost(builder);
+        base.ConfigureWebHostBuilderContext(context, services);
 
-        builder.ConfigureServices((context, services) =>
-        {
-            context.SetKestrelLocalhostPortsConfig(8200, 8201);
+        services.SetSignalRHubTestSender(_signalRServer, ["events"]);
 
-            services.SetSignalRTestSender(_signalRServer, ["events"]);
-
-            FixtureLoggingContext.ConfigureServices(services);
-        });
+        FixtureLoggingContext.ConfigureServices(services);
     }
 }

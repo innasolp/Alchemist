@@ -34,7 +34,7 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
     {
         base.ConfigureServices(services);
 
-        services.SetSignalRTestSender(_signalRServer, ["events"]);
+        services.SetSignalRHubTestSender(_signalRServer, ["events"]);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -43,7 +43,7 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
 
         builder.ConfigureServices((context, services) =>
         {
-            context.SetKestrelLocalhostPortsConfig(8050, 8051);
+            context.Configuration.SetKestrelLocalhostPortsConfig(8050, 8051);
         });
     }
 }

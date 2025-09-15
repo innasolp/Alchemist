@@ -30,7 +30,7 @@ public class GrpcServiceWebAppFactory(string connectionString) : DbAPIWebAppFact
 
         builder.ConfigureServices((context, services) =>
         {
-            context.SetKestrelLocalhostPortsConfig(8070, 8071);
+            context.Configuration.SetKestrelLocalhostPortsConfig(8070, 8071);
 
             ConfigureServices?.Invoke(services);
         });

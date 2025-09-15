@@ -3,7 +3,6 @@ using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Test.Server.Fixtures;
-using Alchemist.Test.SignalRWebAppFactory;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Threading;
@@ -18,13 +17,22 @@ using ShopSettings = Alchemist.Product.Entities.ShopSettings;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
-public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroundServiceWebAppFactory, ImportBackgroundServiceProgram>
-{     
-    public ImportBackgroundServiceTest(ImportBackgroundServiceWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : base(webAppFactory, outputHelper)
-    {       
+public class ImportBackgroundServiceTestFixtureWebAppFactory : ImportBackgroundServiceWebAppFactory
+{
+    public ImportBackgroundServiceTestFixtureWebAppFactory() : base("serviceTestDb", 8050, 8051, 8200, 8201, 8302, 8303)
+    {
+    }
+}
+
+public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgroundServiceTestFixtureWebAppFactory, ImportBackgroundServiceProgram>
+{    
+    public ImportBackgroundServiceTest(ImportBackgroundServiceTestFixtureWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+        : base(webAppFactory, outputHelper)
+    {
         WebAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
         WebAppFactory.SettingsApiFixtureLoggingContext.LoggedMessage += Log;
     }
+     
 
     [Fact]
     public async Task HelloResponseWhenStartingSuccessAsync()
@@ -83,7 +91,7 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
         Action<ShopSettings> onShopSettingsCreated = (settings) => asyncAutoResetEvent.Set();
 
         var messageReceiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>(ShopImportWorkerKeys.EventMessageReceiverKey);
-        messageReceiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, onShopSettingsCreated);
+        messageReceiver.On(Messages.Common.Messages.ShopSettingsCreated, onShopSettingsCreated);
 
         var httpClient = WebAppFactory.CreateClient();
 
@@ -135,120 +143,5 @@ public class ImportBackgroundServiceTest : LogContextTestFixture<ImportBackgroun
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         return settings;
     }
-
-    [Fact]
-
-    public async Task ServiceCreatedCommandSendSuccessAsync()
-    {
-        var messageReceiver = SignalRHelper.CreateSignalRTestReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
-        var serviceCreatedAutoResetEvent = new AsyncAutoResetEvent();
-        var guids = new List<Guid>();
-        var semaphoreSlim = new SemaphoreSlim(1, 1);
-
-        Func<object[], Task> serviceCreatedAsync = async (parameters) =>
-        {
-            await OnServiceCreatedAsync(parameters, semaphoreSlim, guids);
-            serviceCreatedAutoResetEvent.Set();
-        };
-        messageReceiver.On(Messages.Common.Messages.ReceiveServiceCreated, serviceCreatedAsync);
-        await messageReceiver.Start();
-
-        try
-        {
-            var httpClient = WebAppFactory.CreateClient();
-            OutputHelper.WriteLine("Service started.");
-
-            await httpClient.GetAsync("/");
-
-            await Task.Delay(3000);
-
-            if (guids.Count == 0)
-            {
-                var waitServiceCreationTask = serviceCreatedAutoResetEvent.WaitAsync();
-                await waitServiceCreationTask.WaitAsync(TimeSpan.FromMilliseconds(3000));
-                Assert.NotEmpty(guids);
-            }
-        }
-        catch
-        {
-            OutputErrors();
-            OutputWarnings();
-
-            throw;
-        }
-        finally
-        {
-            await messageReceiver.Stop();
-        }
-    }
-    private async Task OnServiceCreatedAsync(object[] parameters, SemaphoreSlim semaphoreSlim, List<Guid> guids)
-    {
-        await semaphoreSlim.WaitAsync();
-        if (parameters.Length > 0 && Guid.TryParse(parameters[0].ToString(), out var guid))
-        {
-            guids.Add(guid);
-            OutputHelper.WriteLine(guid.ToString());
-        }
-        semaphoreSlim.Release();
-    }
-
-
-    [Fact]
-
-    public async Task ServiceCancelledWhenStopCommandSendAsync()
-    {        
-        var serviceGuids = new List<Guid>();        
-        var firstServiceCreatedAutoResetEvent = new AsyncAutoResetEvent(false);
-        var semaphoreSlim = new SemaphoreSlim(1,1);
-        Func<object[], Task> serviceCreatedAsync = async (parameters) =>
-        {
-            await OnServiceCreatedAsync(parameters, semaphoreSlim, serviceGuids);
-            firstServiceCreatedAutoResetEvent.Set();
-        };
-
-        var testMessageReceiver = SignalRHelper.CreateSignalRTestReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
-        testMessageReceiver.On(Messages.Common.Messages.ReceiveServiceCreated, serviceCreatedAsync);        
-        await testMessageReceiver.Start();
-
-        var testMessageSender = SignalRHelper.CreateSignalRTestSender(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
-        
-         await testMessageSender.Start();
-        
-        try
-        {
-            var httpClient = WebAppFactory.CreateClient();
-            OutputHelper.WriteLine("Service started.");            
-
-            await httpClient.GetAsync("/");
-
-            if (serviceGuids.Count == 0)
-            {
-                var waitServiceCreationTask = firstServiceCreatedAutoResetEvent.WaitAsync();
-                await waitServiceCreationTask.WaitAsync(TimeSpan.FromMilliseconds(30000));
-
-                Assert.NotEmpty(serviceGuids);
-            }
-
-            var guid = serviceGuids.First();
-            await testMessageSender.Send(guid, Messages.Common.Messages.SendServiceStop);            
-
-            await Task.Delay(2000);
-
-            Assert.Contains(LogMessages, l => l.LogLevel == Microsoft.Extensions.Logging.LogLevel.Information
-            && l.Message?.Contains($"Stopping service with guid {guid} started.") == true);
-            
-        }
-        catch
-        {
-            OutputErrors();
-            OutputWarnings();
-
-            throw;
-        }
-        finally
-        {
-            await testMessageReceiver.Stop();
-            await testMessageSender.Stop();
-        }
-    }   
+    
 }

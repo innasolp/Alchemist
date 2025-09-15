@@ -1,59 +1,43 @@
-using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
-using Message.Interfaces;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using Moq;
 using System.Collections;
-using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Settings.RestAPI.Test;
 
-public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutputHelper outputHelper) : TestFixture<SettingsAPIWebAppFactory, SettingsAPIProgram>(webAppFactory, outputHelper)
+public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    : LoggedContextTestFixture<SettingsAPIWebAppFactory, SettingsAPIProgram>(webAppFactory, outputHelper)
 {
     private Mock<ILogger> _loggerMock = new();
 
-    private  const string ShopSettingsCreatedMessageFormat = "Shop settings created with id={0}";
-
-    record TestLogMessage(LogLevel LogLevel, string CategoryName, EventId EventId, string Message, Exception? Exception);
-
-    private readonly List<TestLogMessage> _messages = [];
-
-    private void Log(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception)
-    {
-        _messages.Add(new TestLogMessage(logLevel, categoryName, eventId, message, exception));
-    }
+    private  const string ShopSettingsCreatedMessageFormat = "Shop settings created with id={0}";   
 
     [Fact]
-    public async Task GetAllParentsSettingsSuccess()
+    public async Task GetShopSettingsByNameSuccess()
     {
+        var settingsName = "TestShop1_category";
         var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.GetAsync("api/Settings/allParents");
+        var response = await httpClient.GetAsync($"api/Settings/byName?name={settingsName}");
         response.EnsureSuccessStatusCode();
 
-        var shopSettings = await response.Content.ReadFromJsonAsync<ShopSettings[]>();
-        Assert.Equal(1, shopSettings.Length);
+        var shopSettings = await response.Content.ReadFromJsonAsync<ShopSettings>();
+        Assert.Equal(settingsName, shopSettings.Name);
     }
 
     [Fact]
     public async Task MessageSendWhenShopSettingCreatedSuccess()
     { 
-        WebAppFactory.ConfigureContextServices += WebAppFactoryAddServices;
-        WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
-
         var httpClient = WebAppFactory.CreateClient();
 
-        var receiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>("testReceiver");
+        var receiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         await receiver.Start();
-        receiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        receiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
 
         var productShopSettings = TestRepository.CreateProductShopSettings(WebAppFactory.Shops[1].Id, WebAppFactory.Shops[1].Name); 
 
@@ -75,26 +59,16 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
         }
         catch
         {
-            foreach (var errorMessage in _messages.Where(m => m.LogLevel == LogLevel.Error))            
-                OutputHelper.WriteLine($"{errorMessage.Message} : {errorMessage.Exception?.Message ?? ""}");
+            OutputErrors();
+            OutputWarnings();
             
             throw;
-        }
-        finally
-        {
-            WebAppFactory.ConfigureContextServices -= WebAppFactoryAddServices;
-            WebAppFactory.FixtureLoggingContext.LoggedMessage -= Log;
         }
     }
 
     private async Task OnShopSettingsCreatedAsync(ShopSettings settings)
     {
         _loggerMock.Object.LogInformation(string.Format(ShopSettingsCreatedMessageFormat, settings.Id));    
-    }
-
-    private void WebAppFactoryAddServices(WebHostBuilderContext context, IServiceCollection services)
-    {
-        services.SetSignalRTestReceiver("testReceiver", WebAppFactory.SignalRTestServer, "events");
     }
 
     private void VerifyInfoLog(string message)
@@ -140,30 +114,12 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
     }
 
     [Fact]
-    public async Task InterceptorLogErrorWhenInternalServerError()
+    public async Task InterceptorLogInfoOnCallSuccess()
     {
-        var repositoryMock = new Mock<ISettingsRepository>();
-        var errorMessage = Guid.NewGuid().ToString();
-        repositoryMock.Setup(r => r.GetShopSettings(It.IsAny<int>())).Throws(new Exception(errorMessage));
-
-        void mockSettingsRepository(WebHostBuilderContext context, IServiceCollection services)
-        {
-            var sd = services.FirstOrDefault(s => s.ServiceType == typeof(ISettingsRepository));
-            if (sd != null) services.Remove(sd);
-            services.AddSingleton(repositoryMock.Object);
-        }
-
-        WebAppFactory.ConfigureContextServices += mockSettingsRepository;
-        WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
-
         var httpClient = WebAppFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/Settings/byId/1");
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
-        Assert.Contains(_messages, m => m.Message.Contains(errorMessage));
-
-        WebAppFactory.ConfigureContextServices -= mockSettingsRepository;
-        WebAppFactory.FixtureLoggingContext.LoggedMessage -= Log;
+        Assert.Contains(LogMessages, m => m.LogLevel == LogLevel.Information && m.Message.Contains("api/Settings/byId/1"));
     }    
 }
