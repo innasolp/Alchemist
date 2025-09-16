@@ -9,6 +9,7 @@ using Message.Interfaces;
 using Alchemist.Product.Import.Background.ImportItems;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Category.Interfaces;
+using Message.SignalR.HubMessage.DependencyInjection;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -33,14 +34,14 @@ public static class ImportBackgroundDependencyInjectionExtensions
     {
         var signalRUrl = configuration.GetHostSectionValue(signalRUrlSectionName);
 
-        return services.AddKeyedSignalRMessageReceiver(signalRUrl, key);
+        return services.AddKeyedSignalRHubMessageReceiver(signalRUrl, key);
     }
 
     public static IServiceCollection AddShopImportMessageSender(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)
     {
         var signalRUrl = configuration.GetHostSectionValue(signalRUrlSectionName);
 
-        return services.AddKeyedSignalRMessageSender(signalRUrl, key);
+        return services.AddKeyedSignalRHubMessageSender(signalRUrl, key);
     }
 
     public static IServiceCollection AddProductItemHandler(this IServiceCollection services, object messageSenderKey, string methodName)

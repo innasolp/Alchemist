@@ -9,17 +9,18 @@ namespace Alchemist.Product.RestAPIClient;
 
 public class ShopApiClient : IShopDataService
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient;    
 
-    public ShopApiClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(ShopApiClient))] string apiHost)
+    public ShopApiClient(HttpClient httpClient)
     {
-        // _httpClient = httpClientFactory.CreateClient();
-        _httpClient = httpClientFactory.CreateClient(apiHost);
-        _httpClient.BaseAddress = new Uri(apiHost);
+        _httpClient = httpClient;
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
     }
+
+    public ShopApiClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(ShopApiClient))] string apiHost)
+        : this(httpClientFactory.CreateClient(apiHost)) { }    
 
     public async Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory)
     {

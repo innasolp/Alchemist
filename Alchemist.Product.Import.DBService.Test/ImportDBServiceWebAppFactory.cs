@@ -1,19 +1,18 @@
-﻿using Alchemist.Product.GrpcService.Services;
+﻿using Alchemist.DataService.Interfaces;
+using Alchemist.Test.Server.Fixtures;
+using Alchemist.Product.RestAPIClient;
 using Alchemist.Product.SignalR;
 using Alchemist.Test.Host.Interfaces;
 using Alchemist.Test.RabbitMQ;
-using Grpc.AspNetCore.Server;
-using Grpc.Core.Interceptors;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServiceProgram>
+public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServiceProgram>
 {
     private readonly GrpcServiceWebAppFactory _grpcWebAppFactory;
 
@@ -29,6 +28,8 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
 
     public event Action<IServiceCollection> ConfigureServices;
 
+    private readonly HttpClient _shopAPIClient;
+
     public ImportDBServiceWebAppFactory()
     {   
         var settings = new ConfigurationBuilder()
@@ -43,33 +44,13 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
         _signalRApplicationFactory.CreateClient();
 
         _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
-        
+        _shopAPIClient = _shopAPIWebAppFactory.CreateClient();
+
     }
 
-    public void StartHttpClients()
+    public void StartGrpc()
     {
-        _grpcWebAppFactory.CreateClient();
-        _shopAPIWebAppFactory.CreateClient();
-    }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        base.ConfigureWebHost(builder);
-
-        builder.ConfigureServices((context, services) =>
-        {
-            Configuration = context.Configuration;
-
-            var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
-            joinableTaskFactory.Run(async () =>
-            {
-                await _importItemsHost.Start();
-            });
-
-            SetReceiver(services);  
-            
-            ConfigureServices?.Invoke(services);
-        });
+        _grpcWebAppFactory.CreateClient();            
     }
 
     private void SetReceiver(IServiceCollection services)
@@ -84,5 +65,21 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
         return _importItemsHost.CreatePublisher(Services,
             Configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>());
     }
-    
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        Configuration = context.Configuration;
+
+        var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
+        joinableTaskFactory.Run(async () =>
+        {
+            await _importItemsHost.Start();
+        });
+
+        services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(_shopAPIClient));
+
+        SetReceiver(services);
+
+        ConfigureServices?.Invoke(services);
+    }
 }

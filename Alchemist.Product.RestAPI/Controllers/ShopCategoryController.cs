@@ -42,7 +42,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
 
         var newShopCategory = (await _alchemyRepository.AddShopCategory(shopCategory)).To<ShopCategory>();
 
-        await SendMessage(newShopCategory, Messages.Common.Messages.SendCategoryAdded);
+        await SendMessage(newShopCategory, Messages.Common.Messages.CategoryAdded);
 
         var location = Url.Action(nameof(AddShopCategory), new { id = newShopCategory.Id }) ?? $"/{newShopCategory.Id}";
         return TypedResults.Created(location, newShopCategory);

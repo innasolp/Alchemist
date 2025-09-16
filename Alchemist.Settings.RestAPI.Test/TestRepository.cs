@@ -16,10 +16,10 @@ public static class TestRepository
         {
             ShopId = shopId,
             Type = ShopSettingType.Category,
-            Name = $"{shopName}_category_{Guid.NewGuid()}"
+            Name = $"{shopName}_category"
         };
 
-        ((IShopSettings)shopSettings).JsonValue = JsonSerializer.Serialize(new { CategorySourceUrl = $"https://category_{Guid.NewGuid()}" });
+        ((IShopSettings)shopSettings).JsonValue = JsonSerializer.Serialize(new { CategorySourceUrl = $"https://category_{shopName}" });
 
         return shopSettings;
     }
@@ -30,13 +30,13 @@ public static class TestRepository
         {
             ShopId = shopId,
             Type = ShopSettingType.Category,
-            Name = $"{shopName}_product_{Guid.NewGuid()}"
+            Name = $"{shopName}_product"
         };
 
         ((IShopSettings)shopSettings).JsonValue = JsonSerializer.Serialize(new
             {
                 ProductUrlFormat = $"https://product_{Guid.NewGuid()}",
-                CategoryUrlFormat = $"https://product_category_{Guid.NewGuid()}",
+                CategoryUrlFormat = $"https://product_category_{shopName}",
             }
         );
 
@@ -57,7 +57,7 @@ public static class TestRepository
         return serviceSettings;
     }
 
-    private static Product.Entities.ShopSettings CreateShopSettingsService(string serviceName, int shopId, int parentId)
+    private static ShopSettings CreateShopSettingsService(string serviceName, int shopId, int parentId)
     {
         var serviceSettings = new
         {

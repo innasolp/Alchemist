@@ -10,14 +10,16 @@ using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Alchemist.DataService.Interfaces;
+using Alchemist.Product.RestAPIClient;
+using Alchemist.Settings.RestAPIClient;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<ImportBackgroundServiceProgram>, ILoggedContext
+public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBackgroundServiceProgram>, ILoggedContext
 {
     private readonly SettingsAPIWebAppFactory _settingsAPIWebAppFactory;
 
@@ -43,77 +45,62 @@ public class ImportBackgroundServiceWebAppFactory : WebApplicationFactory<Import
 
     public HttpClient ShopApiClient { get; }
 
-    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;    
 
-    public ImportBackgroundServiceWebAppFactory()
+    public ImportBackgroundServiceWebAppFactory(string connectionSection, int shopAPIHttpPort, int shopAPIHttpsPort,
+        int settingsAPIHttpPort, int settingsAPIHttpsPort, 
+        int browserServiceHttpPort, int browserServiceHttpsPort)
     {
         var settings = new ConfigurationBuilder()
               .AddJsonFile("appsettings.json")
               .Build();
 
-        var alchemyDbConnectionString = settings.GetConnectionString("alchemydb");
+        var alchemyDbConnectionString = settings.GetConnectionString(connectionSection);
 
-        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<Test.Log.FixtureLoggerFactoryContext>();
+        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
         _signalRApplicationFactory.CreateClient();
 
-        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
+        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, shopAPIHttpPort, shopAPIHttpsPort);
         ShopApiClient = _shopAPIWebAppFactory.CreateClient();
 
-        _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
+        _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, settingsAPIHttpPort, settingsAPIHttpsPort);
         ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
 
-        _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(8302, 8303);
-    }
-        
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        base.ConfigureWebHost(builder);
-
-        builder.ConfigureTestServices(FixtureLoggingContext.ConfigureServices);
-
-        builder.ConfigureServices((context, services) =>
-        {
-            _configuration = context.Configuration;
-
-            SetBrowserServiceClient(services, _browserServiceFactory.ServerAddress);
-
-            RemoveDBJsonAdapters(services);
-
-            var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
-            joinableTaskFactory.Run(async () =>
-            {
-                await _importItemsHost.Start();
-            });
-            
-            services.SetRabbitMqSender("importqueue", 
-                _importItemsHost.Uri,
-                context.Configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>());
-
-            services.SetSignalRTestSender(ShopImportWorkerKeys.ShopsMessageSenderKey, _signalRApplicationFactory.Server, "import");
-            services.SetSignalRTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
-            services.SetSignalRTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
-        });
-    }
-
-    private static void RemoveDBJsonAdapters(IServiceCollection services)
-    {
-        var descriptors = services.Where(s => s.ServiceType == typeof(ISettingsAdapter) && s.ImplementationType == typeof(SettingsDataAdapter<,>));
-        descriptors.ToList().ForEach(sd => services.Remove(sd));
-    }
-
-    private static void SetBrowserServiceClient(IServiceCollection services, string url)
-    {
-        var descriptors = services.Where(sd => sd.ServiceType == typeof(ILoaderServiceFactory)
-           && sd.ImplementationType == typeof(BrowserServiceClientFactory));
-        descriptors.ToList().ForEach(sd=>services.Remove(sd));
-
-        services.AddBrowserServiceClientFactory(url);
-    }
+        _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(browserServiceHttpPort, browserServiceHttpsPort);
+    }  
      
     public IMessageReceiver CreateImportItemReceiver()
     {
         return _importItemsHost.CreateSubscriber(Services,
             _configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>(),
             _configuration.GetSection("RabbitMqQueueOptions:Name").Get<string>());
+    }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        FixtureLoggingContext.ConfigureServices(services);
+
+        _configuration = context.Configuration;
+
+        services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(ShopApiClient));
+        services.InterceptImplementation<IShopSettingsDataService, SettingsAPIClient>(new SettingsAPIClient(ShopSettingsApiClient));
+        services.InterceptImplementation<ILoaderServiceFactory, BrowserServiceClientFactory>
+            ((services) => services.AddBrowserServiceClientFactory(_browserServiceFactory.ServerAddress));
+
+        services.RemoveImplementations<ISettingsAdapter>(typeof(SettingsDataAdapter<,>));
+
+        var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
+        joinableTaskFactory.Run(async () =>
+        {
+            await _importItemsHost.Start();
+        });
+
+        services.SetRabbitMqSender("importqueue",
+            _importItemsHost.Uri,
+            context.Configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>());
+
+        services.SetSignalRHubTestSender(ShopImportWorkerKeys.ShopsMessageSenderKey, _signalRApplicationFactory.Server, "import");
+        services.SetSignalRHubTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
+        services.SetSignalRHubTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
     }
 }

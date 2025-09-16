@@ -1,4 +1,5 @@
 using Alchemist.DataService.Interfaces;
+using Alchemist.Product.Data.Repository;
 using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
     [Fact]
     public async Task HelloResponseWhenStartingSuccess()
     {
-        WebAppFactory.StartHttpClients();
+        WebAppFactory.StartGrpc();
         var httpClient = WebAppFactory.CreateClient();
 
         var response = await httpClient.GetAsync("/");
@@ -31,9 +32,11 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
     [Fact]
     public async Task WaitForImportItemReceiveByGrpcService()
     {
-        WebAppFactory.GrpcWebAppFactory.ConfigureServices += SetTestRepository;
+        void setTestRepository(IServiceCollection services) => services.InterceptImplementation<IAlchemyRepository, AlchemyRepository>(_alchemyRepositoryMock.Object);
 
-        WebAppFactory.StartHttpClients();
+        WebAppFactory.GrpcWebAppFactory.ConfigureServices += setTestRepository;
+
+        WebAppFactory.StartGrpc();
 
         var productMessageMock = new Mock<IProductData>();
         FillTestProductData(productMessageMock);
@@ -46,16 +49,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
 
         _alchemyRepositoryMock.Verify(r => r.GetShopProductByShopAndItemId(productMessageMock.Object.ShopId, productMessageMock.Object.ShopProduct.ItemId));
 
-        WebAppFactory.GrpcWebAppFactory.ConfigureServices -= SetTestRepository;
-    }
-
-    private void SetTestRepository(IServiceCollection services)    
-    {
-        var sd = services.FirstOrDefault(s => s.ServiceType == typeof(IAlchemyRepository));
-        if(sd != null)
-            services.Remove(sd);
-
-        services.AddSingleton<IAlchemyRepository>(_alchemyRepositoryMock.Object);
+        WebAppFactory.GrpcWebAppFactory.ConfigureServices -= setTestRepository;
     }
 
     private static void FillTestProductData(Mock<IProductData> productDataMock)

@@ -19,4 +19,8 @@ public class ShopAPISignlRMockWebAppFactory : ShopAPIWebAppFactory
         messageSenderMock.Setup(s => s.Send(It.IsAny<It.IsAnyType>(), It.IsAny<string>())).Returns(Task.CompletedTask);
         services.AddSingleton(messageSenderMock.Object);
     }
+
+    protected override void ConfigureWebHostBuilderContext(Microsoft.AspNetCore.Hosting.WebHostBuilderContext context, IServiceCollection services)
+    {        
+    }
 }

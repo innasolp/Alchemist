@@ -1,19 +1,18 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Alchemist.Test.Server.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Test.Server.Fixtures;
+namespace Alchemist.Test.DBApiWebAppFactory;
 
-public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) : TestHostServerWebAppFactory<TEntryPoint>
+public abstract class DBAPIKestrelWebAppFactory<TEntryPoint, TDbContext>(bool ensureDeleted, int httpPort, int httpsPort) 
+    : DbAPIWebAppFactory<TEntryPoint, TDbContext>(ensureDeleted)
      where TEntryPoint : class
+    where TDbContext : DbContext
 {
     public int HttpPort { get; set; } = httpPort;
 
     public int HttpsPort { get; set; } = httpsPort;
-
-    protected override void ConfigureHostAdresses(IWebHostBuilder builder)
-    {
-        builder.UseKestrel();
-    }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {

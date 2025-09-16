@@ -13,7 +13,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.29.1" />
     <PackageReference Include="Grpc.Client.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />    
-    <PackageReference Include="Message.SignalR.DependencyInjection" Version="1.0.0.1" />
+    <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />

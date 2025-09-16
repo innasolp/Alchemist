@@ -13,14 +13,16 @@ public class SettingsAPIClient : IShopSettingsDataService
 {
     private readonly HttpClient _httpClient;
 
-    public SettingsAPIClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(SettingsAPIClient))] string apiHost)
+    public SettingsAPIClient(HttpClient httpClient)
     {
-        // _httpClient = httpClientFactory.CreateClient();
-        _httpClient = httpClientFactory.CreateClient(apiHost);
-        _httpClient.BaseAddress = new Uri(apiHost);
+        _httpClient = httpClient;
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
+    }
+    public SettingsAPIClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(SettingsAPIClient))] string apiHost)
+        :this(httpClientFactory.CreateClient(apiHost))
+    {
     }
 
     public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
@@ -90,7 +92,7 @@ public class SettingsAPIClient : IShopSettingsDataService
 
     public async Task<IShopSettings?> GetShopSettings(string shopSettingsName)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/byName/{shopSettingsName}");
+        var response = await _httpClient.GetAsync($"api/Settings/byName?name={shopSettingsName}");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(default(ShopSettings));
         response.EnsureSuccessStatusCode();

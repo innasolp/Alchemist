@@ -126,7 +126,6 @@ public class SettingsControllerPostTest
     {        
         var shopSettings = new ShopSettings
         {
-            Id = _shopSettings.Count + 1,
             ShopId = 2,
             Type = ShopSettingType.Product,
             JsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(new { Name = "Test" }))

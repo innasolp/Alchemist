@@ -14,6 +14,7 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Background.Settings;
 using Alchemist.Product.Import.Background.Models;
 using Alchemist.Import.Service.Factory.Interfaces;
+using Alchemist.Messages.Common;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -61,16 +62,16 @@ public class ShopImportWorker : BackgroundService
 
         _productDataHandler.ItemProcessed += ProductItemHandledAsync;
 
-        _eventMessageReceiver.On<ShopSettings>(Messages.Common.Messages.ReceiveShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        _eventMessageReceiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
 
-        _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.ReceiveCategoryAdded, OnShopCategoryAdded);       
+        _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);       
 
-        _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ReceiveServiceStop, StopServiceAsync);
+        _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, OnStopServiceAsync);
 
         _settingsDataService = settingsDataService;
     }
 
-    private async Task StopServiceAsync(Guid guid)
+    private async Task OnStopServiceAsync(Guid guid)
     {
         _logger.LogInformation($"Stopping service with guid {guid} started.");
         if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
@@ -79,17 +80,15 @@ public class ShopImportWorker : BackgroundService
 
             _logger.LogInformation($"Service {serviceWithToken.Service.Name} stopped");
 
-            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceStopped, guid);
+            await SendServiceMessageAsync(Messages.Common.Messages.ServiceStopped, guid);
         }
         else
         {
             _logger.LogWarning($"Stopping service is not available. Service with guid {guid} not found");
 
-            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceEventError, 
-                guid, 
-                null,
-                Messages.Common.Messages.ReceiveServiceStop, 
-                $"Service with guid {guid} not found");
+            await SendServiceMessageAsync(Messages.Common.Messages.ServiceEventError, 
+                new ServiceErrorMessage 
+                { Guid = guid, EventName = Messages.Common.Messages.ServiceStop, Message =  $"Service with guid {guid} not found" });
         }
     }
 
@@ -99,8 +98,9 @@ public class ShopImportWorker : BackgroundService
         if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))
             await StartServiceAsync(guid, serviceWithToken.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, serviceWithToken.InnerTokenSource.Token).Token);
         else
-            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceEventError,
-                guid, null, Messages.Common.Messages.ReceiveServiceStart,  $"Service for guid {guid}  not found");
+            await SendServiceMessageAsync(Messages.Common.Messages.ServiceEventError,
+                new ServiceErrorMessage
+                { Guid = guid, EventName = Messages.Common.Messages.ServiceStart, Message = $"Service with guid {guid} not found" });
     }
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
@@ -127,7 +127,7 @@ public class ShopImportWorker : BackgroundService
         var categoryModel = new ImportCategory { Category = item.Category.Name, ItemId = item.Category.Id, Status = processStatus };
 
         if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
-        await SendItemMessagesAsync(categoryModel, Messages.Common.Messages.SendCategoryItem);
+        await SendItemMessagesAsync(categoryModel, Messages.Common.Messages.CategoryItem);
     }
 
     private async Task SendItemMessagesAsync<T>(T item, string eventName)
@@ -153,7 +153,7 @@ public class ShopImportWorker : BackgroundService
     private async Task ProductItemHandledAsync(object sender, IImportProduct item, ResultStatus status)
     {
         var productItemModel = new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status };
-        await SendItemMessagesAsync(productItemModel, Messages.Common.Messages.SendProductItem);
+        await SendItemMessagesAsync(productItemModel, Messages.Common.Messages.ProductItem);
     }
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
@@ -185,7 +185,7 @@ public class ShopImportWorker : BackgroundService
 
             _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
 
-            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceCreated, guid, service.Name);
+            await SendServiceMessageAsync(Messages.Common.Messages.ServiceCreated, new ServiceMessage { Guid = guid, Name = service.Name });
         }
         catch (Exception ex)
         {
@@ -207,12 +207,13 @@ public class ShopImportWorker : BackgroundService
             
             foreach (var service in _servicesWithTokens)
             {
-                await SendServiceMessageAsync(Messages.Common.Messages.SendServiceCreated, service.Key, service.Value.Service.Name);
+                await SendServiceMessageAsync(Messages.Common.Messages.ServiceCreated, 
+                    new ServiceMessage { Guid = service.Key, Name = service.Value.Service.Name });
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message, ex);
+            _logger.LogError(ex, ex.Message);
         }
 
         try
@@ -248,13 +249,13 @@ public class ShopImportWorker : BackgroundService
         {
             await _eventMessageReceiver.Start();
 
-            _eventMessageReceiver.On(Messages.Common.Messages.ReceiveServiceStart, (Func<Guid, Task>)startServiceAsync);
+            _eventMessageReceiver.On(Messages.Common.Messages.ServiceStart, (Func<Guid, Task>)startServiceAsync);
             
             _logger.LogInformation("Import service connected to messaging host.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message, ex);
+            _logger.LogError( ex, ex.Message);
         }
     }
 
@@ -292,7 +293,7 @@ public class ShopImportWorker : BackgroundService
         {
             var serviceStartTask = service.Start(stoppingToken);
 
-            await SendServiceMessageAsync(Messages.Common.Messages.SendServiceStarted, guid);
+            await SendServiceMessageAsync(Messages.Common.Messages.ServiceStarted, guid);
 
             await serviceStartTask.WaitAsync(stoppingToken);
         }
@@ -317,26 +318,18 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task SendServiceMessageAsync(string eventName, Guid guid, string? serviceName  = null, params object[]? parameters)
+    private async Task SendServiceMessageAsync(string eventName, object message)
     {
         try
         {
             if (!_eventMessageSender.IsConnected)
                 await _eventMessageSender.Start();
 
-            if(serviceName == null)
-                await _eventMessageSender.Send(guid, eventName);
-            else
-            {
-                var messageParameters = new List<object>() { guid, serviceName };
-                if (parameters != null) messageParameters.AddRange(parameters);
-
-                await _eventMessageSender.Send(messageParameters.ToArray(), eventName);
-            }            
+            await _eventMessageSender.Send(message, eventName);                  
         }
         catch(Exception e)
         {
-            _logger.LogError(e, $"Sending service {serviceName} message for event {eventName} failed.");
+            _logger.LogError(e, $"Sending service message {message} for event {eventName} failed.");
         }
     }
 

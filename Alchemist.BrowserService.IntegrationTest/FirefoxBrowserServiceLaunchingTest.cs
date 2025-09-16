@@ -1,8 +1,6 @@
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System.Collections;
 using System.Net;
-using System.Net.Http.Json;
 using System.Web;
 using Xunit.Abstractions;
 

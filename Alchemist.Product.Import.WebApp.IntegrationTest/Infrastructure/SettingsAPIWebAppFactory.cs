@@ -2,16 +2,14 @@
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.Interfaces;
 using Alchemist.Test.DBApiWebAppFactory;
-using Alchemist.Test.Server.Fixtures;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.Import.WebApp.IntegrationTest.Infrastructure;
 
-public class SettingsAPIWebAppFactory : DbAPIWebAppFactory<SettingsAPIProgram, AlchemyContext>
+public class SettingsAPIWebAppFactory : DBAPIKestrelWebAppFactory<SettingsAPIProgram, AlchemyContext>
 {
-    public SettingsAPIWebAppFactory() : base(false)
+    public SettingsAPIWebAppFactory() : base(false, 8200, 8201)
     {
     }
 
@@ -31,14 +29,5 @@ public class SettingsAPIWebAppFactory : DbAPIWebAppFactory<SettingsAPIProgram, A
         serviceSettings.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
         dbContext.SaveChanges();
     }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        base.ConfigureWebHost(builder);
-
-        builder.ConfigureServices((context, services) =>
-        {
-            context.SetKestrelLocalhostPortsConfig(8200, 8201);
-        });
-    }
+    
 }
