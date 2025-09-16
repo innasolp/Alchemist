@@ -38,7 +38,6 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
         services.SetSignalRHubTestSender(_signalRServer, ["events"]);
 
         FixtureLoggingContext.ConfigureServices(services);
-
     }
 }
 

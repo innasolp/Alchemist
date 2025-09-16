@@ -10,8 +10,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-
-
 namespace Alchemist.Settings.RestAPI.Test;
 
 public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgram, AlchemyContext>, ILoggedContext
@@ -59,18 +57,12 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
         dbContext.SaveChanges();
     }
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        base.ConfigureWebHost(builder);
+        services.SetSignalRHubTestSender(_signalRApplicationFactory.Server, ["events"]);
 
-        builder.ConfigureServices((context, services) =>
-        {
-            services.SetSignalRHubTestSender(_signalRApplicationFactory.Server, ["events"]);
-            
-            FixtureLoggingContext.ConfigureServices(services);
+        FixtureLoggingContext.ConfigureServices(services);
 
-            ConfigureContextServices?.Invoke(context, services);
-        });
+        ConfigureContextServices?.Invoke(context, services);
     }
-
 }

@@ -1,6 +1,7 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Test.DBApiWebAppFactory;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,11 +17,15 @@ public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<GrpcServiceProg
         dbContext.Brands.Add(new Brand { Name = "infinite" });
         dbContext.Brands.Add(new Brand { Name = "Infinite " });
         dbContext.SaveChanges();
-    }
+    }    
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
         return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder =>
         optionsBuilder.UseNpgsql($"Host=localhost;Database={DataBase};Username=postgres;Password=P@ssw0rd;"));
+    }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {        
     }
 }

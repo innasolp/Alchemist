@@ -35,17 +35,8 @@ public class TestImportWebAppFactory() : TestWebAppKestrelFactory<ImportWebAppPr
 
     private void MockAPIServiceClients(IServiceCollection services)
     {
-        var shopAPIClientDescriptor = services.SingleOrDefault(s => s.ServiceType == typeof(IShopDataService) && s.ImplementationType == typeof(ShopApiClient));
-        if (shopAPIClientDescriptor != null)
-            services.Remove(shopAPIClientDescriptor);
+        services.InterceptImplementation<IShopDataService, ShopApiClient>(ShopAPIClient.Object);
 
-        services.AddSingleton(ShopAPIClient.Object);
-
-        var settingsAPIClientDescriptor = services.SingleOrDefault(s => s.ServiceType == typeof(IShopSettingsDataService) && s.ImplementationType == typeof(SettingsAPIClient));
-        if (settingsAPIClientDescriptor != null)
-            services.Remove(settingsAPIClientDescriptor);
-
-        services.AddSingleton(SettingsAPIClient.Object);
+        services.InterceptImplementation<IShopSettingsDataService, SettingsAPIClient>(SettingsAPIClient.Object);
     }
-
 }

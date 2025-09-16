@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Alchemist.Test.Server.Fixtures;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,12 +7,14 @@ using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Test.DBApiWebAppFactory;
 
-public abstract class DbContextWebAppFactory<TEntryPoint, TDbContext> : WebApplicationFactory<TEntryPoint>
+public abstract class DbContextWebAppFactory<TEntryPoint, TDbContext> : TestWebAppFactory<TEntryPoint>
     where TEntryPoint : class
     where TDbContext : DbContext
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        base.ConfigureWebHost(builder);
+
         builder.ConfigureTestServices(ConfigureServices);
     }
 

@@ -2,16 +2,14 @@
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.Interfaces;
 using Alchemist.Test.DBApiWebAppFactory;
-using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.Import.WebApp.IntegrationTest.Infrastructure;
 
-public class ShopAPIWebAppFactory(TestServer signalRServer) : DbAPIWebAppFactory<ShopAPIProgram, AlchemyContext>(true)
+public class ShopAPIWebAppFactory(TestServer signalRServer) : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8050, 8051)
 {
     private readonly TestServer _signalRServer = signalRServer;
 
@@ -33,16 +31,6 @@ public class ShopAPIWebAppFactory(TestServer signalRServer) : DbAPIWebAppFactory
         base.ConfigureServices(services);
 
         services.SetSignalRHubTestSender(_signalRServer, ["events"]);
-    }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        base.ConfigureWebHost(builder);
-
-        builder.ConfigureServices((context, services) =>
-        {
-            context.Configuration.SetKestrelLocalhostPortsConfig(8050, 8051);
-        });
     }
 }
 

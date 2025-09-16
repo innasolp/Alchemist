@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class GrpcServiceWebAppFactory(string connectionString) : DbAPIWebAppFactory<GrpcServiceProgramm, AlchemyContext>(false)
+public class GrpcServiceWebAppFactory(string connectionString) : DBAPIKestrelWebAppFactory<GrpcServiceProgramm, AlchemyContext>(false, 8070, 8071)
 {
     private readonly string _connectionString = connectionString;
 
@@ -22,17 +22,12 @@ public class GrpcServiceWebAppFactory(string connectionString) : DbAPIWebAppFact
     protected override void FillTestData(AlchemyContext dbContext)
     {
         //todo
-    }
+    }    
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        base.ConfigureWebHost(builder);
+        base.ConfigureWebHostBuilderContext(context, services); 
 
-        builder.ConfigureServices((context, services) =>
-        {
-            context.Configuration.SetKestrelLocalhostPortsConfig(8070, 8071);
-
-            ConfigureServices?.Invoke(services);
-        });
+        ConfigureServices?.Invoke(services);
     }
 }

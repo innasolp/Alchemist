@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServiceProgram>
+public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServiceProgram>
 {
     private readonly GrpcServiceWebAppFactory _grpcWebAppFactory;
 
@@ -53,28 +53,6 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
         _grpcWebAppFactory.CreateClient();            
     }
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        base.ConfigureWebHost(builder);
-
-        builder.ConfigureServices((context, services) =>
-        {
-            Configuration = context.Configuration;
-
-            var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
-            joinableTaskFactory.Run(async () =>
-            {
-                await _importItemsHost.Start();
-            });
-
-            services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(_shopAPIClient));
-
-            SetReceiver(services);  
-            
-            ConfigureServices?.Invoke(services);
-        });
-    }
-
     private void SetReceiver(IServiceCollection services)
     {
         services.SetRabbitMqReceiver(_importItemsHost.Uri,
@@ -87,5 +65,21 @@ public class ImportDBServiceWebAppFactory : WebApplicationFactory<ImportDbServic
         return _importItemsHost.CreatePublisher(Services,
             Configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>());
     }
-    
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        Configuration = context.Configuration;
+
+        var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
+        joinableTaskFactory.Run(async () =>
+        {
+            await _importItemsHost.Start();
+        });
+
+        services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(_shopAPIClient));
+
+        SetReceiver(services);
+
+        ConfigureServices?.Invoke(services);
+    }
 }

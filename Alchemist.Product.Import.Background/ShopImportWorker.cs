@@ -66,12 +66,12 @@ public class ShopImportWorker : BackgroundService
 
         _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);       
 
-        _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, StopServiceAsync);
+        _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, OnStopServiceAsync);
 
         _settingsDataService = settingsDataService;
     }
 
-    private async Task StopServiceAsync(Guid guid)
+    private async Task OnStopServiceAsync(Guid guid)
     {
         _logger.LogInformation($"Stopping service with guid {guid} started.");
         if (_servicesWithTokens.TryGetValue(guid, out var serviceWithToken))

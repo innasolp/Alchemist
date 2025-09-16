@@ -1,4 +1,5 @@
 ﻿using Alchemist.Test.SignalRWebAppFactory;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,5 +14,9 @@ public class ShopAPISignalRWebAppFactory(TestServer signalRServer) : ShopAPIWebA
         base.ConfigureServices(services);
 
         services.SetSignalRHubTestSender(_signalRServer, ["events"]);
+    }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {        
     }
 }

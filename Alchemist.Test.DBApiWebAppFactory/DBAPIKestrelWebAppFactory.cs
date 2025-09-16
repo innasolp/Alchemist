@@ -14,15 +14,8 @@ public abstract class DBAPIKestrelWebAppFactory<TEntryPoint, TDbContext>(bool en
 
     public int HttpsPort { get; set; } = httpsPort;
 
-    protected virtual void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
         context.Configuration.SetKestrelLocalhostPortsConfig(HttpPort, HttpsPort);
-    }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        base.ConfigureWebHost(builder);
-
-        builder.ConfigureServices(ConfigureWebHostBuilderContext);
     }
 }

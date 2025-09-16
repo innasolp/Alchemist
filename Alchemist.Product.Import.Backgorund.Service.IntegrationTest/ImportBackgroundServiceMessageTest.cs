@@ -121,9 +121,10 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             var guid = serviceGuids.First();
             await testMessageSender.Send(guid, Messages.Common.Messages.ServiceStop);
 
-            await Task.Delay(1000);
+            await Task.Delay(3000);
 
-            Assert.Contains(LogMessages, l => l.LogLevel == Microsoft.Extensions.Logging.LogLevel.Information
+            var messages = new List<TestLogMessage>(LogMessages);
+            Assert.Contains(messages, l => l.LogLevel == Microsoft.Extensions.Logging.LogLevel.Information
             && l.Message?.Contains($"Stopping service with guid {guid} started.") == true);
 
         }
