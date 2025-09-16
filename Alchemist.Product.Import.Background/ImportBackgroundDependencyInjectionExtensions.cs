@@ -1,10 +1,8 @@
 ﻿using Alchemist.Common;
 using Alchemist.Import.Settings.Interfaces;
-using DependencyInjection.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.DependencyInjection.Common;
-using Message.SignalR.DependencyInjection;
 using Message.Interfaces;
 using Alchemist.Product.Import.Background.ImportItems;
 using Alchemist.Import.Products.Interfaces;

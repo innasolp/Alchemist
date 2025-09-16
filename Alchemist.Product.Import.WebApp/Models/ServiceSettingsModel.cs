@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.Model;
-using DependencyInjection.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 

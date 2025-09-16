@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DependencyInjection.ImplementationFactory" Version="1.0.0" />
     <PackageReference Include="Google.Protobuf" Version="3.29.1" />
     <PackageReference Include="Grpc.Client.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />    
