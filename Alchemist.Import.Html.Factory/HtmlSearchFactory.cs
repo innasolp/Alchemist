@@ -1,9 +1,8 @@
-﻿using DependencyInjection.ImplementationFactory;
-using Microsoft.Extensions.DependencyInjection; 
+﻿using Microsoft.Extensions.DependencyInjection; 
 
 namespace Alchemist.Import.Html.Factory;
 
-public class HtmlSearchFactory : IServiceImplementationFactory, IServiceImplementationFactory<IHtmlSearcher>
+public class HtmlSearchFactory 
 {
     public static IHtmlSearcher CreateSearcher(SearchMatchType? searchMatchType, SearchElementType? searchElementType = SearchElementType.Attribute)
     {
@@ -31,29 +30,5 @@ public class HtmlSearchFactory : IServiceImplementationFactory, IServiceImplemen
                 default:
                     return new EmptySearcher();
             }
-    }
-
-    object IServiceImplementationFactory.GetService(IServiceProvider serviceProvider, Type serviceType, object? key)
-    {
-        var options = serviceProvider.GetRequiredKeyedService<HtmlSearchFactoryOptions>(key);
-        return CreateSearcher(options.SearchMatchType, options.SearchElementType);
-    }
-
-    object IServiceImplementationFactory.GetService(IServiceProvider serviceProvider, Type serviceType)
-    {
-        var options = serviceProvider.GetRequiredService<HtmlSearchFactoryOptions>();
-        return CreateSearcher(options.SearchMatchType, options.SearchElementType);
-    }
-
-    IHtmlSearcher IServiceImplementationFactory<IHtmlSearcher>.GetService(IServiceProvider serviceProvider, object? key)
-    {
-        var options = serviceProvider.GetRequiredKeyedService<HtmlSearchFactoryOptions>(key);
-        return CreateSearcher(options.SearchMatchType, options.SearchElementType);
-    }
-
-    IHtmlSearcher IServiceImplementationFactory<IHtmlSearcher>.GetService(IServiceProvider serviceProvider)
-    {
-        var options = serviceProvider.GetRequiredService<HtmlSearchFactoryOptions>();
-        return CreateSearcher(options.SearchMatchType, options.SearchElementType);
     }
 }
