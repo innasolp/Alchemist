@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.Import.ViewModel\Alchemist.Product.Import.Model.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.Model.Settings\Alchemist.Product.Model.ShopSettings.csproj" />
   </ItemGroup>
 
   <ItemGroup>
