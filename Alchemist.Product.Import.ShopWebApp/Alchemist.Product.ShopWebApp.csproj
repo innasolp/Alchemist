@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Product.Import.ShopFacade\Alchemist.Product.Model.Shop.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\alchemist_common\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Alchemist.Js.Common\src\confirm.js" Link="wwwroot\lib\alchemist_common\confirm.js" />
+  </ItemGroup>
+
+</Project>
