@@ -337,6 +337,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Model", "
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Alchemist.Js.Common", "Alchemist.Js.Common\Alchemist.Js.Common.esproj", "{54DAB101-C449-ABEF-E87B-9CC066DF79B8}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Alchemist.Css.Common", "Alchemist.Css.Common\Alchemist.Css.Common.esproj", "{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -1504,6 +1506,24 @@ Global
 		{54DAB101-C449-ABEF-E87B-9CC066DF79B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54DAB101-C449-ABEF-E87B-9CC066DF79B8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{54DAB101-C449-ABEF-E87B-9CC066DF79B8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.debug libs|Any CPU.Deploy.0 = Debug|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_core|Any CPU.Deploy.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_settings|Any CPU.Deploy.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.import_shops|Any CPU.Deploy.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1651,6 +1671,7 @@ Global
 		{72585EC4-EAA8-4A09-867F-19F9086A3874} = {AE432863-EA55-41F9-90E4-AEC9C2AEAF48}
 		{2D21C2F6-C301-ECC3-6BE2-D9A64B2C7084} = {7CF38854-7358-43BF-9F62-8B625812B1DA}
 		{54DAB101-C449-ABEF-E87B-9CC066DF79B8} = {7CF38854-7358-43BF-9F62-8B625812B1DA}
+		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3} = {7CF38854-7358-43BF-9F62-8B625812B1DA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
