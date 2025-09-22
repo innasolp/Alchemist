@@ -1,0 +1,32 @@
+{
+  "name": "alchemist_css_common",
+  "version": "1.0.0",
+  "main": "app.js",
+  "exports": {    
+    "./common.css": {
+      "import": "./src/common.css"
+    },
+    "./menu.css": {
+      "import": "./src/menu.css"
+    },
+    "./control.css": {
+      "import": "./src/control.css"
+    },
+    "./fonts.css": {
+      "import": "./src/fonts.css"
+    },
+    "./list.css": {
+      "import": "./src/list.css"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "eslint": "^9.36.0"
+  }
+}

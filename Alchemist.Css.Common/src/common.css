@@ -1,0 +1,32 @@
+.invisible {
+    display: none;
+}
+
+a.selected {
+    color: black;
+    font-weight: 320;
+}
+
+.selected-a {
+    background-color: linen;
+    color: black;
+    font-weight: 320;
+}
+
+a {
+    color: gray;
+}
+
+.selected {
+    background-color: gray;
+}
+
+
+a.active-filter {
+    background-color: #F1FFFF;
+}
+
+.flex {
+    display: flex;
+    width: 100%;
+}
