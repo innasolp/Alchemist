@@ -1,29 +1,27 @@
 ﻿using Alchemist.Product.Import.Model;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
-public class ModelJsonEnumerableBinder(ILogger<ModelJsonEnumerableBinder> logger) : IModelBinder
+public class ModelImplementationJsonBinder(ILogger<ModelImplementationJsonBinder> logger) : IModelBinder
 {
-    private readonly ILogger<ModelJsonEnumerableBinder> _logger = logger;
+    private readonly ILogger<ModelImplementationJsonBinder> _logger = logger;
 
     private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.General)
     {
-        IgnoreReadOnlyProperties = false,
-        IgnoreReadOnlyFields = true,
-        RespectRequiredConstructorParameters = true    ,
-        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-        PropertyNameCaseInsensitive = true,        
+        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        PropertyNameCaseInsensitive = true
     };
 
-    public async Task BindModelAsync(ModelBindingContext bindingContext)
+    public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 
-        if (!typeof(IEnumerable<IModel>).IsAssignableFrom(bindingContext.ModelType))
+        if (!typeof(IModel).IsAssignableFrom(bindingContext.ModelType))
         {
-            throw new NotSupportedException($"The '{nameof(ModelJsonBinder)}' model binder should only be used on {typeof(IEnumerable<IModel>).Name }, it will not work on '{bindingContext.ModelType.Name}'");
+            throw new NotSupportedException($"The '{nameof(ModelImplementationJsonBinder)}' model binder should only be used on {typeof(IModel).Name}, it will not work on '{bindingContext.ModelType.Name}'");
         }
 
         try
@@ -32,25 +30,27 @@ public class ModelJsonEnumerableBinder(ILogger<ModelJsonEnumerableBinder> logger
             {
                 _logger.LogWarning($"ModelName of  {bindingContext.ModelType.Name} is empty");
                 bindingContext.Result = ModelBindingResult.Failed();
-                return;
+                return Task.CompletedTask;
             }
 
             var model = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
-            if (model.Values.Count == 0)
+            if(model.Values.Count == 0 )
             {
-                _logger.LogError($"Model {bindingContext.ModelName} does not contaons values");
+                _logger.LogError($"Model {bindingContext.ModelName} does not contains values");
                 bindingContext.Result = ModelBindingResult.Failed();
-                return;
+                return Task.CompletedTask;
             }
 
             var data = JsonSerializer.Deserialize(model.FirstValue, bindingContext.ModelType, DefaultJsonSerializerOptions);
 
-            bindingContext.Result = ModelBindingResult.Success(data);
+            bindingContext.Result = ModelBindingResult.Success(data);            
         }
         catch (Exception e)
         {
             _logger.LogError(e, $"Error when trying to model bind {bindingContext.ModelType.Name}");
             bindingContext.Result = ModelBindingResult.Failed();
         }
+        
+        return Task.CompletedTask;
     }
 }

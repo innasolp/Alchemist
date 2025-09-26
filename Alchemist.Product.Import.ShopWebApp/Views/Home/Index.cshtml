@@ -1,8 +1,30 @@
-﻿@{
+﻿@using Alchemist.Product.ShopWebApp.Models
+
+@model IndexModel
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }    
+       
+    @if(!Model.ShopsUploaded)
+    {
+        <script>uploadShops($('#shopsTab'), null, setItemsPreventClick);</script>
+    }
+    else
+    {
+        <script>
+            $(()=>setItemsPreventClick());
+        </script>
+    }
+
+    
+}
+
+<div id="shopsTab">
+    @await Html.PartialAsync($"~/Views/Shared/ShopTab.cshtml", Model.ShopTab);   
 </div>

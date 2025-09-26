@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Alchemist.Product.Import.ShopWebApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/jquery-confirm/dist/jquery-confirm.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Alchemist.Product.Import.ShopWebApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Alchemist.Product.ShopWebApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/common/common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/common/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/common/list.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/common/menu.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -42,8 +47,14 @@
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-confirm/dist/jquery-confirm.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> 
+    <script src="~/lib/alchemist_common/confirm.js" asp-append-version="true"></script>
+    <script src="~/lib/alchemist_common/formData.js" asp-append-version="true"></script>
+    <script src="~/lib/alchemist_common/modal.js" asp-append-version="true"></script>
+    <script src="~/lib/alchemist_common/utils.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/shop.js" asp-append-version="true"></script>    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

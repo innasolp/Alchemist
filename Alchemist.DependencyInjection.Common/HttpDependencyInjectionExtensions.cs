@@ -7,34 +7,34 @@ namespace Alchemist.DependencyInjection.Common;
 
 public static class HttpDependencyInjectionExtensions
 {
-    public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string key, out IHttpClientBuilder httpClientBuilder)
+    public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string hostKey, out IHttpClientBuilder httpClientBuilder)
         where TService:class
         where TImplementation : class, TService
     {
         var restApiHost = configuration.GetHostSectionValue(restApiSectionName);
-        httpClientBuilder = services.AddHttpClient(restApiHost);
+        httpClientBuilder = services.AddHttpClient(hostKey);
 
-        services.AddKeyedSingleton(key, restApiHost);
+        services.AddKeyedSingleton(hostKey, restApiHost);
         return services.AddSingleton<TService, TImplementation>();
     }    
     
-    public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string key)
+    public static IServiceCollection AddRestApiClient<TService, TImplementation>(this IServiceCollection services, IConfiguration configuration, string restApiSectionName, string hostKey)
         where TService : class
         where TImplementation : class, TService
     {
         var restApiHost = configuration.GetSection(restApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
         services.AddHttpClient();
 
-        services.AddKeyedSingleton(key, restApiHost);
+        services.AddKeyedSingleton(hostKey, restApiHost);
         return services.AddSingleton<TService, TImplementation>();
     }
 
-    public static IServiceCollection SetHttpMessageDelegatingHandler<TMessageHandler>(this IServiceCollection services, IHttpClientBuilder httpClientBuilder, string key)
+    public static IServiceCollection SetHttpMessageDelegatingHandler<TMessageHandler>(this IServiceCollection services, IHttpClientBuilder httpClientBuilder, string messageHandlerKey)
         where TMessageHandler : DelegatingHandler
     {
         //services.AddKeyedSingleton<TMessageHandler>(key);
 
-        httpClientBuilder.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredKeyedService<TMessageHandler>(key));
+        httpClientBuilder.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredKeyedService<TMessageHandler>(messageHandlerKey));
 
         return services;
     }

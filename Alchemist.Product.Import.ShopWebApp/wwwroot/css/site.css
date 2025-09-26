@@ -20,3 +20,15 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+@media (min-width: 1200px) {
+    .display-7 {
+        font-size: 2.0rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .display-8 {
+        font-size: 1.5rem;
+    }
+}

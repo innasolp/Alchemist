@@ -98,7 +98,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SaveProductShopSettingsToDb([ModelBinder(typeof(ModelJsonBinder))] ProductShopSettingsModel data)
+    public async Task<IActionResult> SaveProductShopSettingsToDb([ModelBinder(typeof(ModelImplementationJsonBinder))] ProductShopSettingsModel data)
     {
         if (data == null) return BadRequest(nameof(data));
 
@@ -125,7 +125,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SaveCategoryShopSettingsToDb([ModelBinder(typeof(ModelJsonBinder))] CategoryShopSettingsModel data)
+    public async Task<IActionResult> SaveCategoryShopSettingsToDb([ModelBinder(typeof(ModelImplementationJsonBinder))] CategoryShopSettingsModel data)
     {
         if (data == null) return BadRequest(nameof(data));
 
@@ -150,7 +150,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult RootCategory([ModelBinder(typeof(ModelJsonBinder))] CategoryUrlModel data)
+    public IActionResult RootCategory([ModelBinder(typeof(ModelImplementationJsonBinder))] CategoryUrlModel data)
     {
         if (data == null)
             return BadRequest("category url is null");
@@ -185,7 +185,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult SetRootCategory([ModelBinder(typeof(ModelJsonBinder))] CategoryUrlModel data)
+    public IActionResult SetRootCategory([ModelBinder(typeof(ModelImplementationJsonBinder))] CategoryUrlModel data)
     {
         if (data == null)
             return BadRequest(data);

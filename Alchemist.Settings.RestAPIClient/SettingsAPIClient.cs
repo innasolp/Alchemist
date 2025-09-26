@@ -13,17 +13,34 @@ public class SettingsAPIClient : IShopSettingsDataService
 {
     private readonly HttpClient _httpClient;
 
-    public SettingsAPIClient(HttpClient httpClient)
+    public SettingsAPIClient([FromKeyedServices("ЫуеештпыApiHttpClient")] HttpClient httpClient)
     {
         _httpClient = httpClient;
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
     }
+
     public SettingsAPIClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(SettingsAPIClient))] string apiHost)
-        :this(httpClientFactory.CreateClient(apiHost))
     {
+        _httpClient = httpClientFactory.CreateClient();
+        _httpClient.BaseAddress = new Uri(apiHost);
+        _httpClient.DefaultRequestHeaders.Accept.Clear();
+        _httpClient.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
     }
+
+    //public SettingsAPIClient(HttpClient httpClient)
+    //{
+    //    _httpClient = httpClient;
+    //    _httpClient.DefaultRequestHeaders.Accept.Clear();
+    //    _httpClient.DefaultRequestHeaders.Accept.Add(
+    //        new MediaTypeWithQualityHeaderValue("application/json"));
+    //}
+    //public SettingsAPIClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(SettingsAPIClient))] string apiHost)
+    //    :this(httpClientFactory.CreateClient(apiHost))
+    //{
+    //}
 
     public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
     {

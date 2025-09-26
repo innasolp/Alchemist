@@ -262,7 +262,7 @@ public class HomeController : Controller
 
     [HttpPost]
     [ProducesResponseType<PartialViewResult>(StatusCodes.Status200OK)]
-    public IActionResult ShopList([ModelBinder(typeof(ModelJsonEnumerableBinder))]  IEnumerable<ShopModel> shops)
+    public IActionResult ShopList([ModelBinder(typeof(ModelImplementationJsonEnumerableBinder))]  IEnumerable<ShopModel> shops)
     {
         return PartialView("~/Views/Home/_ShopListPartial.cshtml", shops);
     }
