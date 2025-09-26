@@ -7,6 +7,6 @@
     </None>
   </ItemGroup>
 	<Target Name="NpmLinkPackage" BeforeTargets="Build">
-		<Exec Command="npm link" />
+		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
 	</Target>
 </Project>

@@ -17,6 +17,21 @@
     },
     "./utils": {
       "import": "./src/utils.js"
+    },
+    "./mvc/confirm": {
+      "import": "./mvc/confirm.js"
+    },
+    "./mvc/fileUpload": {
+      "import": "./mvc/fileUpload.js"
+    },
+    "./mvc/formData": {
+      "import": "./mvc/formData.js"
+    },
+    "./mvc/modal": {
+      "import": "./mvc/modal.js"
+    },
+    "./mvc/utils": {
+      "import": "./mvc/utils.js"
     }
   },
   "scripts": {
