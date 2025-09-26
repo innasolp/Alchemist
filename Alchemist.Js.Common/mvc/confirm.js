@@ -1,4 +1,4 @@
-export function confirm(title, message, onSuccess = null, onCancel = null) {
+function confirm(title, message, onSuccess = null, onCancel = null) {
     $.confirm({
         title: title,
         content: message,
