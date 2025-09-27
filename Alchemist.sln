@@ -345,7 +345,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.WebApp.Co
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Alchemist.Css.Common", "Alchemist.Css.Common\Alchemist.Css.Common.esproj", "{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.ShopWebApp.IntegratonTest", "Alchemist.Product.ShopWebApp.IntegratonTest\Alchemist.Product.ShopWebApp.IntegratonTest.csproj", "{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1556,6 +1556,18 @@ Global
 		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1707,6 +1719,7 @@ Global
 		{79C25787-6D34-1D3D-B428-90316203D1C4} = {5CB3D3A1-328E-4ED3-A88C-15DADFF97238}
 		{BE3A56AF-2385-5394-0432-2721AC82EE4E} = {7CF38854-7358-43BF-9F62-8B625812B1DA}
 		{FACE41B5-9EF4-F4A8-5E05-CF996C5B4DF3} = {7CF38854-7358-43BF-9F62-8B625812B1DA}
+		{23D9B7DD-E0C4-4ED3-8F0A-9078D43F4CD8} = {29F409A8-DE7C-43BE-916A-920352B78953}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
