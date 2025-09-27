@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Product.ShopWebApp.Models;
 
-public class ShopItemModel
+internal class ShopItemModel
 {
     public ShopModel ShopModel { get; set; }
 

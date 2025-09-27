@@ -10,7 +10,7 @@ namespace Alchemist.Product.ShopWebApp.Controllers;
 public class ShopController(ILogger<ShopController> logger, IShopDataService shopDataService) : Controller
 {
     private readonly ILogger<ShopController> _logger = logger;
-    
+
     private readonly ShopFacade _shopFacade = new(shopDataService);
 
     private bool IsShopsUploaded()
@@ -21,27 +21,7 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
     private void SetShopsUploaded()
     {
         HttpContext.Session.SetInt32("shops_uploaded", 1);
-    }
-
-    private static ShopTabModel GetShopTabModel(IEnumerable<ShopModel> shops, int? selectedShopId = null, string shopRefFormat = "/Shop/{0}" )
-    {
-        var selectedShop = selectedShopId != 0
-            ? shops.FirstOrDefault(s => s.Id == selectedShopId) ?? shops.FirstOrDefault()
-            : null ;
-
-        var shopItems = (shops.Select(s => new ShopItemModel
-        {
-            ShopModel = s,
-            IsSelected = s.Id == selectedShop?.Id,
-            HRef = string.Format(shopRefFormat, s.Id)
-        }));
-
-        return new ShopTabModel
-        {
-            ShopItems = shopItems,
-            CurrentShopModel = selectedShop
-        };
-    }
+    }    
 
     private async Task<IndexModel> GetIndexModel(int? shopId = null)
     {
@@ -52,7 +32,7 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
         if (shopsUploaded)
         {
             var shops = await _shopFacade.GetShops();
-            indexViewModel.ShopTab = GetShopTabModel(shops, shopId);
+            indexViewModel.ShopTab = ModelHelper.GetShopTabModel(shops, shopId);
         }
         else
         {
@@ -69,14 +49,14 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
         return View("~/Views/Home/Index.cshtml", indexViewModel);
     }
 
-    [Route("Shop/Index")]    
-    [Route("Shop/")]    
+    [Route("Shop/Index")]
+    [Route("Shop/")]
     [ActionName("Index")]
     public async Task<IActionResult> IndexFromQuery([FromQuery] int shopId)
     {
         var indexViewModel = await GetIndexModel(shopId);
 
-        return View("~/Views/Home/Index.cshtml", indexViewModel);       
+        return View("~/Views/Home/Index.cshtml", indexViewModel);
     }
 
     [Route("Shop/Index/{shopId:int}")]
@@ -94,9 +74,9 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
     public async Task<IActionResult> ShopTab(int? selectedShopId = null)
     {
         var shops = await _shopFacade.GetShops();
-            var tabModel = GetShopTabModel(shops, selectedShopId);
-            SetShopsUploaded();
-            return PartialView("~/Views/Shared/ShopTab.cshtml", tabModel);        
+        var tabModel = ModelHelper.GetShopTabModel(shops, selectedShopId);
+        SetShopsUploaded();
+        return PartialView("~/Views/Shared/ShopTab.cshtml", tabModel);
     }
 
     public IActionResult Privacy()
@@ -110,27 +90,27 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    
+
     public async Task<IActionResult> New()
     {
-        var shops = await _shopFacade.GetShops();        
+        var shops = await _shopFacade.GetShops();
 
-        var shopTabModel = GetShopTabModel(shops, 0);
+        var shopTabModel = ModelHelper.GetShopTabModel(shops, 0);
         shopTabModel.CurrentShopModel = new ShopModel { Id = 0 };
 
         return View("~/Views/Home/Index.cshtml", new IndexModel { ShopsUploaded = IsShopsUploaded(), ShopTab = shopTabModel });
     }
-    
+
 
     [HttpPost]
     public async Task<IActionResult> Save([FromForm] ShopModel shop)
     {
-        var savedShop = await _shopFacade.SaveShop(shop);        
-       
-        return RedirectToAction("Index", "Shop", new { shopId = savedShop.Id});
+        var savedShop = await _shopFacade.SaveShop(shop);
+
+        return RedirectToAction("Index", "Shop", new { shopId = savedShop.Id });
     }
 
-    [HttpPost]    
+    [HttpPost]
     public async Task<IActionResult> IsChanged([FromForm] ShopModel shop)
     {
         var existingShop = await shopDataService.GetShop(shop.Id);
@@ -138,7 +118,7 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
 
         var changed = !(shop.Name == existingShop.Name
                         && shop.Url == existingShop.Url
-                        && ( (string.IsNullOrEmpty(shop.Caption) && string.IsNullOrEmpty(existingShop.Caption)) || shop.Caption == existingShop.Caption));
+                        && ((string.IsNullOrEmpty(shop.Caption) && string.IsNullOrEmpty(existingShop.Caption)) || shop.Caption == existingShop.Caption));
 
         return Ok(changed);
     }

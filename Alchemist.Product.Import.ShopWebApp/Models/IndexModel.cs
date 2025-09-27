@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Product.ShopWebApp.Models;
 
-public class IndexModel
+internal class IndexModel
 {
     public bool ShopsUploaded { get; set; } = false;
 
