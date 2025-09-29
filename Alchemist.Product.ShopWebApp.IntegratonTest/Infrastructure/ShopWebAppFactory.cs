@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
 
-public class ShopWebAppFactory : TestWebAppKestrelFactory<ShopWebAppProgram>
+public abstract class ShopWebAppFactory : TestWebAppKestrelFactory<ShopWebAppProgram>
 {
     private readonly bool _isApi;
 
@@ -39,16 +39,12 @@ public class ShopWebAppFactory : TestWebAppKestrelFactory<ShopWebAppProgram>
         _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, shopAPIHttpPort, shopAPIHttpsPort);
         ShopApiClient = _shopAPIWebAppFactory.CreateClient();
     }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((context, confBuilder) =>
-        {
-            if (_isApi)
-            {
-                var isApiSection = context.Configuration.GetSection("isApi");
-                isApiSection.Value = "true";
-            }
-        });
+        if(_isApi)
+          builder.UseSetting("api", "true");
+        
         base.ConfigureWebHost(builder);
     }
 
@@ -57,5 +53,5 @@ public class ShopWebAppFactory : TestWebAppKestrelFactory<ShopWebAppProgram>
         base.ConfigureWebHostBuilderContext(context, services);
 
         services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(ShopApiClient));
-    }     
+    }
 }

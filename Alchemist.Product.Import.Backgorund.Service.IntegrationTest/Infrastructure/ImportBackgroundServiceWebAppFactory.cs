@@ -35,6 +35,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
+
+
     public FixtureLoggerFactoryContext SettingsApiFixtureLoggingContext => _settingsAPIWebAppFactory.FixtureLoggingContext;
 
     public FixtureLoggerFactoryContext ShopApiFixtureLoggingContext => _shopAPIWebAppFactory.FixtureLoggingContext;
@@ -43,9 +46,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     public HttpClient ShopSettingsApiClient { get; }
 
-    public HttpClient ShopApiClient { get; }
-
-    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;    
+    public HttpClient ShopApiClient { get; }   
 
     public ImportBackgroundServiceWebAppFactory(string connectionSection, int shopAPIHttpPort, int shopAPIHttpsPort,
         int settingsAPIHttpPort, int settingsAPIHttpsPort, 

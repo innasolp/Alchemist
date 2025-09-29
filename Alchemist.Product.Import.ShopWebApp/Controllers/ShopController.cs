@@ -1,4 +1,5 @@
 using Alchemist.DataService.Interfaces;
+using Alchemist.Exceptions;
 using Alchemist.Product.Import.ShopWebApp.Models;
 using Alchemist.Product.ShopWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -54,9 +55,16 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
     [ActionName("Index")]
     public async Task<IActionResult> IndexFromQuery([FromQuery] int shopId)
     {
-        var indexViewModel = await GetIndexModel(shopId);
+        try
+        {
+            var indexViewModel = await GetIndexModel(shopId);
 
-        return View("~/Views/Home/Index.cshtml", indexViewModel);
+            return View("~/Views/Home/Index.cshtml", indexViewModel);
+        }
+        catch (NotFoundException)
+        {
+            return NotFound(shopId);
+        }
     }
 
     [Route("Shop/Index/{shopId:int}")]
@@ -64,9 +72,15 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
     [ActionName("Index")]
     public async Task<IActionResult> IndexRoute(int shopId)
     {
-        var indexViewModel = await GetIndexModel(shopId);
-
-        return View("~/Views/Home/Index.cshtml", indexViewModel);
+        try
+        {
+            var indexViewModel = await GetIndexModel(shopId);
+            return View("~/Views/Home/Index.cshtml", indexViewModel);
+        }
+        catch (NotFoundException)
+        {
+            return NotFound(shopId);
+        }
     }
 
 
@@ -74,9 +88,16 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
     public async Task<IActionResult> ShopTab(int? selectedShopId = null)
     {
         var shops = await _shopFacade.GetShops();
-        var tabModel = ModelHelper.GetShopTabModel(shops, selectedShopId);
-        SetShopsUploaded();
-        return PartialView("~/Views/Shared/ShopTab.cshtml", tabModel);
+        try
+        {
+            var tabModel = ModelHelper.GetShopTabModel(shops, selectedShopId);
+            SetShopsUploaded();
+            return PartialView("~/Views/Shared/ShopTab.cshtml", tabModel);
+        }
+        catch(NotFoundException)
+        {
+            return NotFound(selectedShopId);            
+        }        
     }
 
     public IActionResult Privacy()

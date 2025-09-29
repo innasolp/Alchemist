@@ -12,7 +12,9 @@ using Serilog.Configuration.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var isApi = (args.Length > 0 && args.Contains("-api", StringComparer.InvariantCultureIgnoreCase))
+var isApi = args.Length > 0 && 
+    args.Contains("-api", StringComparer.InvariantCultureIgnoreCase)
+    || args.Contains("--api=true", StringComparer.InvariantCultureIgnoreCase)
     || builder.Configuration.GetValue<bool>("isApi");
 
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);

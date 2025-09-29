@@ -1,5 +1,6 @@
 using Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
+using System.Web;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
@@ -31,5 +32,17 @@ public class ShopWebApiTest(ShopWebAppApiFactory webAppFactory, ITestOutputHelpe
         response.EnsureSuccessStatusCode();
         var hello = await response.Content.ReadAsStringAsync();
         Assert.Equal("Hello ShopWebApp API!", hello);
+    }
+
+    [Fact]
+    public async Task GetViewContentSuccessAsync()
+    {
+        var httpClient = WebAppFactory.CreateClient();
+        var url = $"/ShopApi/ShopList?hrefFormat={HttpUtility.UrlEncode("/Shop/{0}")}";
+        var response = await httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("shop_item", content);
     }
 }

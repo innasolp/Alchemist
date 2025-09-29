@@ -1,12 +1,20 @@
-﻿namespace Alchemist.Product.ShopWebApp.Models;
+﻿using Alchemist.Exceptions;
+
+namespace Alchemist.Product.ShopWebApp.Models;
 
 internal static class ModelHelper
 {
     public static ShopModel? GetSelectedShop(IEnumerable<ShopModel> shops, int? selectedShopId = null)
     {
-        return selectedShopId != 0
-            ? shops.FirstOrDefault(s => s.Id == selectedShopId) ?? shops.FirstOrDefault()
-            : null;
+        if (selectedShopId == null)
+            return shops.FirstOrDefault();
+
+        if (selectedShopId == 0)
+            return null;
+
+        return
+            shops.FirstOrDefault(s => s.Id == selectedShopId) ??
+            throw new NotFoundException($"Shop with id={selectedShopId} not found.");            
     }
 
     public static IEnumerable<ShopItemModel> GetShopItemModels(IEnumerable<ShopModel> shops, 

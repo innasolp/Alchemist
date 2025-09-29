@@ -6,6 +6,8 @@ public class NotFoundException : Exception
 
     public NotFoundException() : base() { }
 
+    public NotFoundException(string message) : base(message) { }
+
     public NotFoundException(string message, IDictionary<string, object> paramValues) : base(message) 
     { 
         ParamValues = paramValues; 
