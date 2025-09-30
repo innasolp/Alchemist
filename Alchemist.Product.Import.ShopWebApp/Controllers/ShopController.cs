@@ -77,9 +77,9 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
             var indexViewModel = await GetIndexModel(shopId);
             return View("~/Views/Home/Index.cshtml", indexViewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException ex)
         {
-            return NotFound(shopId);
+            return NotFound(ex.Message);
         }
     }
 
@@ -94,9 +94,9 @@ public class ShopController(ILogger<ShopController> logger, IShopDataService sho
             SetShopsUploaded();
             return PartialView("~/Views/Shared/ShopTab.cshtml", tabModel);
         }
-        catch(NotFoundException)
+        catch(NotFoundException ex)
         {
-            return NotFound(selectedShopId);            
+            return NotFound(ex.Message);            
         }        
     }
 
