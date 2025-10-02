@@ -2,4 +2,4 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code. 
-import * as alchemist_confirm from "alchemist_common/confirm";
+//import * as alchemist_confirm from "alchemist_common/confirm";

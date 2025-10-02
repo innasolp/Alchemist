@@ -11,7 +11,9 @@
                 <a id="createNewShop" asp-controller="Shop" asp-action="New" >Новый</a>
             </li>
             <li class="left-menu-ul">
-                @await Html.PartialAsync($"~/Views/Shared/ShopList.cshtml", Model.ShopItems)
+                <div id="shopList">
+                    @await Html.PartialAsync($"~/Views/Shared/ShopList.cshtml", Model.ShopItems)
+                </div>
             </li>
         </ul>
     </div>

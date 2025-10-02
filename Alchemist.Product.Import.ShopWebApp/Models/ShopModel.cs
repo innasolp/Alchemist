@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Alchemist.Product.ShopWebApp.Models;
 
-public class ShopModel : IShop
+internal class ShopModel : IShop
 {
     [Required]
     public string Name { get; set; }

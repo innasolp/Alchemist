@@ -23,7 +23,8 @@ internal static class ModelHelper
     {        
         return shops.Select(s => new ShopItemModel
         {
-            ShopModel = s,
+            Id = s.Id,
+            ShopName = s.Name,
             IsSelected = s.Id == selectedShopId,
             HRef = string.Format(shopRefFormat, s.Id)
         });

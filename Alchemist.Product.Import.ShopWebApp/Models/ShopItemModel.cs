@@ -1,8 +1,10 @@
 ﻿namespace Alchemist.Product.ShopWebApp.Models;
 
 internal class ShopItemModel
-{
-    public ShopModel ShopModel { get; set; }
+{    
+    public int Id { get; set; }
+
+    public string ShopName { get; set; }
 
     public string HRef { get; set; }
 

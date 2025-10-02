@@ -2,9 +2,7 @@
 
 internal class ShopTabModel
 {
-    public IEnumerable<ShopItemModel> ShopItems { get; set; } = new List<ShopItemModel>();
+    public IEnumerable<ShopItemModel> ShopItems { get; set; } = [];
 
     public ShopModel? CurrentShopModel { get; set; }
-
-    public int? CurrentShopId { get; set; }
 }

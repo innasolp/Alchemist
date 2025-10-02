@@ -1,5 +1,5 @@
-﻿function uploadShops(shopTabDiv, selectedShopId = null, onSuccess = null) {
-    shopTabDiv.load('/Shop/ShopTab', selectedShopId, (r, status, xhr) => {
+﻿function uploadShopTab(shopTabDiv, shopId = null, onSuccess = null) {
+    shopTabDiv.load('/Shop/ShopTab', { shopId: shopId }, (r, status, xhr) => {
         if (status == "error") {
             console.error("/Shop/ShopTab error: " + xhr.status + ": " + xhr.statusText);
             console.trace(r);
@@ -7,6 +7,18 @@
         }
         else 
             onSuccess();        
+    });
+}
+
+function uploadShopList(shopListDiv, shopId = null, onSuccess = null) {
+    shopListDiv.load('/Shop/ShopList', { shopId: shopId }, (r, status, xhr) => {
+        if (status == "error") {
+            console.error("/Shop/ShopList error: " + xhr.status + ": " + xhr.statusText);
+            console.trace(r);
+            return;
+        }
+        else
+            onSuccess();
     });
 }
 
@@ -39,8 +51,16 @@ function shopItemAction(anchor) {
     window.location.href = anchor.attributes["href"].value;
 }
 
-function saveShop(shopEditForm) {
+function saveShop(shopEditForm, shopListDiv) {
+
+    var updateShopListOnSuccess = function (shop) {
+        uploadShopList($(`#${shopListDiv}`), shop.id, null);
+    };
+
     validateForm($('#' + shopEditForm), () => {
-        $('#' + shopEditForm).trigger("submit");
+        
+        var formData = new FormData($('#' + shopEditForm)[0]);
+        postFormData(url = "/Shop/Save", formData = formData, onSuccess = updateShopListOnSuccess, onError = null);
+
     }, null); 
 }
