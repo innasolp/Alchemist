@@ -19,7 +19,7 @@ public class ShopWebMvcTest(ShopWebAppMvcFactory webAppFactory, ITestOutputHelpe
     {
         var url = "/Shop/ShopTab";
         var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.GetAsync(url);
+        var response = await httpClient.PostAsync(url,null);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
