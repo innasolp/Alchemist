@@ -24,7 +24,7 @@ internal class ModelJsonEnumerableBinder(ILogger<ModelJsonEnumerableBinder> logg
 
         if (!typeof(IEnumerable<IModel>).IsAssignableFrom(bindingContext.ModelType))
         {
-            throw new NotSupportedException($"The '{nameof(ModelJsonBinder)}' model binder should only be used on {typeof(IEnumerable<IModel>).Name }, it will not work on '{bindingContext.ModelType.Name}'");
+            throw new NotSupportedException($"The '{nameof(ModelImplementationJsonBinder)}' model binder should only be used on {typeof(IEnumerable<IModel>).Name }, it will not work on '{bindingContext.ModelType.Name}'");
         }
 
         try

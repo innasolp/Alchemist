@@ -99,7 +99,7 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult SaveServiceSettings([ModelBinder(typeof(ModelJsonBinder))] ServiceSettingsModel data)
+    public IActionResult SaveServiceSettings([ModelBinder(typeof(ModelImplementationJsonBinder))] ServiceSettingsModel data)
     {
         if (data == null)
             return BadRequest(data);
@@ -135,7 +135,7 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
     [ProducesResponseType<OkObjectResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
-    public IActionResult IsServiceSettingsChanged([ModelBinder(typeof(ModelJsonBinder))] ServiceSettingsModel data)
+    public IActionResult IsServiceSettingsChanged([ModelBinder(typeof(ModelImplementationJsonBinder))] ServiceSettingsModel data)
     {
         if (data == null)
             return BadRequest(data);

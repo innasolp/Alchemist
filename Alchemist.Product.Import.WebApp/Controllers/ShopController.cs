@@ -40,7 +40,7 @@ public class ShopController(IImportFacade importFacade, IShopDataService shopDat
     [ProducesResponseType<NotFoundObjectResult>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<BadRequestObjectResult>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ObjectResult>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> SaveAsync([ModelBinder(typeof(ModelJsonBinder))] ShopModel shop)
+    public async Task<IActionResult> SaveAsync([ModelBinder(typeof(ModelImplementationJsonBinder))] ShopModel shop)
     {
         if (shop == null)
             return BadRequest(shop);

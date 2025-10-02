@@ -10,8 +10,8 @@ public static class JsonExtensions
         {
             if (type.IsAssignableFrom(typeInfo.Type) && typeInfo.Kind == JsonTypeInfoKind.Object)
                 // [JsonIgnore] is implemented by setting ShouldSerialize to a function that returns false.
-                foreach (var property in 
-                    typeInfo.Properties.Where(p => ignoreProperties.Any(i=>p.Name.Equals(i,StringComparison.InvariantCultureIgnoreCase))))
+                foreach (var property in
+                    typeInfo.Properties.Where(p => ignoreProperties.Any(i => p.Name.Equals(i, StringComparison.InvariantCultureIgnoreCase))))
                 {
                     if (property.Get != null)
                         property.ShouldSerialize = (param1, param2) => false;
@@ -61,5 +61,16 @@ public static class JsonExtensions
         object result = await JsonSerializer.DeserializeAsync(s, returnType);
         s.Close();
         return await Task.FromResult(result);
-    }    
+    }
+
+    public static T? DeserializeAnonymousType<T>(string json, T anonymousTypeObject, JsonSerializerOptions? options = null)
+    {
+        return JsonSerializer.Deserialize<T>(json, options);
+    }
+
+    public static T? DeserializeAnonymousType<T>(object? obj, T anonymousTypeObject, JsonSerializerOptions? options = null)
+    {
+        var json = JsonSerializer.Serialize(obj, options);
+        return JsonSerializer.Deserialize<T>(json, options);
+    }
 }

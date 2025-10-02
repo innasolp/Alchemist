@@ -2,6 +2,7 @@
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -11,7 +12,7 @@ public class ShopApiClient : IShopDataService
 {
     private readonly HttpClient _httpClient;    
 
-    public ShopApiClient(HttpClient httpClient)
+    public ShopApiClient([FromKeyedServices("ShopApiHttpClient")] HttpClient httpClient)
     {
         _httpClient = httpClient;
         _httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -20,7 +21,13 @@ public class ShopApiClient : IShopDataService
     }
 
     public ShopApiClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(ShopApiClient))] string apiHost)
-        : this(httpClientFactory.CreateClient(apiHost)) { }    
+    {
+        _httpClient = httpClientFactory.CreateClient();
+        _httpClient.BaseAddress = new Uri(apiHost);
+        _httpClient.DefaultRequestHeaders.Accept.Clear();
+        _httpClient.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
+    }
 
     public async Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory)
     {
