@@ -1,7 +1,8 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Interfaces;
 using System.ComponentModel;
 
-namespace Alchemist.Product.Import.Model.Infrastructure;
+namespace Alchemist.Product.Model.ShopSettings.Infrastructure;
 
 public static class TabHelper
 {

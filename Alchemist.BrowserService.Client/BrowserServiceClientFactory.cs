@@ -19,25 +19,25 @@ public class BrowserServiceClientFactory(IHttpClientFactory httpClientFactory,
 
     private readonly IEnumerable<IWebLoader> _webLoaders = webLoaders;
 
-    public ILoaderService Create(IShopImportSettings shopImportSettings)
+    public ILoaderService Create(string name, IShopImportSettings shopImportSettings)
     {
-        var webLoaderSettings = shopImportSettings.GetWebLoader() ??
-            throw new InvalidDataException($"Webloader in settings {shopImportSettings.Name} not exists.");
+        var webLoaderSettings = shopImportSettings.GetWebLoader<IServiceSettings>() ??
+            throw new InvalidDataException($"Webloader in settings {name} not exists.");
        
          var webLoader = _webLoaders.FirstOrDefault(f => f.GetType().Name == webLoaderSettings.ImplementationTypeName
             || f.GetType().Name.Contains(webLoaderSettings.ImplementationTypeName, StringComparison.InvariantCultureIgnoreCase))
             ?? throw new InvalidDataException($"Web loader of type {webLoaderSettings.ImplementationTypeName} not found");
 
-        var requestHeaders = JsonSerializer.Deserialize<JsonObject>(shopImportSettings.GetRequestHeaders().Value);
+        var requestHeaders = JsonSerializer.Deserialize<JsonObject>(shopImportSettings.GetRequestHeaders<IServiceSettings>().Value);
 
         return new BrowserServiceClient(
             _httpClientFactory,
-            shopImportSettings.Name,
+            name,
             _apiHost,
             shopImportSettings.ShopUrl,
             webLoader,
-            shopImportSettings.GetBrowserDataLoader().ImplementationTypeName,
-            shopImportSettings.GetBrowserLauncher().ImplementationTypeName, 
+            shopImportSettings.GetBrowserDataLoader<IServiceSettings>().ImplementationTypeName,
+            shopImportSettings.GetBrowserLauncher<IServiceSettings>().ImplementationTypeName, 
             requestHeaders);
     }
 }

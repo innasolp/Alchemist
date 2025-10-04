@@ -19,18 +19,19 @@ public abstract class ShopImportServiceFactory(ILogger logger,
 
     public abstract Type ServiceImplementationType { get; }
 
-    IImportService IShopImportServiceFactory.Create(IShopItem shopModel, IShopImportSettings shopImportSettings)
+    IImportService IShopImportServiceFactory.Create(string name, IShopItem shopModel, IShopImportSettings shopImportSettings)
     {
-        var browserService = _browserServiceFactory.Create(shopImportSettings);   
+        var browserService = _browserServiceFactory.Create(name, shopImportSettings);   
 
-        var logger = _logFactory == null ? _logger : GetLogger( _logger, _logFactory, shopModel, shopImportSettings) ?? _logger;
+        var logger = _logFactory == null ? _logger : GetLogger( _logger, name, _logFactory, shopModel, shopImportSettings) ?? _logger;
 
-        return Create(logger, shopModel, shopImportSettings, browserService);
+        return Create(logger, name, shopModel, shopImportSettings, browserService);
     }
 
-    protected abstract ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings);
+    protected abstract ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings);
 
-    protected abstract IImportService Create(ILogger logger, 
+    protected abstract IImportService Create(ILogger logger,
+        string name,
         IShopItem shopModel, 
         IShopImportSettings shopImportSettings,  
         ILoaderService browserService);

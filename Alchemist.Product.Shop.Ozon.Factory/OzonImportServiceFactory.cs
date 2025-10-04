@@ -17,19 +17,20 @@ public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
 {
     public override Type ServiceImplementationType => typeof(OzonImportService);
 
-    protected override IImportService Create(ILogger logger, IProductShopModel shopModel, IShopImportSettings shopImportSettings,
+    protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IShopImportSettings shopImportSettings,
         IProductItemHandler itemHandler, ILoaderService browserService)
     {
         return new OzonImportService(logger as ILogger<OzonImportService>,
+            name,
             shopModel,
             browserService,
             itemHandler);
     }
 
-    protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger,string name, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
     {
         if (logger is ILogger<OzonImportService> serviceLogger)
-            return importServiceLogFactory?.GetLogger(serviceLogger, shopModel, shopImportSettings) ?? serviceLogger;
+            return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;
         else
             throw new InvalidDataException(logger.GetType().FullName);
     }

@@ -1,11 +1,11 @@
 ﻿using Alchemist.Import.Settings.Extensions;
-using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Import.Model.Infrastructure;
 using Microsoft.Playwright;
 using System.Text.Json;
 using Xunit.Abstractions;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Model.ShopSettings.Infrastructure;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Test;
 

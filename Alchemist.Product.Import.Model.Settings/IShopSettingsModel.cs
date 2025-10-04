@@ -1,8 +1,9 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Product.Import.Model;
+using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.Import.Model;
+namespace Alchemist.Product.Model.ShopSettings;
 
-public interface IShopSettingsModel : ISettingsModel, ISettings
+public interface IShopSettingsModel : ISettingsModel, IShopSettings
 {
     string? FileName { get; set; }
 }

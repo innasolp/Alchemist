@@ -12,8 +12,8 @@ using Message.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-using ShopSettingType = Alchemist.Import.Settings.Interfaces.ShopSettingType;
 using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
+using Alchemist.Product.Model.ShopSettings;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
@@ -126,7 +126,7 @@ public abstract class ControllerTest<T>
         foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
         {
             if (_importFacade.TryGetServiceSettings(shopSettings.ShopGuid, shopSettings.Guid, primaryServiceName, out var service))
-                service.ServiceTypeName = $"{shopSettings.ShopSettingType}{primaryServiceName}Type{shopSettings.Id}_{Guid.NewGuid()}";
+                service.ServiceTypeName = $"{shopSettings.Type}{primaryServiceName}Type{shopSettings.Id}_{Guid.NewGuid()}";
         }
     }
 

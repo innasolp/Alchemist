@@ -1,10 +1,11 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 using System.Collections;
 using System.Text.Json.Serialization;
 
 namespace Alchemist.Product.Import.Background.Settings;
 
-public abstract class ShopImportSettings : IShopImportSettings
+public abstract class ShopImportSettings : IShopImportSettings, IShopSettings
 {
     public bool? Perfomance { get; set; }
 
@@ -16,19 +17,21 @@ public abstract class ShopImportSettings : IShopImportSettings
     [JsonIgnore]
     public int ShopId { get; set; }
     
-    public List<ImportServiceSettings> Services { get; set; } = [];
+    public Dictionary<string,ImportServiceSettings> Services { get; set; } = [];
 
-    IList IShopImportSettings.Services => Services;
+    IDictionary IShopImportSettings.Services => Services;
 
-    int? ISettings.ParentSettingsId 
+    int? IShopSettings.ParentSettingsId 
     { 
         get { return null; }
         set {; }
     }
-    protected abstract ShopSettingType ShopSettingType { get; }
 
-    ShopSettingType ISettings.ShopSettingType => ShopSettingType;
+    public abstract ShopSettingType ShopSettingType { get; }   
 
     public string ShopName { get; set; }
     public string ShopUrl { get; set; }
+    bool? IShopSettings.IsActual { get ; set; }
+    string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    ShopSettingType IShopSettings.Type { get => ShopSettingType; set => throw new InvalidOperationException(); }
 }

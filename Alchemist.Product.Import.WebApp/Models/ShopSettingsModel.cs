@@ -2,6 +2,7 @@
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Interfaces;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
@@ -16,7 +17,7 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopImport
 
     public override string ToString()
     {
-        return  @$"{base.ToString()};{nameof(ISettings.ShopId)}:{((ISettings)this).ShopId};
+        return  @$"{base.ToString()};{nameof(IShopSettings.ShopId)}:{((IShopSettings)this).ShopId};
                   {nameof(ImportService)}:{GetServiceValueString(ImportService)};
                   {nameof(BrowserDataLoader)}:{GetServiceValueString(BrowserDataLoader)};
                   {nameof(BrowserLauncher)}:{GetServiceValueString(BrowserLauncher)};
@@ -30,53 +31,68 @@ public abstract partial class ShopSettingsModel : SettingsModelBase, IShopImport
     }
 
     [JsonInclude]
-    public SuppressibleObservableCollection<ServiceSettingsModel> Services { get; private set; } = [];
+    public Dictionary<string, ServiceSettingsModel> Services { get; private set; } = [];
 
     [JsonIgnore]
     public override TabType Tab => TabType.Shop;
 
-    public abstract ShopSettingType ShopSettingType { get; }
+    public abstract ShopSettingType Type { get; }
 
     [JsonIgnore]
-    public ServiceSettingsModel? RequestHeaders => this.GetRequestHeaders() as ServiceSettingsModel;
-
-    [Required]
-    [JsonIgnore]
-    public ServiceSettingsModel ImportService => this.GetImportService() as ServiceSettingsModel;
-
-    [JsonIgnore]
-    public ServiceSettingsModel? BrowserDataLoader => this.GetBrowserDataLoader() as ServiceSettingsModel;
-
-    [JsonIgnore]
-    public ServiceSettingsModel? BrowserLauncher => this.GetBrowserLauncher() as ServiceSettingsModel;
+    public ServiceSettingsModel? RequestHeaders => this.GetRequestHeaders<ServiceSettingsModel>();
 
     [Required]
     [JsonIgnore]
-    public ServiceSettingsModel WebLoader => this.GetWebLoader() as ServiceSettingsModel;
+    public ServiceSettingsModel ImportService => this.GetImportService<ServiceSettingsModel>();
+
+    [JsonIgnore]
+    public ServiceSettingsModel? BrowserDataLoader => this.GetBrowserDataLoader<ServiceSettingsModel>();
+
+    [JsonIgnore]
+    public ServiceSettingsModel? BrowserLauncher => this.GetBrowserLauncher<ServiceSettingsModel>();
+
+    [Required]
+    [JsonIgnore]
+    public ServiceSettingsModel WebLoader => this.GetWebLoader<ServiceSettingsModel>();
 
     public bool? Perfomance { get; set; }
 
     public string? FileName { get; set; }  
 
 
-    IList IShopImportSettings.Services => Services;
+    IDictionary IShopImportSettings.Services => Services;
 
     string IShopImportSettings.ShopName { get => null; set { } }
 
     string IShopImportSettings.ShopUrl { get => null; set { } }   
 
-    int? ISettings.ParentSettingsId { get => null; set  { } }
+    int? IShopSettings.ParentSettingsId { get => null; set  { } }
+
+    [JsonIgnore]
+    bool? IShopSettings.IsActual { get ; set; }
+
+    [JsonIgnore]
+    string IShopSettings.JsonValue { get; set; }
+
+    [JsonIgnore]
+    ShopSettingType IShopSettings.Type { get => Type; set {; } }
 
     public ShopSettingsModel(int shopId, int id, Guid shopGuid) : base(shopId, shopGuid)
     {
         Id = id;
 
-        Services.SuspendNotifications();
-        foreach(var serviceName in SettingsCommon.GetPrimaryServiceNames())
+        //Services.SuspendNotifications();
+        //foreach(var serviceName in SettingsCommon.GetPrimaryServiceNames())
+        //{
+        //    var service = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid) { Name = serviceName };
+        //    Services.Add(service);
+        //}
+        //Services.ResumeNotifications();
+
+        foreach (var serviceName in SettingsCommon.GetPrimaryServiceNames())
         {
             var service = new ServiceSettingsModel(shopId, 0, id, Guid, shopGuid) { Name = serviceName };
-            Services.Add(service);
+            Services.Add(serviceName, service);
         }
-        Services.ResumeNotifications();
     }    
 }

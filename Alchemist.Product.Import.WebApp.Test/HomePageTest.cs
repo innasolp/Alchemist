@@ -1,7 +1,8 @@
-using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
+using Alchemist.Product.Interfaces;
+using Alchemist.Product.Model.ShopSettings.Infrastructure;
 using System.Text.Json;
 using Xunit.Abstractions;
 

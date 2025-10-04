@@ -9,6 +9,7 @@ using Moq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 
@@ -201,7 +202,7 @@ public class FileUploadControllerTest : ControllerTest<FileUploadController>
         var fileUploadController = CreateFileUploadController();
         var formFile = GetFormFile(fileName);
 
-        var uploadedShopSettingsResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadShopSettingsAsync(shopSettings.ShopGuid, (int)shopSettings.ShopSettingType, formFile));
+        var uploadedShopSettingsResult = Assert.IsType<OkObjectResult>(await fileUploadController.UploadShopSettingsAsync(shopSettings.ShopGuid, (int)shopSettings.Type, formFile));
         var uploadedShopSettings = Assert.IsType<T>(uploadedShopSettingsResult.Value);
         Assert.Equal(fileName, uploadedShopSettings.FileName);
 

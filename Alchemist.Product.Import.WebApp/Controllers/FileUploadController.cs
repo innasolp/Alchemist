@@ -1,11 +1,12 @@
 ﻿using Alchemist.Product.Import.Model;
-using Alchemist.Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.Model.Infrastructure;
 using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
+using Alchemist.Product.Model.ShopSettings;
+using Alchemist.Product.Interfaces;
 
 
 namespace Alchemist.Product.Import.WebApp.Controllers;

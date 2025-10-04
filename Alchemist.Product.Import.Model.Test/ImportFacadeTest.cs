@@ -1,10 +1,11 @@
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model.Infrastructure;
-using Alchemist.Import.Settings.Interfaces;
 using Moq;
 using Alchemist.Import.Settings.Extensions;
 
 using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
+using Alchemist.Product.Model.ShopSettings;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Model.Test;
 
@@ -60,18 +61,18 @@ public class ImportFacadeTest
     {
         var guid = Guid.NewGuid();
         var shopProductSettingsMock = new Mock<T>();
-        shopProductSettingsMock.Setup(s => s.ShopSettingType).Returns(shopSettingType);
+        shopProductSettingsMock.Setup(s => s.Type).Returns(shopSettingType);
         shopProductSettingsMock.Setup(s => s.Guid).Returns(guid);
         shopProductSettingsMock.Setup(s => s.ShopGuid).Returns(shopGuid);
         shopProductSettingsMock.Setup(s => s.ShopId).Returns(shopId);
 
-        var services = new List<IServiceSettingsModel>();
+        var services = new Dictionary<string,IServiceSettingsModel>();
         shopProductSettingsMock.Setup(s => s.Services).Returns(services);
 
         foreach (var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
         {
             var service = CreateService(shopId, shopGuid, guid, primaryServiceName);
-            shopProductSettingsMock.Object.Services.Add(service);
+            shopProductSettingsMock.Object.Services.Add(primaryServiceName, service);
         }        
 
         return shopProductSettingsMock.Object;
@@ -185,7 +186,7 @@ public class ImportFacadeTest
         var productShopSettings = shopImport.ShopSettingTabs.ShopProductsSettings;
         Assert.True(_importFacade.TryGetShopSettings(shopImport.ShopGuid, productShopSettings.Guid, out var result));
         Assert.Equal(productShopSettings.Guid, result.Guid);
-        Assert.Equal(ShopSettingType.Product, result.ShopSettingType);
+        Assert.Equal(ShopSettingType.Product, result.Type);
     }
 
     [Fact]
@@ -201,8 +202,8 @@ public class ImportFacadeTest
 
         foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
         {
-            if(shopSettings.GetService(primaryServiceName) is IServiceSettingsModel primaryService)
-              Assert.True(primaryService?.IsEmpty());
+            var primaryService = shopSettings.GetService<IServiceSettingsModel>(primaryServiceName);
+            Assert.True(primaryService?.IsEmpty());
         }        
 
         var name = Guid.NewGuid().ToString();
@@ -233,8 +234,8 @@ public class ImportFacadeTest
         
         foreach (var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
         {
-            if (shopSettings.GetService(primaryServiceName) is IServiceSettingsModel primaryService)
-                Assert.True(primaryService?.IsEmpty());
+            var primaryService = shopSettings.GetService<IServiceSettingsModel>(primaryServiceName);
+            Assert.True(primaryService?.IsEmpty());
         }
         
         Assert.False(_importFacade.TryGetServiceSettings(shopImports[1].ShopGuid,

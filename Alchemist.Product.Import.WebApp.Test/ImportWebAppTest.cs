@@ -5,6 +5,7 @@ using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
 using Alchemist.Product.Import.WebApp.Test.Infrastructure;
 using Alchemist.Product.Interfaces;
+using Alchemist.Product.Model.ShopSettings.Infrastructure;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using Moq;

@@ -7,12 +7,13 @@ using Alchemist.Import.Interfaces;
 namespace Alchemist.Product.Shop.Ozon.ImportService;
 
 public class OzonImportService(ILogger<OzonImportService> logger,
+    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] string name,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductShopModel shopUrlModel,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] ILoaderService loaderService,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler) 
     : ShopImportCategoryProductsService<Category, Model.Product>(logger, shopUrlModel, loaderService,itemHandler)
 {
-    public override string Name => "OzonImport";
+    public override string Name { get; } = name;
 
     protected override int PageProductCount => 12;
 

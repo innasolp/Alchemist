@@ -1,5 +1,7 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Import.Model;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
@@ -9,24 +11,24 @@ internal class SettingsDataAdapterContainer(ISettingsDataAdapter productSettings
     private readonly ISettingsDataAdapter _productSettingsDataAdapter = productSettingsDataAdapter;
     private readonly ISettingsDataAdapter _categorySettingsDataAdapter = categorySettingsDataAdapter;
 
-    public async Task<IShopImportSettings?> GetShopImportSettingsAsync(int shopId, ShopSettingType shopSettingType)
+    public async Task<IShopImportSettingsModel?> GetShopImportSettingsAsync(int shopId, ShopSettingType shopSettingType)
     {
         switch (shopSettingType)
         {
             case ShopSettingType.Product:
-                return await _productSettingsDataAdapter.GetShopImportSettings(shopId);
+                return await _productSettingsDataAdapter.GetShopImportSettings(shopId) as IShopImportSettingsModel;
 
             case ShopSettingType.Category:
-                return await _categorySettingsDataAdapter.GetShopImportSettings(shopId);
+                return await _categorySettingsDataAdapter.GetShopImportSettings(shopId) as IShopImportSettingsModel;
 
             default:
                 return null;
         }
     }
 
-    public async Task SaveAsync(IShopImportSettings shopImportSettings)
+    public async Task SaveAsync(IShopImportSettingsModel shopImportSettings)
     {
-        switch(shopImportSettings.ShopSettingType)
+        switch(shopImportSettings.Type)
         {
             case ShopSettingType.Product:
                await _productSettingsDataAdapter.Save(shopImportSettings);

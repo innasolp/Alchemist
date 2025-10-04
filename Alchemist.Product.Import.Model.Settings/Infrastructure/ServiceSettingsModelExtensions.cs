@@ -16,8 +16,7 @@ public static class ServiceSettingsModelExtensions
 
     public static void Update(this IServiceSettingsModel target, IServiceSettingsModel source)
     {
-        if (!source.IsPrimary())
-            target.Name = source.Name;
+        target.Name = source.Name;
 
         target.ServiceProviderPath = source.ServiceProviderPath;
         target.ServiceTypeName = source.ServiceTypeName;
@@ -53,13 +52,6 @@ public static class ServiceSettingsModelExtensions
 
     internal static IServiceSettingsModel? GetServiceSettings(this IShopImportSettingsModel shopSettings, string serviceName)
     {
-        var serviceSettings = shopSettings.GetService(serviceName);
-        if(serviceSettings is IServiceSettingsModel serviceSettingsModel)
-            return serviceSettingsModel;
-
-        if (serviceSettings != null)
-            throw new InvalidOperationException($"Invalid service type {serviceSettings?.GetType().Name}");
-
-        return default;
+        return shopSettings.GetService<IServiceSettingsModel>(serviceName);
     }
 }

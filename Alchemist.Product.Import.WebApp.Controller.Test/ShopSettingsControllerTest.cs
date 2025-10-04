@@ -16,7 +16,6 @@ using Moq;
 using System.Reflection;
 using System.Text.Json;
 
-using ShopSettingType = Alchemist.Import.Settings.Interfaces.ShopSettingType;
 using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
@@ -286,11 +285,11 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
 
         foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
         {
-            var service = shopSettings.GetService(primaryServiceName) ??
+            var service = shopSettings.GetService<IServiceSettingsModel>(primaryServiceName) ??
                 ModelFactory.CreateServiceSettingsModel(shopSettings.ShopId, 0, shopSettings.Id, shopSettingsModel.ShopGuid, shopSettingsModel.Guid);
 
             service.Name = primaryServiceName;
-            shopSettings.Services.Add(service as ServiceSettingsModel);
+            shopSettings.Services.Add(primaryServiceName, service as ServiceSettingsModel);
         }
 
         _shopSettingsDataServiceMock.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
@@ -308,13 +307,13 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         where T:ShopSettingsModel
     {
         var result = shopSettingsResult.ToShopImportSettings<T>();
-        var servicesResult = new List<ServiceSettingsModel>();
-        childrenSettingResult.ToList().ForEach(s => servicesResult.Add(s.ToImportServiceSettings<ServiceSettingsModel>()));
-        servicesResult.ForEach(s=>result.UpdateServiceSettings(s.Name, s));
+        var servicesResult = new Dictionary<string, ServiceSettingsModel>();
+        childrenSettingResult.ToList().ForEach(s => servicesResult.Add(s.Name, s.ToImportServiceSettings<ServiceSettingsModel>()));
+        servicesResult.Values.ToList().ForEach(s=>result.UpdateServiceSettings(s.Name, s));
 
         ModelAssert.EqualFields(expect, result);
         ModelAssert.EqualServices(expect, result);
-        ModelAssert.EqualCollections(expect.Services, servicesResult);        
+        ModelAssert.EqualCollections(expect.Services.Values, servicesResult.Values);        
 
         return await Task.FromResult(new List<IShopSettings>());
     }    

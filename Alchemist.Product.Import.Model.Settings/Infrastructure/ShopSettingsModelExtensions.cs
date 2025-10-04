@@ -1,5 +1,6 @@
 ﻿using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Model.Infrastructure;
 
@@ -28,7 +29,7 @@ public static class ShopSettingsModelExtensions
         foreach (var sourceService in sourceServices)
         {
             //todo name or guid ???
-            var targetService = target.GetService(sourceService.Name ?? sourceService.ServiceTypeName);
+            var targetService = target.GetService<IServiceSettingsModel>(sourceService.Name ?? sourceService.ServiceTypeName);
             if (targetService == null)
             {                
                 targetService = modelFactory.CreateServiceSettingsModel( shopId: target.ShopId, 
@@ -38,7 +39,7 @@ public static class ShopSettingsModelExtensions
                     shopSettingsGuid: target.Guid);
                 targetService.Name = sourceService.Name;
                 targetService.Update(sourceService);
-                target.Services.Add(targetService);
+                target.Services.Add(sourceService.Name, targetService);
             }
             else
                 targetService.Update(sourceService);
@@ -47,7 +48,7 @@ public static class ShopSettingsModelExtensions
 
     private static void UpdateShopSettingsWithoutServices(this IShopImportSettingsModel target, IShopImportSettingsModel source)
     {
-        target.Name = source.Name;
+       target.Name = source.Name;
         target.FileName = source.FileName;
         target.Perfomance = source.Perfomance;
     }
@@ -106,18 +107,18 @@ public static class ShopSettingsModelExtensions
         target.CategorySourceUrl = source.CategorySourceUrl;
     }
 
-    public static void Update(this IModelFactory modelFactory, IShopImportSettingsModel target, IShopImportSettings source)
+    public static void Update(this IModelFactory modelFactory, IShopImportSettingsModel target, IShopImportSettingsModel source)
     {
-        if (target.ShopSettingType != source.ShopSettingType)
+        if (target.Type != source.Type)
             throw new InvalidOperationException("different shop settings types");
 
-        if (target.ShopSettingType == ShopSettingType.Service)
+        if (target.Type == ShopSettingType.Service)
             throw new InvalidOperationException("invalid shop setting type");
 
-        if (source.ShopSettingType == ShopSettingType.Product && source is IProductShopSettingsModel sourceProducts
+        if (source.Type == ShopSettingType.Product && source is IProductShopSettingsModel sourceProducts
             && target is IProductShopSettingsModel targetProducts)
             modelFactory.UpdateProductShopSettings(targetProducts, sourceProducts);
-        else if (source.ShopSettingType == ShopSettingType.Category && source is ICategoryShopSettingsModel sourceCategories
+        else if (source.Type == ShopSettingType.Category && source is ICategoryShopSettingsModel sourceCategories
             && target is ICategoryShopSettingsModel targetCategories)
             modelFactory.UpdateCategoryShopSettings(targetCategories, sourceCategories);
         else

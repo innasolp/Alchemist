@@ -1,14 +1,15 @@
 ﻿using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Alchemist.Import.Settings.Test.Model;
 
-public class TestImportServiceSettings : IImportServiceSettings, IJsonOnDeserialized, IJsonValue
+public class TestImportServiceSettings : IServiceSettings, IShopSettings, IJsonOnDeserialized, IJsonValue
 {   
-    public string? Name { get; set; }
+    public string Name { get; set; }
     public string? ServiceTypeName { get; set; }
     public string? AssemblyPath { get; set; }
     public string? ServiceProviderPath { get; set; }
@@ -31,12 +32,20 @@ public class TestImportServiceSettings : IImportServiceSettings, IJsonOnDeserial
             Value = value != null ? JsonSerializer.Deserialize<JsonObject>(value) : null;
         } 
     }
-    int ISettings.Id { get =>Id ?? 0; set => Id = value; }
+    int IShopSettings.Id { get =>Id ?? 0; set => Id = value; }
 
-    ShopSettingType ISettings.ShopSettingType => ShopSettingType.Service;
+    ShopSettingType IShopSettings.Type
+    {
+        get { return ShopSettingType.Service; }
+        set {; }
+    }
 
+    bool? IShopSettings.IsActual { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    
     void IJsonOnDeserialized.OnDeserialized()
     {
         this.DeserializeValueIfNeed();
     }
+
 }

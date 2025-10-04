@@ -1,5 +1,6 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
+using Alchemist.Product.Interfaces;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
@@ -35,7 +36,7 @@ public partial class ProductShopSettingsModel(int shopId, int id, Guid shopGuid)
 
     public int? PageProductCount { get; set; }
 
-    public override ShopSettingType ShopSettingType => ShopSettingType.Product;
+    public override ShopSettingType Type => ShopSettingType.Product;
 
     [JsonInclude]
     public List<CategoryUrlModel> RootCategories { get; private set; } = [];

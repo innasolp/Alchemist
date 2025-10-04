@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 

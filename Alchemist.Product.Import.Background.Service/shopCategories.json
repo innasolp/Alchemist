@@ -1,15 +1,12 @@
-[
-  {
-    "Name": "OzonCategories",
+{
+  "OzonCategories": {
     "ShopName": "Ozon",
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
     "CategorySourceUrl": "https://www.ozon.ru",
     "Perfomance": true,
-    "Services": [
-      {
-        "Name": "RequestHeaders",
-
+    "Services": {
+      "RequestHeaders": {
         "Value": {
 
           "Headers": {
@@ -59,29 +56,26 @@
           "CookiePrefixLength": 0
         }
       },
-      {
-        "Name": "ImportService",
+
+      "ImportService": {
         "ImplementationTypeName": "ShopImportCategoriesTimerService",
         "AssemblyPath": "Import\\Categories\\Json",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
-      {
-        "Name": "BrowserDataLoader",
+      "BrowserDataLoader": {
         "ImplementationTypeName": "FirefoxDevEdition",
         "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\DevEdition"
       },
-      {
-        "Name": "BrowserLauncher",
+      "BrowserLauncher": {
         "ImplementationTypeName": "FirefoxDevEdition",
         "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\DevEdition"
       },
-      {
-        "Name": "WebLoader",
+      "WebLoader": {
         "ImplementationTypeName": "Firefox",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
         "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
       },
-      {
+      "CategoryLoadOptions": {
         "ServiceTypeName": "CategoryLoadOptions",
         "AssemblyPath": "Import\\Categories\\Json",
         "Value": {
@@ -109,7 +103,7 @@
           }
         }
       },
-      {
+      "HtmlSearchFactoryOptions": {
         "ServiceTypeName": "HtmlSearchFactoryOptions",
         "AssemblyPath": "Import\\Html",
         "Value": {
@@ -117,24 +111,22 @@
           "SearchElementType": 0
         }
       },
-      {
+      "IHtmlSearcher": {
         "ServiceTypeName": "IHtmlSearcher",
         "AssemblyPath": "Import\\Html",
         "ServiceProviderPath": "Import\\Html"
       }
-    ]
-  },
+    }
+    },
 
-  {
-    "Name": "GoldAppleCategories",
+  "GoldAppleCategories": {
     "ShopName": "Goldapple",
     "ShopUrl": "https://goldapple.ru",
     "CategorySourceUrl": "https://goldapple.ru/front/api/catalog/navigation",
     "Caption": "Золотое яблоко",
     "Perfomance": true,
-    "Services": [
-      {
-        "Name": "RequestHeaders",
+    "Services": {
+      "RequestHeaders": {
         "Value": {
           "Headers": {
 
@@ -207,30 +199,26 @@
           "CookiePrefixLength": 0
         }
       },
-      {
-        "Name": "ImportService",
+      "ImportService": {
         "ImplementationTypeName": "ShopImportCategoriesTimerService",
         "AssemblyPath": "Import\\Categories\\Json",
         "ServiceProviderPath": "Import\\Categories"
 
       },
-      {
-        "Name": "BrowserDataLoader",
+      "BrowserDataLoader": {
         "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
       },
-      {
-        "Name": "BrowserLauncher",
+      "BrowserLauncher": {
         "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
       },
-      {
-        "Name": "WebLoader",
+      "WebLoader": {
         "ImplementationTypeName": "Firefox",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
         "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
       },
-      {
+      "CategoryLoadOptions": {
         "ServiceTypeName": "CategoryLoadOptions",
         "AssemblyPath": "Import\\Categories\\Json",
         "Value": {
@@ -260,6 +248,6 @@
           }
         }
       }
-    ]
-  }
-]
+    }
+    }
+}
