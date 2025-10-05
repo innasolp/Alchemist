@@ -2,11 +2,11 @@
 
 namespace Alchemist.Import.Settings.Interfaces;
 
-public interface IShopImportSettings: ISettings
-{ 
+public interface IShopImportSettings
+{
     public bool? Perfomance { get; set; }
 
-    IList Services { get; }
+    IDictionary Services { get; }
 
     string ShopName { get; set; }
 

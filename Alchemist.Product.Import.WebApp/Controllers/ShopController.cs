@@ -3,6 +3,7 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Model.ShopSettings;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;

@@ -11,6 +11,7 @@ using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.Import.Background.Settings;
+using Alchemist.Product.Interfaces;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using DependencyInjection.AssemblyExtensions;
@@ -111,9 +112,9 @@ static void AddShopImporters(WebApplicationBuilder builder)
     builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopProductImportPath").Value}");
     builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
 
-    builder.Services.AddImportServiceLogFactory((logger, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
-    { "ShopImportService", settings.Name },
-    { "ShopSettingsType", settings.ShopSettingType.ToString() } }));
+    builder.Services.AddImportServiceLogFactory((logger, name, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
+    { "ShopImportService", name },
+    { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } }));
 
     builder.Services.AddPerfomanceCounter((logger) => new SerilogUrlLogger<IPerfomanceCounter>(logger));
 

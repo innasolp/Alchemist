@@ -8,6 +8,8 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Interfaces;
+using Alchemist.Product.Model.ShopSettings;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -232,7 +234,7 @@ public class HomeController : Controller
             //todo
             return Ok(!settings.Equals(modelFromJson));
 
-        var originalSettings = await _settingsDataAdapterContainer.GetShopImportSettingsAsync(shopImport.Shop.Id, (settings as ShopSettingsModel).ShopSettingType);
+        var originalSettings = await _settingsDataAdapterContainer.GetShopImportSettingsAsync(shopImport.Shop.Id, (settings as ShopSettingsModel).Type);
         if (originalSettings == null)
            //todo
             return Ok(true);
@@ -307,7 +309,7 @@ public class HomeController : Controller
             {
                 var shopSettingsTab = shopImport.ShopSettingTabs as ShopSettingTabsModel;
 
-                IShopImportSettingsModel selectedSettings = shopSettingsTab.SelectedSettingsTab == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
+                IShopImportSettingsModel selectedSettings = shopSettingsTab.SelectedSettingsTab == ShopSettingType.Product
                     ? shopSettingsTab.ShopProductsSettings
                     : shopSettingsTab.ShopCategoriesSettings;
 

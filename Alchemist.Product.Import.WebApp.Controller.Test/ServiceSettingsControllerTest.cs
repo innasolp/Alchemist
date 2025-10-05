@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using System.Reflection;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 

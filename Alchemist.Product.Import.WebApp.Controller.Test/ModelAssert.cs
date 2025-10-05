@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Models;
-
+using Alchemist.Product.Interfaces;
 using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
@@ -10,13 +10,13 @@ public static class ModelAssert
 {
     internal static void EqualFields(IShopImportSettingsModel expected, IShopImportSettingsModel result)
     {
-        Assert.Equal(expected.ShopSettingType, result.ShopSettingType);
+        Assert.Equal(expected.Type, result.Type);
         Assert.Equal(expected.Name, result.Name);
         Assert.Equal(expected.Perfomance, result.Perfomance);
 
-        if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product)
+        if (expected.Type == ShopSettingType.Product)
             EqualProductShopSettingsFields(expected as IProductShopSettingsModel, result as IProductShopSettingsModel);
-        else if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Category)
+        else if (expected.Type == ShopSettingType.Category)
             EqualCategoryShopSettingsFields(expected as ICategoryShopSettingsModel, result as ICategoryShopSettingsModel);
     }
 
@@ -40,9 +40,9 @@ public static class ModelAssert
     {
         Assert.NotEqual(expected.Name, result.Name);        
 
-        if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product)
+        if (expected.Type == ShopSettingType.Product)
             NotEqualProductShopSettingsFields(expected as IProductShopSettingsModel, result as IProductShopSettingsModel);
-        else if (expected.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Category)
+        else if (expected.Type == ShopSettingType.Category)
             NotEqualCategoryShopSettingsFields(expected as ICategoryShopSettingsModel, result as ICategoryShopSettingsModel);
     }
 

@@ -10,11 +10,11 @@ public class CategoriesSerializationTests
     [Fact]
     public async Task TestJsonDeserialization()
     {
-        var settings = await _categoriesJsonFileName.ReadFromJsonFileAsync<TestCategoryShopImportSettings[]>();
+        var settings = await _categoriesJsonFileName.ReadFromJsonFileAsync<Dictionary<string,TestCategoryShopImportSettings>>();
 
         Assert.NotNull(settings);
-        Assert.Equal(2, settings.Length);
-        Assert.NotEmpty(settings[0].Services);
-        Assert.NotEmpty(settings[1].Services);
+        Assert.Equal(2, settings.Count);
+        Assert.NotEmpty(settings["OzonCategories"].Services);
+        Assert.NotEmpty(settings["GoldAppleCategories"].Services);
     }
 }

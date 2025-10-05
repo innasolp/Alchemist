@@ -5,5 +5,5 @@ namespace Alchemist.Import.Factory.BrowserService;
 
 public interface ILoaderServiceFactory
 {
-    ILoaderService Create(IShopImportSettings shopImportSettings);
+    ILoaderService Create(string name, IShopImportSettings shopImportSettings);
 }

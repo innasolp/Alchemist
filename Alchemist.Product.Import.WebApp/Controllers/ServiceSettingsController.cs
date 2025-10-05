@@ -2,8 +2,8 @@
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Model.ShopSettings;
 using Microsoft.AspNetCore.Mvc;
-using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
 
 namespace Alchemist.Product.Import.WebApp.Controllers;
 
@@ -37,8 +37,11 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
         }
         else
         {
-            if (!_importFacade.TryGetServiceSettings(shopGuid, shopSettingsGuid, guid.Value, out serviceSettingsModel))            
-                serviceSettingsModel = _importFacade.CreateNewServiceSettings(shopSettings, serviceSettingsName);            
+            if (!_importFacade.TryGetServiceSettings(shopGuid, shopSettingsGuid, guid.Value, out serviceSettingsModel))
+            {
+                serviceSettingsModel = _importFacade.CreateNewServiceSettings(shopSettings);
+                serviceSettingsModel.Name = serviceSettingsName;
+            }
         }
 
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettingsModel);
@@ -147,7 +150,7 @@ public class ServiceSettingsController(IImportFacade importFacade) : Controller
             return NotFound(data.ShopSettingsGuid);
 
         IServiceSettingsModel? serviceSettingsModel;
-        if (data.IsPrimary())
+        if (data.Name.IsPrimaryServiceName())
         {
             if (!_importFacade.TryGetServiceSettings(data.ShopGuid, data.ShopSettingsGuid, data.Name, out serviceSettingsModel))
                 return NotFound(data.Name);

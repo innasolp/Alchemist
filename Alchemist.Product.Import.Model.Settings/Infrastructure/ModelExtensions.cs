@@ -5,10 +5,10 @@ namespace Alchemist.Product.Import.Model.Infrastructure;
 
 public static class ModelExtensions
 {
-   public static bool FieldsEquals(this IImportServiceSettings source, IImportServiceSettings target)
+   public static bool FieldsEquals(this IServiceSettingsModel source, IServiceSettingsModel target)
     {
-        return source.Name == target.Name
-           && ((string.IsNullOrEmpty(source.ServiceTypeName) && string.IsNullOrEmpty(target.ServiceTypeName))
+        return source.Name == target.Name &&
+           ((string.IsNullOrEmpty(source.ServiceTypeName) && string.IsNullOrEmpty(target.ServiceTypeName))
              || string.Equals(source.ServiceTypeName, target.ServiceTypeName, StringComparison.CurrentCultureIgnoreCase))
             && ((string.IsNullOrEmpty(source.AssemblyPath) && string.IsNullOrEmpty(target.AssemblyPath))
              || string.Equals(source.AssemblyPath, target.AssemblyPath, StringComparison.CurrentCultureIgnoreCase))

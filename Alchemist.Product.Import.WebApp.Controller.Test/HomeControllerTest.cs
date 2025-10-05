@@ -2,13 +2,13 @@
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Controllers;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Interfaces;
+using Alchemist.Product.Model.ShopSettings.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
 using System.Data;
 using System.Text.Json;
-using ShopSettingType = Alchemist.Import.Settings.Interfaces.ShopSettingType;
 
 namespace Alchemist.Product.Import.WebApp.Controller.Test;
 

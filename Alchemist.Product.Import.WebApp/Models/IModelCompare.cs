@@ -31,13 +31,13 @@ public partial class ShopSettingsModel : IModelCompare
 
         foreach(var primaryServiceName in SettingsCommon.GetPrimaryServiceNames())
         {
-            var currentService = this.GetService(primaryServiceName);
-            var otherService = shopSettings.GetService(primaryServiceName);
+            var currentService = this.GetService<IServiceSettingsModel>(primaryServiceName);
+            var otherService = shopSettings.GetService<IServiceSettingsModel>(primaryServiceName);
             if (!((currentService == null && otherService == null) || currentService?.FieldsEquals(otherService) == true))
                 return false;
         }
 
-        return Services.Where(s => !s.IsPrimary()).All(s => shopSettings.Services.Any(s1 => s1.FieldsEquals(s)));
+        return Services.Where(s => !s.Key.IsPrimaryServiceName()).All(s => shopSettings.Services.Any(s1 => s1.Value.FieldsEquals(s)));
     }
 }
 

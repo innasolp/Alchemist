@@ -1,5 +1,5 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Import.Model;
+using Alchemist.Product.Model.ShopSettings;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using Alchemist.Test.Server.Fixtures;

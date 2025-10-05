@@ -113,7 +113,7 @@ internal static class PageTestExtensions
         await pageTest.ExpectWithNullValueAsync(serviceForm.Locator("#ServiceProviderPath"), serviceSettings.ServiceProviderPath);
     }
 
-    public static async Task<ServiceSettingsModel> ExpectSetServiceSettingsAsync(this PageTest pageTest, IPage page, List<IShopSettings> shopSettings,  string serviceName, IShopImportSettings shopImportSettings)
+    public static async Task<ServiceSettingsModel> ExpectSetServiceSettingsAsync(this PageTest pageTest, IPage page, List<IShopSettings> shopSettings,  string serviceName, IShopSettings shopImportSettings)
     {
         var serviceForm = await pageTest.ExpectShowServiceModalFormAsync(page, async (page) => await pageTest.ExpectShowServiceSettingsButtonAsync(page, serviceName));
 

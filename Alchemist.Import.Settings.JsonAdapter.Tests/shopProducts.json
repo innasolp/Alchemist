@@ -1,34 +1,33 @@
-[
-  {
-    "Name": "Ozon",
+{
+  "Ozon": {
     "ShopName": "Ozon",
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
     "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fproduct%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
     "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2F{0}%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D{1}%26page%3D2",
     "Perfomance": true,
-    "Services": [
-      {
+    "Services": {
+      "ImportService": {
         "ServiceTypeName": "ImportService",
-          "AssemblyPath": "Import\\Products\\Ozon"        
+        "AssemblyPath": "Import\\Products\\Ozon"
       },
-      {
+      "BrowserDataLoader": {
         "ServiceTypeName": "BrowserDataLoader",
         "ImplementationTypeName": "Firefox.Standart",
         "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
       },
-      {
+      "BrowserLauncher": {
         "ServiceTypeName": "BrowserLauncher",
         "ImplementationTypeName": "Firefox.Standart",
         "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
       },
-      {
+      "WebLoader": {
         "ServiceTypeName": "WebLoader",
         "ImplementationTypeName": "Firefox",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
         "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
       },
-      {
+      "RequestHeaders": {
         "ServiceTypeName": "RequestHeaders",
         "Value": {
           "Headers": {
@@ -78,11 +77,10 @@
           "CookiePrefixLength": 0
         }
       }
-    ]
+    }
   },
 
-  {
-    "Name": "GoldApple",
+  "GoldApple": {
     "ShopName": "Goldapple",
     "Caption": "Золотое яблоко",
     "ShopUrl": "https://goldapple.ru",
@@ -90,16 +88,16 @@
     "CategoryUrlFormat": "https://goldapple.ru/front/api/catalog/products?categoryId={0}&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber={1}",
     "PageProductCount": 30,
     "Perfomance": true,
-    "Services": [
-      {
+    "Services": {
+      "ImportService": {
         "ServiceTypeName": "ImportService",
         "AssemblyPath": "Import\\Products\\GoldApple"
       },
-      {
+      "WebLoader": {
         "ServiceTypeName": "WebLoader",
         "ImplementationTypeName": "HttpClient",
         "AssemblyPath": "Libs\\webLoader\\HttpClient"
       }
-    ]
+    }
   }
-    ]
+}

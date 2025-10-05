@@ -2,6 +2,7 @@
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Interfaces;
 using NuGet.Packaging;
 using System.Reflection;
 using System.Text.Json;
@@ -21,7 +22,7 @@ internal static class ModelExtensions
 
     internal static IShopImportSettingsModel GetCopy(this IModelFactory modelFactory, IShopImportSettingsModel shopSettings)
     {
-        ShopSettingsModel newShopSettings = shopSettings.ShopSettingType == Alchemist.Import.Settings.Interfaces.ShopSettingType.Product
+        ShopSettingsModel newShopSettings = shopSettings.Type == ShopSettingType.Product
             ? new ProductShopSettingsModel(shopSettings.ShopId, shopSettings.Id, shopSettings.ShopGuid)
             : new CategoryShopSettingsModel(shopSettings.ShopId, shopSettings.Id, shopSettings.ShopGuid);
         modelFactory.Update(newShopSettings, shopSettings);

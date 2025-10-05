@@ -1,13 +1,14 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
+using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.Import.Model;
+namespace Alchemist.Product.Model.ShopSettings;
 
 public interface IImportFacade
 {
     bool TryGetShopImport(Guid guid, out ShopImportModel shopImport);
 
-    Task<List<ShopImportModel>> LoadShops(IEnumerable<Interfaces.IShop> shops);  
+    Task<List<ShopImportModel>> LoadShops(IEnumerable<IShop> shops);  
 
     bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out IShopImportSettingsModel shopSettings);
 
@@ -19,7 +20,7 @@ public interface IImportFacade
 
     bool TryGetServiceSettings(Guid shopGuid, Guid shopSettingsGuid, Guid guid, out IServiceSettingsModel serviceSettings);
 
-    ShopImportModel AddNewShop(Interfaces.IShop shop);
+    ShopImportModel AddNewShop(IShop shop);
 
     List<ShopImportModel> GetShops();    
 
@@ -31,5 +32,5 @@ public interface IImportFacade
 
     void AddNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel, string serviceName, out IServiceSettingsModel serviceSettingsModel );
 
-    IServiceSettingsModel CreateNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel, string serviceName);
+    IServiceSettingsModel CreateNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel);
 }

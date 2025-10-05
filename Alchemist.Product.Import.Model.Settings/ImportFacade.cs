@@ -1,6 +1,6 @@
-﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Import.Model.Infrastructure;
+﻿using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Interfaces;
+using Alchemist.Product.Model.ShopSettings;
 
 namespace Alchemist.Product.Import.Model;
 
@@ -15,7 +15,7 @@ public class ImportFacade(IModelFactory modelFactory) : IImportFacade
         return _shopImports.TryGetValue(guid, out shopImport) && shopImport != null;
     }    
 
-    public bool TryGetShopSettings(Guid shopGuid, Alchemist.Import.Settings.Interfaces.ShopSettingType shopSettingType, out IShopImportSettingsModel shopSettings)
+    public bool TryGetShopSettings(Guid shopGuid, ShopSettingType shopSettingType, out IShopImportSettingsModel shopSettings)
     {
         shopSettings = default;
 
@@ -74,7 +74,7 @@ public class ImportFacade(IModelFactory modelFactory) : IImportFacade
         if (!TryGetShopSettings(shopGuid, shopSettingsGuid, out var shopSettings))
             return false;
 
-        serviceSettings = shopSettings.Services.OfType<IServiceSettingsModel>().FirstOrDefault(s => s.Guid == guid);
+        serviceSettings = shopSettings.Services.OfType<KeyValuePair<string,IServiceSettingsModel>>().FirstOrDefault(s => s.Value.Guid == guid).Value;
         return serviceSettings != null;
     }    
 
@@ -153,19 +153,18 @@ public class ImportFacade(IModelFactory modelFactory) : IImportFacade
 
     public void AddNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel, string serviceName, out IServiceSettingsModel serviceModel)
     {
-       serviceModel = CreateNewServiceSettings(shopServicesSettingsModel, serviceName);
+       serviceModel = CreateNewServiceSettings(shopServicesSettingsModel);
 
-        shopServicesSettingsModel.Services.Add(serviceModel);
+        shopServicesSettingsModel.Services.Add(serviceName, serviceModel);
     }
 
-    public IServiceSettingsModel CreateNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel, string serviceName)
+    public IServiceSettingsModel CreateNewServiceSettings(IShopImportSettingsModel shopServicesSettingsModel)
     {
-        var service =  _modelFactory.CreateServiceSettingsModel(shopId: (shopServicesSettingsModel as ISettings).ShopId,
+        var service =  _modelFactory.CreateServiceSettingsModel(shopId: shopServicesSettingsModel.ShopId,
             id: 0,
             parentId: shopServicesSettingsModel.Id,
             shopGuid: shopServicesSettingsModel.ShopGuid,
             shopSettingsGuid: shopServicesSettingsModel.Guid);
-        service.Name = serviceName;
         return service;
     }
 }

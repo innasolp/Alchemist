@@ -1,8 +1,9 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
-using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Interfaces;
+using Alchemist.Product.Model.ShopSettings;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using ModelHelper = Alchemist.Product.Import.WebApp.Models.ModelHelper;
@@ -83,7 +84,7 @@ public class ShopSettingsController(ILogger<ShopSettingsController> logger,
             return BadRequest(json);
 
         if (!_importFacade.TryGetShopImport(shopGuid, out var shopImport)
-            || !_importFacade.TryGetShopSettings(shopGuid, shopSettingsFromJson.ShopSettingType, out var shopSettingsModel))
+            || !_importFacade.TryGetShopSettings(shopGuid, shopSettingsFromJson.Type, out var shopSettingsModel))
             return NotFound(shopGuid);        
 
         _modelFactory.Update(shopSettingsModel, shopSettingsFromJson);

@@ -6,5 +6,5 @@ namespace Alchemist.Import.Factory.Logging;
 
 public interface IImportServiceLogFactory
 {
-    ILogger<T> GetLogger<T>(ILogger<T> logger, IShopItem shopModel, IShopImportSettings shopImportSettings);
+    ILogger<T> GetLogger<T>(ILogger<T> logger, string name, IShopItem shopModel, IShopImportSettings shopImportSettings);
 }

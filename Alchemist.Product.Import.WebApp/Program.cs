@@ -3,6 +3,8 @@ using Alchemist.DependencyInjection.Common;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.Import.Model;
 using Alchemist.Product.Import.WebApp.Models;
+using Alchemist.Product.Interfaces;
+using Alchemist.Product.Model.ShopSettings;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using Message.SignalR.DependencyInjection;
@@ -11,8 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
 builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient), out IHttpClientBuilder settingsHttpClientBuilder);
-builder.Services.AddKeyedTypedSettingsDataAdapter<ProductShopSettingsModel,  ServiceSettingsModel>(Alchemist.Product.Interfaces.ShopSettingType.Product, Alchemist.Import.Settings.Interfaces.ShopSettingType.Product);
-builder.Services.AddKeyedTypedSettingsDataAdapter<CategoryShopSettingsModel, ServiceSettingsModel>(Alchemist.Product.Interfaces.ShopSettingType.Category, Alchemist.Import.Settings.Interfaces.ShopSettingType.Category);
+builder.Services.AddKeyedTypedSettingsDataAdapter<ProductShopSettingsModel,  ServiceSettingsModel>(ShopSettingType.Product, ShopSettingType.Product);
+builder.Services.AddKeyedTypedSettingsDataAdapter<CategoryShopSettingsModel, ServiceSettingsModel>(ShopSettingType.Category, ShopSettingType.Category);
 builder.Services.AddSingleton<IModelFactory, ModelFactory>();
 builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 

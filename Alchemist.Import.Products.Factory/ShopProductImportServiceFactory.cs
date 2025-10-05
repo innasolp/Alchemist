@@ -17,14 +17,16 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
 
 
     protected override IImportService Create(ILogger logger, 
+        string name,
         IShopItem shopModel, 
         IShopImportSettings shopImportSettings,
         ILoaderService browserService)
     {
-        return Create(logger, shopModel as IProductShopModel, shopImportSettings, _itemHandler, browserService);
+        return Create(logger, name, shopModel as IProductShopModel, shopImportSettings, _itemHandler, browserService);
     }
 
     protected abstract IImportService Create(ILogger logger,
+        string name,
         IProductShopModel shopModel,
         IShopImportSettings shopImportSettings,
         IProductItemHandler productItemHandler, 

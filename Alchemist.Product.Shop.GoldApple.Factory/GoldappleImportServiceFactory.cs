@@ -18,21 +18,23 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
     public override Type ServiceImplementationType => typeof(GoldAppleImportService);    
 
     protected override IImportService Create(ILogger logger,
+        string name,
         IProductShopModel shopModel,
         IShopImportSettings shopImportSettings, 
         IProductItemHandler itemHandler, 
         ILoaderService loaderService)
     {
         return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>, 
+            name,
             shopModel,           
             loaderService,             
             itemHandler);
     }
 
-    protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
     {
         if(logger is ILogger< GoldAppleImportService> serviceLogger)
-            return importServiceLogFactory?.GetLogger(serviceLogger, shopModel, shopImportSettings) ?? serviceLogger;
+            return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;
         else
             throw new InvalidDataException(logger.GetType().FullName);
     }

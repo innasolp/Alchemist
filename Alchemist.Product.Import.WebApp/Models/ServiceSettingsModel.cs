@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Alchemist.Product.Import.Model.Infrastructure;
 using Alchemist.Product.Import.Model;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.WebApp.Models;
 
@@ -12,7 +13,7 @@ namespace Alchemist.Product.Import.WebApp.Models;
 public partial class ServiceSettingsModel(int shopId, int id, int parentSettingsId, Guid shopSettingsGuid, Guid shopGuid) 
     : SettingsModelBase(shopId, shopGuid), IServiceSettingsModel
 { 
-    string? ISettings.Name { get => Name; set=> Name = value; }
+    string? IShopSettings.Name { get => Name; set=> Name = value; }
 
     public int Id { get; set; } = id;
 
@@ -64,7 +65,7 @@ public partial class ServiceSettingsModel(int shopId, int id, int parentSettings
     [JsonInclude]
     public int ParentSettingsId { get; set; } = parentSettingsId;
 
-    int? ISettings.ParentSettingsId { get => ParentSettingsId; set => ParentSettingsId = value ?? 0; }
+    int? IShopSettings.ParentSettingsId { get => ParentSettingsId; set => ParentSettingsId = value ?? 0; }
 
 
     [JsonInclude]
@@ -72,4 +73,12 @@ public partial class ServiceSettingsModel(int shopId, int id, int parentSettings
 
     string? IServiceSettings.Value { get => StringValue; set => StringValue = value; }
 
+    [JsonIgnore]
+    bool? IShopSettings.IsActual { get; set; }
+
+    [JsonIgnore]
+    string IShopSettings.JsonValue { get; set; }
+
+    [JsonIgnore]
+    ShopSettingType IShopSettings.Type { get; set; }
 }

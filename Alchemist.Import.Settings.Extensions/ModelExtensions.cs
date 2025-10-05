@@ -5,28 +5,16 @@ using System.Text.Json;
 namespace Alchemist.Import.Settings.Extensions;
 
 public static class ModelExtensions
-{  
-    public static T ConvertToImportServiceSettings<T>(this IShopSettings shopSettings)
-        where T : IImportServiceSettings
-    {
-        var serviceSettings = JsonSerializer.Deserialize<T>(shopSettings.JsonValue);
-        serviceSettings.Id = shopSettings.Id;
-        serviceSettings.ParentSettingsId = shopSettings.ParentSettingsId;
-        serviceSettings.Name = shopSettings.Name;
-        return serviceSettings;
-    }    
-
-    public static void Update(this IImportServiceSettings serviceSettings, IImportServiceSettings source)
+{
+    
+    public static void Update<TService>(this TService serviceSettings, TService source)
+        where TService : class, IServiceSettings
     {
         if (source == null) return;
-
-        if (source.Id != null && source.Id != 0) serviceSettings.Id = source.Id;
-        if (source.ParentSettingsId != null && source.ParentSettingsId != 0) serviceSettings.ParentSettingsId = source.ParentSettingsId;
-
+        
         serviceSettings.ServiceProviderPath = source.ServiceProviderPath;
         serviceSettings.AssemblyPath = source.AssemblyPath;
         serviceSettings.ServiceTypeName = source.ServiceTypeName;
-        serviceSettings.Name = source.Name;
         serviceSettings.ImplementationTypeName = source.ImplementationTypeName;
         serviceSettings.Value = source.Value;
     }
@@ -34,31 +22,29 @@ public static class ModelExtensions
     public static TShopImportSettings GetShopImportSettings<TShopImportSettings, TImportServiceSettings>(this IShopSettings shopSettings,
         IEnumerable<IShopSettings> services)
         where TShopImportSettings : IShopImportSettings
-        where TImportServiceSettings : IImportServiceSettings
+        where TImportServiceSettings : class, IServiceSettings
     {
         var shopImportSettings = JsonSerializer.Deserialize<TShopImportSettings>(shopSettings.JsonValue);
-
-        shopImportSettings.Id = shopSettings.Id;
-        shopImportSettings.ShopId = shopSettings.ShopId;
-
+                
         foreach (var service in services)
         {
-            var serviceSource = service.ConvertToImportServiceSettings<TImportServiceSettings>();
+            var serviceSource = service.ToImportServiceSettings<TImportServiceSettings>();
 
-            shopImportSettings.UpdateServiceSettings(serviceSource.Name, serviceSource);
+            shopImportSettings.UpdateServiceSettings(service.Name, serviceSource);
         }
 
         return shopImportSettings;
     }
 
-    public static void UpdateServiceSettings(this IShopImportSettings shopImportSettings, string serviceName, IImportServiceSettings serviceSource)       
+    public static void UpdateServiceSettings<TService>(this IShopImportSettings shopImportSettings, string serviceName, TService serviceSource)
+        where TService : class, IServiceSettings 
     {
-        var targetService = shopImportSettings.GetService(serviceName);
+        var targetService = shopImportSettings.GetService<TService>(serviceName);
 
         if (targetService != null)
             targetService.Update(serviceSource);
         else
-            shopImportSettings.Services.Add(serviceSource);
+            shopImportSettings.Services.Add(serviceName, serviceSource);
     }
 
 }
