@@ -5,30 +5,44 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.ShopWebApp.Controllers;
 
+public class ShopApiData
+{
+    public int? ShopId { get; set; } = null;
+
+    public string HRefFormat { get; set; }
+}
+
+public class ShopContentData
+{
+    public int? ShopId { get; set; } = null;
+
+    public string Content { get; set; }
+}
+
 [ApiController]
 [Route("[controller]")]
 public class ShopApiController(IShopDataService shopDataService) : Controller
 {
     private readonly ShopFacade _shopFacade = new(shopDataService);
-
-    [HttpGet("ShopList", Name = "ShopList")]
-    public async Task<IActionResult> ShopList(int? selectedShopId, string hrefFormat)
+    
+    [HttpPost("ShopList", Name = "ShopList")]
+    public async Task<IActionResult> ShopList(ShopApiData data)
     {
         var shops = await _shopFacade.GetShops();
-        var selectedShop = ModelHelper.GetSelectedShop(shops, selectedShopId);
-        var shopListModel = ModelHelper.GetShopItemModels(shops, selectedShop?.Id, hrefFormat);
+        var selectedShop = ModelHelper.GetSelectedShop(shops, data.ShopId);
+        var shopListModel = ModelHelper.GetShopItemModels(shops, selectedShop?.Id, data.HRefFormat);
         var content = await ViewHelper.GetViewHtml(HttpContext.RequestServices,
             ControllerContext,
             "~/Views/Shared/ShopList.cshtml",
             shopListModel);
-        return Ok(content);
+        return Ok(new ShopContentData { Content = content, ShopId = selectedShop?.Id });
     }
 
-    [HttpGet("ShopTab", Name = "ShopTab")]
-    public async Task<IActionResult> ShopTab(int? selectedShopId, string hrefFormat)
+    [HttpPost("ShopTab", Name = "ShopTab")]
+    public async Task<IActionResult> ShopTab(ShopApiData data)
     {
         var shops = await _shopFacade.GetShops();
-        var shopTabModel = ModelHelper.GetShopTabModel(shops, selectedShopId, hrefFormat);
+        var shopTabModel = ModelHelper.GetShopTabModel(shops, data.ShopId, data.HRefFormat);
         var content = await ViewHelper.GetViewHtml(HttpContext.RequestServices,
             ControllerContext,
             "~/Views/Shared/ShopTab.cshtml",

@@ -21,35 +21,37 @@ function getFormData(formSelector) {
     return object;
 }
 
-function fetchData(data, action, method = 'post', onSuccess = null, onError = null) {
-
+function fetchData(data,
+    action,
+    method = 'post',
+    contentType = 'application/x-www-form-urlencoded; charset=UTF-8',
+    onSuccess = null,
+    onError = null)
+{
     try {
 
         fetch(action, {
             method: method,
             body: data,
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'Content-Type': contentType,
             }
         })
             .then(response => {
 
-                var r = response.clone();
-
-                var jsonResult = r.json();
+                var r = response.clone();                
 
                 if (r.ok) {
                     if (onSuccess != null)
-                        onSuccess(jsonResult);
+                        onSuccess(r);
 
-                    console.log(jsonResult);
+                    console.log(r);
                 }
                 else {
                     if (onError != null)
-                        onError(jsonResult);
+                        onError(r);
                     console.error(r);
-                }
-                response.json();
+                }                
             });
     }
     catch (error) {

@@ -1,0 +1,25 @@
+﻿@model IndexModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@functions
+{
+    string GetShopSettingsTabData() => $"{Model.ShopImportSettingsTabModel.ShopId?.ToString() ?? "null"},{(int)Model.ShopImportSettingsTabModel.ShopSettingType}";
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+    <script> 
+        uploadShopSettingsTab(@GetShopSettingsTabData());
+    </script>
+    
+}
+
+ @await Html.PartialAsync("~/Views/Shared/ShopImportSettingsTab.cshtml", Model.ShopImportSettingsTabModel);
+

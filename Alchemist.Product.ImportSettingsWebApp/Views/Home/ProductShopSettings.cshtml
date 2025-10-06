@@ -1,0 +1,55 @@
+﻿@using System.Text.Json
+
+@model ProductShopImportSettingsModel
+
+<div class="form-group">
+    <label asp-for="ProductUrlFormat" class="control-label"></label>
+    <input asp-for="ProductUrlFormat" class="form-control form-input" value="@Model.ProductUrlFormat" />
+    <span asp-validation-for="ProductUrlFormat" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="CategoryUrlFormat" class="control-label"></label>
+    <input asp-for="CategoryUrlFormat" class="form-control form-input" value="@Model.CategoryUrlFormat" />
+    <span asp-validation-for="CategoryUrlFormat" class="text-danger"></span>
+</div>
+
+<div class="form-group-table">
+    <ul class="table-ul rootCategories">
+        <li class="table-ul header">
+            <div class="flex">
+                <div class="table_header">Item ID</div>
+                <div class="table_header">Url</div>
+                <div></div>
+            </div>
+        </li>
+        @foreach (var category in (Model.RootCategories ?? []))
+        {
+            <li class="table-ul rootcategory_li">
+                <div class="flex rootCategoryRow">
+                    <div class="table_cell item" >@category.Item</div>
+                    <div class="table_cell url">@category.Url</div>
+                    <div>
+                        <button type="button" class="editRootCategory" onclick="showRootCategory(@JsonSerializer.Serialize(category, new JsonSerializerOptions
+                                                                       {
+                                                                           PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                                                           WriteIndented = true
+                                                                       }))">
+                            <i class='fa fa-edit' style='font-size:18px'></i>
+                        </button>
+                    </div>                    
+                </div>
+            </li>
+        }
+        <li class="table-ul">
+            <div>
+                <a class="addRootCategory">Add category</a>
+            </div>         
+        </li>
+        <li class="table-ul">
+            <vc:show-modal modal-div-class="rootCategoryModal" 
+                           modal-body-div-class="categoryModalBody"
+                           modal-close-btn="rootCategoryCloseBtn"></vc:show-modal>            
+        </li>
+    </ul>
+</div>
+
