@@ -35,12 +35,9 @@ namespace Alchemist.Product.ImportSettingsWebApp.Controllers
         public async Task<IActionResult> ImportSettings(int? shopId, int shopSettingsType)
         {
             return View("~/Views/Home/Index.cshtml", new IndexModel
-                {
-                    ShopImportSettingsTabModel = new ShopImportSettingsTabModel
-                    {
+                {                    
                         ShopId = shopId,
-                        ShopSettingType = (ShopSettingType)shopSettingsType
-                    }
+                        ShopSettingType = (ShopSettingType)shopSettingsType                    
                 }
             );
         }

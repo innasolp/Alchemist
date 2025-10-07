@@ -1,6 +1,10 @@
-﻿namespace Alchemist.Product.ImportSettingsWebApp.Models;
+﻿using Alchemist.Product.Interfaces;
+
+namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
 public class IndexModel
-{
-    public ShopImportSettingsTabModel ShopImportSettingsTabModel { get; set; } = new ShopImportSettingsTabModel();
+{    
+    public int? ShopId { get; set; }
+
+    public ShopSettingType ShopSettingType { get; set; } = ShopSettingType.Product;
 }

@@ -4,11 +4,6 @@
 @{
 }
 
-@model ShopImportSettingsTabModel
+@model ShopImportSettingsModel
 
-<div class="flex">
-    <div id="shopListDiv">
-    </div>
-    <div id="importSettingsDiv">
-    </div>
-</div>
+@await Html.PartialAsync("~/Views/Shared/ImportSettings.cshtml", Model);

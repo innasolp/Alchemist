@@ -17,15 +17,15 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
 {
     private readonly SettingsDataAdapterContainer _settingsDataAdapter = new(productSettingsDataAdapter, categorySettingsDataAdapter);
 
-    [Route("/Import/Settings/")]
+    [Route("/Import/SettingsTab/")]
     [HttpPost]
-    public async Task<IActionResult> ImportSettingsAsync([FromBody]ShopSettingsData data)
+    public async Task<IActionResult> ImportSettingsTabAsync([FromBody]ShopSettingsData data)
     {
         var importSettings = data.ShopId != null
             ? await _settingsDataAdapter.GetShopImportSettingsAsync((int)data.ShopId, (ShopSettingType)data.ShopSettingsType)
                 ?? ModelHelper.GetShopImportSettingsModel((ShopSettingType)data.ShopSettingsType)
             : ModelHelper.GetShopImportSettingsModel((ShopSettingType)data.ShopSettingsType);
 
-        return PartialView("~/Views/Shared/ImportSettings.cshtml", importSettings);
+        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", importSettings);
     }
 }

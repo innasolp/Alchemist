@@ -3,9 +3,10 @@
 
 // Write your JavaScript code.
 
-function uploadShopSettingsTab(shopId, shopSettingsType) {
+function uploadShopList(shopId, shopSettingsType) {
 
-    var data = { hrefFormat: '/Import/Settings/{0}/' + shopSettingsType, shopId: shopId };
+    const hrefFormat = '/Import/Settings/{0}/' + shopSettingsType; 
+    var data = { hrefFormat: hrefFormat, shopId: shopId };
 
     postData(url = '/ShopApi/ShopList',
         data = JSON.stringify(data),
@@ -21,14 +22,4 @@ function uploadShopSettingsTab(shopId, shopSettingsType) {
         );
 }
 
-function uploadImportSettings(shopId, shopSettingsType) {
-    var data = { shopSettingsType: shopSettingsType, shopId: shopId };
-    postData(url = '/Import/Settings',
-        data = JSON.stringify(data),
-        onSuccess = (result) => {
-            $("#importSettingsDiv").html(result);
-        },
-        null,
-        contentType = 'application/json; charset=utf-8'
-    );
-}
+
