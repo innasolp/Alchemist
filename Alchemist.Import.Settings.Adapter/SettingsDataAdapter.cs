@@ -56,6 +56,7 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         target.Id = source.Id;
         target.ParentSettingsId = source.ParentSettingsId;
         target.Type = source.Type;
+        target.ShopId = source.ShopId;
     }
 
     public async Task Save(TShopImportSettings shopSettingsModel)

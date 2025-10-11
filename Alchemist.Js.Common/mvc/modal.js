@@ -90,9 +90,9 @@ class ModalForm {
             return;
         }
 
-        var data = getFormData($(modalForm.InputConfirmationSettings.Form));
+        var formData = new FormData($(modalForm.InputConfirmationSettings.Form)[0]);       
 
-        modalForm.InputConfirmationSettings.OnInputDataChanged(data, changed => {
+        modalForm.InputConfirmationSettings.OnInputDataChanged(formData, changed => {
             if (!changed) {
                 modalForm.closeModal(true);
                 return;
@@ -131,6 +131,18 @@ class ModalForm {
             $(this.ModalDiv).on("show.bs.modal", this.OnShow);
 
         showItemModal($(this.ModalDiv), $(this.ModalBodyDiv), url, data, () => { if (onHide != null) this.hide(onHide); })
+    }
+}
+
+function onLoadCallback(url, response, status, xhr, onSuccess) {
+    if (status == "error") {
+        console.error(xhr);
+        if (response)
+            console.trace(response);
+    }
+    else {
+        console.log('url ' + url + ' load');
+        onSuccess();
     }
 }
 

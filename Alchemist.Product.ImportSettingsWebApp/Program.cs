@@ -15,6 +15,14 @@ builder.Services.AddKeyedTypedSettingsDataAdapter<CategoryShopImportSettingsMode
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".ShopImportSettingsApp.Session";
+    options.IdleTimeout = TimeSpan.FromSeconds(1800);
+    options.Cookie.IsEssential = true;
+});
+
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -36,6 +44,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",

@@ -8,18 +8,29 @@ function uploadShopList(shopId, shopSettingsType) {
     const hrefFormat = '/Import/Settings/{0}/' + shopSettingsType; 
     var data = { hrefFormat: hrefFormat, shopId: shopId };
 
-    postData(url = '/ShopApi/ShopList',
+    postJsonData(url = '/ShopApi/ShopList',
         data = JSON.stringify(data),
         onSuccess = (result) => {
 
             $("#shopListDiv").html(result.content);
 
-            var selectedShopId = result.shopId;
-            uploadImportSettings(selectedShopId, shopSettingsType);
+            loadImportSettings(result.shopId, shopSettingsType);
         },
-         null,
-         contentType = 'application/json; charset=utf-8'         
-        );
+         null);
+}
+
+function enableSaveButton(saveButton) {
+    $(saveButton).prop('disabled', false);
+}
+
+async function saveSettings(settingsForm, url, onSuccess, onError, onValidateionError) {
+
+    validateForm($(settingsForm), () => {
+
+        var formData = new FormData($(settingsForm)[0]);
+        postFormData(url = url, formData = formData, onSuccess = onSuccess, onError = onError);
+
+    }, onValidateionError);
 }
 
 

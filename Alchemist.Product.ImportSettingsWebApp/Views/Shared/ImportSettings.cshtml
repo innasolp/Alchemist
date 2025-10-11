@@ -1,4 +1,5 @@
 ﻿@using System.Text.Json
+@using Alchemist.Product.ImportSettingsWebApp.Controllers
 @using Alchemist.Product.Interfaces
 @using Alchemist.Web.Components.FileUpload
 @*
@@ -8,22 +9,16 @@
 
 @functions {
 
-    public object GetServiceData() => JsonSerializer.Serialize(new { shopSettingsId = Model.Id });
-    public string GetServiceUploadOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '"  + serviceName + "', (data)=>{setValIfValid('#" + serviceName + "', data.serviceTypeName); " + UploadFromFile.OnSuccess + " })";
-    public string GetUploadServiceValueOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + serviceName + "', (data)=>{" + UploadFromFile.OnSuccess + " })";
-    public string GetUploadShopSettingsOnChange(string id) => "setShopSettingsFromJson($('#loadSettingsFromJsonForm'), '" + id + "', '" + (int)Model.ShopSettingType + ")";
+    public object GetServiceData(Guid guid) => JsonSerializer.Serialize(new ServiceSettingsData { ShopSettingsType = (int)Model.ShopSettingType, ShopId = Model.ShopId, Guid = guid });
+    public string GetServiceUploadOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '"  + serviceName + "', (data)=>{setValIfValid('#" + serviceName + "', data.serviceTypeName); })";
+    public string GetUploadServiceValueOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + serviceName + "')";
+    string GetSaveAction() => $"/Import/Settings/{(Model.ShopSettingType == ShopSettingType.Product ? "Product" : "Category")}/Save";
 }
 
 <div class="row">
     <div class="col-md-8">
         <vc:show-modal modal-div-class="serviceSettingsModal" modal-body-div-class="serviceSettingsModalBody" modal-close-btn="serviceSettingsCloseBtn"></vc:show-modal>
-        <form id="loadSettingsFromJsonForm">
-            <div class="form-group">
-                <vc:upload-from-file on-change="@GetUploadShopSettingsOnChange("loadShopSettingsFromJson")"
-                id="loadShopSettingsFromJson"
-                file-name="@Model.FileName"></vc:upload-from-file>               
-            </div>
-        </form>
+        
         <form id="settingsForm">            
             <input type="hidden" name="ShopId" value="@Model.ShopId" />            
             <input type="hidden" name="Id" value="@Model.Id" />
@@ -40,66 +35,24 @@
                 @if (Model.ShopSettingType == ShopSettingType.Product)
                 @await Html.PartialAsync($"~/Views/Home/ProductShopSettings.cshtml", Model)
                                 else if (Model.ShopSettingType == ShopSettingType.Category)
-                            @await Html.PartialAsync($"~/Views/Home/CategoryShopSettings.cshtml", Model)
+                        @await Html.PartialAsync($"~/Views/Home/CategoryShopSettings.cshtml", Model)
                 
-
-                        </div>
+                    </div>
 
                         <div class="form-group">
                             <label asp-for="ImportService" class="control-label"></label>
-                            <div class="flex">
-                                <div>
-                                    <input class="form-control form-input" id="ImportService" readonly="readonly" value="@Model.ImportService?.ServiceTypeName" />
-                                    <span asp-validation-for="ImportService" class="text-danger"></span>
-                                </div>
-                                <div class="flex control-group">
-                                    <div>
-                                        <button onclick="showServiceSettingsModal('/ServiceSettings/ImportService', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('importServiceJson'); }  )"
-                                                class="btn btn-primary btn-sm form-button">
-                                            Set
-                                        </button>
-                                    </div>
-                                    <vc:upload-from-file id="importServiceJson"
-                                                         on-change="@GetServiceUploadOnChange("ImportService")"
-                                                        file-name="@Model.ImportService?.FileName"></vc:upload-from-file>                                    
-                                </div>
-                            </div>
+                            @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml", 
+                                new PrimaryServiceModel(Model){ ServiceSettings =  Model.ImportService, Name="ImportService", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType })                           
                         </div>
                         <div class="form-group">
-                            <label asp-for="BrowserDataLoader" class="control-label"></label>
-                            <div class="flex">
-                                <div>
-                                    <input class="form-control form-input" id="BrowserDataLoader" readonly="readonly" value="@Model.BrowserDataLoader?.ServiceTypeName" />
-                                    <span asp-validation-for="BrowserDataLoader" class="text-danger"></span>
-                                </div>
-                                <div class="flex control-group">
-                                    <button onclick="showServiceSettingsModal('/ServiceSettings/BrowserDataLoader', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('browserDataLoaderJson'); }  )"
-                                            class="btn btn-primary btn-sm form-button">
-                                        Set
-                                    </button>
-                                    <vc:upload-from-file id="browserDataLoaderJson"
-                                                         on-change="@GetServiceUploadOnChange("BrowserDataLoader")"
-                                                         file-name="@Model.BrowserDataLoader?.FileName"></vc:upload-from-file>                                    
-                                </div>
-                            </div>
+                            <label asp-for="BrowserDataLoader" class="control-label"></label>                           
+                             @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml",
+                                new PrimaryServiceModel(Model) { ServiceSettings = Model.BrowserDataLoader, Name = "BrowserDataLoader", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType })                             
                         </div>
                         <div class="form-group">
-                            <label asp-for="BrowserLauncher" class="control-label"></label>
-                            <div class="flex">
-                                <div>
-                                    <input class="form-control form-input" id="BrowserLauncher" readonly="readonly" value="@Model.BrowserLauncher?.ServiceTypeName" />
-                                    <span asp-validation-for="BrowserLauncher" class="text-danger"></span>
-                                </div>
-                                <div class="flex control-group">
-                                    <button onclick="showServiceSettingsModal('/ServiceSettings/BrowserLauncher', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('browserLauncherJson'); }  )"
-                                            class="btn btn-primary btn-sm form-button">
-                                        Set
-                                    </button>
-                                    <vc:upload-from-file id="browserLauncherJson"
-                                                         on-change="@GetServiceUploadOnChange("BrowserLauncher")"
-                                                         file-name="@Model.BrowserLauncher?.FileName"></vc:upload-from-file>
-                                </div>
-                            </div>
+                            <label asp-for="BrowserLauncher" class="control-label"></label>                           
+                            @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml",
+                                new PrimaryServiceModel(Model) { ServiceSettings = Model.BrowserLauncher, Name = "BrowserLauncher", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType })                            
                         </div>
                         <div class="form-group">
                             <label asp-for="RequestHeaders" class="control-label"></label>
@@ -109,22 +62,9 @@
                                                  file-name="@Model.RequestHeaders?.FileName"></vc:upload-from-file>
                         </div>
                         <div class="form-group">
-                            <label asp-for="WebLoader" class="control-label"></label>
-                            <div class="flex">
-                                <div>
-                                    <input class="form-control form-input" id="WebLoader" readonly="readonly" value="@Model.WebLoader?.ServiceTypeName" />
-                                    <span asp-validation-for="WebLoader" class="text-danger"></span>
-                                </div>
-                                <div class="flex  control-group">
-                                    <button onclick="showServiceSettingsModal('/ServiceSettings/WebLoader', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('webLoaderJson'); } )"
-                                            class="btn btn-primary btn-sm form-button">
-                                        Set
-                                    </button>
-                                    <vc:upload-from-file id="webLoaderJson"
-                                                         on-change="@GetServiceUploadOnChange("WebLoader")"
-                                                         file-name="@Model.WebLoader?.FileName"></vc:upload-from-file>
-                                </div>
-                            </div>
+                            <label asp-for="WebLoader" class="control-label"></label>                            
+                            @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml",
+                                new PrimaryServiceModel(Model) { ServiceSettings = Model.WebLoader, Name = "WebLoader", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType })
                         </div>
                         <div class="form-group-table">
                             @if (Model.ShopSettingType == ShopSettingType.Category)
@@ -133,8 +73,8 @@
                             }
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary form-button"
-                        onclick="this.disabled=true;saveShopSettings($('#settingsForm'),'@Model.ShopSettingType.ToString()', this);">
+                <button type="button" class="btn btn-primary form-button" id="saveImportSettingsBtn"
+                        onclick="this.disabled=true;saveImportSettings('@GetSaveAction()');">
                     Save
                 </button>
             </div>

@@ -1,9 +1,24 @@
-﻿@*
+﻿@using Alchemist.Product.Interfaces
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
-@{
+@functions{
+    string GetShopSettingsContentAction() => Model.ShopSettingType == ShopSettingType.Product ? "/Import/Settings/Product/" : "/Import/Settings/Category/";
+    public string GetUploadShopSettingsOnChange(string id) => "uploadImportSettingsFromJson($('#loadSettingsFromJsonForm'), '" + id + "', '" + GetShopSettingsContentAction() + "')";
 }
 
 @model ShopImportSettingsModel
 
-@await Html.PartialAsync("~/Views/Shared/ImportSettings.cshtml", Model)
+<div id="importSettingsUploadDiv">
+    <form id="loadSettingsFromJsonForm">
+        <div class="form-group">
+            <vc:upload-from-file on-change="@GetUploadShopSettingsOnChange("loadShopSettingsFromJson")"
+                                 id="loadShopSettingsFromJson"
+                                 file-name="@Model.FileName"></vc:upload-from-file>
+        </div>
+    </form>
+</div>
+<div id="importSettingsDiv">
+    @await Html.PartialAsync("~/Views/Shared/ImportSettings.cshtml", Model)
+</div>
+

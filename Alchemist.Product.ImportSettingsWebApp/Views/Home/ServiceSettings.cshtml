@@ -1,5 +1,85 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@using Alchemist.Import.Settings.Extensions
+@using Alchemist.Web.Components.FileUpload
+@model ServiceSettingsModel
+
+@functions
+{
+    string ServiceSetResult()
+    {
+        if(Model.Name.IsPrimaryServiceName())
+        {
+            return $"(data)=>{{ $('#{Model.Name}').val(data); }}";
+        }
+        return "";
+    } 
 }
+
+<h4>Service settings</h4>
+<hr />
+<form id="serviceSettingsForm">
+    <input type="hidden" name="Guid" value="@Model.Guid" />
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ParentSettingsId" value="@Model.ParentSettingsId" />
+    @if (Model.IsPrimary())
+    {
+        <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
+    }
+    <div class="row">
+        <div class="col-md-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
+            <div class="form-group"> 
+                @if (Model.IsPrimary())
+                {
+                    <input type="hidden" asp-for="Value" id="Value" />
+                }
+                <vc:upload-from-file id="uploadValueFromJson"
+                                     on-change="uploadServiceSettingsValueFromJson('uploadValueFromJson',(data)=>{ $('#Value').val(data);})"
+                                     file-name="@Model.FileName"></vc:upload-from-file>                
+            </div>
+            @if(!Model.IsPrimary())
+            {
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control form-input" id="ServiceName" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            }
+            <div class="form-group">
+                <label asp-for="ServiceTypeName" class="control-label"></label>
+                <input asp-for="ServiceTypeName" class="form-control form-input" />
+                <span asp-validation-for="ServiceTypeName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ImplementationTypeName" class="control-label"></label>
+                <input asp-for="ImplementationTypeName" class="form-control form-input" />
+                <span asp-validation-for="ImplementationTypeName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AssemblyPath" class="control-label"></label>
+                <input asp-for="AssemblyPath" id="AssemblyPath" class="form-control form-input"/>
+                <span asp-validation-for="AssemblyPath" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ServiceProviderPath" class="control-label"></label>
+                <input asp-for="ServiceProviderPath" class="form-control form-input" />
+                <span asp-validation-for="ServiceProviderPath" class="text-danger"></span>                
+            </div>
+            @if(!Model.IsPrimary())
+            {
+                <div class="form-group">
+                    <label asp-for="Value" class="control-label"></label>
+                    <textarea asp-for="Value" class="form-control form-input" id="StringValue"></textarea>
+                    <span asp-validation-for="Value" class="text-danger"></span>
+                </div>
+            }
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary"
+                        onclick="saveServiceSettings($('#serviceSettingsForm'), @ServiceSetResult())">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+

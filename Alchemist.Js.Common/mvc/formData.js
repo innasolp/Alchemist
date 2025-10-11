@@ -60,12 +60,14 @@ function fetchData(data,
     }
 }
 
-function postData(url, data = null, onSuccess = null, onError = null, contentType = "application/x-www-form-urlencoded; charset=UTF-8", processData = false) {
+function postData(url, data = null, onSuccess = null, onError = null,
+    contentType = "application/x-www-form-urlencoded; charset=UTF-8",
+    processData = false) {
     $.ajax({
         method: 'POST',
         url: url,
         data: data,
-        contentType: contentType,
+        contentType: contentType,        
         processData: processData,
         success: function (result) {
             console.log(`post ${url} successed`);
@@ -82,7 +84,11 @@ function postData(url, data = null, onSuccess = null, onError = null, contentTyp
 }
 
 function postFormData(url, formData, onSuccess = null, onError = null) {
-    postData(url, formData, onSuccess, onError, false, false);
+    postData(url, formData, onSuccess, onError, false);
+}
+
+function postJsonData(url, jsonData, onSuccess = null, onError = null) {
+    postData(url, jsonData, onSuccess, onError, 'application/json; charset=utf-8');
 }
 
 function save(formSelector, url, data, onValidationError = null, onSuccess = null, onError = null) {
