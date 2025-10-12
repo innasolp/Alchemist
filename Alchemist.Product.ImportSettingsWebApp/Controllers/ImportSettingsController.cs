@@ -6,13 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
-public class ShopSettingsData
-{
-    public int? ShopId { get; set; }
-
-    public int ShopSettingsType { get; set; }
-}
-
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
     [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) : Controller
 {
@@ -56,14 +50,11 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
     }
 
 
-    [Route("/Import/SettingsTab/")]
+    [Route("/Import/Settings/Tab/")]
     [HttpPost]
     public async Task<IActionResult> ImportSettingsTabAsync([FromBody] ShopSettingsData data)
     {
-        var importSettings = data.ShopId != null
-            ? await _settingsDataAdapter.GetShopImportSettingsAsync((int)data.ShopId, (ShopSettingType)data.ShopSettingsType)
-                ?? ModelHelper.GetShopImportSettingsModel((ShopSettingType)data.ShopSettingsType)
-            : ModelHelper.GetShopImportSettingsModel((ShopSettingType)data.ShopSettingsType);
+        var importSettings = await _settingsDataAdapter.GetShopImportSettingsModel(data.ShopId, (ShopSettingType)data.ShopSettingsType);
 
         HttpContext.Session.SetImportSettingtoSession(importSettings);
 

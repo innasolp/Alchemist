@@ -18,6 +18,7 @@ public class ServiceSettingsData
     public Guid? Guid { get; set; } = System.Guid.NewGuid();
 }
 
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ServiceSettingsController(
     [FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
     [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) : Controller
@@ -51,7 +52,7 @@ public class ServiceSettingsController(
             shopImportSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(shopId, shopSettingType);
             if (shopImportSettings == null)
             {
-                shopImportSettings = ModelHelper.GetShopImportSettingsModel(shopSettingType);
+                shopImportSettings = ModelHelper.CreateShopImportSettingsModel(shopSettingType);
                 shopImportSettings.ShopId = shopId;
             }
 

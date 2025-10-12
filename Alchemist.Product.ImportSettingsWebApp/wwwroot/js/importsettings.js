@@ -1,6 +1,6 @@
 ﻿function loadImportSettings(shopId, shopSettingsType) {
     var data = { shopSettingsType: shopSettingsType, shopId: shopId };
-    postJsonData(url = '/Import/SettingsTab',
+    postJsonData(url = '/Import/Settings/Tab',
         data = JSON.stringify(data),
         onSuccess = (result) => {
             $("#importSettingsTabDiv").html(result);

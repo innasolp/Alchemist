@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ValidationController : Controller
 {
     [AcceptVerbs("GET", "POST")]
