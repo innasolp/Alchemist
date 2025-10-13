@@ -15,9 +15,8 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
     private async Task SaveShopImportSettingsAsync<T>(T data, Action<T, T> updateFields)
         where T : ShopImportSettingsModel
     {
-        if (await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType)
-            is not T existingShopSettings)
-            throw new InvalidOperationException();
+        var existing = await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType);
+        var existingShopSettings = existing as T;
 
         var sessionShopSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync() as T;
 
@@ -34,18 +33,17 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         }
         else
         {
+            var toSave = sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId
+                ? sessionShopSettings
+                : data;
+
+            toSave.UpdateFields(data);
+            updateFields((T)toSave, data);
+
             if (sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId)
-            {
-                sessionShopSettings.UpdateFields(data);
+                toSave.UpdateServices(sessionShopSettings.Services);
 
-                updateFields(sessionShopSettings, data);
-
-                sessionShopSettings.UpdateServices(sessionShopSettings.Services);
-
-                await _settingsDataAdapter.SaveAsync(sessionShopSettings);
-            }
-            else
-                await _settingsDataAdapter.SaveAsync(data);
+            await _settingsDataAdapter.SaveAsync(toSave);
         }
     }
 

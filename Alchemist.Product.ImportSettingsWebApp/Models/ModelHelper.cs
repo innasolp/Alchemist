@@ -18,7 +18,7 @@ internal static class ModelHelper
     {
         return shopId != null
             ? await settingsDataAdapter.GetShopImportSettingsAsync((int)shopId, shopSettingsType)
-                ?? ModelHelper.CreateShopImportSettingsModel(shopSettingsType)
-            : ModelHelper.CreateShopImportSettingsModel(shopSettingsType);
+                ?? CreateShopImportSettingsModel(shopSettingsType)
+            : CreateShopImportSettingsModel(shopSettingsType);
     }
 }

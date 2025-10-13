@@ -139,4 +139,12 @@ internal static class ModelExtensions
     { 
         target.CategorySourceUrl = source.CategorySourceUrl;
     }
+
+    internal static bool IsEmpty(this ServiceSettingsModel serviceSettings)
+    {
+        return string.IsNullOrEmpty(serviceSettings.ServiceTypeName)
+               && string.IsNullOrEmpty(serviceSettings.AssemblyPath)
+               && string.IsNullOrEmpty(serviceSettings.ServiceProviderPath)
+               && string.IsNullOrEmpty(serviceSettings.ImplementationTypeName);
+    }
 }

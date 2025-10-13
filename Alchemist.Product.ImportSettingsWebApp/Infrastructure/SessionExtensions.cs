@@ -4,9 +4,9 @@ using System.Text.Json;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 
-internal static class SessionExtensions
+public static class SessionExtensions
 {
-    internal static void SetImportSettingtoSession(this ISession session, ShopImportSettingsModel shopImportSettings)
+    public static void SetImportSettingtoSession(this ISession session, ShopImportSettingsModel shopImportSettings)
     {
         session.SetInt32(SessionKeys.ShopSettingsTypeKey, (int)shopImportSettings.ShopSettingType);
 
@@ -15,10 +15,11 @@ internal static class SessionExtensions
         session.Set(SessionKeys.ShopImportSettingsKey, bytes);
     }
 
-    internal static async Task<ShopImportSettingsModel?> GetShopImportSettingsFromSessionAsync(this ISession session)
+    public static async Task<ShopImportSettingsModel?> GetShopImportSettingsFromSessionAsync(this ISession session)
     {
-        var shopSettingType = session.GetInt32(SessionKeys.ShopSettingsTypeKey) ??
-            throw new InvalidOperationException("Session does not contains shopsettingstype.");
+        var shopSettingType = session.GetInt32(SessionKeys.ShopSettingsTypeKey);
+
+        if(shopSettingType == null) return null;
 
         if (session.TryGetValue(SessionKeys.ShopImportSettingsKey, out var bytes))
         {

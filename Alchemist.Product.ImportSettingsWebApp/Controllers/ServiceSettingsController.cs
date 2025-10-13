@@ -151,7 +151,7 @@ public class ServiceSettingsController(
 
         var shopImportSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
         if (shopImportSettings == null)
-            return Ok();
+            return Ok(!data.IsEmpty());
 
         var existingService = shopImportSettings.GetService<ServiceSettingsModel>(data.Name) ??
             shopImportSettings.GetService(data.Guid);
