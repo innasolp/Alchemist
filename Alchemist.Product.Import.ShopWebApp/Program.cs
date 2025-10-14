@@ -77,7 +77,7 @@ app.UseAuthorization();
 app.UseSession();
 
 if (isApi)
-    app.SetApiRoute();
+    app.SetApiRoute("Hello ShopWebApp API!");
 else
     app.MapControllerRoute(
         name: "default",

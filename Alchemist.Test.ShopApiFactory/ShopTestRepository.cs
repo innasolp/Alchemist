@@ -1,10 +1,12 @@
 ﻿using Shop = Alchemist.Product.Entities.Shop;
 
-namespace Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
+namespace Alchemist.Test.ShopApiFactory;
 
-internal class TestRepository
+public static class ShopTestRepository
 {
-    public static List<Shop> GetShopsTestData(int count)
+    private static readonly List<Shop> _shops = [];
+
+    public static List<Shop> CreateShopsTestData(int count)
     {
         var shops = new List<Shop>();
         for (int i = 0; i < count; i++)

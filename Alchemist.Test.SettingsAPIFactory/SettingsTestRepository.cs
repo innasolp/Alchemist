@@ -3,27 +3,13 @@ using Alchemist.Product.Interfaces;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-
 using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
-using Shop = Alchemist.Product.Entities.Shop;
 using ShopSettings = Alchemist.Product.Entities.ShopSettings;
 
-namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
+namespace Alchemist.Test.SettingsAPIFactory;
 
-internal class TestRepository
+public static class SettingsTestRepository
 {
-    public static List<Shop> GetShopsTestData(int count)
-    {
-        var shops = new List<Shop>();
-        for (int i = 0; i < count; i++)
-        {
-            var shop = new Shop { Name = $"TestShop{i + 1}", Url = $"https://testshop{i + 1}" };
-            shops.Add(shop);
-        }
-
-        return shops;
-    }
-
     public static IShopSettings CreateProductShopSettings(int shopId)
     {
         var productShopImportSettings = new

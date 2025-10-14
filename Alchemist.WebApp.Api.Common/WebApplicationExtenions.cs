@@ -16,13 +16,13 @@ public static class WebApplicationExtenions
         });
     }
 
-    public static void SetApiRoute<TAppBuilder>(this TAppBuilder app)
+    public static void SetApiRoute<TAppBuilder>(this TAppBuilder app, string helloText)
         where TAppBuilder : IApplicationBuilder, IEndpointRouteBuilder
     {
         app.UseHsts();
 
         app.MapControllers();
 
-        app.MapGet("/", () => "Hello ImportSettingsWebApp API!");
+        app.MapGet("/", () => helloText);
     }
 }

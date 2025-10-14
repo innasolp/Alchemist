@@ -20,7 +20,7 @@ internal class SettingsDataAdapterContainer(ISettingsDataAdapter productSettings
                 return await _categorySettingsDataAdapter.GetShopImportSettings(shopId) as ShopImportSettingsModel;
 
             default:
-                return null;
+                throw new InvalidOperationException($"Invalid shopSettingType {shopSettingType}");
         }
     }
 

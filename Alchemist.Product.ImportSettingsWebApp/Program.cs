@@ -20,9 +20,8 @@ builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(b
 builder.Services.AddKeyedTypedSettingsDataAdapter<ProductShopImportSettingsModel, ServiceSettingsModel>(ShopSettingType.Product, ShopSettingType.Product);
 builder.Services.AddKeyedTypedSettingsDataAdapter<CategoryShopImportSettingsModel, ServiceSettingsModel>(ShopSettingType.Category, ShopSettingType.Category);
 
-
-builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+if(!isApi)
+    builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 builder.Services.AddSession(options =>
 {
@@ -44,7 +43,8 @@ AddLogging(builder, isApi);
 
 var app = builder.Build();
 
-app.MapReverseProxy();
+if (!isApi)
+    app.MapReverseProxy();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -69,7 +69,7 @@ app.UseAuthorization();
 app.UseSession();
 
 if (isApi)
-    app.SetApiRoute();
+    app.SetApiRoute("Hello ImportSettingsWebApp API!");
 else
     app.MapControllerRoute(
     name: "default",

@@ -9,23 +9,23 @@ using Microsoft.AspNetCore.TestHost;
 using Alchemist.Test.DBApiWebAppFactory;
 using Alchemist.Test.Log;
 
-namespace Alchemist.Product.ShopWebApp.Test.Infrastructure;
+namespace Alchemist.Test.ShopApiFactory;
 
-public class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort) 
-    : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, httpPort, httpsPort)
+public class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort, bool ensureDeleted = true) 
+    : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
 {
     private readonly TestServer _signalRServer = signalRServer;
 
     private readonly string _connectionString = connectionString;
 
-    public ShopAPIWebAppFactory(string connectionString, TestServer signalRServer)
-        : this(connectionString, signalRServer, 8050, 8051) { }
+    public ShopAPIWebAppFactory(string connectionString, TestServer signalRServer, bool ensureDeleted = true)
+        : this(connectionString, signalRServer, 8050, 8051, ensureDeleted) { }
 
     public FixtureLoggerFactoryContext FixtureLoggingContext   { get; } = new FixtureLoggerFactoryContext();
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        var shops = TestRepository.GetShopsTestData(4);
+        var shops = ShopTestRepository.CreateShopsTestData(4);
         shops.ForEach(s => dbContext.Shops.Add(s.To<Shop>()));
         dbContext.SaveChanges();
     }

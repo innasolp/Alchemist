@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
+    <ProjectReference Include="..\Alchemist.Settings.RestAPI\Alchemist.Settings.RestAPI.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.DBApiWebAppFactory\Alchemist.Test.DBApiWebAppFactory.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.SignalRWebAppFactory\Alchemist.Test.SignalRWebAppFactory.csproj" />
+  </ItemGroup>
+
+</Project>

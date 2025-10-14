@@ -1,7 +1,8 @@
-﻿using Alchemist.Product.ShopWebApp.Controllers;
+﻿using Alchemist.Product.Interfaces;
+using Alchemist.Product.ShopWebApp.Controllers;
+using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
-using Alchemist.Test.ShopWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,15 +10,15 @@ using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 
-namespace Alchemist.Product.ShopWebApp.IntegratonTest;
+namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest;
 
-public class ShopWebAppApiLoggedFactory : ShopWebAppFullFactory, ILoggedContext
+public class ImportSettingsWebAppApiLoggedFactory : ImportsettingsWebAppFullFactory, ILoggedContext
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
-    public ShopWebAppApiLoggedFactory() : base(true, "ShopWebApiLogTestDb", 8406, 8407, 8064, 8065)
+    public ImportSettingsWebAppApiLoggedFactory() : base(true, null, 7086, 7087, "SettingsWebApiLogTestDb", 8214, 8215)
     {
     }
 
@@ -29,16 +30,16 @@ public class ShopWebAppApiLoggedFactory : ShopWebAppFullFactory, ILoggedContext
     }
 }
 
-public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFactory, ITestOutputHelper outputHelper) 
-    : LoggedContextTestFixture<ShopWebAppApiLoggedFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
+public class ImportSettingsWebAppApiHttpInterceptionTest(ImportSettingsWebAppApiLoggedFactory webAppFactory, ITestOutputHelper outputHelper) 
+    : LoggedContextTestFixture<ImportSettingsWebAppApiLoggedFactory, ImportSettingsWebAppProgramm>(webAppFactory, outputHelper)
 {
     [Fact]
     public async Task InfoMiddlewareLogSuccessAsync()
     {
         var httpClient = WebAppFactory.CreateClient();
 
-        var data = new ShopApiData { HRefFormat = "/Shop/{0}" };
-        var url = $"/ShopApi/ShopList";
+        var data = new { ShopId = 1, ShopSettingsType = 1 };
+        var url = "/Tab";
         var response = await httpClient.PostAsync(url, JsonContent.Create(data));
 
         try
@@ -61,8 +62,8 @@ public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFac
     {
         var httpClient = WebAppFactory.CreateClient();
 
-        var data = new ShopApiData { HRefFormat = "/Shop/{0}" , ShopId = new Random().Next(100, 1000) };
-        var url = $"/ShopApi/ShopList";
+        var data = new { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Service };
+        var url = "/Tab";
         var response = await httpClient.PostAsync(url, JsonContent.Create(data));
 
         try
@@ -70,7 +71,8 @@ public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFac
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
             Assert.Contains(LogMessages, 
-                (msg) => msg.LogLevel == LogLevel.Error && msg.Exception?.Message.Contains("not found") == true);
+                (msg) => msg.LogLevel == LogLevel.Error && 
+                        msg.Exception?.Message.Contains("Invalid shopSettingType", StringComparison.InvariantCultureIgnoreCase) == true);
         }
         catch
         {
