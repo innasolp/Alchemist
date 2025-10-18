@@ -18,8 +18,9 @@
 <hr />
 <form id="serviceSettingsForm">
     <input type="hidden" name="Guid" value="@Model.Guid" />
-    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ShopId" value="@Model.ShopId" />
     <input type="hidden" name="ParentSettingsId" value="@Model.ParentSettingsId" />
+    <input type="hidden" name="ParentShopSettingsType" value="@Model.ParentShopSettingsType" />
     @if (Model.IsPrimary())
     {
         <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
@@ -73,8 +74,8 @@
                 </div>
             }
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary"
-                        onclick="saveServiceSettings($('#serviceSettingsForm'), @ServiceSetResult())">
+                <button type="button" class="btn btn-primary" id="saveServiceSettingsBtn"
+                        onclick="this.disabled=true;saveServiceSettings($('#serviceSettingsForm'), @ServiceSetResult())">
                     Save
                 </button>
             </div>

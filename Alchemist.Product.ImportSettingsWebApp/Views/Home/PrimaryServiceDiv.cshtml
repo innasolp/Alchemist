@@ -13,19 +13,20 @@
 
 <div class="flex">
     <div>
-        <input class="form-control form-input" readonly="readonly" value="@Model.ServiceSettings?.ServiceTypeName"
+        <input class="form-control form-input @Model.ClassName" readonly="readonly" value="@Model.ServiceSettings?.ServiceTypeName"
                asp-for-model="@Model.Parent" model-property="@Model.Name" />
         <span asp-validation-for-model="@Model.Parent" model-property="@Model.Name" class="text-danger"></span>
     </div>
     <div class="flex control-group">
         <div>
             <button onclick="showServiceSettingsModal('/Import/Settings/@Model.Name', @GetServiceData(), (result)=>{ if(result) clearFileNameFromUploadControl('@(Model.Name)Json'); }  )"
-                    class="btn btn-primary btn-sm form-button">
+                    class="btn btn-primary btn-sm form-button btn-set @Model.ClassName">
                 Set
             </button>
         </div>
         <vc:upload-from-file id="@(Model.Name)Json"
                              on-change="@GetServiceUploadOnChange()"
-                             file-name="@Model.ServiceSettings?.FileName"></vc:upload-from-file>
+                             file-name="@Model.ServiceSettings?.FileName"
+                             class-name="@Model.ClassName"></vc:upload-from-file>
     </div>
 </div>

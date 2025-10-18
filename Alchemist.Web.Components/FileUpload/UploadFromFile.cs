@@ -8,7 +8,7 @@ public class UploadFromFile : ViewComponent
 {
     private const string OnSetFileNameFormat = "$('#{0}').html('<i>'+ this.files[0].name + '</i>');";
 
-    public IViewComponentResult Invoke(string onChange, string id = "uploadFromFile", string buttonLabel = "From file", string? fileName = null, bool setFileName = true)
+    public IViewComponentResult Invoke(string onChange, string id = "uploadFromFile", string buttonLabel = "From file", string className = "", string? fileName = null, bool setFileName = true)
     {
         var labelId = $"{id}_label";
         var onChangeWithFileNameLabel = onChange;
@@ -23,7 +23,7 @@ public class UploadFromFile : ViewComponent
         }        
 
         var html = ComponentHtmlHelper.GetHtml("Alchemist.Web.Components.FileUpload.FileUpload.html");
-        var content = string.Format(html, [id, labelId, fileName, onChangeWithFileNameLabel, buttonLabel]);
+        var content = string.Format(html, [id, labelId, fileName, onChangeWithFileNameLabel, buttonLabel, className]);
         return new HtmlContentViewComponentResult(new HtmlString(content));
     }
 }

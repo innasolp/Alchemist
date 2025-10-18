@@ -48,6 +48,8 @@ public class ServiceSettingsModel : IServiceSettings, IShopSettings
 
     public int? ParentSettingsId { get; set; }
 
+    public ShopSettingType ParentShopSettingsType { get; set; }
+
     public int ShopId { get; set; }
 
     public string? FileName { get; set; }

@@ -14,12 +14,14 @@ function uploadShopList(shopId, shopSettingsType) {
 
             $("#shopListDiv").html(result.content);
 
-            loadImportSettings(result.shopId, shopSettingsType);
+            setShopSettingsItemsPreventClick();
+
+            loadImportSettingsTab(result.shopId, shopSettingsType);
         },
          null);
 }
 
-function enableSaveButton(saveButton) {
+function enableButton(saveButton) {
     $(saveButton).prop('disabled', false);
 }
 
@@ -33,4 +35,16 @@ async function saveSettings(settingsForm, url, onSuccess, onError, onValidateion
     }, onValidateionError);
 }
 
+function setShopSettingsItemsPreventClick() {
+    $(".shop_item").on('click', onImportSettingsItemChangePrevent);
+}
 
+function getIsSettingsChangedUrl() {
+
+    return $('#settingsIsChangedAction').val();
+}
+
+function onImportSettingsItemChangePrevent(event) {
+
+    onItemChangePrevent(event, getIsSettingsChangedUrl(), '#settingsForm');
+}

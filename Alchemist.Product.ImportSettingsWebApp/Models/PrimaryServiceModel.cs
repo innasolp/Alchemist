@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.Interfaces;
-using Microsoft.AspNetCore.Mvc.TagHelpers;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
@@ -14,5 +13,6 @@ public class PrimaryServiceModel(ShopImportSettingsModel parent)
     public ServiceSettingsModel? ServiceSettings { get; set; }
 
     public ShopImportSettingsModel Parent { get; } = parent;
-    
+
+    public string ClassName { get; set; }
 }

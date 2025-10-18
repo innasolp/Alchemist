@@ -147,4 +147,25 @@ internal static class ModelExtensions
                && string.IsNullOrEmpty(serviceSettings.ServiceProviderPath)
                && string.IsNullOrEmpty(serviceSettings.ImplementationTypeName);
     }
+
+    internal static bool ShopImportSettingsIsEmpty(this ShopImportSettingsModel shopImportSettings)
+    {
+        return string.IsNullOrEmpty(shopImportSettings.Name)
+              && !shopImportSettings.Services.Any();
+    }
+
+    internal static bool IsEmpty(this ProductShopImportSettingsModel productSettings)
+    {
+        return productSettings.ShopImportSettingsIsEmpty()
+               && string.IsNullOrEmpty(productSettings.ProductUrlFormat)
+               && string.IsNullOrEmpty(productSettings.CategoryUrlFormat)
+               && productSettings.PageProductCount == null
+               && productSettings.RootCategories?.Any() == false;
+    }
+
+    internal static bool IsEmpty(this CategoryShopImportSettingsModel categorySettings)
+    {
+        return categorySettings.ShopImportSettingsIsEmpty()
+               && string.IsNullOrEmpty(categorySettings.CategorySourceUrl);
+    }
 }

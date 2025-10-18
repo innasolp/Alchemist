@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\Alchemist.Css.Common\Alchemist.Css.Common.esproj" />
+	<!-- <ProjectReference Include="..\Alchemist.Css.Common\Alchemist.Css.Common.esproj" /> -->
 	<ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
 	<ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
-	<ProjectReference Include="..\Alchemist.Js.Common\Alchemist.Js.Common.esproj" />
+	<!-- <ProjectReference Include="..\Alchemist.Js.Common\Alchemist.Js.Common.esproj" /> -->
 	<ProjectReference Include="..\Alchemist.Product.Import.Model\Alchemist.Product.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
     <ProjectReference Include="..\Alchemist.Product.WebApp.Common\Alchemist.Product.WebApp.Common.csproj" />

@@ -18,6 +18,8 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
 
     private readonly string _connectionString = connectionString;
 
+    private readonly List<IShop> _initialShops = [];
+   
     public ShopAPIWebAppFactory(string connectionString, TestServer signalRServer, bool ensureDeleted = true)
         : this(connectionString, signalRServer, 8050, 8051, ensureDeleted) { }
 
@@ -25,8 +27,8 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        var shops = ShopTestRepository.CreateShopsTestData(4);
-        shops.ForEach(s => dbContext.Shops.Add(s.To<Shop>()));
+        _initialShops.AddRange(ShopTestRepository.CreateShopsTestData(4));
+        _initialShops.ForEach(s => dbContext.Shops.Add(s.To<Shop>()));
         dbContext.SaveChanges();
     }
 

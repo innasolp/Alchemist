@@ -13,7 +13,7 @@ public class SettingsAPIClient : IShopSettingsDataService
 {
     private readonly HttpClient _httpClient;
 
-    public SettingsAPIClient([FromKeyedServices("ЫуеештпыApiHttpClient")] HttpClient httpClient)
+    public SettingsAPIClient([FromKeyedServices("SettingsApiHttpClient")] HttpClient httpClient)
     {
         _httpClient = httpClient;
         _httpClient.DefaultRequestHeaders.Accept.Clear();

@@ -14,7 +14,7 @@ public class ShopWebAppFactory : TestWebAppKestrelFactory<ShopWebAppProgram>
     {
     }
 
-    private readonly Mock<IShopDataService> _shopAPIClient = new Mock<IShopDataService>();    
+    private readonly Mock<IShopDataService> _shopAPIClient = new();    
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {

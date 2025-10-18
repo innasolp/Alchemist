@@ -1,12 +1,24 @@
-﻿function loadImportSettings(shopId, shopSettingsType) {
+﻿function loadImportSettingsTab(shopId, shopSettingsType) {
     var data = { shopSettingsType: shopSettingsType, shopId: shopId };
     postJsonData(url = '/Import/Settings/Tab',
         data = JSON.stringify(data),
         onSuccess = (result) => {
             $("#importSettingsTabDiv").html(result);
+
+            setItemsPreventClick();
         },
         null
     );
+}
+
+function setItemsPreventClick() {
+    $(".shop-tab").on('click', onSettingsTabChangePrevent);
+}
+
+function onSettingsTabChangePrevent(event) {
+
+    var url = getIsSettingsChangedUrl();
+    onItemChangePrevent(event, url, '#settingsForm');
 }
 
 async function uploadImportSettingsFromJson(formSelector, fileInputName, importSettingsUrl) {
@@ -28,7 +40,7 @@ async function uploadImportSettingsFromJson(formSelector, fileInputName, importS
 }
 
 function enableSaveSettingsButton() {
-    enableSaveButton('#saveImportSettingsBtn');
+    enableButton('#saveImportSettingsBtn');
 }
  
 async function saveImportSettings(url) {   

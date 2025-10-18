@@ -14,7 +14,8 @@ public static class SettingsTestRepository
     {
         var productShopImportSettings = new
         {
-            ProductUrlFormat = $"https://url{Guid.NewGuid()}"
+            ProductUrlFormat = $"https://product_url{Guid.NewGuid()}",
+            CategoryUrlFormat = $"https://product_category_url{Guid.NewGuid()}"
         };
         var json = JsonSerializer.Serialize(productShopImportSettings);
         var jsonValue = JsonSerializer.Deserialize<JsonObject>(json);
@@ -52,16 +53,21 @@ public static class SettingsTestRepository
         foreach (var primaryServiceName in primaryServiceNames)
         {
             var primaryService = CreateShopSettingsService(primaryServiceName);
+            primaryService.ShopId = shopSetting.ShopId;
+            primaryService.ParentSettingsId = shopSetting.Id;            
             serviceSettings.Add(primaryService);
         }
 
-        var requestHeaders = new ShopSettings { Name = nameof(PrimaryServiceName.RequestHeaders) };
-        var fileName = "Ozon.Headers.Firefox.json";
-        var filePath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/{fileName}";
+        //var requestHeaders = new ShopSettings { Name = nameof(PrimaryServiceName.RequestHeaders) };
+        //var fileName = "Ozon.Headers.Firefox.json";
+        //var filePath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/{fileName}";
 
-        using var s = File.OpenRead(filePath);
-        requestHeaders.JsonValue = JsonSerializer.Deserialize<JsonObject>(s);
-        serviceSettings.Add(requestHeaders);
+        //using var s = File.OpenRead(filePath);
+
+
+
+        //requestHeaders.JsonValue = JsonSerializer.Deserialize<JsonObject>(s);
+        //serviceSettings.Add(requestHeaders);
 
         return serviceSettings;
     }

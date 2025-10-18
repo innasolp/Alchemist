@@ -53,7 +53,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
     [HttpGet("byId/{id:int}", Name = nameof(GetShopSettingsById))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<ShopSettings>>> GetShopSettingsById(int id)
     {
-        if (id <= 0)
+        if (id < 0)
             return TypedResults.BadRequest(id);
 
         var shopSettings = await _settingsRepository.GetShopSettings(id);

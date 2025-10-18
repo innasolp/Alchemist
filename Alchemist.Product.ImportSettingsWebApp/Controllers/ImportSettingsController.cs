@@ -16,11 +16,10 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         where T : ShopImportSettingsModel
     {
         var existing = await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType);
-        var existingShopSettings = existing as T;
 
         var sessionShopSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync() as T;
 
-        if (existingShopSettings != null)
+        if (existing is T existingShopSettings)
         {
             existingShopSettings.UpdateFields(data);
 
@@ -38,7 +37,7 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
                 : data;
 
             toSave.UpdateFields(data);
-            updateFields((T)toSave, data);
+            updateFields(toSave, data);
 
             if (sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId)
                 toSave.UpdateServices(sessionShopSettings.Services);
@@ -83,6 +82,36 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", data);
     }
 
+    private async Task<bool> IsSettingsChanged<T>(T data, Func<T, bool> isEmpty, Func<T,T?, bool> typedFieldsEquals)
+        where T:ShopImportSettingsModel
+    {
+        try
+        {
+            var existingShopSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType)
+                as T;
+
+            var sessionShopSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
+            if (sessionShopSettings != null && sessionShopSettings.ShopSettingType == data.ShopSettingType
+                && sessionShopSettings.ShopId == data.ShopId)
+            {
+                return existingShopSettings == null
+                    ? !(isEmpty(data) && sessionShopSettings.ShopImportSettingsIsEmpty())
+                    : !(typedFieldsEquals(data, existingShopSettings)
+                            && sessionShopSettings.Services.ServicesAreEquals(existingShopSettings.Services));
+            }
+            else
+            {
+                return existingShopSettings == null
+                    ? !isEmpty(data)
+                    : !typedFieldsEquals(data, existingShopSettings);
+            }
+        }
+        catch (Exception ex) 
+        { 
+            throw ex;
+        }
+    }
+
     [Route("/Import/Settings/Product/IsChanged")]
     [HttpPost]
     public async Task<IActionResult> ProductSettingsIsChangedAsync(ProductShopImportSettingsModel data)
@@ -90,21 +119,9 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         if (data == null)
             return BadRequest("Empty json for product shopsettings.");
 
-        var existingShopSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType)
-            as ProductShopImportSettingsModel;
-
-        if (existingShopSettings == null)
-            return Ok(true);
-
-        var sessionShopSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
-        if (sessionShopSettings != null && sessionShopSettings.ShopSettingType == data.ShopSettingType
-            && sessionShopSettings.ShopId == data.ShopId)
-        {
-            return Ok(!(data.ProductShopSettingsFieldsEquals(existingShopSettings)
-                && sessionShopSettings.Services.ServicesAreEquals(existingShopSettings.Services)));
-        }
-        else
-            return Ok(!data.ProductShopSettingsFieldsEquals(existingShopSettings));
+        var result = await IsSettingsChanged(data, (settings) => settings.IsEmpty(), 
+            (target, source) => target.ProductShopSettingsFieldsEquals(source));
+        return Ok(result);
     }
 
     [Route("/Import/Settings/Category/IsChanged")]
@@ -114,19 +131,9 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         if (data == null)
             return BadRequest("Empty json for category shopsettings.");
 
-        if (await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType)
-            is not CategoryShopImportSettingsModel existingShopSettings)
-            return Ok(true);
-
-        var sessionShopSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
-        if (sessionShopSettings != null && sessionShopSettings.ShopSettingType == data.ShopSettingType
-            && sessionShopSettings.ShopId == data.ShopId)
-        {
-            return Ok(!(data.CategoryShopSettingsFieldsEquals(existingShopSettings)
-                && sessionShopSettings.Services.ServicesAreEquals(existingShopSettings.Services)));
-        }
-        else
-            return Ok(!data.CategoryShopSettingsFieldsEquals(existingShopSettings));
+        var result = await IsSettingsChanged(data, (settings) => settings.IsEmpty(), 
+            (target, source) => target.CategoryShopSettingsFieldsEquals(source));
+        return Ok(result);
     }
 
     [Route("/Import/Settings/Product/Save")]

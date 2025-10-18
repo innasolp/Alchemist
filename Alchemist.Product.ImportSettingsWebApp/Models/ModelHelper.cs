@@ -3,12 +3,12 @@ namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
 internal static class ModelHelper
 {
-    public static ShopImportSettingsModel CreateShopImportSettingsModel(ShopSettingType shopSettingType)
+    public static ShopImportSettingsModel CreateShopImportSettingsModel(int shopId, ShopSettingType shopSettingType)
     {
         return shopSettingType switch
         {
-            ShopSettingType.Product => new ProductShopImportSettingsModel(),
-            ShopSettingType.Category => new CategoryShopImportSettingsModel(),
+            ShopSettingType.Product => new ProductShopImportSettingsModel() { ShopId = shopId },
+            ShopSettingType.Category => new CategoryShopImportSettingsModel() { ShopId = shopId },
             _ => throw new InvalidOperationException($"Invalid settings type {shopSettingType}"),
         };
     }
@@ -18,7 +18,7 @@ internal static class ModelHelper
     {
         return shopId != null
             ? await settingsDataAdapter.GetShopImportSettingsAsync((int)shopId, shopSettingsType)
-                ?? CreateShopImportSettingsModel(shopSettingsType)
-            : CreateShopImportSettingsModel(shopSettingsType);
+                ?? CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType)
+            : CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType);
     }
 }

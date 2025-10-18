@@ -26,6 +26,7 @@
     <div id="shopListDiv">
     </div>
     <div id="importSettingsTabDiv" style="width:100%">
+        @await Html.PartialAsync("~/Views/Shared/ShopImportSettingsTab.cshtml", ModelHelper.CreateShopImportSettingsModel(Model.ShopId ?? 0, Model.ShopSettingType))
     </div>
 </div>
  

@@ -32,6 +32,9 @@
     },
     "./mvc/utils": {
       "import": "./mvc/utils.js"
+    },
+    "./mvc/preeventchange.js": {
+      "import": "./mvc/preeventchange.js"
     }
   },
   "scripts": {

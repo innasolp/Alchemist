@@ -18,6 +18,7 @@ public class ServiceSettingsData
     public Guid? Guid { get; set; } = System.Guid.NewGuid();
 }
 
+
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ServiceSettingsController(
     [FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
@@ -36,6 +37,9 @@ public class ServiceSettingsController(
                      : new ServiceSettingsModel();
 
         service.Name = serviceName;
+        service.ParentShopSettingsType = shopImportSettings.ShopSettingType;
+        service.ParentSettingsId = shopImportSettings.Id;
+        service.ShopId = shopImportSettings.ShopId;
 
         return service;
     }    
@@ -52,7 +56,7 @@ public class ServiceSettingsController(
             shopImportSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(shopId, shopSettingType);
             if (shopImportSettings == null)
             {
-                shopImportSettings = ModelHelper.CreateShopImportSettingsModel(shopSettingType);
+                shopImportSettings = ModelHelper.CreateShopImportSettingsModel(shopId, shopSettingType);
                 shopImportSettings.ShopId = shopId;
             }
 
@@ -118,14 +122,14 @@ public class ServiceSettingsController(
         return await GetServiceSettingsActionAsync(data);
     }
 
-    [Route("/Import/Settings/Service/Save")]
+    [Route("/Import/Settings/Service/Set")]
     [HttpPost]
     public async Task<IActionResult> SaveAsync([FromForm]ServiceSettingsModel data)
     {
         if (string.IsNullOrEmpty(data.Name))
             return BadRequest("Empty service name");
 
-        var shopImportSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
+        var shopImportSettings = await GetShopImportSettingsAsync(data.ShopId, data.ParentShopSettingsType);//HttpContext.Session.GetShopImportSettingsFromSessionAsync();
         if (shopImportSettings == null)
             return Ok();
 
@@ -149,7 +153,7 @@ public class ServiceSettingsController(
         if (string.IsNullOrEmpty(data.Name))
             return BadRequest("Empty service name");
 
-        var shopImportSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
+        var shopImportSettings = await GetShopImportSettingsAsync(data.ShopId, data.ParentShopSettingsType);// HttpContext.Session.GetShopImportSettingsFromSessionAsync();
         if (shopImportSettings == null)
             return Ok(!data.IsEmpty());
 

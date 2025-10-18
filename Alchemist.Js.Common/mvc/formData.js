@@ -124,11 +124,12 @@ function validateForm(formSelector, onValidationSuccess = null, onValidationErro
         return;
     }
 
-    var pendingRequest = formSelector.data('validator').pendingRequest;
-    if (pendingRequest == 0)
-        if(onValidationSuccess != null) onValidationSuccess();
-    else
-        setTimeout(() => {
+    if (!formSelector.data('validator').pendingRequest) {
+        if (onValidationSuccess != null) onValidationSuccess();
+        return;
+    }
+
+    setTimeout(() => {
             if (formSelector.valid()) {
                 if (onValidationSuccess != null) onValidationSuccess();
             }
