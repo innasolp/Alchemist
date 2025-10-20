@@ -15,5 +15,5 @@ public interface IProductShopImportSettings : IShopImportSettings
 
     public int? PageProductCount { get; set; }
 
-    public ICategoryUrl[]? RootCategories { get; set; }
+    public IEnumerable<ICategoryUrl>? RootCategories { get; set; }
 }

@@ -115,7 +115,7 @@ class ModalForm {
             onHide(false);
     }
 
-    show(url, data, onHide = null) {
+    show(url, data, onShowModal = null, onHide = null) {
 
         if (this.ParentForm != null)
             $(this.ParentForm).on('submit', this.submitPreventDefault);
@@ -130,7 +130,7 @@ class ModalForm {
         if (this.OnShow != null)
             $(this.ModalDiv).on("show.bs.modal", this.OnShow);
 
-        showItemModal($(this.ModalDiv), $(this.ModalBodyDiv), url, data, () => { if (onHide != null) this.hide(onHide); })
+        showItemModal($(this.ModalDiv), $(this.ModalBodyDiv), url, data, onShowModal, () => { if (onHide != null) this.hide(onHide); })
     }
 }
 
@@ -142,22 +142,28 @@ function onLoadCallback(url, response, status, xhr, onSuccess) {
     }
     else {
         console.log('url ' + url + ' load');
-        onSuccess();
+        onSuccess(response);
     }
 }
 
-function showItemModal(modalDiv, modalBodyDiv, url, data, onHide = null) {
+function showItemModal(modalDiv, modalBodyDiv, url, data, onShow = null, onHide = null) {
     if (onHide != null)
         modalDiv.on('hide.bs.modal', function () {
             onHide(true);
         });
 
+    const onSuccess = (response) => {
+        modalDiv.modal("show");
+        if (onShow != null)
+            onShow(response);
+    };
+
     if (data != null)
         modalBodyDiv.load(url, data, function (response, status, xhr) {
-            onLoadCallback(url, response, status, xhr, () => { modalDiv.modal("show"); })
+            onLoadCallback(url, response, status, xhr, onSuccess)
         });
     else
         modalBodyDiv.load(url, function (response, status, xhr) {
-            onLoadCallback(url, response, status, xhr, () => { modalDiv.modal("show"); })
+            onLoadCallback(url, response, status, xhr, onSuccess)
         });
 }

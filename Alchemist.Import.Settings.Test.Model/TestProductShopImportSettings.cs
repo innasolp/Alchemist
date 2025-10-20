@@ -19,8 +19,11 @@ public class TestProductShopImportSettings : TestShopImportSettings, IProductSho
     public int? PageProductCount { get; set; }
 
     public TestCategoryUrl[]? RootCategories { get; set; } = [];
-
-    ICategoryUrl[]? IProductShopImportSettings.RootCategories { get => RootCategories; set => RootCategories = (TestCategoryUrl[])value; }
-
+        
     public override ShopSettingType Type => ShopSettingType.Product ;
+
+    IEnumerable<ICategoryUrl>? IProductShopImportSettings.RootCategories { get => RootCategories; 
+        set => RootCategories = value is TestCategoryUrl[] testCategoryUrls 
+            ? testCategoryUrls
+            : value != null ? value.OfType<TestCategoryUrl>().ToArray() : []; }
 }

@@ -15,6 +15,13 @@ internal static class ImportSettingPageTestExtensions
         await pageTest.Expect(pageTest.Page.Locator("#CategoryUrlFormat")).Not.ToHaveValueAsync("");
     }
 
+    internal static async Task ExpectCategoryShopSettingsLoadedAsync(this PageTest pageTest)
+    {
+        await pageTest.Expect(pageTest.Page.Locator("#shopListDiv")).Not.ToBeEmptyAsync();
+        
+        await pageTest.Expect(pageTest.Page.Locator("#CategorySourceUrl")).Not.ToHaveValueAsync("");
+    }
+
     internal static async Task SelectShopClickAsync(this PageTest pageTest, Func<ILocator, ILocator> nextShopLocator)
     {
         var nextAction = pageTest.Page.Locator("a.shop_item:not(.selected)");
@@ -28,26 +35,33 @@ internal static class ImportSettingPageTestExtensions
         await pageTest.SelectShopClickAsync(locator=>locator.First);
     }
 
-    internal static async Task<string> ExpectSelectShopAsync(this PageTest pageTest, Func<ILocator, ILocator> nextShopLocator)
-    
+    internal static async Task<string> ExpectSelectShopAsync(this PageTest pageTest, 
+        Func<ILocator, ILocator> nextShopLocator,
+        Func<Task>? expectLoading = null)    
     {
-        var startShopName = await pageTest.Page.Locator("a[class='shop_item selected']").TextContentAsync();
-
+        var startShopName = await pageTest.Page.Locator("a.shop_item.selected").TextContentAsync();
+        
         await pageTest.SelectShopClickAsync(nextShopLocator);
 
-        await pageTest.Expect(pageTest.Page.Locator("a[class='shop_item selected']")).Not.ToHaveTextAsync(startShopName);
+        if(expectLoading != null) await expectLoading();
 
-        return await pageTest.Page.Locator("a[class='shop_item selected']").TextContentAsync();
+        var selectedShopItem = pageTest.Page.Locator("a.shop_item.selected");
+
+        await pageTest.Expect(selectedShopItem).Not.ToHaveTextAsync(startShopName);
+
+        return await selectedShopItem.TextContentAsync();
     }
 
-    internal static async Task<string> ExpectSelectNextShopAsync(this PageTest pageTest)
+    internal static async Task<string> ExpectSelectNextShopAsync(this PageTest pageTest, Func<Task>? expectLoading = null)
     {
-        return await pageTest.ExpectSelectShopAsync(locator => locator.First);
+        return await pageTest.ExpectSelectShopAsync(locator => locator.First, expectLoading);
     }
 
     internal static async Task SettingsTabClickAsync(this PageTest pageTest, string tab)
     {
         var categoryShopTabDivLocator = pageTest.Page.Locator("div.shop-tab").Locator("a:not(.selected)").GetByText(tab);
+
+        await pageTest.Expect(categoryShopTabDivLocator).ToHaveCountAsync(1);
         
         await categoryShopTabDivLocator.ClickAsync();
     }

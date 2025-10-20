@@ -44,7 +44,7 @@ internal static class ModelExtensions
             target.All(ts=>source.Any(s=>s.Key == ts.Key && ts.Value.ServiceEquals(s.Value)));
     }
 
-    private static bool IsEquals(this CategoryUrlModel target, CategoryUrlModel source)
+    public static bool IsEquals(this CategoryUrlModel target, CategoryUrlModel source)
     {
         return target.Item == source.Item && target.Url.EqualsWithEmpty(source.Url);
     }
@@ -55,6 +55,12 @@ internal static class ModelExtensions
          && target.ProductUrlFormat.EqualsWithEmpty(source.ProductUrlFormat)
             && target.CategoryUrlFormat.EqualsWithEmpty(source.CategoryUrlFormat)
             && target.PageProductCount.Equals(source.PageProductCount);
+    }
+
+    internal static bool RootCategoriesEquals(this ProductShopImportSettingsModel target, ProductShopImportSettingsModel source)
+    {
+        return target.RootCategories.Count == source.RootCategories.Count
+            && target.RootCategories.All(c => source.RootCategories.Any(sc => sc.IsEquals(c)));
     }
 
     internal static bool CategoryShopSettingsFieldsEquals(this CategoryShopImportSettingsModel target, CategoryShopImportSettingsModel source)
@@ -167,5 +173,11 @@ internal static class ModelExtensions
     {
         return categorySettings.ShopImportSettingsIsEmpty()
                && string.IsNullOrEmpty(categorySettings.CategorySourceUrl);
+    }
+
+    internal static bool IsEmpty(this CategoryUrlModel categoryUrl)
+    {
+        return  string.IsNullOrEmpty(categoryUrl.Url)
+               && categoryUrl.Item == 0;
     }
 }

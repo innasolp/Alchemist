@@ -8,7 +8,8 @@ namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
-    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) : Controller
+    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) 
+    : SettingsController(productSettingsDataAdapter, categorySettingsDataAdapter)
 {
     private readonly SettingsDataAdapterContainer _settingsDataAdapter = new(productSettingsDataAdapter, categorySettingsDataAdapter);
 
@@ -82,7 +83,8 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", data);
     }
 
-    private async Task<bool> IsSettingsChanged<T>(T data, Func<T, bool> isEmpty, Func<T,T?, bool> typedFieldsEquals)
+    private async Task<bool> IsSettingsChanged<T>(T data, Func<T, bool> isEmpty, Func<T,T?, bool> inputFieldsEquals,
+        Func<T,T, bool>? additionalFieldsEquals = null)
         where T:ShopImportSettingsModel
     {
         try
@@ -90,25 +92,25 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
             var existingShopSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType)
                 as T;
 
-            var sessionShopSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
-            if (sessionShopSettings != null && sessionShopSettings.ShopSettingType == data.ShopSettingType
-                && sessionShopSettings.ShopId == data.ShopId)
+            if(await HttpContext.Session.GetShopImportSettingsFromSessionAsync() is T sessionShopSettings &&
+                sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId)
             {
                 return existingShopSettings == null
                     ? !(isEmpty(data) && sessionShopSettings.ShopImportSettingsIsEmpty())
-                    : !(typedFieldsEquals(data, existingShopSettings)
-                            && sessionShopSettings.Services.ServicesAreEquals(existingShopSettings.Services));
+                    : !(inputFieldsEquals(data, existingShopSettings)
+                      && additionalFieldsEquals?.Invoke(sessionShopSettings, existingShopSettings) != false
+                      && sessionShopSettings.Services.ServicesAreEquals(existingShopSettings.Services));
             }
             else
             {
                 return existingShopSettings == null
                     ? !isEmpty(data)
-                    : !typedFieldsEquals(data, existingShopSettings);
+                    : !inputFieldsEquals(data, existingShopSettings);
             }
         }
         catch (Exception ex) 
         { 
-            throw ex;
+            throw;
         }
     }
 
@@ -120,7 +122,8 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
             return BadRequest("Empty json for product shopsettings.");
 
         var result = await IsSettingsChanged(data, (settings) => settings.IsEmpty(), 
-            (target, source) => target.ProductShopSettingsFieldsEquals(source));
+            (target, source) => target.ProductShopSettingsFieldsEquals(source),
+            (target, source) => target.RootCategoriesEquals(source));
         return Ok(result);
     }
 
@@ -158,5 +161,68 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
             (target, source)=>target.UpdateCategoryShopImportSettings (source));
 
         return Ok(true);
+    }
+
+    [Route("/Import/Settings/Product/CategoryUrl")]
+    [HttpPost]
+    public IActionResult RootCategory(CategoryUrlModel data)
+    {
+        if (data == null) return BadRequest("Empty json for category url.");
+
+        return PartialView("~/Views/Home/RootCategoryUrl.cshtml", data);
+    }
+
+    [Route("/Import/Settings/Product/CategoryUrl/Set")]
+    [HttpPost]
+    public async Task<IActionResult> SetRootCategory(CategoryUrlModel data)
+    {
+        if (data == null) return BadRequest("Empty json for category url.");
+
+        if (await GetShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
+            return new ObjectResult("Invalid shopId") { StatusCode = StatusCodes.Status500InternalServerError };
+
+        var currentRootCategory = productShopSettings.RootCategories.FirstOrDefault(c =>c.Guid == data.Guid);
+
+        IActionResult result;
+        if (currentRootCategory == null)
+        {
+            productShopSettings.RootCategories.Add(data);
+            result = Ok(data);
+        }
+        else
+        {
+            currentRootCategory.Url = data.Url;
+            currentRootCategory.Item = data.Item;
+            result = Ok(currentRootCategory);
+        }
+
+        HttpContext.Session.SetImportSettingtoSession(productShopSettings);
+
+        return result;
+    }
+
+    [Route("/Import/Settings/Product/CategoryUrl/IsChanged")]
+    [HttpPost]
+    public async Task<IActionResult> RootCategoryIsChanged(CategoryUrlModel data)
+    {
+        if (data == null) return BadRequest("Empty json for category url.");
+
+        if (await GetShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
+            return new ObjectResult("Invalid shopId") { StatusCode = StatusCodes.Status500InternalServerError };
+
+        var currentRootCategory = productShopSettings.RootCategories.FirstOrDefault(c =>
+                    c.Url.Equals(data.Url, StringComparison.InvariantCultureIgnoreCase)
+                    && c.Item == data.Item);
+
+        return currentRootCategory == null ? Ok(!data.IsEmpty()) : Ok(!currentRootCategory.IsEquals(data));
+    }
+
+    [Route("/Import/Settings/Product/CategoryUrl/Item")]
+    [HttpPost]
+    public IActionResult RootCategoryItem([FromBody]CategoryUrlModel data)
+    {
+        if (data == null) return BadRequest("Empty json for category url.");
+
+        return PartialView("~/Views/Home/RootCategoryUrlItem.cshtml", data);
     }
 }

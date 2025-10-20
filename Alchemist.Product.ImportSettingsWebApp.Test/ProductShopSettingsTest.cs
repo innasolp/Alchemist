@@ -1,7 +1,6 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Microsoft.Playwright;
-using Microsoft.Playwright.Xunit;
 using Xunit.Abstractions;
 using TestCommon = Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure.Common;
 
@@ -9,14 +8,16 @@ namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class ProductShopSettingsTestImportSettingsWebAppFactory()
     : ImportSettingsWebAppFactory(false,
-        TestCommon.CreateShopWebAppApiFactory("ProductSettingsTestDb", 8424, 8425, 8076, 8077).ServerAddress,
-        8094, 8095,
-        TestCommon.CreateSettingsApiHttpClient("ProductSettingsTestDb", 8224, 8225))
+        TestCommon.CreateShopWebAppApiFactory("ProductSettingsTestDb", 8426, 8427, 8078, 8079).ServerAddress,
+        8096, 8097,
+        TestCommon.CreateSettingsApiHttpClient("ProductSettingsTestDb", 8226, 8227))
 {
 }
 
-public class ProductShopSettingsTest : PageTest, IClassFixture<ProductShopSettingsTestImportSettingsWebAppFactory>
+public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSettingsTestImportSettingsWebAppFactory>
 {
+    private record CategoryUrl(int item, string url);
+
     private readonly ProductShopSettingsTestImportSettingsWebAppFactory _webAppFactory;
     private readonly ITestOutputHelper _outputHelper;
 
@@ -28,113 +29,152 @@ public class ProductShopSettingsTest : PageTest, IClassFixture<ProductShopSettin
         _webAppFactory.CreateClient();
     }
 
+    protected override async Task ExpectSettingsLoadedAsync()
+    {
+        var url = _webAppFactory.ServerAddress;
+        await Page.GotoAsync(url);
+
+        await this.ExpectProductShopSettingsLoadedAsync();
+    }
+
+    protected override async Task FillInputFieldsAsync()
+    {
+        await Page.Locator($"#ShopSettingsName").FillAsync(Guid.NewGuid().ToString());
+        await Page.Locator($"#ProductUrlFormat").FillAsync(Guid.NewGuid().ToString());
+        await Page.Locator($"#CategoryUrlFormat").FillAsync(Guid.NewGuid().ToString());
+    }
+
+    protected override async Task SelectOtherTabAsync()
+    {
+        await this.SettingsTabClickAsync("Category");
+    }
+
+    private async Task<CategoryUrl> ExpectAddCategoryUrlAsync()
+    {
+        await Page.GetByText("Add category").ClickAsync();
+
+        await Expect(Page.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
+
+        return await ExpectCategoryUrlSaveAsync();
+    }
+
+    private async Task<CategoryUrl> ExpectCategoryUrlSaveAsync()
+    {
+        var categoryUrl = new CategoryUrl(new Random().Next(0, int.MaxValue), Guid.NewGuid().ToString());
+
+        await Page.GetByRole(AriaRole.Spinbutton, new() { Name = "Item" }).FillAsync($"{categoryUrl.item}");
+        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Url", Exact = true }).FillAsync(categoryUrl.url);
+
+        await Page.Locator("button.save-root-category").ClickAsync();
+
+        await Expect(Page.Locator("#rootCategoryFormDiv")).Not.ToBeVisibleAsync();
+
+        return categoryUrl;
+    }
+
     [Fact]
     public async Task PopupConfirmationWhenSelectOtherShopAfterMakingChanges()
     {
         var url = _webAppFactory.ServerAddress;
         await Page.GotoAsync(url);
 
-        await this.ExpectProductShopSettingsLoadedAsync();       
-
-        await Page.Locator("#ProductUrlFormat" ).FillAsync(Guid.NewGuid().ToString());
-
-        await this.SelectNextShopClickAsync();
-
-        await Expect(Page.GetByRole(AriaRole.Dialog, new() { Name = "Input data will be reset. Continue?" })).ToBeVisibleAsync();
+        await PopupConfirmationWhenSelectOtherShopAfterMakingChangesAsync();
     }
 
     [Fact]
-    public async Task PopupConfirmationWhenSelectCategoryTabAfterMakingChanges()
+    public async Task PopupConfirmationWhenSelectOtherTabAfterMakingChanges()
     {
-        var url = _webAppFactory.ServerAddress;
-        await Page.GotoAsync(url);
-
-        await this.ExpectProductShopSettingsLoadedAsync();
-
-        await Page.Locator("#ProductUrlFormat").FillAsync(Guid.NewGuid().ToString());
-
-        await this.SettingsTabClickAsync("Category");
-
-        await Expect(Page.GetByRole(AriaRole.Dialog, new() { Name = "Input data will be reset. Continue?" })).ToBeVisibleAsync();
+        await PopupConfirmationWhenSelectOtherTabAfterMakingChangesAsync();
     }
-
-    
 
     [Fact]
     public async Task ValidationErrorWhenShopSettingsNameIsEmpty()
     {
-        var url = _webAppFactory.ServerAddress;
-        await Page.GotoAsync(url);
-
-        await this.ExpectProductShopSettingsLoadedAsync();
-
-        await this.ExpectImportSettingsRequiredValidationErrorAsync("ShopSettingsName", "Name");
+        await ValidationErrorWhenShopSettingsNameIsEmptyAsync();
     }
 
     [Fact]
     public async Task ValidationErrorWhenProductUrlFormatIsEmpty()
     {
-        var url = _webAppFactory.ServerAddress;
-        await Page.GotoAsync(url);
-
-        await this.ExpectProductShopSettingsLoadedAsync();
-
-        await this.ExpectImportSettingsRequiredValidationErrorAsync("ProductUrlFormat", "ProductUrlFormat");
+        await ValidationErrorWhenRequiredFieldIsEmptyAsync("ProductUrlFormat", "ProductUrlFormat");
     }
 
     [Fact]
     public async Task ValidationErrorWhenCategoryUrlFormatIsEmpty()
     {
-        var url = _webAppFactory.ServerAddress;
-        await Page.GotoAsync(url);
-
-        await this.ExpectProductShopSettingsLoadedAsync();
-
-        await this.ExpectImportSettingsRequiredValidationErrorAsync("CategoryUrlFormat", "CategoryUrlFormat");
+        await ValidationErrorWhenRequiredFieldIsEmptyAsync("CategoryUrlFormat", "CategoryUrlFormat");
     }
 
     [Fact]
     public async Task ValidationErrorWhenImportServiceNotSet()
     {
-        var url = _webAppFactory.ServerAddress;
-        await Page.GotoAsync(url);
-
-        await this.ExpectProductShopSettingsLoadedAsync();
-
-        await this.ExpectSelectShopAsync(locator => locator.Last);
-
-        await Page.Locator($"#ShopSettingsName").FillAsync(Guid.NewGuid().ToString());
-        await Page.Locator($"#ProductUrlFormat").FillAsync(Guid.NewGuid().ToString());
-        await Page.Locator($"#CategoryUrlFormat").FillAsync(Guid.NewGuid().ToString());
-
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
-        await Expect(Page.GetByText($"The ImportService field is required.")).ToBeVisibleAsync();
+        await ValidationErrorWhenImportServiceNotSetAsync();
     }
 
     [Fact]
     public async Task ValidationErrorWhenWebLoaderNotSet()
     {
-        var url = _webAppFactory.ServerAddress;
-        await Page.GotoAsync(url);
+        await ValidationErrorWhenWebLoaderNotSetAsync();
+    }
 
-        await this.ExpectProductShopSettingsLoadedAsync();
+    [Fact]
+    public async Task CategoryUrlDialogWhenAddRootCategoryClick()
+    {
+        await ExpectSettingsLoadedAsync();
 
-        await this.ExpectSelectShopAsync(locator => locator.Last);
+        await Page.GetByText("Add category").ClickAsync();
 
-        await Page.Locator($"#ShopSettingsName").FillAsync(Guid.NewGuid().ToString());
-        await Page.Locator($"#ProductUrlFormat").FillAsync(Guid.NewGuid().ToString());
-        await Page.Locator($"#CategoryUrlFormat").FillAsync(Guid.NewGuid().ToString());
+        await Expect(Page.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
+    }
 
-        await this.SetServiceButtonClickAsync("import-service");
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(Guid.NewGuid().ToString());
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" }).FillAsync(Guid.NewGuid().ToString());
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true }).FillAsync(Guid.NewGuid().ToString());
-        await this.SaveServiceBtnClickAsync();
+    [Fact]
+    public async Task CategoryUrlValidationErrorWhenRequiredFieldsAreEmpty()
+    {
+        await ExpectSettingsLoadedAsync();
 
-        await Expect(Page.Locator("#serviceSettingsForm > .row")).Not.ToBeVisibleAsync();
+        await Page.GetByText("Add category").ClickAsync();
 
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
-        await Expect(Page.GetByText($"The WebLoader field is required.")).ToBeVisibleAsync();
+        await Expect(Page.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
+
+        await Page.Locator("button.save-root-category").ClickAsync();
+
+        await Expect(Page.GetByText("The Item field is required.")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("The Url field is required.")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task NewRowInCategoryUrlTableWhenSaved()
+    {
+        await ExpectSettingsLoadedAsync();
+
+        var categoryUrl = await ExpectAddCategoryUrlAsync();
+
+        var li = Page.Locator("li.rootcategory_li");
+
+        await Expect(li.Filter(new LocatorFilterOptions { HasText = $"{categoryUrl.item}" })
+          .And(li.Filter(new LocatorFilterOptions { HasText = categoryUrl.url }))).ToHaveCountAsync(1);
+    }
+
+    [Fact]
+    public async Task RowInCategoryUrlTableChangedWhenSaved()
+    {
+        await ExpectSettingsLoadedAsync();
+
+        var newCategoryUrl = await ExpectAddCategoryUrlAsync();
+
+        var li = Page.Locator("li.rootcategory_li");
+        var row = li.Filter(new LocatorFilterOptions { HasText = $"{newCategoryUrl.item}" })
+          .And(li.Filter(new LocatorFilterOptions { HasText = newCategoryUrl.url }));
+        var editCategoryBtn = row.Locator("button.editRootCategory");
+        await Expect(editCategoryBtn).ToHaveCountAsync(1);
+        
+        await editCategoryBtn.ClickAsync();
+
+        var savedCategoryUrl = await ExpectCategoryUrlSaveAsync();
+        var savedRow = li.Filter(new LocatorFilterOptions { HasText = $"{savedCategoryUrl.item}" })
+          .And(li.Filter(new LocatorFilterOptions { HasText = savedCategoryUrl.url }));
+
+        await Expect(savedRow).ToHaveCountAsync(1);
+        await Expect(row).ToHaveCountAsync(0);
     }
 }
-

@@ -19,14 +19,11 @@ public class ProductShopImportSettingsModel : ShopImportSettingsModel, IProductS
     public int? PageProductCount { get; set; }
 
     public List<CategoryUrlModel> RootCategories { get; set; } = [];
-
-    ICategoryUrl[]? IProductShopImportSettings.RootCategories
-    {
-        get => [.. RootCategories];
-        set
-        {
-            RootCategories.Clear();
-            RootCategories.AddRange(value?.OfType<CategoryUrlModel>() ?? []);
-        }
+    IEnumerable<ICategoryUrl>? IProductShopImportSettings.RootCategories 
+    { 
+        get => RootCategories; 
+        set => RootCategories = value is List<CategoryUrlModel> categoryUrls
+            ? categoryUrls 
+            : value != null ? [.. value.OfType<CategoryUrlModel>()] : [];
     }
 }

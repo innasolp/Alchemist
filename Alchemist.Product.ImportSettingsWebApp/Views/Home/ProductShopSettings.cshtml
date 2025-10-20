@@ -2,6 +2,29 @@
 
 @model ProductShopImportSettingsModel
 
+@functions
+{
+    public string GetNewData()
+    {
+        return JsonSerializer.Serialize(new CategoryUrlModel {ShopId = Model.ShopId});
+    }
+
+    CategoryUrlModel GetCategoryUrlModel(CategoryUrlModel category)
+    {
+        return new CategoryUrlModel
+        {
+            Guid = category.Guid,
+            Url = category.Url,
+            Item = category.Item,
+            ShopId = Model.ShopId
+        };
+    } 
+}
+
+<vc:show-modal modal-div-class="rootCategoryModal"
+               modal-body-div-class="categoryModalBody"
+               modal-close-btn="rootCategoryCloseBtn"></vc:show-modal>
+
 <div class="form-group">
     <label asp-for="ProductUrlFormat" class="control-label"></label>
     <input asp-for="ProductUrlFormat" class="form-control form-input" value="@Model.ProductUrlFormat" />
@@ -24,31 +47,12 @@
         </li>
         @foreach (var category in (Model.RootCategories ?? []))
         {
-            <li class="table-ul rootcategory_li">
-                <div class="flex rootCategoryRow">
-                    <div class="table_cell item" >@category.Item</div>
-                    <div class="table_cell url">@category.Url</div>
-                    <div>
-                        <button type="button" class="editRootCategory" onclick="showRootCategory(@JsonSerializer.Serialize(category, new JsonSerializerOptions
-                                                                       {
-                                                                           PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                                                                           WriteIndented = true
-                                                                       }))">
-                            <i class='fa fa-edit' style='font-size:18px'></i>
-                        </button>
-                    </div>                    
-                </div>
-            </li>
+            @await Html.PartialAsync("~/Views/Home/RootCategoryUrlItem.cshtml", GetCategoryUrlModel(category))
         }
-        <li class="table-ul">
+        <li class="table-ul add-btn-ul">
             <div>
-                <a class="addRootCategory">Add category</a>
+                <a class="addRootCategory" onclick="showCategoryUrlModal('@Guid.NewGuid()', @Model.ShopId)">Add category</a>
             </div>         
-        </li>
-        <li class="table-ul">
-            <vc:show-modal modal-div-class="rootCategoryModal" 
-                           modal-body-div-class="categoryModalBody"
-                           modal-close-btn="rootCategoryCloseBtn"></vc:show-modal>            
         </li>
     </ul>
 </div>

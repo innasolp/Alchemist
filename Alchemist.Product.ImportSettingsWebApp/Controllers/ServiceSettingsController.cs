@@ -22,10 +22,10 @@ public class ServiceSettingsData
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ServiceSettingsController(
     [FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
-    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) : Controller
+    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter)
+    : SettingsController(productSettingsDataAdapter, categorySettingsDataAdapter)
 {
-    private readonly SettingsDataAdapterContainer _settingsDataAdapter = new(productSettingsDataAdapter, categorySettingsDataAdapter);
-
+    
     private static ServiceSettingsModel GetServiceSettings(ShopImportSettingsModel shopImportSettings, string? serviceName = null, Guid? guid = null)
     {
         var service = serviceName?.IsPrimaryServiceName() == true
@@ -42,31 +42,8 @@ public class ServiceSettingsController(
         service.ShopId = shopImportSettings.ShopId;
 
         return service;
-    }    
-
-    private async Task<ShopImportSettingsModel> GetShopImportSettingsAsync(int shopId, ShopSettingType shopSettingType)
-    {
-        try
-        {
-            var shopImportSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync();
-            if (shopImportSettings != null &&
-                    shopImportSettings.ShopId == shopId && shopImportSettings.ShopSettingType == shopSettingType)
-                return shopImportSettings;
-
-            shopImportSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(shopId, shopSettingType);
-            if (shopImportSettings == null)
-            {
-                shopImportSettings = ModelHelper.CreateShopImportSettingsModel(shopId, shopSettingType);
-                shopImportSettings.ShopId = shopId;
-            }
-
-            return shopImportSettings;
-        }
-        catch(Exception ex) 
-        {
-            throw ex;
-        }
-    }
+    } 
+  
 
     private async Task<IActionResult> GetServiceSettingsActionAsync(ServiceSettingsData serviceSettingsData)
     {

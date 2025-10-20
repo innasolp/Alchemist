@@ -10,7 +10,7 @@ public static class SessionExtensions
     {
         session.SetInt32(SessionKeys.ShopSettingsTypeKey, (int)shopImportSettings.ShopSettingType);
 
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(shopImportSettings);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(shopImportSettings, shopImportSettings.GetType());
 
         session.Set(SessionKeys.ShopImportSettingsKey, bytes);
     }
