@@ -90,3 +90,25 @@ function saveServiceSettings(serviceForm, setServiceInfo) {
 
     }, enableSaveServiceSettingsButton);     
 }
+
+function onSetServiceItem(data) {
+    var li = $('li.table-ul.service_li').filter(function () {
+        return $(this).find('.guid').val() === data.guid;
+    });
+    if (li.length == 0)
+        addServiceItem(data);
+    else
+        updateServiceItem(li, data);
+}
+
+function updateServiceItem(li, data) {
+    li.find(".table_cell.name").text(data.name);
+    li.find(".table_cell.serviceTypeName").text(data.serviceTypeName);
+}
+
+function addServiceItem(data) {
+    var li = $('ul.table-ul.services > .add-btn-ul');
+    postJsonData('/Import/Settings/Service/Item', JSON.stringify(data), (content) => {
+        li.before(content);
+    });
+}

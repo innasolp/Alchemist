@@ -6,11 +6,12 @@
 {
     string ServiceSetResult()
     {
-        if(Model.Name.IsPrimaryServiceName())
+        if (Model.Name.IsPrimaryServiceName())
         {
-            return $"(data)=>{{ $('#{Model.Name}').val(data); }}";
+            return $"(data)=>{{ $('#{Model.Name}').val(data.serviceTypeName); }}";
         }
-        return "";
+        else
+            return "onSetServiceItem";       
     } 
 }
 

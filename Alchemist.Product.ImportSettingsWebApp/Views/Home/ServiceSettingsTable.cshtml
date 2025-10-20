@@ -2,6 +2,15 @@
 @using System.Text.Json
 @model ShopImportSettingsModel
 
+@functions
+{
+    ServiceSettingsModel GetServiceItem(ServiceSettingsModel serviceSettings)
+    {
+        serviceSettings.ShopId = Model.ShopId;
+        serviceSettings.ParentShopSettingsType = Model.ShopSettingType;
+        return serviceSettings;
+    }
+}
 
 <ul class="table-ul services">
     <li class="table-ul header">
@@ -13,22 +22,13 @@
     </li>
     @foreach (var service in Model.Services.Where(s => !s.Key.IsPrimaryServiceName()))
     {
-        <li class="table-ul service_li">
-            <div class="flex serviceRow">
-                <div class="table_cell name" style="width:200px">@service.Value.Name</div>
-                <div class="table_cell serviceTypeName" style="width:200px">@service.Value.ServiceTypeName</div>
-                <input type="hidden" class="guid" value="@service.Value.Guid" />
-                <div>
-                    <i class='fa fa-edit editService' style='font-size:18px'
-                       onclick="showServiceSettingsModal('/ServiceSettings/', {'shopId': '@service.Value.ShopId', 'shopSettingsId':'@service.Value.ParentSettingsId', 'guid':'@service.Value.Guid' })"></i>
-                </div>
-            </div>
-        </li>
+        @await Html.PartialAsync("~/Views/Home/ServiceSettingsItem.cshtml", GetServiceItem(service.Value))
+
     }
-    <li class="table-ul">
+    <li class="table-ul add-btn-ul">
         <div>
             <a class="addService"
-               onclick="showServiceSettingsModal('/ServiceSettings/', {'ShopId': '@Model.ShopId', 'shopSettingsId':'@Model.Id' })">Add service</a>
+               onclick="showServiceSettingsModal('/Import/Settings/Service', {'shopId': @Model.ShopId, 'shopSettingsType':@((int)Model.ShopSettingType) })">Add service</a>
         </div>
     </li>
 </ul>

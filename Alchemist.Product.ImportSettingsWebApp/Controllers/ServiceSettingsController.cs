@@ -30,13 +30,13 @@ public class ServiceSettingsController(
     {
         var service = serviceName?.IsPrimaryServiceName() == true
             ? shopImportSettings.GetService<ServiceSettingsModel>(serviceName) ?? new ServiceSettingsModel { Name = serviceName}
-            : shopImportSettings.Services.TryGetValue(serviceName, out var serviceSettings) && serviceSettings != null 
+            : !string.IsNullOrEmpty(serviceName) &&  shopImportSettings.Services.TryGetValue(serviceName, out var serviceSettings) && serviceSettings != null 
                 ? serviceSettings
                 : guid != null 
                      ? shopImportSettings.Services.FirstOrDefault(s=>s.Value.Guid == guid).Value ?? new ServiceSettingsModel()
                      : new ServiceSettingsModel();
 
-        service.Name = serviceName;
+        if(!string.IsNullOrEmpty(serviceName)) service.Name = serviceName;
         service.ParentShopSettingsType = shopImportSettings.ShopSettingType;
         service.ParentSettingsId = shopImportSettings.Id;
         service.ShopId = shopImportSettings.ShopId;
@@ -54,7 +54,7 @@ public class ServiceSettingsController(
 
     [Route("/Import/Settings/Service")]
     [HttpPost]
-    public async Task<IActionResult> ServiceSettingsAsync([FromBody]ServiceSettingsData data)
+    public async Task<IActionResult> ServiceSettingsAsync(ServiceSettingsData data)
     {
         return await GetServiceSettingsActionAsync(data);
     }
@@ -106,21 +106,28 @@ public class ServiceSettingsController(
         if (string.IsNullOrEmpty(data.Name))
             return BadRequest("Empty service name");
 
-        var shopImportSettings = await GetShopImportSettingsAsync(data.ShopId, data.ParentShopSettingsType);//HttpContext.Session.GetShopImportSettingsFromSessionAsync();
+        var shopImportSettings = await GetShopImportSettingsAsync(data.ShopId, data.ParentShopSettingsType);
         if (shopImportSettings == null)
             return Ok();
 
         var existingService = shopImportSettings.GetService<ServiceSettingsModel>(data.Name) ?? 
             shopImportSettings.GetService(data.Guid);
 
+        ServiceSettingsModel result;
         if (existingService == null)
+        {
             shopImportSettings.Services.Add(data.Name, data);
+            result = data;
+        }
         else
+        {
             existingService.Updateservice(data);
+            result = existingService;
+        }
 
         HttpContext.Session.SetImportSettingtoSession(shopImportSettings);
 
-        return Ok(data.ServiceTypeName);
+        return Ok(result);
     }
 
     [Route("/Import/Settings/Service/IsChanged")]
@@ -138,5 +145,14 @@ public class ServiceSettingsController(
             shopImportSettings.GetService(data.Guid);
 
         return Ok(existingService != null && !data.ServiceEquals(existingService));
+    }
+
+    [Route("/Import/Settings/Service/Item")]
+    [HttpPost]
+    public IActionResult ServiceItem([FromBody] ServiceSettingsModel data)
+    {
+        if (data == null) return BadRequest("Empty json for service.");
+
+        return PartialView("~/Views/Home/ServiceSettingsItem.cshtml", data);
     }
 }

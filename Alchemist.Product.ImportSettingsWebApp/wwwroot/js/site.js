@@ -16,7 +16,7 @@ function uploadShopList(shopId, shopSettingsType) {
 
             setShopSettingsItemsPreventClick();
 
-            loadImportSettingsTab(result.shopId, shopSettingsType);
+            loadImportSettingsTab(result.shopId ?? shopId, shopSettingsType);
         },
          null);
 }
