@@ -6,7 +6,7 @@ namespace Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 
 public static class SessionExtensions
 {
-    public static void SetImportSettingtoSession(this ISession session, ShopImportSettingsModel shopImportSettings)
+    public static void SetImportSettingToSession(this ISession session, ShopImportSettingsModel shopImportSettings)
     {
         session.SetInt32(SessionKeys.ShopSettingsTypeKey, (int)shopImportSettings.ShopSettingType);
 

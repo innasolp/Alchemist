@@ -3,7 +3,14 @@
     postJsonData(url = '/Import/Settings/Tab',
         data = JSON.stringify(data),
         onSuccess = (result) => {
+
             $("#importSettingsTabDiv").html(result);
+
+            initImportSettingsEvents();
+
+            initRootCategoriesEvents();
+
+            initServiceEvents();
 
             setItemsPreventClick();
         },
@@ -41,13 +48,19 @@ async function uploadImportSettingsFromJson(formSelector, fileInputName, importS
 
 function enableSaveSettingsButton() {
     enableButton('#saveImportSettingsBtn');
-}
- 
-async function saveImportSettings(url) {   
+} 
 
-    await saveSettings('#settingsForm', url,
-        (result) => { enableSaveSettingsButton(); },
-        (error) => { enableSaveSettingsButton(); },
-        () => { enableSaveSettingsButton(); }
-    );
+
+function initImportSettingsEvents() {
+    $("#saveImportSettingsBtn").on('click', async function (event) {
+        event.target.setAttribute('disabled', true);
+        const shopSettingsType = $("#ShopSettingType").val();
+
+        await saveSettings('#settingsForm',
+            `/Import/Settings/${shopSettingsType}/Save`,
+            (result) => { enableSaveSettingsButton(); },
+            (error) => { enableSaveSettingsButton(); },
+            () => { enableSaveSettingsButton(); }
+        );
+    });
 }

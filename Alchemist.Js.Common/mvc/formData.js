@@ -88,7 +88,7 @@ function postFormData(url, formData, onSuccess = null, onError = null) {
 }
 
 function postJsonData(url, jsonData, onSuccess = null, onError = null) {
-    postData(url, jsonData, onSuccess, onError, 'application/json; charset=utf-8');
+    postData(url, jsonData, onSuccess, onError, 'application/json');
 }
 
 function save(formSelector, url, data, onValidationError = null, onSuccess = null, onError = null) {
@@ -154,4 +154,51 @@ function setDivToForm(formDiv, div, formId) {
     var newDiv = $(div[0].outerHTML);
     form.append(newDiv);
     div.remove();
+}
+
+function tryFillFormDataByUrlParams(formData, paramNames) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.size > 0) {
+
+        for (var i = 0; i < paramNames.length; i++) {
+            if (!urlParams.has(paramNames[i])) continue;
+
+            const value = urlParams.get(paramNames[i]);
+            formData.append(paramNames[i], value);
+        }
+        return true;
+    }
+    return false;
+}
+
+function tryFillFormDataByPathNameParameters(formData, paramNames) {
+    const url = new URL(window.location.href);
+    const pathname = url.pathname;
+    const pathSegments = pathname.split('/').filter(segment => segment !== '');
+
+    if (pathSegments.length < paramNames.length) return false;
+
+    const shift = pathSegments.length - paramNames.length;
+    for (var i = 0; i < paramNames.length; i++) {
+        formData.append(paramNames[i], pathSegments[i + shift]);
+    }
+    return true;
+}
+
+function getFormDataCopy(formData) {
+
+    const copiedFormData = new FormData();
+
+    for (const [key, value] of formData.entries()) {
+        // Check if the value is a File or Blob to preserve its type and filename
+        if (value instanceof File) {
+            copiedFormData.append(key, value, value.name);
+        } else if (value instanceof Blob) {
+            copiedFormData.append(key, value); // Filename might be "blob" by default
+        } else {
+            copiedFormData.append(key, value);
+        }
+    }
+
+    return copiedFormData;
 }

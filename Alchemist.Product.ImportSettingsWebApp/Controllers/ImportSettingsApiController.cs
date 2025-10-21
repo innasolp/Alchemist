@@ -19,7 +19,7 @@ public class ImportSettingsApiController([FromKeyedServices(ShopSettingType.Prod
     {
         var importSettings = await _settingsDataAdapter.GetShopImportSettingsModel(data.ShopId, (ShopSettingType)data.ShopSettingsType);
 
-        HttpContext.Session.SetImportSettingtoSession(importSettings);
+        HttpContext.Session.SetImportSettingToSession(importSettings);
 
         return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", importSettings);
     }

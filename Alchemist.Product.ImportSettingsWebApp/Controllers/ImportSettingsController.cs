@@ -54,7 +54,7 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
     {
         var importSettings = await _settingsDataAdapter.GetShopImportSettingsModel(data.ShopId, (ShopSettingType)data.ShopSettingsType);
 
-        HttpContext.Session.SetImportSettingtoSession(importSettings);
+        HttpContext.Session.SetImportSettingToSession(importSettings);
 
         return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", importSettings);
     }
@@ -66,7 +66,7 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         if (data == null)
             return BadRequest("Empty json for product shopsettings.");
 
-        HttpContext.Session.SetImportSettingtoSession(data);
+        HttpContext.Session.SetImportSettingToSession(data);
 
         return PartialView("~/Views/Shared/ImportSettings.cshtml", data);
     }
@@ -78,7 +78,7 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         if (data == null)
             return BadRequest("Empty json for category shopsettings.");
 
-        HttpContext.Session.SetImportSettingtoSession(data);
+        HttpContext.Session.SetImportSettingToSession(data);
 
         return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", data);
     }
@@ -196,7 +196,7 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
             result = Ok(currentRootCategory);
         }
 
-        HttpContext.Session.SetImportSettingtoSession(productShopSettings);
+        HttpContext.Session.SetImportSettingToSession(productShopSettings);
 
         return result;
     }

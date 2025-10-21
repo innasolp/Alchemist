@@ -43,7 +43,7 @@ public partial class ProductShopSettingsModel(int shopId, int id, Guid shopGuid)
 
     IList IProductShopSettingsModel.RootCategories => RootCategories;
 
-    ICategoryUrl[]? IProductShopImportSettings.RootCategories { get => [.. RootCategories]; 
+    IEnumerable<ICategoryUrl>? IProductShopImportSettings.RootCategories { get => [.. RootCategories]; 
         set { 
             RootCategories.Clear();
             RootCategories.AddRange(value.OfType<CategoryUrlModel>()); 

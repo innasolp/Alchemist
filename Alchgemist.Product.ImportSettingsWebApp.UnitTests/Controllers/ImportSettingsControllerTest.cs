@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Alchemist.Import.Settings.DataAdapter;
+﻿using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
@@ -137,7 +136,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var sessionModel = NewProductSettings(3);
         sessionModel.Services["ImportService"] = NewService("ImportService", name: "DifferentServiceName");
-        controller.HttpContext.Session.SetImportSettingtoSession(sessionModel);
+        controller.HttpContext.Session.SetImportSettingToSession(sessionModel);
         
         var data = NewProductSettings(3);
         var result = await controller.ProductSettingsIsChangedAsync(data);
@@ -178,7 +177,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
         // session contains one service, which should be applied to existing when saving
         var sessionModel = NewProductSettings(4);
         sessionModel.Services["WebLoader"] = NewService("WebLoader", name: "WebLoader");
-        controller.HttpContext.Session.SetImportSettingtoSession(sessionModel);
+        controller.HttpContext.Session.SetImportSettingToSession(sessionModel);
         
 
         var payload = NewProductSettings(4, name: "New");
@@ -211,5 +210,115 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
         var result = controller.LoadCategoryShopImportSettings(null);
         var br = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Contains("Empty json", br.Value?.ToString());
+    }
+
+    [Fact]
+    public void RootCategory_ReturnsPartialView_WhenValid()
+    {
+        var controller = CreateController();
+
+        var data = new CategoryUrlModel() { Item = 1, Url = "https://example.com/c/1", ShopId = 1 };
+
+        var result = controller.RootCategory(data);
+
+        var pv = Assert.IsType<PartialViewResult>(result);
+        Assert.Equal("~/Views/Home/RootCategoryUrl.cshtml", pv.ViewName);
+        Assert.Same(data, pv.Model);
+    }
+
+    [Fact]
+    public async Task SetRootCategory_AddsNew_WhenNotExist()
+    {
+        var product = NewProductSettings(1);
+        product.RootCategories = new List<CategoryUrlModel>();
+
+        _productAdapter.Setup(a => a.GetShopImportSettings(1)).ReturnsAsync(product);
+
+        var controller = CreateController();
+
+        var data = new CategoryUrlModel() { Item = 5, Url = "https://example.com/c/5", ShopId = 1 };
+
+        var result = await controller.SetRootCategory(data) as OkObjectResult;
+
+        Assert.NotNull(result);
+        var returned = Assert.IsType<CategoryUrlModel>(result.Value);
+        Assert.Equal(data.Url, returned.Url);
+
+        var stored = await controller.HttpContext.Session.GetShopImportSettingsFromSessionAsync() as ProductShopImportSettingsModel;
+        Assert.NotNull(stored);
+        Assert.Contains(stored.RootCategories, c => c.Url == data.Url && c.Item == data.Item);
+    }
+
+    [Fact]
+    public async Task SetRootCategory_UpdatesExisting_WhenExists()
+    {
+        var existing = new CategoryUrlModel() { Item = 7, Url = "https://old", ShopId = 1, Guid = Guid.NewGuid() };
+        var product = NewProductSettings(1);
+        product.RootCategories = new List<CategoryUrlModel> { existing };
+
+        _productAdapter.Setup(a => a.GetShopImportSettings(1)).ReturnsAsync(product);
+
+        var controller = CreateController();
+
+        var data = new CategoryUrlModel() { Item = 7, Url = "https://new", ShopId = 1, Guid = existing.Guid };
+
+        var result = await controller.SetRootCategory(data) as OkObjectResult;
+
+        Assert.NotNull(result);
+        var returned = Assert.IsType<CategoryUrlModel>(result.Value);
+        Assert.Equal("https://new", returned.Url);
+
+        var stored = await controller.HttpContext.Session.GetShopImportSettingsFromSessionAsync() as ProductShopImportSettingsModel;
+        Assert.NotNull(stored);
+        Assert.Contains(stored.RootCategories, c => c.Url == "https://new" && c.Item == 7);
+    }
+
+    [Fact]
+    public async Task RootCategoryIsChanged_ReturnsTrue_WhenNotExists()
+    {
+        var product = NewProductSettings(2);
+        product.RootCategories = new List<CategoryUrlModel>();
+
+        _productAdapter.Setup(a => a.GetShopImportSettings(2)).ReturnsAsync(product);
+
+        var controller = CreateController();
+
+        var data = new CategoryUrlModel() { Item = 10, Url = "https://example.com/c/10", ShopId = 2 };
+
+        var result = await controller.RootCategoryIsChanged(data) as OkObjectResult;
+        Assert.NotNull(result);
+        Assert.Equal(true, result.Value);
+    }
+
+    [Fact]
+    public async Task RootCategoryIsChanged_ReturnsFalse_WhenEquals()
+    {
+        var existing = new CategoryUrlModel() { Item = 3, Url = "https://same", ShopId = 3 };
+        var product = NewProductSettings(3);
+        product.RootCategories = new List<CategoryUrlModel> { existing };
+
+        _productAdapter.Setup(a => a.GetShopImportSettings(3)).ReturnsAsync(product);
+
+        var controller = CreateController();
+
+        var data = new CategoryUrlModel() { Item = 3, Url = "https://same", ShopId = 3 };
+
+        var result = await controller.RootCategoryIsChanged(data) as OkObjectResult;
+        Assert.NotNull(result);
+        Assert.Equal(false, result.Value);
+    }
+
+    [Fact]
+    public void RootCategoryItem_ReturnsPartialView()
+    {
+        var controller = CreateController();
+
+        var data = new CategoryUrlModel() { Item = 2, Url = "u", ShopId = 1 };
+
+        var result = controller.RootCategoryItem(data);
+
+        var pv = Assert.IsType<PartialViewResult>(result);
+        Assert.Equal("~/Views/Home/RootCategoryUrlItem.cshtml", pv.ViewName);
+        Assert.Same(data, pv.Model);
     }
 }

@@ -79,7 +79,7 @@ internal static class ImportSettingPageTestExtensions
 
     internal static async Task SetServiceButtonClickAsync(this PageTest pageTest, string serviceClass)
     {
-        var setButton = pageTest.Page.Locator($"button.btn-set.{serviceClass}");
+        var setButton = pageTest.Page.Locator($"button.set-service.{serviceClass}");
         await pageTest.Expect(setButton).ToHaveCountAsync(1);
         await setButton.ClickAsync();
     }

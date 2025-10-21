@@ -4,11 +4,6 @@
 
 @functions
 {
-    public string GetNewData()
-    {
-        return JsonSerializer.Serialize(new CategoryUrlModel {ShopId = Model.ShopId});
-    }
-
     CategoryUrlModel GetCategoryUrlModel(CategoryUrlModel category)
     {
         return new CategoryUrlModel
@@ -51,7 +46,7 @@
         }
         <li class="table-ul add-btn-ul">
             <div>
-                <a class="addRootCategory" onclick="showCategoryUrlModal('@Guid.NewGuid()', @Model.ShopId)">Add category</a>
+                <a class="add-root-category">Add category</a>
             </div>         
         </li>
     </ul>

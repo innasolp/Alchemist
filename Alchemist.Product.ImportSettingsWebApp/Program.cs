@@ -2,15 +2,18 @@ using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Import.Settings.DataAdapter;
+using Alchemist.Log.Extensions;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
+using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 using Alchemist.Product.ImportSettingsWebApp.Models;
 using Alchemist.Product.Interfaces;
 using Alchemist.Settings.RestAPIClient;
+using Alchemist.WebApp.Api.Common;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog.Configuration.Extensions;
-using Alchemist.Log.Extensions;
-using Alchemist.WebApp.Api.Common;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +40,14 @@ if (isApi)
     builder.Services.AddBaseControllerInterceptors<ImportSettingsApiController>();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.WriteIndented = true; 
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; 
+    options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.JsonSerializerOptions.Converters.Add(new EmptyGuidConverter());
+}); 
 
 AddLogging(builder, isApi);
 

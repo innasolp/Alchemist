@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
 public class ServiceSettingsModel : IServiceSettings, IShopSettings
-{
+{    
     public Guid Guid { get; set; } = Guid.NewGuid();
 
     [Required(AllowEmptyStrings = true)]
@@ -47,8 +47,6 @@ public class ServiceSettingsModel : IServiceSettings, IShopSettings
     public string Name { get; set; }
 
     public int? ParentSettingsId { get; set; }
-
-    public ShopSettingType ParentShopSettingsType { get; set; }
 
     public int ShopId { get; set; }
 

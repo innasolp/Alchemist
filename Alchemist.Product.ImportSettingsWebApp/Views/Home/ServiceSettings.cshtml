@@ -2,35 +2,20 @@
 @using Alchemist.Web.Components.FileUpload
 @model ServiceSettingsModel
 
-@functions
-{
-    string ServiceSetResult()
-    {
-        if (Model.Name.IsPrimaryServiceName())
-        {
-            return $"(data)=>{{ $('#{Model.Name}').val(data.serviceTypeName); }}";
-        }
-        else
-            return "onSetServiceItem";       
-    } 
-}
-
 <h4>Service settings</h4>
 <hr />
 <form id="serviceSettingsForm">
-    <input type="hidden" name="Guid" value="@Model.Guid" />
-    <input type="hidden" name="ShopId" value="@Model.ShopId" />
-    <input type="hidden" name="ParentSettingsId" value="@Model.ParentSettingsId" />
-    <input type="hidden" name="ParentShopSettingsType" value="@Model.ParentShopSettingsType" />
-    @if (Model.IsPrimary())
-    {
-        <input type="hidden" name="Name" value="@Model.Name" id="ServiceName" />
+    <input type="hidden" asp-for="Guid"/>
+    <input type="hidden" asp-for="ParentSettingsId"/>
+    @if (Model.Name?.IsPrimaryServiceName() == true)
+    {        
+        <input asp-for="Name" class="form-control form-input" id="ServiceName" readonly="readonly" />
     }
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
             <div class="form-group"> 
-                @if (Model.IsPrimary())
+                @if (Model.Name?.IsPrimaryServiceName() == true)
                 {
                     <input type="hidden" asp-for="Value" id="Value" />
                 }
@@ -38,7 +23,7 @@
                                      on-change="uploadServiceSettingsValueFromJson('uploadValueFromJson',(data)=>{ $('#Value').val(data);})"
                                      file-name="@Model.FileName"></vc:upload-from-file>                
             </div>
-            @if(!Model.IsPrimary())
+            @if(Model.Name?.IsPrimaryServiceName() != true)
             {
                 <div class="form-group">
                     <label asp-for="Name" class="control-label"></label>
@@ -66,7 +51,7 @@
                 <input asp-for="ServiceProviderPath" class="form-control form-input" />
                 <span asp-validation-for="ServiceProviderPath" class="text-danger"></span>                
             </div>
-            @if(!Model.IsPrimary())
+            @if(Model.Name?.IsPrimaryServiceName() != true)
             {
                 <div class="form-group">
                     <label asp-for="Value" class="control-label"></label>
@@ -75,8 +60,7 @@
                 </div>
             }
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="saveServiceSettingsBtn"
-                        onclick="this.disabled=true;saveServiceSettings($('#serviceSettingsForm'), @ServiceSetResult())">
+                <button type="button" class="btn btn-primary" id="saveServiceSettingsBtn">
                     Save
                 </button>
             </div>

@@ -361,7 +361,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Web.Components", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.WebApp.Api.Common", "Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj", "{7B1D326F-F26E-4319-A0F1-D25FFE7441C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchgemist.Product.ImportSettingsWebApp.UnitTests", "Alchgemist.Product.ImportSettingsWebApp.UnitTests\Alchgemist.Product.ImportSettingsWebApp.UnitTests.csproj", "{AC1204FC-246D-42AB-85EB-E2ED4A3C8C0D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.ImportSettingsWebApp.UnitTests", "Alchgemist.Product.ImportSettingsWebApp.UnitTests\Alchemist.Product.ImportSettingsWebApp.UnitTests.csproj", "{AC1204FC-246D-42AB-85EB-E2ED4A3C8C0D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.ImportSettingsWebApp.IntegrationTest", "Alchemist.Product.ImportSettingsWebApp.IntegrationTest\Alchemist.Product.ImportSettingsWebApp.IntegrationTest.csproj", "{C5985AE7-C0B1-4CDD-BD23-E058A907632F}"
 EndProject

@@ -40,11 +40,10 @@ function setShopSettingsItemsPreventClick() {
 }
 
 function getIsSettingsChangedUrl() {
-
-    return $('#settingsIsChangedAction').val();
+    var shopSettingsType = $("#ShopSettingType").val();
+    return `/Import/Settings/${shopSettingsType}/IsChanged`;
 }
 
-function onImportSettingsItemChangePrevent(event) {
-
+function onImportSettingsItemChangePrevent(event) {    
     onItemChangePrevent(event, getIsSettingsChangedUrl(), '#settingsForm');
 }

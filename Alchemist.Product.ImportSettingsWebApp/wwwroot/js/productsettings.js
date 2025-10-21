@@ -10,18 +10,25 @@ function onCategoryUrlChanged(formData, onChanged) {
     );
 }
 
-function showCategoryUrlModal(guid, shopId, onHide = null) {
+function onSetRootCategory(event) {
+    var guid = event.target.hasAttribute("data-guid") ? event.target.getAttribute("data-guid") : null;
     const onShow = (response) => {
         setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
+        $("button.save-root-category").on("click", function (event){
+            setCategoryUrl('#rootCategoryForm');
+            });
     };
-    categoryUrlModalSettings.show('/Import/Settings/Product/CategoryUrl', getCategoryUrlData(guid, shopId), onShow, onHide);
+    categoryUrlModalSettings.show('/Import/Settings/Product/CategoryUrl', getCategoryUrlData(guid), onShow, null);
 }
 
-function getCategoryUrlData(guid, shopId) {
+function getCategoryUrlData(guid) {
+    var shopId = $("#ShopId").val();
     var data = { guid: guid, shopId: shopId };
-    const li = $('#' + data.guid);
-    data.item = li.find(".table_cell.item").text()
-    data.url = li.find(".table_cell.url").text()
+    if (guid != null) {
+        const li = $(`li[data-guid='${guid}']`);
+        data.item = li.find(".table_cell.item").text();
+        data.url = li.find(".table_cell.url").text();
+    }
     return data;
 }
 
@@ -49,7 +56,7 @@ function setCategoryUrl(categoryUrlForm, onSetCategory = null) {
 }
 
 function onSetCategoryUrlItem(data) {
-    var li = $('#' + data.guid);
+    var li = $(`li[data-guid='${data.guid}']`);
     if (li.length == 0)
         addCategoryUrlItem(data);
     else
@@ -65,5 +72,11 @@ function addCategoryUrlItem(data) {
     var li = $('ul.table-ul.rootCategories > .add-btn-ul');
     postJsonData('/Import/Settings/Product/CategoryUrl/Item', JSON.stringify(data), (content) => {
         li.before(content);
+        li.prev().find(".edit-root-category").on('click', onSetRootCategory);
     });
+}
+
+function initRootCategoriesEvents() {
+    $(".add-root-category").on('click', onSetRootCategory);
+    $(".edit-root-category").on('click', onSetRootCategory);
 }

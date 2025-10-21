@@ -2,18 +2,13 @@
 @using Alchemist.Product.ImportSettingsWebApp.Controllers
 @using Alchemist.Product.Interfaces
 @using Alchemist.Web.Components.FileUpload
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+
 @model ShopImportSettingsModel
 
 @functions {
 
-    public object GetServiceData(Guid guid) => JsonSerializer.Serialize(new ServiceSettingsData { ShopSettingsType = (int)Model.ShopSettingType, ShopId = Model.ShopId, Guid = guid });
     public string GetServiceUploadOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '"  + serviceName + "', (data)=>{setValIfValid('#" + serviceName + "', data.serviceTypeName); })";
-    public string GetUploadServiceValueOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + serviceName + "')";
-    string GetSaveAction() => $"/Import/Settings/{(Model.ShopSettingType == ShopSettingType.Product ? "Product" : "Category")}/Save";
-    string GetIsChangedAction() => $"/Import/Settings/{(Model.ShopSettingType == ShopSettingType.Product ? "Product" : "Category")}/IsChanged";
+    
 }
 
 <div class="row">
@@ -21,10 +16,9 @@
         <vc:show-modal modal-div-class="serviceSettingsModal" modal-body-div-class="serviceSettingsModalBody" modal-close-btn="serviceSettingsCloseBtn"></vc:show-modal>
         
         <form id="settingsForm">            
-            <input type="hidden" name="ShopId" value="@Model.ShopId" />            
-            <input type="hidden" name="Id" value="@Model.Id" />
-            <input type="hidden" name="ShopSettingType" value="@((int)Model.ShopSettingType)" />
-            <input type="hidden" id="settingsIsChangedAction" value="@GetIsChangedAction()"/>
+            <input type="hidden" asp-for="ShopId" />
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ShopSettingType" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
@@ -75,8 +69,7 @@
                             }
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary form-button" id="saveImportSettingsBtn"
-                        onclick="this.disabled=true;saveImportSettings('@GetSaveAction()');">
+                <button type="button" class="btn btn-primary form-button" id="saveImportSettingsBtn">
                     Save
                 </button>
             </div>

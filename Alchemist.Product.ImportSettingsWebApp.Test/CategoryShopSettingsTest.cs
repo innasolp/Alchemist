@@ -151,7 +151,7 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
         var row = FindServiceRow(service);
         await Expect(row).ToHaveCountAsync(1);
 
-        var editServiceBtn = row.Locator("i.editService");
+        var editServiceBtn = row.Locator("i.edit-service");
         await Expect(editServiceBtn).ToHaveCountAsync(1);
 
         await editServiceBtn.ClickAsync();

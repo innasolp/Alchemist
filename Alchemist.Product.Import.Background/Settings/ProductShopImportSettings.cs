@@ -21,5 +21,5 @@ public class ProductShopImportSettings : ShopImportSettings, IProductShopImportS
 
     public override ShopSettingType ShopSettingType => ShopSettingType.Product;
 
-    ICategoryUrl[]? IProductShopImportSettings.RootCategories { get => RootCategories; set => RootCategories = (CategoryUrl[])value; }
+    IEnumerable<ICategoryUrl>? IProductShopImportSettings.RootCategories { get => RootCategories; set => RootCategories = (CategoryUrl[])value; }
 }

@@ -7,7 +7,6 @@
     ServiceSettingsModel GetServiceItem(ServiceSettingsModel serviceSettings)
     {
         serviceSettings.ShopId = Model.ShopId;
-        serviceSettings.ParentShopSettingsType = Model.ShopSettingType;
         return serviceSettings;
     }
 }
@@ -27,8 +26,7 @@
     }
     <li class="table-ul add-btn-ul">
         <div>
-            <a class="addService"
-               onclick="showServiceSettingsModal('/Import/Settings/Service', {'shopId': @Model.ShopId, 'shopSettingsType':@((int)Model.ShopSettingType) })">Add service</a>
+            <a class="add-service">Add service</a>
         </div>
     </li>
 </ul>

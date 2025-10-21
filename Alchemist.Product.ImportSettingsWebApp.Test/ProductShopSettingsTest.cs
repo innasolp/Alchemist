@@ -136,6 +136,8 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
 
         await Expect(Page.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
 
+        await Page.GetByRole(AriaRole.Spinbutton, new() { Name = "Item" }).FillAsync("");
+
         await Page.Locator("button.save-root-category").ClickAsync();
 
         await Expect(Page.GetByText("The Item field is required.")).ToBeVisibleAsync();
@@ -165,7 +167,8 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
         var li = Page.Locator("li.rootcategory_li");
         var row = li.Filter(new LocatorFilterOptions { HasText = $"{newCategoryUrl.item}" })
           .And(li.Filter(new LocatorFilterOptions { HasText = newCategoryUrl.url }));
-        var editCategoryBtn = row.Locator("button.editRootCategory");
+        
+        var editCategoryBtn = row.Locator("button.edit-root-category");
         await Expect(editCategoryBtn).ToHaveCountAsync(1);
         
         await editCategoryBtn.ClickAsync();

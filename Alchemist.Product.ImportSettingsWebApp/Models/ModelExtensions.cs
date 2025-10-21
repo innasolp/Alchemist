@@ -157,7 +157,7 @@ internal static class ModelExtensions
     internal static bool ShopImportSettingsIsEmpty(this ShopImportSettingsModel shopImportSettings)
     {
         return string.IsNullOrEmpty(shopImportSettings.Name)
-              && !shopImportSettings.Services.Any();
+              && shopImportSettings.Services.Count == 0;
     }
 
     internal static bool IsEmpty(this ProductShopImportSettingsModel productSettings)

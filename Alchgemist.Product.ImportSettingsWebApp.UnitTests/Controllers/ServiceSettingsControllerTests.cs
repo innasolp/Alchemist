@@ -22,12 +22,12 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
             return controller;
         }
 
-        private static ProductShopImportSettingsModel NewShopSettings(int shopId)
+        private static ProductShopImportSettingsModel NewProductShopSettings(int shopId)
         {
             return new ProductShopImportSettingsModel
             {
                 ShopId = shopId,
-                Services = []
+                Services = new Dictionary<string, ServiceSettingsModel>()
             };
         }
 
@@ -35,13 +35,13 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task ServiceSettingsAsync_ReturnsPartialView_WithServiceModel()
         {
             var controller = CreateController();
-            var shopSettings = NewShopSettings(1);
+            var shopSettings = NewProductShopSettings(1);
             var service = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = Guid.NewGuid() };
             shopSettings.Services.Add(service.Name, service);
 
-            controller.HttpContext.Session.SetImportSettingtoSession(shopSettings);
+            controller.HttpContext.Session.SetImportSettingToSession(shopSettings);
 
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = "S1" };
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = "S1" };
 
             var result = await controller.ServiceSettingsAsync(data);
 
@@ -55,7 +55,7 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task ImportServiceSettingsAsync_ReturnsBadRequest_WhenNameMismatch()
         {
             var controller = CreateController();
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = "Other" };
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = "Other" };
 
             var result = await controller.ImportServiceSettingsAsync(data) as BadRequestObjectResult;
 
@@ -67,11 +67,11 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task ImportServiceSettingsAsync_ReturnsPartialView_WhenNameMatches()
         {
             var controller = CreateController();
-            var shopSettings = NewShopSettings(1);
+            var shopSettings = NewProductShopSettings(1);
 
-            controller.HttpContext.Session.SetImportSettingtoSession(shopSettings);
+            controller.HttpContext.Session.SetImportSettingToSession(shopSettings);
 
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.ImportService) };
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.ImportService) };
 
             var result = await controller.ImportServiceSettingsAsync(data);
 
@@ -83,7 +83,7 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task BrowserDataLoaderSettingsAsync_ReturnsBadRequest_WhenNameMismatch()
         {
             var controller = CreateController();
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = "Other" };
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = "Other" };
 
             var result = await controller.BrowserDataLoaderSettingsAsync(data) as BadRequestObjectResult;
 
@@ -96,8 +96,8 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         {
             var controller = CreateController();
 
-            controller.HttpContext.Session.SetImportSettingtoSession(NewShopSettings(1));
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.BrowserDataLoader) };
+            controller.HttpContext.Session.SetImportSettingToSession(NewProductShopSettings(1));
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.BrowserDataLoader) };
 
             var result = await controller.BrowserDataLoaderSettingsAsync(data);
 
@@ -109,7 +109,7 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task BrowserLauncherSettingsAsync_ReturnsBadRequest_WhenNameMismatch()
         {
             var controller = CreateController();
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = "Other" };
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = "Other" };
 
             var result = await controller.BrowserLauncherSettingsAsync(data) as BadRequestObjectResult;
 
@@ -122,8 +122,8 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         {
             var controller = CreateController();
 
-            controller.HttpContext.Session.SetImportSettingtoSession(NewShopSettings(1));
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.BrowserLauncher) };
+            controller.HttpContext.Session.SetImportSettingToSession(NewProductShopSettings(1));
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.BrowserLauncher) };
 
             var result = await controller.BrowserLauncherSettingsAsync(data);
 
@@ -135,7 +135,7 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task WebLoaderSettingsAsync_ReturnsBadRequest_WhenNameMismatch()
         {
             var controller = CreateController();
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = "Other" };
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = "Other" };
 
             var result = await controller.WebLoaderSettingsAsync(data) as BadRequestObjectResult;
 
@@ -148,9 +148,9 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         {
             var controller = CreateController();
 
-            controller.HttpContext.Session.SetImportSettingtoSession(NewShopSettings(1));
+            controller.HttpContext.Session.SetImportSettingToSession(NewProductShopSettings(1));
             
-            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.WebLoader) };
+            var data = new ServiceSettingsData { ShopId = 1, ShopSettingsType = ShopSettingType.Product, ServiceName = nameof(PrimaryServiceName.WebLoader) };
 
             var result = await controller.WebLoaderSettingsAsync(data);
 
@@ -164,7 +164,9 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
             var controller = CreateController();
             var data = new ServiceSettingsModel { Name = string.Empty };
 
-            var result = await controller.SaveAsync(data) as BadRequestObjectResult;
+            var payload = new SaveServiceSettingsData { ServiceSettings = data, ShopSettingsType = ShopSettingType.Product, ShopId = data.ShopId };
+
+            var result = await controller.SaveAsync(payload) as BadRequestObjectResult;
 
             Assert.NotNull(result);
             Assert.Equal("Empty service name", result.Value);
@@ -175,28 +177,30 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         {
             var controller = CreateController();
             // session empty -> GetShopImportSettingsFromSessionAsync should return null
-            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1" };
+            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", ShopId = 1 };
+            var payload = new SaveServiceSettingsData { ServiceSettings = data, ShopSettingsType = ShopSettingType.Product, ShopId = 1 };
 
-            var result = await controller.SaveAsync(data) as OkResult;
+            var result = Assert.IsType<OkObjectResult>(await controller.SaveAsync(payload));
 
-            Assert.NotNull(result);
+            Assert.NotNull(result.Value);
         }
 
         [Fact]
         public async Task SaveAsync_AddsNewServiceAndReturnsServiceTypeName()
         {
-            var shopSettings = NewShopSettings(1);            
+            var shopSettings = NewProductShopSettings(1);            
             
             var controller = CreateController();
 
-            controller.HttpContext.Session.SetImportSettingtoSession(shopSettings);
+            controller.HttpContext.Session.SetImportSettingToSession(shopSettings);
 
-            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = Guid.NewGuid() };
+            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = Guid.NewGuid(), ShopId = 1 };
+            var payload = new SaveServiceSettingsData { ServiceSettings = data, ShopSettingsType = ShopSettingType.Product, ShopId = 1 };
 
-            var result = await controller.SaveAsync(data) as OkObjectResult;
+            var result = await controller.SaveAsync(payload) as OkObjectResult;
 
             Assert.NotNull(result);
-            Assert.Equal("T1", result.Value);
+            Assert.Equal(data, result.Value);
 
             var updated = await controller.HttpContext.Session.GetShopImportSettingsFromSessionAsync();
             Assert.NotNull(updated);
@@ -209,7 +213,9 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
             var controller = CreateController();
             var data = new ServiceSettingsModel { Name = string.Empty };
 
-            var result = await controller.IsChanged(data) as BadRequestObjectResult;
+            var payload = new SaveServiceSettingsData { ServiceSettings = data, ShopSettingsType = ShopSettingType.Product, ShopId = data.ShopId };
+
+            var result = await controller.IsChanged(payload) as BadRequestObjectResult;
 
             Assert.NotNull(result);
             Assert.Equal("Empty service name", result.Value);
@@ -219,9 +225,10 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task IsChanged_ReturnsOk_WhenNoSessionShopSettings()
         {
             var controller = CreateController();
-            var data = new ServiceSettingsModel { Name = "S1" };
+            var data = new ServiceSettingsModel { Name = "S1", ShopId = 1 };
+            var payload = new SaveServiceSettingsData { ServiceSettings = data, ShopSettingsType = ShopSettingType.Product, ShopId = 1 };
 
-            var result = await controller.IsChanged(data) as OkObjectResult;
+            var result = await controller.IsChanged(payload) as OkObjectResult;
 
             Assert.NotNull(result);
         }
@@ -230,16 +237,17 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task IsChanged_ReturnsFalse_WhenServiceEquals()
         {
             var controller = CreateController();
-            var shopSettings = NewShopSettings(1);
+            var shopSettings = NewProductShopSettings(1);
             var g = Guid.NewGuid();
-            var existing = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = g };
+            var existing = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = g, ShopId = 1 };
             shopSettings.Services.Add(existing.Name, existing);
             
-            controller.HttpContext.Session.SetImportSettingtoSession(shopSettings);
+            controller.HttpContext.Session.SetImportSettingToSession(shopSettings);
 
-            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = g };
+            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = g, ShopId = 1 };
+            var payload = new SaveServiceSettingsData { ServiceSettings = data, ShopSettingsType = ShopSettingType.Product, ShopId = 1 };
 
-            var result = await controller.IsChanged(data) as OkObjectResult;
+            var result = await controller.IsChanged(payload) as OkObjectResult;
             Assert.NotNull(result);
             Assert.Equal(false, result.Value);
         }
@@ -248,15 +256,16 @@ namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers
         public async Task IsChanged_ReturnsTrue_WhenServiceDifferent()
         {
             var controller = CreateController();
-            var shopSettings = NewShopSettings(1);
+            var shopSettings = NewProductShopSettings(1);
             var existing = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = Guid.NewGuid() };
             shopSettings.Services.Add(existing.Name, existing);
            
-            controller.HttpContext.Session.SetImportSettingtoSession(shopSettings);
+            controller.HttpContext.Session.SetImportSettingToSession(shopSettings);
 
-            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "Different", Guid = existing.Guid };
+            var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "Different", Guid = existing.Guid, ShopId = 1 };
+            var payload = new SaveServiceSettingsData { ServiceSettings = data, ShopSettingsType = ShopSettingType.Product, ShopId = 1 };
 
-            var result = await controller.IsChanged(data) as OkObjectResult;
+            var result = await controller.IsChanged(payload) as OkObjectResult;
             Assert.NotNull(result);
             Assert.Equal(true, result.Value);
         }
