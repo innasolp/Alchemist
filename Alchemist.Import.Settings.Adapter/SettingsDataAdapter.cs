@@ -20,24 +20,26 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
     {
         var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, _shopSettingType);
         if (shopSettings == null) return null;
-
-        return await GetShopImportSettings(shopSettings);
+        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
+        return SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>.GetShopImportSettings(shopSettings, services);
     }
 
     public async Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName)
     {
         var shopSettings = await _shopSettingsDataService.GetShopSettings(shopSettingsName);
         if (shopSettings == null) return null;
-        return await GetShopImportSettings(shopSettings);
+        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
+        return SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>.GetShopImportSettings(shopSettings, services);
     }
 
-    private async Task<TShopImportSettings?> GetShopImportSettings(IShopSettings shopSettings)
+    private static TShopImportSettings GetShopImportSettings(IShopSettings shopSettings, IEnumerable<IShopSettings> services)
     {
         var shopSettingsModel = shopSettings.ToShopImportSettings<TShopImportSettings>();
         SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>.SetShopSettings(shopSettingsModel, shopSettings);
+        //todo ShouldSerialize =>(..,..) => false not working
+        shopSettingsModel.Services.Clear();
 
-        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
-        var serviceModels = services.ToDictionary(s=>s.Name, s =>
+        var serviceModels = services.ToDictionary(s => s.Name, s =>
         {
             var service = s.ToImportServiceSettings<TImportServiceSettings>();
             SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>.SetShopSettings(service, s);
@@ -46,7 +48,7 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
             .ToList();
 
         foreach (var serviceModel in serviceModels)
-            shopSettingsModel.UpdateServiceSettings(serviceModel.Key, serviceModel.Value);
+            shopSettingsModel.UpdateServices(serviceModel.Key, serviceModel.Value);
 
         return shopSettingsModel;
     }
@@ -60,22 +62,29 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         target.Name = source.Name;
     }
 
-    public async Task Save(TShopImportSettings shopSettingsModel)
+    public async Task<TShopImportSettings> Save(TShopImportSettings shopSettingsModel)
     {
         var shopSettings = shopSettingsModel.To<ShopSettings>() as IShopSettings;
-        shopSettings.JsonValue = JsonSerializer.Serialize(shopSettingsModel);
+        shopSettings.JsonValue = JsonSerializer.Serialize(shopSettingsModel,
+            EntityExtensions.GetDefaultImportSettingsSerializationOptions<TShopImportSettings>());
 
         var services = new List<IShopSettings>();
-        foreach (var (serviceModel, service) in from serviceModel in shopSettingsModel.Services.OfType<TImportServiceSettings>()
-                                                let service = serviceModel.To<ShopSettings>() as IShopSettings
+        foreach (var (serviceModel, service) in from serviceModel in shopSettingsModel.Services.OfType<KeyValuePair<string, TImportServiceSettings>>()
+                                                let service = serviceModel.Value.ToEntity()
                                                 select (serviceModel, service))
         {
-            service.JsonValue = JsonSerializer.Serialize(serviceModel);
+            service.JsonValue = JsonSerializer.Serialize(serviceModel.Value);
+            if(string.IsNullOrEmpty(service.Name)) service.Name = serviceModel.Key;
             services.Add(service);
         }
 
-        //todo add primary services if need
-        await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
+        var result = await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
+
+        var savedShopSettings = result.First();
+        var savedServices = result.TakeLast(result.Count - 1);
+        var savedShopImportSettings = SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>.GetShopImportSettings(savedShopSettings, savedServices);
+        
+        return savedShopImportSettings;
     }
 
     public async Task<Dictionary<string,IShopImportSettings>> GetAllShopImportSettings()
@@ -84,7 +93,8 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         var allShopImportSettings = new Dictionary<string,IShopImportSettings>();
         foreach (var shopSettings in allParents)
         {
-            var shopImportSettings = await GetShopImportSettings(shopSettings);
+            var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
+            var shopImportSettings = SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>.GetShopImportSettings(shopSettings, services);
             
             if(shopImportSettings != null)
                 allShopImportSettings.Add(shopSettings.Name, shopImportSettings);
@@ -97,11 +107,11 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         return await GetShopImportSettings(shopSettingsName);
     }
 
-    Task ISettingsDataAdapter.Save(IShopImportSettings shopSettingsModel)
+    async Task<IShopImportSettings> ISettingsDataAdapter.Save(IShopImportSettings shopSettingsModel)
     {
         if (shopSettingsModel is not TShopImportSettings shopImportSettings)
             throw new InvalidOperationException($"Shop settings type {shopSettingsModel.GetType().Name} not implement {typeof(TShopImportSettings).Name}.");
 
-        return Save(shopImportSettings);
+        return await Save(shopImportSettings);
     }
 }

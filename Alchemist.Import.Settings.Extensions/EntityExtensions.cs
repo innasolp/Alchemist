@@ -1,41 +1,72 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
-using System.Runtime;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Import.Settings.Extensions;
 
 public static class EntityExtensions
 {
+    public static JsonSerializerOptions GetDefaultServiceSerializationOptions<T>()
+    {
+        return new JsonSerializerOptions()
+        {
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(
+            Alchemist.Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
+                    nameof(IShopSettings.Id),
+                    nameof(IShopSettings.ParentSettingsId),
+                    nameof(IShopSettings.ShopId),
+                    nameof(IShopSettings.Name)) 
+            )
+        };
+    }
+
+    public static JsonSerializerOptions GetDefaultImportSettingsSerializationOptions<T>()
+        where T : IShopImportSettings
+    {
+        return new JsonSerializerOptions()
+        {
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(
+                Alchemist.Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
+                    nameof(IShopImportSettings.Services),
+                    nameof(IShopSettings.Id),
+                    nameof(IShopSettings.ParentSettingsId),
+                    nameof(IShopSettings.ShopId),
+                    nameof(IShopSettings.Name)))
+        };
+    }
+
     public static T ToShopImportSettings<T>(this IShopSettings shopSettings, params JsonConverter[] jsonConverters)
         where T : IShopImportSettings
     {
-        var option = new JsonSerializerOptions();
-        jsonConverters.ToList().ForEach(option.Converters.Add);
+        var options = GetDefaultImportSettingsSerializationOptions<T>();
+        jsonConverters.ToList().ForEach(options.Converters.Add);
 
-        var model = JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString());
+        var model = JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString(), options);
 
         return model;
     }
 
     public static T? ToImportServiceSettings<T>(this IShopSettings shopSettings, params JsonConverter[] jsonConverters)
-        where T : IServiceSettings //, IShopSettings
+        where T : IServiceSettings
     {
-        var option = new JsonSerializerOptions();
+        var option = GetDefaultServiceSerializationOptions<T>();
         jsonConverters.ToList().ForEach(option.Converters.Add);
 
         var model = shopSettings.JsonValue != null 
             ? JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString(), option) 
-            : default(T);
+            : default;
         return model;
     }
 
     public static IShopSettings ToEntity<T>(this T shopSettings, JsonSerializerOptions? options = null)
         where T : class, IShopSettings
     {
+        options ??= GetDefaultServiceSerializationOptions<T>();
+
         var json = JsonSerializer.Serialize(shopSettings, options);
 
         return new ShopSettings

@@ -109,7 +109,7 @@ public class ShopSettingsActionTest : ImportWebAppTest
         };
 
         foreach(var serviceName in serviceNames)
-            shopProductSettings.UpdateServiceSettings(serviceName, servicesByName[serviceName]);       
+            shopProductSettings.UpdateServices(serviceName, servicesByName[serviceName]);       
 
         await settingsForm.Locator("#ShopSettingsName").FillAsync(shopProductSettings.Name);
         await settingsForm.Locator("#ProductUrlFormat").FillAsync(shopProductSettings.ProductUrlFormat);

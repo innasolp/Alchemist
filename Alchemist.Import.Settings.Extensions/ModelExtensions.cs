@@ -30,13 +30,13 @@ public static class ModelExtensions
         {
             var serviceSource = service.ToImportServiceSettings<TImportServiceSettings>();
 
-            shopImportSettings.UpdateServiceSettings(service.Name, serviceSource);
+            shopImportSettings.UpdateServices(service.Name, serviceSource);
         }
 
         return shopImportSettings;
     }
 
-    public static void UpdateServiceSettings<TService>(this IShopImportSettings shopImportSettings, string serviceName, TService serviceSource)
+    public static void UpdateServices<TService>(this IShopImportSettings shopImportSettings, string serviceName, TService serviceSource)
         where TService : class, IServiceSettings 
     {
         var targetService = shopImportSettings.GetService<TService>(serviceName);

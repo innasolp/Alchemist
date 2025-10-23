@@ -6,5 +6,5 @@ public interface ISettingsDataAdapter: ISettingsAdapter
 {
     Task<IShopImportSettings?> GetShopImportSettings(int shopId);
         
-    Task Save(IShopImportSettings shopSettingsModel);    
+    Task<IShopImportSettings> Save(IShopImportSettings shopSettingsModel);    
 }
