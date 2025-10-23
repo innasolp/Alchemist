@@ -1,21 +1,24 @@
 ﻿function loadImportSettingsTab(shopId, shopSettingsType) {
-    var data = { shopSettingsType: shopSettingsType, shopId: shopId };
-    postJsonData(url = '/Import/Settings/Tab',
-        data = JSON.stringify(data),
+    postJsonData(url = `/Import/Settings/Tab/${shopId}/${shopSettingsType}`,
+        null,
         onSuccess = (result) => {
 
             $("#importSettingsTabDiv").html(result);
 
-            initImportSettingsEvents();
-
-            initRootCategoriesEvents();
-
-            initServiceEvents();
-
-            setItemsPreventClick();
+            initSettingsEvents();
         },
         null
     );
+}
+
+function initSettingsEvents() {
+    initImportSettingsEvents();
+
+    initRootCategoriesEvents();
+
+    initServiceEvents();
+
+    setItemsPreventClick();
 }
 
 function setItemsPreventClick() {
@@ -30,18 +33,20 @@ function onSettingsTabChangePrevent(event) {
 
 async function uploadImportSettingsFromJson(formSelector, fileInputName, importSettingsUrl) {
 
-    var lodImportSettingsToDiv = (html) => $("#importSettingsDiv").html(html);
+    var lodImportSettingsToDiv = function (html) {
+        $("#importSettingsDiv").html(html);
+        initSettingsEvents();
+    }
 
     postFormInputFile('/Upload/Json/',
         formSelector,
         fileInputName,
         null,
-        (data) => {
-            if (data == null) return;
-            console.trace(data);
+        (json) => {
+            if (json == null) return;
+            console.trace(json);
             console.log('shop settings upload successfully');
-
-            postJsonData(importSettingsUrl, data, lodImportSettingsToDiv, null);
+            postJsonData(importSettingsUrl, json, lodImportSettingsToDiv, null);
         }
     );
 }

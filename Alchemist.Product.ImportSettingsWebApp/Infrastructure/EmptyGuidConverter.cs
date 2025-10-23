@@ -10,7 +10,7 @@ public class EmptyGuidConverter : JsonConverter<Guid>
         if (reader.TokenType == JsonTokenType.String)
         {
             string guidString = reader.GetString();
-            if (string.IsNullOrEmpty(guidString))
+            if (string.IsNullOrEmpty(guidString) || guidString.Equals("null", StringComparison.InvariantCultureIgnoreCase))
             {
                 return Guid.NewGuid();
             }

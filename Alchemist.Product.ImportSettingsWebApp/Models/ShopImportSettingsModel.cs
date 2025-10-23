@@ -7,7 +7,7 @@ using Alchemist.Import.Settings.Extensions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
-public abstract class ShopImportSettingsModel : IShopImportSettings, IShopSettings
+public abstract class ShopImportSettingsModel : IShopImportSettings, IShopSettings, IJsonOnDeserialized
 {
     public bool? Perfomance { get ; set; }
 
@@ -49,9 +49,15 @@ public abstract class ShopImportSettingsModel : IShopImportSettings, IShopSettin
 
     ShopSettingType IShopSettings.Type { get => ShopSettingType; set {; } }
 
+    [JsonIgnore]
     IDictionary IShopImportSettings.Services => Services;
-
-    //todo
+    
     string IShopImportSettings.ShopName { get; set; }
     string IShopImportSettings.ShopUrl { get; set; }
+
+    void IJsonOnDeserialized.OnDeserialized()
+    {
+        foreach (var service in Services.Where(s => s.Key.IsPrimaryServiceName() && string.IsNullOrEmpty(s.Value.Name)))
+            service.Value.Name = service.Key;
+    }
 }

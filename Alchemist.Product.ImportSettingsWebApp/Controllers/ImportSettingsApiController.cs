@@ -14,10 +14,10 @@ public class ImportSettingsApiController([FromKeyedServices(ShopSettingType.Prod
     private readonly SettingsDataAdapterContainer _settingsDataAdapter = new(productSettingsDataAdapter, categorySettingsDataAdapter);
 
     [HttpPost]
-    [Route("/Tab")]
-    public async Task<IActionResult> ShopSettingsTab([FromBody] ShopSettingsData data)
+    [Route("/Tab/{shopId:int}/{shopSettingsType:ShopSettingType}")]
+    public async Task<IActionResult> ShopSettingsTab(int shopId, ShopSettingType shopSettingsType)
     {
-        var importSettings = await _settingsDataAdapter.GetShopImportSettingsModel(data.ShopId, (ShopSettingType)data.ShopSettingsType);
+        var importSettings = await _settingsDataAdapter.GetShopImportSettingsModel(shopId, shopSettingsType);
 
         HttpContext.Session.SetImportSettingToSession(importSettings);
 

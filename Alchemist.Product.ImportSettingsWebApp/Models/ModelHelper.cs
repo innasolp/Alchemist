@@ -1,4 +1,5 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
+using Alchemist.Product.Interfaces;
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
 internal static class ModelHelper
@@ -14,6 +15,15 @@ internal static class ModelHelper
     }
 
     internal static async Task<ShopImportSettingsModel> GetShopImportSettingsModel(this SettingsDataAdapterContainer settingsDataAdapter,
+        int? shopId, ShopSettingType shopSettingsType)
+    {
+        return shopId != null
+            ? await settingsDataAdapter.GetShopImportSettingsAsync((int)shopId, shopSettingsType)
+                ?? CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType)
+            : CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType);
+    }
+
+    internal static async Task<ShopImportSettingsModel> GetShopImportSettingsModel(this SettingsFacade settingsDataAdapter,
         int? shopId, ShopSettingType shopSettingsType)
     {
         return shopId != null

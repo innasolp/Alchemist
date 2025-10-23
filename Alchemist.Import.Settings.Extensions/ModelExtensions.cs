@@ -5,8 +5,7 @@ using System.Text.Json;
 namespace Alchemist.Import.Settings.Extensions;
 
 public static class ModelExtensions
-{
-    
+{    
     public static void Update<TService>(this TService serviceSettings, TService source)
         where TService : class, IServiceSettings
     {

@@ -1,4 +1,6 @@
 ﻿using Alchemist.Import.Settings.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
@@ -6,7 +8,7 @@ internal static class ModelExtensions
 {
     internal static ServiceSettingsModel GetService(this ShopImportSettingsModel shopImportSettings, Guid guid)
     {
-        return shopImportSettings.Services.FirstOrDefault(s=>s.Value.Guid == guid).Value;
+        return shopImportSettings.Services.FirstOrDefault(s => s.Value.Guid == guid).Value;
     }
 
     internal static void Updateservice(this ServiceSettingsModel target, ServiceSettingsModel source)
@@ -14,14 +16,14 @@ internal static class ModelExtensions
         if (!(target.Name.IsPrimaryServiceName() || source.Name.IsPrimaryServiceName()))
             target.Name = source.Name;
 
-        target.Update(source); 
+        target.Update(source);
     }
 
     private static bool EqualsWithEmpty(this string? target, string? source)
     {
         return (string.IsNullOrEmpty(target) && string.IsNullOrEmpty(source))
             || target?.Equals(source, StringComparison.OrdinalIgnoreCase) == true;
-}
+    }
 
     internal static bool ServiceEquals(this ServiceSettingsModel target, ServiceSettingsModel source)
     {
@@ -38,10 +40,10 @@ internal static class ModelExtensions
             && target.Perfomance == source.Perfomance;
     }
 
-    internal static bool ServicesAreEquals(this IDictionary<string, ServiceSettingsModel> target,  IDictionary<string, ServiceSettingsModel> source)
+    internal static bool ServicesAreEquals(this IDictionary<string, ServiceSettingsModel> target, IDictionary<string, ServiceSettingsModel> source)
     {
-        return target.Count == source.Count && 
-            target.All(ts=>source.Any(s=>s.Key == ts.Key && ts.Value.ServiceEquals(s.Value)));
+        return target.Count == source.Count &&
+            target.All(ts => source.Any(s => s.Key == ts.Key && ts.Value.ServiceEquals(s.Value)));
     }
 
     public static bool IsEquals(this CategoryUrlModel target, CategoryUrlModel source)
@@ -65,18 +67,18 @@ internal static class ModelExtensions
 
     internal static bool CategoryShopSettingsFieldsEquals(this CategoryShopImportSettingsModel target, CategoryShopImportSettingsModel source)
     {
-        return target.ShopSettingsIsEquals(source) &&  target.CategorySourceUrl.EqualsWithEmpty(source.CategorySourceUrl);
+        return target.ShopSettingsIsEquals(source) && target.CategorySourceUrl.EqualsWithEmpty(source.CategorySourceUrl);
     }
 
     internal static bool ProductShopSettingsIsEquals(this ProductShopImportSettingsModel target, ProductShopImportSettingsModel source)
     {
         if (!target.ShopSettingsIsEquals(source)) return false;
 
-        if( !( target.ProductUrlFormat.EqualsWithEmpty(source.ProductUrlFormat)
+        if (!(target.ProductUrlFormat.EqualsWithEmpty(source.ProductUrlFormat)
             && target.CategoryUrlFormat.EqualsWithEmpty(source.CategoryUrlFormat)
             && target.PageProductCount.Equals(source.PageProductCount))) return false;
 
-        if(!target.Services.ServicesAreEquals(source.Services)) return false;
+        if (!target.Services.ServicesAreEquals(source.Services)) return false;
 
         return target.RootCategories.Count == source.RootCategories.Count &&
             target.RootCategories.All(ts => source.RootCategories.Any(s => s.IsEquals(ts)));
@@ -86,7 +88,7 @@ internal static class ModelExtensions
     {
         if (!target.ShopSettingsIsEquals(source)) return false;
 
-        if(!target.CategorySourceUrl.EqualsWithEmpty(source.CategorySourceUrl)) return false;
+        if (!target.CategorySourceUrl.EqualsWithEmpty(source.CategorySourceUrl)) return false;
 
         return target.Services.ServicesAreEquals(source.Services);
     }
@@ -97,14 +99,16 @@ internal static class ModelExtensions
 
         foreach (var targetService in targetServices)
         {
-            var sourceService = services.FirstOrDefault(s=>s.Key == targetService.Key);
+            var sourceService = services.FirstOrDefault(s => s.Key == targetService.Key);
             if (sourceService.Value != null)
+            {
                 targetService.Value.Update(sourceService.Value);
+            }
             else
                 shopImportSettings.Services.Remove(targetService.Key);
         }
 
-        var newServices = services.Where(s=>!targetServices.ContainsKey(s.Key));
+        var newServices = services.Where(s => !targetServices.ContainsKey(s.Key));
         foreach (var newService in newServices)
             shopImportSettings.Services.Add(newService.Key, newService.Value);
     }
@@ -112,7 +116,7 @@ internal static class ModelExtensions
     internal static void UpdateCategorySources(this ProductShopImportSettingsModel productShopImportSettings, List<CategoryUrlModel> categoryUrls)
     {
         var targetCategoryUrls = productShopImportSettings.RootCategories.ToList();
-        foreach(var targetCategoryUrl in targetCategoryUrls)
+        foreach (var targetCategoryUrl in targetCategoryUrls)
         {
             var sourceCategoryUrl = categoryUrls.FirstOrDefault(c => c.Item == targetCategoryUrl.Item);
             if (sourceCategoryUrl == null)
@@ -121,19 +125,19 @@ internal static class ModelExtensions
                 targetCategoryUrl.Url = sourceCategoryUrl.Url;
         }
 
-        var newCategoryUrls = categoryUrls.Where(c=>!targetCategoryUrls.Any(tc=>tc.Item == c.Item));
+        var newCategoryUrls = categoryUrls.Where(c => !targetCategoryUrls.Any(tc => tc.Item == c.Item));
         foreach (var newCategoryUrl in newCategoryUrls)
             productShopImportSettings.RootCategories.Add(newCategoryUrl);
     }
 
-    internal static void UpdateFields(this ShopImportSettingsModel target, ShopImportSettingsModel source)
+    internal static void UpdateShopImportSettingsCore(this ShopImportSettingsModel target, ShopImportSettingsModel source)
     {
         target.Name = source.Name;
         target.Perfomance = source.Perfomance;
     }
 
-    internal static void UpdateProductShopImportSettings(this ProductShopImportSettingsModel target, ProductShopImportSettingsModel source)
-    { 
+    internal static void UpdateProductShopImportSettingsCore(this ProductShopImportSettingsModel target, ProductShopImportSettingsModel source)
+    {
         target.ProductUrlFormat = source.ProductUrlFormat;
         target.CategoryUrlFormat = source.CategoryUrlFormat;
         target.PageProductCount = source.PageProductCount;
@@ -141,8 +145,8 @@ internal static class ModelExtensions
         target.UpdateCategorySources(source.RootCategories);
     }
 
-    internal static void UpdateCategoryShopImportSettings(this CategoryShopImportSettingsModel target, CategoryShopImportSettingsModel source)
-    { 
+    internal static void UpdateCategoryShopImportSettingsCore(this CategoryShopImportSettingsModel target, CategoryShopImportSettingsModel source)
+    {
         target.CategorySourceUrl = source.CategorySourceUrl;
     }
 
@@ -177,7 +181,38 @@ internal static class ModelExtensions
 
     internal static bool IsEmpty(this CategoryUrlModel categoryUrl)
     {
-        return  string.IsNullOrEmpty(categoryUrl.Url)
+        return string.IsNullOrEmpty(categoryUrl.Url)
                && categoryUrl.Item == 0;
+    }
+
+    internal static void Update(this ProductShopImportSettingsModel target, ProductShopImportSettingsModel source)
+    {
+        target.UpdateShopImportSettingsCore(source);
+        target.UpdateProductShopImportSettingsCore(source);
+        target.UpdateServices(source.Services);
+    }
+
+    internal static void Update(this CategoryShopImportSettingsModel target, CategoryShopImportSettingsModel source)
+    {
+        target.UpdateShopImportSettingsCore(source);
+        target.UpdateCategoryShopImportSettingsCore(source);
+        target.UpdateServices(source.Services);
+    }
+
+    internal static CategoryUrlModel SetRootCategory(this ProductShopImportSettingsModel productShopSettings, CategoryUrlModel category)
+    {
+        var currentRootCategory = productShopSettings.RootCategories.FirstOrDefault(c => c.Guid == category.Guid);
+
+        if (currentRootCategory == null)
+        {
+            productShopSettings.RootCategories.Add(category);
+            return category;
+        }
+        else
+        {
+            currentRootCategory.Url = category.Url;
+            currentRootCategory.Item = category.Item;
+            return currentRootCategory;
+        }
     }
 }

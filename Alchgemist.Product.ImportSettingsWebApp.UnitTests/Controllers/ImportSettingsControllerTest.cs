@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
+namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 
 public class ImportSettingsControllerTest : ControllerTest<ImportSettingsController>
 {
@@ -60,7 +60,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var controller = CreateController();
 
-        var result = await controller.ImportSettingsTabAsync(new ShopSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product });
+        var result = await controller.ImportSettingsTabAsync(1, ShopSettingType.Product);
 
         var pv = Assert.IsType<PartialViewResult>(result);
         Assert.Equal("~/Views/Shared/ShopImportSettingsTab.cshtml", pv.ViewName);
@@ -77,23 +77,23 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
     }
 
     [Fact]
-    public void LoadProductShopImportSettings_BadRequest_WhenNull()
+    public async Task LoadProductShopImportSettings_BadRequest_WhenNull()
     {
         var controller = CreateController();
 
-        var result = controller.LoadProductShopImportSettings(null);
+        var result = await controller.LoadProductShopImportSettings(1, null);
 
         var br = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Contains("Empty json", br.Value?.ToString());
     }
 
     [Fact]
-    public void LoadProductShopImportSettings_ReturnsPartialView_AndSetsSession()
+    public async Task LoadProductShopImportSettings_ReturnsPartialView_AndSetsSession()
     {
         var controller = CreateController();
         var data = NewProductSettings(5);
 
-        var result = controller.LoadProductShopImportSettings(data);
+        var result = await controller.LoadProductShopImportSettings(5, data);
 
         var pv = Assert.IsType<PartialViewResult>(result);
         Assert.Equal("~/Views/Shared/ImportSettings.cshtml", pv.ViewName);
@@ -172,7 +172,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
         _productAdapter
             .Setup(a => a.Save(It.IsAny<IShopImportSettings>()))
             .Callback<IShopImportSettings>(m => saved = Assert.IsType<ProductShopImportSettingsModel>(m))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(existing);
 
         // session contains one service, which should be applied to existing when saving
         var sessionModel = NewProductSettings(4);
@@ -204,10 +204,10 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
     }
 
     [Fact]
-    public void LoadCategoryShopImportSettings_BadRequest_WhenNull()
+    public async Task LoadCategoryShopImportSettings_BadRequest_WhenNull()
     {
         var controller = CreateController();
-        var result = controller.LoadCategoryShopImportSettings(null);
+        var result = await controller.LoadCategoryShopImportSettings(1, null);
         var br = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Contains("Empty json", br.Value?.ToString());
     }

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;

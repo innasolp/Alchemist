@@ -47,7 +47,13 @@ builder.Services.AddControllersWithViews().AddJsonOptions(options =>
     options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.Converters.Add(new EmptyGuidConverter());
-}); 
+});
+
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.ConstraintMap.Add("shopSettingType", typeof(EnumRouteConstraint<ShopSettingType>)); 
+});
+
 
 AddLogging(builder, isApi);
 

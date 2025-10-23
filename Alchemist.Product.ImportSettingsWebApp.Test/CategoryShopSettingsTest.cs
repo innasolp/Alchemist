@@ -60,12 +60,14 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
                 Guid.NewGuid().ToString()
         );
 
-        await Page.Locator("#ServiceName").FillAsync(service.Name);
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(service.ServiceTypeName);
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" }).FillAsync(service.ImplementationTypeName);
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true }).FillAsync(service.AssemblyPath);
+        var form = Page.Locator("#serviceSettingsForm");
 
-        await Page.Locator("#saveServiceSettingsBtn").ClickAsync();
+        await form.Locator("#ServiceName").FillAsync(service.Name);
+        await form.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(service.ServiceTypeName);
+        await form.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" }).FillAsync(service.ImplementationTypeName);
+        await form.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true }).FillAsync(service.AssemblyPath);
+
+        await form.Locator("#saveServiceSettingsBtn").ClickAsync();
 
         await Expect(Page.Locator("#serviceSettingsForm")).Not.ToBeVisibleAsync();
 

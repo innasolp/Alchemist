@@ -57,7 +57,9 @@ public class ServiceSettingsModel : IServiceSettings, IShopSettings
 
     bool? IShopSettings.IsActual { get; set; }
 
+    [JsonIgnore]
     string IShopSettings.JsonValue { get => Value; set => Value  = value; }
 
+    [JsonIgnore]
     ShopSettingType IShopSettings.Type { get => ShopSettingType; set {; }  }
 }

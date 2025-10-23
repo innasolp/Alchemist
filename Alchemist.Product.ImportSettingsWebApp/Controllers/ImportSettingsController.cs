@@ -6,112 +6,63 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
+
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
-    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) 
-    : SettingsController(productSettingsDataAdapter, categorySettingsDataAdapter)
+public class ImportSettingsController : Controller
 {
-    private readonly SettingsDataAdapterContainer _settingsDataAdapter = new(productSettingsDataAdapter, categorySettingsDataAdapter);
+    private readonly ShopImportSettingsFacade _facade;
 
-    private async Task SaveShopImportSettingsAsync<T>(T data, Action<T, T> updateFields)
-        where T : ShopImportSettingsModel
+    public ImportSettingsController([FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
+        [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter)
     {
-        var existing = await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType);
-
-        var sessionShopSettings = await HttpContext.Session.GetShopImportSettingsFromSessionAsync() as T;
-
-        if (existing is T existingShopSettings)
-        {
-            existingShopSettings.UpdateFields(data);
-
-            updateFields(existingShopSettings, data);
-
-            if (sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId)
-                existingShopSettings.UpdateServices(sessionShopSettings.Services);
-
-            await _settingsDataAdapter.SaveAsync(existingShopSettings);
-        }
-        else
-        {
-            var toSave = sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId
-                ? sessionShopSettings
-                : data;
-
-            toSave.UpdateFields(data);
-            updateFields(toSave, data);
-
-            if (sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId)
-                toSave.UpdateServices(sessionShopSettings.Services);
-
-            await _settingsDataAdapter.SaveAsync(toSave);
-        }
+        _facade = new ShopImportSettingsFacade(productSettingsDataAdapter, categorySettingsDataAdapter, this);
     }
 
-
-    [Route("/Import/Settings/Tab/")]
+    [Route("/Import/Settings/Tab/{shopId:int}/{shopSettingsType:ShopSettingType}")]
     [HttpPost]
-    public async Task<IActionResult> ImportSettingsTabAsync([FromBody] ShopSettingsData data)
+    public async Task<IActionResult> ImportSettingsTabAsync(int shopId, ShopSettingType shopSettingsType)
     {
-        var importSettings = await _settingsDataAdapter.GetShopImportSettingsModel(data.ShopId, (ShopSettingType)data.ShopSettingsType);
+        var importSettings = await _facade.GetShopImportSettingsModel(shopId, shopSettingsType);
 
         HttpContext.Session.SetImportSettingToSession(importSettings);
 
         return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", importSettings);
     }
 
-    [Route("/Import/Settings/Product/")]
+    [Route("/Import/Settings/Product/{shopId:int}")]
     [HttpPost]
-    public IActionResult LoadProductShopImportSettings([FromBody] ProductShopImportSettingsModel data)
+    public async Task<IActionResult> LoadProductShopImportSettings(int shopId, [FromBody]ProductShopImportSettingsModel data)
     {
         if (data == null)
             return BadRequest("Empty json for product shopsettings.");
 
-        HttpContext.Session.SetImportSettingToSession(data);
+        if(await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product) 
+            is not ProductShopImportSettingsModel currentProductSettings)
+            throw new InvalidOperationException("Invalid shopId");
 
-        return PartialView("~/Views/Shared/ImportSettings.cshtml", data);
+        currentProductSettings.Update(data);
+
+        HttpContext.Session.SetImportSettingToSession(currentProductSettings);
+
+        return PartialView("~/Views/Shared/ImportSettings.cshtml", currentProductSettings);
     }
 
-    [Route("/Import/Settings/Category/")]
+    [Route("/Import/Settings/Category/{shopId:int}")]
     [HttpPost]
-    public IActionResult LoadCategoryShopImportSettings(CategoryShopImportSettingsModel data)
+    public async Task<IActionResult> LoadCategoryShopImportSettings(int shopId, [FromBody]CategoryShopImportSettingsModel data)
     {
         if (data == null)
             return BadRequest("Empty json for category shopsettings.");
 
-        HttpContext.Session.SetImportSettingToSession(data);
+        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Category)
+            is not CategoryShopImportSettingsModel currentCategorySettings)
+            throw new InvalidOperationException("Invalid shopId");
 
-        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", data);
-    }
+        currentCategorySettings.Update(data);
 
-    private async Task<bool> IsSettingsChanged<T>(T data, Func<T, bool> isEmpty, Func<T,T?, bool> inputFieldsEquals,
-        Func<T,T, bool>? additionalFieldsEquals = null)
-        where T:ShopImportSettingsModel
-    {
-        try
-        {
-            var existingShopSettings = await _settingsDataAdapter.GetShopImportSettingsAsync(data.ShopId, data.ShopSettingType)
-                as T;
+        HttpContext.Session.SetImportSettingToSession(currentCategorySettings);
 
-            if(await HttpContext.Session.GetShopImportSettingsFromSessionAsync() is T sessionShopSettings &&
-                sessionShopSettings != null && sessionShopSettings.ShopId == data.ShopId)
-            {
-                return existingShopSettings == null
-                    ? !(isEmpty(data) && sessionShopSettings.ShopImportSettingsIsEmpty())
-                    : !(inputFieldsEquals(data, existingShopSettings)
-                      && additionalFieldsEquals?.Invoke(sessionShopSettings, existingShopSettings) != false
-                      && sessionShopSettings.Services.ServicesAreEquals(existingShopSettings.Services));
-            }
-            else
-            {
-                return existingShopSettings == null
-                    ? !isEmpty(data)
-                    : !inputFieldsEquals(data, existingShopSettings);
-            }
-        }
-        catch (Exception ex) 
-        { 
-            throw;
-        }
+        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", currentCategorySettings);
     }
 
     [Route("/Import/Settings/Product/IsChanged")]
@@ -121,9 +72,8 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         if (data == null)
             return BadRequest("Empty json for product shopsettings.");
 
-        var result = await IsSettingsChanged(data, (settings) => settings.IsEmpty(), 
-            (target, source) => target.ProductShopSettingsFieldsEquals(source),
-            (target, source) => target.RootCategoriesEquals(source));
+        var result = await _facade.IsProductShopSettingsChangedAsync(data);
+
         return Ok(result);
     }
 
@@ -134,8 +84,8 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
         if (data == null)
             return BadRequest("Empty json for category shopsettings.");
 
-        var result = await IsSettingsChanged(data, (settings) => settings.IsEmpty(), 
-            (target, source) => target.CategoryShopSettingsFieldsEquals(source));
+        var result = await _facade.IsCategoryShopSettingsChangedAsync(data);
+
         return Ok(result);
     }
 
@@ -144,9 +94,8 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
     public async Task<IActionResult> ProductSettingsSave(ProductShopImportSettingsModel data)
     {
         if (data == null) return BadRequest("Empty json for product shopsettings.");
-
-        await SaveShopImportSettingsAsync(data, 
-            (target, source)=>target.UpdateProductShopImportSettings (source));
+        
+        await _facade.SaveProductShopSettings(data);
 
         return Ok(true);
     }
@@ -157,8 +106,7 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
     {
         if (data == null) return BadRequest("Empty json for category shopsettings.");
 
-        await SaveShopImportSettingsAsync(data, 
-            (target, source)=>target.UpdateCategoryShopImportSettings (source));
+        await _facade.SaveCategoryShopSettings(data);
 
         return Ok(true);
     }
@@ -178,27 +126,14 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
     {
         if (data == null) return BadRequest("Empty json for category url.");
 
-        if (await GetShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
-            return new ObjectResult("Invalid shopId") { StatusCode = StatusCodes.Status500InternalServerError };
+        if (await _facade.GetCurrentShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
+            return BadRequest("Invalid shopId");
 
-        var currentRootCategory = productShopSettings.RootCategories.FirstOrDefault(c =>c.Guid == data.Guid);
-
-        IActionResult result;
-        if (currentRootCategory == null)
-        {
-            productShopSettings.RootCategories.Add(data);
-            result = Ok(data);
-        }
-        else
-        {
-            currentRootCategory.Url = data.Url;
-            currentRootCategory.Item = data.Item;
-            result = Ok(currentRootCategory);
-        }
+        var result = productShopSettings.SetRootCategory(data);
 
         HttpContext.Session.SetImportSettingToSession(productShopSettings);
 
-        return result;
+        return Ok(result);
     }
 
     [Route("/Import/Settings/Product/CategoryUrl/IsChanged")]
@@ -207,8 +142,9 @@ public class ImportSettingsController([FromKeyedServices(ShopSettingType.Product
     {
         if (data == null) return BadRequest("Empty json for category url.");
 
-        if (await GetShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
-            return new ObjectResult("Invalid shopId") { StatusCode = StatusCodes.Status500InternalServerError };
+        if (await _facade.GetCurrentShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) 
+            is not ProductShopImportSettingsModel productShopSettings)
+            return BadRequest("Invalid shopId");
 
         var currentRootCategory = productShopSettings.RootCategories.FirstOrDefault(c =>
                     c.Url.Equals(data.Url, StringComparison.InvariantCultureIgnoreCase)

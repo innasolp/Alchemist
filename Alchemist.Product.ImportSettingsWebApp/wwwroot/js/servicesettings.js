@@ -7,14 +7,18 @@ function getServiceData(formData) {
     //todo ???
     formDataCopy.delete('uploadValueFromJson');
     formDataCopy.delete('Value');
-    const data = Object.fromEntries(formDataCopy.entries());      
-    return { ServiceSettings: data, ShopSettingsType: $("#ShopSettingType").val(), ShopId: $("#ShopId").val() };
+    const data = Object.fromEntries(formDataCopy.entries());  
+    return data;
 }
 
 function onServiceSettingsChanged(formData, onChanged) {
 
     var serviceData = getServiceData(formData);
-    postJsonData('/Import/Settings/Service/IsChanged',
+
+    const shopSettingsType = $("#ShopSettingType").val();
+    const shopId = $("#ShopId").val();
+
+    postJsonData(`/Import/Settings/${shopId}/${shopSettingsType}/Service/IsChanged`,
         JSON.stringify(serviceData),
         (result) => onChanged(result)
     );
@@ -51,9 +55,12 @@ function saveServiceSettings(serviceForm, onServiceSet) {
     validateForm($(serviceForm),
         () => {
 
-        var serviceData = getServiceData(new FormData($(serviceForm)[0]));
+            var serviceData = getServiceData(new FormData($(serviceForm)[0]));
+
+            const shopSettingsType = $("#ShopSettingType").val();
+            const shopId = $("#ShopId").val();
                 
-        postJsonData(url = "/Import/Settings/Service/Set",
+            postJsonData(url = `/Import/Settings/${shopId}/${shopSettingsType}/Service/Set`,
             JSON.stringify(serviceData),
             onSuccess = onSuccess,
             onError = (error) => { enableSaveServiceSettingsButton(); });
@@ -96,10 +103,8 @@ function onSetPrimaryServiceClick(event) {
     var shopId = $("#ShopId").val();
     var shopSettingsType = $("#ShopSettingType").val();
 
-    var data = { shopId: shopId, shopSettingsType: shopSettingsType, serviceName: serviceName };
-
-    showServiceSettingsModal(`/Import/Settings/${serviceName}`,
-        data,
+    showServiceSettingsModal(`/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/${serviceName}`,
+        null,
         (result) => {
             $(`#${serviceName}`).val(result.serviceTypeName);
         },
@@ -112,9 +117,9 @@ function onSetSecondaryServiceClick(event) {
     var guid = event.target.hasAttribute("data-guid") ? event.target.getAttribute("data-guid") : null;
     var shopId = $("#ShopId").val();
     var shopSettingsType = $("#ShopSettingType").val();
-    var data = { shopId: shopId, shopSettingsType: shopSettingsType, guid: guid };
-    showServiceSettingsModal('/Import/Settings/Service',
-        data,
+    var url = guid != null ? `/Import/Settings/${shopId}/${shopSettingsType}/Service/${guid}` : `/Import/Settings/${shopId}/${shopSettingsType}/Service`;
+    showServiceSettingsModal(url,
+        null,
         onSetServiceItem
         //todo
         //,(result) => {

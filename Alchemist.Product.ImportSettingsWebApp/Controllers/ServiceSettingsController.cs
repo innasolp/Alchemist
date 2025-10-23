@@ -7,156 +7,99 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
-public class ServiceSettingsData
-{
-    public int ShopId { get; set; }
-
-    public ShopSettingType ShopSettingsType { get; set; }
-
-    public string? ServiceName { get; set; }
-
-    public Guid? Guid { get; set; } = System.Guid.NewGuid();
-}
-
-public class SaveServiceSettingsData
-{
-    public ServiceSettingsModel ServiceSettings { get; set; }
-
-    public ShopSettingType ShopSettingsType { get; set; }
-
-    public int ShopId { get; set; }
-}
-
 
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ServiceSettingsController(
-    [FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
-    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter)
-    : SettingsController(productSettingsDataAdapter, categorySettingsDataAdapter)
+public class ServiceSettingsController : Controller
 {
-    
-    private static ServiceSettingsModel GetServiceSettings(ShopImportSettingsModel shopImportSettings, string? serviceName = null, Guid? guid = null)
+
+    ServiceSettingsFacade _serviceSettingsFacade;
+
+    public ServiceSettingsController(
+        [FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
+        [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) 
     {
-        var service = serviceName?.IsPrimaryServiceName() == true
-            ? shopImportSettings.GetService<ServiceSettingsModel>(serviceName) ?? new ServiceSettingsModel { Name = serviceName}
-            : !string.IsNullOrEmpty(serviceName) &&  shopImportSettings.Services.TryGetValue(serviceName, out var serviceSettings) && serviceSettings != null 
-                ? serviceSettings
-                : guid != null 
-                     ? shopImportSettings.Services.FirstOrDefault(s=>s.Value.Guid == guid).Value ?? new ServiceSettingsModel()
-                     : new ServiceSettingsModel();
+        _serviceSettingsFacade = new ServiceSettingsFacade(productSettingsDataAdapter, categorySettingsDataAdapter, this);
+    }    
 
-        if(!string.IsNullOrEmpty(serviceName)) service.Name = serviceName;
-        service.ParentSettingsId = shopImportSettings.Id;
-        service.ShopId = shopImportSettings.ShopId;
-
-        return service;
-    } 
-  
-
-    private async Task<IActionResult> GetServiceSettingsActionAsync(ServiceSettingsData serviceSettingsData)
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service")]
+    [HttpGet]
+    public async Task<IActionResult> NewServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType)
     {
-        var shopImportSettings = await GetShopImportSettingsAsync(serviceSettingsData.ShopId,(ShopSettingType) serviceSettingsData.ShopSettingsType);
-        var serviceSettings = GetServiceSettings(shopImportSettings, serviceSettingsData.ServiceName, serviceSettingsData.Guid);
+        var serviceSettings = await _serviceSettingsFacade.GetServiceSettingsAsync(Guid.NewGuid(), shopId, shopSettingsType);
+
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettings);
     }
 
-    [Route("/Import/Settings/Service")]
-    [HttpPost]
-    public async Task<IActionResult> ServiceSettingsAsync(ServiceSettingsData data)
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/{guid:Guid}")]
+    [HttpGet]
+    public async Task<IActionResult> ServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, Guid guid)
     {
-        return await GetServiceSettingsActionAsync(data);
+        var serviceSettings = await _serviceSettingsFacade.GetServiceSettingsAsync(guid, shopId, shopSettingsType);
+
+        return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettings);        
     }
 
-    [Route($"/Import/Settings/{nameof(PrimaryServiceName.ImportService)}")]
-    [HttpPost]
-    public async Task<IActionResult> ImportServiceSettingsAsync(ServiceSettingsData data)
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/PrimaryService/{serviceName}")]
+    [HttpGet]
+    public async Task<IActionResult> PrimaryServiceAsync(int shopId, ShopSettingType shopSettingsType, string serviceName)
     {
-        if (data.ServiceName != nameof(PrimaryServiceName.ImportService))
-            return BadRequest($"Invalid request for {nameof(PrimaryServiceName.ImportService)}");
+        if (string.IsNullOrEmpty(serviceName))
+            return BadRequest("Service name is empty");
 
-        return await GetServiceSettingsActionAsync(data);
+        if (!serviceName.IsPrimaryServiceName() 
+            || serviceName.Equals(PrimaryServiceName.RequestHeaders.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            return BadRequest($"Service name {serviceName} is invalid.");
+
+        var serviceSettings = await _serviceSettingsFacade.GetServiceSettingsAsync(serviceName, shopId, shopSettingsType);
+
+        return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettings);
     }
 
-    [Route($"/Import/Settings/{nameof(PrimaryServiceName.BrowserDataLoader)}")]
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/PrimaryService/Set/{serviceName}")]
     [HttpPost]
-    public async Task<IActionResult> BrowserDataLoaderSettingsAsync(ServiceSettingsData data)
+    public async Task<IActionResult> SetPrimaryServiceAsync(int shopId, ShopSettingType shopSettingsType, string serviceName, [FromBody]ServiceSettingsModel data)
     {
-        if (data.ServiceName != nameof(PrimaryServiceName.BrowserDataLoader))
-            return BadRequest($"Invalid request for {nameof(PrimaryServiceName.BrowserDataLoader)}");
-
-        return await GetServiceSettingsActionAsync(data);
-    }
-
-    [Route($"/Import/Settings/{nameof(PrimaryServiceName.BrowserLauncher)}")]
-    [HttpPost]
-    public async Task<IActionResult> BrowserLauncherSettingsAsync(ServiceSettingsData data)
-    {
-        if (data.ServiceName != nameof(PrimaryServiceName.BrowserLauncher))
-            return BadRequest($"Invalid request for {nameof(PrimaryServiceName.BrowserLauncher)}");
-
-        return await GetServiceSettingsActionAsync(data);
-    }
-
-    [Route($"/Import/Settings/{nameof(PrimaryServiceName.WebLoader)}")]
-    [HttpPost]
-    public async Task<IActionResult> WebLoaderSettingsAsync(ServiceSettingsData data)
-    {
-        if (data.ServiceName != nameof(PrimaryServiceName.WebLoader))
-            return BadRequest($"Invalid request for {nameof(PrimaryServiceName.WebLoader)}");
-
-        return await GetServiceSettingsActionAsync(data);
-    }
-
-    [Route("/Import/Settings/Service/Set")]
-    [HttpPost]
-    public async Task<IActionResult> SaveAsync([FromBody] SaveServiceSettingsData data)
-    {
-        if (string.IsNullOrEmpty(data.ServiceSettings?.Name))
+        if (string.IsNullOrEmpty(serviceName))
             return BadRequest("Empty service name");
 
-        var shopImportSettings = await GetShopImportSettingsAsync(data.ShopId, data.ShopSettingsType);
-        if (shopImportSettings == null || shopImportSettings.ShopImportSettingsIsEmpty())
-        {
-            shopImportSettings?.Services.Add(data.ServiceSettings.Name, data.ServiceSettings);
-            HttpContext.Session.SetImportSettingToSession(shopImportSettings);
-            return Ok(data.ServiceSettings);
-        }
+        var serviceSettings = await _serviceSettingsFacade.SaveServiceSettingsAsync(shopId, shopSettingsType, serviceName, data);
 
-        var existingService = shopImportSettings.GetService<ServiceSettingsModel>(data.ServiceSettings.Name) ?? 
-            shopImportSettings.GetService(data.ServiceSettings.Guid);
-
-        ServiceSettingsModel result;
-        if (existingService == null)
-        {
-            shopImportSettings.Services.Add(data.ServiceSettings.Name, data.ServiceSettings);
-            result = data.ServiceSettings;
-        }
-        else
-        {
-            existingService.Updateservice(data.ServiceSettings);
-            result = existingService;
-        }
-
-        HttpContext.Session.SetImportSettingToSession(shopImportSettings);
-
-        return Ok(result);
+        return Ok(serviceSettings);
     }
 
-    [Route("/Import/Settings/Service/IsChanged")]
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/Set/{guid}")]
     [HttpPost]
-    public async Task<IActionResult> IsChanged([FromBody] SaveServiceSettingsData data)
+    public async Task<IActionResult> SetServiceAsync(int shopId, ShopSettingType shopSettingsType, Guid guid, [FromBody]ServiceSettingsModel data)
     {
-        if (string.IsNullOrEmpty(data.ServiceSettings?.Name))
+        if (guid == Guid.Empty)
+            return BadRequest("Empty service guid");
+
+        var serviceSettings = await _serviceSettingsFacade.SaveServiceSettingsAsync(shopId, shopSettingsType, guid, data);
+
+        return Ok(serviceSettings);
+    }
+
+
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/Set")]
+    [HttpPost]
+    public async Task<IActionResult> SaveAsync(int shopId, ShopSettingType shopSettingsType, [FromBody] ServiceSettingsModel data)
+    {
+        if (string.IsNullOrEmpty(data?.Name))
             return BadRequest("Empty service name");
 
-        var shopImportSettings = await GetShopImportSettingsAsync(data.ShopId, data.ShopSettingsType);
-        if (shopImportSettings == null)
-            return Ok(!data.ServiceSettings.IsEmpty());
+        var serviceSettings = await _serviceSettingsFacade.SaveServiceSettingsAsync(shopId, shopSettingsType, data.Name, data);
 
-        var existingService = shopImportSettings.GetService<ServiceSettingsModel>(data.ServiceSettings.Name) ??
-            shopImportSettings.GetService(data.ServiceSettings.Guid);
+        return Ok(serviceSettings);
+    }
 
-        return Ok(existingService != null && !data.ServiceSettings.ServiceEquals(existingService));
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/IsChanged")]
+    [HttpPost]
+    public async Task<IActionResult> IsChanged(int shopId, ShopSettingType shopSettingsType, [FromBody] ServiceSettingsModel data)
+    {
+        if (string.IsNullOrEmpty(data?.Name))
+            return BadRequest("Empty service name");
+
+        return Ok(await _serviceSettingsFacade.IsChanged(shopId, shopSettingsType,data));
     }
 
     [Route("/Import/Settings/Service/Item")]

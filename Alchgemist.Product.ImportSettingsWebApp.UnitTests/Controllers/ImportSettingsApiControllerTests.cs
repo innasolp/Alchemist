@@ -1,5 +1,4 @@
-﻿using Xunit;
-using Alchemist.Product.ImportSettingsWebApp.Controllers;
+﻿using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchgemist.Product.ImportSettingsWebApp.UnitTests.Infrastructure;
 using Moq;
 using Alchemist.Import.Settings.DataAdapter;
@@ -9,7 +8,7 @@ using Alchemist.Product.Interfaces;
 using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 
 
-namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
+namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 
 public class ImportSettingsApiControllerTests : ControllerTest<ImportSettingsApiController>
 {
@@ -31,7 +30,7 @@ public class ImportSettingsApiControllerTests : ControllerTest<ImportSettingsApi
 
         var controller = CreateController();
 
-        var result = await controller.ShopSettingsTab(new ShopSettingsData { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Product });
+        var result = await controller.ShopSettingsTab(1, ShopSettingType.Product);
 
         var pv = Assert.IsType<PartialViewResult>(result);
         Assert.Equal("~/Views/Shared/ShopImportSettingsTab.cshtml", pv.ViewName);
