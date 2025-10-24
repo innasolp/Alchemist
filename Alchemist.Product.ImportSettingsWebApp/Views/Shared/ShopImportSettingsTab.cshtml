@@ -4,8 +4,6 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @functions{
-    string GetShopSettingsContentAction() => $"/Import/Settings/{Model.ShopSettingType.ToString()}/{Model.ShopId}";
-    string GetUploadShopSettingsOnChange(string id) => "uploadImportSettingsFromJson($('#loadSettingsFromJsonForm'), '" + id + "', '" + GetShopSettingsContentAction() + "')";
     string Disabled(ShopSettingType shopSettingType) => Model.ShopSettingType == shopSettingType ? "disabled-link" : "";
     string Selected(ShopSettingType shopSettingType) => Model.ShopSettingType == shopSettingType ? "selected" : "";
 }
@@ -28,9 +26,7 @@
 <div id="importSettingsUploadDiv">
     <form id="loadSettingsFromJsonForm">
         <div class="form-group">
-            <vc:upload-from-file on-change="@GetUploadShopSettingsOnChange("loadShopSettingsFromJson")"
-                                 id="loadShopSettingsFromJson"
-                                 file-name="@Model.FileName"></vc:upload-from-file>
+            <file-upload class="import-settings" name="ImportSettings_(@Model.Name)_UploadFromJson"></file-upload>
         </div>
     </form>
 </div>

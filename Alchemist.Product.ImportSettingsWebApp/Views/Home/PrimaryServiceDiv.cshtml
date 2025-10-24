@@ -1,19 +1,11 @@
-﻿@using System.Text.Json
-@using Alchemist.Product.ImportSettingsWebApp.Controllers
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Alchemist.Product.ImportSettingsWebApp.Controllers
 @model PrimaryServiceModel
-
-
-@functions{
-    public string GetServiceUploadOnChange() => "setServiceSettingsFromJson($('#settingsForm'), this.name, '" + Model.Name + "', (data)=>{setValIfValid('#" + Model.Name + "', data.serviceTypeName); })";
-}
 
 <div class="flex">
     <div>
         <input class="form-control form-input @Model.ClassName" readonly="readonly" value="@Model.ServiceSettings?.ServiceTypeName"
-               asp-for-model="@Model.Parent" model-property="@Model.Name" />
+               asp-for-model="@Model.Parent" model-property="@Model.Name" 
+               data-name="@Model.Name" />
         <span asp-validation-for-model="@Model.Parent" model-property="@Model.Name" class="text-danger"></span>
     </div>
     <div class="flex control-group">
@@ -22,10 +14,7 @@
                     data-name="@Model.Name">
                 Set
             </button>
-        </div>
-        <vc:upload-from-file id="@(Model.Name)Json"
-                             on-change="@GetServiceUploadOnChange()"
-                             file-name="@Model.ServiceSettings?.FileName"
-                             class-name="@Model.ClassName"></vc:upload-from-file>
+        </div>        
+        <file-upload class="@Model.ClassName" data-name="@Model.Name" name="@(Model.Name)UploadFromJson"></file-upload>
     </div>
 </div>

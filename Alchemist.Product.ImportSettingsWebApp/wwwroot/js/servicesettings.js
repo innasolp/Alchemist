@@ -1,8 +1,4 @@
-﻿function uploadServiceSettingsValueFromJson(fileInputName, onSuccess) {
-    postFormInputFile('/ServiceSettings/UploadFromFile', $('#serviceSettingsForm'), fileInputName, null, onSuccess);
-}
-
-function getServiceData(formData) {
+﻿function getServiceData(formData) {
     var formDataCopy = getFormDataCopy(formData);
     //todo ???
     formDataCopy.delete('uploadValueFromJson');
@@ -95,6 +91,10 @@ function initServiceEvents() {
     $(".set-service").on('click', onSetPrimaryServiceClick);
     $(".edit-service").on('click', onSetSecondaryServiceClick);
     $(".add-service").on('click', onSetSecondaryServiceClick);
+    $("file-upload.import-service").on('file-uploaded', onSetServiceUpload);
+    $("file-upload.browser-data-loader").on('file-uploaded', onSetServiceUpload);
+    $("file-upload.browser-launcher").on('file-uploaded', onSetServiceUpload);
+    $("file-upload.web-loader").on('file-uploaded', onSetServiceUpload);
 }
 
 function onSetPrimaryServiceClick(event) {
@@ -125,5 +125,31 @@ function onSetSecondaryServiceClick(event) {
         //,(result) => {
         //    if (result) clearFileNameFromUploadControl(`${serviceName}Json`);
         //}
+    );
+}
+
+function onSetServiceUpload(event) {
+    const shopId = $("#ShopId").val();
+    const shopSettingsType = $("#ShopSettingType").val();
+    const modelName = $(event.target).attr("data-name") ?? null;
+    const url = `/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/Set/${modelName}`;
+    const fileInputName = $(event.target).find("input").attr("name");
+    const onSuccess = (data) => {       
+        $(`input[data-name='${modelName}']`).val(data.serviceTypeName);
+    };
+    uploadServiceSettingsFromJson($('#settingsForm'), fileInputName, url, onSuccess);
+}
+
+async function uploadServiceSettingsFromJson(formSelector, fileInputName, url, onSuccess) {
+    postFormInputFile('/Upload/Json/',
+        formSelector,
+        fileInputName,
+        null,
+        (json) => {
+            if (json == null) return;
+            console.trace(json);
+            console.log('shop settings upload successfully');
+            postJsonData(url, json, onSuccess, null);
+        }
     );
 }

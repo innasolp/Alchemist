@@ -24,6 +24,9 @@
     "./mvc/fileUpload": {
       "import": "./mvc/fileUpload.js"
     },
+    "./mvc/fileUploadElement": {
+      "import": "./mvc/fileUploadElement.js"
+    },
     "./mvc/formData": {
       "import": "./mvc/formData.js"
     },

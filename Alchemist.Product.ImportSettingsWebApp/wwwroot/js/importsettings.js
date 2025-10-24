@@ -19,6 +19,8 @@ function initSettingsEvents() {
     initServiceEvents();
 
     setItemsPreventClick();
+
+    initImportSettingsUpload();
 }
 
 function setItemsPreventClick() {
@@ -29,6 +31,19 @@ function onSettingsTabChangePrevent(event) {
 
     var url = getIsSettingsChangedUrl();
     onItemChangePrevent(event, url, '#settingsForm');
+}
+
+function initImportSettingsUpload() {
+
+    const onImportSettingsUpload = (event) => {
+        const shopId = $("#ShopId").val();
+        const shopSettingsType = $("#ShopSettingType").val();
+        const url = `/Import/Settings/${shopSettingsType}/${shopId}`;
+        const fileInputName = $(event.target).find("input").attr("name");        
+        uploadImportSettingsFromJson($('#loadSettingsFromJsonForm'), fileInputName, url);
+    };
+
+    $("file-upload.import-settings").on('file-uploaded', onImportSettingsUpload);
 }
 
 async function uploadImportSettingsFromJson(formSelector, fileInputName, importSettingsUrl) {

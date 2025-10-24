@@ -62,7 +62,7 @@ public class ServiceSettingsController : Controller
         if (string.IsNullOrEmpty(serviceName))
             return BadRequest("Empty service name");
 
-        var serviceSettings = await _serviceSettingsFacade.SaveServiceSettingsAsync(shopId, shopSettingsType, serviceName, data);
+        var serviceSettings = await _serviceSettingsFacade.SetServiceSettingsAsync(shopId, shopSettingsType, serviceName, data);
 
         return Ok(serviceSettings);
     }
@@ -74,7 +74,7 @@ public class ServiceSettingsController : Controller
         if (guid == Guid.Empty)
             return BadRequest("Empty service guid");
 
-        var serviceSettings = await _serviceSettingsFacade.SaveServiceSettingsAsync(shopId, shopSettingsType, guid, data);
+        var serviceSettings = await _serviceSettingsFacade.SetServiceSettingsAsync(shopId, shopSettingsType, guid, data);
 
         return Ok(serviceSettings);
     }
@@ -87,7 +87,9 @@ public class ServiceSettingsController : Controller
         if (string.IsNullOrEmpty(data?.Name))
             return BadRequest("Empty service name");
 
-        var serviceSettings = await _serviceSettingsFacade.SaveServiceSettingsAsync(shopId, shopSettingsType, data.Name, data);
+        var serviceSettings = data.Name.IsPrimaryServiceName()
+            ? await _serviceSettingsFacade.SetServiceSettingsAsync(shopId, shopSettingsType, data.Name, data)
+            : await _serviceSettingsFacade.SetServiceSettingsAsync(shopId, shopSettingsType, data.Guid, data);
 
         return Ok(serviceSettings);
     }
@@ -96,8 +98,8 @@ public class ServiceSettingsController : Controller
     [HttpPost]
     public async Task<IActionResult> IsChanged(int shopId, ShopSettingType shopSettingsType, [FromBody] ServiceSettingsModel data)
     {
-        if (string.IsNullOrEmpty(data?.Name))
-            return BadRequest("Empty service name");
+        if (data == null)
+            return BadRequest("json is invalid");
 
         return Ok(await _serviceSettingsFacade.IsChanged(shopId, shopSettingsType,data));
     }

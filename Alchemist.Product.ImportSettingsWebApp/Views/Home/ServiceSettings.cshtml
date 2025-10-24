@@ -18,10 +18,7 @@
                 @if (Model.Name?.IsPrimaryServiceName() == true)
                 {
                     <input type="hidden" asp-for="Value" id="Value" />
-                }
-                <vc:upload-from-file id="uploadValueFromJson"
-                                     on-change="uploadServiceSettingsValueFromJson('uploadValueFromJson',(data)=>{ $('#Value').val(data);})"
-                                     file-name="@Model.FileName"></vc:upload-from-file>                
+                }               
             </div>
             @if(Model.Name?.IsPrimaryServiceName() != true)
             {

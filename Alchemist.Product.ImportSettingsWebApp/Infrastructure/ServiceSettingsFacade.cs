@@ -38,27 +38,34 @@ internal class ServiceSettingsFacade(ISettingsDataAdapter productSettingsDataAda
         return GetServiceSettings(shopImportSettings, null, guid);
     }
 
-    private async Task<ServiceSettingsModel> SaveServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, ServiceSettingsModel data,
-        Func<ShopImportSettingsModel, ServiceSettingsModel> getCurrentService)
+    private ServiceSettingsModel AddNewService(ShopImportSettingsModel shopImportSettings, string? serviceName, ServiceSettingsModel data)
+    {
+        var newService = new ServiceSettingsModel { Name = serviceName ?? data.Name };
+        newService.Update(data);
+        shopImportSettings?.Services.Add(newService.Name, newService);
+        return newService;
+    }
+
+    private async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType,
+        string serviceName, Guid? guid, ServiceSettingsModel data, 
+        Func<ShopImportSettingsModel, ServiceSettingsModel?> getExistingService)
     {
         var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType);
 
         if (shopImportSettings == null //todo
             || shopImportSettings.ShopImportSettingsIsEmpty())
         {
-            shopImportSettings?.Services.Add(data.Name, data);
+            var newService = AddNewService(shopImportSettings, serviceName, data);
             Controller.HttpContext.Session.SetImportSettingToSession(shopImportSettings);
-            return data;
+            return newService;
         }
 
-        var existingService = getCurrentService(shopImportSettings);
-        //shopImportSettings.GetService<ServiceSettingsModel>(data.Name) ?? shopImportSettings.GetService(data.Guid);
+        var existingService = getExistingService(shopImportSettings);
 
         ServiceSettingsModel result;
         if (existingService == null)
         {
-            shopImportSettings.Services.Add(data.Name, data);
-            result = data;
+            result = AddNewService(shopImportSettings, serviceName, data);
         }
         else
         {
@@ -71,15 +78,15 @@ internal class ServiceSettingsFacade(ISettingsDataAdapter productSettingsDataAda
         return result;
     }
 
-    public async Task<ServiceSettingsModel> SaveServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, string name, ServiceSettingsModel data)
+    public async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, string name, ServiceSettingsModel data)
     {
-        return await SaveServiceSettingsAsync(shopId, shopSettingsType, data,
-            (shopImportSettings) => shopImportSettings.GetService<ServiceSettingsModel>(name));
+        return await SetServiceSettingsAsync(shopId, shopSettingsType, name, null, data,
+            (shopImportSettings)=>shopImportSettings.GetService<ServiceSettingsModel>(name));
     }
 
-    public async Task<ServiceSettingsModel> SaveServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, Guid guid, ServiceSettingsModel data)
+    public async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, Guid guid, ServiceSettingsModel data)
     {
-        return await SaveServiceSettingsAsync(shopId, shopSettingsType, data,
+        return await SetServiceSettingsAsync(shopId, shopSettingsType, data.Name, guid, data,
             (shopImportSettings) => shopImportSettings.GetService(guid));
     }
 
