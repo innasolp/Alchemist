@@ -17,22 +17,14 @@ class ShowModalCompleteEvent extends Event {
     }
 }
 
-class ModalClosedEvent extends Event {
-    static eventName = 'modal-closed';
+class ModalCloseEvent extends Event {
+    static eventName = 'modal-close';   
 
-    #response = "";    
+   
 
-    get response() {
-        return this.#response;
-    }
-
-    set response(value) {
-        this.#response = value;
-    }
-
-    constructor(response) {
-        super(ModalClosedEvent.eventName, { bubbles: true, composed: true });
-        this.#response = response;
+    constructor() {
+        super(ModalCloseEvent.eventName, { bubbles: true, composed: true, cancelable : true });
+        //this.#parentForm = parentForm;
     }
 }
 
@@ -66,8 +58,15 @@ class ModalErrorEvent extends Event {
     }
 }
 
+class ModalHideEvent extends Event {
+    static eventName = 'modal-hide';
 
-class ShowModalComponent extends HTMLElement {
+    constructor() {
+        super(ModalErrorEvent.eventName, { bubbles: true, composed: true });
+    }
+}
+
+class ModalElement extends HTMLElement {
     constructor() {
         super();
     }
@@ -107,6 +106,21 @@ class ShowModalComponent extends HTMLElement {
         modalContentDiv.append(modalBodyDiv);
 
         $(this).append(modalDiv);
+    }    
+}
+
+customElements.define("modal-div", ModalElement);
+
+class ShowModal extends EventTarget {
+
+    #modalElement;
+
+    #parentForm;
+
+    constructor(modalElement, parentForm = null) {
+        super();
+        this.#modalElement = modalElement;
+        this.#parentForm = parentForm;
     }
 
     #submitPreventDefault(event) {
@@ -114,15 +128,15 @@ class ShowModalComponent extends HTMLElement {
     }
 
     get #modalCloseBtn() {
-        return $(this).find('a.close');
+        return $(this.#modalElement).find('a.close');
     }
 
     get #modalBodyDiv() {
-        return $(this).find('div.modal-body');
+        return $(this.#modalElement).find('div.modal-body');
     }
 
     get #modalDiv() {
-        return $(this).find('div.modal.fade');
+        return $(this.#modalElement).find('div.modal.fade');
     }
 
     #onLoadCallback(url, response, status, xhr, onComplete) {
@@ -138,93 +152,75 @@ class ShowModalComponent extends HTMLElement {
         }
     }
 
-    #showItemModal(modalDiv, modalBodyDiv, url, data, onShow = null, onHide = null) {
+    #showItemModal(modalDiv, modalBodyDiv, url, data, onLoadCallback, onShow = null, onHide = null) {
         if (onHide != null)
-            modalDiv.on('hide.bs.modal', function () {
-                onHide(true);
-            });
+            modalDiv.on('hide.bs.modal',onHide);
+
+        if (onShow != null)
+            modalDiv.on('show.bs.modal', onShow);
 
         const onComplete = (response, success) => {
             if (success) {
-                modalDiv.modal("show");
-                if (onShow != null)
-                    onShow(response);
+                modalDiv.modal("show");                
             }
         };
 
         if (data != null)
             modalBodyDiv.load(url, data, function (response, status, xhr) {
-                this.#onLoadCallback(url, response, status, xhr, onComplete)
+                onLoadCallback(url, response, status, xhr, onComplete)
             });
         else
             modalBodyDiv.load(url, function (response, status, xhr) {
-                this.#onLoadCallback(url, response, status, xhr, onComplete)
+                onLoadCallback(url, response, status, xhr, onComplete)
             });
     }
 
-    show(url, data, parentForm) {
+    #onShow(event) {
+        const showModalCompleteEvent = new ShowModalCompleteEvent(response);
+        this.dispatchEvent(showModalCompleteEvent);
+    }
 
-        if (parentForm != null)
-            $(parentForm).on('submit', this.#submitPreventDefault);
+    #onHide(response) {
+        const hideModalEvent = new ModalHideEvent(response);
+        this.dispatchEvent(hideModalEvent);
+    }
 
-        this.#modalCloseBtn().on('click', (event) => {
-            //todo
-        });
+    show(url, data) {
+
+        if (this.#parentForm != null)
+            $(this.#parentForm).on('submit', this.#submitPreventDefault);
+
+        this.#modalCloseBtn.on('click', this.#onModalClose);
 
         $(this.#modalBodyDiv).on('load', function (event) {
             console.log(event);
             console.trace(event);
         });
 
-        if (this.OnShow != null)
-            $(this.#modalDiv).on("show.bs.modal", (event) => {
-                //todo
-            });
 
-        this.#showItemModal($(this.#modalDiv), $(this.#modalBodyDiv), url, data, (event) => {
-            //todo
-        },
-            () => { if (onHide != null) this.hide(onHide); })
+        this.#showItemModal($(this.#modalDiv), $(this.#modalBodyDiv), url, data,
+            this.#onLoadCallback,
+            this.#onShow,
+            this.#onHide);
     }
 
     #onModalClose(event) {
-
         event.preventDefault();
 
-        const modalForm = event.data;
+        const modalClosedEvent = new ModalCloseEvent();
 
-        if (modalForm.InputConfirmationSettings == null) {
-            modalForm.closeModal();
-            return;
-        }
+        if (this.dispatchEvent(modalClosedEvent)) return;
 
-        var formData = new FormData($(modalForm.InputConfirmationSettings.Form)[0]);
-
-        modalForm.InputConfirmationSettings.OnInputDataChanged(formData, changed => {
-            if (!changed) {
-                modalForm.closeModal(true);
-                return;
-            }
-
-            confirm('Reseting', 'Input values will be reset. Are you sure?',
-                function () {
-                    modalForm.closeModal(false);
-                });
-        });
+        closeModal();
     }
 
-    closeModal(setSuccess = false) {
-        if (this.ModalResultInput != null && setSuccess == true)
-            $(this.ModalDiv).append(`<input type='hidden' id='${this.ModalResultInput}' value='success'/>`);
+    closeModal() {
+        $(this.#modalDiv).modal("hide");
+        $(this.#modalCloseBtn).off('click', this.#onModalClose);
+        if(this.#parentForm != null)
+            $(this.#parentForm).off('submit', this.#submitPreventDefault);
 
-        $(this.ModalDiv).modal("hide");
-        $(this.ModalCloseBtn).off('click', this.#onModalClose);
-        if (parentForm != null)
-            $(parentForm).off('submit', this.submitPreventDefault);
-
-        if (this.OnShow != null)
-            $(this.ModalDiv).off("show.bs.modal", this.OnShow);
-    }    
+        if (this.#onShow != null)
+            $(this.#modalDiv).off("show.bs.modal", this.#onShow);
+    }
 }
-
-customElements.define("show-modal", ShowModalComponent);

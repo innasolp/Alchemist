@@ -20,19 +20,9 @@ function onServiceSettingsChanged(formData, onChanged) {
     );
 }
 
-const serviceModalSettings = new ModalForm(".serviceSettingsModal", ".serviceSettingsModalBody", '#serviceSettingsCloseBtn', null, '#settingsForm', new InputConfirmationSettings('#serviceSettingsForm', onServiceSettingsChanged));
-function showServiceSettingsModal(url, data, onServiceSet, onHide = null) {
-    serviceModalSettings.show(url,
-        data,
-        function (response)
-        {
-            $("#saveServiceSettingsBtn").on('click', function (event) {
-                event.target.setAttribute('disabled', true);
-                saveServiceSettings('#serviceSettingsForm', onServiceSet);
-            });
-        },
-        onHide);
-}
+
+
+const showServiceSettingsModal = new ShowModal(".service-settings-modal", "#settingsForm");
 
 function enableSaveServiceSettingsButton() {
     enableButton('#saveServiceSettingsBtn');
@@ -42,11 +32,12 @@ function saveServiceSettings(serviceForm, onServiceSet) {
 
     var onSuccess = (data) => {
 
-        serviceModalSettings.closeModal(true);
+        showServiceSettingsModal.closeModal();
+
         if (data == null) return;
         onServiceSet(data);
         enableSaveServiceSettingsButton();
-    }
+    };
     
     validateForm($(serviceForm),
         () => {
@@ -91,41 +82,68 @@ function initServiceEvents() {
     $(".set-service").on('click', onSetPrimaryServiceClick);
     $(".edit-service").on('click', onSetSecondaryServiceClick);
     $(".add-service").on('click', onSetSecondaryServiceClick);
+
     $("file-upload.import-service").on('file-uploaded', onSetServiceUpload);
     $("file-upload.browser-data-loader").on('file-uploaded', onSetServiceUpload);
     $("file-upload.browser-launcher").on('file-uploaded', onSetServiceUpload);
     $("file-upload.web-loader").on('file-uploaded', onSetServiceUpload);
 }
 
+function onSaveServiceSettings(event) {
+    event.target.setAttribute('disabled', true);
+    saveServiceSettings('#serviceSettingsForm', onServiceSet);
+}
+
+function setModalEvents(onServiceSet) {
+
+    showServiceSettingsModal.addEventListener('modal-close', (event) => {
+        onServiceSettingsChanged($("#serviceSettingsForm"),
+            function (isChanged) {
+                if (!isChanged) return;
+                confirm('Reseting',
+                    'Input values will be reset. Are you sure?',
+                    null,
+                    () => { event.preventDefault(); });
+            }
+        );
+    });
+
+    showServiceSettingsModal.addEventListener("show-modal-complete", (event) => {
+        $("#saveServiceSettingsBtn").on('click', function (event) {
+            event.target.setAttribute('disabled', true);
+            saveServiceSettings('#serviceSettingsForm', (result) => {
+                onServiceSet(result);
+            });
+        });
+    });
+}
+
 function onSetPrimaryServiceClick(event) {
     var serviceName = event.target.getAttribute("data-name");
+
+    const onSetPrimaryService = function (result) {
+        $(`#${serviceName}`).val(result.serviceTypeName);
+        clearFileNameFromUploadControl(`${serviceName}Json`);
+    };
+
+    setModalEvents(onSetPrimaryService);
 
     var shopId = $("#ShopId").val();
     var shopSettingsType = $("#ShopSettingType").val();
 
-    showServiceSettingsModal(`/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/${serviceName}`,
-        null,
-        (result) => {
-            $(`#${serviceName}`).val(result.serviceTypeName);
-        },
-        (result) => {
-            if (result) clearFileNameFromUploadControl(`${serviceName}Json`);
-        });
+    showServiceSettingsModal.show(`/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/${serviceName}`, null);
+
 }
 
 function onSetSecondaryServiceClick(event) {
+
+    setModalEvents(onSetServiceItem);
+
     var guid = event.target.hasAttribute("data-guid") ? event.target.getAttribute("data-guid") : null;
     var shopId = $("#ShopId").val();
     var shopSettingsType = $("#ShopSettingType").val();
     var url = guid != null ? `/Import/Settings/${shopId}/${shopSettingsType}/Service/${guid}` : `/Import/Settings/${shopId}/${shopSettingsType}/Service`;
-    showServiceSettingsModal(url,
-        null,
-        onSetServiceItem
-        //todo
-        //,(result) => {
-        //    if (result) clearFileNameFromUploadControl(`${serviceName}Json`);
-        //}
-    );
+    showServiceSettingsModal.show(url, null);    
 }
 
 function onSetServiceUpload(event) {
