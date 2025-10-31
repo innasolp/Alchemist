@@ -1,0 +1,5 @@
+  {  
+  "ServiceTypeName" : "IImportService2",
+        "ImplementationTypeName": "GoldAppleImportService",
+        "AssemblyPath": "Import\\Products\\GoldApple"
+		}

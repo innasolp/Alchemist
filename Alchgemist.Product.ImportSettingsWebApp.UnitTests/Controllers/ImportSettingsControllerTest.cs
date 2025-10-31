@@ -97,7 +97,11 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var pv = Assert.IsType<PartialViewResult>(result);
         Assert.Equal("~/Views/Shared/ImportSettings.cshtml", pv.ViewName);
-        Assert.Same(data, pv.Model);
+        var productSettings = Assert.IsType<ProductShopImportSettingsModel>(pv.Model);
+
+        Assert.Same(data.Name, productSettings.Name);
+        Assert.Same(data.ProductUrlFormat, productSettings.ProductUrlFormat);
+        Assert.Same(data.CategoryUrlFormat, productSettings.CategoryUrlFormat);
         Assert.True(controller.HttpContext.Session.TryGetValue(SessionKeys.ShopImportSettingsKey, out _));
     }
 
@@ -236,9 +240,9 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var controller = CreateController();
 
-        var data = new CategoryUrlModel() { Item = 5, Url = "https://example.com/c/5", ShopId = 1 };
+        var data = new CategoryUrlModel() { Item = 5, Url = "https://example.com/c/5" };
 
-        var result = await controller.SetRootCategory(data) as OkObjectResult;
+        var result = await controller.SetRootCategory(1, data) as OkObjectResult;
 
         Assert.NotNull(result);
         var returned = Assert.IsType<CategoryUrlModel>(result.Value);
@@ -260,9 +264,9 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var controller = CreateController();
 
-        var data = new CategoryUrlModel() { Item = 7, Url = "https://new", ShopId = 1, Guid = existing.Guid };
+        var data = new CategoryUrlModel() { Item = 7, Url = "https://new", Guid = existing.Guid };
 
-        var result = await controller.SetRootCategory(data) as OkObjectResult;
+        var result = await controller.SetRootCategory(1, data) as OkObjectResult;
 
         Assert.NotNull(result);
         var returned = Assert.IsType<CategoryUrlModel>(result.Value);
@@ -283,9 +287,9 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var controller = CreateController();
 
-        var data = new CategoryUrlModel() { Item = 10, Url = "https://example.com/c/10", ShopId = 2 };
+        var data = new CategoryUrlModel() { Item = 10, Url = "https://example.com/c/10" };
 
-        var result = await controller.RootCategoryIsChanged(data) as OkObjectResult;
+        var result = await controller.RootCategoryIsChanged(2, data) as OkObjectResult;
         Assert.NotNull(result);
         Assert.Equal(true, result.Value);
     }
@@ -301,9 +305,9 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var controller = CreateController();
 
-        var data = new CategoryUrlModel() { Item = 3, Url = "https://same", ShopId = 3 };
+        var data = new CategoryUrlModel() { Item = 3, Url = "https://same" };
 
-        var result = await controller.RootCategoryIsChanged(data) as OkObjectResult;
+        var result = await controller.RootCategoryIsChanged(3, data) as OkObjectResult;
         Assert.NotNull(result);
         Assert.Equal(false, result.Value);
     }

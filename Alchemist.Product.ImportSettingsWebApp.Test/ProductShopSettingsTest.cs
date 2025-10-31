@@ -238,5 +238,14 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
 
         await Expect(savedRow).ToHaveCountAsync(1);
         await Expect(row).ToHaveCountAsync(0);
-    }    
+    }
+
+    [Fact]
+    public async Task UploadFromJson()
+    {
+        var fileName = "productsettings.json";
+        var serviceTypeName = "IImportService";
+
+        await this.UploadFormJsonAsync(fileName, serviceTypeName);
+    }
 }

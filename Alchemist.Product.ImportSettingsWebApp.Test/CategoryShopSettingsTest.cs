@@ -171,4 +171,13 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
         var editedRow = FindServiceRow(editedService);
         await Expect(editedRow).ToHaveCountAsync(1);
     }
+
+    [Fact]
+    public async Task UploadFromJson()
+    {
+        var fileName = "productsettings.json";
+        var serviceTypeName = "IImportService";
+
+        await this.UploadFormJsonAsync(fileName, serviceTypeName);
+    }
 }

@@ -148,9 +148,9 @@ public class ServiceSettingsControllerTests : ControllerTest<ServiceSettingsCont
         var data = new ServiceSettingsModel { Name = "S1", ServiceTypeName = "T1", Guid = Guid.NewGuid(), ShopId =1 };
 
         var result = Assert.IsType<OkObjectResult>(await controller.SaveAsync(1, ShopSettingType.Product, data));
+        var service = Assert.IsType<ServiceSettingsModel>(result.Value);
 
-        Assert.NotNull(result);
-        Assert.Equal(data, result.Value);
+        Assert.Equal(data.ServiceTypeName, service.ServiceTypeName);
 
         var updated = await controller.HttpContext.Session.GetShopImportSettingsFromSessionAsync();
         Assert.NotNull(updated);
@@ -160,13 +160,12 @@ public class ServiceSettingsControllerTests : ControllerTest<ServiceSettingsCont
     [Fact]
     public async Task IsChanged_ReturnsBadRequest_WhenNameEmpty()
     {
-        var controller = CreateController();
-        var data = new ServiceSettingsModel { Name = string.Empty };
+        var controller = CreateController();        
 
-        var result = Assert.IsType< BadRequestObjectResult>(await controller.IsChanged(data.ShopId, ShopSettingType.Product, data));
+        var result = Assert.IsType<BadRequestObjectResult>(await controller.IsChanged(1, ShopSettingType.Product, null));
 
         Assert.NotNull(result);
-        Assert.Equal("Empty service name", result.Value);
+        Assert.Equal("json is invalid", result.Value);
     }
 
     [Fact]

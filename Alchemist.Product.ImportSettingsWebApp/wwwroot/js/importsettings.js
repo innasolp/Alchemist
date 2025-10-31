@@ -35,41 +35,32 @@ function onSettingsTabChangePrevent(event) {
 
 function initImportSettingsUpload() {
 
-    const onImportSettingsUpload = (event) => {
+    const onImportSettingsUpload = async (event) => {
         const shopId = $("#ShopId").val();
         const shopSettingsType = $("#ShopSettingType").val();
         const url = `/Import/Settings/${shopSettingsType}/${shopId}`;
         const fileInputName = $(event.target).find("input").attr("name");        
-        uploadImportSettingsFromJson($('#loadSettingsFromJsonForm'), fileInputName, url);
+        await uploadImportSettingsFromJson('#loadSettingsFromJsonForm', fileInputName, url);
     };
 
     $("file-upload.import-settings").on('file-uploaded', onImportSettingsUpload);
 }
 
-async function uploadImportSettingsFromJson(formSelector, fileInputName, importSettingsUrl) {
+async function uploadImportSettingsFromJson(form, fileInputName, importSettingsUrl) {
 
-    var lodImportSettingsToDiv = function (html) {
-        $("#importSettingsDiv").html(html);
-        initSettingsEvents();
-    }
-
-    postFormInputFile('/Upload/Json/',
-        formSelector,
-        fileInputName,
-        null,
-        (json) => {
-            if (json == null) return;
-            console.trace(json);
-            console.log('shop settings upload successfully');
-            postJsonData(importSettingsUrl, json, lodImportSettingsToDiv, null);
-        }
-    );
+    var json = await postFormInputFileAsync('/Upload/Json/', form, fileInputName, null);
+    if (json == null) return;
+    console.trace(json);
+    console.log('shop settings upload successfully');
+    var html = await postJsonDataAsync(importSettingsUrl, json);   
+    $("#importSettingsDiv").html(html);
+    //todo obsolete?
+    initSettingsEvents();
 }
 
 function enableSaveSettingsButton() {
     enableButton('#saveImportSettingsBtn');
 } 
-
 
 function initImportSettingsEvents() {
     $("#saveImportSettingsBtn").on('click', async function (event) {

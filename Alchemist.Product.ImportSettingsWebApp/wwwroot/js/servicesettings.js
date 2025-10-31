@@ -83,6 +83,7 @@ function initServiceEvents() {
     $("file-upload.browser-data-loader").on('file-uploaded', onSetServiceUpload);
     $("file-upload.browser-launcher").on('file-uploaded', onSetServiceUpload);
     $("file-upload.web-loader").on('file-uploaded', onSetServiceUpload);
+    $("file-upload.request-headers").on('file-uploaded', onSetServiceUpload);
 }
 
 function onSaveServiceSettings(event) {
@@ -141,28 +142,26 @@ function onSetSecondaryServiceClick(event) {
     showServiceSettingsModal.show(url, null, onShow, tryServiceSettingsModalClose);    
 }
 
-function onSetServiceUpload(event) {
+async function onSetServiceUpload(event) {
     const shopId = $("#ShopId").val();
     const shopSettingsType = $("#ShopSettingType").val();
     const modelName = $(event.target).attr("data-name") ?? null;
     const url = `/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/Set/${modelName}`;
     const fileInputName = $(event.target).find("input").attr("name");
-    const onSuccess = (data) => {       
-        $(`input[data-name='${modelName}']`).val(data.serviceTypeName);
-    };
-    uploadServiceSettingsFromJson($('#settingsForm'), fileInputName, url, onSuccess);
+   
+    var data = await uploadServiceSettingsFromJson('#settingsForm', fileInputName, url);
+    $(`input[data-name='${modelName}']`).val(data.serviceTypeName);
+    console.log(`service settings ${data.serviceTypeName} set from file successfully`);
 }
 
-function uploadServiceSettingsFromJson(formSelector, fileInputName, url, onSuccess) {
-    postFormInputFile('/Upload/Json/',
-        formSelector,
+async function uploadServiceSettingsFromJson(form, fileInputName, url) {
+    var json = await postFormInputFileAsync('/Upload/Json/',
+        form,
         fileInputName,
-        null,
-        (json) => {
-            if (json == null) return;
-            console.trace(json);
-            console.log('shop settings upload successfully');
-            postJsonData(url, json, onSuccess, null);
-        }
+        null
     );
+    if (json == null) return;
+    console.trace(json);
+    console.log('service settings file upload successfully');
+    return await postJsonDataAsync(url, json);
 }

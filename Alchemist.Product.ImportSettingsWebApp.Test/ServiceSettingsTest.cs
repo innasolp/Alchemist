@@ -1,7 +1,10 @@
-﻿using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
+﻿using Alchemist.Product.ImportSettingsWebApp.Models;
+using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
+using Alchemist.Test.Functional.Playwright;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using System.Collections.ObjectModel;
 using Xunit.Abstractions;
 using TestCommon = Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure.Common;
 
@@ -19,6 +22,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 {
     private readonly ServiceSettingsTestImportSettingsWebAppFactory _webAppFactory;
     private readonly ITestOutputHelper _outputHelper;
+    private readonly ObservableCollection<IConsoleMessage> _messages = [];
 
     public ServiceSettingsTest(ServiceSettingsTestImportSettingsWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
     {
@@ -26,7 +30,18 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
         _outputHelper = outputHelper;
 
         _webAppFactory.CreateClient();
-    }    
+    }
+
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+        Page.Console += OnPageConsole;
+    }
+
+    private void OnPageConsole(object? sender, IConsoleMessage e)
+    {
+        _messages.Add(e);
+    }
 
     private async Task ExpectShowServiceAsync(string serviceClass)
     {
@@ -237,5 +252,24 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" })).ToHaveValueAsync(newServiceImplementationType);
         await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true })).ToHaveValueAsync(newServiceAssemblyPath);
+    }
+
+    [Fact]
+    public async Task ServiceSetWhenUploadFromFile()
+    {
+        var fileName = "importservice.json";
+        var serviceTypeName = "IImportService";
+
+        var url = _webAppFactory.ServerAddress;
+        await Page.GotoAsync(url);
+
+        await this.ExpectProductShopSettingsLoadedAsync();
+
+        await this.ExpectFileUploadAsync("import-service", fileName, Path.Combine($"{Directory.GetCurrentDirectory()}/Content", fileName));
+
+        await Expect(Page.Locator($"input[data-name='{nameof(ShopImportSettingsModel.ImportService)}']")).ToHaveValueAsync(serviceTypeName);
+
+        await ExpectShowServiceAsync("import-service");
+        await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" })).ToHaveValueAsync(serviceTypeName);
     }
 }

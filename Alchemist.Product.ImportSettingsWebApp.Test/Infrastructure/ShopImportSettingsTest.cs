@@ -1,6 +1,8 @@
-﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
+﻿using Alchemist.Product.ImportSettingsWebApp.Models;
+using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using Alchemist.Test.Functional.Playwright;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 
@@ -82,5 +84,14 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
         await Expect(Page.GetByText($"The WebLoader field is required.")).ToBeVisibleAsync();
+    }
+
+    protected virtual async Task UploadFormJsonAsync(string fileName, string serviceTypeName)
+    {
+        await ExpectSettingsLoadedAsync();       
+
+        await this.ExpectFileUploadAsync("import-settings", fileName, Path.Combine($"{Directory.GetCurrentDirectory()}/Content", fileName));
+
+        await Expect(Page.Locator($"input[data-name='{nameof(ShopImportSettingsModel.ImportService)}']")).ToHaveValueAsync(serviceTypeName);
     }
 }
