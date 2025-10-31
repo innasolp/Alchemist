@@ -7,20 +7,16 @@
     return data;
 }
 
-function onServiceSettingsChanged(formData, onChanged) {
+async function isServiceSettingsChanged(formData) {
 
     var serviceData = getServiceData(formData);
 
     const shopSettingsType = $("#ShopSettingType").val();
     const shopId = $("#ShopId").val();
 
-    postJsonData(`/Import/Settings/${shopId}/${shopSettingsType}/Service/IsChanged`,
-        JSON.stringify(serviceData),
-        (result) => onChanged(result)
-    );
+    return await postJsonDataAsync(`/Import/Settings/${shopId}/${shopSettingsType}/Service/IsChanged`,
+        JSON.stringify(serviceData));
 }
-
-
 
 const showServiceSettingsModal = new ShowModal(".service-settings-modal", "#settingsForm");
 
@@ -94,28 +90,13 @@ function onSaveServiceSettings(event) {
     saveServiceSettings('#serviceSettingsForm', onServiceSet);
 }
 
-function setModalEvents(onServiceSet) {
+async function tryServiceSettingsModalClose() {
 
-    showServiceSettingsModal.addEventListener('modal-close', (event) => {
-        onServiceSettingsChanged($("#serviceSettingsForm"),
-            function (isChanged) {
-                if (!isChanged) return;
-                confirm('Reseting',
-                    'Input values will be reset. Are you sure?',
-                    null,
-                    () => { event.preventDefault(); });
-            }
-        );
-    });
+    const isChanged = await isServiceSettingsChanged(new FormData($("#serviceSettingsForm")[0]));
 
-    showServiceSettingsModal.addEventListener("show-modal-complete", (event) => {
-        $("#saveServiceSettingsBtn").on('click', function (event) {
-            event.target.setAttribute('disabled', true);
-            saveServiceSettings('#serviceSettingsForm', (result) => {
-                onServiceSet(result);
-            });
-        });
-    });
+    if (!isChanged) return true;
+
+    return await confirmAsync('Reseting', 'Input values will be reset. Are you sure?');
 }
 
 function onSetPrimaryServiceClick(event) {
@@ -124,26 +105,40 @@ function onSetPrimaryServiceClick(event) {
     const onSetPrimaryService = function (result) {
         $(`#${serviceName}`).val(result.serviceTypeName);
         clearFileNameFromUploadControl(`${serviceName}Json`);
+    };    
+
+    const shopId = $("#ShopId").val();
+    const shopSettingsType = $("#ShopSettingType").val();
+
+    const onShow = function (event) {
+        $("#saveServiceSettingsBtn").on('click', function (event) {
+                    event.target.setAttribute('disabled', true);
+                    saveServiceSettings('#serviceSettingsForm', (result) => {
+                        onSetPrimaryService(result);
+                    });
+                });
     };
 
-    setModalEvents(onSetPrimaryService);
-
-    var shopId = $("#ShopId").val();
-    var shopSettingsType = $("#ShopSettingType").val();
-
-    showServiceSettingsModal.show(`/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/${serviceName}`, null);
-
+    const url = `/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/${serviceName}`;
+    showServiceSettingsModal.show(url, null, onShow, tryServiceSettingsModalClose);
 }
 
 function onSetSecondaryServiceClick(event) {
 
-    setModalEvents(onSetServiceItem);
+    const onShow = function (event) {
+        $("#saveServiceSettingsBtn").on('click', function (event) {
+            event.target.setAttribute('disabled', true);
+            saveServiceSettings('#serviceSettingsForm', (result) => {
+                onSetServiceItem(result);
+            });
+        });
+    };
 
-    var guid = event.target.hasAttribute("data-guid") ? event.target.getAttribute("data-guid") : null;
-    var shopId = $("#ShopId").val();
-    var shopSettingsType = $("#ShopSettingType").val();
-    var url = guid != null ? `/Import/Settings/${shopId}/${shopSettingsType}/Service/${guid}` : `/Import/Settings/${shopId}/${shopSettingsType}/Service`;
-    showServiceSettingsModal.show(url, null);    
+    const guid = event.target.hasAttribute("data-guid") ? event.target.getAttribute("data-guid") : null;
+    const shopId = $("#ShopId").val();
+    const shopSettingsType = $("#ShopSettingType").val();
+    const url = guid != null ? `/Import/Settings/${shopId}/${shopSettingsType}/Service/${guid}` : `/Import/Settings/${shopId}/${shopSettingsType}/Service`;
+    showServiceSettingsModal.show(url, null, onShow, tryServiceSettingsModalClose);    
 }
 
 function onSetServiceUpload(event) {
@@ -158,7 +153,7 @@ function onSetServiceUpload(event) {
     uploadServiceSettingsFromJson($('#settingsForm'), fileInputName, url, onSuccess);
 }
 
-async function uploadServiceSettingsFromJson(formSelector, fileInputName, url, onSuccess) {
+function uploadServiceSettingsFromJson(formSelector, fileInputName, url, onSuccess) {
     postFormInputFile('/Upload/Json/',
         formSelector,
         fileInputName,

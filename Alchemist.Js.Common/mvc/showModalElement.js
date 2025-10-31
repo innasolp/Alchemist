@@ -1,30 +1,16 @@
 class ShowModalCompleteEvent extends Event {
-    static eventName = 'show-modal-complete';
+    static eventName = 'show-modal-complete';    
 
-    #response = "";   
-
-    get response() {
-        return this.#response;
-    }
-
-    set response(value) {
-        this.#response = value;
-    }    
-
-    constructor(response) {
-        super(ShowModalCompleteEvent.eventName, { bubbles: true, composed: true });
-        this.#response = response;        
+    constructor() {
+        super(ShowModalCompleteEvent.eventName, { bubbles: true, composed: true });            
     }
 }
 
 class ModalCloseEvent extends Event {
-    static eventName = 'modal-close';   
-
-   
+    static eventName = 'modal-close'; 
 
     constructor() {
-        super(ModalCloseEvent.eventName, { bubbles: true, composed: true, cancelable : true });
-        //this.#parentForm = parentForm;
+        super(ModalCloseEvent.eventName, { bubbles: true, composed: true, cancelable : true });        
     }
 }
 
@@ -99,128 +85,135 @@ class ModalElement extends HTMLElement {
         const modalHeaderDiv = $("<div class='modal-header'></div>");
         modalContentDiv.append(modalHeaderDiv);
 
-        const closeBtn = $("<a href='#' class='close'>&times;</a>");
+        const closeBtn = $("<a href='#' class='close'>&times;</a>");        
         modalHeaderDiv.append(closeBtn);
 
         const modalBodyDiv = $("<div class='modal-body'></div>");
         modalContentDiv.append(modalBodyDiv);
 
         $(this).append(modalDiv);
+    } 
+
+    async #onClose(event) {
+        event.preventDefault();
+
+        const onModalClose = event.data.onClose;
+
+        var result = true;
+
+        if (typeof onModalClose == "function") {
+            if (onModalClose.constructor.name == "AsyncFunction") 
+                result = await onModalClose();            
+            else 
+                result = onModalClose();            
+        }
+
+        if (result == true)
+            event.data.target.closeModal();
     }    
+
+    #onShow(event) {
+        const onShow = event.data;
+        if (onShow != null)
+            onShow();
+    }
+
+    #onHide(event) {
+        //todo
+    }
+
+    get #modalDiv() {
+        return $(this).find('div.modal.fade');
+    }
+
+    get #modalCloseBtn() {
+        return $(this).find('a.close');
+    }
+
+    get #modalBodyDiv() {
+        return $(this).find('div.modal-body');
+    }    
+
+    #onLoad(event) {
+        console.log(event);
+        console.trace(event);
+    }
+
+    showModal(url, data, onShow = null, onClose = null) {
+        this.#modalCloseBtn.on('click', { target : this, onClose : onClose} , this.#onClose);
+
+        this.#modalBodyDiv.on('load', this.#onLoad);
+
+        this.#modalDiv.on('hide.bs.modal', this.#onHide);
+
+        this.#modalDiv.on('show.bs.modal', onShow, this.#onShow);
+
+        const onComplete = (response, success) => {
+            if (success) {
+                this.#modalDiv.modal("show");
+            }
+        };
+
+        const onLoadCallback = function (url, response, status, xhr, onComplete) {
+            if (status == "error") {
+                console.error(xhr);
+                if (response)
+                    console.trace(response);
+                onComplete(response, false);
+            }
+            else {
+                console.log('url ' + url + ' load');
+                onComplete(response, true);
+            }
+        };
+
+        if (data != null)
+            this.#modalBodyDiv.load(url, data, function (response, status, xhr) {
+                onLoadCallback(url, response, status, xhr, onComplete)
+            });
+        else
+            this.#modalBodyDiv.load(url, function (response, status, xhr) {
+                onLoadCallback(url, response, status, xhr, onComplete)
+            });
+    }
+
+    closeModal() {
+        this.#modalDiv.modal("hide");
+        this.#modalCloseBtn.off('click', this.#onClose);
+        this.#modalBodyDiv.off('load', this.#onLoad);
+        this.#modalDiv.off('hide.bs.modal', this.#onHide);
+        this.#modalDiv.off('show.bs.modal', this.#onShow);
+    }
 }
 
 customElements.define("modal-div", ModalElement);
 
-class ShowModal extends EventTarget {
-
+class ShowModal
+{
     #modalElement;
 
     #parentForm;
 
-    constructor(modalElement, parentForm = null) {
-        super();
+    constructor(modalElement, parentForm = null) {       
         this.#modalElement = modalElement;
         this.#parentForm = parentForm;
     }
 
     #submitPreventDefault(event) {
         event.preventDefault();
-    }
+    }    
 
-    get #modalCloseBtn() {
-        return $(this.#modalElement).find('a.close');
-    }
-
-    get #modalBodyDiv() {
-        return $(this.#modalElement).find('div.modal-body');
-    }
-
-    get #modalDiv() {
-        return $(this.#modalElement).find('div.modal.fade');
-    }
-
-    #onLoadCallback(url, response, status, xhr, onComplete) {
-        if (status == "error") {
-            console.error(xhr);
-            if (response)
-                console.trace(response);
-            onComplete(response, false);
-        }
-        else {
-            console.log('url ' + url + ' load');
-            onComplete(response, true);
-        }
-    }
-
-    #showItemModal(modalDiv, modalBodyDiv, url, data, onLoadCallback, onShow = null, onHide = null) {
-        if (onHide != null)
-            modalDiv.on('hide.bs.modal',onHide);
-
-        if (onShow != null)
-            modalDiv.on('show.bs.modal', onShow);
-
-        const onComplete = (response, success) => {
-            if (success) {
-                modalDiv.modal("show");                
-            }
-        };
-
-        if (data != null)
-            modalBodyDiv.load(url, data, function (response, status, xhr) {
-                onLoadCallback(url, response, status, xhr, onComplete)
-            });
-        else
-            modalBodyDiv.load(url, function (response, status, xhr) {
-                onLoadCallback(url, response, status, xhr, onComplete)
-            });
-    }
-
-    #onShow(event) {
-        const showModalCompleteEvent = new ShowModalCompleteEvent(response);
-        this.dispatchEvent(showModalCompleteEvent);
-    }
-
-    #onHide(response) {
-        const hideModalEvent = new ModalHideEvent(response);
-        this.dispatchEvent(hideModalEvent);
-    }
-
-    show(url, data) {
-
+    show(url, data, onShow = null, onClose = null) {
         if (this.#parentForm != null)
             $(this.#parentForm).on('submit', this.#submitPreventDefault);
-
-        this.#modalCloseBtn.on('click', this.#onModalClose);
-
-        $(this.#modalBodyDiv).on('load', function (event) {
-            console.log(event);
-            console.trace(event);
-        });
-
-
-        this.#showItemModal($(this.#modalDiv), $(this.#modalBodyDiv), url, data,
-            this.#onLoadCallback,
-            this.#onShow,
-            this.#onHide);
-    }
-
-    #onModalClose(event) {
-        event.preventDefault();
-
-        const modalClosedEvent = new ModalCloseEvent();
-
-        if (this.dispatchEvent(modalClosedEvent)) return;
-
-        closeModal();
-    }
+        
+        $(this.#modalElement)[0].showModal(url, data, onShow, onClose);
+    }    
 
     closeModal() {
-        $(this.#modalDiv).modal("hide");
-        $(this.#modalCloseBtn).off('click', this.#onModalClose);
-        if(this.#parentForm != null)
-            $(this.#parentForm).off('submit', this.#submitPreventDefault);
+        if (this.#parentForm != null)
+            $(this.#parentForm).off('submit', this.#submitPreventDefault);        
 
-        if (this.#onShow != null)
-            $(this.#modalDiv).off("show.bs.modal", this.#onShow);
+        $(this.#modalElement)[0].closeModal();
     }
 }

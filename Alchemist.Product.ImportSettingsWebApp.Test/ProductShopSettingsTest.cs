@@ -72,19 +72,34 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
         return categoryUrl;
     }
 
+    private async Task<(ILocator li, ILocator row)> ExpectAddRootCategoryAndEditAsync()
+    {
+        var newCategoryUrl = await ExpectAddCategoryUrlAsync();
+
+        var li = Page.Locator("li.rootcategory_li");
+        var row = li.Filter(new LocatorFilterOptions { HasText = $"{newCategoryUrl.item}" })
+          .And(li.Filter(new LocatorFilterOptions { HasText = newCategoryUrl.url }));
+
+        var editCategoryBtn = row.Locator("button.edit-root-category");
+        await Expect(editCategoryBtn).ToHaveCountAsync(1);
+
+        await editCategoryBtn.ClickAsync();
+        return (li, row);
+    }
+
     [Fact]
-    public async Task PopupConfirmationWhenSelectOtherShopAfterMakingChanges()
+    public async Task PopupConfirmationWhenOtherShopSelectWithoutSavingChanges()
     {
         var url = _webAppFactory.ServerAddress;
         await Page.GotoAsync(url);
 
-        await PopupConfirmationWhenSelectOtherShopAfterMakingChangesAsync();
+        await PopupConfirmationWhenOtherShopSelectWithoutSavingChangesAsync();
     }
 
     [Fact]
-    public async Task PopupConfirmationWhenSelectOtherTabAfterMakingChanges()
+    public async Task PopupConfirmationWhenOtherTabSelectWithoutSavingChanges()
     {
-        await PopupConfirmationWhenSelectOtherTabAfterMakingChangesAsync();
+        await PopupConfirmationWhenOtherTabSelectWithoutSavingChangesAsync();
     }
 
     [Fact]
@@ -145,6 +160,60 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     }
 
     [Fact]
+    public async Task NewRootCategoryCloseWithoutChangesSuccess()
+    {
+        await ExpectSettingsLoadedAsync();
+
+        await Page.GetByText("Add category").ClickAsync();
+
+        await Expect(Page.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
+
+        var form = Page.Locator("#rootCategoryForm");
+
+        await Expect(form).ToBeVisibleAsync();
+
+        await Page.Locator(".root-category-modal").Locator(".close").ClickAsync();
+
+        await Expect(form).Not.ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PopupConfirmationWhenNewRootCategoryCloseWithoutSavingChanges()
+    {
+        await ExpectSettingsLoadedAsync();
+
+        await Page.GetByText("Add category").ClickAsync();
+
+        await Expect(Page.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
+
+        var form = Page.Locator("#rootCategoryForm");
+
+        await form.GetByRole(AriaRole.Textbox, new() { Name = "Url" }).FillAsync(Guid.NewGuid().ToString());
+
+        await Page.Locator(".root-category-modal").Locator(".close").ClickAsync();
+
+        await Expect(Page.GetByRole(AriaRole.Dialog, new() { Name = "Input values will be reset. Are you sure?" })).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PopupConfirmationWhenEditRootCategoryCloseWithoutSavingChanges()
+    {
+        await ExpectSettingsLoadedAsync();
+
+        await ExpectAddRootCategoryAndEditAsync();
+
+        await Expect(Page.Locator("#rootCategoryFormDiv")).ToBeVisibleAsync();
+
+        var form = Page.Locator("#rootCategoryForm");
+
+        await form.GetByRole(AriaRole.Textbox, new() { Name = "Url" }).FillAsync(Guid.NewGuid().ToString());
+
+        await Page.Locator(".root-category-modal").Locator(".close").ClickAsync();
+
+        await Expect(Page.GetByRole(AriaRole.Dialog, new() { Name = "Input values will be reset. Are you sure?" })).ToBeVisibleAsync();
+    }
+
+    [Fact]
     public async Task NewRowInCategoryUrlTableWhenSaved()
     {
         await ExpectSettingsLoadedAsync();
@@ -161,17 +230,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     public async Task RowInCategoryUrlTableChangedWhenSaved()
     {
         await ExpectSettingsLoadedAsync();
-
-        var newCategoryUrl = await ExpectAddCategoryUrlAsync();
-
-        var li = Page.Locator("li.rootcategory_li");
-        var row = li.Filter(new LocatorFilterOptions { HasText = $"{newCategoryUrl.item}" })
-          .And(li.Filter(new LocatorFilterOptions { HasText = newCategoryUrl.url }));
-        
-        var editCategoryBtn = row.Locator("button.edit-root-category");
-        await Expect(editCategoryBtn).ToHaveCountAsync(1);
-        
-        await editCategoryBtn.ClickAsync();
+        (ILocator li, ILocator row) = await ExpectAddRootCategoryAndEditAsync();
 
         var savedCategoryUrl = await ExpectCategoryUrlSaveAsync();
         var savedRow = li.Filter(new LocatorFilterOptions { HasText = $"{savedCategoryUrl.item}" })
@@ -179,5 +238,5 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
 
         await Expect(savedRow).ToHaveCountAsync(1);
         await Expect(row).ToHaveCountAsync(0);
-    }
+    }    
 }

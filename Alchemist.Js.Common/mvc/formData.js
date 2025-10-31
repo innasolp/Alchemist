@@ -83,12 +83,31 @@ function postData(url, data = null, onSuccess = null, onError = null,
     });
 }
 
+async function postDataAsync(url, data = null,
+    contentType = "application/x-www-form-urlencoded; charset=UTF-8") {
+    return await $.ajax({
+        method: 'POST',
+        url: url,
+        data: data,
+        contentType: contentType,
+        processData: false
+    });
+}
+
 function postFormData(url, formData, onSuccess = null, onError = null) {
     postData(url, formData, onSuccess, onError, false);
 }
 
+async function postFormDataAsync(url, formData) {
+    return await postDataAsync(url, formData);
+}
+
 function postJsonData(url, jsonData, onSuccess = null, onError = null) {
     postData(url, jsonData, onSuccess, onError, 'application/json');
+}
+
+async function postJsonDataAsync(url, jsonData) {
+    return await postDataAsync(url, jsonData, 'application/json');
 }
 
 function save(formSelector, url, data, onValidationError = null, onSuccess = null, onError = null) {

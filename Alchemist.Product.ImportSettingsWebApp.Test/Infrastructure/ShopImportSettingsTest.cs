@@ -11,7 +11,7 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
 
     protected abstract Task FillInputFieldsAsync();
 
-    protected virtual async Task PopupConfirmationWhenSelectOtherShopAfterMakingChangesAsync()
+    protected virtual async Task PopupConfirmationWhenOtherShopSelectWithoutSavingChangesAsync()
     {
         await ExpectSettingsLoadedAsync();       
 
@@ -24,7 +24,7 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
 
     protected abstract Task SelectOtherTabAsync();
     
-    protected virtual async Task PopupConfirmationWhenSelectOtherTabAfterMakingChangesAsync()
+    protected virtual async Task PopupConfirmationWhenOtherTabSelectWithoutSavingChangesAsync()
     {
         await ExpectSettingsLoadedAsync();
 

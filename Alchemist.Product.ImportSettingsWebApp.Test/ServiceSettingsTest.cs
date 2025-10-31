@@ -37,6 +37,11 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
         await Expect(Page.Locator("#serviceSettingsForm > .row")).ToBeVisibleAsync();
     }    
 
+    private async Task CloseServiceSettingsAsync()
+    {
+        await Page.Locator(".service-settings-modal").Locator(".close").ClickAsync();
+    }
+
     [Fact]
     public async Task ShowImportService()
     {
@@ -91,13 +96,13 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await ExpectShowServiceAsync("import-service");
 
-        await Page.Locator("#serviceSettingsCloseBtn").ClickAsync();
+        await CloseServiceSettingsAsync();
 
         await Expect(Page.Locator("#serviceSettingsForm > .row")).Not.ToBeVisibleAsync();
     }
 
     [Fact]
-    public async Task PopupConfirmationWhenServiceClosingAfterMakingChanges()
+    public async Task PopupConfirmationWhenServiceClosingWithoutSavingChanges()
     {
         var url = _webAppFactory.ServerAddress;
         await Page.GotoAsync(url);
@@ -108,7 +113,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(Guid.NewGuid().ToString());
 
-        await Page.Locator("#serviceSettingsCloseBtn").ClickAsync();
+        await CloseServiceSettingsAsync();
 
         await Expect(Page.Locator("#serviceSettingsForm > .row")).ToBeVisibleAsync();
 
@@ -127,7 +132,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(Guid.NewGuid().ToString());
 
-        await Page.Locator("#serviceSettingsCloseBtn").ClickAsync();
+        await CloseServiceSettingsAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Yes" }).ClickAsync();
 
@@ -146,7 +151,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(Guid.NewGuid().ToString());
 
-        await Page.Locator("#serviceSettingsCloseBtn").ClickAsync();
+        await CloseServiceSettingsAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
 

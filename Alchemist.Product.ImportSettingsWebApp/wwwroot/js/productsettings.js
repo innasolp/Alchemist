@@ -1,24 +1,31 @@
-﻿const categoryUrlModalSettings = new ModalForm(".rootCategoryModal", ".categoryModalBody", '#rootCategoryCloseBtn', null, '#settingsForm', new InputConfirmationSettings('#rootCategoryForm', onCategoryUrlChanged));
+﻿const showRootCategoryModal = new ShowModal(".root-category-modal", "#settingsForm");
 
-function onCategoryUrlChanged(formData, onChanged) {
-
-    var data = getFormDataCopy(formData);
-
-    postFormData('/Import/Settings/Product/CategoryUrl/IsChanged',
-        data,
-        (result) => onChanged(result)
-    );
+async function isCategoryUrlChanged(formData) {
+    var formDataCopy = getFormDataCopy(formData);
+    const data = Object.fromEntries(formDataCopy.entries());  
+    const shopId = $("#ShopId").val();    
+    return await postJsonDataAsync(`/Import/Settings/Product/${shopId}/CategoryUrl/IsChanged`, JSON.stringify(data));
 }
+
+async function tryRootCategoryModalClose() {
+
+    const isChanged = await isCategoryUrlChanged(new FormData($("#rootCategoryForm")[0]));
+
+    if (!isChanged) return true;
+
+    return await confirmAsync('Reseting', 'Input values will be reset. Are you sure?');
+}
+
 
 function onSetRootCategory(event) {
     var guid = event.target.hasAttribute("data-guid") ? event.target.getAttribute("data-guid") : null;
-    const onShow = (response) => {
+    const onShow = () => {
         setDivToForm($('#rootCategoryDiv'), $('#rootCategoryFormDiv'), 'rootCategoryForm');
         $("button.save-root-category").on("click", function (event){
             setCategoryUrl('#rootCategoryForm');
             });
     };
-    categoryUrlModalSettings.show('/Import/Settings/Product/CategoryUrl', getCategoryUrlData(guid), onShow, null);
+    showRootCategoryModal.show('/Import/Settings/Product/CategoryUrl', getCategoryUrlData(guid), onShow, tryRootCategoryModalClose);
 }
 
 function getCategoryUrlData(guid) {
@@ -36,7 +43,7 @@ function setCategoryUrl(categoryUrlForm, onSetCategory = null) {
 
     var onSuccess = (data) => {
 
-        categoryUrlModalSettings.closeModal(true);
+        showRootCategoryModal.closeModal();
         if (data == null) return;
         onSetCategoryUrlItem(data);
         if (onSetCategory != null)
@@ -46,8 +53,8 @@ function setCategoryUrl(categoryUrlForm, onSetCategory = null) {
     validateForm($(categoryUrlForm), () => {
 
         var formData = new FormData($(categoryUrlForm)[0]);
-
-        postFormData(url = "/Import/Settings/Product/CategoryUrl/Set",
+        const shopId = $("#ShopId").val();
+        postFormData(url = `/Import/Settings/Product/${shopId}/CategoryUrl/Set`,
             formData = formData,
             onSuccess = onSuccess,
             onError = null);

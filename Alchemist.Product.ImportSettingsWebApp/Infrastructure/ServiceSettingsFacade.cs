@@ -99,6 +99,9 @@ internal class ServiceSettingsFacade(ISettingsDataAdapter productSettingsDataAda
         var existingService = shopImportSettings.GetService<ServiceSettingsModel>(data.Name) ??
             shopImportSettings.GetService(data.Guid);
 
+        if (existingService == null)
+            return !data.IsEmpty();
+
         return existingService != null && !data.ServiceEquals(existingService);
     }
 }

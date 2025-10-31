@@ -82,15 +82,15 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
     }
 
     [Fact]
-    public async Task PopupConfirmationWhenSelectOtherShopAfterMakingChanges()
+    public async Task PopupConfirmationWhenOtherShopSelectWithoutSavingChanges()
     {
-        await PopupConfirmationWhenSelectOtherShopAfterMakingChangesAsync();
+        await PopupConfirmationWhenOtherShopSelectWithoutSavingChangesAsync();
     }
 
     [Fact]
-    public async Task PopupConfirmationWhenSelectOtherTabAfterMakingChanges()
+    public async Task PopupConfirmationWhenOtherTabSelectWithoutSavingChanges()
     {
-        await PopupConfirmationWhenSelectOtherTabAfterMakingChangesAsync();
+        await PopupConfirmationWhenOtherTabSelectWithoutSavingChangesAsync();
     }
 
     [Fact]

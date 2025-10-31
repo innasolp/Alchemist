@@ -120,13 +120,13 @@ public class ImportSettingsController : Controller
         return PartialView("~/Views/Home/RootCategoryUrl.cshtml", data);
     }
 
-    [Route("/Import/Settings/Product/CategoryUrl/Set")]
+    [Route("/Import/Settings/Product/{shopId:int}/CategoryUrl/Set")]
     [HttpPost]
-    public async Task<IActionResult> SetRootCategory(CategoryUrlModel data)
+    public async Task<IActionResult> SetRootCategory(int shopId, [FromForm]CategoryUrlModel data)
     {
         if (data == null) return BadRequest("Empty json for category url.");
 
-        if (await _facade.GetCurrentShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
+        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
             return BadRequest("Invalid shopId");
 
         var result = productShopSettings.SetRootCategory(data);
@@ -136,19 +136,20 @@ public class ImportSettingsController : Controller
         return Ok(result);
     }
 
-    [Route("/Import/Settings/Product/CategoryUrl/IsChanged")]
+    [Route("/Import/Settings/Product/{shopId:int}/CategoryUrl/IsChanged")]
     [HttpPost]
-    public async Task<IActionResult> RootCategoryIsChanged(CategoryUrlModel data)
+    public async Task<IActionResult> RootCategoryIsChanged(int shopId, [FromBody]CategoryUrlModel data)
     {
         if (data == null) return BadRequest("Empty json for category url.");
 
-        if (await _facade.GetCurrentShopImportSettingsAsync(data.ShopId, ShopSettingType.Product) 
+        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product) 
             is not ProductShopImportSettingsModel productShopSettings)
             return BadRequest("Invalid shopId");
 
         var currentRootCategory = productShopSettings.RootCategories.FirstOrDefault(c =>
-                    c.Url.Equals(data.Url, StringComparison.InvariantCultureIgnoreCase)
-                    && c.Item == data.Item);
+                    c.Guid == data.Guid ||
+                    (c.Url.Equals(data.Url, StringComparison.InvariantCultureIgnoreCase)
+                    && c.Item == data.Item));
 
         return currentRootCategory == null ? Ok(!data.IsEmpty()) : Ok(!currentRootCategory.IsEquals(data));
     }

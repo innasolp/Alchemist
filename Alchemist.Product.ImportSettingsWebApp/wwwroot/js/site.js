@@ -3,12 +3,12 @@
 
 // Write your JavaScript code.
 
-function uploadShopList(shopId, shopSettingsType) {
+async function uploadShopList(shopId, shopSettingsType) {
 
     const hrefFormat = '/Import/Settings/{0}/' + shopSettingsType; 
     var data = { hrefFormat: hrefFormat, shopId: shopId };
 
-    postJsonData(url = '/ShopApi/ShopList',
+    await postJsonData(url = '/ShopApi/ShopList',
         data = JSON.stringify(data),
         onSuccess = (result) => {
 
