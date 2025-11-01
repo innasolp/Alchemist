@@ -1,13 +1,10 @@
-﻿using Alchemist.Product.Interfaces;
-using Alchemist.Product.ShopWebApp.Controllers;
-using Alchemist.Test.ImportSettingsWebApp.Factory;
+﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest;
@@ -38,9 +35,8 @@ public class ImportSettingsWebAppApiHttpInterceptionTest(ImportSettingsWebAppApi
     {
         var httpClient = WebAppFactory.CreateClient();
 
-        var data = new { ShopId = 1, ShopSettingsType = 1 };
-        var url = "/Tab";
-        var response = await httpClient.PostAsync(url, JsonContent.Create(data));
+        var url = "/Tab/1/1";
+        var response = await httpClient.PostAsync(url, null);
 
         try
         {
@@ -62,9 +58,8 @@ public class ImportSettingsWebAppApiHttpInterceptionTest(ImportSettingsWebAppApi
     {
         var httpClient = WebAppFactory.CreateClient();
 
-        var data = new { ShopId = 1, ShopSettingsType = (int)ShopSettingType.Service };
-        var url = "/Tab";
-        var response = await httpClient.PostAsync(url, JsonContent.Create(data));
+        var url = "/Tab/1/0";
+        var response = await httpClient.PostAsync(url, null);
 
         try
         {

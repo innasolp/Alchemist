@@ -1,7 +1,6 @@
 ﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Alchemist.Test.Server.Fixtures;
 using System.Net;
-using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest;
@@ -52,7 +51,7 @@ public class ImportSettingsApiWebAppIntegrationTest : TestFixture<TestImportSett
     [Fact]
     public async Task ImportSettingsApi_SettingsTabEndpoint_ReturnsShopsSettingsContent()
     {
-        var response = await _client.PostAsync("/Tab", JsonContent.Create(new { ShopId  = 1, ShopSettingsType = 1 }));
+        var response = await _client.PostAsync($"/Tab/1/1", null);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
