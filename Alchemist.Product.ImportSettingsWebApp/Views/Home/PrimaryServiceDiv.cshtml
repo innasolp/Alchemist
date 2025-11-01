@@ -1,0 +1,20 @@
+﻿@using Alchemist.Product.ImportSettingsWebApp.Controllers
+@model PrimaryServiceModel
+
+<div class="flex">
+    <div>
+        <input class="form-control form-input @Model.ClassName" readonly="readonly" value="@Model.ServiceSettings?.ServiceTypeName"
+               asp-for-model="@Model.Parent" model-property="@Model.Name" 
+               data-name="@Model.Name" />
+        <span asp-validation-for-model="@Model.Parent" model-property="@Model.Name" class="text-danger"></span>
+    </div>
+    <div class="flex control-group">
+        <div>
+            <button class="btn btn-primary btn-sm form-button set-service @Model.ClassName"
+                    data-name="@Model.Name">
+                Set
+            </button>
+        </div>        
+        <file-upload class="@Model.ClassName" data-name="@Model.Name" name="@(Model.Name)UploadFromJson"></file-upload>
+    </div>
+</div>

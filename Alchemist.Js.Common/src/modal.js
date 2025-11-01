@@ -90,9 +90,9 @@ export class ModalForm {
             return;
         }
 
-        var data = getFormData($(modalForm.InputConfirmationSettings.Form));
+        var formData = new FormData($(modalForm.InputConfirmationSettings.Form)[0]);       
 
-        modalForm.InputConfirmationSettings.OnInputDataChanged(data, changed => {
+        modalForm.InputConfirmationSettings.OnInputDataChanged(formData, changed => {
             if (!changed) {
                 modalForm.closeModal(true);
                 return;

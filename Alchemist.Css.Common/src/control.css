@@ -1,0 +1,31 @@
+﻿.form-input {
+    width:300px;
+}
+
+.form-button {
+    min-width: 100px;
+    height:40px;
+}
+
+.control-label {
+    width: 200px;
+    text-wrap: wrap;
+    margin-bottom:5px;
+}
+
+.form-group
+{
+    margin-top:5px;
+    margin-bottom:10px;
+}
+
+.control-group {
+    margin-left: 10px;
+    row-gap:5px;
+    column-gap:5px;
+}
+
+.form-group-table {
+    margin-top: 15px;
+    margin-bottom: 10px;
+}

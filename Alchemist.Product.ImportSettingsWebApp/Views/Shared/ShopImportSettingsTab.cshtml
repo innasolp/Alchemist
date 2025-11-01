@@ -1,0 +1,36 @@
+﻿@using Alchemist.Product.Interfaces
+@using Alchemist.Import.Settings.Extensions
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@functions{
+    string Disabled(ShopSettingType shopSettingType) => Model.ShopSettingType == shopSettingType ? "disabled-link" : "";
+    string Selected(ShopSettingType shopSettingType) => Model.ShopSettingType == shopSettingType ? "selected" : "";
+}
+
+@model ShopImportSettingsModel
+
+<div class="menu tabsMenuDiv">
+    <div class="shop-tab menu_item-a">
+        <a href="/Import/Settings/@Model.ShopId/@((int)ShopSettingType.Product)"           
+           class="display-8 @Disabled(ShopSettingType.Product) menu_header @Selected(ShopSettingType.Product)">
+           @Enum.GetName(ShopSettingType.Product)</a>
+    </div>
+    <div class="shop-tab menu_item-a">
+        <a href="/Import/Settings/@Model.ShopId/@((int)ShopSettingType.Category)"
+           class="display-8 @Disabled(ShopSettingType.Category) menu_header @Selected(ShopSettingType.Category)">
+           @Enum.GetName(ShopSettingType.Category)</a>
+    </div>
+</div>
+
+<div id="importSettingsUploadDiv">
+    <form id="loadSettingsFromJsonForm">
+        <div class="form-group">
+            <file-upload class="import-settings" name="ImportSettings_(@Model.Name)_UploadFromJson"></file-upload>
+        </div>
+    </form>
+</div>
+<div id="importSettingsDiv">
+    @await Html.PartialAsync("~/Views/Shared/ImportSettings.cshtml", Model)
+</div>
+

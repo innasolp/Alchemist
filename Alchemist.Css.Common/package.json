@@ -17,6 +17,9 @@
     },
     "./list.css": {
       "import": "./src/list.css"
+    },
+    "./table.css": {
+      "import": "./src/table.css"
     }
   },
   "scripts": {

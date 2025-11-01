@@ -1,0 +1,33 @@
+﻿@using Alchemist.Import.Settings.Extensions
+@using System.Text.Json
+@model ShopImportSettingsModel
+
+@functions
+{
+    ServiceSettingsModel GetServiceItem(ServiceSettingsModel serviceSettings)
+    {
+        serviceSettings.ShopId = Model.ShopId;
+        return serviceSettings;
+    }
+}
+
+<ul class="table-ul services">
+    <li class="table-ul header">
+        <div class="flex">
+            <div class="table_header" style="width:200px">Name</div>
+            <div class="table_header" style="width:200px">ServiceTypeName</div>
+            <div></div>
+        </div>
+    </li>
+    @foreach (var service in Model.Services.Where(s => !s.Key.IsPrimaryServiceName()))
+    {
+        @await Html.PartialAsync("~/Views/Home/ServiceSettingsItem.cshtml", GetServiceItem(service.Value))
+
+    }
+    <li class="table-ul add-btn-ul">
+        <div>
+            <a class="add-service">Add service</a>
+        </div>
+    </li>
+</ul>
+

@@ -30,3 +30,8 @@ a.active-filter {
     display: flex;
     width: 100%;
 }
+
+.disabled-link {
+    pointer-events: none;
+    cursor: default; /* Optional: Changes the cursor to indicate non-interactivity */
+}

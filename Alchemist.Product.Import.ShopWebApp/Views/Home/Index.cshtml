@@ -13,12 +13,12 @@
        
     @if(!Model.ShopsUploaded)
     {
-        <script>uploadShopTab($('#shopsTab'), null, setItemsPreventClick);</script>
+        <script>uploadShopTab($('#shopsTab'), null, setShopItemsPreventClick);</script>
     }
     else
     {
         <script>
-            $(()=>setItemsPreventClick());
+            $(()=>setShopItemsPreventClick());
         </script>
     }    
 }

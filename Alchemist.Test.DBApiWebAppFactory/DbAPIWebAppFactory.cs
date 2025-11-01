@@ -42,9 +42,9 @@ public abstract class DbAPIWebAppFactory<TEntryPoint, TDbContext>(bool ensureDel
 
             FillTestData(appContext);
         }
-        catch (Exception ex)
+        catch
         {
-            throw ex;
+            throw;
         }
     }
 

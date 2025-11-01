@@ -43,7 +43,7 @@ internal static class ShopModelExtensions
 
         if (productShopModel.Id != 0)
         {
-            if (shopImportSettings.RootCategories?.Length > 0)
+            if (shopImportSettings.RootCategories?.Count() > 0)
             {
                 var shopCategories = new List<IShopCategory>();
 

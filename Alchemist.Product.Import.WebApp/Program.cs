@@ -8,6 +8,7 @@ using Alchemist.Product.Model.ShopSettings;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using Message.SignalR.DependencyInjection;
+using Message.SignalR.HubMessage.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddSingleton<IModelFactory, ModelFactory>();
 builder.Services.AddSingleton<IImportFacade, ImportFacade>();
 
 var signalRUrl = builder.Configuration.GetHostSectionValue("ShopMessageReceiver");
-builder.Services.AddSignalRMessageReceiver(signalRUrl);
+builder.Services.AddSignalRHubMessageReceiver(signalRUrl);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddJsonOptions(options=>

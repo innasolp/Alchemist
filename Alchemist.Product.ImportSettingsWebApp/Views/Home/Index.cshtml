@@ -1,0 +1,33 @@
+﻿@using Microsoft.AspNetCore.Html
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@functions
+{
+    HtmlString GetShopSettingsTabData() => new HtmlString($"{Model.ShopId?.ToString() ?? "null"},{(int)Model.ShopSettingType}");
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+    <script> 
+        uploadShopList(@GetShopSettingsTabData());
+    </script>
+    
+}
+
+<div class="flex">
+    <div id="shopListDiv">
+    </div>
+    <div id="importSettingsTabDiv" style="width:100%">
+        @await Html.PartialAsync("~/Views/Shared/ShopImportSettingsTab.cshtml", ModelHelper.CreateShopImportSettingsModel(Model.ShopId ?? 0, Model.ShopSettingType))
+    </div>
+</div>
+ 
+

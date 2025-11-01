@@ -1,16 +1,17 @@
-﻿using Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
+﻿using Alchemist.Product.ShopWebApp.Controllers;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.ShopWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Web;
+using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
-public class ShopWebAppApiLoggedFactory : ShopWebAppFactory, ILoggedContext
+public class ShopWebAppApiLoggedFactory : ShopWebAppFullFactory, ILoggedContext
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
@@ -35,8 +36,10 @@ public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFac
     public async Task InfoMiddlewareLogSuccessAsync()
     {
         var httpClient = WebAppFactory.CreateClient();
-        var url = $"/ShopApi/ShopList?hrefFormat={HttpUtility.UrlEncode("/Shop/{0}")}";
-        var response = await httpClient.GetAsync(url);
+
+        var data = new ShopApiData { HRefFormat = "/Shop/{0}" };
+        var url = $"/ShopApi/ShopList";
+        var response = await httpClient.PostAsync(url, JsonContent.Create(data));
 
         try
         {
@@ -57,8 +60,10 @@ public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFac
     public async Task GlobalExceptionHandlerLogSuccessAsync()
     {
         var httpClient = WebAppFactory.CreateClient();
-        var url = $"/ShopApi/ShopList?selectedShopId={new Random().Next(100,1000)}&hrefFormat={HttpUtility.UrlEncode("/Shop/{0}")}";
-        var response = await httpClient.GetAsync(url);
+
+        var data = new ShopApiData { HRefFormat = "/Shop/{0}" , ShopId = new Random().Next(100, 1000) };
+        var url = $"/ShopApi/ShopList";
+        var response = await httpClient.PostAsync(url, JsonContent.Create(data));
 
         try
         {

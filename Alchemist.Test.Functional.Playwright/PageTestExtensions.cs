@@ -74,4 +74,13 @@ public static class PageTestExtensions
         await pageTest.Expect(elementLocator).ToBeVisibleAsync();
         return elementLocator;
     }
+
+    public static async Task ExpectFileUploadAsync(this PageTest pageTest, string className, string fileName, string filePath)
+    {
+        var fileUpload = pageTest.Page.Locator($"file-upload.{className}");
+        await pageTest.Expect(pageTest.Page.GetByText(fileName)).Not.ToBeVisibleAsync();
+        await fileUpload.Locator("button").ClickAsync();
+        await fileUpload.Locator("input").SetInputFilesAsync(filePath);
+        await pageTest.Expect(pageTest.Page.Locator($"file-upload.{className}").Locator(".file-info")).ToHaveTextAsync(fileName);
+    }
 }

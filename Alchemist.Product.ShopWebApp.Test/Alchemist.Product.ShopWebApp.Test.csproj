@@ -19,10 +19,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Import.ShopWebApp\Alchemist.Product.ShopWebApp.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.RestAPI\Alchemist.Product.RestAPI.csproj" />
-    <ProjectReference Include="..\Alchemist.Test.DBApiWebAppFactory\Alchemist.Test.DBApiWebAppFactory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Functional.Playwright\Alchemist.Test.Functional.Playwright.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.ImportSettingsWebApp.Factory\Alchemist.Test.ImportSettingsWebApp.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.SettingsAPIFactory\Alchemist.Test.SettingsAPIFactory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.SignalRWebAppFactory\Alchemist.Test.SignalRWebAppFactory.csproj" />
   </ItemGroup>
 

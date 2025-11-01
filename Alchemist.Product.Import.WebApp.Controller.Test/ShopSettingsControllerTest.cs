@@ -309,7 +309,7 @@ public class ShopSettingsControllerTest : ControllerTest<ShopSettingsController>
         var result = shopSettingsResult.ToShopImportSettings<T>();
         var servicesResult = new Dictionary<string, ServiceSettingsModel>();
         childrenSettingResult.ToList().ForEach(s => servicesResult.Add(s.Name, s.ToImportServiceSettings<ServiceSettingsModel>()));
-        servicesResult.Values.ToList().ForEach(s=>result.UpdateServiceSettings(s.Name, s));
+        servicesResult.Values.ToList().ForEach(s=>result.UpdateServices(s.Name, s));
 
         ModelAssert.EqualFields(expect, result);
         ModelAssert.EqualServices(expect, result);

@@ -1,0 +1,38 @@
+{ 
+    "ShopName": "GoldApple",
+    "Caption": "Золотое яблоко",
+    "ShopUrl": "https://goldapple.ru",
+    "ProductUrlFormat": "https://goldapple.ru/front/api/catalog/product-card/base?itemId={0}&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0",
+    "CategoryUrlFormat": "https://goldapple.ru/front/api/catalog/products?categoryId={0}&pageNumber={1}",
+    "PageProductCount": 30,
+    "Perfomance": true,
+    "Services": {
+      "ImportService": {
+		  "ServiceTypeName" : "IImportService",
+        "ImplementationTypeName": "GoldAppleImportService",
+        "AssemblyPath": "Import\\Products\\GoldApple"
+      },
+      "BrowserDataLoader": {
+		   "ServiceTypeName" : "IBrowserDataLoader",
+        "ImplementationTypeName": "FirefoxStandart",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
+      "BrowserLauncher": {
+		   "ServiceTypeName" : "IBrowserLauncher",
+        "ImplementationTypeName": "FirefoxStandart",
+        "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+      },
+      "WebLoader": {
+		    "ServiceTypeName" : "IWebLoader",
+        "ImplementationTypeName": "Firefox",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
+      },
+      "RequestHeaders": {
+        "Value": {   
+          "CookieIndex": 4,
+          "CookiePrefixLength": 0
+        }
+      }
+    }
+}
+

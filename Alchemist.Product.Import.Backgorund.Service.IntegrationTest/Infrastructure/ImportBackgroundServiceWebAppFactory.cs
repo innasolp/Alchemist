@@ -16,6 +16,8 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using Microsoft.Extensions.DependencyInjection;
+using Alchemist.Test.ShopApiFactory;
+using Alchemist.Test.SettingsAPIFactory;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 

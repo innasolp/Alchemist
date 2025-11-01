@@ -24,14 +24,23 @@
     "./mvc/fileUpload": {
       "import": "./mvc/fileUpload.js"
     },
+    "./mvc/fileUploadElement": {
+      "import": "./mvc/fileUploadElement.js"
+    },
     "./mvc/formData": {
       "import": "./mvc/formData.js"
     },
     "./mvc/modal": {
       "import": "./mvc/modal.js"
     },
+    "./mvc/showModalElement": {
+      "import": "./mvc/showModalElement.js"
+    },
     "./mvc/utils": {
       "import": "./mvc/utils.js"
+    },
+    "./mvc/preeventchange.js": {
+      "import": "./mvc/preeventchange.js"
     }
   },
   "scripts": {
