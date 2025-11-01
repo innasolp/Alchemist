@@ -14,7 +14,7 @@ public class CategoryShopSettingsTestImportSettingsWebAppFactory()
 {
 }
 
-public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSettingsTestImportSettingsWebAppFactory>
+public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSettingsTestImportSettingsWebAppFactory, (string, string)>
 {
     internal record Service(string Name, string ServiceTypeName, string ImplementationTypeName, string AssemblyPath);
 
@@ -29,7 +29,7 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
         _webAppFactory.CreateClient();
     }
 
-    protected override async Task ExpectSettingsLoadedAsync()
+    protected override async Task ExpectPageLoadedAsync()
     {
         var url = _webAppFactory.ServerAddress;
         await Page.GotoAsync(url);
@@ -41,9 +41,9 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
         await this.ExpectCategoryShopSettingsLoadedAsync();
     }
 
-    protected override async Task FillInputFieldsAsync()
+    protected override async Task<(string, string)> FillInputFieldsAsync()
     {
-        await Page.Locator($"#CategorySourceUrl").FillAsync(Guid.NewGuid().ToString());
+        return await this.FillCategoryInputFieldsAsync();
     }
 
     protected override async Task SelectOtherTabAsync()
@@ -121,7 +121,7 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
     [Fact]
     public async Task ServiceFormShowWhenAddServiceButtonClick()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await Page.GetByText("Add service").ClickAsync();
         await Expect(Page.Locator("#serviceSettingsForm")).ToBeVisibleAsync();
@@ -130,7 +130,7 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
     [Fact]
     public async Task NewRowInServiceTableWhenServiceSaved()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await Page.GetByText("Add service").ClickAsync();
 
@@ -144,7 +144,7 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
     [Fact] 
     public async Task ServiceRowUpdatedWhenServiceEditedAndSaved()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await Page.GetByText("Add service").ClickAsync();
 
@@ -178,6 +178,6 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
         var fileName = "productsettings.json";
         var serviceTypeName = "IImportService";
 
-        await this.UploadFormJsonAsync(fileName, serviceTypeName);
+        await UploadFormJsonAsync(fileName, serviceTypeName);
     }
 }

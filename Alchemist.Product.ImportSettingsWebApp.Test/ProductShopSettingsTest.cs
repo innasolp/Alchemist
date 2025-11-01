@@ -14,7 +14,8 @@ public class ProductShopSettingsTestImportSettingsWebAppFactory()
 {
 }
 
-public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSettingsTestImportSettingsWebAppFactory>
+public class ProductShopSettingsTest
+    : ShopImportSettingsTest<ProductShopSettingsTestImportSettingsWebAppFactory, (string,string,string)>
 {
     private record CategoryUrl(int item, string url);
 
@@ -29,7 +30,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
         _webAppFactory.CreateClient();
     }
 
-    protected override async Task ExpectSettingsLoadedAsync()
+    protected override async Task ExpectPageLoadedAsync()
     {
         var url = _webAppFactory.ServerAddress;
         await Page.GotoAsync(url);
@@ -37,11 +38,9 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
         await this.ExpectProductShopSettingsLoadedAsync();
     }
 
-    protected override async Task FillInputFieldsAsync()
+    protected override async Task<(string, string, string)> FillInputFieldsAsync()
     {
-        await Page.Locator($"#ShopSettingsName").FillAsync(Guid.NewGuid().ToString());
-        await Page.Locator($"#ProductUrlFormat").FillAsync(Guid.NewGuid().ToString());
-        await Page.Locator($"#CategoryUrlFormat").FillAsync(Guid.NewGuid().ToString());
+        return await this.FillProductInputFieldsAsync();
     }
 
     protected override async Task SelectOtherTabAsync()
@@ -135,7 +134,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     [Fact]
     public async Task CategoryUrlDialogWhenAddRootCategoryClick()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await Page.GetByText("Add category").ClickAsync();
 
@@ -145,7 +144,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     [Fact]
     public async Task CategoryUrlValidationErrorWhenRequiredFieldsAreEmpty()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await Page.GetByText("Add category").ClickAsync();
 
@@ -162,7 +161,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     [Fact]
     public async Task NewRootCategoryCloseWithoutChangesSuccess()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await Page.GetByText("Add category").ClickAsync();
 
@@ -180,7 +179,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     [Fact]
     public async Task PopupConfirmationWhenNewRootCategoryCloseWithoutSavingChanges()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await Page.GetByText("Add category").ClickAsync();
 
@@ -198,7 +197,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     [Fact]
     public async Task PopupConfirmationWhenEditRootCategoryCloseWithoutSavingChanges()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await ExpectAddRootCategoryAndEditAsync();
 
@@ -216,7 +215,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     [Fact]
     public async Task NewRowInCategoryUrlTableWhenSaved()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         var categoryUrl = await ExpectAddCategoryUrlAsync();
 
@@ -229,7 +228,7 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
     [Fact]
     public async Task RowInCategoryUrlTableChangedWhenSaved()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
         (ILocator li, ILocator row) = await ExpectAddRootCategoryAndEditAsync();
 
         var savedCategoryUrl = await ExpectCategoryUrlSaveAsync();
@@ -246,6 +245,6 @@ public class ProductShopSettingsTest : ShopImportSettingsTest<ProductShopSetting
         var fileName = "productsettings.json";
         var serviceTypeName = "IImportService";
 
-        await this.UploadFormJsonAsync(fileName, serviceTypeName);
+        await UploadFormJsonAsync(fileName, serviceTypeName);
     }
 }

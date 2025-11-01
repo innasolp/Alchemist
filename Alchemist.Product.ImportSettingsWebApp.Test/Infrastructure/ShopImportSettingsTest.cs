@@ -6,16 +6,16 @@ using Alchemist.Test.Functional.Playwright;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 
-public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
-    where T :  ImportSettingsWebAppFactory
+public abstract class ShopImportSettingsTest<TWebAppFactory, TInput> : PageTest, IClassFixture<TWebAppFactory>
+    where TWebAppFactory :  ImportSettingsWebAppFactory
 {   
-    protected abstract Task ExpectSettingsLoadedAsync();
+    protected abstract Task ExpectPageLoadedAsync();
 
-    protected abstract Task FillInputFieldsAsync();
+    protected abstract Task<TInput> FillInputFieldsAsync();
 
     protected virtual async Task PopupConfirmationWhenOtherShopSelectWithoutSavingChangesAsync()
     {
-        await ExpectSettingsLoadedAsync();       
+        await ExpectPageLoadedAsync();       
 
         await FillInputFieldsAsync();
 
@@ -28,7 +28,7 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
     
     protected virtual async Task PopupConfirmationWhenOtherTabSelectWithoutSavingChangesAsync()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await FillInputFieldsAsync();
 
@@ -40,7 +40,7 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
 
     protected virtual async Task ValidationErrorWhenShopSettingsNameIsEmptyAsync()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await this.ExpectImportSettingsRequiredValidationErrorAsync("ShopSettingsName", "Name");
     }
@@ -48,14 +48,14 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
 
     protected virtual async Task ValidationErrorWhenRequiredFieldIsEmptyAsync(string inputFieldName, string property)
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await this.ExpectImportSettingsRequiredValidationErrorAsync(inputFieldName, property);
     }
 
     protected virtual async Task ValidationErrorWhenImportServiceNotSetAsync()
     {       
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await this.ExpectSelectShopAsync(locator => locator.Last);
 
@@ -67,7 +67,7 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
     
     protected virtual async Task ValidationErrorWhenWebLoaderNotSetAsync()
     {
-        await ExpectSettingsLoadedAsync();
+        await ExpectPageLoadedAsync();
 
         await this.ExpectSelectShopAsync(locator => locator.Last);
 
@@ -88,10 +88,10 @@ public abstract class ShopImportSettingsTest<T> : PageTest, IClassFixture<T>
 
     protected virtual async Task UploadFormJsonAsync(string fileName, string serviceTypeName)
     {
-        await ExpectSettingsLoadedAsync();       
+        await ExpectPageLoadedAsync();       
 
         await this.ExpectFileUploadAsync("import-settings", fileName, Path.Combine($"{Directory.GetCurrentDirectory()}/Content", fileName));
 
         await Expect(Page.Locator($"input[data-name='{nameof(ShopImportSettingsModel.ImportService)}']")).ToHaveValueAsync(serviceTypeName);
-    }
+    }    
 }

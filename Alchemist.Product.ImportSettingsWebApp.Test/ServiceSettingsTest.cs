@@ -43,20 +43,6 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
         _messages.Add(e);
     }
 
-    private async Task ExpectShowServiceAsync(string serviceClass)
-    {
-        await Expect(Page.Locator($"input.form-input.{serviceClass}")).Not.ToHaveValueAsync("");
-
-        await this.SetServiceButtonClickAsync(serviceClass);
-
-        await Expect(Page.Locator("#serviceSettingsForm > .row")).ToBeVisibleAsync();
-    }    
-
-    private async Task CloseServiceSettingsAsync()
-    {
-        await Page.Locator(".service-settings-modal").Locator(".close").ClickAsync();
-    }
-
     [Fact]
     public async Task ShowImportService()
     {
@@ -65,7 +51,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.ExpectProductShopSettingsLoadedAsync();
 
-        await ExpectShowServiceAsync("import-service");
+        await this.ExpectShowServiceAsync("import-service");
     }
 
     [Fact]
@@ -76,7 +62,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.ExpectProductShopSettingsLoadedAsync();
 
-        await ExpectShowServiceAsync("browser-data-loader");
+        await this.ExpectShowServiceAsync("browser-data-loader");
     }
 
     [Fact]
@@ -87,7 +73,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.ExpectProductShopSettingsLoadedAsync();
 
-        await ExpectShowServiceAsync("browser-launcher");
+        await this.ExpectShowServiceAsync("browser-launcher");
     }
 
     [Fact]
@@ -98,7 +84,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.ExpectProductShopSettingsLoadedAsync();
 
-        await ExpectShowServiceAsync("web-loader");
+        await this.ExpectShowServiceAsync("web-loader");
     }
 
     [Fact]
@@ -109,9 +95,9 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.ExpectProductShopSettingsLoadedAsync();
 
-        await ExpectShowServiceAsync("import-service");
+        await this.ExpectShowServiceAsync("import-service");
 
-        await CloseServiceSettingsAsync();
+        await this.CloseServiceSettingsAsync();
 
         await Expect(Page.Locator("#serviceSettingsForm > .row")).Not.ToBeVisibleAsync();
     }
@@ -124,11 +110,11 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.ExpectProductShopSettingsLoadedAsync();
 
-        await ExpectShowServiceAsync("import-service");
+        await this.ExpectShowServiceAsync("import-service");
 
         await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(Guid.NewGuid().ToString());
 
-        await CloseServiceSettingsAsync();
+        await this.CloseServiceSettingsAsync();
 
         await Expect(Page.Locator("#serviceSettingsForm > .row")).ToBeVisibleAsync();
 
@@ -147,7 +133,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(Guid.NewGuid().ToString());
 
-        await CloseServiceSettingsAsync();
+        await this.CloseServiceSettingsAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Yes" }).ClickAsync();
 
@@ -166,7 +152,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(Guid.NewGuid().ToString());
 
-        await CloseServiceSettingsAsync();
+        await this.CloseServiceSettingsAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
 
@@ -218,8 +204,6 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.ExpectProductShopSettingsLoadedAsync();
 
-        var previousServiceType = await Page.GetByRole(AriaRole.Textbox, new() { Name = "ImportService" }).InputValueAsync();
-
         await this.SetServiceButtonClickAsync("import-service");
 
         var newServiceTypeName = Guid.NewGuid().ToString();
@@ -237,21 +221,11 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
         await Page.GotoAsync(url);
 
         await this.ExpectProductShopSettingsLoadedAsync();
+        var (serviceType, serviceImplementationType, serviceAssemblyPath) = await this.SetServiceSettingsAsync("import-service");
 
         await this.SetServiceButtonClickAsync("import-service");
 
-        var newServiceImplementationType = Guid.NewGuid().ToString();
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" }).FillAsync(newServiceImplementationType);
-
-        var newServiceAssemblyPath = Guid.NewGuid().ToString();
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true }).FillAsync(newServiceAssemblyPath);
-
-        await this.SaveServiceBtnClickAsync();
-
-        await this.SetServiceButtonClickAsync("import-service");
-
-        await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" })).ToHaveValueAsync(newServiceImplementationType);
-        await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true })).ToHaveValueAsync(newServiceAssemblyPath);
+        await this.ExpectServiceSettingsFieldsAsync(serviceType, serviceImplementationType, serviceAssemblyPath);
     }
 
     [Fact]
@@ -269,7 +243,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await Expect(Page.Locator($"input[data-name='{nameof(ShopImportSettingsModel.ImportService)}']")).ToHaveValueAsync(serviceTypeName);
 
-        await ExpectShowServiceAsync("import-service");
+        await this.ExpectShowServiceAsync("import-service");
         await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" })).ToHaveValueAsync(serviceTypeName);
     }
 }

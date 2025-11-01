@@ -94,4 +94,70 @@ internal static class ImportSettingPageTestExtensions
         await pageTest.Page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
         await pageTest.Expect(pageTest.Page.GetByText($"The {property} field is required.")).ToBeVisibleAsync();
     }
+
+    internal static async Task<(string serviceTypeName, string serviceImplementationType, string serviceAssemblyPath)>
+        SetServiceSettingsAsync(this PageTest pageTest, string serviceClass)
+    {
+        await pageTest.SetServiceButtonClickAsync(serviceClass);
+
+        var newServiceTypeName = Guid.NewGuid().ToString();
+        await pageTest.Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }).FillAsync(newServiceTypeName);
+
+        var newServiceImplementationType = Guid.NewGuid().ToString();
+        await pageTest.Page.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" }).FillAsync(newServiceImplementationType);
+
+        var newServiceAssemblyPath = Guid.NewGuid().ToString();
+        await pageTest.Page.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true }).FillAsync(newServiceAssemblyPath);
+
+        await pageTest.SaveServiceBtnClickAsync();
+
+        return (newServiceTypeName, newServiceImplementationType, newServiceAssemblyPath);
+    }
+
+    internal static async Task ExpectServiceSettingsFieldsAsync(this PageTest pageTest, string serviceTypeName, string serviceImplementationType, string serviceAssemblyPath)
+    {
+        await pageTest.Expect(pageTest.Page.GetByRole(AriaRole.Textbox, new() { Name = "Service type" }))
+            .ToHaveValueAsync(serviceTypeName);
+        await pageTest.Expect(pageTest.Page.GetByRole(AriaRole.Textbox, new() { Name = "Service implementation type" }))
+            .ToHaveValueAsync(serviceImplementationType);
+        await pageTest.Expect(pageTest.Page.GetByRole(AriaRole.Textbox, new() { Name = "Service assembly path", Exact = true }))
+            .ToHaveValueAsync(serviceAssemblyPath);
+    }
+    internal static async Task ExpectShowServiceAsync(this PageTest pageTest, string serviceClass)
+    {
+        await pageTest.Expect(pageTest.Page.Locator($"input.form-input.{serviceClass}")).Not.ToHaveValueAsync("");
+
+        await pageTest.SetServiceButtonClickAsync(serviceClass);
+
+        await pageTest.Expect(pageTest.Page.Locator("#serviceSettingsForm > .row")).ToBeVisibleAsync();
+    }
+
+    internal static async Task CloseServiceSettingsAsync(this PageTest pageTest)
+    {
+        await pageTest.Page.Locator(".service-settings-modal").Locator(".close").ClickAsync();
+    }
+
+    internal static async Task<(string, string, string)> FillProductInputFieldsAsync(this PageTest pageTest)
+    {
+        var name = Guid.NewGuid().ToString();
+        await pageTest.Page.Locator($"#ShopSettingsName").FillAsync(name);
+
+        var productUrlFormat = Guid.NewGuid().ToString();
+        await pageTest.Page.Locator($"#ProductUrlFormat").FillAsync(productUrlFormat);
+
+        var categoryUrlFormat = Guid.NewGuid().ToString();
+        await pageTest.Page.Locator($"#CategoryUrlFormat").FillAsync(categoryUrlFormat);
+
+        return (name, productUrlFormat, categoryUrlFormat);
+    }
+
+    internal static async Task<(string, string)> FillCategoryInputFieldsAsync(this PageTest pageTest)
+    {
+        var name = Guid.NewGuid().ToString();
+        await pageTest.Page.Locator($"#ShopSettingsName").FillAsync(name);
+
+        var categorySourceUrl = Guid.NewGuid().ToString();
+        await pageTest.Page.Locator($"#CategorySourceUrl").FillAsync(categorySourceUrl);
+        return (name, categorySourceUrl);
+    }
 }
