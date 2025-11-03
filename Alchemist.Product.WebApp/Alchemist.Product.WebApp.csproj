@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<!-- <ProjectReference Include="..\Alchemist.Css.Common\Alchemist.Css.Common.esproj" /> -->
+		<ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
+		<ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
+	</ItemGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
+	<PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
+  </ItemGroup>
+
+	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
+	</Target>
+	
+	<Target Name="CopyNpmCssToWwwRoot" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<ItemGroup>
+			<NpmCssFiles Include="..\node_modules\alchemist_css_common\src\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(NpmCssFiles)" DestinationFolder="wwwroot/css/common/%(RecursiveDir)" />
+	</Target>
+
+	<Target Name="CopyNpmLibsToWwwRoot" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<ItemGroup>
+			<NpmLibFiles Include="..\node_modules\alchemist_common\mvc\*.*" />
+			<JQueryConfirmLibFiles Include="..\node_modules\jquery-confirm\dist\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(NpmLibFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
+		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
+	</Target>
+
+
+</Project>

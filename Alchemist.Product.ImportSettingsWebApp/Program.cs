@@ -12,7 +12,6 @@ using Alchemist.WebApp.Api.Common;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog.Configuration.Extensions;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);

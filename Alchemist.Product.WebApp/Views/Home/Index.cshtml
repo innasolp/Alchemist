@@ -1,0 +1,20 @@
+﻿@model IndexModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@functions{
+    string Disabled(Tab tab) => Model.Tab == tab ? "disabled-link" : "";
+    string Selected(Tab tab) => Model.Tab == tab ? "selected" : "";        
+}
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<tab-panel class="menu tabsMenuDiv">
+    <tab-item class="tab-item menu_item-a" content="@Enum.GetName(Tab.Shops)"></tab-item>
+    <tab-item class="tab-item menu_item-a" content="@Enum.GetName(Tab.ImportSettings)"></tab-item>
+</tab-panel>
