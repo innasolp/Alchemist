@@ -23,4 +23,23 @@ public class ImportSettingsApiController([FromKeyedServices(ShopSettingType.Prod
 
         return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", importSettings);
     }
+
+    [HttpPost]
+    [Route("/ImportSettingsApi/Import/Settings/{shopId:int}/{shopSettingsType:int}")]
+    public IActionResult ShopImportSettings(int shopId, int shopSettingsType)
+    {
+        var model = new IndexModel
+        {
+            ShopId = shopId,
+            ShopSettingType = (ShopSettingType)shopSettingsType
+        };
+        return PartialView("~/Views/Home/Index.cshtml", model);
+    }
+
+    [HttpPost]
+    [Route("/ImportSettingsApi/Import/Settings")]
+    public IActionResult Default()
+    {
+        return PartialView("~/Views/Home/Index.cshtml", new IndexModel());
+    }
 }
