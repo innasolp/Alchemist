@@ -27,11 +27,18 @@ class TabElement extends HTMLElement {
 
     set selected(value) {
         this.#selected = value;
+        this.#setSelected(value);
+    }
 
-        if (this.#selected == true && !this.#a.hasClass("selected"))
-            this.#a.addClass("selected");
-        else if (this.#selected == false && this.#a.hasClass("selected"))
+    #setSelected(value) {
+        if (value == true) {
+            if (!this.#a.hasClass("selected")) this.#a.addClass("selected");
+            if (!this.#a.hasClass("disabled-link")) this.#a.addClass("disabled-link");
+        }
+        else if (value == false) {
             this.#a.removeClass("selected");
+            this.#a.removeClass("disabled-link");
+        }
     }
 
     get #a() {
@@ -39,11 +46,15 @@ class TabElement extends HTMLElement {
     }
 
     get action() {
-        return this.#a.attr('href');
+        return this.getAttribute('action');
     }
 
     set action(value) {
-        this.#a.attr('href', value);
+        if (value) {
+            this.setAttribute('action', value);
+        } else {
+            this.removeAttribute('action');
+        }
     }    
 
     get method() {
@@ -67,27 +78,34 @@ class TabElement extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['content']; 
+        return ['content', 'action']; 
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'content') {
             this.#a.text(newValue);
         }
+        else if (name === 'action') {
+            this.#a.attr('href', newValue);
+        }
     }
 
     connectedCallback() {
-        const fullDivClassName = this.className != null ? `tab-item ${this.className}` : 'tab-item';
-        const tabDiv = $(`<div class='${fullDivClassName}'></div>`);
+        const tabDiv = $("<div class='menu_item-a tab-item-div'></div>");
         tabDiv.on('click', this, this.#onClick);
 
-        var fullAnchorClassName = `display-8 menu_header ${this.selected == true ? "selected" : "disabled-link"}`;
-        if(this.className != null) fullAnchorClassName = fullAnchorClassName + " " + this.className;
-        const anchor = $(`<a class='${fullAnchorClassName}'></a>`);
-        anchor.text(this.content);
+        const anchor = $("<a class='display-8 menu_header'></a>");
+        this.#setAnchor(anchor);
         tabDiv.append(anchor);        
 
         $(this).append(tabDiv);
+    }
+
+    #setAnchor(anchor) {
+        if (this.className) anchor.addClass(this.className);
+        this.#setSelected(this.selected);
+        if (this.content) anchor.text(this.content);
+        if (this.action) anchor.attr('href', this.action);
     }
 
     #onClick(event) {
@@ -124,8 +142,8 @@ class TabPanelElement extends HTMLElement {
     }
 
     connectedCallback() {
-        const fullClassName = this.className != null ? `tabs ${this.className}` : 'tabs';
-        const tabsDiv = $(`<div class='${fullClassName}'></div>`);
+        const tabsDiv = $("<div class='tabs'></div>");
+        if (this.className) tabsDiv.addClass(this.className);
 
         this.#tabs.each((index,child) => {
             $(child).on('tab-select', this, this.#onTabSelect);

@@ -22,6 +22,8 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapReverseProxy();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

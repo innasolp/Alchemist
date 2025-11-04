@@ -2,11 +2,13 @@
 
 public enum Tab
 {
-    Shops = 0,
+    Shop = 0,
     ImportSettings  = 1
 }
 
 public class IndexModel
 {
     public Tab Tab { get; set; }
+
+    public object Data { get; set; }
 }

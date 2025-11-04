@@ -12,9 +12,14 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        init('@Model.Tab.ToString()');
+    </script>
 }
 
 <tab-panel class="menu tabsMenuDiv">
-    <tab-item class="tab-item menu_item-a" content="@Enum.GetName(Tab.Shops)"></tab-item>
-    <tab-item class="tab-item menu_item-a" content="@Enum.GetName(Tab.ImportSettings)"></tab-item>
+    <tab-item class="tab-item" data-item="shops" content="@Enum.GetName(Tab.Shop)" action="#"></tab-item>
+    <tab-item class="tab-item" data-item="importSettings" content="@Enum.GetName(Tab.ImportSettings)" action="#"></tab-item>
 </tab-panel>
+<div id="appDiv"></div>
