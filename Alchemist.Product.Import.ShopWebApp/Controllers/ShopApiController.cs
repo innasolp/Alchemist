@@ -1,4 +1,5 @@
 ﻿using Alchemist.DataService.Interfaces;
+using Alchemist.Exceptions;
 using Alchemist.Product.ShopWebApp.Models;
 using Alchemist.Product.WebApp.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -38,15 +39,22 @@ public class ShopApiController(IShopDataService shopDataService) : Controller
         return Ok(new ShopContentData { Content = content, ShopId = selectedShop?.Id });
     }
 
-    [HttpPost("ShopTab", Name = "ShopTab")]
-    public async Task<IActionResult> ShopTab(ShopApiData data)
+    [HttpPost]
+    [Route("/ShopApi/Shop/{shopId:int}")]
+    public async Task<IActionResult> ShopTab(int shopId)
     {
+        if (shopId <= 0)
+            return BadRequest($"Invalid shopId : {shopId}");
+
         var shops = await _shopFacade.GetShops();
-        var shopTabModel = ModelHelper.GetShopTabModel(shops, data.ShopId, data.HRefFormat);
-        var content = await ViewHelper.GetViewHtml(HttpContext.RequestServices,
-            ControllerContext,
-            "~/Views/Shared/ShopTab.cshtml",
-            shopTabModel);
-        return Ok(content);
+        try
+        {
+            var tabModel = ModelHelper.GetShopTabModel(shops, shopId);
+            return PartialView("~/Views/Shared/ShopTab.cshtml", tabModel);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

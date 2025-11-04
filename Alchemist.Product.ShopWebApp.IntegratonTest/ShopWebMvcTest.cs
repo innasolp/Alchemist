@@ -15,28 +15,6 @@ public class ShopWebMvcTest(ShopWebAppMvcFactory webAppFactory, ITestOutputHelpe
     : TestFixture<ShopWebAppMvcFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
 {
     [Fact]
-    public async Task LoadShopTabSuccessAsync()
-    {
-        var url = "/Shop/ShopTab";
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.PostAsync(url,null);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-
-        try
-        {
-            Assert.Contains("left-menu-ul shopsList", content);
-            Assert.Contains("shop_item selected", content);
-        }
-        catch
-        {
-            OutputHelper.WriteLine(content);
-            throw;
-        }
-    }
-
-    [Fact]
     public async Task IndexPageSuccessAsync()
     {
         var url = "/";

@@ -49,4 +49,26 @@ public class ShopWebApiTest(ShopWebAppApiFactory webAppFactory, ITestOutputHelpe
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("shop_item", content);
     }
+
+    [Fact]
+    public async Task LoadShopTabSuccessAsync()
+    {
+        var url = "/ShopApi/Shop/1";
+        var httpClient = WebAppFactory.CreateClient();
+        var response = await httpClient.PostAsync(url, null);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            Assert.Contains("left-menu-ul shopsList", content);
+            Assert.Contains("shop_item selected", content);
+        }
+        catch
+        {
+            OutputHelper.WriteLine(content);
+            throw;
+        }
+    }
 }

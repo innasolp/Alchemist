@@ -6,23 +6,21 @@
     ViewData["Title"] = "Home Page";
 }
 
+@functions
+{
+    string GetShopId() => Model.ShopId != null ? Model.ShopId.Value.ToString() : "null";
+}
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }    
-       
-    @if(!Model.ShopsUploaded)
-    {
-        <script>uploadShopTab($('#shopsTab'), null, setShopItemsPreventClick);</script>
-    }
-    else
-    {
-        <script>
-            $(()=>setShopItemsPreventClick());
-        </script>
-    }    
+    }       
+
+    <script>
+        uploadShopList(@GetShopId(), loadShop);
+    </script>
 }
 
 <div id="shopsTab">
-    @await Html.PartialAsync($"~/Views/Shared/ShopTab.cshtml", Model.ShopTab);   
+    @await Html.PartialAsync($"~/Views/Shared/ShopTab.cshtml", new ShopTabModel());   
 </div>

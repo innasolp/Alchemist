@@ -82,10 +82,10 @@ public abstract class ShopControllerTest
         return shops[new Random().Next(0, shops.Count)];
     }
 
-    protected async Task AssertActionBadRequestWhenInvalidShopIdAsync(int shopId,
-        Func<ShopController, int, Task<IActionResult>> action)
+    protected void AssertActionBadRequestWhenInvalidShopId(int shopId,
+        Func<ShopController, int, IActionResult> action)
     {
-        var result = Assert.IsType<BadRequestObjectResult>(await action(ShopController, shopId));
+        var result = Assert.IsType<BadRequestObjectResult>(action(ShopController, shopId));
         Assert.Equal($"Invalid shopId : {shopId}", result.Value);
     }
 
@@ -97,10 +97,10 @@ public abstract class ShopControllerTest
     }
     
 
-    protected async Task AssertActionNotFoundWhenNotExistingShopIdAsync(int shopId,
-        Func<ShopController, int, Task<IActionResult>> Action)
+    protected void AssertActionNotFoundWhenNotExistingShopId(int shopId,
+        Func<ShopController, int, IActionResult> Action)
     {
-        var result = Assert.IsType<NotFoundObjectResult>(await Action(ShopController, shopId));
+        var result = Assert.IsType<NotFoundObjectResult>(Action(ShopController, shopId));
         Assert.Equal($"Shop with id={shopId} not found.", result.Value);
     }
 }

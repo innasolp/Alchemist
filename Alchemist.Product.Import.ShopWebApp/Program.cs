@@ -18,12 +18,6 @@ builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Confi
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSession(options =>
-{
-    options.Cookie.Name = ".ShopApp.Session";
-    options.IdleTimeout = TimeSpan.FromSeconds(60);
-    options.Cookie.IsEssential = true;
-});
 
 if (isApi)
     builder.Services.AddSwaggerApi();
@@ -73,9 +67,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
-
-app.UseSession();
-
 if (isApi)
     app.SetApiRoute("Hello ShopWebApp API!");
 else

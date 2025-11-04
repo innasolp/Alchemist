@@ -9,34 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Alchemist.Product.ShopWebApp.UnitTests;
 
 public class ShopControllerPostActionsTest : ShopControllerTest
-{
-    private static void AssertShopTabModel(object model, IList<IShop>? shops = null, int? shopId = null)
-    {
-        var shopTabDefinition = new
-        {
-            CurrentShopModel = new Shop(),
-            ShopItems = new[] { new { ShopName = "", HRef = "", IsSelected = false, Id = 0 } }
-        };
-
-        var shopTabModel = JsonExtensions.DeserializeAnonymousType(model, shopTabDefinition);
-
-        if (shops != null)
-        {
-            Assert.Equal(shops.Count, shopTabModel?.ShopItems.Length);
-            Assert.True(shopTabModel?.ShopItems.All(shopItem => shops.Any(s => s.Name == shopItem.ShopName)));
-        }
-
-        if (shopId != null)
-        {
-            Assert.Equal(shopId, shopTabModel.CurrentShopModel?.Id);
-
-            if (shopId != 0)
-                Assert.Equal(shopId, shopTabModel?.ShopItems.FirstOrDefault(s => s.IsSelected)?.Id);
-            else
-                Assert.True(shopTabModel?.ShopItems.All(s => !s.IsSelected));
-        }
-    }
-
+{    
     private static void AssertShopListModel(object model, IList<IShop> shops, int? shopId = null)
     {
         var shopListDefinition = new[] { new { ShopName = "", HRef = "", IsSelected = false, Id = 0 } };
@@ -69,57 +42,7 @@ public class ShopControllerPostActionsTest : ShopControllerTest
         Assert.Equal(expected.Url, result.Url);
         Assert.True((string.IsNullOrEmpty(expected.Caption) && string.IsNullOrEmpty(result.Caption))
             || result.Caption.Equals(expected.Caption));
-    }
-
-    #region ShopTab
-
-    [Fact]
-    public async Task ShopTabActionSuccessResultIsShopTabPartialViewAsync()
-    {
-        SetupShops();
-
-        SessionMock.Object.SetInt32("shops_uploaded", 1);
-
-        var shop = await GetRandomShop();
-
-        var result = Assert.IsType<PartialViewResult>(await ShopController.ShopTab(shop.Id));
-        Assert.Equal("~/Views/Shared/ShopTab.cshtml", result.ViewName);
-    }
-
-    [Fact]
-    public async Task ShopTabModelSelectedShopByIdAsync()
-    {
-        SetupShops();
-
-        var shops = await GetShopsAsync();
-        var shopId = shops[new Random().Next(0, shops.Count)].Id;
-
-        var shopTabView = Assert.IsType<PartialViewResult>(await ShopController.ShopTab(shopId));
-
-        AssertShopTabModel(shopTabView.Model, shops, shopId);
-    }
-
-    [Fact]
-    public async Task ShopTabActionBadRequestWhenShopIdIsNegativeAsync()
-    {
-        var shopId = new Random().Next(1, int.MaxValue) * -1;
-        await AssertActionBadRequestWhenInvalidShopIdAsync(shopId, (shopController, shopId) => shopController.ShopTab(shopId));
-    }
-
-    [Fact]
-    public async Task ShopTabActionBadRequestWhenShopIdIsZeroAsync()
-    {
-        await AssertActionBadRequestWhenInvalidShopIdAsync(0, (shopController, shopId) => shopController.ShopTab(shopId));
-    }
-
-    [Fact]
-    public async Task ShopTabActionNotFoundWhenNotExistingShopAsync()
-    {
-        SetupShops();
-        await AssertActionNotFoundWhenNotExistingShopIdAsync((await GetShopsAsync()).Count + 1, (shopController, shopId) => shopController.ShopTab(shopId));
-    }
-
-    #endregion ShopTab
+    }    
 
     #region ShopList
 
@@ -153,13 +76,8 @@ public class ShopControllerPostActionsTest : ShopControllerTest
     public async Task ShopListActionBadRequestWhenShopIdIsNegativeAsync()
     {
         var shopId = new Random().Next(1, int.MaxValue) * -1;
-        await AssertActionBadRequestWhenInvalidShopIdAsync(shopId, (shopController, shopId) => shopController.ShopList(shopId));
-    }
-
-    [Fact]
-    public async Task ShopListActionBadRequestWhenShopIdIsZeroAsync()
-    {
-        await AssertActionBadRequestWhenInvalidShopIdAsync(0, (shopController, shopId) => shopController.ShopList(shopId));
+        var result = Assert.IsType<BadRequestObjectResult>(await ShopController.ShopList(shopId));
+        Assert.Equal($"Invalid shopId : {shopId}", result.Value);
     }
 
     #endregion ShopList
@@ -238,4 +156,38 @@ public class ShopControllerPostActionsTest : ShopControllerTest
     }
 
     #endregion IsChanged
+
+    #region Shop
+
+    [Fact]
+    public async Task ShopReturnsBadRequestWhenShopIdIsNegative()
+    {
+        var shopId = -1;
+        var result = Assert.IsType<BadRequestObjectResult>(await ShopController.Shop(shopId));
+        Assert.Equal($"Invalid shopId : {shopId}", result.Value);
+    }
+
+    [Fact]
+    public async Task ShopOkEmptyModelWhenShopIdNotExists()
+    {
+        SetupShops();
+        var shopId = int.MaxValue;
+        var result = Assert.IsType<PartialViewResult>(await ShopController.Shop(shopId));
+        var model = Assert.IsAssignableFrom<IShop>(result.Model);
+        Assert.NotEqual(shopId, model.Id);
+        Assert.Null(model.Name);
+    }
+
+    [Fact]
+    public async Task ShopOkWhenShopIdExists()
+    {
+        SetupShops();
+        var shop = await GetRandomShop();
+        var result = Assert.IsType<PartialViewResult>(await ShopController.Shop(shop.Id));
+        var model = Assert.IsAssignableFrom<IShop>(result.Model);
+        Assert.Equal(shop.Id, model.Id);
+        Assert.Equal(shop.Name, model.Name);
+    }
+
+    #endregion
 }

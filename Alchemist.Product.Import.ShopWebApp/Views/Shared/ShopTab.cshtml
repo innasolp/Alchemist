@@ -12,12 +12,12 @@
             </li>
             <li class="left-menu-ul">
                 <div id="shopList">
-                    @await Html.PartialAsync($"~/Views/Shared/ShopList.cshtml", Model.ShopItems)
+                    @await Html.PartialAsync($"~/Views/Shared/ShopList.cshtml", Model.ShopItems ?? new List<ShopItemModel>())
                 </div>
             </li>
         </ul>
     </div>
-    <div style="width:100%">
-        @await Html.PartialAsync($"~/Views/Home/ShopEdit.cshtml", Model.CurrentShopModel)
+    <div style="width:100%" id="shopDiv">
+        @await Html.PartialAsync($"~/Views/Home/ShopEdit.cshtml", Model.CurrentShopModel ?? new ShopModel())
     </div>
 </div>
