@@ -1,5 +1,6 @@
 ﻿@using Alchemist.Product.Interfaces
 @using Alchemist.Import.Settings.Extensions
+@using Microsoft.AspNetCore.Html
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
@@ -8,29 +9,34 @@
     string Selected(ShopSettingType shopSettingType) => Model.ShopSettingType == shopSettingType ? "selected" : "";
 }
 
-@model ShopImportSettingsModel
 
-<div class="menu tabsMenuDiv">
-    <div class="shop-tab menu_item-a">
-        <a href="/Import/Settings/@Model.ShopId/@((int)ShopSettingType.Product)"           
-           class="display-8 @Disabled(ShopSettingType.Product) menu_header @Selected(ShopSettingType.Product)">
-           @Enum.GetName(ShopSettingType.Product)</a>
-    </div>
-    <div class="shop-tab menu_item-a">
-        <a href="/Import/Settings/@Model.ShopId/@((int)ShopSettingType.Category)"
-           class="display-8 @Disabled(ShopSettingType.Category) menu_header @Selected(ShopSettingType.Category)">
-           @Enum.GetName(ShopSettingType.Category)</a>
-    </div>
-</div>
+@model IndexModel
 
-<div id="importSettingsUploadDiv">
-    <form id="loadSettingsFromJsonForm">
-        <div class="form-group">
-            <file-upload class="import-settings" name="ImportSettings_(@Model.Name)_UploadFromJson"></file-upload>
+
+<div class="flex">
+    <div id="shopListDiv">
+    </div>
+    <div id="importSettingsTabDiv" style="width:100%">
+        <div class="menu tabsMenuDiv">
+            <div class="shop-tab menu_item-a">
+                <a href="/Import/Settings/@Model.ShopId/@((int)ShopSettingType.Product)"
+                   class="display-8 @Disabled(ShopSettingType.Product) menu_header @Selected(ShopSettingType.Product)">
+                    @Enum.GetName(ShopSettingType.Product)
+                </a>
+            </div>
+            <div class="shop-tab menu_item-a">
+                <a href="/Import/Settings/@Model.ShopId/@((int)ShopSettingType.Category)"
+                   class="display-8 @Disabled(ShopSettingType.Category) menu_header @Selected(ShopSettingType.Category)">
+                    @Enum.GetName(ShopSettingType.Category)
+                </a>
+            </div>
         </div>
-    </form>
+        
+        <div id="importSettingsDiv">
+            @await Html.PartialAsync("~/Views/Shared/ImportSettings.cshtml", ModelHelper.CreateShopImportSettingsModel(Model.ShopId ?? 0, Model.ShopSettingType))
+        </div>
+    </div>
 </div>
-<div id="importSettingsDiv">
-    @await Html.PartialAsync("~/Views/Shared/ImportSettings.cshtml", Model)
-</div>
+
+
 

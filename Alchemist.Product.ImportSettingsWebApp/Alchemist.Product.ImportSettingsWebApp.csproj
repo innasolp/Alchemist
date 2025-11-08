@@ -29,6 +29,21 @@
 	  <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
 	  <ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="wwwroot\js\importsettings.js">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="wwwroot\js\productsettings.js">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="wwwroot\js\servicesettings.js">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="wwwroot\js\shopsettingssite.js">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
 		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
 	</Target>
@@ -48,6 +63,10 @@
 		</ItemGroup>
 		<Copy SourceFiles="@(NpmLibFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
 		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
+	</Target>
+
+	<Target Name="NpmLinkOutputPackage" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
 	</Target>
 
 </Project>

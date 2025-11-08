@@ -4,12 +4,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	  <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
   </PropertyGroup>
 
 	<ItemGroup>
 		<!-- <ProjectReference Include="..\Alchemist.Css.Common\Alchemist.Css.Common.esproj" /> -->
 		<ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
 		<ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
+		<ProjectReference Include="..\Alchemist.Product.ImportSettingsWebApp\Alchemist.Product.ImportSettingsWebApp.csproj" />
 	</ItemGroup>
 	
   <ItemGroup>
@@ -18,8 +20,8 @@
   </ItemGroup>
 
 	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
-		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
-	</Target>
+		<Exec Command="npm link alchemist_common alchemist_css_common importsettings shop" WorkingDirectory="$(SolutionDir)" />
+	</Target>	
 	
 	<Target Name="CopyNpmCssToWwwRoot" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
 		<ItemGroup>
@@ -32,10 +34,14 @@
 		<ItemGroup>
 			<NpmLibFiles Include="..\node_modules\alchemist_common\mvc\*.*" />
 			<JQueryConfirmLibFiles Include="..\node_modules\jquery-confirm\dist\*.*" />
+			<ImportSettingsLibFiles Include="..\node_modules\importsettings\wwwroot\js\*.*" />
+			<ShopLibFiles Include="..\node_modules\shop\wwwroot\js\*.*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(NpmLibFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
 		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
-	</Target>
-
+		<Copy SourceFiles="@(ImportSettingsLibFiles)" DestinationFolder="wwwroot/lib/importsettings/%(RecursiveDir)" />
+		<Copy SourceFiles="@(ShopLibFiles)" DestinationFolder="wwwroot/lib/shop/%(RecursiveDir)" />
+	</Target>	
+	
 
 </Project>

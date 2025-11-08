@@ -30,6 +30,9 @@
     <Content Update="wwwroot\js\shop.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\js\shopapp.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\lib\alchemist_common\confirm.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -38,6 +41,11 @@
   <ItemGroup>
     <Folder Include="wwwroot\lib\alchemist_common\" />
   </ItemGroup>
+
+	<Target Name="NpmLinkPackage" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
+	</Target>
+	
 	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build">
 		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
 	</Target>
@@ -58,6 +66,15 @@
 		<Copy SourceFiles="@(NpmLibFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
 		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
 	</Target>
+	
+	<!--<Target Name="CopySiteLibs" BeforeTargets="Build">
+		<ItemGroup>
+			<JsFiles Include="wwwroot\js\*.*" />			
+		</ItemGroup>
+		<Copy SourceFiles="@(JsFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
+		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
+	</Target>-->
+
 
 
 </Project>

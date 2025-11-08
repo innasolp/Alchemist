@@ -1,52 +1,19 @@
 {
-  "name": "alchemist_common",
+  "name": "importsettings",
   "version": "1.0.0",
   "main": "app.js",
   "exports": {
-    "./confirm": {
-      "import": "./src/confirm.js"
+    "./importsettings": {
+      "import": "./wwwroot/js/importsettings.js"
     },
-    "./fileUpload": {
-      "import": "./src/fileUpload.js"
+    "./productsettings": {
+      "import": "./wwwroot/js/productsettings.js"
     },
-    "./formData": {
-      "import": "./src/formData.js"
+    "./servicesettings": {
+      "import": "./wwwroot/js/servicesettings.js"
     },
-    "./modal": {
-      "import": "./src/modal.js"
-    },
-    "./utils": {
-      "import": "./src/utils.js"
-    },
-    "./mvc/confirm": {
-      "import": "./mvc/confirm.js"
-    },
-    "./mvc/fileUpload": {
-      "import": "./mvc/fileUpload.js"
-    },
-    "./mvc/fileUploadElement": {
-      "import": "./mvc/fileUploadElement.js"
-    },
-    "./mvc/formData": {
-      "import": "./mvc/formData.js"
-    },
-    "./mvc/modal": {
-      "import": "./mvc/modal.js"
-    },
-    "./mvc/showModalElement": {
-      "import": "./mvc/showModalElement.js"
-    },
-    "./mvc/utils": {
-      "import": "./mvc/utils.js"
-    },
-    "./mvc/preeventchange.js": {
-      "import": "./mvc/preeventchange.js"
-    },
-    "./mvc/tabComponent.js": {
-      "import": "./mvc/tabComponent.js"
-    },
-    "./mvc/appevents.js": {
-      "import": "./mvc/appevents.js"
+    "./shopsettingssite": {
+      "import": "./wwwroot/js/importsettingssite.js"
     }
   },
   "scripts": {
@@ -55,7 +22,7 @@
   "keywords": [],
   "author": "github.com/innasolp",
   "license": "ISC",
-  "description": "alchemist js common methods",
+  "description": "importsettings js methods",
   "devDependencies": {
     "eslint": "^9.35.0"
   },
@@ -133,5 +100,13 @@
     "which": "^2.0.2",
     "word-wrap": "^1.2.5",
     "yocto-queue": "^0.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/github.com/innasolp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/github.com/innasolp/issues"
+  },
+  "homepage": "https://github.com/github.com/innasolp#readme"
 }

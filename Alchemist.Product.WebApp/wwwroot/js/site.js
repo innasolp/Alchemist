@@ -3,10 +3,13 @@
 
 // Write your JavaScript code.
 
-function init(tab) {
+function init(tab, data) {
     
     const url = new URL(window.location.href);   
     const apiUrl = `/${tab}Api${url.pathname}`;
 
-    postData(apiUrl, null, (response) => { $('#appDiv').html(response); });    
+    postData(apiUrl, null, (response) => {
+        $('#appDiv').html(response);
+        document.dispatchEvent(new AppStartEvent("shop", data, ""));
+    });    
 }

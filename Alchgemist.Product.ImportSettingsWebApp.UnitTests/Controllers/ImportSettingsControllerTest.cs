@@ -60,7 +60,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsControl
 
         var controller = CreateController();
 
-        var result = await controller.ImportSettingsTabAsync(1, ShopSettingType.Product);
+        var result = await controller.ImportSettingsAsync(1, ShopSettingType.Product);
 
         var pv = Assert.IsType<PartialViewResult>(result);
         Assert.Equal("~/Views/Shared/ShopImportSettingsTab.cshtml", pv.ViewName);

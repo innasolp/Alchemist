@@ -20,16 +20,16 @@ public class ImportSettingsController : Controller
 
     [Route("/Import/Settings/Tab/{shopId:int}/{shopSettingsType:ShopSettingType}")]
     [HttpPost]
-    public async Task<IActionResult> ImportSettingsTabAsync(int shopId, ShopSettingType shopSettingsType)
+    public async Task<IActionResult> ImportSettingsAsync(int shopId, ShopSettingType shopSettingsType)
     {
         var importSettings = await _facade.GetShopImportSettingsModel(shopId, shopSettingsType);
 
         HttpContext.Session.SetImportSettingToSession(importSettings);
 
-        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", importSettings);
+        return PartialView("~/Views/Shared/ImportSettings.cshtml", importSettings);
     }
 
-    [Route("/Import/Settings/Product/{shopId:int}")]
+    [Route("/Import/Settings/Set/{shopId:int}/Product")]
     [HttpPost]
     public async Task<IActionResult> LoadProductShopImportSettings(int shopId, [FromBody]ProductShopImportSettingsModel data)
     {
@@ -47,7 +47,7 @@ public class ImportSettingsController : Controller
         return PartialView("~/Views/Shared/ImportSettings.cshtml", currentProductSettings);
     }
 
-    [Route("/Import/Settings/Category/{shopId:int}")]
+    [Route("/Import/Settings/Set/{shopId:int}/Category")]
     [HttpPost]
     public async Task<IActionResult> LoadCategoryShopImportSettings(int shopId, [FromBody]CategoryShopImportSettingsModel data)
     {
@@ -62,7 +62,7 @@ public class ImportSettingsController : Controller
 
         HttpContext.Session.SetImportSettingToSession(currentCategorySettings);
 
-        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", currentCategorySettings);
+        return PartialView("~/Views/Shared/ImportSettings.cshtml", currentCategorySettings);
     }
 
     [Route("/Import/Settings/Product/IsChanged")]
