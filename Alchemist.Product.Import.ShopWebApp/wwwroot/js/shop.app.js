@@ -1,4 +1,4 @@
-﻿function uploadShopList(shopId = null, onSuccess = null) {
+function uploadShopList(shopId = null, onSuccess = null) {
     $("#shopList").load('/ShopAction/ShopList', { shopId: shopId }, (r, status, xhr) => {
         if (status == "error") {
             console.error("/ShopAction/ShopList error: " + xhr.status + ": " + xhr.statusText);
@@ -46,3 +46,14 @@ function saveShop(shopEditForm) {
 
     }, null); 
 }
+$(
+    function ()
+    {
+        $(document).on(AppStartEvent.eventName, (event) => {
+            if (!event.detail.appName || event.detail.appName != 'shopapp') return;
+
+            if (!Object.hasOwn(event.detail, 'shopId')) return;
+
+            uploadShopList(event.detail.shopId, loadShop);
+        });        
+    });

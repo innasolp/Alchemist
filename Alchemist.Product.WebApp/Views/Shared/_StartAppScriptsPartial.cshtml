@@ -11,7 +11,10 @@
         switch(Model.Tab)
         {
             case Tab.Shop:
-                return ["shopapp.js", "shop.js"];
+                return ["shopapp/shop.app.js"];
+
+                case Tab.ImportSettings:
+                return ["importsettingsapp/importsettings.app.js"];
 
             default:
                 return [];
@@ -19,8 +22,8 @@
     }
 }
 
-@foreach(var scriptFile in GetScriptFiles())
+@foreach(var scriptPath in GetScriptFiles())
 {
-    <script src="~/js/@scriptFile" asp-append-version="true"></script>
+    <script src="~/lib/@scriptPath" asp-append-version="true"></script>
 }
 

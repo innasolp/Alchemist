@@ -15,13 +15,21 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        return Redirect("/Shop/1/1");
+        return Redirect("/Shop/1");
     }
 
-    [Route("/Shop/{shopId:int}")]
-    public IActionResult IndexShops(int shopId)
+    [Route("/Shop/{shopId:int?}")]
+    public IActionResult IndexShops(int? shopId)
     {
-        return View("~/Views/Home/Index.cshtml", new IndexModel { Tab = Tab.Shop, Data = shopId});
+        return View("~/Views/Home/Index.cshtml", 
+            new IndexModel { Tab = Tab.Shop, AppName = "shopapp", Data = new { ShopId = shopId } });
+    }
+
+    [Route("/Shop/New")]
+    public IActionResult NewShop()
+    {
+        return View("~/Views/Home/Index.cshtml", 
+            new IndexModel { Tab = Tab.Shop, AppName = "shopapp", Data = new { ShopId = 0 } });
     }
 
     [Route("/Import/Settings/{shopId:int}/{shopSettingsType:int}")]    
@@ -30,6 +38,7 @@ public class HomeController : Controller
         return View("~/Views/Home/Index.cshtml", new IndexModel
         {
             Tab = Tab.ImportSettings,
+            AppName = "importsettingsapp",
             Data = new { ShopId = shopId, ShopSettingsType = shopSettingsType }
         });
     }

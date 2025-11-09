@@ -1,19 +1,20 @@
 {
   "version": "1.0.0",
-  "name": "shop",
+  "name": "shopapp",
   "dependencies": {
     "del": "^8.0.1",
     "gulp": "^5.0.1",
-    "jquery-validation-unobtrusive": "^4.0.0"
+    "jquery-validation-unobtrusive": "^4.0.0",
+    "alchemist_common" : "1.0.0"
   },
   "description": "shop js methods",
   "main": "app.js",
   "exports": {
-    "./shop": {
-      "import": "./wwwroot/js/shop.js"
+    "./shop.app": {
+      "import": "./wwwroot/js/shop.app.js"
     },
-    "./shopsite": {
-      "import": "./wwwroot/js/shopsite.js"
+    "./shop.app.min": {
+      "import": "./wwwroot/js/shop.app.min.js"
     }
   },
   "devDependencies": { "eslint": "^9.35.0" },

@@ -10,5 +10,7 @@ public class IndexModel
 {
     public Tab Tab { get; set; }
 
+    public string AppName { get; set; }
+
     public object Data { get; set; }
 }

@@ -86,9 +86,8 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
     private async Task GoToNewShopAsync()
     {
-        var url = $"{_webAppFactory.ServerAddress}Shop/New";
-        var response = await Page.GotoAsync(url);
-        Assert.True(response?.Ok);
+        var newShopLocator = Page.Locator("#createNewShop");
+        await newShopLocator.ClickAsync();
     }
 
     private async Task ExpectSaveClickAsync()

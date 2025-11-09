@@ -9,7 +9,17 @@
 @functions{
     string Disabled(Tab tab) => Model.Tab == tab ? "disabled-link" : "";
     string Selected(Tab tab) => Model.Tab == tab ? "selected" : "";    
-    HtmlString GetData() => new HtmlString(@JsonSerializer.Serialize(Model.Data));
+    HtmlString GetData()
+    {
+        {
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true // Optional: for pretty-printed JSON
+            };
+            return new HtmlString(@JsonSerializer.Serialize(Model.Data, serializeOptions));
+        }
+    }
 
 }
 @section Scripts {
@@ -19,7 +29,7 @@
     }
 
     <script>
-        init('@Model.Tab.ToString()', @GetData()) ;
+        init('@Model.Tab.ToString()', '@Model.AppName', @GetData()) ;
     </script>
 }
 

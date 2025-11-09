@@ -1,5 +1,4 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Exceptions;
 using Alchemist.Product.ShopWebApp.Models;
 using Alchemist.Product.WebApp.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -45,16 +44,14 @@ public class ShopApiController(IShopDataService shopDataService) : Controller
     {
         if (shopId <= 0)
             return BadRequest($"Invalid shopId : {shopId}");
+        
+        return PartialView("~/Views/Shared/ShopTab.cshtml", new IndexModel { ShopId = shopId});
+    }
 
-        var shops = await _shopFacade.GetShops();
-        try
-        {
-            var tabModel = ModelHelper.GetShopTabModel(shops, shopId);
-            return PartialView("~/Views/Shared/ShopTab.cshtml", tabModel);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+    [HttpPost]
+    [Route("/ShopApi/Shop/New")]
+    public IActionResult New()
+    {
+        return PartialView("~/Views/Shared/ShopTab.cshtml", new IndexModel { ShopId = 0 });
     }
 }

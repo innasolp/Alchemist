@@ -1,15 +1,13 @@
 using Alchemist.Common;
-using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
 using Alchemist.Product.ShopWebApp.Controllers;
-using Alchemist.Product.ShopWebApp.UnitTests.Infrastructure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.ShopWebApp.UnitTests;
 
-public class ShopControllerGetActionsTest : ShopControllerTest
+public class HomeControllerActionsTest 
 {
+    private readonly HomeController _homeController = new HomeController(null);
+
     private static void AssertIndexModel(object model, int? shopId = null)
     {
         var indexModelDefinition = new
@@ -29,16 +27,14 @@ public class ShopControllerGetActionsTest : ShopControllerTest
     [Fact]
     public void IndexActionIsViewResult()
     {
-        SetupShops();
-        var result = Assert.IsType<ViewResult>(ShopController.Index());
+        var result = Assert.IsType<ViewResult>(_homeController.Index());
         Assert.Equal("~/Views/Home/Index.cshtml", result.ViewName);
     }
 
     [Fact]
     public void IndexActionModelShopsNotLoadedOnStart()
     {
-        SetupShops();
-        var result = Assert.IsType<ViewResult>(ShopController.Index());       
+        var result = Assert.IsType<ViewResult>(_homeController.Index());       
 
         var indexModel = JsonExtensions.DeserializeAnonymousType(result.Model, new { ShopsUploaded = true });
         Assert.False(indexModel?.ShopsUploaded);
@@ -51,31 +47,23 @@ public class ShopControllerGetActionsTest : ShopControllerTest
     [Fact]
     public void IndexFromQueryActionReturnsBadRequestWhenShopIdIsNegative()
     {
-        AssertActionBadRequestWhenInvalidShopId(new Random().Next(1, int.MaxValue) * -1, (controller, shopId)=>controller.IndexFromQuery(shopId));
-    }
+        var shopId = -1;
+        var result = Assert.IsType<BadRequestObjectResult>(_homeController.IndexFromQuery(shopId));
+        Assert.Equal($"Invalid shopId : {shopId}", result.Value);
+    }    
 
     [Fact]
-    public void IndexFromQueryActionReturnsBadRequestWhenShopIdIsZero()
+    public void IndexFromQueryActionIsIndexViewWhenSuccess()
     {
-        AssertActionBadRequestWhenInvalidShopId(0, (controller, shopId) => controller.IndexFromQuery(shopId));
-    }
-
-    [Fact]
-    public async Task IndexFromQueryActionIsIndexViewWhenSuccessAsync()
-    {
-        SetupShops();
-        
-        var shop = await GetRandomShop();
-
-        var indexView = Assert.IsType<ViewResult>(ShopController.IndexFromQuery(shop.Id));
+        var indexView = Assert.IsType<ViewResult>(_homeController.IndexFromQuery(5));
         Assert.Equal("~/Views/Home/Index.cshtml", indexView.ViewName);
     }
 
     [Fact]
-    public async Task IndexFromQueryModelSelectedShopByIdAsync()
+    public void IndexFromQueryModelSelectedShopById()
     {
         var shopId = 5;
-        var indexView = Assert.IsType<ViewResult>(ShopController.IndexFromQuery(shopId));
+        var indexView = Assert.IsType<ViewResult>(_homeController.IndexFromQuery(shopId));
 
         AssertIndexModel(indexView.Model, shopId);
     }
@@ -87,17 +75,15 @@ public class ShopControllerGetActionsTest : ShopControllerTest
     [Fact]
     public void IndexRouteActionReturnsBadRequestWhenShopIdIsNegative()
     {
-        AssertActionBadRequestWhenInvalidShopId(new Random().Next(1, int.MaxValue) * -1, (controller, shopId) => controller.IndexRoute(shopId));
+        var shopId = -1;
+        var result = Assert.IsType<BadRequestObjectResult>(_homeController.IndexRoute(shopId));
+        Assert.Equal($"Invalid shopId : {shopId}", result.Value);
     }    
 
     [Fact]
-    public async Task IndexRouteActionIsIndexViewWhenSuccessAsync()
+    public void IndexRouteActionIsIndexViewWhenSuccess()
     {
-        SetupShops();
-
-        var shop = await GetRandomShop();
-
-        var indexView =Assert.IsType<ViewResult>(ShopController.IndexRoute(shop.Id));
+        var indexView = Assert.IsType<ViewResult>(_homeController.IndexRoute(3));
 
         Assert.Equal("~/Views/Home/Index.cshtml", indexView.ViewName);
     }
@@ -107,7 +93,7 @@ public class ShopControllerGetActionsTest : ShopControllerTest
     {
         var shopId = 3;
 
-        var indexView = Assert.IsType<ViewResult>(ShopController.IndexRoute(shopId));
+        var indexView = Assert.IsType<ViewResult>(_homeController.IndexRoute(shopId));
 
         AssertIndexModel(indexView.Model, shopId);
     }
@@ -119,7 +105,7 @@ public class ShopControllerGetActionsTest : ShopControllerTest
     [Fact]
     public void NewActionIsIndexView()
     {
-        var indexView = Assert.IsType<ViewResult>(ShopController.New());
+        var indexView = Assert.IsType<ViewResult>(_homeController.New());
 
         Assert.Equal("~/Views/Home/Index.cshtml", indexView.ViewName);
     }
@@ -127,7 +113,7 @@ public class ShopControllerGetActionsTest : ShopControllerTest
     [Fact]
     public void NewActionModelShopNotSelected()
     {
-        var indexView = Assert.IsType<ViewResult>(ShopController.New());
+        var indexView = Assert.IsType<ViewResult>(_homeController.New());
 
         AssertIndexModel(indexView.Model, 0);
     }
