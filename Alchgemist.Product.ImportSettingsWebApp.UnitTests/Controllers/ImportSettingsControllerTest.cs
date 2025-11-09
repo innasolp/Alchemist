@@ -11,15 +11,15 @@ using Moq;
 
 namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 
-public class ImportSettingsControllerTest : ControllerTest<ImportSettingsController>
+public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionController>
 {
     private readonly Mock<ISettingsDataAdapter> _productAdapter = new();
 
     private readonly Mock<ISettingsDataAdapter> _categoryAdapter = new();
 
-    protected override ImportSettingsController CreateController()
+    protected override ImportSettingsActionController CreateController()
     {
-        var controller = new ImportSettingsController(_productAdapter.Object, _categoryAdapter.Object);
+        var controller = new ImportSettingsActionController(_productAdapter.Object, _categoryAdapter.Object);
         controller.ControllerContext.HttpContext = HttpContextMock.Object;
         return controller;
     }    

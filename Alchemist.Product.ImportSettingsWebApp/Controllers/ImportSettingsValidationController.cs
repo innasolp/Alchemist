@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ValidationController : Controller
+public class ImportSettingsValidationController : Controller
 {
     [AcceptVerbs("GET", "POST")]
     public IActionResult AssemblyPathOrProviderPathNotEmpty(string serviceTypeName, string assemblyPath, string serviceProviderPath)

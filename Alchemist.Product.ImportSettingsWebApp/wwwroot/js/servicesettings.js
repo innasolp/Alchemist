@@ -14,7 +14,7 @@ async function isServiceSettingsChanged(formData) {
     const shopSettingsType = $("#ShopSettingType").val();
     const shopId = $("#ShopId").val();
 
-    return await postJsonDataAsync(`/Import/Settings/${shopId}/${shopSettingsType}/Service/IsChanged`,
+    return await postJsonDataAsync(`/ImportSettingsAction/${shopId}/${shopSettingsType}/Service/IsChanged`,
         JSON.stringify(serviceData));
 }
 
@@ -43,7 +43,7 @@ function saveServiceSettings(serviceForm, onServiceSet) {
             const shopSettingsType = $("#ShopSettingType").val();
             const shopId = $("#ShopId").val();
                 
-            postJsonData(url = `/Import/Settings/${shopId}/${shopSettingsType}/Service/Set`,
+            postJsonData(url = `/ImportSettingsAction/${shopId}/${shopSettingsType}/Service/Set`,
             JSON.stringify(serviceData),
             onSuccess = onSuccess,
             onError = (error) => { enableSaveServiceSettingsButton(); });
@@ -68,7 +68,7 @@ function updateServiceItem(li, data) {
 
 function addServiceItem(data) {
     var li = $('ul.table-ul.services > .add-btn-ul');
-    postJsonData('/Import/Settings/Service/Item', JSON.stringify(data), (content) => {
+    postJsonData('/ImportSettingsAction/Service/Item', JSON.stringify(data), (content) => {
         li.before(content);
         li.prev().find(".edit-service").on('click', onSetSecondaryServiceClick);
     });
@@ -104,7 +104,7 @@ function onSetPrimaryServiceClick(event) {
     var serviceName = event.target.getAttribute("data-name");
 
     const onSetPrimaryService = function (result) {
-        $(`#${serviceName}`).val(result.serviceTypeName);
+        $(`input[data-name='${serviceName}']`).val(result.serviceTypeName);
         clearFileNameFromUploadControl(`${serviceName}Json`);
     };    
 
@@ -120,7 +120,7 @@ function onSetPrimaryServiceClick(event) {
                 });
     };
 
-    const url = `/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/${serviceName}`;
+    const url = `/ImportSettingsAction/${shopId}/${shopSettingsType}/PrimaryService/${serviceName}`;
     showServiceSettingsModal.show(url, null, onShow, tryServiceSettingsModalClose);
 }
 
@@ -138,7 +138,7 @@ function onSetSecondaryServiceClick(event) {
     const guid = event.target.hasAttribute("data-guid") ? event.target.getAttribute("data-guid") : null;
     const shopId = $("#ShopId").val();
     const shopSettingsType = $("#ShopSettingType").val();
-    const url = guid != null ? `/Import/Settings/${shopId}/${shopSettingsType}/Service/${guid}` : `/Import/Settings/${shopId}/${shopSettingsType}/Service`;
+    const url = guid != null ? `/ImportSettingsAction/${shopId}/${shopSettingsType}/Service/${guid}` : `/ImportSettingsAction/${shopId}/${shopSettingsType}/Service`;
     showServiceSettingsModal.show(url, null, onShow, tryServiceSettingsModalClose);    
 }
 
@@ -146,7 +146,7 @@ async function onSetServiceUpload(event) {
     const shopId = $("#ShopId").val();
     const shopSettingsType = $("#ShopSettingType").val();
     const modelName = $(event.target).attr("data-name") ?? null;
-    const url = `/Import/Settings/${shopId}/${shopSettingsType}/PrimaryService/Set/${modelName}`;
+    const url = `/ImportSettingsAction/${shopId}/${shopSettingsType}/PrimaryService/Set/${modelName}`;
     const fileInputName = $(event.target).find("input").attr("name");
    
     var data = await uploadServiceSettingsFromJson('#settingsForm', fileInputName, url);

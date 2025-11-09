@@ -8,17 +8,17 @@ namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
 
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ImportSettingsController : Controller
+public class ImportSettingsActionController : Controller
 {
     private readonly ShopImportSettingsFacade _facade;
 
-    public ImportSettingsController([FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
+    public ImportSettingsActionController([FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
         [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter)
     {
         _facade = new ShopImportSettingsFacade(productSettingsDataAdapter, categorySettingsDataAdapter, this);
     }
 
-    [Route("/Import/Settings/Tab/{shopId:int}/{shopSettingsType:ShopSettingType}")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}")]
     [HttpPost]
     public async Task<IActionResult> ImportSettingsAsync(int shopId, ShopSettingType shopSettingsType)
     {
@@ -29,7 +29,7 @@ public class ImportSettingsController : Controller
         return PartialView("~/Views/Shared/ImportSettings.cshtml", importSettings);
     }
 
-    [Route("/Import/Settings/Set/{shopId:int}/Product")]
+    [Route($"/{ControllerPrefix.Action}/Set/{{shopId:int}}/Product")]
     [HttpPost]
     public async Task<IActionResult> LoadProductShopImportSettings(int shopId, [FromBody]ProductShopImportSettingsModel data)
     {
@@ -47,7 +47,7 @@ public class ImportSettingsController : Controller
         return PartialView("~/Views/Shared/ImportSettings.cshtml", currentProductSettings);
     }
 
-    [Route("/Import/Settings/Set/{shopId:int}/Category")]
+    [Route($"/{ControllerPrefix.Action}/Set/{{shopId:int}}/Category")]
     [HttpPost]
     public async Task<IActionResult> LoadCategoryShopImportSettings(int shopId, [FromBody]CategoryShopImportSettingsModel data)
     {
@@ -65,7 +65,7 @@ public class ImportSettingsController : Controller
         return PartialView("~/Views/Shared/ImportSettings.cshtml", currentCategorySettings);
     }
 
-    [Route("/Import/Settings/Product/IsChanged")]
+    [Route($"/{ControllerPrefix.Action}/Product/IsChanged")]
     [HttpPost]
     public async Task<IActionResult> ProductSettingsIsChangedAsync(ProductShopImportSettingsModel data)
     {
@@ -77,7 +77,7 @@ public class ImportSettingsController : Controller
         return Ok(result);
     }
 
-    [Route("/Import/Settings/Category/IsChanged")]
+    [Route($"/{ControllerPrefix.Action}/Category/IsChanged")]
     [HttpPost]
     public async Task<IActionResult> CategorySettingsIsChangedAsync(CategoryShopImportSettingsModel data)
     {
@@ -89,7 +89,7 @@ public class ImportSettingsController : Controller
         return Ok(result);
     }
 
-    [Route("/Import/Settings/Product/Save")]
+    [Route($"/{ControllerPrefix.Action}/Product/Save")]
     [HttpPost]
     public async Task<IActionResult> ProductSettingsSave(ProductShopImportSettingsModel data)
     {
@@ -100,7 +100,7 @@ public class ImportSettingsController : Controller
         return Ok(true);
     }
 
-    [Route("/Import/Settings/Category/Save")]
+    [Route($"/{ControllerPrefix.Action}/Category/Save")]
     [HttpPost]
     public async Task<IActionResult> CategorySettingsSave(CategoryShopImportSettingsModel data)
     {
@@ -111,7 +111,7 @@ public class ImportSettingsController : Controller
         return Ok(true);
     }
 
-    [Route("/Import/Settings/Product/CategoryUrl")]
+    [Route($"/{ControllerPrefix.Action}/Product/CategoryUrl")]
     [HttpPost]
     public IActionResult RootCategory(CategoryUrlModel data)
     {
@@ -120,7 +120,7 @@ public class ImportSettingsController : Controller
         return PartialView("~/Views/Home/RootCategoryUrl.cshtml", data);
     }
 
-    [Route("/Import/Settings/Product/{shopId:int}/CategoryUrl/Set")]
+    [Route($"/{ControllerPrefix.Action}/Product/{{shopId:int}}/CategoryUrl/Set")]
     [HttpPost]
     public async Task<IActionResult> SetRootCategory(int shopId, [FromForm]CategoryUrlModel data)
     {
@@ -136,7 +136,7 @@ public class ImportSettingsController : Controller
         return Ok(result);
     }
 
-    [Route("/Import/Settings/Product/{shopId:int}/CategoryUrl/IsChanged")]
+    [Route($"/{ControllerPrefix.Action}/Product/{{shopId:int}}/CategoryUrl/IsChanged")]
     [HttpPost]
     public async Task<IActionResult> RootCategoryIsChanged(int shopId, [FromBody]CategoryUrlModel data)
     {
@@ -154,7 +154,7 @@ public class ImportSettingsController : Controller
         return currentRootCategory == null ? Ok(!data.IsEmpty()) : Ok(!currentRootCategory.IsEquals(data));
     }
 
-    [Route("/Import/Settings/Product/CategoryUrl/Item")]
+    [Route($"/{ControllerPrefix.Action}/Product/CategoryUrl/Item")]
     [HttpPost]
     public IActionResult RootCategoryItem([FromBody]CategoryUrlModel data)
     {

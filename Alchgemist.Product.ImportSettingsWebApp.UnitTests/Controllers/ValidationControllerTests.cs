@@ -8,7 +8,7 @@ public class ValidationControllerTests
     [Fact()]
     public void AssemblyPathOrProviderPathNotEmptyWhenOnlyServiceTypeNameIsNotEmptyTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
 
         // both empty -> false
         var resultEmpty = controller.AssemblyPathOrProviderPathNotEmpty("Service", string.Empty, string.Empty) as JsonResult;
@@ -19,7 +19,7 @@ public class ValidationControllerTests
     [Fact()]
     public void AssemblyPathOrProviderPathNotEmptyReturnsFalseWhenOnlyServiceProviderPathIsEmptyTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
 
         // assemblyPath provided -> true
         var resultAssembly = controller.AssemblyPathOrProviderPathNotEmpty("Service", "some.dll", string.Empty) as JsonResult;
@@ -30,7 +30,7 @@ public class ValidationControllerTests
     [Fact()]
     public void AssemblyPathOrProviderPathNotEmptyReturnsFalseWhenOnlyAssemblyPathIsEmptyTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
 
         // serviceProviderPath provided -> true
         var resultProvider = controller.AssemblyPathOrProviderPathNotEmpty("Service", string.Empty, "provider") as JsonResult;
@@ -41,7 +41,7 @@ public class ValidationControllerTests
     [Fact()]
     public void AssemblyPathForJsonValueReturnsFalseWhenAssemblyPathIsEmptyTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
 
         // assemblyPath empty -> false
         var resultEmpty = controller.AssemblyPathForJsonValueNotEmpty("{\"a\":1}", string.Empty) as Microsoft.AspNetCore.Mvc.JsonResult;
@@ -54,7 +54,7 @@ public class ValidationControllerTests
     [Fact()]
     public void AssemblyPathForJsonValueReturnsTrueWhenAssemblyPathNotEmptyTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
 
         // assemblyPath provided -> true
         var resultAssembly = controller.AssemblyPathForJsonValueNotEmpty("{\"a\":1}", "some.dll") as JsonResult;
@@ -65,7 +65,7 @@ public class ValidationControllerTests
     [Fact()]
     public void InvalidJsonValueReturnsTrueWhenJsonIsEmptyTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
 
         // null or empty -> true
         var resultEmpty = controller.InvalidJsonValue(string.Empty) as JsonResult;
@@ -76,7 +76,7 @@ public class ValidationControllerTests
     [Fact()]
     public void InvalidJsonValueReturnsTrueWhenJsonIsValidTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
         // valid json -> true
         var validJson = "{\"key\":\"value\"}";
         var resultValid = controller.InvalidJsonValue(validJson) as JsonResult;
@@ -87,7 +87,7 @@ public class ValidationControllerTests
     [Fact()]
     public void InvalidJsonValueReturnsTrueWhenJsonIsInvalidTest()
     {
-        var controller = new ValidationController();
+        var controller = new ImportSettingsValidationController();
 
         // invalid json -> false
         var invalidJson = "{key: value"; // malformed

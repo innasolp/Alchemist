@@ -1,4 +1,4 @@
-class AppStartEvent extends Event {
+class AppStartEvent extends CustomEvent {
     static eventName = 'app-start';
 
     #appName = "";
@@ -19,10 +19,10 @@ class AppStartEvent extends Event {
 
     set startAction(value) {
         this.#startAction = value;
-    }
+    }   
 
-    constructor(appName, startAction) {
-        super(AppStartEvent.eventName, { bubbles: true, composed: true });
+    constructor(appName, startAction, detail) {
+        super(AppStartEvent.eventName, { bubbles: true, composed: true, detail: detail });
         this.#appName = appName;
         this.#startAction = startAction;
     }

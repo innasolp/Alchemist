@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -13,8 +14,8 @@ public class ServiceSettingsModel : IServiceSettings, IShopSettings
 
     [Required(AllowEmptyStrings = true)]
     [Display(Name = "Service type")]
-    [Remote(action: "AssemblyPathOrProviderPathNotEmpty",
-        controller: "Validation",
+    [Remote(action: nameof(ImportSettingsValidationController.AssemblyPathOrProviderPathNotEmpty),
+        controller: "ImportSettingsValidation",
         HttpMethod = "POST",
         AdditionalFields = $"{nameof(AssemblyPath)},{nameof(ServiceProviderPath)}",
         ErrorMessage = "Assembly path for implementation type or implementation factory is required")]
@@ -32,8 +33,8 @@ public class ServiceSettingsModel : IServiceSettings, IShopSettings
 
     [JsonIgnore]
     [Display(Name = "Value in json format")]
-    [Remote(action: "InvalidJsonValue",
-        controller: "Validation",
+    [Remote(action: nameof(ImportSettingsValidationController.InvalidJsonValue),
+        controller: "ImportSettingsValidation",
         HttpMethod = "POST",
         ErrorMessage = "Invalid json value")]
     public string? Value { get; set; }

@@ -109,8 +109,8 @@ app.UseSession();
 
 if (isApi)
     app.SetApiRoute("Hello ImportSettingsWebApp API!");
-else
-    app.MapControllerRoute(
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 

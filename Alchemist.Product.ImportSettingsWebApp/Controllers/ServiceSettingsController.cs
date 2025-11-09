@@ -11,7 +11,6 @@ namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ServiceSettingsController : Controller
 {
-
     ServiceSettingsFacade _serviceSettingsFacade;
 
     public ServiceSettingsController(
@@ -21,7 +20,7 @@ public class ServiceSettingsController : Controller
         _serviceSettingsFacade = new ServiceSettingsFacade(productSettingsDataAdapter, categorySettingsDataAdapter, this);
     }    
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}/Service")]
     [HttpGet]
     public async Task<IActionResult> NewServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType)
     {
@@ -30,7 +29,7 @@ public class ServiceSettingsController : Controller
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettings);
     }
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/{guid:Guid}")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}/Service/{{guid:Guid}}")]
     [HttpGet]
     public async Task<IActionResult> ServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, Guid guid)
     {
@@ -39,7 +38,7 @@ public class ServiceSettingsController : Controller
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettings);        
     }
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/PrimaryService/{serviceName}")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}/PrimaryService/{{serviceName}}")]
     [HttpGet]
     public async Task<IActionResult> PrimaryServiceAsync(int shopId, ShopSettingType shopSettingsType, string serviceName)
     {
@@ -55,7 +54,7 @@ public class ServiceSettingsController : Controller
         return PartialView("~/Views/Home/ServiceSettings.cshtml", serviceSettings);
     }
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/PrimaryService/Set/{serviceName}")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}/PrimaryService/Set/{{serviceName}}")]
     [HttpPost]
     public async Task<IActionResult> SetPrimaryServiceAsync(int shopId, ShopSettingType shopSettingsType, string serviceName, [FromBody]ServiceSettingsModel data)
     {
@@ -67,7 +66,7 @@ public class ServiceSettingsController : Controller
         return Ok(serviceSettings);
     }
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/Set/{guid}")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}/Service/Set/{{guid}}")]
     [HttpPost]
     public async Task<IActionResult> SetServiceAsync(int shopId, ShopSettingType shopSettingsType, Guid guid, [FromBody]ServiceSettingsModel data)
     {
@@ -80,7 +79,7 @@ public class ServiceSettingsController : Controller
     }
 
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/Set")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}/Service/Set")]
     [HttpPost]
     public async Task<IActionResult> SaveAsync(int shopId, ShopSettingType shopSettingsType, [FromBody] ServiceSettingsModel data)
     {
@@ -94,7 +93,7 @@ public class ServiceSettingsController : Controller
         return Ok(serviceSettings);
     }
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}/Service/IsChanged")]
+    [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}/Service/IsChanged")]
     [HttpPost]
     public async Task<IActionResult> IsChanged(int shopId, ShopSettingType shopSettingsType, [FromBody] ServiceSettingsModel data)
     {
@@ -104,7 +103,7 @@ public class ServiceSettingsController : Controller
         return Ok(await _serviceSettingsFacade.IsChanged(shopId, shopSettingsType,data));
     }
 
-    [Route("/Import/Settings/Service/Item")]
+    [Route($"/{ControllerPrefix.Action}/Service/Item")]
     [HttpPost]
     public IActionResult ServiceItem([FromBody] ServiceSettingsModel data)
     {

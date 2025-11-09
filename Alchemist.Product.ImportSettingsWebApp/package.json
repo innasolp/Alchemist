@@ -1,19 +1,13 @@
 {
-  "name": "importsettings",
+  "name": "importsettingsapp",
   "version": "1.0.0",
   "main": "app.js",
   "exports": {
-    "./importsettings": {
-      "import": "./wwwroot/js/importsettings.js"
+    "./importsettings.app": {
+      "import": "./wwwroot/js/importsettings.app.js"
     },
-    "./productsettings": {
-      "import": "./wwwroot/js/productsettings.js"
-    },
-    "./servicesettings": {
-      "import": "./wwwroot/js/servicesettings.js"
-    },
-    "./shopsettingssite": {
-      "import": "./wwwroot/js/importsettingssite.js"
+    "./importsettings.app.min": {
+      "import": "./wwwroot/js/importsettings.app.min.js"
     }
   },
   "scripts": {

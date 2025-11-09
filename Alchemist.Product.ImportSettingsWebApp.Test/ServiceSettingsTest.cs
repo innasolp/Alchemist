@@ -211,7 +211,7 @@ public class ServiceSettingsTest : PageTest, IClassFixture<ServiceSettingsTestIm
 
         await this.SaveServiceBtnClickAsync();
 
-        await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "ImportService" })).ToHaveValueAsync(newServiceTypeName);
+        await Expect(Page.Locator("input.import-service")).ToHaveValueAsync(newServiceTypeName);
     }
 
     [Fact]

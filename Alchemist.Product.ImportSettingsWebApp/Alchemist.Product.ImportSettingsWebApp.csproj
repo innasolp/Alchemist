@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup>   
     <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
 	<PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
   </ItemGroup>
@@ -15,7 +15,7 @@
 		<Folder Include="wwwroot\lib\alchemist_common\" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup>	 
 	  <!-- <ProjectReference Include="..\Alchemist.Css.Common\Alchemist.Css.Common.esproj" /> -->
 	  <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
 	  <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
@@ -25,7 +25,6 @@
 	  <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
 	  <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
 	  <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
-	  <ProjectReference Include="..\Alchemist.Web.Components\Alchemist.Web.Components.csproj" />
 	  <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
 	  <ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
 	</ItemGroup>
@@ -44,10 +43,10 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
+	
 	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
 		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
 	</Target>
-
 
 	<Target Name="CopyNpmCssToWwwRoot" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
 		<ItemGroup>
@@ -65,7 +64,7 @@
 		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
 	</Target>
 
-	<Target Name="NpmLinkOutputPackage" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+	<Target Name="NpmLinkPackage" AfterTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
 		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
 	</Target>
 
