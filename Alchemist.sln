@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35327.3
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.Entities", "Alchemist.Product.Entities\Alchemist.Product.Entities.csproj", "{B811DC49-6D2C-4DE6-BD52-6A30AA1E8FC3}"
 EndProject
@@ -376,6 +376,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.ImportSettingsWebApp.Test", "Alchemist.Product.ImportSettingsWebApp.Test\Alchemist.Product.ImportSettingsWebApp.Test.csproj", "{37810167-97DF-4489-BE25-4D2507874583}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.WebApp", "Alchemist.Product.WebApp\Alchemist.Product.WebApp.csproj", "{B357F3CD-291A-4F58-A2C8-D433BB851955}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.WebApp.UnitTests", "Alchemist.Product.WebApp.UnitTests\Alchemist.Product.WebApp.UnitTests.csproj", "{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1690,6 +1692,18 @@ Global
 		{B357F3CD-291A-4F58-A2C8-D433BB851955}.import_shops|Any CPU.Build.0 = Release|Any CPU
 		{B357F3CD-291A-4F58-A2C8-D433BB851955}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B357F3CD-291A-4F58-A2C8-D433BB851955}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1857,6 +1871,7 @@ Global
 		{E3E58607-DEA2-4EEC-B214-F76F4DF0D6FC} = {0F848C53-6BE9-4BC4-9258-F8BAF5DB6952}
 		{37810167-97DF-4489-BE25-4D2507874583} = {B9529332-D6A9-4131-959C-404F384C7680}
 		{B357F3CD-291A-4F58-A2C8-D433BB851955} = {7CF38854-7358-43BF-9F62-8B625812B1DA}
+		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6} = {8DD0CA95-E6CF-4919-8F23-00B6929081FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
