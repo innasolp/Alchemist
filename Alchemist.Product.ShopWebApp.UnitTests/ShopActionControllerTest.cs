@@ -3,6 +3,7 @@ using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Alchemist.Product.ShopWebApp.Controllers;
+using Alchemist.Product.ShopWebApp.Models;
 using Alchemist.Product.ShopWebApp.UnitTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -86,8 +87,8 @@ public class ShopActionControllerTest
         return shops[new Random().Next(0, shops.Count)];
     }
 
-    private async Task AssertActionBadRequestWhenInvalidShopIdAsync(IShop shop,
-        Func<ShopActionController, IShop, Task<IActionResult>> action)
+    private async Task AssertActionBadRequestWhenInvalidShopIdAsync(ShopModel shop,
+        Func<ShopActionController, ShopModel, Task<IActionResult>> action)
     {
         var result = Assert.IsType<BadRequestObjectResult>(await action(_shopController, shop));
         Assert.Equal($"Invalid shopId : {shop.Id}", result.Value);
@@ -177,7 +178,7 @@ public class ShopActionControllerTest
     [Fact]
     public async Task SaveActionBadRequestWhenShopIdIsNegativeAsync()
     {
-        var shop = new Shop { Id = new Random().Next(1, int.MaxValue) * -1 };
+        var shop = new ShopModel { Id = new Random().Next(1, int.MaxValue) * -1 };
         await AssertActionBadRequestWhenInvalidShopIdAsync(shop, (shopController, shop) => shopController.Save(shop));
     }
 
@@ -188,7 +189,7 @@ public class ShopActionControllerTest
 
         var shop = await GetRandomShop();
         SetRandomValues(shop);
-        var result = Assert.IsAssignableFrom<OkObjectResult>(await _shopController.Save(shop));
+        var result = Assert.IsAssignableFrom<OkObjectResult>(await _shopController.Save(shop.To<ShopModel>()));
         var savedShop = Assert.IsAssignableFrom<IShop>(result.Value);
         AssertShopsEquals(shop, savedShop);
     }
@@ -207,7 +208,7 @@ public class ShopActionControllerTest
     [Fact]
     public async Task IsChangedActionBadRequestWhenShopIdIsNegativeAsync()
     {
-        var shop = new Shop { Id = new Random().Next(1, int.MaxValue) * -1 };
+        var shop = new ShopModel { Id = new Random().Next(1, int.MaxValue) * -1 };
         await AssertActionBadRequestWhenInvalidShopIdAsync(shop, (shopController, shop) => shopController.IsChanged(shop));
     }
 
@@ -217,7 +218,7 @@ public class ShopActionControllerTest
         SetupShops();
 
         var shop = await GetRandomShop();
-        var shopCopy = shop.To<Shop>();
+        var shopCopy = shop.To<ShopModel>();
         SetRandomValues(shopCopy);
 
         var result = Assert.IsAssignableFrom<OkObjectResult>(await _shopController.IsChanged(shopCopy));
@@ -233,7 +234,7 @@ public class ShopActionControllerTest
         var shop = await GetRandomShop();
         var shopCopy = shop.To<Shop>();
 
-        var result = Assert.IsAssignableFrom<OkObjectResult>(await _shopController.IsChanged(shopCopy));
+        var result = Assert.IsAssignableFrom<OkObjectResult>(await _shopController.IsChanged(shopCopy.To<ShopModel>()));
         var isChanged = Assert.IsType<bool>(result.Value);
         Assert.False(isChanged);
     }

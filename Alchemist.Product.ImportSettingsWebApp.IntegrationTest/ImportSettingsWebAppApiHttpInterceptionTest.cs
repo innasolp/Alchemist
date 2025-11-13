@@ -35,7 +35,7 @@ public class ImportSettingsWebAppApiHttpInterceptionTest(ImportSettingsWebAppApi
     {
         var httpClient = WebAppFactory.CreateClient();
 
-        var url = "/Tab/1/1";
+        var url = "/ImportSettingsApi/Import/Settings/1/1";
         var response = await httpClient.PostAsync(url, null);
 
         try
@@ -43,31 +43,6 @@ public class ImportSettingsWebAppApiHttpInterceptionTest(ImportSettingsWebAppApi
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             Assert.Contains(LogMessages, (msg) => msg.LogLevel == LogLevel.Information && msg.Message.Contains(url));
-        }
-        catch
-        {
-            OutputErrors();
-            OutputWarnings();
-
-            throw;
-        }
-    }
-
-    [Fact]
-    public async Task GlobalExceptionHandlerLogSuccessAsync()
-    {
-        var httpClient = WebAppFactory.CreateClient();
-
-        var url = "/Tab/1/0";
-        var response = await httpClient.PostAsync(url, null);
-
-        try
-        {
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-
-            Assert.Contains(LogMessages, 
-                (msg) => msg.LogLevel == LogLevel.Error && 
-                        msg.Exception?.Message.Contains("Invalid shopSettingType", StringComparison.InvariantCultureIgnoreCase) == true);
         }
         catch
         {

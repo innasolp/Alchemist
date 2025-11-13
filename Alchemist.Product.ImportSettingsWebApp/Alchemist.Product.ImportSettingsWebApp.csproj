@@ -26,6 +26,7 @@
 	  <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
 	  <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
 	  <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
+	  <ProjectReference Include="..\Alchemist.Web.Components\Alchemist.Web.Components.csproj" />
 	  <ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
 	</ItemGroup>
 

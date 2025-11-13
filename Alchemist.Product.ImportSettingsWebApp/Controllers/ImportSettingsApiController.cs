@@ -13,6 +13,12 @@ public class ImportSettingsApiController : Controller
     [Route("/ImportSettingsApi/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}")]
     public IActionResult ShopImportSettings(int shopId, ShopSettingType shopSettingsType)
     {
+        if (shopId < 0)
+            return BadRequest($"shopId {shopId} is invalid.");
+
+        if (shopSettingsType == ShopSettingType.Service)
+            return BadRequest($"shopSettingsType {shopSettingsType} is invalid.");
+
         var model = new IndexModel
         {
             ShopId = shopId,

@@ -1,7 +1,7 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
+namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 
 public class ValidationControllerTests
 {
@@ -44,7 +44,7 @@ public class ValidationControllerTests
         var controller = new ImportSettingsValidationController();
 
         // assemblyPath empty -> false
-        var resultEmpty = controller.AssemblyPathForJsonValueNotEmpty("{\"a\":1}", string.Empty) as Microsoft.AspNetCore.Mvc.JsonResult;
+        var resultEmpty = controller.AssemblyPathForJsonValueNotEmpty("{\"a\":1}", string.Empty) as JsonResult;
         Assert.NotNull(resultEmpty);
         Assert.Equal(false, resultEmpty.Value);
 

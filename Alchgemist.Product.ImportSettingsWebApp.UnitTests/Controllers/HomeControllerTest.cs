@@ -4,7 +4,7 @@ using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
+namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 
 public class HomeControllerTest
 {
@@ -29,7 +29,7 @@ public class HomeControllerTest
     public void ImportSettings_ReturnsIndexView_WithModel()
     {
         var controller = new HomeController(NullLogger<HomeController>.Instance);
-        var result = controller.ImportSettings(1, (int)ShopSettingType.Product);
+        var result = controller.ImportSettings(1, ShopSettingType.Product);
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("~/Views/Home/Index.cshtml", view.ViewName);

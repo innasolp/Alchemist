@@ -51,7 +51,7 @@ public class ImportSettingsApiWebAppIntegrationTest : TestFixture<TestImportSett
     [Fact]
     public async Task ImportSettingsApi_SettingsTabEndpoint_ReturnsShopsSettingsContent()
     {
-        var response = await _client.PostAsync($"/Tab/1/1", null);
+        var response = await _client.PostAsync($"/ImportSettingsApi/Import/Settings/1/1", null);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();

@@ -2,6 +2,7 @@ using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using System.Collections.ObjectModel;
 using Xunit.Abstractions;
 using TestCommon = Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure.Common;
 
@@ -19,6 +20,7 @@ public class HomePageTest : PageTest, IClassFixture<HomePageTestImportSettingsWe
 {
     private readonly HomePageTestImportSettingsWebAppFactory _webAppFactory;
     private readonly ITestOutputHelper _outputHelper;
+    private readonly ObservableCollection<IConsoleMessage> _messages = [];
 
     public HomePageTest(HomePageTestImportSettingsWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
     {
@@ -27,6 +29,17 @@ public class HomePageTest : PageTest, IClassFixture<HomePageTestImportSettingsWe
 
         _webAppFactory.CreateClient();
     }
+
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+        Page.Console += OnPageConsole;
+    }
+    private void OnPageConsole(object? sender, IConsoleMessage e)
+    {
+        _messages.Add(e);
+    }
+
 
     [Fact]
     public async Task StartPageTest()
@@ -81,10 +94,21 @@ public class HomePageTest : PageTest, IClassFixture<HomePageTestImportSettingsWe
         var url = _webAppFactory.ServerAddress;
         await Page.GotoAsync(url);
 
-        await this.ExpectNextSettingsTabAsync("Category");
+        try
+        {
+            await this.ExpectProductShopSettingsLoadedAsync();
 
-        await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "CategorySourceUrl" })).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "ProductUrlFormat" })).Not.ToBeVisibleAsync();
+            await this.ExpectNextSettingsTabAsync("Category");
+
+            await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "CategorySourceUrl" })).ToBeVisibleAsync();
+            await Expect(Page.GetByRole(AriaRole.Textbox, new() { Name = "ProductUrlFormat" })).Not.ToBeVisibleAsync();
+        }
+        catch
+        {
+            foreach (var error in _messages.Where(m => m.Type == "error"))
+                _outputHelper.WriteLine(error.Text);
+            throw;
+        }
     }
 
     [Fact]
