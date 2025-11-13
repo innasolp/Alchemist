@@ -1,15 +1,19 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿$(document).on(AppStartEvent.eventName, (event) => {
+    if (!event.detail.appName || event.detail.appName != 'importsettingsapp') return;
 
-// Write your JavaScript code.
+    if (!Object.hasOwn(event.detail, 'shopId') || !Object.hasOwn(event.detail, 'shopSettingsType')) return;   
 
-$(
-    function () {
-        $(document).on(AppStartEvent.eventName, (event) => {
-            if (!event.detail.appName || event.detail.appName != 'importsettingsapp') return;
+    uploadShopList(event.detail.shopId, event.detail.shopSettingsType);
+});
 
-            if (!event.detail.shopId || !event.detail.shopSettingsType) return;
+$(document).on(AppClosingEvent.eventName, onEditDataChanged);
 
-            uploadShopList(event.detail.shopId, event.detail.shopSettingsType);
-        });
-    });
+async function onEditDataChanged(event) {
+    if (!Object.hasOwn(event.detail, 'appName') || event.detail.appName != 'importsettingsapp' || !Object.hasOwn(event.detail, 'onSuccess')
+        || !Object.hasOwn(event.detail, 'shopId') || !Object.hasOwn(event.detail, 'shopSettingsType')) return;
+    let map = new Map();
+    map.set('#settingsForm', `/ImportSettingsAction/${event.detail.shopSettingsType}/IsChanged`);
+    map.set('#serviceSettingsForm', `/ImportSettingsAction/${event.detail.shopId}/${event.detail.shopSettingsType}/Service/IsChanged`);
+    const changed = await onEditableDataChangedWithConfirmAsync(map);
+    if (!changed) event.detail.onSuccess();
+}

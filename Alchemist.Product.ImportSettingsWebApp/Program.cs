@@ -42,26 +42,6 @@ if (isApi)
 if (isApi)
     builder.Services.AddBaseControllerInterceptors<ImportSettingsApiController>();
 
-if(isApi)
-{
-    builder.Services.AddMvc()
-    .ConfigureApplicationPartManager(manager =>
-    {
-        // Example: Remove a specific assembly from controller discovery
-        // manager.ApplicationParts.RemoveAll(part => part.Name == "AssemblyNameToExclude");
-
-        // Example: Replace the default ControllerFeatureProvider to filter controllers
-        // based on custom logic (e.g., attributes, naming conventions)
-
-        //manager.ApplicationParts.Re
-        var controllerFeatureProvider = manager.FeatureProviders
-            .Single(p => p.GetType() == typeof(Microsoft.AspNetCore.Mvc.Controllers.ControllerFeatureProvider));
-        //manager.FeatureProviders[manager.FeatureProviders.IndexOf(controllerFeatureProvider)] = new ApiControllerFeatureProvider([typeof(HomeController)]);
-
-        //manager.ApplicationParts.FirstOrDefault(ap=>ap.)
-    });
-}
-
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddJsonOptions(options =>
 {

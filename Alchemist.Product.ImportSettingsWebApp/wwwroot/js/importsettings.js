@@ -1,6 +1,6 @@
-﻿function uploadShopList(shopId, shopSettingsType) {
+﻿function uploadShopList(shopId, shopSettingsType, onLoadSuccess = loadImportSettingsTab) {
 
-    const hrefFormat = '/Import/Settings/{0}/' + shopSettingsType;
+    const hrefFormat = `/Import/Settings/{0}/${shopSettingsType ?? 'Product'}`;
     var data = { hrefFormat: hrefFormat, shopId: shopId };
 
     postJsonData(url = '/ShopApi/ShopList',
@@ -16,7 +16,7 @@
             else {
                 setShopSettingsItemsPreventClick();
 
-                loadImportSettingsTab(shopId, shopSettingsType);
+                onLoadSuccess(shopId, shopSettingsType);
             }
         },
         null);

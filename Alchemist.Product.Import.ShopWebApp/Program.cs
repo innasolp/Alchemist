@@ -4,10 +4,11 @@ using Alchemist.DependencyInjection.Common;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Product.ShopWebApp.Controllers;
+using Alchemist.WebApp.Api.Common;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog.Configuration.Extensions;
-using Alchemist.WebApp.Api.Common;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,13 @@ bool isApi = builder.IsApi(args);
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.WriteIndented = true;
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+});
 
 
 if (isApi)

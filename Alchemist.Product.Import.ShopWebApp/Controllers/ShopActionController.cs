@@ -1,5 +1,4 @@
 using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Interfaces;
 using Alchemist.Product.ShopWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,7 +39,7 @@ public class ShopActionController(ILogger<ShopActionController> logger, IShopDat
     }
 
     [HttpPost]
-    public async Task<IActionResult> Save([FromForm][ModelBinder(BinderType = typeof(ShopModelFormBinder), Name = "Shop")] IShop shop)
+    public async Task<IActionResult> Save(ShopModel shop)
     {
         if (shop == null)
             return BadRequest("shop is null");
@@ -54,7 +53,7 @@ public class ShopActionController(ILogger<ShopActionController> logger, IShopDat
     }
 
     [HttpPost]
-    public async Task<IActionResult> IsChanged([FromForm][ModelBinder(BinderType = typeof(ShopModelFormBinder), Name = "Shop")] IShop shop)
+    public async Task<IActionResult> IsChanged(ShopModel shop)
     {
         if (shop == null)
             return BadRequest("shop is null");

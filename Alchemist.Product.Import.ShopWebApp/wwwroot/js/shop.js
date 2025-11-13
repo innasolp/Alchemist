@@ -19,9 +19,12 @@
     });
 }
 
-function loadShop(shopId) {
+function loadShop(shopId, onSuccess = null) {
     const shopUrl = `/ShopAction/${shopId}`;
-    postData(shopUrl, null, (html) => { $("#shopDiv").html(html); });
+    postData(shopUrl, null, (html) => {
+        $("#shopDiv").html(html);
+        if (onSuccess != null) onSuccess();
+    });
 }
 
 function setShopItemsPreventClick() {

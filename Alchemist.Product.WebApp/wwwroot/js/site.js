@@ -1,9 +1,4 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
-
-function init(tab, appName, data) {
+﻿function init(tab, appName, data) {
     
     const url = new URL(window.location.href);   
     const apiUrl = `/${tab}Api${url.pathname}`;
@@ -12,5 +7,13 @@ function init(tab, appName, data) {
     postData(apiUrl, null, (response) => {
         $('#appDiv').html(response);
         document.dispatchEvent(new AppStartEvent(appName, "", data));
-    });    
+    });
+
+    $("tab-item.app-item").on(TabSelectEvent.eventName, (event) => {
+        event.preventDefault();
+        const href = event.target.getAttribute('data-href');
+        var eventDetails = { ...data };
+        eventDetails.onSuccess = () => { window.location.href = href;  };
+        document.dispatchEvent(new AppClosingEvent(appName, eventDetails));
+    });
 }

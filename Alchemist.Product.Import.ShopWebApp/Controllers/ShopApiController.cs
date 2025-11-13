@@ -35,8 +35,8 @@ public class ShopApiController(IShopDataService shopDataService) : Controller
     }
 
     [HttpPost]
-    [Route("/ShopApi/Shop/{shopId:int}")]
-    public async Task<IActionResult> ShopTab(int shopId)
+    [Route("/ShopApi/Shop/{shopId:int?}")]
+    public IActionResult ShopTab(int? shopId)
     {
         if (shopId <= 0)
             return BadRequest($"Invalid shopId : {shopId}");

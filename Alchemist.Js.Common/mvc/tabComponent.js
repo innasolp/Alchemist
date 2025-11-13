@@ -17,27 +17,25 @@ class TabElement extends HTMLElement {
 
     set name(value) {
         this.setAttribute('name', value);
-    }
-
-    #selected = false;
+    }    
 
     get selected() {
-        return this.#selected;
+        return this.getAttribute('selected');
     }
 
     set selected(value) {
-        this.#selected = value;
-        this.#setSelected(value);
+        this.setAttribute('selected', value);
+        this.#setAnchorSelected(this.#a, value);
     }
 
-    #setSelected(value) {
-        if (value == true) {
-            if (!this.#a.hasClass("selected")) this.#a.addClass("selected");
-            if (!this.#a.hasClass("disabled-link")) this.#a.addClass("disabled-link");
+    #setAnchorSelected(anchor, value) {
+        if (value == true || value == 'selected') {
+            if (!anchor.hasClass("selected")) anchor.addClass("selected");
+            if (!anchor.hasClass("disabled-link")) anchor.addClass("disabled-link");
         }
-        else if (value == false) {
-            this.#a.removeClass("selected");
-            this.#a.removeClass("disabled-link");
+        else {
+            anchor.removeClass("selected");
+            anchor.removeClass("disabled-link");
         }
     }
 
@@ -103,15 +101,16 @@ class TabElement extends HTMLElement {
 
     #setAnchor(anchor) {
         if (this.className) anchor.addClass(this.className);
-        this.#setSelected(this.selected);
+        this.#setAnchorSelected(anchor, this.selected);
         if (this.content) anchor.text(this.content);
         if (this.action) anchor.attr('href', this.action);
     }
 
     #onClick(event) {
         const tabSelectEvent = new TabSelectEvent();
-        if (this.dispatchEvent(tabSelectEvent)) {
-            if (event.data instanceof TabElement)
+        if (!(event.data instanceof TabElement)) return;
+
+        if (event.data.dispatchEvent(tabSelectEvent)) {           
                 event.data.selected = true;
         }
         else

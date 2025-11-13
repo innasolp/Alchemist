@@ -28,7 +28,7 @@ class AppStartEvent extends CustomEvent {
     }
 }
 
-class AppClosingEvent extends Event {
+class AppClosingEvent extends CustomEvent {
     static eventName = 'app-closing';
 
     #appName = "";
@@ -41,8 +41,8 @@ class AppClosingEvent extends Event {
         this.#appName = value;
     }    
 
-    constructor(appName) {
-        super(AppClosingEvent.eventName, { bubbles: true, composed: true, cancelable : true });
+    constructor(appName, detail) {
+        super(AppClosingEvent.eventName, { bubbles: true, composed: true, cancelable: true, detail: detail });
         this.#appName = appName;
     }
 }

@@ -13,4 +13,6 @@ public class IndexModel
     public string AppName { get; set; }
 
     public object Data { get; set; }
+
+    public Dictionary<string, string> AppUrls { get; set; } = [];
 }

@@ -83,15 +83,21 @@ function postData(url, data = null, onSuccess = null, onError = null,
     });
 }
 
-async function postDataAsync(url, data = null,
-    contentType = "application/x-www-form-urlencoded; charset=UTF-8") {
-    return await $.ajax({
-        method: 'POST',
-        url: url,
-        data: data,
-        contentType: contentType,
-        processData: false
-    });
+async function postDataAsync(url, data = null, contentType = "multipart/form-data") {
+    try {
+        return await $.ajax({
+            method: 'POST',
+            url: url,
+            data: data,
+            contentType: contentType,
+            processData: false,
+            async : true
+        });
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
 }
 
 function postFormData(url, formData, onSuccess = null, onError = null) {
@@ -99,7 +105,11 @@ function postFormData(url, formData, onSuccess = null, onError = null) {
 }
 
 async function postFormDataAsync(url, formData) {
-    return await postDataAsync(url, formData);
+    const response =  await fetch(url, {
+        method: "POST",
+        body: formData, // body data type must match "Content-Type" header
+    });
+    return await response.json();
 }
 
 function postJsonData(url, jsonData, onSuccess = null, onError = null) {

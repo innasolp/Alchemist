@@ -2,8 +2,8 @@
   {
     "outputFileName": "wwwroot/js/importsettings.app.js",
     "inputFiles": [
-      "wwwroot/js/importsettings.js",
       "wwwroot/js/productsettings.js",
+      "wwwroot/js/importsettings.js",
       "wwwroot/js/servicesettings.js",
       "wwwroot/js/start.js"
     ]

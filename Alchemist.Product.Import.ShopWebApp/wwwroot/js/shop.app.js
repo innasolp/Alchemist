@@ -19,9 +19,12 @@ function uploadShopList(shopId = null, onSuccess = null) {
     });
 }
 
-function loadShop(shopId) {
+function loadShop(shopId, onSuccess = null) {
     const shopUrl = `/ShopAction/${shopId}`;
-    postData(shopUrl, null, (html) => { $("#shopDiv").html(html); });
+    postData(shopUrl, null, (html) => {
+        $("#shopDiv").html(html);
+        if (onSuccess != null) onSuccess();
+    });
 }
 
 function setShopItemsPreventClick() {
@@ -46,14 +49,27 @@ function saveShop(shopEditForm) {
 
     }, null); 
 }
-$(
-    function ()
-    {
-        $(document).on(AppStartEvent.eventName, (event) => {
-            if (!event.detail.appName || event.detail.appName != 'shopapp') return;
 
-            if (!Object.hasOwn(event.detail, 'shopId')) return;
+$(document).on(AppStartEvent.eventName, (event) => {
+    if (!event.detail.appName || event.detail.appName != 'shopapp') return;
 
-            uploadShopList(event.detail.shopId, loadShop);
-        });        
+    if (!Object.hasOwn(event.detail, 'shopId')) return;
+
+    const setEditForms = function () {
+        $("#shopEditForm").addClass("edit-form");
+    }
+
+    uploadShopList(event.detail.shopId, (shopId) => {
+        loadShop(shopId, setEditForms);
     });
+});
+
+$(document).on(AppClosingEvent.eventName, onShopDataChangedBeforeClosing);
+
+async function onShopDataChangedBeforeClosing(event) {
+    if (!Object.hasOwn(event.detail, 'appName') || event.detail.appName != 'shopapp' || !Object.hasOwn(event.detail, 'onSuccess')) return;
+    let map = new Map();
+    map.set('.edit-form', "/ShopAction/IsChanged");
+    const changed = await onEditableDataChangedWithConfirmAsync(map);
+    if (!changed) event.detail.onSuccess();    
+}

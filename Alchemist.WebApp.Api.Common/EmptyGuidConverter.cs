@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.ImportSettingsWebApp.Infrastructure;
+namespace Alchemist.WebApp.Api.Common;
 
 public class EmptyGuidConverter : JsonConverter<Guid>
 {

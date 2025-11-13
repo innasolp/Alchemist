@@ -7,8 +7,7 @@
 }
 
 @functions{
-    string Disabled(Tab tab) => Model.Tab == tab ? "disabled-link" : "";
-    string Selected(Tab tab) => Model.Tab == tab ? "selected" : "";    
+    bool IsSelected(Tab tab) => Model.Tab == tab;
     HtmlString GetData()
     {
         {
@@ -29,12 +28,17 @@
     }
 
     <script>
-        init('@Model.Tab.ToString()', '@Model.AppName', @GetData()) ;
+        $( 
+            function(){
+                init('@Model.Tab.ToString()', '@Model.AppName', @GetData()) ;
+        });       
     </script>
 }
 
 <tab-panel class="menu tabsMenuDiv">
-    <tab-item class="tab-item" data-item="shops" content="@Enum.GetName(Tab.Shop)" action="#"></tab-item>
-    <tab-item class="tab-item" data-item="importSettings" content="@Enum.GetName(Tab.ImportSettings)" action="#"></tab-item>
+    <tab-item class="app-item" data-app="@AppStore.ShopApp" content="@Enum.GetName(Tab.Shop)" action="#" selected="@IsSelected(Tab.Shop)"
+        data-href='@Model.AppUrls[AppStore.ShopApp]'></tab-item>
+    <tab-item class="app-item" data-app="@AppStore.ImportSettingsApp" content="@Enum.GetName(Tab.ImportSettings)" selected="@IsSelected(Tab.ImportSettings)"
+        data-href='@Model.AppUrls[AppStore.ImportSettingsApp]' action="#"></tab-item>
 </tab-panel>
 <div id="appDiv"></div>
