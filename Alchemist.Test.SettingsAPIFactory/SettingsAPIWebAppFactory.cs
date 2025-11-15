@@ -10,12 +10,13 @@ using Alchemist.Test.Log;
 
 namespace Alchemist.Test.SettingsAPIFactory;
 
-public class SettingsAPIWebAppFactory (string connectionString, TestServer signalRServer, int httpPort, int httpsPort, bool ensureDeleted = true) 
+public class SettingsAPIWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort, bool ensureDeleted = true) 
     : DBAPIKestrelWebAppFactory<SettingsAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
 {
     private readonly string _connectionString = connectionString;
 
     private readonly TestServer _signalRServer = signalRServer;
+
     
     public SettingsAPIWebAppFactory(string connectionString, TestServer signalRServer, bool ensureDeleted = true)
         :this(connectionString, signalRServer, 8200, 8201, ensureDeleted) { }

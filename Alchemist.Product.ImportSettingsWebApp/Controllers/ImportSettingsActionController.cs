@@ -66,6 +66,7 @@ public class ImportSettingsActionController : Controller
     }
 
     [Route($"/{ControllerPrefix.Action}/Product/IsChanged")]
+    [Route($"/{ControllerPrefix.Action}/1/IsChanged")]
     [HttpPost]
     public async Task<IActionResult> ProductSettingsIsChangedAsync(ProductShopImportSettingsModel data)
     {
@@ -78,6 +79,7 @@ public class ImportSettingsActionController : Controller
     }
 
     [Route($"/{ControllerPrefix.Action}/Category/IsChanged")]
+    [Route($"/{ControllerPrefix.Action}/2/IsChanged")]
     [HttpPost]
     public async Task<IActionResult> CategorySettingsIsChangedAsync(CategoryShopImportSettingsModel data)
     {

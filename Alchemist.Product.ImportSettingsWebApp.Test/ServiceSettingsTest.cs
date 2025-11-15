@@ -2,6 +2,8 @@
 using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 using Alchemist.Test.Functional.Playwright;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
+using Alchemist.Test.SettingsAPIFactory;
+using Alchemist.Test.ShopWebAppFactory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using System.Collections.ObjectModel;
@@ -12,9 +14,9 @@ namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class ServiceSettingsTestImportSettingsWebAppFactory()
     : ImportSettingsWebAppFactory(false,
-        TestCommon.CreateShopWebAppApiFactory("ServiceSettingsTestDb", 8422, 8423, 8074, 8075).ServerAddress,
+        ShopWebAppHelper.CreateShopWebAppApiFactory("ServiceSettingsTestDb", 8422, 8423, 8074, 8075, TestCommon.SignalRTestServer).ServerAddress,
         8092, 8093,
-        TestCommon.CreateSettingsApiHttpClient("ServiceSettingsTestDb", 8222, 8223))
+        SettingsApiHelper.CreateSettingsApiHttpClient("ServiceSettingsTestDb", 8222, 8223, TestCommon.SignalRTestServer, (dbContext) => TestCommon.FillTestData(dbContext, [1, 2, 3, 4])))
 {
 }
 
