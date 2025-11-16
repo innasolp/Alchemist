@@ -3,9 +3,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.Model;
+namespace Alchemist.Web.ModelBinder;
 
-internal class ModelJsonConverter<T> : JsonConverter<T>   
+public class ModelJsonConverter<T> : JsonConverter<T>   
     where T : class, IModel
 {
     public ModelJsonConverter() { }

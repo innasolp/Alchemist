@@ -1,11 +1,10 @@
-﻿using Alchemist.Product.Model;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace Alchemist.Product.Import.Model;
+namespace Alchemist.Web.ModelBinder;
 
-internal class ModelJsonEnumerableBinder(ILogger<ModelJsonEnumerableBinder> logger) : IModelBinder
+public class ModelJsonEnumerableBinder(ILogger<ModelJsonEnumerableBinder> logger) : IModelBinder
 {
     private readonly ILogger<ModelJsonEnumerableBinder> _logger = logger;
 

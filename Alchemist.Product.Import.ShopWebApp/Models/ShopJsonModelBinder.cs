@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.Model;
+﻿using Alchemist.Web.ModelBinder;
 
 namespace Alchemist.Product.ShopWebApp.Models;
 

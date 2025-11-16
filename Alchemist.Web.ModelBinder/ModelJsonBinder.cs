@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Model;
+namespace Alchemist.Web.ModelBinder;
 
 public abstract class ModelJsonBinder(ILogger logger) : ModelBinder(logger)
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Product.Model;
+namespace Alchemist.Web.ModelBinder;
 
 public abstract class ModelFormBinder(ILogger logger) : ModelBinder(logger)
 {

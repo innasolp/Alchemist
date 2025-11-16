@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36623.8 d17.14
+VisualStudioVersion = 17.14.36623.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.Entities", "Alchemist.Product.Entities\Alchemist.Product.Entities.csproj", "{B811DC49-6D2C-4DE6-BD52-6A30AA1E8FC3}"
 EndProject
@@ -333,7 +333,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Message.SignalR.HubConnecti
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApp", "WebApp", "{7CF38854-7358-43BF-9F62-8B625812B1DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.Model", "Alchemist.Product.Import.Model\Alchemist.Product.Model.csproj", "{2D21C2F6-C301-ECC3-6BE2-D9A64B2C7084}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Web.ModelBinder", "Alchemist.Web.ModelBinder\Alchemist.Web.ModelBinder.csproj", "{2D21C2F6-C301-ECC3-6BE2-D9A64B2C7084}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Alchemist.Js.Common", "Alchemist.Js.Common\Alchemist.Js.Common.esproj", "{54DAB101-C449-ABEF-E87B-9CC066DF79B8}"
 EndProject
