@@ -1,0 +1,44 @@
+﻿@using System.Text.Json
+@using Microsoft.AspNetCore.Html
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@functions{
+    bool IsSelected(Tab tab) => Model.Tab == tab;
+    HtmlString GetData()
+    {
+        {
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true // Optional: for pretty-printed JSON
+            };
+            return new HtmlString(@JsonSerializer.Serialize(Model.Data, serializeOptions));
+        }
+    }
+
+}
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_StartAppScriptsPartial");
+    }
+
+    <script>
+        $( 
+            function(){
+                init('@Model.Tab.ToString()', '@Model.AppName', @GetData()) ;
+        });       
+    </script>
+}
+
+<tab-panel class="menu tabsMenuDiv">
+    <tab-item class="app-item" data-app="@AppStore.ShopApp" content="@Enum.GetName(Tab.Shop)" action="#" selected="@IsSelected(Tab.Shop)"
+        data-href='@Model.AppUrls[AppStore.ShopApp]'></tab-item>
+    <tab-item class="app-item" data-app="@AppStore.ImportSettingsApp" content="@Enum.GetName(Tab.ImportSettings)" selected="@IsSelected(Tab.ImportSettings)"
+        data-href='@Model.AppUrls[AppStore.ImportSettingsApp]' action="#"></tab-item>
+</tab-panel>
+<div id="appDiv"></div>

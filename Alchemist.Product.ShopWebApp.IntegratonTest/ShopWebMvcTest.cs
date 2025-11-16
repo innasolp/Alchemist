@@ -1,0 +1,37 @@
+﻿using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.ShopWebAppFactory;
+using Xunit.Abstractions;
+
+namespace Alchemist.Product.ShopWebApp.IntegratonTest;
+
+public class ShopWebAppMvcFactory : ShopWebAppFullFactory
+{
+    public ShopWebAppMvcFactory() : base(false, Common.ConfigurationHelper.GetConnectionString("ShopMvcTestDb"), 8404, 8405, 8062, 8063)
+    {
+    }
+}
+
+public class ShopWebMvcTest(ShopWebAppMvcFactory webAppFactory, ITestOutputHelper outputHelper)
+    : TestFixture<ShopWebAppMvcFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
+{
+    [Fact]
+    public async Task IndexPageSuccessAsync()
+    {
+        var url = "/";
+        var httpClient = WebAppFactory.CreateClient();
+        var response = await httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            Assert.Contains("id=\"shopsTab\"", content);
+        }
+        catch
+        {
+            OutputHelper.WriteLine(content);
+            throw;
+        }
+    }
+}

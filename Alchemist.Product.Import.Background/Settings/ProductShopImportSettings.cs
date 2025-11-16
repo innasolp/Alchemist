@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Settings;
 
@@ -18,7 +19,7 @@ public class ProductShopImportSettings : ShopImportSettings, IProductShopImportS
 
     public CategoryUrl[]? RootCategories { get; set; } = [];
 
-    protected override ShopSettingType ShopSettingType => ShopSettingType.Product;
+    public override ShopSettingType ShopSettingType => ShopSettingType.Product;
 
-    ICategoryUrl[]? IProductShopImportSettings.RootCategories { get => RootCategories; set => RootCategories = (CategoryUrl[])value; }
+    IEnumerable<ICategoryUrl>? IProductShopImportSettings.RootCategories { get => RootCategories; set => RootCategories = (CategoryUrl[])value; }
 }

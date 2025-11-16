@@ -1,0 +1,12 @@
+﻿@model ServiceSettingsModel
+
+<li class="table-ul service_li">
+    <div class="flex serviceRow">
+        <div class="table_cell name" style="width:200px">@Model.Name</div>
+        <div class="table_cell serviceTypeName" style="width:200px">@Model.ServiceTypeName</div>
+        <input type="hidden" class="guid" value="@Model.Guid" />
+        <div>
+            <i class='fa fa-edit edit-service' style='font-size:18px' data-guid="@Model.Guid"></i>
+        </div>
+    </div>
+</li>

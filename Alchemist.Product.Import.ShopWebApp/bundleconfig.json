@@ -1,0 +1,9 @@
+[
+  {
+    "outputFileName": "wwwroot/js/shop.app.js",
+    "inputFiles": [
+      "wwwroot/js/shop.js",
+      "wwwroot/js/start.js"
+    ]
+  }
+]

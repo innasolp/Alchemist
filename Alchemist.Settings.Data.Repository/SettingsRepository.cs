@@ -42,6 +42,7 @@ public class SettingsRepository(AlchemyContext context) : ISettingsRepository
             .SetProperty(s => s.ParentSettingsId, s => shopSettings.ParentSettingsId)
             .SetProperty(s => s.Type, s => shopSettings.Type)
             .SetProperty(s => s.ShopId, s => shopSettings.ShopId)
+            .SetProperty(s => s.Name, s => shopSettings.Name)
            );
 
         if (result > 0) return shopSettings;

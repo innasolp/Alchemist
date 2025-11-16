@@ -3,9 +3,9 @@ using Alchemist.Import.Settings.Interfaces;
 
 namespace Alchemist.Import.Service.Factory.Interfaces;
 
-public interface IShopImportServiceFactory
+public interface IShopImportServiceFactory  
 {
     Type ServiceImplementationType { get; }
 
-    IImportService Create(IShopItem shopModel, IShopImportSettings shopImportSettings);
+    IImportService Create(string name, IShopItem shopModel, IShopImportSettings shopImportSettings);
 }

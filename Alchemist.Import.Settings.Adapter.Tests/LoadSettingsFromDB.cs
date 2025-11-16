@@ -33,13 +33,13 @@ public class LoadSettingsFromDB
             new ShopSettings{ Id = 11, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.ImportService) },
             new ShopSettings { Id = 12, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.WebLoader) },
             new ShopSettings { Id = 14, ShopId = 2, ParentSettingsId = 4, Type = ShopSettingType.Service, Name = nameof(PrimaryServiceName.BrowserLauncher) },
-            new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product },
+            new ShopSettings{ Id = 13, ShopId = 3, Type = ShopSettingType.Product,  Name="shop3Products" },
         ];
 
     public LoadSettingsFromDB()
     {
         var builder = new HostApplicationBuilder();
-        builder.Services.AddSingleton<IShopSettingsDataService>(_shopSettingsDataServiceMock.Object);
+        builder.Services.AddSingleton(_shopSettingsDataServiceMock.Object);
         builder.Services.AddKeyedTypedSettingsDataAdapter<TestProductShopImportSettings, TestImportServiceSettings>(ShopSettingType.Product, ShopSettingType.Product);
         builder.Services.AddKeyedTypedSettingsDataAdapter<TestCategoryShopImportSettings, TestImportServiceSettings>(ShopSettingType.Category, ShopSettingType.Category);
         
@@ -115,58 +115,74 @@ public class LoadSettingsFromDB
 
     [Fact]
     public async Task LoadProductSettingsByShopIdAndSettingsType()
-    {        
-        var shopSettings = await _productAdapter.GetShopImportSettings(1);
-        Assert.NotNull(shopSettings);
-        Assert.Equal(2, shopSettings.Services.Count);
-        Assert.NotNull(shopSettings.GetImportService());
-        Assert.Null(shopSettings.GetBrowserDataLoader());
-        Assert.Null(shopSettings.GetBrowserLauncher());
-        Assert.NotNull(shopSettings.GetWebLoader());
-        Assert.Null(shopSettings.GetRequestHeaders());
+    {
+        var productShopSettings = _shopSettings.Where(s => s.Type == ShopSettingType.Product 
+            && _shopSettings.Count(s1 => s1.Type == ShopSettingType.Service && s1.ParentSettingsId == s.Id) > 0).ToArray();
+        var shopSettings = productShopSettings[new Random().Next(0, productShopSettings.Length)];
+        var services = _shopSettings.Where(s => s.Type == ShopSettingType.Service && s.ParentSettingsId == shopSettings.Id);
+
+        var shopImportSettings = (await _productAdapter.GetShopImportSettings(shopSettings.ShopId)) as TestShopImportSettings;
+
+        Assert.NotNull(shopImportSettings);
+        Assert.Equal(services.Count(), shopImportSettings.Services.Count);
+
+        AssertService.PrimaryServicesExist(services, shopImportSettings);
         
-        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ServiceTypeName);
-        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ImplementationTypeName);
+        Assert.Equal($"ServiceType_ImportService_{shopImportSettings.Id}", 
+            shopImportSettings.GetImportService<TestImportServiceSettings>()?.ServiceTypeName);
+
+        Assert.Equal($"ServiceImplementation_ImportService_{shopImportSettings.Id}", 
+            shopImportSettings.GetImportService<TestImportServiceSettings>()?.ImplementationTypeName);
     }
 
     [Fact]
     public async Task LoadCategorySettingsByShopIdAndSettingsType()
     {
-        var shopSettings = await _categoryAdapter.GetShopImportSettings(1);
-        Assert.NotNull(shopSettings);
-        Assert.NotEmpty(shopSettings.Services);
-        Assert.NotNull(shopSettings.GetImportService());
-        Assert.NotNull(shopSettings.GetRequestHeaders());
-        Assert.Null(shopSettings.GetWebLoader());
-        Assert.Null(shopSettings.GetBrowserDataLoader());
-        Assert.Null(shopSettings.GetBrowserLauncher());
+        var categoryShopSettings = _shopSettings.Where(s => s.Type == ShopSettingType.Category
+            && _shopSettings.Count(s1 => s1.Type == ShopSettingType.Service && s1.ParentSettingsId == s.Id) > 0).ToArray();
+        var shopSettings = categoryShopSettings[new Random().Next(0, categoryShopSettings.Length)];
+        var services = _shopSettings.Where(s => s.Type == ShopSettingType.Service && s.ParentSettingsId == shopSettings.Id);
 
-        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ServiceTypeName);
-        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ImplementationTypeName);
+        var shopImportSettings = (await _categoryAdapter.GetShopImportSettings(shopSettings.ShopId)) as TestShopImportSettings;
+
+        Assert.NotNull(shopImportSettings);
+        Assert.NotEmpty(shopImportSettings.Services);
+        AssertService.PrimaryServicesExist(services, shopImportSettings);
+       
+        Assert.Equal($"ServiceType_ImportService_{shopImportSettings.Id}",
+            shopImportSettings.GetImportService<TestImportServiceSettings>()?.ServiceTypeName);
+
+        Assert.Equal($"ServiceImplementation_ImportService_{shopImportSettings.Id}", 
+            shopImportSettings.GetImportService<TestImportServiceSettings>()?.ImplementationTypeName);
     }
 
     [Fact]
     public async Task LoadSettingsByName()
     {
-        var shopSettings = await _categoryAdapter.GetShopImportSettings("shop1Category");
-        Assert.NotNull(shopSettings);
-        Assert.Equal(Interfaces.ShopSettingType.Category, shopSettings.ShopSettingType);
-        Assert.NotEmpty(shopSettings.Services);
-        Assert.NotNull(shopSettings.GetImportService());
-        Assert.NotNull(shopSettings.GetRequestHeaders());
-        Assert.Null(shopSettings.GetWebLoader());
-        Assert.Null(shopSettings.GetBrowserDataLoader());
-        Assert.Null(shopSettings.GetBrowserLauncher());
+        var allNotServiceSettings = _shopSettings.Where(s => s.Type != ShopSettingType.Service).ToArray();
+        var shopSettings = allNotServiceSettings[new Random().Next(0, allNotServiceSettings.Length)];
+        var services = _shopSettings.Where(s => s.Type == ShopSettingType.Service && s.ParentSettingsId == shopSettings.Id);
 
-        Assert.Equal($"ServiceType_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ServiceTypeName);
-        Assert.Equal($"ServiceImplementation_ImportService_{shopSettings.Id}", shopSettings.GetImportService()?.ImplementationTypeName);
+        var shopImportSettings = (await _categoryAdapter.GetShopImportSettings(shopSettings.Name)) as TestShopImportSettings ;
+
+        Assert.NotNull(shopImportSettings);
+
+        Assert.Equal(shopSettings.Type, shopImportSettings.Type);
+        Assert.NotEmpty(shopImportSettings.Services);
+        AssertService.PrimaryServicesExist(services, shopImportSettings);
+
+        Assert.Equal($"ServiceType_ImportService_{shopImportSettings.Id}", shopImportSettings.GetImportService<TestImportServiceSettings>()?.ServiceTypeName);
+        Assert.Equal($"ServiceImplementation_ImportService_{shopImportSettings.Id}", shopImportSettings.GetImportService<TestImportServiceSettings>()?.ImplementationTypeName);
     }
 
     [Fact]
     public async Task LoadAllSettings()
     {
+        var allNotServiceSettings = _shopSettings.Where(s => s.Type != ShopSettingType.Service).ToArray();
+
         var allSettings = await _productAdapter.GetAllShopImportSettings();
-        Assert.Equal(5, allSettings.Count);
-        Assert.Equal(9, allSettings.SelectMany(s => s.Services.OfType<TestImportServiceSettings>()).Count());
+        Assert.Equal(allNotServiceSettings.Length, allSettings.Count);
+        Assert.Equal(_shopSettings.Count - allNotServiceSettings.Length, 
+            allSettings.SelectMany(s => s.Value.Services.OfType<KeyValuePair<string,TestImportServiceSettings>>()).Count());
     }
 }

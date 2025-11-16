@@ -178,7 +178,7 @@ public class ShopImportWorker : BackgroundService
             if (!ShopModels.Any(s => s.ShopName == shopModel.ShopName))
                 ShopModels.Add(shopModel);
 
-            if (!TryGetImportService(shopImportSettings, shopModel, out var service)) return;
+            if (!TryGetImportService(newShopSettings.Name, shopImportSettings, shopModel, out var service)) return;
 
             var guid = Guid.NewGuid();
             _servicesWithTokens.Add(guid, new ServiceWithToken(service, new CancellationTokenSource()));
@@ -199,7 +199,7 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            List<IShopImportSettings> allShopImportSettings = await GetAllShopImportSettingsAsync();
+            var allShopImportSettings = await GetAllShopImportSettingsAsync();
 
             await CreateServicesFromImportSettingsAsync(allShopImportSettings);           
 
@@ -227,14 +227,14 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task CreateServicesFromImportSettingsAsync(IEnumerable<IShopImportSettings> allShopImportSettings)
+    private async Task CreateServicesFromImportSettingsAsync(IDictionary<string, IShopImportSettings> allShopImportSettings)
     {
         foreach (var shopImportSettings in allShopImportSettings)
         {
-            var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
+            var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings.Value);
             ShopModels.Add(shopModel);
 
-            if(!TryGetImportService(shopImportSettings, shopModel, out var shopImportService))
+            if(!TryGetImportService(shopImportSettings.Key, shopImportSettings.Value, shopModel, out var shopImportService))
                 continue;
 
             var guid = Guid.NewGuid();
@@ -259,20 +259,20 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task<List<IShopImportSettings>> GetAllShopImportSettingsAsync()
+    private async Task<Dictionary<string, IShopImportSettings>> GetAllShopImportSettingsAsync()
     {
-        var allShopImportSettings = new List<IShopImportSettings>();
+        var allShopImportSettings = new Dictionary<string, IShopImportSettings>();
         foreach (var adapter in _settingsAdapters)
         {
             var shopImportSettings = await adapter.GetAllShopImportSettings();
-            var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Name == s.Name));
-            allShopImportSettings.AddRange(newSettings);
+            var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Key == s.Key));
+            newSettings.ToList().ForEach(s => allShopImportSettings.Add(s.Key, s.Value));            
         }
 
         return allShopImportSettings;
     }
 
-    private bool TryGetImportService(IShopImportSettings shopImportSettings, IShopItem shopModel, out IImportService service)
+    private bool TryGetImportService(string name, IShopImportSettings shopImportSettings, IShopItem shopModel, out IImportService service)
     {
         service = default;
 
@@ -283,7 +283,7 @@ public class ShopImportWorker : BackgroundService
         var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
         if (serviceFactory == null) return false;
 
-        service = serviceFactory.Create(shopModel, shopImportSettings);
+        service = serviceFactory.Create(name, shopModel, shopImportSettings);
         return true;
     }
 

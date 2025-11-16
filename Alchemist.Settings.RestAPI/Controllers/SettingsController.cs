@@ -43,7 +43,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
     [HttpGet("byShopId/{shopId:int}/{shopSettingType:int}", Name = nameof(GetShopSettingsByShopId))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<ShopSettings>>> GetShopSettingsByShopId(int shopId, int shopSettingType)
     {
-        if (shopId <= 0)
+        if (shopId < 0)
             return TypedResults.BadRequest(shopId);
 
         var shopSettings = await _settingsRepository.GetShopSettings(shopId, (ShopSettingType)shopSettingType);
@@ -53,7 +53,7 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
     [HttpGet("byId/{id:int}", Name = nameof(GetShopSettingsById))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<ShopSettings>>> GetShopSettingsById(int id)
     {
-        if (id <= 0)
+        if (id < 0)
             return TypedResults.BadRequest(id);
 
         var shopSettings = await _settingsRepository.GetShopSettings(id);

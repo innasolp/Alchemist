@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Import.Settings.Test.Model;
 
@@ -6,5 +7,5 @@ public class TestCategoryShopImportSettings : TestShopImportSettings, ICategoryS
 {
     public string CategorySourceUrl { get; set; }
 
-    protected override ShopSettingType ShopSettingType => ShopSettingType.Category;
+    public override ShopSettingType Type => ShopSettingType.Category;
 }

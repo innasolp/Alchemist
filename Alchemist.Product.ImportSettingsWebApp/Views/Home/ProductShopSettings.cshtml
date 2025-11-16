@@ -1,0 +1,52 @@
+﻿@using System.Text.Json
+
+@model ProductShopImportSettingsModel
+
+@functions
+{
+    CategoryUrlModel GetCategoryUrlModel(CategoryUrlModel category)
+    {
+        return new CategoryUrlModel
+        {
+            Guid = category.Guid,
+            Url = category.Url,
+            Item = category.Item,
+            ShopId = Model.ShopId
+        };
+    } 
+}
+
+<modal-div class="root-category-modal"></modal-div>
+
+<div class="form-group">
+    <label asp-for="ProductUrlFormat" class="control-label"></label>
+    <input asp-for="ProductUrlFormat" class="form-control form-input" value="@Model.ProductUrlFormat" />
+    <span asp-validation-for="ProductUrlFormat" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label asp-for="CategoryUrlFormat" class="control-label"></label>
+    <input asp-for="CategoryUrlFormat" class="form-control form-input" value="@Model.CategoryUrlFormat" />
+    <span asp-validation-for="CategoryUrlFormat" class="text-danger"></span>
+</div>
+
+<div class="form-group-table">
+    <ul class="table-ul rootCategories">
+        <li class="table-ul header">
+            <div class="flex">
+                <div class="table_header">Item ID</div>
+                <div class="table_header">Url</div>
+                <div></div>
+            </div>
+        </li>
+        @foreach (var category in (Model.RootCategories ?? []))
+        {
+            @await Html.PartialAsync("~/Views/Home/RootCategoryUrlItem.cshtml", GetCategoryUrlModel(category))
+        }
+        <li class="table-ul add-btn-ul">
+            <div>
+                <a class="add-root-category">Add category</a>
+            </div>         
+        </li>
+    </ul>
+</div>
+

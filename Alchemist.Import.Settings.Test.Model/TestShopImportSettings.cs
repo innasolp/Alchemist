@@ -1,10 +1,11 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Product.Interfaces;
 using System.Collections;
 using System.Text.Json.Serialization;
 
 namespace Alchemist.Import.Settings.Test.Model;
 
-public abstract class TestShopImportSettings : IShopImportSettings
+public abstract class TestShopImportSettings : IShopImportSettings, IShopSettings
 {
     public bool? Perfomance { get; set; }
 
@@ -16,20 +17,21 @@ public abstract class TestShopImportSettings : IShopImportSettings
     [JsonIgnore]
     public int ShopId { get; set; }
 
-    public List<TestImportServiceSettings> Services { get; set; } = [];    
+    public Dictionary<string, TestImportServiceSettings> Services { get; set; } = [];    
 
-    IList IShopImportSettings.Services => Services;
+    IDictionary IShopImportSettings.Services => Services;
 
-    int? ISettings.ParentSettingsId
+    int? IShopSettings.ParentSettingsId
     {
         get { return null; }
         set {; }
     }
 
-    protected abstract ShopSettingType ShopSettingType { get; }
-
-    ShopSettingType ISettings.ShopSettingType => ShopSettingType;
+    public abstract ShopSettingType Type {get;}
 
     public string ShopName { get; set; }
     public string ShopUrl { get; set; }
+    bool? IShopSettings.IsActual { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    ShopSettingType IShopSettings.Type { get => Type; set => throw new NotImplementedException(); }
 }

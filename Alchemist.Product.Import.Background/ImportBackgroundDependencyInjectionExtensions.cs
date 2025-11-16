@@ -15,7 +15,7 @@ public static class ImportBackgroundDependencyInjectionExtensions
 {
     public static void SetAppPath(this IShopImportSettings shopImportSettings, string appPath)
     {
-        foreach(var serviceSettings in shopImportSettings.Services.OfType<IImportServiceSettings>())
+        foreach(var serviceSettings in shopImportSettings.Services.OfType<IServiceSettings>())
             serviceSettings.SetAppPath(appPath);
     }
 

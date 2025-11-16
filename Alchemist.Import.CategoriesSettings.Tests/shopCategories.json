@@ -1,6 +1,5 @@
- [
-  {
-    "Name": "OzonCategories",
+{
+  "OzonCategories": {
     "Url": "https://www.ozon.ru",
     "RequestHeaders": {
       "Value": {
@@ -53,20 +52,20 @@
 
     },
     "Perfomance": true,
-    "ImportService": {
-      "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
-      "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
-    },
-    "BrowserDataLoader": {
-      "ImplementationTypeName": "Firefox.Standart",
-      "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
-    },
-    "WebLoader": {
-      "ImplementationTypeName": "Firefox",
-      "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
-    },
-    "Services": [
-      {
+    "Services": {
+      "ImportService": {
+        "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+        "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
+      },
+      "BrowserDataLoader": {
+        "ImplementationTypeName": "Firefox.Standart",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
+      "WebLoader": {
+        "ImplementationTypeName": "Firefox",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
+      },
+      "CategoryLoadOptions": {
         "ServiceTypeName": "CategoryLoadOptions",
         "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
         "Value": {
@@ -94,7 +93,7 @@
           }
         }
       },
-      {
+      "HtmlSearchFactoryOptions": {
         "ServiceTypeName": "HtmlSearchFactoryOptions",
         "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll",
         "Value": {
@@ -102,16 +101,15 @@
           "SearchElementType": 0
         }
       },
-      {
+      "HtmlSearcher": {
         "ServiceTypeName": "IHtmlSearcher",
         "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.dll",
-        "ServiceProviderPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll"        
-      }  
-    ]  
-  },
+        "ServiceProviderPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll"
+      }
+    }
+    },
 
-  {
-    "Name": "GoldAppleCategories",
+  "GoldAppleCategories": {
     "Url": "https://goldapple.ru",
     "RequestHeaders": {
       "Value": {
@@ -184,57 +182,58 @@
         "CookieIndex": 4,
         "CookiePrefixLength": 0
       }
-      },
+    },
     "Perfomance": true,
-    "ImportService": {
-      "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
-      "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
 
-    },
-    "BrowserDataLoader": {
-      "Name": "Firefox.Standart",
-      "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
-    },
-    "WebLoader": {
-      "Name": "Firefox",
-      "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
-    },
-    "Services": [
-      {
-          "ServiceTypeName": "CategoryLoadOptions",
-          "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
-          "Value": {
-            "HtmlSearchOptions": {
-              "Tag": "script",
-              "ValueString": "window.serverCache['navigation']"
-            },
-            "FirstNodePath": [ "data" ],
-            "SecondsInterval": 1800,
-            "CategoryPropertyPaths": {
-              "Url": {
-                "PropertyName": "Url",
-                "Path": "link"
-              },
-              "Description": {
-                "PropertyName": "Description",
-                "Path": "name"
-              },
-              "Children": {
-                "PropertyName": "Children",
-                "Path": "children"
-              },
-              "Id": {
-                "PropertyName": "Id",
-                "Path": "id"
-              },
-              "IsParented": {
-                "PropertyName": "IsParented",
-                "Path": "parent"
-              }
-            }
-          }        
+    "Services": {
+      "ImportService": {
+        "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+        "ServiceProviderPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll"
+
       },
-      {
+      "BrowserDataLoader": {
+        "Name": "Firefox.Standart",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
+      "WebLoader": {
+        "Name": "Firefox",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
+      },
+      "CategoryLoadOptions": {
+        "ServiceTypeName": "CategoryLoadOptions",
+        "AssemblyPath": "Import\\Categories\\Json\\Alchemist.Import.Category.Json.dll",
+        "Value": {
+          "HtmlSearchOptions": {
+            "Tag": "script",
+            "ValueString": "window.serverCache['navigation']"
+          },
+          "FirstNodePath": [ "data" ],
+          "SecondsInterval": 1800,
+          "CategoryPropertyPaths": {
+            "Url": {
+              "PropertyName": "Url",
+              "Path": "link"
+            },
+            "Description": {
+              "PropertyName": "Description",
+              "Path": "name"
+            },
+            "Children": {
+              "PropertyName": "Children",
+              "Path": "children"
+            },
+            "Id": {
+              "PropertyName": "Id",
+              "Path": "id"
+            },
+            "IsParented": {
+              "PropertyName": "IsParented",
+              "Path": "parent"
+            }
+          }
+        }
+      },
+      "HtmlSearchFactoryOptions": {
         "ServiceTypeName": "HtmlSearchFactoryOptions",
         "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll",
         "Value": {
@@ -242,12 +241,12 @@
           "SearchElementType": 1
         }
       },
-      {
+      "HtmlSearcher": {
         "ServiceTypeName": "IHtmlSearcher",
         "AssemblyPath": "Import\\Html\\Alchemist.Import.Html.dll",
         "ServiceProviderPath": "Import\\Html\\Alchemist.Import.Html.Factory.dll"
-      }  
-    ]
-  }
-  ]
+      }
+    }
+    }
+}
 

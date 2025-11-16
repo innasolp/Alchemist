@@ -3,6 +3,7 @@ using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.SettingsAPIFactory;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Threading;
@@ -132,8 +133,8 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
 
     private async Task<ShopSettings> CreateNewShopSettingsAsync(int shopId)
     {
-        var shopSettings = TestRepository.CreateProductShopSettings(shopId);
-        var services = TestRepository.CreateShopSettingsServicesTestData(shopSettings);
+        var shopSettings = SettingsTestRepository.CreateProductShopSettings(shopId);
+        var services = SettingsTestRepository.CreateShopSettingsServicesTestData(shopSettings);
         var settingsData = new ArrayList() { shopSettings, services.ToArray() };
         var settingsPutResponse = await WebAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData);
         settingsPutResponse.EnsureSuccessStatusCode();

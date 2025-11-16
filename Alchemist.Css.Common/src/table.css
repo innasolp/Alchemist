@@ -1,0 +1,16 @@
+.table_header {
+    padding-left: 10px;
+    padding-right: 10px;
+    background: lightgray;
+    width: 100px;
+    height: 30px;
+    text-wrap: nowrap;
+}
+
+.table_cell {
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 100px;
+    height: 30px;
+    text-wrap: wrap;
+}

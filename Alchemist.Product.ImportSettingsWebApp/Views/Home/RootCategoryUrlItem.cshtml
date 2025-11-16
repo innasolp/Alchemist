@@ -1,0 +1,15 @@
+﻿@using System.Text.Json
+
+@model CategoryUrlModel
+
+<li class="table-ul rootcategory_li" data-guid="@Model.Guid">
+    <div class="flex rootCategoryRow">
+        <div class="table_cell item">@Model.Item</div>
+        <div class="table_cell url">@Model.Url</div>        
+        <div>
+            <button type="button" class="edit-root-category" data-guid="@Model.Guid">
+                <i class='fa fa-edit' style='font-size:18px' data-guid="@Model.Guid"></i>
+            </button>
+        </div>
+    </div>
+</li>

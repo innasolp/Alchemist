@@ -8,12 +8,13 @@ using Alchemist.Import.Interfaces;
 namespace Alchemist.Product.Shop.GoldApple.ImportService;
 
 public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string name,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductShopModel shopUrlModel,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] ILoaderService loader,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductItemHandler productDataHandler)
     : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger, shopUrlModel, loader, productDataHandler)
 {
-    public override string Name => "GoldAppleImport";
+    public override string Name { get; } = name;
 
     protected override int PageProductCount => 24;
 

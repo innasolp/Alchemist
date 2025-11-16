@@ -22,15 +22,16 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
     public override Type ServiceImplementationType => typeof(ShopImportCategoriesTimerService);    
 
     protected override IImportService Create(ILogger logger, 
+        string name,
         IShopItem shopModel,
         IShopImportSettings shopImportSettings,
         ILoaderService browserService)
     {
-        var loadOptionsService = (shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value) 
-            ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopImportSettings.Name}");
+        var loadOptionsService = (shopImportSettings.Services.OfType<IServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value) 
+            ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopImportSettings.ShopName}");
         var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
         
-        var htmlSearchOptionsService = shopImportSettings.Services.OfType<IImportServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(HtmlSearchFactoryOptions))?.Value;
+        var htmlSearchOptionsService = shopImportSettings.Services.OfType<IServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(HtmlSearchFactoryOptions))?.Value;
         var htmlSearchFactoryOptions = htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
 
         var htmlSearcher = htmlSearchFactoryOptions != null 
@@ -38,17 +39,17 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
             : null;
 
         return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, 
-            shopImportSettings.Name,
+            name,
             htmlSearcher,
             browserService,
             shopModel as ICategoryShopModel,
             categoryLoadOptions, _itemHandler);
     }
 
-    protected override ILogger GetLogger(ILogger logger, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
     {
         if (logger is ILogger<ShopImportCategoriesTimerService> serviceLogger)
-            return importServiceLogFactory?.GetLogger(serviceLogger, shopModel, shopImportSettings) ?? serviceLogger;
+            return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;
         else 
             throw new InvalidDataException(logger.GetType().FullName);
     }

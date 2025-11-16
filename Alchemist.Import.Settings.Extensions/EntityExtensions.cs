@@ -1,5 +1,6 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
+using Alchemist.Product.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -9,54 +10,63 @@ namespace Alchemist.Import.Settings.Extensions;
 
 public static class EntityExtensions
 {
-    public static T ToShopImportSettings<T>(this Product.Interfaces.IShopSettings shopSettings, params JsonConverter[] jsonConverters)
+    public static JsonSerializerOptions GetDefaultServiceSerializationOptions<T>()
+    {
+        return new JsonSerializerOptions()
+        {
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(
+            Alchemist.Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
+                    nameof(IShopSettings.Id),
+                    nameof(IShopSettings.ParentSettingsId),
+                    nameof(IShopSettings.ShopId),
+                    nameof(IShopSettings.Name)) 
+            )
+        };
+    }
+
+    public static JsonSerializerOptions GetDefaultImportSettingsSerializationOptions<T>()
         where T : IShopImportSettings
     {
-        var option = new JsonSerializerOptions();
-        jsonConverters.ToList().ForEach(option.Converters.Add);
+        return new JsonSerializerOptions()
+        {
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(
+                Alchemist.Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
+                    nameof(IShopImportSettings.Services),
+                    nameof(IShopSettings.Id),
+                    nameof(IShopSettings.ParentSettingsId),
+                    nameof(IShopSettings.ShopId),
+                    nameof(IShopSettings.Name)))
+        };
+    }
 
-        var model = JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString());
+    public static T ToShopImportSettings<T>(this IShopSettings shopSettings, params JsonConverter[] jsonConverters)
+        where T : IShopImportSettings
+    {
+        var options = GetDefaultImportSettingsSerializationOptions<T>();
+        jsonConverters.ToList().ForEach(options.Converters.Add);
 
-        model.Id = shopSettings.Id;
-        model.ShopId = shopSettings.ShopId;
-        model.Name = shopSettings.Name;
+        var model = JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString(), options);
 
         return model;
     }
 
-    public static T? ToImportServiceSettings<T>(this Product.Interfaces.IShopSettings shopSettings, params JsonConverter[] jsonConverters)
-        where T : IImportServiceSettings
+    public static T? ToImportServiceSettings<T>(this IShopSettings shopSettings, params JsonConverter[] jsonConverters)
+        where T : IServiceSettings
     {
-        var option = new JsonSerializerOptions();
+        var option = GetDefaultServiceSerializationOptions<T>();
         jsonConverters.ToList().ForEach(option.Converters.Add);
 
         var model = shopSettings.JsonValue != null 
             ? JsonSerializer.Deserialize<T>(shopSettings.JsonValue.ToString(), option) 
-            : default(T);
-
-        if (model != null)
-        {
-            model.Id = shopSettings.Id;
-            model.Name = shopSettings.Name;
-            model.ParentSettingsId = shopSettings.ParentSettingsId;
-            model.ShopId = shopSettings.ShopId;
-        }
-
+            : default;
         return model;
     }
 
-    private static List<string> GetShopImportSettingsSerializeProperties()
+    public static IShopSettings ToEntity<T>(this T shopSettings, JsonSerializerOptions? options = null)
+        where T : class, IShopSettings
     {
-        return
-        [
-            nameof(IProductShopImportSettings.Name),
-            nameof(IProductShopImportSettings.Perfomance)
-        ];
-    }
+        options ??= GetDefaultServiceSerializationOptions<T>();
 
-    private static ShopSettings ToEntity<T>(this T shopSettings, Product.Interfaces.ShopSettingType shopSettingType, JsonSerializerOptions options)
-        where T : class, ISettings
-    {
         var json = JsonSerializer.Serialize(shopSettings, options);
 
         return new ShopSettings
@@ -64,94 +74,9 @@ public static class EntityExtensions
             Id = shopSettings.Id,
             JsonValue = JsonSerializer.Deserialize<JsonObject>(json),
             ShopId = shopSettings.ShopId,
-            Type = shopSettingType,
+            Type = shopSettings.Type,
             Name = shopSettings.Name,
             ParentSettingsId = shopSettings.ParentSettingsId
         };
-    }
-
-    private static ShopSettings ProductSettingsToEntity<T>(this T shopSettings)
-        where T : class, IProductShopImportSettings
-    {
-        var props = GetShopImportSettingsSerializeProperties();
-        props.AddRange([nameof(IProductShopImportSettings.PageProductCount),
-                nameof(IProductShopImportSettings.CategoryUrlFormat),
-                nameof(IProductShopImportSettings.ProductUrlFormat), 
-                nameof(IProductShopImportSettings.RootCategories), ]);
-
-        var option = new JsonSerializerOptions
-        {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers = { Alchemist.Common.JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
-            }
-        };
-
-        return shopSettings.ToEntity(Product.Interfaces.ShopSettingType.Product, option);
-    }
-
-    private static ShopSettings CategorySettingsToEntity<T>(this T shopSettings)
-        where T : class, ICategoryShopImportSettings
-    {
-        var props = GetShopImportSettingsSerializeProperties();
-        props.AddRange([nameof(ICategoryShopImportSettings.CategorySourceUrl)]);
-
-        var option = new JsonSerializerOptions
-        {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers = { Alchemist.Common.JsonExtensions.SetPropertiesForSerialize(typeof(T), [.. props]) }
-            }
-        };
-
-        return shopSettings.ToEntity(Product.Interfaces.ShopSettingType.Category, option);
-    }
-
-    private static ShopSettings ServiceSettingsToEntity<T>(this T service)
-        where T : class, IImportServiceSettings
-    {
-        var option = new JsonSerializerOptions
-        {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers = { Alchemist.Common.JsonExtensions.SetPropertiesForSerialize(typeof(T),
-                nameof(IImportServiceSettings.AssemblyPath),
-                nameof(IImportServiceSettings.ImplementationTypeName),
-                nameof(IImportServiceSettings.ServiceTypeName),
-                nameof(IImportServiceSettings.ServiceProviderPath),
-                nameof(IImportServiceSettings.Value),
-                nameof(IImportServiceSettings.Name)) }
-            }
-        };
-
-        return service.ToEntity(Product.Interfaces.ShopSettingType.Service, option);
-    }
-
-    public static ShopSettings? ToEntity<T>(this T shopSettings)
-        where T : class, ISettings
-    {
-        switch (shopSettings.ShopSettingType)
-        {
-            case ShopSettingType.Product:
-                return (shopSettings is IProductShopImportSettings productShopImportSettings) 
-                    ? productShopImportSettings.ProductSettingsToEntity() 
-                    : null;
-
-            case ShopSettingType.Category:
-                return (shopSettings is ICategoryShopImportSettings categoryShopImportSettings)
-                    ? categoryShopImportSettings.CategorySettingsToEntity()
-                    : null;
-
-            case ShopSettingType.Service:
-                return (shopSettings is IImportServiceSettings serviceSettings)
-                    ? serviceSettings.ServiceSettingsToEntity()
-                    : null;
-
-            default:
-                return null;
-        }
     }
 }
