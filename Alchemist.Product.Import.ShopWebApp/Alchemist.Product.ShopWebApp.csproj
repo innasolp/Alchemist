@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+  </PropertyGroup>  
 
   <ItemGroup>
 	<!-- <ProjectReference Include="..\Alchemist.Css.Common\Alchemist.Css.Common.esproj" /> -->
@@ -13,7 +13,6 @@
 	<!-- <ProjectReference Include="..\Alchemist.Js.Common\Alchemist.Js.Common.esproj" /> -->
 	<ProjectReference Include="..\Alchemist.Product.Import.Model\Alchemist.Product.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.WebApp.Common\Alchemist.Product.WebApp.Common.csproj" />
 	<ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
 	<ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
   </ItemGroup>
@@ -30,6 +29,9 @@
     <Content Update="wwwroot\js\shop.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\js\start.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\lib\alchemist_common\confirm.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -38,6 +40,12 @@
   <ItemGroup>
     <Folder Include="wwwroot\lib\alchemist_common\" />
   </ItemGroup>
+  
+
+	<Target Name="NpmLinkPackage" AfterTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
+	</Target>
+	
 	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build">
 		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
 	</Target>
@@ -58,6 +66,4 @@
 		<Copy SourceFiles="@(NpmLibFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
 		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
 	</Target>
-
-
 </Project>

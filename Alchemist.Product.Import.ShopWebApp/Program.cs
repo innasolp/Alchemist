@@ -4,10 +4,11 @@ using Alchemist.DependencyInjection.Common;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Product.ShopWebApp.Controllers;
+using Alchemist.WebApp.Api.Common;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog.Configuration.Extensions;
-using Alchemist.WebApp.Api.Common;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,14 +17,14 @@ bool isApi = builder.IsApi(args);
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "ShopAPIHost", nameof(ShopApiClient), out IHttpClientBuilder shopHttpClientBuilder);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddSession(options =>
+builder.Services.AddControllersWithViews().AddJsonOptions(options =>
 {
-    options.Cookie.Name = ".ShopApp.Session";
-    options.IdleTimeout = TimeSpan.FromSeconds(60);
-    options.Cookie.IsEssential = true;
+    options.JsonSerializerOptions.WriteIndented = true;
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
+
 
 if (isApi)
     builder.Services.AddSwaggerApi();
@@ -38,7 +39,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Shop/Error");
+    app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -73,15 +74,12 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
-
-app.UseSession();
-
 if (isApi)
     app.SetApiRoute("Hello ShopWebApp API!");
-else
-    app.MapControllerRoute(
+
+app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Shop}/{action=Index}/{id?}");
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
 

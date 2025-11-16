@@ -1,24 +1,29 @@
-﻿function uploadShopTab(shopTabDiv, shopId = null, onSuccess = null) {
-    shopTabDiv.load('/Shop/ShopTab', { shopId: shopId }, (r, status, xhr) => {
+﻿function uploadShopList(shopId = null, onSuccess = null) {
+    $("#shopList").load('/ShopAction/ShopList', { shopId: shopId }, (r, status, xhr) => {
         if (status == "error") {
-            console.error("/Shop/ShopTab error: " + xhr.status + ": " + xhr.statusText);
+            console.error("/ShopAction/ShopList error: " + xhr.status + ": " + xhr.statusText);
             console.trace(r);
             return;
         }
-        else 
-            onSuccess();        
+        else {
+            if (shopId == null) {
+                const shopItems = $("a.shop_item");
+                if (shopItems.length == 0) return;
+                window.location.href = shopItems.first().attr("href");
+            }
+            else {
+                setShopItemsPreventClick();
+                if (onSuccess != null && shopId != 0) onSuccess(shopId);
+            }
+        }
     });
 }
 
-function uploadShopList(shopListDiv, shopId = null, onSuccess = null) {
-    shopListDiv.load('/Shop/ShopList', { shopId: shopId }, (r, status, xhr) => {
-        if (status == "error") {
-            console.error("/Shop/ShopList error: " + xhr.status + ": " + xhr.statusText);
-            console.trace(r);
-            return;
-        }
-        else
-            onSuccess();
+function loadShop(shopId, onSuccess = null) {
+    const shopUrl = `/ShopAction/${shopId}`;
+    postData(shopUrl, null, (html) => {
+        $("#shopDiv").html(html);
+        if (onSuccess != null) onSuccess();
     });
 }
 
@@ -28,19 +33,19 @@ function setShopItemsPreventClick() {
 
 function onShopItemChangePrevent(event) {
 
-    onItemChangePrevent(event, "/Shop/IsChanged", '#shopEditForm');
+    onItemChangePrevent(event, "/ShopAction/IsChanged", '#shopEditForm');
 }
 
-function saveShop(shopEditForm, shopListDiv) {
+function saveShop(shopEditForm) {
 
     var updateShopListOnSuccess = function (shop) {
-        uploadShopList($(`#${shopListDiv}`), shop.id, null);
+        uploadShopList(shop.id, null);
     };
 
     validateForm($('#' + shopEditForm), () => {
         
         var formData = new FormData($('#' + shopEditForm)[0]);
-        postFormData(url = "/Shop/Save", formData = formData, onSuccess = updateShopListOnSuccess, onError = null);
+        postFormData(url = "/ShopAction/Save", formData = formData, onSuccess = updateShopListOnSuccess, onError = null);
 
     }, null); 
 }

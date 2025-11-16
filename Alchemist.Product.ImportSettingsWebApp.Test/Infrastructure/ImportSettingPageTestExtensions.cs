@@ -67,12 +67,13 @@ internal static class ImportSettingPageTestExtensions
 
     internal static async Task ExpectNextSettingsTabAsync(this PageTest pageTest, string tab)
     {
-        var categoryShopTabDivLocator = pageTest.Page.Locator("div.shop-tab").Locator("a:not(.selected)");
-        await pageTest.Expect(categoryShopTabDivLocator).ToHaveTextAsync(tab);
+        var nextSettingsTabDivLocator = pageTest.Page.Locator("div.shop-tab").Filter(new LocatorFilterOptions { HasText = tab });
+        await pageTest.Expect(nextSettingsTabDivLocator.Locator("a:not(.selected)")).ToHaveCountAsync(1);
 
-        await categoryShopTabDivLocator.ClickAsync();
+        await nextSettingsTabDivLocator.ClickAsync();
 
         var selectedShopTabDiv = pageTest.Page.Locator("div.shop-tab").Locator("a.selected");
+        await pageTest.Expect(selectedShopTabDiv).ToHaveCountAsync(1);
         await pageTest.Expect(selectedShopTabDiv).ToHaveTextAsync(tab);
     }
 

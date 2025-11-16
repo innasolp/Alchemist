@@ -5,7 +5,6 @@ using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.ImportSettingsWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Alchemist.Product.Interfaces;
-using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 
 
 namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
@@ -17,28 +16,58 @@ public class ImportSettingsApiControllerTests : ControllerTest<ImportSettingsApi
 
     protected override ImportSettingsApiController CreateController()
     {
-        var controller = new ImportSettingsApiController(_productAdapter.Object, _categoryAdapter.Object);
+        var controller = new ImportSettingsApiController();
         controller.ControllerContext.HttpContext = HttpContextMock.Object;
         return controller;
     }
 
     [Fact]
-    public async Task ShopSettingsTab_ReturnsPartialView_AndSetsSession()
+    public void ShopSettings_ReturnsPartialView()
     {
-        var product = new ProductShopImportSettingsModel { ShopId = 1 };
-        _productAdapter.Setup(a => a.GetShopImportSettings(1)).ReturnsAsync(product);
-
         var controller = CreateController();
 
-        var result = await controller.ShopSettingsTab(1, ShopSettingType.Product);
+        var result = controller.ShopImportSettings(1, ShopSettingType.Product);
 
         var pv = Assert.IsType<PartialViewResult>(result);
         Assert.Equal("~/Views/Shared/ShopImportSettingsTab.cshtml", pv.ViewName);
-        var model = Assert.IsAssignableFrom<ShopImportSettingsModel>(pv.Model);
+        var model = Assert.IsAssignableFrom<IndexModel>(pv.Model);
         Assert.Equal(1, model.ShopId);
         Assert.Equal(ShopSettingType.Product, model.ShopSettingType);
+    }
 
-        // Session should contain stored settings
-        Assert.NotNull(await controller.HttpContext.Session.GetShopImportSettingsFromSessionAsync());
+    [Fact]
+    public void Default_ReturnsPartialView_WithEmptyIndexModel()
+    {
+        var controller = CreateController();
+
+        var result = controller.Default();
+
+        var pv = Assert.IsType<PartialViewResult>(result);
+        Assert.Equal("~/Views/Shared/ShopImportSettingsTab.cshtml", pv.ViewName);
+        var model = Assert.IsAssignableFrom<IndexModel>(pv.Model);
+        Assert.Null(model.ShopId);
+        Assert.Equal(ShopSettingType.Product, model.ShopSettingType);
+    }
+
+    [Fact]
+    public void ShopSettings_ReturnsBadRequest_WhenShopIdIsNegative()
+    {
+        var controller = CreateController();
+        var shopId = -1;
+        var result = controller.ShopImportSettings(shopId, ShopSettingType.Product);
+
+        var pv = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal($"shopId {shopId} is invalid.", pv.Value);        
+    }
+
+    [Fact]
+    public void ShopSettings_ReturnsBadRequest_WhenShopSettingsTypeIsService()
+    {
+        var controller = CreateController();
+        var shopSettingsType = ShopSettingType.Service;
+        var result = controller.ShopImportSettings(5, shopSettingsType);
+
+        var pv = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal($"shopSettingsType {shopSettingsType} is invalid.", pv.Value);        
     }
 }

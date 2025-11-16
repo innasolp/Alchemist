@@ -61,7 +61,10 @@ public abstract class ShopImportSettingsTest<TWebAppFactory, TInput> : PageTest,
 
         await FillInputFieldsAsync();
 
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
+        await Expect(Page.Locator("input.import-service")).ToBeEmptyAsync();
+
+        await Page.Locator("#saveImportSettingsBtn").ClickAsync();
+        await Expect(Page.Locator("#saveImportSettingsBtn")).ToBeEnabledAsync();
         await Expect(Page.GetByText($"The ImportService field is required.")).ToBeVisibleAsync();
     }
     
@@ -81,6 +84,8 @@ public abstract class ShopImportSettingsTest<TWebAppFactory, TInput> : PageTest,
         await this.SaveServiceBtnClickAsync();
 
         await Expect(Page.Locator("#serviceSettingsForm > .row")).Not.ToBeVisibleAsync();
+
+        await Expect(Page.Locator("input.web-loader")).ToBeEmptyAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
         await Expect(Page.GetByText($"The WebLoader field is required.")).ToBeVisibleAsync();

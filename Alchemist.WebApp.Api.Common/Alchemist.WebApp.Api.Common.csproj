@@ -15,6 +15,5 @@
 		<PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
 		<PackageReference Include="Http.Info" Version="1.0.0.1" />
 	</ItemGroup>
-
-
+	
 </Project>

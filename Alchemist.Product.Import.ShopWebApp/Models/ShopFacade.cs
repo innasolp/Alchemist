@@ -15,6 +15,12 @@ internal class ShopFacade(IShopDataService shopDataService)
         return result;
     }
 
+    public async Task<ShopModel> GetShop(int shopId)
+    {
+        var shop = await _shopDataService.GetShop(shopId);
+        return shop?.To<ShopModel>() ?? new ShopModel();
+    }
+
     public async Task<ShopModel> SaveShop(IShop shop)
     {  
         var savedShop = shop.Id == 0

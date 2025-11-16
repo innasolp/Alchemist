@@ -1,9 +1,60 @@
-﻿function loadImportSettingsTab(shopId, shopSettingsType) {
-    postJsonData(url = `/Import/Settings/Tab/${shopId}/${shopSettingsType}`,
+﻿function uploadShopList(shopId, shopSettingsType, onLoadSuccess = loadImportSettingsTab) {
+
+    const hrefFormat = `/Import/Settings/{0}/${shopSettingsType ?? 'Product'}`;
+    var data = { hrefFormat: hrefFormat, shopId: shopId };
+
+    postJsonData(url = '/ShopApi/ShopList',
+        data = JSON.stringify(data),
+        onSuccess = (result) => {
+            $("#shopListDiv").html(result);
+
+            if (shopId == null) {
+                const shopItems = $("a.shop_item");
+                if (shopItems.length == 0) return;
+                window.location.href = shopItems.first().attr("href");
+            }
+            else {
+                setShopSettingsItemsPreventClick();
+
+                onLoadSuccess(shopId, shopSettingsType);
+            }
+        },
+        null);
+}
+
+function enableButton(saveButton) {
+    $(saveButton).prop('disabled', false);
+}
+
+async function saveSettings(settingsForm, url, onSuccess, onError, onValidateionError) {
+
+    validateForm($(settingsForm), () => {
+
+        var formData = new FormData($(settingsForm)[0]);
+        postFormData(url = url, formData = formData, onSuccess = onSuccess, onError = onError);
+
+    }, onValidateionError);
+}
+
+function setShopSettingsItemsPreventClick() {
+    $(".shop_item").on('click', onImportSettingsItemChangePrevent);
+}
+
+function getIsSettingsChangedUrl() {
+    var shopSettingsType = $("#ShopSettingType").val();
+    return `/ImportSettingsAction/${shopSettingsType}/IsChanged`;
+}
+
+function onImportSettingsItemChangePrevent(event) {
+    onItemChangePrevent(event, getIsSettingsChangedUrl(), '#settingsForm');
+}
+
+function loadImportSettingsTab(shopId, shopSettingsType) {
+    postJsonData(url = `/ImportSettingsAction/${shopId}/${shopSettingsType}`,
         null,
         onSuccess = (result) => {
 
-            $("#importSettingsTabDiv").html(result);
+            $("#importSettingsDiv").html(result);
 
             initSettingsEvents();
         },
@@ -38,7 +89,7 @@ function initImportSettingsUpload() {
     const onImportSettingsUpload = async (event) => {
         const shopId = $("#ShopId").val();
         const shopSettingsType = $("#ShopSettingType").val();
-        const url = `/Import/Settings/${shopSettingsType}/${shopId}`;
+        const url = `/ImportSettingsAction/Set/${shopId}/${shopSettingsType}`;
         const fileInputName = $(event.target).find("input").attr("name");        
         await uploadImportSettingsFromJson('#loadSettingsFromJsonForm', fileInputName, url);
     };
@@ -68,7 +119,7 @@ function initImportSettingsEvents() {
         const shopSettingsType = $("#ShopSettingType").val();
 
         await saveSettings('#settingsForm',
-            `/Import/Settings/${shopSettingsType}/Save`,
+            `/ImportSettingsAction/${shopSettingsType}/Save`,
             (result) => { enableSaveSettingsButton(); },
             (error) => { enableSaveSettingsButton(); },
             () => { enableSaveSettingsButton(); }

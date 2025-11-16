@@ -1,6 +1,5 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.ShopWebApp.Models;
-using Alchemist.Product.WebApp.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alchemist.Product.ShopWebApp.Controllers;
@@ -31,22 +30,24 @@ public class ShopApiController(IShopDataService shopDataService) : Controller
         var shops = await _shopFacade.GetShops();
         var selectedShop = ModelHelper.GetSelectedShop(shops, data.ShopId);
         var shopListModel = ModelHelper.GetShopItemModels(shops, selectedShop?.Id, data.HRefFormat);
-        var content = await ViewHelper.GetViewHtml(HttpContext.RequestServices,
-            ControllerContext,
-            "~/Views/Shared/ShopList.cshtml",
-            shopListModel);
-        return Ok(new ShopContentData { Content = content, ShopId = selectedShop?.Id });
+
+        return PartialView("~/Views/Shared/ShopList.cshtml", shopListModel);
     }
 
-    [HttpPost("ShopTab", Name = "ShopTab")]
-    public async Task<IActionResult> ShopTab(ShopApiData data)
+    [HttpPost]
+    [Route("/ShopApi/Shop/{shopId:int?}")]
+    public IActionResult ShopTab(int? shopId)
     {
-        var shops = await _shopFacade.GetShops();
-        var shopTabModel = ModelHelper.GetShopTabModel(shops, data.ShopId, data.HRefFormat);
-        var content = await ViewHelper.GetViewHtml(HttpContext.RequestServices,
-            ControllerContext,
-            "~/Views/Shared/ShopTab.cshtml",
-            shopTabModel);
-        return Ok(content);
+        if (shopId < 0)
+            return BadRequest($"Invalid shopId : {shopId}");
+        
+        return PartialView("~/Views/Shared/ShopTab.cshtml", new IndexModel { ShopId = shopId});
+    }
+
+    [HttpPost]
+    [Route("/ShopApi/Shop/New")]
+    public IActionResult New()
+    {
+        return PartialView("~/Views/Shared/ShopTab.cshtml", new IndexModel { ShopId = 0 });
     }
 }

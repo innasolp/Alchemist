@@ -41,6 +41,12 @@
     },
     "./mvc/preeventchange.js": {
       "import": "./mvc/preeventchange.js"
+    },
+    "./mvc/tabComponent.js": {
+      "import": "./mvc/tabComponent.js"
+    },
+    "./mvc/appevents.js": {
+      "import": "./mvc/appevents.js"
     }
   },
   "scripts": {

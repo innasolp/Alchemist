@@ -1,6 +1,4 @@
-﻿using Alchemist.Import.Settings.DataAdapter;
-using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
-using Alchemist.Product.ImportSettingsWebApp.Models;
+﻿using Alchemist.Product.ImportSettingsWebApp.Models;
 using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,19 +6,31 @@ namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ImportSettingsApiController([FromKeyedServices(ShopSettingType.Product)] ISettingsDataAdapter productSettingsDataAdapter,
-    [FromKeyedServices(ShopSettingType.Category)] ISettingsDataAdapter categorySettingsDataAdapter) : Controller
-{
-    private readonly SettingsDataAdapterContainer _settingsDataAdapter = new(productSettingsDataAdapter, categorySettingsDataAdapter);
+public class ImportSettingsApiController : Controller
+{    
 
     [HttpPost]
-    [Route("/Tab/{shopId:int}/{shopSettingsType:ShopSettingType}")]
-    public async Task<IActionResult> ShopSettingsTab(int shopId, ShopSettingType shopSettingsType)
+    [Route("/ImportSettingsApi/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}")]
+    public IActionResult ShopImportSettings(int shopId, ShopSettingType shopSettingsType)
     {
-        var importSettings = await _settingsDataAdapter.GetShopImportSettingsModel(shopId, shopSettingsType);
+        if (shopId < 0)
+            return BadRequest($"shopId {shopId} is invalid.");
 
-        HttpContext.Session.SetImportSettingToSession(importSettings);
+        if (shopSettingsType == ShopSettingType.Service)
+            return BadRequest($"shopSettingsType {shopSettingsType} is invalid.");
 
-        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", importSettings);
+        var model = new IndexModel
+        {
+            ShopId = shopId,
+            ShopSettingType = shopSettingsType
+        };
+        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", model);
+    }    
+
+    [HttpPost]
+    [Route("/ImportSettingsApi/Import/Settings")]
+    public IActionResult Default()
+    {
+        return PartialView("~/Views/Shared/ShopImportSettingsTab.cshtml", new IndexModel());
     }
 }

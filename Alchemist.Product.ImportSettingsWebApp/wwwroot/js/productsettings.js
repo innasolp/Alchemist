@@ -4,7 +4,7 @@ async function isCategoryUrlChanged(formData) {
     var formDataCopy = getFormDataCopy(formData);
     const data = Object.fromEntries(formDataCopy.entries());  
     const shopId = $("#ShopId").val();    
-    return await postJsonDataAsync(`/Import/Settings/Product/${shopId}/CategoryUrl/IsChanged`, JSON.stringify(data));
+    return await postJsonDataAsync(`/ImportSettingsAction/Product/${shopId}/CategoryUrl/IsChanged`, JSON.stringify(data));
 }
 
 async function tryRootCategoryModalClose() {
@@ -25,7 +25,7 @@ function onSetRootCategory(event) {
             setCategoryUrl('#rootCategoryForm');
             });
     };
-    showRootCategoryModal.show('/Import/Settings/Product/CategoryUrl', getCategoryUrlData(guid), onShow, tryRootCategoryModalClose);
+    showRootCategoryModal.show('/ImportSettingsAction/Product/CategoryUrl', getCategoryUrlData(guid), onShow, tryRootCategoryModalClose);
 }
 
 function getCategoryUrlData(guid) {
@@ -54,7 +54,7 @@ function setCategoryUrl(categoryUrlForm, onSetCategory = null) {
 
         var formData = new FormData($(categoryUrlForm)[0]);
         const shopId = $("#ShopId").val();
-        postFormData(url = `/Import/Settings/Product/${shopId}/CategoryUrl/Set`,
+        postFormData(url = `/ImportSettingsAction/Product/${shopId}/CategoryUrl/Set`,
             formData = formData,
             onSuccess = onSuccess,
             onError = null);
@@ -77,7 +77,7 @@ function updateCategoryUrlItem(li, data) {
 
 function addCategoryUrlItem(data) {
     var li = $('ul.table-ul.rootCategories > .add-btn-ul');
-    postJsonData('/Import/Settings/Product/CategoryUrl/Item', JSON.stringify(data), (content) => {
+    postJsonData('/ImportSettingsAction/Product/CategoryUrl/Item', JSON.stringify(data), (content) => {
         li.before(content);
         li.prev().find(".edit-root-category").on('click', onSetRootCategory);
     });

@@ -26,14 +26,14 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:int}")]
+    [Route("/Import/Settings/{shopId:int}/{shopSettingsType:ShopSettingType}")]
     [HttpGet]
-    public IActionResult ImportSettings(int? shopId, int shopSettingsType)
+    public IActionResult ImportSettings(int? shopId, ShopSettingType shopSettingsType)
     {
         return View("~/Views/Home/Index.cshtml", new IndexModel
         {
             ShopId = shopId,
-            ShopSettingType = (ShopSettingType)shopSettingsType
+            ShopSettingType = shopSettingsType
         }
         );
     }

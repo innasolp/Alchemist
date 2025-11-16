@@ -29,15 +29,4 @@ internal static class ModelHelper
             HRef = string.Format(shopRefFormat, s.Id)
         });
     }
-
-    internal static ShopTabModel GetShopTabModel(IEnumerable<ShopModel> shops, int? selectedShopId = null, string shopRefFormat = "/Shop/{0}")
-    {
-        var selectedShop = GetSelectedShop(shops, selectedShopId);
-        var shopItems = GetShopItemModels(shops, selectedShop?.Id, shopRefFormat);
-        return new ShopTabModel
-        {
-            ShopItems = shopItems,
-            CurrentShopModel = selectedShop
-        };
-    }
 }

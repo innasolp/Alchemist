@@ -14,12 +14,17 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;    
 
-    private async Task ExpectLoadShopsAsync(int shopsCount)
+    private async Task ExpectLoadShopListAsync(int shopsCount)
     {
         var response = await Page.GotoAsync(_webAppFactory.ServerAddress);
         Assert.True(response?.Ok);
 
         await Expect(Page.Locator("a.shop_item")).ToHaveCountAsync(shopsCount);
+    }
+
+    private async Task ExpectLoadShopAsync()
+    {   
+        await Expect(Page.Locator("#Name")).Not.ToBeEmptyAsync();
     }
 
     private async Task ExpectShopEditFormFilledByShopFieldValuesAsync(IShop shop)
@@ -81,9 +86,8 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
     private async Task GoToNewShopAsync()
     {
-        var url = $"{_webAppFactory.ServerAddress}Shop/New";
-        var response = await Page.GotoAsync(url);
-        Assert.True(response?.Ok);
+        var newShopLocator = Page.Locator("#createNewShop");
+        await newShopLocator.ClickAsync();
     }
 
     private async Task ExpectSaveClickAsync()
@@ -97,7 +101,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         _webAppFactory.SetupShops();
         var shops = await _webAppFactory.GetShopsAsync();
 
-        await ExpectLoadShopsAsync(shops.Count);
+        await ExpectLoadShopListAsync(shops.Count);
 
         return shops;
     }
@@ -214,6 +218,8 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
     public async Task ShopItemAndFieldsUpdatedWhenShopEditedAndSavedAsync()
     {
         var shops = await ExpectInitializeAsync();
+
+        await ExpectLoadShopAsync();
 
         var shop = shops[new Random().Next(0, shops.Count)];
         await GoToShopAsync(shop.Id);

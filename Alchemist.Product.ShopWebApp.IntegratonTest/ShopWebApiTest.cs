@@ -8,7 +8,7 @@ namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
 public class ShopWebAppApiFactory : ShopWebAppFullFactory
 {
-    public ShopWebAppApiFactory() : base (true, "ShopWebApiTestDb", 8402,8403,8060,8061)
+    public ShopWebAppApiFactory() : base (true, Common.ConfigurationHelper.GetConnectionString("ShopWebApiTestDb"), 8402,8403,8060,8061)
     {
     }
 }
@@ -48,5 +48,48 @@ public class ShopWebApiTest(ShopWebAppApiFactory webAppFactory, ITestOutputHelpe
 
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("shop_item", content);
+    }
+
+    [Fact]
+    public async Task LoadShopTabSuccessAsync()
+    {
+        var url = "/ShopApi/Shop/1";
+        var httpClient = WebAppFactory.CreateClient();
+        var response = await httpClient.PostAsync(url, null);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            Assert.Contains("left-menu-ul shopsList", content);            
+        }
+        catch
+        {
+            OutputHelper.WriteLine(content);
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task NewShopSuccessAsync()
+    {
+        var url = "/ShopApi/Shop/New";
+        var httpClient = WebAppFactory.CreateClient();
+        var response = await httpClient.PostAsync(url, null);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            Assert.Contains("left-menu-ul shopsList", content);
+            Assert.DoesNotContain("shop_item selected", content);
+        }
+        catch
+        {
+            OutputHelper.WriteLine(content);
+            throw;
+        }
     }
 }

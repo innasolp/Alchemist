@@ -1,0 +1,29 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@model IndexModel
+
+@functions
+{
+    string[] GetScriptFiles()
+    {
+        switch(Model.Tab)
+        {
+            case Tab.Shop:
+                return ["shopapp/shop.app.js"];
+
+                case Tab.ImportSettings:
+                return ["importsettingsapp/importsettings.app.js"];
+
+            default:
+                return [];
+        }
+    }
+}
+
+@foreach(var scriptPath in GetScriptFiles())
+{
+    <script src="~/lib/@scriptPath" asp-append-version="true"></script>
+}
+

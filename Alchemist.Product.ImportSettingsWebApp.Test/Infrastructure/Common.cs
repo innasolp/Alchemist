@@ -1,9 +1,9 @@
-﻿using Alchemist.Test.Log;
-using Alchemist.Test.ShopApiFactory;
-using Alchemist.Test.ShopWebAppFactory;
+﻿using Alchemist.Product.Data;
+using Alchemist.Product.Interfaces;
+using Alchemist.Test.Log;
+using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.Configuration;
 
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
@@ -20,40 +20,28 @@ internal static class Common
 
             return _signalRTestServer;
         }
-    }    
-
-    internal static HttpClient CreateShopApiClient(string connectionStringSection, int httpPort, int httpsPort, bool ensureDeleted = true)
-    {
-        var alchemyDbConnectionString = GetConnectionString(connectionStringSection);
-        var shopApiWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, SignalRTestServer, httpPort, httpsPort, ensureDeleted);
-        return shopApiWebAppFactory.CreateClient();
     }
 
-    private static string? GetConnectionString(string connectionStringSection)
-    {
-        var settings = new ConfigurationBuilder()
-     .AddJsonFile("appsettings.json")
-     .Build();
+    internal static void FillTestData(AlchemyContext dbContext, int[] shopIds)
+    {  
+        for (var i = 0; i < shopIds.Length - 1; i++)
+        {
+            var shopId = shopIds[i];
+            var productSettings = SettingsTestRepository.CreateProductShopSettings(shopId);
+            var productSettingsEntry = dbContext.ShopSettings.Add(productSettings.To<ShopSettings>());
 
-        var alchemyDbConnectionString = settings.GetConnectionString(connectionStringSection);
-        return alchemyDbConnectionString;
-    }    
+            var categorySettings = SettingsTestRepository.CreateCategoryShopSettings(shopId);
+            var categorySettingsEntry = dbContext.ShopSettings.Add(categorySettings.To<ShopSettings>());
 
-    internal static HttpClient CreateSettingsApiHttpClient(string connectionStringSection, int httpPort, int httpsPort, bool ensureDeleted = false)
-    {
-        var alchemyDbConnectionString = GetConnectionString(connectionStringSection);
-        var settingsApiFactory = new TestSettingsApiFactory(alchemyDbConnectionString, SignalRTestServer, httpPort, httpsPort, [1, 2, 3, 4], ensureDeleted);
+            dbContext.SaveChanges();
 
-        var settingsApiHttpClient = settingsApiFactory.Server.CreateClient();
-        settingsApiHttpClient.BaseAddress = new Uri(settingsApiFactory.ServerAddress);
+            var productServices = SettingsTestRepository.CreateShopSettingsServicesTestData(productSettingsEntry.Entity);
+            productServices.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
 
-        return settingsApiHttpClient;
-    }    
+            var categoryServices = SettingsTestRepository.CreateShopSettingsServicesTestData(categorySettingsEntry.Entity);
+            categoryServices.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
 
-    internal static ShopWebAppFactory CreateShopWebAppApiFactory(string connectionStringSection, int httpPort, int httpsPort, int shopApiHttpPort, int shopApiHttpsPort)
-    {
-        var shopApiClient = CreateShopApiClient(connectionStringSection, shopApiHttpPort, shopApiHttpsPort, true);
-        var shopWebAppApiFactory = new ShopWebAppFactory(true, httpPort, httpsPort, shopApiClient);
-        return shopWebAppApiFactory;
-    }    
+            dbContext.SaveChanges();
+        }
+    }
 }

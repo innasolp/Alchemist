@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Alchgemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
+namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 
 public class UploadFromFileControllerTests
 {

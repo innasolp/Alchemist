@@ -11,7 +11,7 @@ public class TestImportSettingsApiWebAppFactory : ImportsettingsWebAppFullFactor
        null,
     httpPort: 7084,
     httpsPort: 7085,
-    settingsApiConnectionDbSection: "SettingsWebApiTestDb",
+    settingsApiDbConnectionString: Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsWebApiTestDb"),
     settingsApiHttpPort: 8212,
     settingsApiHttpsPort: 8213,
     Common.SignalRTestServer)
@@ -51,7 +51,7 @@ public class ImportSettingsApiWebAppIntegrationTest : TestFixture<TestImportSett
     [Fact]
     public async Task ImportSettingsApi_SettingsTabEndpoint_ReturnsShopsSettingsContent()
     {
-        var response = await _client.PostAsync($"/Tab/1/1", null);
+        var response = await _client.PostAsync($"/ImportSettingsApi/Import/Settings/1/1", null);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();

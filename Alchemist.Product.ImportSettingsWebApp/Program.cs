@@ -12,7 +12,6 @@ using Alchemist.WebApp.Api.Common;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog.Configuration.Extensions;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +33,11 @@ builder.Services.AddSession(options =>
 });
 
 if (isApi)
+{
+    builder.Services.AddEndpointsApiExplorer();
+
     builder.Services.AddSwaggerApi();
+}
 
 if (isApi)
     builder.Services.AddBaseControllerInterceptors<ImportSettingsApiController>();
@@ -86,8 +89,8 @@ app.UseSession();
 
 if (isApi)
     app.SetApiRoute("Hello ImportSettingsWebApp API!");
-else
-    app.MapControllerRoute(
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 

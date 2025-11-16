@@ -6,7 +6,7 @@ namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
 public class ShopWebAppMvcFactory : ShopWebAppFullFactory
 {
-    public ShopWebAppMvcFactory() : base(false, "ShopMvcTestDb", 8404, 8405, 8062, 8063)
+    public ShopWebAppMvcFactory() : base(false, Common.ConfigurationHelper.GetConnectionString("ShopMvcTestDb"), 8404, 8405, 8062, 8063)
     {
     }
 }
@@ -14,28 +14,6 @@ public class ShopWebAppMvcFactory : ShopWebAppFullFactory
 public class ShopWebMvcTest(ShopWebAppMvcFactory webAppFactory, ITestOutputHelper outputHelper)
     : TestFixture<ShopWebAppMvcFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
 {
-    [Fact]
-    public async Task LoadShopTabSuccessAsync()
-    {
-        var url = "/Shop/ShopTab";
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.PostAsync(url,null);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-
-        try
-        {
-            Assert.Contains("left-menu-ul shopsList", content);
-            Assert.Contains("shop_item selected", content);
-        }
-        catch
-        {
-            OutputHelper.WriteLine(content);
-            throw;
-        }
-    }
-
     [Fact]
     public async Task IndexPageSuccessAsync()
     {
