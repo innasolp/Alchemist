@@ -17,7 +17,7 @@ public class ImportSettingsWebAppFactory(bool isApi, string? shopApiHost, int ht
 
     private readonly HttpClient _settingsApiClient = settingsApiClient;
 
-    public ImportSettingsWebAppFactory(bool isApi, int httpPort, int httpsPort,HttpClient settingsApiClient) 
+    public ImportSettingsWebAppFactory(bool isApi, int httpPort, int httpsPort, HttpClient settingsApiClient) 
         : this(isApi, null, httpPort, httpsPort, settingsApiClient)
     { }
 

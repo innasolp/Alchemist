@@ -17,7 +17,8 @@ public class ShopWebAppApiLoggedFactory : ShopWebAppFullFactory, ILoggedContext
 
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
-    public ShopWebAppApiLoggedFactory() : base(true, "ShopWebApiLogTestDb", 8406, 8407, 8064, 8065)
+    public ShopWebAppApiLoggedFactory() : base(true, Common.ConfigurationHelper.GetConnectionString("ShopWebApiLogTestDb"),
+        8406, 8407, 8064, 8065)
     {
     }
 

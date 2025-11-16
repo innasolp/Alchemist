@@ -1,5 +1,4 @@
-﻿using Alchemist.Common;
-using Alchemist.Product.Data;
+﻿using Alchemist.Product.Data;
 using Microsoft.AspNetCore.TestHost;
 
 namespace Alchemist.Test.SettingsAPIFactory;
@@ -17,9 +16,8 @@ internal class SettingsAPIWebAppFactoryTestDataImpl(string connectionString, Tes
 
 public static class SettingsApiHelper
 {
-    public static HttpClient CreateSettingsApiHttpClient(string connectionStringSection, int httpPort, int httpsPort, TestServer signalRTestServer, bool ensureDeleted = false)
+    public static HttpClient CreateSettingsApiHttpClient(string alchemyDbConnectionString, int httpPort, int httpsPort, TestServer signalRTestServer, bool ensureDeleted = false)
     {
-        var alchemyDbConnectionString = ConfigurationHelper.GetConnectionString(connectionStringSection);
         var settingsApiFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, signalRTestServer, httpPort, httpsPort, ensureDeleted);
 
         var settingsApiHttpClient = settingsApiFactory.Server.CreateClient();
@@ -28,9 +26,8 @@ public static class SettingsApiHelper
         return settingsApiHttpClient;
     }
 
-    public static HttpClient CreateSettingsApiHttpClient(string connectionStringSection, int httpPort, int httpsPort, TestServer signalRTestServer, Action<AlchemyContext> fillTestData, bool ensureDeleted = false)
+    public static HttpClient CreateSettingsApiHttpClient(string alchemyDbConnectionString, int httpPort, int httpsPort, TestServer signalRTestServer, Action<AlchemyContext> fillTestData, bool ensureDeleted = false)
     {
-        var alchemyDbConnectionString = ConfigurationHelper.GetConnectionString(connectionStringSection);
         var settingsApiFactory = new SettingsAPIWebAppFactoryTestDataImpl(alchemyDbConnectionString, signalRTestServer, httpPort, httpsPort, fillTestData, ensureDeleted);
 
         var settingsApiHttpClient = settingsApiFactory.Server.CreateClient();

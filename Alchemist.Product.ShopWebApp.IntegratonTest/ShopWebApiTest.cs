@@ -8,7 +8,7 @@ namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
 public class ShopWebAppApiFactory : ShopWebAppFullFactory
 {
-    public ShopWebAppApiFactory() : base (true, "ShopWebApiTestDb", 8402,8403,8060,8061)
+    public ShopWebAppApiFactory() : base (true, Common.ConfigurationHelper.GetConnectionString("ShopWebApiTestDb"), 8402,8403,8060,8061)
     {
     }
 }

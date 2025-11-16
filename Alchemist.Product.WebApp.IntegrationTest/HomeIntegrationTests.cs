@@ -7,10 +7,11 @@ using TestCommon = Alchemist.Product.WebApp.IntegrationTest.Infrastructure.Commo
 
 namespace Alchemist.Product.WebApp.IntegrationTest;
 
-
 public class TestProductWebAppFactory : ProductWebAppFactory
 {
-    public TestProductWebAppFactory() : base(7102, 7103, "ContainerWebAppTestDb", TestCommon.SignalRTestServer,
+    public TestProductWebAppFactory() : base(7102, 7103,
+        Common.ConfigurationHelper.GetConnectionString("ContainerWebAppTestDb"),
+        TestCommon.SignalRTestServer,
       8060, 8061, 7500, 7501,
       8406, 8407, 7088, 7089)
     { }

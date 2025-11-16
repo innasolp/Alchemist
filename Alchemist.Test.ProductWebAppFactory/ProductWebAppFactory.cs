@@ -8,19 +8,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Test.ProductWebAppFactory;
 
-public class ProductWebAppFactory(int httpPort, int httpsPort, HttpClient shopWebAppPiClient, HttpClient importSettingsWebAppApiClient) : TestWebAppKestrelFactory<ProductWebAppProgramm>(httpPort, httpsPort)
+public class ProductWebAppFactory(int httpPort, int httpsPort, HttpClient shopWebAppPiClient, HttpClient importSettingsWebAppApiClient) 
+    : TestWebAppKestrelFactory<ProductWebAppProgramm>(httpPort, httpsPort)
 {
     private readonly HttpClient _shopWebAppApiClient = shopWebAppPiClient;
 
     private readonly HttpClient _importSettingsWebAppApiClient = importSettingsWebAppApiClient;
 
-    public ProductWebAppFactory(int httpPort, int httpsPort, string connectionStringSection, TestServer signalRTestServer,
+    public ProductWebAppFactory(int httpPort, int httpsPort, string connectionString, TestServer signalRTestServer,
         int shopApiHttpPort, int shopApiHttpsPort, int shopWebAppApiHttpPort, int shopWebAppApiHttspPort,
         int settingsApiHttpPort, int settingsApiHttpsPort, int settingsWebAppApiHttpPort, int settingsWebAppApiHttspPort) :
          this(httpPort, httpsPort, 
-             ShopWebAppHelper.CreateShopWebAppApiHttpClient(connectionStringSection, shopWebAppApiHttpPort, shopWebAppApiHttspPort, shopApiHttpPort,
-           shopApiHttpsPort, signalRTestServer),
-             ImportSettingsWebAppHelper.CreateImportSettingsWebAppApiHttpClient(connectionStringSection, settingsWebAppApiHttpPort, settingsWebAppApiHttspPort,
+             ShopWebAppHelper.CreateShopWebAppApiHttpClient(connectionString,
+                 shopWebAppApiHttpPort, shopWebAppApiHttspPort, shopApiHttpPort,
+                 shopApiHttpsPort, signalRTestServer),
+             ImportSettingsWebAppHelper.CreateImportSettingsWebAppApiHttpClient(connectionString,
+                  settingsWebAppApiHttpPort, settingsWebAppApiHttspPort,
             null,
             settingsApiHttpPort,
           settingsApiHttpsPort, signalRTestServer))

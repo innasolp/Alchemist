@@ -6,7 +6,7 @@ namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
 public class ShopWebAppMvcFactory : ShopWebAppFullFactory
 {
-    public ShopWebAppMvcFactory() : base(false, "ShopMvcTestDb", 8404, 8405, 8062, 8063)
+    public ShopWebAppMvcFactory() : base(false, Common.ConfigurationHelper.GetConnectionString("ShopMvcTestDb"), 8404, 8405, 8062, 8063)
     {
     }
 }

@@ -15,7 +15,8 @@ public class ImportSettingsWebAppApiLoggedFactory : ImportsettingsWebAppFullFact
 
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
-    public ImportSettingsWebAppApiLoggedFactory() : base(true, null, 7086, 7087, "SettingsWebApiLogTestDb", 8214, 8215)
+    public ImportSettingsWebAppApiLoggedFactory() : base(true, null, 7086, 7087, Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsWebApiLogTestDb")
+        , 8214, 8215)
     {
     }
 

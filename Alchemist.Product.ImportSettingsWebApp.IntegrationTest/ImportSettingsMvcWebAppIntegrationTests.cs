@@ -16,13 +16,14 @@ public class TestImportSettingsMvcWebAppFactory : ImportsettingsWebAppFullFactor
         "https://localhost:8411",
     httpPort : 7082,
     httpsPort : 7083,
-    settingsApiConnectionDbSection: "SettingsMvcTestDb",
+    settingsApiDbConnectionString: Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsMvcTestDb"),
     settingsApiHttpPort : 8210,
     settingsApiHttpsPort : 8211,
     Common.SignalRTestServer)
     {
         _shopWebAppFactory = new ShopWebAppFullFactory(isApi: true,
-            connectionSection: "SettingsMvcTestDb", httpPort: 8410, httpsPort: 8411, shopAPIHttpPort: 8070, shopAPIHttpsPort: 8071,
+            connectionString: Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsMvcTestDb"),
+            httpPort: 8410, httpsPort: 8411, shopAPIHttpPort: 8070, shopAPIHttpsPort: 8071,
             Common.SignalRTestServer
             );
         _shopWebAppFactory.CreateClient();

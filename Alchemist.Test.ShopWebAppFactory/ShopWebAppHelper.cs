@@ -6,33 +6,33 @@ namespace Alchemist.Test.ShopWebAppFactory;
 
 public static class ShopWebAppHelper
 {
-    public static ShopWebAppFactory CreateShopWebAppApiFactory(string connectionStringSection, 
+    public static ShopWebAppFactory CreateShopWebAppApiFactory(string connectionString, 
         int httpPort, 
         int httpsPort, 
         int shopApiHttpPort, 
         int shopApiHttpsPort,
         TestServer signalRTestServer)
     {
-        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionStringSection, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, true);
+        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionString, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, true);
         var shopWebAppApiFactory = new ShopWebAppFactory(true, httpPort, httpsPort, shopApiClient);
         return shopWebAppApiFactory;
     }
 
-    public static HttpClient CreateShopWebAppApiHttpClient(string connectionStringSection, 
+    public static HttpClient CreateShopWebAppApiHttpClient(string connectionString, 
         int httpPort, 
         int httpsPort, 
         int shopApiHttpPort, 
         int shopApiHttpsPort,
         TestServer signalRTestServer)
     {
-        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionStringSection, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, true);
+        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionString, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, true);
         var shopWebAppApiFactory = new ShopWebAppFactory(true, httpPort, httpsPort, shopApiClient);
         var httpClient = shopWebAppApiFactory.CreateClient();
         httpClient.BaseAddress = new Uri(shopWebAppApiFactory.ServerAddress);
         return httpClient;
     }
 
-    public static ShopWebAppFactory CreateShopWebAppApiFactory(string connectionStringSection, 
+    public static ShopWebAppFactory CreateShopWebAppApiFactory(string connectionString, 
         int httpPort, 
         int httpsPort, 
         int shopApiHttpPort, 
@@ -40,12 +40,12 @@ public static class ShopWebAppHelper
         TestServer signalRTestServer,
         Action<AlchemyContext> fillTestData)
     {
-        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionStringSection, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, fillTestData, true);
+        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionString, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, fillTestData, true);
         var shopWebAppApiFactory = new ShopWebAppFactory(true, httpPort, httpsPort, shopApiClient);
         return shopWebAppApiFactory;
     }
 
-    public static HttpClient CreateShopWebAppApiHttpClient(string connectionStringSection, 
+    public static HttpClient CreateShopWebAppApiHttpClient(string connectionString, 
         int httpPort, 
         int httpsPort, 
         int shopApiHttpPort, 
@@ -53,7 +53,7 @@ public static class ShopWebAppHelper
         TestServer signalRTestServer,
         Action<AlchemyContext> fillTestData)
     {
-        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionStringSection, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, fillTestData, true);
+        var shopApiClient = ShopApiHelper.CreateShopApiClient(connectionString, shopApiHttpPort, shopApiHttpsPort, signalRTestServer, fillTestData, true);
         var shopWebAppApiFactory = new ShopWebAppFactory(true, httpPort, httpsPort, shopApiClient);
         var httpClient = shopWebAppApiFactory.CreateClient();
         httpClient.BaseAddress = new Uri(shopWebAppApiFactory.ServerAddress);

@@ -38,7 +38,7 @@ public class ShopApiController(IShopDataService shopDataService) : Controller
     [Route("/ShopApi/Shop/{shopId:int?}")]
     public IActionResult ShopTab(int? shopId)
     {
-        if (shopId <= 0)
+        if (shopId < 0)
             return BadRequest($"Invalid shopId : {shopId}");
         
         return PartialView("~/Views/Shared/ShopTab.cshtml", new IndexModel { ShopId = shopId});

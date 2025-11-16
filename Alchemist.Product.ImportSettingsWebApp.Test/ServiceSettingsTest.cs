@@ -14,9 +14,11 @@ namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class ServiceSettingsTestImportSettingsWebAppFactory()
     : ImportSettingsWebAppFactory(false,
-        ShopWebAppHelper.CreateShopWebAppApiFactory("ServiceSettingsTestDb", 8422, 8423, 8074, 8075, TestCommon.SignalRTestServer).ServerAddress,
+        ShopWebAppHelper.CreateShopWebAppApiFactory(Common.ConfigurationHelper.GetConnectionString("ServiceSettingsTestDb"),
+            8422, 8423, 8074, 8075, TestCommon.SignalRTestServer).ServerAddress,
         8092, 8093,
-        SettingsApiHelper.CreateSettingsApiHttpClient("ServiceSettingsTestDb", 8222, 8223, TestCommon.SignalRTestServer, (dbContext) => TestCommon.FillTestData(dbContext, [1, 2, 3, 4])))
+        SettingsApiHelper.CreateSettingsApiHttpClient(Common.ConfigurationHelper.GetConnectionString("ServiceSettingsTestDb"),
+            8222, 8223, TestCommon.SignalRTestServer, (dbContext) => TestCommon.FillTestData(dbContext, [1, 2, 3, 4])))
 {
 }
 
