@@ -5,7 +5,6 @@ using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
-using System.ComponentModel.DataAnnotations;
 
 namespace Alchemist.Product.Import.Background.Models;
 

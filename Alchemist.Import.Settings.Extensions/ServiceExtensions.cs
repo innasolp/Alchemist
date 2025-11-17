@@ -4,13 +4,6 @@ namespace Alchemist.Import.Settings.Extensions;
 
 public static class ServiceExtensions
 {   
-    public static bool IsPrimary(this IServiceSettings service)
-    {
-        var primaryServiceNames = Common.GetPrimaryServiceNames();
-        return primaryServiceNames.Any(n => service.ServiceTypeName == n 
-          || service.ServiceTypeName?.Contains(n, StringComparison.InvariantCultureIgnoreCase) == true);
-    }
-
     public static bool IsPrimaryServiceName(this string serviceName)
     {
         var primaryServiceNames = Common.GetPrimaryServiceNames();
@@ -30,29 +23,6 @@ public static class ServiceExtensions
     public static IServiceSettings? GetService(this IShopImportSettings shopImportSettings, string name)    
     {
         return shopImportSettings.GetService<IServiceSettings>(name);
-    }
-
-    public static TService? GetPrimaryService<TService>(this IShopImportSettings shopImportSettings, string name)
-        where TService : class, IServiceSettings
-    {
-        if (Common.GetPrimaryServiceNames().Contains(name))
-            return shopImportSettings.GetService<TService>(name);
-
-        throw new InvalidOperationException($"Service name {name} is not primary.");
-    }
-
-    public static IServiceSettings? GetPrimaryService(this IShopImportSettings shopImportSettings, string name)    
-    {
-        if (Common.GetPrimaryServiceNames().Contains(name))
-            return shopImportSettings.GetService(name);
-
-        throw new InvalidOperationException($"Service name {name} is not primary.");
-    }
-
-    public static IEnumerable<TService> GetPrimaryServices<TService>(this IShopImportSettings shopImportSettings)
-        where TService : class, IServiceSettings
-    {
-        return shopImportSettings.Services.OfType<TService>().Where(s => s.IsPrimary());
     }
 
     public static TService? GetImportService<TService>(this IShopImportSettings shopImportSettings)

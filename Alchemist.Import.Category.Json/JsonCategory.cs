@@ -195,9 +195,9 @@ public class JsonCategory : ICategory
                     LoadChildrenTree(parentCategory, jsonCategories, categoryElement, propertyPathes);
                 }
         }
-        catch (Exception ex)
+        catch
         {
-            throw ex;
+            throw;
         }
     }
 

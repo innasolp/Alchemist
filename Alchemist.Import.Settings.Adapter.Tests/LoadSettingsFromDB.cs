@@ -1,8 +1,6 @@
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Moq;
 using System.Text.Json;
 using Alchemist.Import.Settings.Extensions;
@@ -13,8 +11,7 @@ namespace Alchemist.Import.Settings.DataAdapter.Tests;
 
 public class LoadSettingsFromDB
 {
-    private readonly ISettingsDataAdapter _productAdapter;
-    private readonly ISettingsDataAdapter _categoryAdapter;
+    private readonly Dictionary<ShopSettingType, ISettingsDataAdapter> _adapters = [];
 
     private readonly Mock<IShopSettingsDataService> _shopSettingsDataServiceMock = new();
 
@@ -38,14 +35,17 @@ public class LoadSettingsFromDB
 
     public LoadSettingsFromDB()
     {
-        var builder = new HostApplicationBuilder();
-        builder.Services.AddSingleton(_shopSettingsDataServiceMock.Object);
-        builder.Services.AddKeyedTypedSettingsDataAdapter<TestProductShopImportSettings, TestImportServiceSettings>(ShopSettingType.Product, ShopSettingType.Product);
-        builder.Services.AddKeyedTypedSettingsDataAdapter<TestCategoryShopImportSettings, TestImportServiceSettings>(ShopSettingType.Category, ShopSettingType.Category);
-        
-        var host = builder.Build();
-        _productAdapter = host.Services.GetRequiredKeyedService<ISettingsDataAdapter>(ShopSettingType.Product);
-        _categoryAdapter = host.Services.GetRequiredKeyedService<ISettingsDataAdapter>(ShopSettingType.Category);
+        _adapters.Add(ShopSettingType.Product, new SettingsDataAdapter<TestProductShopImportSettings, TestImportServiceSettings>
+            (
+            _shopSettingsDataServiceMock.Object,
+            ShopSettingType.Product
+            ));
+
+        _adapters.Add(ShopSettingType.Category, new SettingsDataAdapter<TestCategoryShopImportSettings, TestImportServiceSettings>
+            (
+            _shopSettingsDataServiceMock.Object,
+            ShopSettingType.Category
+            ));
 
         InitializeSettings();
 
@@ -121,7 +121,7 @@ public class LoadSettingsFromDB
         var shopSettings = productShopSettings[new Random().Next(0, productShopSettings.Length)];
         var services = _shopSettings.Where(s => s.Type == ShopSettingType.Service && s.ParentSettingsId == shopSettings.Id);
 
-        var shopImportSettings = (await _productAdapter.GetShopImportSettings(shopSettings.ShopId)) as TestShopImportSettings;
+        var shopImportSettings = (await _adapters[ShopSettingType.Product].GetShopImportSettings(shopSettings.ShopId)) as TestShopImportSettings;
 
         Assert.NotNull(shopImportSettings);
         Assert.Equal(services.Count(), shopImportSettings.Services.Count);
@@ -143,7 +143,7 @@ public class LoadSettingsFromDB
         var shopSettings = categoryShopSettings[new Random().Next(0, categoryShopSettings.Length)];
         var services = _shopSettings.Where(s => s.Type == ShopSettingType.Service && s.ParentSettingsId == shopSettings.Id);
 
-        var shopImportSettings = (await _categoryAdapter.GetShopImportSettings(shopSettings.ShopId)) as TestShopImportSettings;
+        var shopImportSettings = (await _adapters[ShopSettingType.Category].GetShopImportSettings(shopSettings.ShopId)) as TestShopImportSettings;
 
         Assert.NotNull(shopImportSettings);
         Assert.NotEmpty(shopImportSettings.Services);
@@ -159,11 +159,12 @@ public class LoadSettingsFromDB
     [Fact]
     public async Task LoadSettingsByName()
     {
-        var allNotServiceSettings = _shopSettings.Where(s => s.Type != ShopSettingType.Service).ToArray();
-        var shopSettings = allNotServiceSettings[new Random().Next(0, allNotServiceSettings.Length)];
+        var allServices = _shopSettings.Where(s => s.Type == ShopSettingType.Service);
+        var allShopSettingsWithServices = _shopSettings.Where(s => s.Type != ShopSettingType.Service && allServices.Any(ss=>ss.ParentSettingsId == s.Id)).ToArray();
+        var shopSettings = allShopSettingsWithServices[new Random().Next(0, allShopSettingsWithServices.Length)];
         var services = _shopSettings.Where(s => s.Type == ShopSettingType.Service && s.ParentSettingsId == shopSettings.Id);
 
-        var shopImportSettings = (await _categoryAdapter.GetShopImportSettings(shopSettings.Name)) as TestShopImportSettings ;
+        var shopImportSettings = (await _adapters[shopSettings.Type].GetShopImportSettings(shopSettings.Name)) as TestShopImportSettings ;
 
         Assert.NotNull(shopImportSettings);
 
@@ -180,7 +181,7 @@ public class LoadSettingsFromDB
     {
         var allNotServiceSettings = _shopSettings.Where(s => s.Type != ShopSettingType.Service).ToArray();
 
-        var allSettings = await _productAdapter.GetAllShopImportSettings();
+        var allSettings = await _adapters[ShopSettingType.Product].GetAllShopImportSettings();
         Assert.Equal(allNotServiceSettings.Length, allSettings.Count);
         Assert.Equal(_shopSettings.Count - allNotServiceSettings.Length, 
             allSettings.SelectMany(s => s.Value.Services.OfType<KeyValuePair<string,TestImportServiceSettings>>()).Count());

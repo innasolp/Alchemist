@@ -6,6 +6,7 @@ using Alchemist.Import.Html.Factory;
 using Alchemist.Import.Interfaces;
 using Alchemist.Import.Service.Factory.Abstractions;
 using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.Extensions;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -27,11 +28,11 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
         IShopImportSettings shopImportSettings,
         ILoaderService browserService)
     {
-        var loadOptionsService = (shopImportSettings.Services.OfType<IServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(CategoryLoadOptions))?.Value) 
+        var loadOptionsService = (shopImportSettings.GetService(nameof(CategoryLoadOptions))?.Value) 
             ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopImportSettings.ShopName}");
         var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
         
-        var htmlSearchOptionsService = shopImportSettings.Services.OfType<IServiceSettings>().FirstOrDefault(s => s.ServiceTypeName == nameof(HtmlSearchFactoryOptions))?.Value;
+        var htmlSearchOptionsService = shopImportSettings.GetService(nameof(HtmlSearchFactoryOptions))?.Value;
         var htmlSearchFactoryOptions = htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
 
         var htmlSearcher = htmlSearchFactoryOptions != null 

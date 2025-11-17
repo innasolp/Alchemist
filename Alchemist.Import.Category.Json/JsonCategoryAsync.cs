@@ -99,9 +99,9 @@ public class JsonCategoryAsync : JsonCategory
                     Select(c => LoadChildrenTreeAsync(parentCategory, jsonCategories, c, propertyPathes, cancellationToken)));
            
         }
-        catch (Exception ex)
+        catch
         {
-            throw ex;
+            throw;
         }
     }
 }

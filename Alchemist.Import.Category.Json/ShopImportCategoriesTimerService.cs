@@ -189,9 +189,9 @@ public class ShopImportCategoriesTimerService : ImportService
             return await Task.FromResult(values);
         }
 #if DEBUG
-        catch (Exception ex)
+        catch
         {
-            throw ex;
+            throw;
         }
 #endif  
         finally
@@ -213,9 +213,9 @@ public class ShopImportCategoriesTimerService : ImportService
             return await Task.FromResult(categoriesJson);
         }
 #if DEBUG
-        catch (Exception ex)
+        catch
         {
-            throw ex;
+            throw;
         }
 #endif  
         finally
