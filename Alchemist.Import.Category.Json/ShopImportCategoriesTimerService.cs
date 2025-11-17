@@ -252,11 +252,4 @@ public class ShopImportCategoriesTimerService : ImportService
             }
         }
     }
-
-    public override ValueTask DisposeAsync()
-    {
-        _timer.Dispose();
-
-        return base.DisposeAsync();
-    }
 }

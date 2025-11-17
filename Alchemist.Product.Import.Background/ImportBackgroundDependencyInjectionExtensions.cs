@@ -44,19 +44,23 @@ public static class ImportBackgroundDependencyInjectionExtensions
 
     public static IServiceCollection AddProductItemHandler(this IServiceCollection services, object messageSenderKey, string methodName)
     {
+        services.AddSingleton<ProductItemProcessor>();
         return services.AddSingleton<IProductItemHandler>((serviceProvider) =>
         {
             var messageSender = serviceProvider.GetRequiredKeyedService<IMessageSender>(messageSenderKey);
-            return new ProductItemHandler(messageSender, methodName);
+            var productItemProcessor = serviceProvider.GetRequiredService<ProductItemProcessor>();
+            return new ProductItemHandler(messageSender, methodName, productItemProcessor);
         });
     }
 
     public static IServiceCollection AddCategoryItemHandler(this IServiceCollection services, object messageSenderKey, string methodName)
     {
+        services.AddSingleton<CategoryItemProcessor>();
         return services.AddSingleton<ICategoryItemHandler>((serviceProvider) =>
         {
             var messageSender = serviceProvider.GetRequiredKeyedService<IMessageSender>(messageSenderKey);
-            return new CategoryItemHandler(messageSender, methodName);
+            var categoryItemProcessor = serviceProvider.GetRequiredService<CategoryItemProcessor>();
+            return new CategoryItemHandler(messageSender, methodName, categoryItemProcessor);
         });
     }
 }

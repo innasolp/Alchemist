@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Alchemist.Import.Service;
 
 public abstract class ImportService(ILogger logger, ILoaderService loaderService, string host)
-    : IImportService, IAsyncDisposable
+    : IImportService
 {
     public abstract string Name { get; }
 
@@ -219,7 +219,7 @@ public abstract class ImportService(ILogger logger, ILoaderService loaderService
         else
         {
             Logger.LogInformation(LogMessages.ServiceWasCancelledOnLoadingFromUrl, Name, url);
-            throw operationCancelledException;
+            throw new OperationCanceledException(operationCancelledException.Message, operationCancelledException);
         }
     }
 
@@ -234,7 +234,7 @@ public abstract class ImportService(ILogger logger, ILoaderService loaderService
         else
         {
             Logger.LogInformation(LogMessages.ServiceWasCancelled, Name);
-            throw operationCancelledException;
+            throw new OperationCanceledException(operationCancelledException.Message, operationCancelledException);
         }
     }
 
@@ -342,16 +342,5 @@ public abstract class ImportService(ILogger logger, ILoaderService loaderService
     {
         var stream = await LoaderService.Load(url, _loadData);
         return await Task.FromResult(stream);
-    }
-
-    public virtual async ValueTask DisposeAsync()
-    {
-        if (LoaderService == null)
-            return;
-
-        if (LoaderService.IsStarted)
-            await LoaderService.Close();
-
-        await LoaderService.DisposeAsync();
     }
 }
