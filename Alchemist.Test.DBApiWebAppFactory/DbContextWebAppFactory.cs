@@ -53,9 +53,9 @@ public abstract class DbContextWebAppFactory<TEntryPoint, TDbContext> : TestWebA
 
             FillTestData(appContext);
         }
-        catch (Exception ex)
+        catch
         {
-            throw ex;
+            throw;
         }
     }
 }

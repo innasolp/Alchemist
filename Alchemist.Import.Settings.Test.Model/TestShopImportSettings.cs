@@ -27,11 +27,11 @@ public abstract class TestShopImportSettings : IShopImportSettings, IShopSetting
         set {; }
     }
 
-    public abstract ShopSettingType Type {get;}
+    public abstract ShopSettingType Type { get; }
 
     public string ShopName { get; set; }
     public string ShopUrl { get; set; }
     bool? IShopSettings.IsActual { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    ShopSettingType IShopSettings.Type { get => Type; set => throw new NotImplementedException(); }
+    ShopSettingType IShopSettings.Type { get => Type; set {; } }
 }

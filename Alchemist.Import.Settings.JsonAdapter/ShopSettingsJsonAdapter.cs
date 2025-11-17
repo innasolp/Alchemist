@@ -1,8 +1,5 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Json.FileExtensions;
-using Microsoft.Extensions.Logging;
-using System.Linq;
-
 
 namespace Alchemist.Import.Settings.JsonAdapter;
 
@@ -10,12 +7,10 @@ public class ShopSettingsJsonAdapter<TShopImportSettings> : ISettingsAdapter
     where TShopImportSettings : class, IShopImportSettings
 {
     private readonly string _jsonFilePath;
-    private readonly ILogger<ShopSettingsJsonAdapter<TShopImportSettings>> _logger;
 
-    internal ShopSettingsJsonAdapter(ILogger<ShopSettingsJsonAdapter<TShopImportSettings>> logger, string jsonFilePath)
+    public ShopSettingsJsonAdapter(string jsonFilePath)
     {
         _jsonFilePath = jsonFilePath;
-        _logger = logger;        
     }
 
     public async Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName)

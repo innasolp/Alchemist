@@ -6,16 +6,16 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
-namespace Alchemist.Import.Settings.Extensions;
+namespace Alchemist.Import.Settings.DataAdapter;
 
 public static class EntityExtensions
 {
-    public static JsonSerializerOptions GetDefaultServiceSerializationOptions<T>()
+    internal static JsonSerializerOptions GetDefaultServiceSerializationOptions<T>()
     {
         return new JsonSerializerOptions()
         {
             TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(
-            Alchemist.Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
+            Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
                     nameof(IShopSettings.Id),
                     nameof(IShopSettings.ParentSettingsId),
                     nameof(IShopSettings.ShopId),
@@ -24,13 +24,13 @@ public static class EntityExtensions
         };
     }
 
-    public static JsonSerializerOptions GetDefaultImportSettingsSerializationOptions<T>()
+    internal static JsonSerializerOptions GetDefaultImportSettingsSerializationOptions<T>()
         where T : IShopImportSettings
     {
         return new JsonSerializerOptions()
         {
             TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(
-                Alchemist.Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
+                Common.JsonExtensions.IgnorePropertiesForSerialize(typeof(T),
                     nameof(IShopImportSettings.Services),
                     nameof(IShopSettings.Id),
                     nameof(IShopSettings.ParentSettingsId),
@@ -39,7 +39,7 @@ public static class EntityExtensions
         };
     }
 
-    public static T ToShopImportSettings<T>(this IShopSettings shopSettings, params JsonConverter[] jsonConverters)
+    internal static T ToShopImportSettings<T>(this IShopSettings shopSettings, params JsonConverter[] jsonConverters)
         where T : IShopImportSettings
     {
         var options = GetDefaultImportSettingsSerializationOptions<T>();
@@ -62,7 +62,7 @@ public static class EntityExtensions
         return model;
     }
 
-    public static IShopSettings ToEntity<T>(this T shopSettings, JsonSerializerOptions? options = null)
+    internal static IShopSettings ToEntity<T>(this T shopSettings, JsonSerializerOptions? options = null)
         where T : class, IShopSettings
     {
         options ??= GetDefaultServiceSerializationOptions<T>();

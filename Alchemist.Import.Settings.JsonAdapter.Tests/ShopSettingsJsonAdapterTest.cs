@@ -1,8 +1,6 @@
 ﻿using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Test.Model;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Import.Settings.JsonAdapter.Tests;
@@ -14,13 +12,8 @@ public class ShopSettingsJsonAdapterTest
 
     public ShopSettingsJsonAdapterTest()
     {
-        var builder = new HostApplicationBuilder();
-        builder.Services.AddKeyedSettingsJsonAdapter<TestProductShopImportSettings>("shopProducts.json", "shopProducts");
-        builder.Services.AddKeyedSettingsJsonAdapter<TestCategoryShopImportSettings>("shopCategories.json", "shopCategories");
-        var host = builder.Build();
-
-        _productShopSettingsJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>("shopProducts");
-        _categoryShopSettingsJsonAdapter = host.Services.GetRequiredKeyedService<ISettingsAdapter>("shopCategories");
+        _productShopSettingsJsonAdapter = new ShopSettingsJsonAdapter<TestProductShopImportSettings>("shopProducts.json");
+        _categoryShopSettingsJsonAdapter = new ShopSettingsJsonAdapter<TestCategoryShopImportSettings>("shopCategories.json");
     }
 
     [Fact]
@@ -35,13 +28,15 @@ public class ShopSettingsJsonAdapterTest
         var ozonProducts = shopSettings.Where(s=>s.Value.Type == ShopSettingType.Product && s.Value.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(ozonProducts.Value);
         ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings<TestImportServiceSettings>(ozonProducts.Value);
-        Assert.Empty(ozonProducts.Value.Services.Values.OfType<TestImportServiceSettings>().Where(s => !s.Name.IsPrimaryServiceName()));
+        Assert.Empty(ozonProducts.Value.Services.Values.OfType<TestImportServiceSettings>()
+            .Where(s => !s.Name.IsPrimaryServiceName() && s.ServiceTypeName?.IsPrimaryServiceName() != true));
 
         var goldAppleProducts = shopSettings.Where(s => s.Value.Type == ShopSettingType.Product 
             && s.Value.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleProducts.Value); 
         ShopSettingsAsserts.AssertHttpRequestLoaderShopSettings<TestImportServiceSettings>(goldAppleProducts.Value);
-        Assert.Empty(goldAppleProducts.Value.Services.Values.OfType<TestImportServiceSettings>().Where(s => !s.Name.IsPrimaryServiceName()));
+        Assert.Empty(goldAppleProducts.Value.Services.Values.OfType<TestImportServiceSettings>().
+            Where(s => !s.Name.IsPrimaryServiceName() && s.ServiceTypeName?.IsPrimaryServiceName() != true));
     }
 
     [Fact]
@@ -50,20 +45,22 @@ public class ShopSettingsJsonAdapterTest
         var allShopImportSettings = await _categoryShopSettingsJsonAdapter.GetAllShopImportSettings();
         var shopSettings = allShopImportSettings.ToDictionary(s=>s.Key, s=>s.Value as TestShopImportSettings);
         Assert.NotNull(shopSettings);
-        Assert.Equal(2, shopSettings.Count());
+        Assert.Equal(2, shopSettings.Count);
         Assert.Equal(0, shopSettings.Count(s => s.Value.Type == ShopSettingType.Product));
         Assert.Equal(2, shopSettings.Count(s => s.Value.Type == ShopSettingType.Category));
 
         var ozonCategories = shopSettings.Where(s => s.Value.Type == ShopSettingType.Category && s.Value.ShopUrl.Contains("ozon", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(ozonCategories.Value);
         ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings<TestImportServiceSettings>(ozonCategories.Value);
-        Assert.Equal(3, ozonCategories.Value.Services.Values.OfType < TestImportServiceSettings > ().Where(s => !s.Name.IsPrimaryServiceName()).Count());
+        Assert.Equal(3, ozonCategories.Value.Services.Values.OfType < TestImportServiceSettings > ().
+            Where(s => !s.Name.IsPrimaryServiceName() && s.ServiceTypeName?.IsPrimaryServiceName() != true).Count());
 
         var goldAppleCategories = shopSettings.Where(s => s.Value.Type == ShopSettingType.Category &&
             s.Value.ShopUrl.Contains("goldapple", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
         Assert.NotNull(goldAppleCategories.Value);
         ShopSettingsAsserts.AssertBrowserWebLoaderShopSettings<TestImportServiceSettings>(goldAppleCategories.Value);
-        Assert.Equal(3, goldAppleCategories.Value.Services.Values.OfType<TestImportServiceSettings>().Where(s => !s.Name.IsPrimaryServiceName()).Count());
+        Assert.Equal(3, goldAppleCategories.Value.Services.Values.OfType<TestImportServiceSettings>()
+            .Where(s => !s.Name.IsPrimaryServiceName() && s.ServiceTypeName?.IsPrimaryServiceName() != true).Count());
     }
 
     [Fact]

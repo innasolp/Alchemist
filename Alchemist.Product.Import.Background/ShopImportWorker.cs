@@ -11,10 +11,10 @@ using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.Interfaces;
 using Alchemist.Import.Settings.Extensions;
-using Alchemist.Product.Import.Background.Settings;
 using Alchemist.Product.Import.Background.Models;
 using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Messages.Common;
+using Alchemist.Import.Settings.DataAdapter;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -25,11 +25,11 @@ public class ShopImportWorker : BackgroundService
     private readonly IMessageReceiver _eventMessageReceiver;
     private readonly IMessageSender _eventMessageSender;
     private readonly IShopDataService _shopDataService;
-    private readonly IEnumerable<ISettingsAdapter> _settingsAdapters;
+    private readonly IEnumerable<ISettingsAdapter> _initSettingsAdapters;
+    private readonly IDictionary<ShopSettingType, ISettingsDataAdapter> _processedSettingsAdapters;
     private readonly IEnumerable<IMessageSender> _itemMessageSenders;
     private readonly IProductItemHandler _productDataHandler;
     private readonly ICategoryItemHandler? _categoryDataHandler;
-    private readonly IShopSettingsDataService _settingsDataService;
 
     private record ServiceWithToken(IImportService Service, CancellationTokenSource InnerTokenSource);   
 
@@ -38,17 +38,14 @@ public class ShopImportWorker : BackgroundService
     private readonly Dictionary<Guid, ServiceWithToken> _servicesWithTokens = [];
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
-        [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)]
-        IMessageReceiver eventMessageReceiver,
-        [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)]
-        IMessageSender eventMessageSender,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)] IMessageReceiver eventMessageReceiver,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)] IMessageSender eventMessageSender,
         IShopDataService shopDataService,
-        IEnumerable<ISettingsAdapter> settingsAdapters,
+        [FromKeyedServices(ShopImportWorkerKeys.InitImportSettings)]  IEnumerable<ISettingsAdapter> initSettingsAdapters,
+        [FromKeyedServices(ShopImportWorkerKeys.ProcessedImportSettings)] IDictionary<ShopSettingType, ISettingsDataAdapter> processedSettingsAdapters,
         IEnumerable<IShopImportServiceFactory> shopImportFactories,
-        [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)]
-        IEnumerable<IMessageSender> itemMessageSenders,
-        IProductItemHandler productDataHandler,
-        IShopSettingsDataService settingsDataService)
+        [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)] IEnumerable<IMessageSender> itemMessageSenders,
+        IProductItemHandler productDataHandler)
     {
         _logger = logger;
         _eventMessageReceiver = eventMessageReceiver;
@@ -56,7 +53,8 @@ public class ShopImportWorker : BackgroundService
         _shopDataService = shopDataService;
         _itemMessageSenders = itemMessageSenders;
         _productDataHandler = productDataHandler;
-        _settingsAdapters = settingsAdapters;
+        _initSettingsAdapters = initSettingsAdapters;
+        _processedSettingsAdapters = processedSettingsAdapters;
 
         _shopServiceFactories = shopImportFactories;
 
@@ -67,8 +65,6 @@ public class ShopImportWorker : BackgroundService
         _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);       
 
         _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, OnStopServiceAsync);
-
-        _settingsDataService = settingsDataService;
     }
 
     private async Task OnStopServiceAsync(Guid guid)
@@ -104,19 +100,16 @@ public class ShopImportWorker : BackgroundService
     }
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
-        [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)]
-        IMessageReceiver eventMessageReceiver,
-        [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)]
-        IMessageSender eventMessageSender,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)] IMessageReceiver eventMessageReceiver,
+        [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)] IMessageSender eventMessageSender,
         IShopDataService shopDataService,
-        IEnumerable<ISettingsAdapter> settingsAdapters,
+        [FromKeyedServices(ShopImportWorkerKeys.InitImportSettings)] IEnumerable<ISettingsAdapter> initSettingsAdapters,
         IEnumerable<IShopImportServiceFactory> shopImportFactories,
-        [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)]
-        IEnumerable<IMessageSender> itemMessageSenders,
+        [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)] IEnumerable<IMessageSender> itemMessageSenders,
+        [FromKeyedServices(ShopImportWorkerKeys.ProcessedImportSettings)] IDictionary<ShopSettingType, ISettingsDataAdapter> processedSettingsAdapters,
         IProductItemHandler productDataHandler,
-        ICategoryItemHandler categoryDataHandler,
-        IShopSettingsDataService settingsDataService)
-        : this(logger, eventMessageReceiver, eventMessageSender, shopDataService, settingsAdapters, shopImportFactories, itemMessageSenders, productDataHandler, settingsDataService)
+        ICategoryItemHandler categoryDataHandler)
+        : this(logger, eventMessageReceiver, eventMessageSender, shopDataService, initSettingsAdapters, processedSettingsAdapters, shopImportFactories, itemMessageSenders, productDataHandler)
     {
         _categoryDataHandler = categoryDataHandler;
         _categoryDataHandler.ItemProcessed += CategoryHandledAsync;
@@ -171,8 +164,10 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            var serviceSettings = await _settingsDataService.GetChildSettings(newShopSettings.Id);
-            var shopImportSettings = newShopSettings.GetShopImportSettings(serviceSettings);
+            if (!_processedSettingsAdapters.TryGetValue(newShopSettings.Type, out var adapter))
+                return;
+
+            var shopImportSettings = await adapter.GetShopImportSettings(newShopSettings.Id);
 
             var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
             if (!ShopModels.Any(s => s.ShopName == shopModel.ShopName))
@@ -262,7 +257,7 @@ public class ShopImportWorker : BackgroundService
     private async Task<Dictionary<string, IShopImportSettings>> GetAllShopImportSettingsAsync()
     {
         var allShopImportSettings = new Dictionary<string, IShopImportSettings>();
-        foreach (var adapter in _settingsAdapters)
+        foreach (var adapter in _initSettingsAdapters)
         {
             var shopImportSettings = await adapter.GetAllShopImportSettings();
             var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Key == s.Key));

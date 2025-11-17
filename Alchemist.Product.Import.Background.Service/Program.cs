@@ -78,10 +78,12 @@ static void AddMessages(WebApplicationBuilder builder)
 
 static void AddSettingsAdapters(WebApplicationBuilder builder)
 {
-    builder.Services.AddSettingsDataAdapter<ProductShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Product);
-    builder.Services.AddSettingsDataAdapter<CategoryShopImportSettings, ImportServiceSettings>(Alchemist.Product.Interfaces.ShopSettingType.Category);
-    builder.Services.AddSettingsJsonAdapter<ProductShopImportSettings>("shopProducts.json");
-    builder.Services.AddSettingsJsonAdapter<CategoryShopImportSettings>("shopCategories.json");
+    builder.Services.AddSettingsDataAdapterToCollection<ProductShopImportSettings, ImportServiceSettings>(ShopSettingType.Product, 
+        ShopImportWorkerKeys.ProcessedImportSettings);
+    builder.Services.AddSettingsDataAdapterToCollection<CategoryShopImportSettings, ImportServiceSettings>(ShopSettingType.Category,
+        ShopImportWorkerKeys.ProcessedImportSettings);
+    builder.Services.AddKeyedSettingsJsonAdapter<ProductShopImportSettings>("shopProducts.json", ShopImportWorkerKeys.InitImportSettings);
+    builder.Services.AddKeyedSettingsJsonAdapter<CategoryShopImportSettings>("shopCategories.json", ShopImportWorkerKeys.InitImportSettings);
 }
 
 static void AddLoaderService(WebApplicationBuilder builder)

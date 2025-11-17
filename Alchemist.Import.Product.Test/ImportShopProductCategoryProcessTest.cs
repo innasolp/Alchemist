@@ -228,7 +228,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         await Task.Delay((categoryProducts.CategoryProductItems.Length + 1)*200);
         
         await token.CancelAsync();
-
+        
         LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == categoryUrl), It.IsAny<object>()));
 
         foreach (var item in categoryProducts.CategoryProductItems)

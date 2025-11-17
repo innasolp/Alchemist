@@ -219,7 +219,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             Debug.WriteLine(ex.Message);
             Debug.WriteLine(ex.StackTrace);
-            throw ex;
+            throw;
         }
 #endif  
         finally
@@ -230,10 +230,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected async Task<TProductItem?> GetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)
     {
-        var productItem = await GetFromApiUrlAsync<TProductItem>(apiUrl, token);
-
-        if (productItem == null)
-            throw new Exception(string.Format(ImportProductLogMessages.ProductFromUrlIsNullError, apiUrl));
+        var productItem = await GetFromApiUrlAsync<TProductItem>(apiUrl, token)
+            ?? throw new Exception(string.Format(ImportProductLogMessages.ProductFromUrlIsNullError, apiUrl));
 
         productItem.Url = categoryProductItem.ItemUrl;
         productItem.Price = categoryProductItem.Price;

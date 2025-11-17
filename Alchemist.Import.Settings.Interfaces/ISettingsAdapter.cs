@@ -4,5 +4,5 @@ public interface ISettingsAdapter
 {
     Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName);
 
-    Task<Dictionary<string,IShopImportSettings>> GetAllShopImportSettings();
+    Task<Dictionary<string, IShopImportSettings>> GetAllShopImportSettings();
 }
