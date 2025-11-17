@@ -1,11 +1,12 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.DataItem.Interfaces;
+using Alchemist.Product.Import.Background.Models;
 using Message.Interfaces;
 
 namespace Alchemist.Product.Import.Background.ImportItems;
 
-internal class CategoryItemHandler(IMessageSender messageSender, string methodName)
-    : ItemHandler<IImportCategory, ICategoryData>(messageSender, methodName), ICategoryItemHandler
+internal class CategoryItemHandler(IMessageSender messageSender, string methodName, CategoryItemProcessor categoryItemProcessor)
+    : ItemHandler<IImportCategory, ICategoryData, ImportCategory>(messageSender, methodName, categoryItemProcessor), ICategoryItemHandler
 {
     protected override ICategoryData ConvertToImportEntity(IImportCategory item)
     {

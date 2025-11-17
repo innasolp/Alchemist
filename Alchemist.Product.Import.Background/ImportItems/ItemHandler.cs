@@ -4,13 +4,16 @@ using Message.Interfaces;
 
 namespace Alchemist.Product.Import.Background.ImportItems;
 
-internal abstract class ItemHandler<T, TEntity>(IMessageSender messageSender, string methodName) : IItemHandler<T, ResultStatus>    
+internal abstract class ItemHandler<T, TItem, TMessageItem>(IMessageSender messageSender, string methodName, ItemProcessor<T, TMessageItem> itemProcessor) : IItemHandler<T, ResultStatus> 
 {
     private readonly IMessageSender _messageSender = messageSender;
 
     private readonly string _methodName = methodName;
 
     public event AsyncItemHandler<T, ResultStatus> ItemProcessed;
+
+    private readonly ItemProcessor<T, TMessageItem> _itemProcessor = itemProcessor;
+
     public async Task<ResultStatus> HandleItem(T item)
     {
         try
@@ -31,13 +34,15 @@ internal abstract class ItemHandler<T, TEntity>(IMessageSender messageSender, st
         }
     }
 
-    protected abstract TEntity ConvertToImportEntity(T item);
+    protected abstract TItem ConvertToImportEntity(T item);
 
     protected abstract string GetUrl(T item);
 
-    private Task InvokeItemProcessedAsync(T item, ResultStatus itemProcessStatus)
+    private async Task InvokeItemProcessedAsync(T item, ResultStatus itemProcessStatus)
     {
-        return ItemProcessed?.Invoke(this, item, itemProcessStatus) ?? Task.FromResult(false);
+        await _itemProcessor.ProcessItemAsync(item, itemProcessStatus);
+        
+        await ItemProcessed?.Invoke(this, item, itemProcessStatus);
     }
 
 }
