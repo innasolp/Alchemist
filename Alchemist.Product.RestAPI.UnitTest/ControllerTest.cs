@@ -33,8 +33,8 @@ public abstract class ControllerTest<TController, TEntity>
         Controller.Url = _urlHelper.Object;
         _urlHelper.Setup(url => url.Action(It.IsAny<UrlActionContext>())).Returns(getUrlAction);        
 
-        _messageSender.Setup(m => m.Start()).Returns(StartSender);
-        _messageSender.Setup(m => m.Send(It.IsAny<TEntity>(), It.IsAny<string>())).Returns(Send<TEntity>);        
+        _messageSender.Setup(m => m.Start(It.IsAny<CancellationToken>())).Returns(StartSender);
+        _messageSender.Setup(m => m.Send(It.IsAny<TEntity>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Send<TEntity>);        
     }
 
     private string getUrlAction(UrlActionContext context)

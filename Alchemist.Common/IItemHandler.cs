@@ -1,10 +1,16 @@
 ﻿namespace Alchemist.Common;
 
-public interface IItemHandler<TItem, TStatus>
+public class ItemProcessEventArgs<TItem, TStatus>(TItem item, TStatus processStatus, CancellationToken cancellationToken) : AsyncEventArgs(cancellationToken)
 {
-    Task<TStatus> HandleItem(TItem item);
+    public TStatus ProcessStatus { get; } = processStatus;
 
-    event AsyncItemHandler<TItem, TStatus> ItemProcessed;
+    public TItem Item { get; } = item;
 }
 
-public delegate Task AsyncItemHandler<TItem, TStatus>(object sender, TItem item, TStatus itemProcessStatus);
+
+public interface IItemHandler<TItem, TStatus>
+{
+    Task<TStatus> HandleItem(TItem item, CancellationToken cancellationToken = default);
+
+    event AsyncEventHandler<ItemProcessEventArgs<TItem, TStatus>> ItemProcessed;
+}

@@ -56,7 +56,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected override async Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceStoppingToken)
+    protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
         while (!Categories.IsEmpty && !stoppingToken.IsCancellationRequested)
         {
@@ -157,10 +157,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return TaskResult<CategoryResult>.FromStatus(categoryResult.Status);
     }
 
-    protected async Task<ResultStatus> ProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken token)
+    protected async Task<ResultStatus> ProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
         var url = GetApiUrl(categoryProductItem);
-        var productItem = await ProcessUrlTaskAsync(url => GetProductItemFromCategoryItemAsync(categoryProductItem, url, token), url);
+        var productItem = await ProcessUrlTaskAsync(url => GetProductItemFromCategoryItemAsync(categoryProductItem, url, cancellationToken), url);
 
         if (productItem.Status == ResultStatus.Error)
         {
@@ -170,7 +170,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         else if (productItem.Status == ResultStatus.Success)
         {
             Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, [productItem.Value.Name, productItem.Value.ApiUrl]);
-            await HandleProductItemAsync(productItem.Value);
+            await HandleProductItemAsync(productItem.Value, cancellationToken);
         }
         else if (productItem.Status == ResultStatus.Warning)
         {
@@ -195,9 +195,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return categoryResult;
     }
 
-    protected async Task<ResultStatus> HandleProductItemAsync(TProductItem productItem)
+    protected async Task<ResultStatus> HandleProductItemAsync(TProductItem productItem, CancellationToken cancellationToken)
     {
-        var result = await ProcessUrlTaskAsync((i) => _itemHandler.HandleItem(new ImportProduct(i, ProductShopModel)), i => i.ApiUrl, productItem);
+        var result = await ProcessUrlTaskAsync((i) => _itemHandler.HandleItem(new ImportProduct(i, ProductShopModel), cancellationToken),
+            i => i.ApiUrl, productItem);
 
         Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, [productItem.Name, productItem.ApiUrl, result.Value]);
 
@@ -210,7 +211,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
        
         try
         {
-            using var stream = await LoadFromUrlAsync(apiUrl);
+            using var stream = await LoadFromUrlAsync(apiUrl, token);
             var item = await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: token);
             return await Task.FromResult(item);
         }

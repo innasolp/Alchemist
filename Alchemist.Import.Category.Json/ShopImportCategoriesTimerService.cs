@@ -72,7 +72,7 @@ public class ShopImportCategoriesTimerService : ImportService
             return await LoadJsonFromUrlAsync(url, cancellationToken);
     }
 
-    protected override async Task ProcessAsync(CancellationToken stoppingToken, CancellationTokenSource serviceStopiingToken)
+    protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
         if (_isStarted == null)
         {
@@ -183,7 +183,7 @@ public class ShopImportCategoriesTimerService : ImportService
         await _htmlLoaderSemaphoreSlim.WaitAsync(token);
         try
         {
-            using var stream = await LoadFromUrlAsync(url);
+            using var stream = await LoadFromUrlAsync(url, token);
             var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
             stream.Close();
             return await Task.FromResult(values);
@@ -208,7 +208,7 @@ public class ShopImportCategoriesTimerService : ImportService
 
         try
         { 
-            using var stream = await LoadFromUrlAsync(url);
+            using var stream = await LoadFromUrlAsync(url, stoppingToken);
             var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
             return await Task.FromResult(categoriesJson);
         }
@@ -224,32 +224,39 @@ public class ShopImportCategoriesTimerService : ImportService
         }       
     }
 
-    private readonly object _categoryCollectionChangedLock = new();
-    private void CategoryCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private readonly CancellationToken _currentCancellationToken = default;
+    
+    private readonly SemaphoreSlim _categoryCollectionChangedSemaphore = new (1,1);
+
+    private async void CategoryCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add)return;
+
+        await _categoryCollectionChangedSemaphore.WaitAsync();
+
+        try
         {
-            lock(_categoryCollectionChangedLock)
+            var newItems = e.NewItems?.OfType<JsonCategory>();
+            if (newItems == null) return;
+
+            foreach (var category in newItems)
             {
-                var newItems = e.NewItems?.OfType<JsonCategory>();
-                if (newItems == null) return;
+                Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasLoaded,
+                    category.Name, category.Id, ShopModel.ShopName);
 
-                var joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
+                await _itemHandler.HandleItem(new ImportCategory(category, ShopModel), _currentCancellationToken);
 
-                foreach (var category in newItems)
-                {
-                    Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasLoaded,
-                        category.Name, category.Id, ShopModel.ShopName);
-
-                    joinableTaskFactory.Run(async () =>
-                    {
-                        await _itemHandler.HandleItem(new ImportCategory(category, ShopModel));
-                    });
-
-                    Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
-                        category.Name, category.Id, ShopModel.ShopName);
-                }
+                Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
+                    category.Name, category.Id, ShopModel.ShopName);
             }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Item handling error.");
+        }
+        finally
+        {
+            _categoryCollectionChangedSemaphore.Release();
         }
     }
 }

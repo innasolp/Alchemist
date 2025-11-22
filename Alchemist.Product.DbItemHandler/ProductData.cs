@@ -2,7 +2,7 @@
 using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.ImportItem.Handler;
+namespace Alchemist.Product.DbItemHandler;
 
 internal class ProductData : IProductData
 {

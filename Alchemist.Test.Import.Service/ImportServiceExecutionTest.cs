@@ -86,6 +86,6 @@ public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputH
             );
 
         var token = new CancellationTokenSource();
-        var exception = await Assert.ThrowsAsync<ImportCanceledException>(async ()=> await Service.Start(token.Token));            
+        var exception = await Assert.ThrowsAsync<Exception>(async ()=> await Service.Start(token.Token));            
     }
 }

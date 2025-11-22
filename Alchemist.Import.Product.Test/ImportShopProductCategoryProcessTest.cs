@@ -61,7 +61,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
         LoaderMock.SetupLoadItemsThrowsExceptions(productItems.Keys, getItemException, requestData);
 
-        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>())).Returns(Task.FromResult(ResultStatus.Success));
+        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(ResultStatus.Success));
 
         testCategory = categoryProducts;
         url = categoryUrl;
@@ -90,7 +90,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(Service.GetTestApiUrl, TestHelper.CreateProductItem);
         LoaderMock.SetupLoadItemsSuccessfull(productItems, requestData);
 
-        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>())).Returns(Task.FromResult(ResultStatus.Success));
+        ProductItemHandlerMock.Setup(s => s.HandleItem(It.IsAny<IImportProduct>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(ResultStatus.Success));
 
         testCategory = categoryProducts;
         url = categoryUrl;

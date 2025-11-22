@@ -15,8 +15,8 @@ public class ShopAPISignlRMockWebAppFactory : ShopAPIWebAppFactory
             services.Remove(signalRDescriptor);
 
         var messageSenderMock = new Mock<IMessageSender>();
-        messageSenderMock.Setup(s => s.Start()).Returns(Task.CompletedTask);
-        messageSenderMock.Setup(s => s.Send(It.IsAny<It.IsAnyType>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+        messageSenderMock.Setup(s => s.Start(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        messageSenderMock.Setup(s => s.Send(It.IsAny<It.IsAnyType>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         services.AddSingleton(messageSenderMock.Object);
     }
 

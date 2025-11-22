@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alchemist.Product.Entities", "Alchemist.Product.Entities\Alchemist.Product.Entities.csproj", "{B811DC49-6D2C-4DE6-BD52-6A30AA1E8FC3}"
 EndProject
@@ -243,7 +243,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WorkerServices", "WorkerSer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.DataItem.Interfaces", "Alchemist.Product.Import.ItemHandler.Interfaces\Alchemist.Product.DataItem.Interfaces.csproj", "{599AB701-E45B-FD5F-53EC-58F59CAC7229}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.ImportItem.Handler", "Alchemist.Product.Import.ItemHandler\Alchemist.Product.ImportItem.Handler.csproj", "{CC4D1630-EE50-A506-6288-F4FC0C95144A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.DbItemHandler", "Alchemist.Product.DbItemHandler\Alchemist.Product.DbItemHandler.csproj", "{CC4D1630-EE50-A506-6288-F4FC0C95144A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Factory.Products", "Alchemist.Import.Products.Factory\Alchemist.Import.Factory.Products.csproj", "{FD69EC7D-07C2-41F5-9757-77920AF0340B}"
 EndProject
@@ -372,6 +372,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.ProductWebAppFactory", "Alchemist.Test.ProductWebAppFactory\Alchemist.Test.ProductWebAppFactory.csproj", "{2E60E83F-454D-4155-B6F3-E2E42FD040B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.WebApp.Test", "Alchemist.Product.WebApp.Test\Alchemist.Product.WebApp.Test.csproj", "{A69CFC97-5325-4E6E-AA66-BF1C7407BBA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.ImportItemHandler", "Alchemist.Product.ImportItemHandler\Alchemist.Product.ImportItemHandler.csproj", "{064178A9-4C52-46A2-B7E4-8A4F5C746220}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -600,6 +602,7 @@ Global
 		{C7D2AA8C-C93C-41AA-B528-F106105FA0BB}.import_settings|Any CPU.ActiveCfg = Debug|Any CPU
 		{C7D2AA8C-C93C-41AA-B528-F106105FA0BB}.import_settings|Any CPU.Build.0 = Debug|Any CPU
 		{C7D2AA8C-C93C-41AA-B528-F106105FA0BB}.import_shops|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7D2AA8C-C93C-41AA-B528-F106105FA0BB}.import_shops|Any CPU.Build.0 = Debug|Any CPU
 		{C7D2AA8C-C93C-41AA-B528-F106105FA0BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7D2AA8C-C93C-41AA-B528-F106105FA0BB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2430C844-ED5D-464A-A241-3F6750A43BFC}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
@@ -1668,6 +1671,17 @@ Global
 		{A69CFC97-5325-4E6E-AA66-BF1C7407BBA6}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
 		{A69CFC97-5325-4E6E-AA66-BF1C7407BBA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A69CFC97-5325-4E6E-AA66-BF1C7407BBA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1792,7 +1806,6 @@ Global
 		{5677389B-14BF-446C-A35F-EF751C9AF4AA} = {4E0CD101-2CB2-49B9-A8B8-1A7D4E86467C}
 		{7F1F3056-28D7-4081-90CE-6B388143F471} = {4E0CD101-2CB2-49B9-A8B8-1A7D4E86467C}
 		{49D04C39-8584-41BD-ABAF-863F98B184D2} = {12086BE5-637C-47BB-9A33-2F2D48CC99DB}
-		{9068C743-747E-49D6-BA86-8196E555B744} = {00000000-0000-0000-0000-000000000000}
 		{00D15449-1568-2732-0C04-8B8D960C5D53} = {8DD0CA95-E6CF-4919-8F23-00B6929081FC}
 		{12086BE5-637C-47BB-9A33-2F2D48CC99DB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2256F407-785E-E942-AB70-FD310E0E8165} = {29F409A8-DE7C-43BE-916A-920352B78953}
@@ -1828,11 +1841,7 @@ Global
 		{2291C37D-43D9-455F-8DF5-6D41F4351AFC} = {0F848C53-6BE9-4BC4-9258-F8BAF5DB6952}
 		{E3E58607-DEA2-4EEC-B214-F76F4DF0D6FC} = {0F848C53-6BE9-4BC4-9258-F8BAF5DB6952}
 		{37810167-97DF-4489-BE25-4D2507874583} = {B9529332-D6A9-4131-959C-404F384C7680}
-		{B357F3CD-291A-4F58-A2C8-D433BB851955} = {00000000-0000-0000-0000-000000000000}
-		{AFA385B1-589E-480A-B4FB-BD7AECFD32C6} = {00000000-0000-0000-0000-000000000000}
-		{9A473ED2-3F55-4FDE-BAA7-209A0E68C4DB} = {00000000-0000-0000-0000-000000000000}
-		{2E60E83F-454D-4155-B6F3-E2E42FD040B6} = {00000000-0000-0000-0000-000000000000}
-		{A69CFC97-5325-4E6E-AA66-BF1C7407BBA6} = {00000000-0000-0000-0000-000000000000}
+		{064178A9-4C52-46A2-B7E4-8A4F5C746220} = {2B9E318A-ACF8-4407-8738-E4E5424F52A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

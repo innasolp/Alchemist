@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.Background.Models;
+namespace Alchemist.Product.ImportItemHandler;
 
 internal class ImportCategory : IImportCategoryItem
 {

@@ -1,7 +1,7 @@
 ﻿using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.Import.Background.ImportItems;
+namespace Alchemist.Product.ImportItemHandler;
 
 internal class CategoryData : ICategoryData
 {

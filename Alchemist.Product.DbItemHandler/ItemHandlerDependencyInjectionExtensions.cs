@@ -1,7 +1,7 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.Product.ImportItem.Handler;
+namespace Alchemist.Product.DbItemHandler;
 
 public static class ItemHandlerDependencyInjectionExtensions
 {

@@ -2,7 +2,6 @@ using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Product.Import.DBService;
-using Alchemist.Product.ImportItem.Handler;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Log.Extensions;
 using Grpc.Client.RequestInterceptor;
@@ -12,6 +11,7 @@ using Http.RequestHandling.PerfomanceCounter;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using Message.RabbitMQ.DependencyInjection;
+using Alchemist.Product.DbItemHandler;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";

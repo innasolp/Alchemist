@@ -6,7 +6,6 @@ using Alchemist.Import.Factory.BrowserService;
 using Alchemist.Import.Factory.Logging;
 using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
-using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.Import.Background;
@@ -17,11 +16,11 @@ using Alchemist.Settings.RestAPIClient;
 using DependencyInjection.AssemblyExtensions;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
-using Message.Interfaces;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
+using Alchemist.Product.ImportItemHandler;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
@@ -68,12 +67,9 @@ app.MapGet("/", () => "Hello ImportBackgroundService!");
 await app.RunAsync();
 
 static void AddMessages(WebApplicationBuilder builder)
-{
-    builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalRImportUrl", "monitorItemSender");
-    builder.Services.AddShopImportMessageSender(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageSenderKey);
+{    
+    builder.Services.AddSignalRMessageSender(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageSenderKey);
     builder.Services.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageReceiverKey);
-    
-    builder.Services.CollectServicesToEnumerable<IMessageSender>(["monitorItemSender"], ShopImportWorkerKeys.ShopsMessageSenderKey);
 }
 
 static void AddSettingsAdapters(WebApplicationBuilder builder)
@@ -128,6 +124,10 @@ static void AddShopImportItemHandlers(IServiceCollection services, IConfiguratio
     var rabbitMQOptions = configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
     rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
     services.AddRabbitMQMessageSender("importqueue", rabbitMQOptions);
+    
+    services.AddImportProductMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
+    services.AddImportCategoryMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
+
     services.AddProductItemHandler("importqueue", configuration.GetSection("RabbitMQProductEvent").Get<string>());
     services.AddCategoryItemHandler("importqueue", configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 }

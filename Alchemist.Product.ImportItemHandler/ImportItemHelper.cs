@@ -3,11 +3,12 @@ using Alchemist.Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Entities;
+using Alchemist.Product.Import.Background.ImportItems;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.Import.Background.ImportItems;
+namespace Alchemist.Product.ImportItemHandler;
 
-public static class ImportItemHelper
+internal static class ImportItemHelper
 {
     public static ImportItem.Interfaces.IProductData ConvertToImportProductItem(this IProductItem productItem, IShopItem shopItem)
     {
