@@ -32,7 +32,9 @@
     "__Secure-user-id",
     "abt_data",
     "ADDRESSBOOKBAR_WEB_CLARIFICATION",
-    "is_cookies_accepted"
+    "is_cookies_accepted",
+    "rfuid",
+    "xcid"
   ],
 
   "DefaultCookies": {
@@ -48,5 +50,4 @@
 
   "CookieIndex": 5,
   "CookiePrefixLength": 0
-
 }

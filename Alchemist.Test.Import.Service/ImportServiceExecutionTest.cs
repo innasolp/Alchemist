@@ -19,7 +19,7 @@ public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputH
         Service.SetName(name);
 
         LoaderMock.Setup(l => l.Name).Returns(Guid.NewGuid().ToString());
-        LoaderMock.Setup(w => w.Start()).Throws(exception);
+        LoaderMock.Setup(w => w.Start(It.IsAny<CancellationToken>())).Throws(exception);
 
         var token = new CancellationTokenSource();
         await Service.Start(token.Token);
@@ -78,8 +78,8 @@ public abstract class ImportServiceExecutionTest<TService, TLogger>(ITestOutputH
         var requestData = new object();
         LoaderMock.SetupGetRequestData(requestData);
 
-        LoaderMock.Setup(l => l.Load(It.IsAny<string>(), It.IsAny<object?>())).Returns(
-            (string url, object? data) =>
+        LoaderMock.Setup(l => l.Load(It.IsAny<string>(), It.IsAny<object?>(), It.IsAny<CancellationToken>())).Returns(
+            (string url, object? data, CancellationToken token) =>
                 {
                     throw new LoaderServiceException($"{url} failed.", LoaderServiceAction.Reset);
                 }

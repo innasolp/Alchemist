@@ -32,7 +32,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         ProductShopModelMock.Setup(s => s.CategoryUrl).Returns(Guid.NewGuid().ToString());
 
         var url = ProductShopModelMock.Object.GetCategoryPageUrl(categoryMock.Object, 1);
-        LoaderMock.Setup(w => w.Load(url, It.IsAny<object>())).Throws(exception);
+        LoaderMock.Setup(w => w.Load(url, It.IsAny<object>(), It.IsAny<CancellationToken>())).Throws(exception);
 
         categoryUrl = url;
     }
@@ -110,7 +110,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         await Task.Delay(1000);
 
         LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), 
-            It.IsAny<object>()));
+            It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
         LoggerMock.VerifyWarning(ImportProductsResourceManager.GetString("CategoryNotLoadedFromUrlWarning"), url, exception.Message);        
 
@@ -126,9 +126,9 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     {
         var exception = new LoaderServiceException( "error redirect loop", LoaderServiceAction.Reset);
         SetupServiceWithCategoryLoadException(Guid.NewGuid().ToString(), exception, out var url);
-        LoaderMock.Setup(s => s.Reset()).Returns(Task.FromResult(true));
-        LoaderMock.Setup(s => s.UpdateData(url)).Returns(Task.FromResult(true));
-        LoaderMock.Setup(s => s.GetData(It.IsAny<string>())).Returns(Task.FromResult(new object()));
+        LoaderMock.Setup(s => s.Reset(It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
+        LoaderMock.Setup(s => s.UpdateData(url, It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
+        LoaderMock.Setup(s => s.GetData(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new object()));
 
         var token = new CancellationTokenSource();
         var task = Service.StartServiceInFactoryAsync(token.Token); 
@@ -136,7 +136,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         await Task.Delay(1000);
 
         LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), 
-            It.IsAny<object>()));
+            It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
         LoggerMock.VerifyWarning(exception, LogResourceManager.GetString("LoadFromUrlCompletedWithErrorAndNeedReset"), [url, exception.Message]);
 
@@ -163,7 +163,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await token.CancelAsync();
 
-        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), It.IsAny<object>()));
+        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
         LoggerMock.VerifyWarning(exception, LogResourceManager.GetString("ProcessUrlNotCompleteWarning"), url, exception.Message);       
 
@@ -181,7 +181,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await Task.Delay(1000);
 
-        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), It.IsAny<object>()));
+        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == url), It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
         LoggerMock.VerifyError(exception, LogResourceManager.GetString("ProcessUrlFailedError"), url);
 
@@ -205,7 +205,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         await token.CancelAsync();
 
-        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == categoryUrl), It.IsAny<object>()));
+        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == categoryUrl), It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
         foreach (var item in categoryProducts.CategoryProductItems)
         {
@@ -229,7 +229,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         
         await token.CancelAsync();
         
-        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == categoryUrl), It.IsAny<object>()));
+        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == categoryUrl), It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
         foreach (var item in categoryProducts.CategoryProductItems)
         {

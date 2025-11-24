@@ -10,6 +10,7 @@ namespace Alchemist.Product.ImportItemHandler;
 internal class ImportCategory : IImportCategoryItem
 {
     public int Id { get; set; }
+
     public int ItemId { get; set; }
 
     public string Name { get; set; }

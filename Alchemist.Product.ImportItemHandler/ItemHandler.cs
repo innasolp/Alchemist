@@ -30,7 +30,7 @@ internal abstract class ItemHandler<T, TItem, TMessageItem>(IMessageSender messa
         }
         catch (Exception e)
         {
-            await InvokeItemProcessedAsync(item,  ResultStatus.Warning);
+            await InvokeItemProcessedAsync(item,  ResultStatus.Warning, cancellationToken);
             throw new WarningException($"Item {GetUrl(item)} proccessed with error.", e);
         }
     }

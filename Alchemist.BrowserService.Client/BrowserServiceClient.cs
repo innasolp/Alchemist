@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Interfaces;
 using BrowserDataLoader.Interfaces;
-using System.Collections;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -47,25 +46,25 @@ internal class BrowserServiceClient : ILoaderService
 
     bool ILoaderService.IsStarted => _webLoader?.IsStarted ?? false;
 
-    public async Task<IEnumerable<ICookieData>> LoadCookies(string host)
+    public async Task<IEnumerable<ICookieData>> LoadCookies(string host, CancellationToken token = default)
     {
-        var response = await _httpClient.GetAsync($"browserdata/getCookies/{_browserDataLoader}/{host}");
+        var response = await _httpClient.GetAsync($"browserdata/getCookies/{_browserDataLoader}/{host}", token);
         
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(new List<ICookieData>());
 
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<List<CookieData>>();
+        return await response.Content.ReadFromJsonAsync<List<CookieData>>(token);
     }
 
-    public async Task UpdateData(string url)
+    public async Task UpdateData(string url, CancellationToken token = default)
     {
         var encodedBrowserLauncher = HttpUtility.UrlEncode(_browserDataLauncher);
         var encodedHost = HttpUtility.UrlEncode(url);
         var requestUrl = $"browserdata/launch?browser={encodedBrowserLauncher}&url={encodedHost}";
 
-        var response = await _httpClient.PostAsync(requestUrl, null);
+        var response = await _httpClient.PostAsync(requestUrl, null, token);
         response.EnsureSuccessStatusCode();       
     }    
 
@@ -74,17 +73,17 @@ internal class BrowserServiceClient : ILoaderService
         await _webLoader.DisposeAsync();
     }
 
-    async Task<object> ILoaderService.GetData(string host)
+    async Task<object> ILoaderService.GetData(string host, CancellationToken token = default)
     {
-        return await LoadCookies(host);        
+        return await LoadCookies(host, token);        
     }
 
-    public async Task<Stream> Load(string url, object? data)
+    public async Task<Stream> Load(string url, object? data, CancellationToken token = default)
     {
         if (data is not IEnumerable<ICookieData> cookies)
             throw new InvalidOperationException($"Invalid type of {data}");
 
-        var headers= HeadersHelper.GetHeadersForRequest(_requestHeaders, cookies);
+        var headers = HeadersHelper.GetHeadersForRequest(_requestHeaders, cookies);
 
         try
         {
@@ -108,30 +107,30 @@ internal class BrowserServiceClient : ILoaderService
         }
     }
 
-    private async Task<int> ClearCookiesForHost(string host)
+    private async Task<int> ClearCookiesForHost(string host, CancellationToken token = default)
     {
         var encodedBrowserDataLoader = HttpUtility.UrlEncode(_browserDataLoader);
         var encodedHost = HttpUtility.UrlEncode(host);
         var url = $"browserdata/clearCookies?browser={encodedBrowserDataLoader}&host={encodedHost}";
 
-        var response = await _httpClient.PostAsync(url, null);
+        var response = await _httpClient.PostAsync(url, null, token);
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadAsStringAsync();
+        var result = await response.Content.ReadAsStringAsync(token);
         return int.TryParse(result, out var deleted) ? deleted : 0;    
     }
 
-    public async Task Reset()
+    public async Task Reset(CancellationToken token = default)
     {
         await _webLoader.Reset(_host);
-        await ClearCookiesForHost(_host);
+        await ClearCookiesForHost(_host, token);
     }
 
-    public async Task Start()
+    public async Task Start(CancellationToken token = default)
     {
         await _webLoader.Start();
     }
 
-    public async Task Close()
+    public async Task Close(CancellationToken token = default)
     {
         await _webLoader.Close();
     }

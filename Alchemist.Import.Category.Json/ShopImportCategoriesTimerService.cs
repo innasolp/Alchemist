@@ -90,7 +90,7 @@ public class ShopImportCategoriesTimerService : ImportService
 
     private async Task LoadCategoriesAsync(CancellationToken stoppingToken)
     {
-        var documentResult = await ProcessUrlTaskAsync((url) => LoadJsonDocumentAsync(url, stoppingToken), ShopModel.CategorySourceUrl);
+        var documentResult = await ProcessUrlTaskAsync(LoadJsonDocumentAsync, ShopModel.CategorySourceUrl, stoppingToken);
         
         if (documentResult.Status != Common.ResultStatus.Success || documentResult.Value == null)
         {            
@@ -155,7 +155,7 @@ public class ShopImportCategoriesTimerService : ImportService
         var url = string.Format(urlFormat, parentCategory.Id);
 
         //todo if html?
-        var categoriesJsonResult = await ProcessUrlTaskAsync((url) => LoadJsonFromUrlAsync(url, token), url);
+        var categoriesJsonResult = await ProcessUrlTaskAsync(LoadJsonFromUrlAsync, url, token);
         if (categoriesJsonResult.Status == Common.ResultStatus.Cancelled)
             token.ThrowIfCancellationRequested();
 
@@ -232,7 +232,7 @@ public class ShopImportCategoriesTimerService : ImportService
     {
         if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add)return;
 
-        await _categoryCollectionChangedSemaphore.WaitAsync();
+        await _categoryCollectionChangedSemaphore.WaitAsync(_currentCancellationToken);
 
         try
         {
@@ -249,6 +249,10 @@ public class ShopImportCategoriesTimerService : ImportService
                 Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
                     category.Name, category.Id, ShopModel.ShopName);
             }
+        }
+        catch(OperationCanceledException operationCanceled) 
+        {
+            Logger.LogInformation(operationCanceled, "Item handling canceled.");
         }
         catch (Exception ex)
         {

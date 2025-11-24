@@ -76,12 +76,12 @@
 
       },
       "BrowserDataLoader": {
-        "ImplementationTypeName": "FirefoxDevEdition",
-        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\DevEdition"
+        "ImplementationTypeName": "FirefoxStandartEdition",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
       },
       "BrowserLauncher": {
-        "ImplementationTypeName": "FirefoxDevEdition",
-        "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\DevEdition"
+        "ImplementationTypeName": "FirefoxStandartEdition",
+        "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
       },
       "WebLoader": {
         "ImplementationTypeName": "Firefox",
@@ -143,7 +143,7 @@
           },
 
           "Cookies": [
-            "__zzatw-goldapple-ru",
+            "__zzatw-goldapple",
             "_ga",
             "_ga_QE5MQ8XJJK",
             "_gcl_au",
@@ -160,17 +160,17 @@
             "advcake_session_id",
             "advcake_track_id",
             "advcake_track_url",
-            "cfidsw-goldapple-ru",
+            "cfidsw-goldapple",
             "client-store-code",
             "digi-analytics-sessionId",
             "directCrm-session",
             "domain_sid",
-            "fgsscw-goldapple-ru",
+            "fgsscw-goldapple",
             "ga-device-id",
             "ga-lang",
             "isAddressConfirmed",
             "ga-session-assets",
-            "gsscw-goldapple-ru",
+            "gsscw-goldapple",
             "mage-cache-sessid",
             "mindboxDeviceUUID",
             "tmr_detect",
