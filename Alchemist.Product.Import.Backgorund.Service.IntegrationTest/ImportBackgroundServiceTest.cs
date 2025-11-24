@@ -89,10 +89,15 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
     public async Task NewShopSettingsHandlingWhenNewShopSettingsSavedAsync()
     {
         AsyncAutoResetEvent asyncAutoResetEvent = new();
-        Action<ShopSettings> onShopSettingsCreated = (settings) => asyncAutoResetEvent.Set();
+        async Task onShopSettingsCreatedAsync(ShopSettings settings)
+        {
+            asyncAutoResetEvent.Set();
+            await Task.FromResult(true);
+        }
+
 
         var messageReceiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>(ShopImportWorkerKeys.EventMessageReceiverKey);
-        messageReceiver.On(Messages.Common.Messages.ShopSettingsCreated, onShopSettingsCreated);
+        messageReceiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, onShopSettingsCreatedAsync);
 
         var httpClient = WebAppFactory.CreateClient();
 

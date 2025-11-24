@@ -20,7 +20,8 @@
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
     <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.5" />
-	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.5" />
+	<PackageReference Include="Message.Interfaces" Version="1.0.0.2" />
+	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,7 @@
     <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.ImportItemHandler\Alchemist.Product.ImportItemHandler.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />

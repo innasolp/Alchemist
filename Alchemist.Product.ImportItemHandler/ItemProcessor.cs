@@ -13,26 +13,26 @@ internal abstract class ItemProcessor<TProcessItem, TMessageItem>(ILogger logger
 
     private readonly string _eventName = eventName;
 
-    public async Task ProcessItemAsync(TProcessItem item, ResultStatus status)
+    public async Task ProcessItemAsync(TProcessItem item, ResultStatus status, CancellationToken cancellationToken = default)
     {
         var messageItem = CreateMessageItem(item, status);
-        await SendItemMessagesAsync(messageItem, _eventName);
+        await SendItemMessagesAsync(messageItem, _eventName, cancellationToken);
     }
 
     protected abstract TMessageItem CreateMessageItem(TProcessItem item, ResultStatus status);
 
     protected abstract string GetInfo(TMessageItem item);
 
-    private async Task SendItemMessagesAsync(TMessageItem item, string eventName)        
+    private async Task SendItemMessagesAsync(TMessageItem item, string eventName, CancellationToken cancellationToken = default)        
     {
         foreach (var itemMessageSender in _itemMessageSenders)
         {
             try
             {
                 if (!itemMessageSender.IsConnected)
-                    await itemMessageSender.Start();
+                    await itemMessageSender.Start(cancellationToken);
 
-                await itemMessageSender.Send(item, eventName);
+                await itemMessageSender.Send(item, eventName, cancellationToken);
             }
             catch (Exception ex)
             {

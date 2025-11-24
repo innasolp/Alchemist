@@ -1,5 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.Import.Background.Models;
+using Alchemist.Product.ImportItemHandler;
 using Message.Interfaces;
 
 

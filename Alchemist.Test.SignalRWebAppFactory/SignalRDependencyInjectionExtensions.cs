@@ -48,7 +48,7 @@ public static class SignalRDependencyInjectionExtensions
                     sd.IsKeyedService && sd.ServiceKey == key).ToList();
         hubConnectionDescriptors.ForEach(d => services.Remove(d));
 
-        services.RemoveKeyImplementations< IMessageSender>("SignalR", key);
+        services.RemoveKeyImplementations<IMessageSender>("SignalR", key);
 
         var handler = signalRServer.CreateHandler();
         var signalRUrl = $"{signalRServer.BaseAddress.AbsoluteUri}{hub}";

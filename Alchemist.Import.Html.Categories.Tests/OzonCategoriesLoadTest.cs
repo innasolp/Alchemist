@@ -2,9 +2,7 @@ using Alchemist.Import.Category.Json;
 using Alchemist.Import.Html.Factory;
 using BrowserDataLoader.Interfaces;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using System.Text.Json;
-using WebLoader.Common;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
 
@@ -28,7 +26,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
 
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
-    private readonly IBrowserDataLoader _browserDataLoader = new BrowserDataLoader.Firefox.DevEdition.Windows.FirefoxDevEditionDataLoader();
+    private readonly IBrowserDataLoader _browserDataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
 
     private static async Task<IWebLoader> CreateWebLoaderAsync()
     {

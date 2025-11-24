@@ -24,7 +24,6 @@ public class ShopImportWorker : BackgroundService
     private readonly IShopDataService _shopDataService;
     private readonly IEnumerable<ISettingsAdapter> _initSettingsAdapters;
     private readonly IDictionary<ShopSettingType, ISettingsDataAdapter> _processedSettingsAdapters;
-    private readonly IEnumerable<IMessageSender> _itemMessageSenders;
 
     private record ServiceToken(IImportService Service, CancellationTokenSource InnerTokenSource);   
 
@@ -38,15 +37,13 @@ public class ShopImportWorker : BackgroundService
         IShopDataService shopDataService,
         [FromKeyedServices(ShopImportWorkerKeys.InitImportSettings)]  IEnumerable<ISettingsAdapter> initSettingsAdapters,
         [FromKeyedServices(ShopImportWorkerKeys.ProcessedImportSettings)] IDictionary<ShopSettingType, ISettingsDataAdapter> processedSettingsAdapters,
-        IEnumerable<IShopImportServiceFactory> shopImportFactories,
-        [FromKeyedServices(ShopImportWorkerKeys.ShopsMessageSenderKey)] IEnumerable<IMessageSender> itemMessageSenders
+        IEnumerable<IShopImportServiceFactory> shopImportFactories
         )
     {
         _logger = logger;
         _eventMessageReceiver = eventMessageReceiver;
         _eventMessageSender = eventMessageSender;
         _shopDataService = shopDataService;
-        _itemMessageSenders = itemMessageSenders;
         _initSettingsAdapters = initSettingsAdapters;
         _processedSettingsAdapters = processedSettingsAdapters;
 
@@ -122,7 +119,8 @@ public class ShopImportWorker : BackgroundService
 
             _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
 
-            await SendServiceMessageAsync(Messages.Common.Messages.ServiceCreated, new ServiceMessage { Guid = guid, Name = service.Name });
+            await SendServiceMessageAsync(Messages.Common.Messages.ServiceCreated, 
+                new ServiceMessage { Guid = guid, Name = service.Name });
         }
         catch (Exception ex)
         {
@@ -145,7 +143,8 @@ public class ShopImportWorker : BackgroundService
             foreach (var service in _servicesTokens)
             {
                 await SendServiceMessageAsync(Messages.Common.Messages.ServiceCreated, 
-                    new ServiceMessage { Guid = service.Key, Name = service.Value.Service.Name });
+                    new ServiceMessage { Guid = service.Key, Name = service.Value.Service.Name },
+                    stoppingToken);
             }
         }
         catch (Exception ex)
@@ -156,7 +155,8 @@ public class ShopImportWorker : BackgroundService
         try
         {
             await Parallel.ForEachAsync(_servicesTokens, (s, t) =>
-                new ValueTask(StartServiceAsync(s.Key, s.Value.Service, CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, s.Value.InnerTokenSource.Token).Token)));
+                new ValueTask(StartServiceAsync(s.Key, s.Value.Service, 
+                CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, s.Value.InnerTokenSource.Token).Token)));
         }
         catch (Exception e)
         {
@@ -180,13 +180,14 @@ public class ShopImportWorker : BackgroundService
     }
 
     private async Task StartEventMessageReceiverAsync(CancellationToken stoppingToken)
-    {
-        async Task startServiceAsync(Guid guid) => await OnStartServiceAsync(guid, stoppingToken);
+    {        
         try
         {
-            await _eventMessageReceiver.Start();
+            async Task startServiceAsync(Guid guid) => await OnStartServiceAsync(guid, stoppingToken);
 
-            _eventMessageReceiver.On(Messages.Common.Messages.ServiceStart, (Func<Guid, Task>)startServiceAsync);
+            await _eventMessageReceiver.Start(stoppingToken);
+
+            _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStart, startServiceAsync);
             
             _logger.LogInformation("Import service connected to messaging host.");
         }
@@ -230,7 +231,7 @@ public class ShopImportWorker : BackgroundService
         {
             var serviceStartTask = service.Start(stoppingToken);
 
-            await SendServiceMessageAsync(Messages.Common.Messages.ServiceStarted, guid);
+            await SendServiceMessageAsync(Messages.Common.Messages.ServiceStarted, guid, stoppingToken);
 
             await serviceStartTask.WaitAsync(stoppingToken);
         }
@@ -255,14 +256,14 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task SendServiceMessageAsync(string eventName, object message)
+    private async Task SendServiceMessageAsync(string eventName, object message, CancellationToken cancellationToken = default)
     {
         try
         {
             if (!_eventMessageSender.IsConnected)
-                await _eventMessageSender.Start();
+                await _eventMessageSender.Start(cancellationToken);
 
-            await _eventMessageSender.Send(message, eventName);                  
+            await _eventMessageSender.Send(message, eventName, cancellationToken);                  
         }
         catch(Exception e)
         {
@@ -275,12 +276,9 @@ public class ShopImportWorker : BackgroundService
         foreach(var serviceToken in _servicesTokens.Where(s=>!s.Value.InnerTokenSource.IsCancellationRequested))        
             await serviceToken.Value.InnerTokenSource.CancelAsync();        
 
-        await _eventMessageReceiver.Stop();   
+        await _eventMessageReceiver.Stop(cancellationToken);   
         
-        await _eventMessageSender.Stop();
-
-        foreach (var itemMessageSender in _itemMessageSenders)
-            await itemMessageSender.Stop();
+        await _eventMessageSender.Stop(cancellationToken);
 
         await base.StopAsync(cancellationToken);
     }  

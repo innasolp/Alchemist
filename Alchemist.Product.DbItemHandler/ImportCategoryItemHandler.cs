@@ -5,24 +5,29 @@ using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.ImportItem.Handler;
+namespace Alchemist.Product.DbItemHandler;
 
 internal class ImportCategoryItemHandler(IShopDataService shopDataService, string eventName) : IImportItemHandler
 {
+    private class ImportCategoryProcessEventArgs(ICategoryData item, ItemProcessStatus processStatus, CancellationToken cancellationToken)
+        : ItemProcessEventArgs<object, ItemProcessStatus>(item, processStatus, cancellationToken)
+    { }
+
+
     private readonly IShopDataService _shopDataService = shopDataService;
 
     Type IImportItemHandler.ItemType => typeof(CategoryData);
 
     public string EventName { get; private set; } = eventName;
 
-    private event AsyncItemHandler<object, ItemProcessStatus>? _itemProcessed;
-    public event AsyncItemHandler<object, ItemProcessStatus> ItemProcessed
+    private event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>>? _itemProcessed;
+    public event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>> ItemProcessed
     {
         add => _itemProcessed += value;
         remove => _itemProcessed -= value;
     }
 
-    public async Task<ItemProcessStatus> HandleItem(object item)
+    public async Task<ItemProcessStatus> HandleItem(object item, CancellationToken cancellationToken = default)
     {
         if (item is not ICategoryData categoryData)
             throw new InvalidDataException($"Item type {item.GetType().Name} is invalid. Expected type must implement {nameof(ICategoryData)}");
@@ -34,7 +39,7 @@ internal class ImportCategoryItemHandler(IShopDataService shopDataService, strin
             try
             {
                 shopCategory = await AddShopCategoryAsync(categoryData);
-                await InvokeItemProcessedAsync(categoryData, ItemProcessStatus.New);
+                await InvokeItemProcessedAsync(categoryData, ItemProcessStatus.New, cancellationToken);
                 return ItemProcessStatus.New;
             }
             catch (Exception ex)
@@ -44,14 +49,14 @@ internal class ImportCategoryItemHandler(IShopDataService shopDataService, strin
         }
         else
         {
-            await InvokeItemProcessedAsync(categoryData, ItemProcessStatus.AlreadyExists);
+            await InvokeItemProcessedAsync(categoryData, ItemProcessStatus.AlreadyExists, cancellationToken);
             return ItemProcessStatus.AlreadyExists;
         }
     }
 
-    private Task InvokeItemProcessedAsync(ICategoryData item, ItemProcessStatus itemProcessStatus)
+    private Task InvokeItemProcessedAsync(ICategoryData item, ItemProcessStatus itemProcessStatus, CancellationToken cancellationToken = default)
     {
-        return _itemProcessed?.Invoke(this, item, itemProcessStatus) ?? Task.FromResult(false);
+        return _itemProcessed?.Invoke(this, new ImportCategoryProcessEventArgs(item, itemProcessStatus, cancellationToken)) ?? Task.FromResult(false);
     }
 
     private async Task<IShopCategory?> AddShopCategoryAsync(ICategoryData categoryItem)

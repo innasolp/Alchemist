@@ -74,9 +74,10 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             await messageReceiver.Stop();            
         }
     }
-    private async Task OnServiceCreatedAsync(ServiceMessage serviceMessage, SemaphoreSlim semaphoreSlim, List<Guid> guids)
+    private async Task OnServiceCreatedAsync(ServiceMessage serviceMessage, SemaphoreSlim semaphoreSlim, List<Guid> guids,
+        CancellationToken cancellationToken = default)
     {
-        await semaphoreSlim.WaitAsync();
+        await semaphoreSlim.WaitAsync(cancellationToken);
         guids.Add(serviceMessage.Guid);
         OutputHelper.WriteLine($"Guid {serviceMessage.Guid};Name {serviceMessage.Name}");
         semaphoreSlim.Release();
@@ -90,14 +91,14 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
         var serviceGuids = new List<Guid>();
         var firstServiceCreatedAutoResetEvent = new AsyncAutoResetEvent(false);
         var semaphoreSlim = new SemaphoreSlim(1, 1);
-        Func<ServiceMessage, Task> serviceCreatedAsync = async (serviceMessage) =>
+        async Task serviceCreatedAsync(ServiceMessage serviceMessage)
         {
             await OnServiceCreatedAsync(serviceMessage, semaphoreSlim, serviceGuids);
             firstServiceCreatedAutoResetEvent.Set();
-        };
+        }
 
         var testMessageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(webAppFactory.Services, webAppFactory.SignalRTestServer, "events");
-        testMessageReceiver.On(Messages.Common.Messages.ServiceCreated, serviceCreatedAsync);
+        testMessageReceiver.On(Messages.Common.Messages.ServiceCreated, (Func<ServiceMessage, Task>)serviceCreatedAsync);
         await testMessageReceiver.Start();
 
         var testMessageSender = SignalRHelper.CreateTestSignalRMessageHubSender(webAppFactory.Services, webAppFactory.SignalRTestServer, "events");

@@ -1,6 +1,6 @@
 ﻿using Alchemist.Common;
 
-namespace Alchemist.Product.ImportItem.Handler;
+namespace Alchemist.Product.DbItemHandler;
 
 public interface IImportItemHandler : IItemHandler<object, ItemProcessStatus>
 {

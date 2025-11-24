@@ -1,8 +1,6 @@
 using Alchemist.Import.Category.Json;
 using BrowserDataLoader.Interfaces;
-using Json.FileExtensions;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using System.Text.Json;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
@@ -15,10 +13,10 @@ public class GoldAppleCategoriesLoadTest
 
     private readonly IWebLoader _webLoader;
     
-    private readonly string _shopCategoriesUrl = "https://goldapple.ru/front/api/catalog/navigation";    
+    private readonly string _shopCategoriesUrl = "https://goldapple.ru/web/api/v3/catalog/navigation";    
 
     private readonly string requestHeadersFileName = "GoldApple.Headers.Firefox.json";
-    string[] _nodePath = ["data"];
+    string[] _nodePath = ["general"];
 
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -27,8 +25,7 @@ public class GoldAppleCategoriesLoadTest
             { "Url",new PropertyPath("Url","link",true) },
             {"Description",new PropertyPath("Description","name") },
             {"Id",new PropertyPath("Id","id") },
-            {"Children",new PropertyPath("Children","children") },
-            {"IsParented",new PropertyPath("IsParented","parent") }
+            {"Children",new PropertyPath("Children","children") }
         };
 
     public GoldAppleCategoriesLoadTest(ITestOutputHelper testOutputHelper)

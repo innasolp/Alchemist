@@ -5,11 +5,12 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Import.Background.Models;
+namespace Alchemist.Product.ImportItemHandler;
 
 internal class ImportCategory : IImportCategoryItem
 {
     public int Id { get; set; }
+
     public int ItemId { get; set; }
 
     public string Name { get; set; }

@@ -18,6 +18,7 @@ using Alchemist.Settings.RestAPIClient;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.ShopApiFactory;
 using Alchemist.Test.SettingsAPIFactory;
+using Alchemist.Product.ImportItemHandler;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
@@ -102,7 +103,8 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
             _importItemsHost.Uri,
             context.Configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>());
 
-        services.SetSignalRHubTestSender(ShopImportWorkerKeys.ShopsMessageSenderKey, _signalRApplicationFactory.Server, "import");
+        services.SetSignalRHubTestSender(ServiceKeys.ImportProductMessageSenderKey, _signalRApplicationFactory.Server, "import");
+        services.SetSignalRHubTestSender(ServiceKeys.ImportCategoryMessageSenderKey, _signalRApplicationFactory.Server, "import");
         services.SetSignalRHubTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
         services.SetSignalRHubTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
     }

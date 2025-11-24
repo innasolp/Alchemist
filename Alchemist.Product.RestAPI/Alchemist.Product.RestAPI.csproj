@@ -14,7 +14,8 @@
     <PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
     <PackageReference Include="Http.Info" Version="1.0.0.1" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
-    <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.0" />
+    <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.3" />
+    <PackageReference Include="Message.Interfaces" Version="1.0.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0.1" />

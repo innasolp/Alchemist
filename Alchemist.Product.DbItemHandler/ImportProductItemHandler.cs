@@ -5,11 +5,15 @@ using Alchemist.Product.Entities;
 using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.ImportItem.Handler;
+namespace Alchemist.Product.DbItemHandler;
 
-internal class ImportProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName) 
+internal class ImportProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName)
     : IImportItemHandler
 {
+    private class ImportProductProcessEventArgs(IProductData item, ItemProcessStatus processStatus, CancellationToken cancellationToken)
+       : ItemProcessEventArgs<object, ItemProcessStatus>(item, processStatus, cancellationToken)
+    { }
+
     private readonly IProductDataService _productDataService = productDataService;
 
     private readonly IShopDataService _shopDataService = shopDataService;
@@ -18,18 +22,18 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
 
     Type IImportItemHandler.ItemType => typeof(ProductData);
 
-    private event AsyncItemHandler<object, ItemProcessStatus>? _itemProcessed;
-    public event AsyncItemHandler<object, ItemProcessStatus> ItemProcessed
+    private event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>>? _itemProcessed;
+    public event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>> ItemProcessed
     {
         add => _itemProcessed += value;
         remove => _itemProcessed -= value;
     }
 
-    public async Task<ItemProcessStatus> HandleItem(object item)
+    public async Task<ItemProcessStatus> HandleItem(object item, CancellationToken cancellationToken = default)
     {
         if (item is not IProductData productData)
             throw new InvalidDataException($"Item type {item.GetType().Name} is invalid. Expected type must implement {nameof(IProductData)}");
-        
+
         try
         {
             var shopProduct = await _productDataService.GetShopProductByShopAndItemId(productData.ShopId, productData.ShopProduct?.ItemId ?? string.Empty)
@@ -59,14 +63,14 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
                 return result;
             }
 
-            var product = await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand?.Name)
-                                ?? await _productDataService.FindProductByName(productData.Product.Name);
+            var product = await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand?.Name, cancellationToken)
+                                ?? await _productDataService.FindProductByName(productData.Product.Name, cancellationToken);
 
             if (product != null)
             {
                 if (await _productDataService.GetShopProductByShopAndProductId(productData.ShopId, product.Id) != null)
                 {
-                    await InvokeItemProcessedAsync(productData, ItemProcessStatus.AlreadyExists);
+                    await InvokeItemProcessedAsync(productData, ItemProcessStatus.AlreadyExists, cancellationToken);
                     return ItemProcessStatus.AlreadyExists;
                 }
             }
@@ -81,25 +85,24 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
             if (!await SetShopProductPriceForItemAsync(productData, newShopProduct.Id) ||
                     !await SetShopProductCategoryIfNeedAsync(productData.ShopId, newShopProduct.Id, productData.ShopCategory.ItemId))
             {
-                await InvokeItemProcessedAsync(productData, ItemProcessStatus.Error);
+                await InvokeItemProcessedAsync(productData, ItemProcessStatus.Error, cancellationToken);
                 return await Task.FromResult(ItemProcessStatus.Error);
             }
 
             //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
 
-
-            await InvokeItemProcessedAsync(productData, ItemProcessStatus.New);
+            await InvokeItemProcessedAsync(productData, ItemProcessStatus.New, cancellationToken);
             return ItemProcessStatus.New;
         }
         catch (Exception e)
-        { 
+        {
             throw new WarningException($"Product {productData.ShopProduct.ItemUrl} proccessed with error.", e);
         }
     }
 
-    private Task InvokeItemProcessedAsync(IProductData item, ItemProcessStatus itemProcessStatus)
+    private Task InvokeItemProcessedAsync(IProductData item, ItemProcessStatus itemProcessStatus, CancellationToken cancellationToken)
     {
-        return _itemProcessed?.Invoke(this, item, itemProcessStatus) ?? Task.FromResult(false);
+        return _itemProcessed?.Invoke(this, new ImportProductProcessEventArgs(item, itemProcessStatus, cancellationToken)) ?? Task.FromResult(false);
     }
 
     private async Task<bool> SetShopProductCategoryIfNeedAsync(int shopId, long shopProductId, int categoryItemId)
@@ -183,7 +186,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
     private async Task SetProductPurposesAsync(IEnumerable<IPurposeType> purposes, long productId)
     {
         var productPurposes = await _productDataService.GetProductPurposes(productId);
-        foreach (var purpose in purposes.Where(p => 
+        foreach (var purpose in purposes.Where(p =>
         !productPurposes.Any(pp => pp.Name.Equals(p.Name.Trim(), StringComparison.InvariantCultureIgnoreCase))))
         {
             var name = purpose.Name.Trim().RemoveSpecialCharacters();

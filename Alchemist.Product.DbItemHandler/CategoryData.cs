@@ -2,7 +2,7 @@
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.ImportItem.Handler;
+namespace Alchemist.Product.DbItemHandler;
 
 internal class CategoryData : ICategoryData
 {

@@ -91,7 +91,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         var exception = new Exception("Json loading failed");
         var requestData = new object();
         LoaderMock.SetupGetRequestData(requestData);
-        LoaderMock.Setup(w=>w.Load(_categoryShopModelMock.Object.CategorySourceUrl, requestData)).Throws(exception);
+        LoaderMock.Setup(w=>w.Load(_categoryShopModelMock.Object.CategorySourceUrl, requestData, It.IsAny<CancellationToken>())).Throws(exception);
 
         var name = Guid.NewGuid().ToString();
 
