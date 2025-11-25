@@ -4,7 +4,7 @@ namespace Alchemist.Common;
 
 public static class Utils
 {
-    private static Dictionary<PlatformID, string> _separators = new Dictionary<PlatformID, string>
+    private static Dictionary<PlatformID, string> _separators = new()
     {
         {PlatformID.Win32NT,"\\" },
         {PlatformID.Unix, "/" }
@@ -32,6 +32,12 @@ public static class Utils
     private const string LocalHostVariable = "$[localhost]";
     private const string OSlocalHost = "localhost";
     private const string DockerLocalhost = "host.docker.internal";
+
+    public static bool ContainsLocalHost(this string value)
+    {
+        return value.Contains(LocalHostVariable);
+    }
+
     public static string SetEnvironmentLocalHostIfNeed(this string value)
     {
         if (!value.Contains(LocalHostVariable)) return value;

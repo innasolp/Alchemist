@@ -5,12 +5,17 @@ using Alchemist.Log.Extensions;
 using Alchemist.Product.RestAPIClient;
 using Alchemist.Product.ShopWebApp.Controllers;
 using Alchemist.WebApp.Api.Common;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog.Configuration.Extensions;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
 bool isApi = builder.IsApi(args);
 

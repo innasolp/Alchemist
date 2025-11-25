@@ -1,28 +1,34 @@
 using Alchemist.Common;
-using Alchemist.Product.Data.Repository;
+using Alchemist.DataService.Interfaces;
 using Alchemist.Log.Extensions;
+using Alchemist.Product.Data;
+using Alchemist.Product.Data.Postgresql;
+using Alchemist.Product.Data.Repository;
+using Alchemist.Product.RestAPI.Controllers;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
 using Http.RequestHandling.PerfomanceCounter;
-using Microsoft.EntityFrameworkCore;
-using Serilog.Loggers;
-using Alchemist.Product.Data;
-using Alchemist.Product.RestAPI.Controllers;
-using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Data.Postgresql;
-using Serilog.Configuration.Extensions;
 using Message.SignalR.HubMessage.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Serilog.Configuration.Extensions;
+using Serilog.Loggers;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
+
+
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?
-    .SetEnvironmentLocalHostIfNeed()));
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
 builder.Services.AddScoped<IAlchemyRepository, AlchemyRepository>();
 
-var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>()?.SetEnvironmentLocalHostIfNeed();
+var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
 
 builder.Services.AddControllers();

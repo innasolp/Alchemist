@@ -1,16 +1,18 @@
-using Alchemist.Product.GrpcService.Services;
-using Microsoft.EntityFrameworkCore;
 using Alchemist.Common;
-using Grpc.Server.Interceptors;
+using Alchemist.DataService.Interfaces;
+using Alchemist.Log.Extensions;
+using Alchemist.Product.Data;
+using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.Data.Repository;
+using Alchemist.Product.GrpcService.Services;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
+using Grpc.Server.Interceptors;
 using Grpc.Server.RequestInterceptor;
 using Http.RequestHandling.PerfomanceCounter;
-using Serilog.Loggers;
-using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Data.Postgresql;
-using Alchemist.Product.Data;
+using Microsoft.EntityFrameworkCore;
 using Serilog.Configuration.Extensions;
-using Alchemist.Log.Extensions;
+using Serilog.Loggers;
 
 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -24,9 +26,12 @@ void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
+
 builder.Services.AddPerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>((logger) => new SerilogUrlLogger<PerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>>(logger));
 
-builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?.SetEnvironmentLocalHostIfNeed()));
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 builder.Services.AddScoped<IAlchemyRepository,AlchemyRepository>();
 
 builder.Services.AddSingleton<ServerLoggingInterceptor<AlchemyService>>();

@@ -1,17 +1,19 @@
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
+using Alchemist.Log.Extensions;
+using Alchemist.Product.DbItemHandler;
 using Alchemist.Product.Import.DBService;
 using Alchemist.Product.RestAPIClient;
-using Alchemist.Log.Extensions;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
 using Grpc.Client.RequestInterceptor;
 using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
+using Message.RabbitMQ.DependencyInjection;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
-using Message.RabbitMQ.DependencyInjection;
-using Alchemist.Product.DbItemHandler;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
@@ -19,19 +21,22 @@ var logPath = $"{appPath}/Logs";
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
+
+
 builder.Services.AddGrpcServiceClient<IProductDataService,Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
 builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
 builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
 
 builder.Services.ConfigureDefaultHttps();
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "RestAPIHost", nameof(ShopApiClient), out var shopHttpClientBuilder);
-var restApiHost = builder.Configuration.GetHostSectionValue("RestAPIHost");
+var restApiHost = builder.Configuration.GetSection("RestAPIHost").Get<string>();
 builder.Services.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(shopHttpClientBuilder);
 
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
 var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
-rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
 builder.Services.AddRabbitMQMessageReceiver(rabbitMQOptions);
 
 builder.Services.AddProductItemHandler(builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());

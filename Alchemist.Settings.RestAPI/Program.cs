@@ -5,6 +5,8 @@ using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Settings.Data.Repository;
 using Alchemist.Settings.RestAPI.Controllers;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
 using Message.SignalR.HubMessage.DependencyInjection;
@@ -13,14 +15,16 @@ using Serilog.Configuration.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
+
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")?
-    .SetEnvironmentLocalHostIfNeed()));
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
 builder.Services.AddScoped<ISettingsRepository,SettingsRepository>();
 
-var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>()?.SetEnvironmentLocalHostIfNeed();
+var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
 
 builder.Services.AddControllers();

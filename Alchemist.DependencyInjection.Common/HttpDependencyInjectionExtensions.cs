@@ -11,7 +11,7 @@ public static class HttpDependencyInjectionExtensions
         where TService:class
         where TImplementation : class, TService
     {
-        var restApiHost = configuration.GetHostSectionValue(restApiSectionName);
+        var restApiHost = configuration.GetSection(restApiSectionName).Get<string>();
         httpClientBuilder = services.AddHttpClient(hostKey);
 
         services.AddKeyedSingleton(hostKey, restApiHost);
@@ -22,7 +22,7 @@ public static class HttpDependencyInjectionExtensions
         where TService : class
         where TImplementation : class, TService
     {
-        var restApiHost = configuration.GetSection(restApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        var restApiHost = configuration.GetSection(restApiSectionName).Get<string>();
         services.AddHttpClient();
 
         services.AddKeyedSingleton(hostKey, restApiHost);
@@ -65,7 +65,7 @@ public static class HttpDependencyInjectionExtensions
         where TService : class
         where TImplementation : class, TService
     {
-        var grpcApiHost = configuration.GetSection(grpcApiSectionName).Get<string>()?.SetEnvironmentLocalHostIfNeed();
+        var grpcApiHost = configuration.GetSection(grpcApiSectionName).Get<string>();
         services.AddGrpcChannelWithoutCertificateCheck(grpcApiHost);
         return services.AddSingleton<TService, TImplementation>();
     }

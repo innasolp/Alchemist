@@ -4,17 +4,21 @@ using Alchemist.DependencyInjection.Common;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
-using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 using Alchemist.Product.ImportSettingsWebApp.Models;
 using Alchemist.Product.Interfaces;
 using Alchemist.Settings.RestAPIClient;
 using Alchemist.WebApp.Api.Common;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog.Configuration.Extensions;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
 bool isApi = builder.IsApi(args);
 
