@@ -11,6 +11,7 @@
     <PackageReference Include="Http.Info" Version="1.0.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
 	<PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.3" />
+	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.0" />
   </ItemGroup>
 
   <ItemGroup>

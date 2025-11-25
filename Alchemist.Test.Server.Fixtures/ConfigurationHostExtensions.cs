@@ -21,7 +21,7 @@ public static class ConfigurationHostExtensions
 
     public static bool SetPortToHostSection(this IConfiguration configuration, string hostSection, int port)
     {
-        var shopApiHost = configuration.GetHostSectionValue(hostSection);
+        var shopApiHost = configuration.GetSection(hostSection).Get<string>();
         if (!Uri.TryCreate(shopApiHost, UriKind.Absolute, out var uri))
             return false;
 

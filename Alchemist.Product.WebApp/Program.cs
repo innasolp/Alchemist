@@ -1,8 +1,14 @@
+using Alchemist.Common;
 using Alchemist.Product.Interfaces;
 using Alchemist.WebApp.Api.Common;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
 builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 

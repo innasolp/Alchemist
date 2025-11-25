@@ -21,12 +21,17 @@ using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
 using Alchemist.Product.ImportItemHandler;
+using CustomJsonConfigurationProvider;
+using CustomConfigurationProvider;
 
 var appPath = Utils.GetAppPath();
 var logPath = $"{appPath}/Logs";
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
+builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
 AddSettingsAdapters(builder);
 
@@ -85,14 +90,14 @@ static void AddSettingsAdapters(WebApplicationBuilder builder)
 static void AddLoaderService(WebApplicationBuilder builder)
 {
     builder.Services.AddKeyedSingleton(nameof(BrowserServiceClientFactory),
-           builder.Configuration.GetHostSectionValue("BrowserServiceHost").SetEnvironmentLocalHostIfNeed());
+           builder.Configuration.GetSection("BrowserServiceHost").Get<string>());
     builder.Services.AddSingleton<ILoaderServiceFactory, BrowserServiceClientFactory>();
     builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("WebLoaderPath").Value}");
 }
 
 static void AddShopAPIService(WebApplicationBuilder builder, out string restApiHost)
 {
-    restApiHost = builder.Configuration.GetHostSectionValue("RestAPIHost");
+    restApiHost = builder.Configuration.GetSection("RestAPIHost").Get<string>();
     builder.Services.ConfigureDefaultHttps();
     builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "RestAPIHost", nameof(ShopApiClient), out var shopHttpClientBuilder);
     builder.Services.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(shopHttpClientBuilder);
@@ -100,7 +105,7 @@ static void AddShopAPIService(WebApplicationBuilder builder, out string restApiH
 
 static void AddShopSettingsAPIService(WebApplicationBuilder builder, out string settingsAPIHost)
 {
-    settingsAPIHost = builder.Configuration.GetHostSectionValue("SettingsAPIHost");
+    settingsAPIHost = builder.Configuration.GetSection("SettingsAPIHost").Get<string>();
     builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient), out var settingsHttpClientBuilder);
     builder.Services.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(settingsHttpClientBuilder);
 }
@@ -122,7 +127,6 @@ static void AddShopImporters(WebApplicationBuilder builder)
 static void AddShopImportItemHandlers(IServiceCollection services, IConfiguration configuration)
 {
     var rabbitMQOptions = configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
-    rabbitMQOptions.RabbitMqServiceOptions.HostName = rabbitMQOptions.RabbitMqServiceOptions.HostName.SetEnvironmentLocalHostIfNeed();
     services.AddRabbitMQMessageSender("importqueue", rabbitMQOptions);
     
     services.AddImportProductMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
