@@ -6,7 +6,7 @@ using BrowserLauncher.Interfaces;
 using DependencyInjection.AssemblyExtensions;
 using Http.ErrorHandling;
 using Http.Info;
-using Serilog.Configuration.Extensions;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,15 +25,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler<BrowserServiceContro
 builder.Services.AddSingleton<InfoLogMiddleware<BrowserServiceController>>();
 builder.Services.AddProblemDetails();
 
-var logPath = $"{Utils.GetAppPath()}/Logs";
-var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
-var appSerilogBuilder = new SerilogConfigurationBuilder(builder.Configuration);
-var serviceName = "Alchemist.BrowserService";
-appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, serviceName);
-appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
-
-appSerilogBuilder.SetSerilog(builder.Logging);
+AddLogging(builder.Configuration, builder.Logging);
 
 var app = builder.Build();
 
@@ -65,5 +57,20 @@ app.MapControllers();
 app.MapGet("/", () => "Hello BrowserService!");
 
 app.Run();
+
+static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
+{
+    var logPath = $"{Utils.GetAppPath()}/Logs";
+    var logContextFile = "log.property.json";
+    var serviceName = "Alchemist.BrowserService";
+
+    var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+
+    loggerConfiguration.SetSerilog(loggingBuilder);
+}
 
 public class BrowserServiceProgramm { }

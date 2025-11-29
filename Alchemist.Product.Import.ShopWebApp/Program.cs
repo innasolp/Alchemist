@@ -9,6 +9,7 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
+using Serilog;
 using Serilog.Configuration.Extensions;
 using System.Text.Json.Serialization;
 
@@ -37,7 +38,7 @@ if (isApi)
 if (isApi)
     builder.Services.AddBaseControllerInterceptors<ShopApiController>();
 
-AddLogging(builder, isApi);
+AddLogging(builder.Configuration, builder.Logging, isApi);
 
 var app = builder.Build();
 
@@ -88,19 +89,20 @@ app.MapControllerRoute(
 
 app.Run();
 
-static void AddLogging(WebApplicationBuilder builder, bool isApi)
+static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, bool isApi)
 {
     var logPath = $"{Utils.GetAppPath()}/Logs";
-    var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
-    var appSerilogBuilder = new SerilogConfigurationBuilder(builder.Configuration);
+    var logContextFile = "log.property.json";
     var serviceName = "Alchemist.Product.ShopWebApp";
-    appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, serviceName);
+    var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
     if (isApi)
     {
-        appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-        appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
     }
-    appSerilogBuilder.SetSerilog(builder.Logging);
+    loggerConfiguration.SetSerilog(loggingBuilder);
 }
 
 public class ShopWebAppProgram

@@ -23,9 +23,7 @@ using WebLoader.Interfaces;
 using Alchemist.Product.ImportItemHandler;
 using CustomJsonConfigurationProvider;
 using CustomConfigurationProvider;
-
-var appPath = Utils.GetAppPath();
-var logPath = $"{appPath}/Logs";
+using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,7 +45,7 @@ AddMessages(builder);
 
 AddShopImporters(builder);
 
-AddLogging(logPath, builder, restApiHost, settingsAPIHost);
+AddLogging(builder.Configuration, builder.Logging, builder.Environment, restApiHost, settingsAPIHost);
 
 builder.Services.AddHostedService<ShopImportWorker>();
 
@@ -136,50 +134,50 @@ static void AddShopImportItemHandlers(IServiceCollection services, IConfiguratio
     services.AddCategoryItemHandler("importqueue", configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 }
 
-static void AddShopImportLogging(string logPath, IWebHostEnvironment environment, SerilogConfigurationBuilder appLogConfBuilder)
+static void AddShopImportLogging(string logPath, IWebHostEnvironment environment, LoggerConfiguration loggerConfiguration)
 {
-    appLogConfBuilder.AddContextPropertyConfig(logContextPath: $"{environment.ContentRootPath}/log.contextproperty.json",
-        logPath: $"{logPath}/Import/Products",
-        propertyName: "ShopImportService",
+    loggerConfiguration.AddContextPropertyConfig(logContextFile: "log.contextproperty.json",
+         logPath: $"{logPath}/Import/Products",
+         contextPropertyName: "ShopImportService",
         sourceContext: "Import",
-        null,
-        [new SerilogPropertyExpression(SerilogFunc.Contains, [new ContextProperty("ShopSettingsType"), ShopSettingType.Product.ToString()])]);
+        propertyExpressions: [new PropertyExpression(SerilogFunc.Contains, [new ContextProperty("ShopSettingsType"), ShopSettingType.Product.ToString()])]);
 
-    appLogConfBuilder.AddContextPropertyConfig(logContextPath: $"{environment.ContentRootPath}/log.contextproperty.json",
-        logPath: $"{logPath}/Import/Categories",
-        propertyName: "ShopImportService",
+    loggerConfiguration.AddContextPropertyConfig(logContextFile: "log.contextproperty.json",
+         logPath: $"{logPath}/Import/Categories",
+         contextPropertyName: "ShopImportService",
         sourceContext: "Import",
-        null,
-        [new SerilogPropertyExpression(SerilogFunc.Contains, [new ContextProperty("ShopSettingsType"), ShopSettingType.Category.ToString()])]);
+        propertyExpressions: [new PropertyExpression(SerilogFunc.Contains, [new ContextProperty("ShopSettingsType"), ShopSettingType.Category.ToString()])]);
+    }
+
+static void AddPerfomanceLogging(LoggerConfiguration loggerConfiguration, string logPath, string? restApiHost, string? settingsAPIHost, string logContextFile)
+{
+    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, restApiHost, EventIds.Perfomance.Id, "AlchemyRestAPIClient");
+    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, settingsAPIHost, EventIds.Perfomance.Id, "AlchemySettingsRestAPIClient");
+
+    loggerConfiguration.AddContextPropertyConfig(
+        logContextFile,
+        $"{logPath}/Perfomance",
+        "Host",
+        "Perfomance",
+        [new PropertyExpression("=", [SerilogExpressions.EventId, EventIds.Perfomance.Id])],
+        ["Url"]
+        );
 }
 
-static void AddPerfomanceLogging(string logPath, WebApplicationBuilder builder, string? restApiHost, string? settingsAPIHost, string logContextPath, SerilogConfigurationBuilder appLogConfBuilder)
+static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, IWebHostEnvironment environment,  string? restApiHost, string? settingsAPIHost)
 {
-    appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: "alchemygrpcservice", EventIds.Perfomance.Id, serviceName: "AlchemyGrpcClient");
-    appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: restApiHost, EventIds.Perfomance.Id, serviceName: "AlchemyRestAPIClient");
-    appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: settingsAPIHost, EventIds.Perfomance.Id, serviceName: "AlchemySettingsRestAPIClient");
+    var logPath = $"{Utils.GetAppPath()}/Logs";
+    var logContextFile = "log.property.json";
+    var appLogConfBuilder = new SerilogConfigurationBuilder(configuration);
+    var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
-    appLogConfBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
-        logPath: $"{logPath}/Perfomance",
-        propertyName: "Host",
-        sourceContext: "Perfomance",
-        ["Url"],
-        [new SerilogPropertyExpression("=", [SerilogExpressions.EventId, EventIds.Perfomance.Id]),
-     new SerilogPropertyExpression("<>",[new ContextProperty("Host"), "localhost"])]);
-}
+    AddShopImportLogging(logPath, environment, loggerConfiguration);
 
-static void AddLogging(string logPath, WebApplicationBuilder builder, string? restApiHost, string? settingsAPIHost)
-{
-    var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
-    var appLogConfBuilder = new SerilogConfigurationBuilder(builder.Configuration);
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ShopImportWorker).Name);
 
-    AddShopImportLogging(logPath, builder.Environment, appLogConfBuilder);
+    AddPerfomanceLogging(loggerConfiguration, logPath, restApiHost, settingsAPIHost, logContextFile);
 
-    appLogConfBuilder.AddServiceBaseConfigs(logContextPath, logPath, typeof(ShopImportWorker).Name);
-
-    AddPerfomanceLogging(logPath, builder, restApiHost, settingsAPIHost, logContextPath, appLogConfBuilder);
-
-    appLogConfBuilder.SetSerilog(builder.Logging);
+    loggerConfiguration.SetSerilog(loggingBuilder);
 }
 
 public class ImportBackgroundServiceProgram

@@ -12,6 +12,7 @@ using Http.Info;
 using Http.RequestHandling.PerfomanceCounter;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 
@@ -48,24 +49,13 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddPerfomanceCounter<InfoLogMiddleware<ShopController>>((logger) => new SerilogUrlLogger<PerfomanceCounter<InfoLogMiddleware<ShopController>>>(logger));
 
-
-
-var logPath = $"{Utils.GetAppPath()}/Logs";
-var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
-var appSerilogBuilder = new SerilogConfigurationBuilder(builder.Configuration);
-var serviceName = "Alchemist.Shop.RestAPI";
-appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, serviceName);
-appSerilogBuilder.AddPerfomanceCounter(logContextPath, logPath, url: "https://localhost:8051", EventIds.Perfomance.Id, serviceName);
-appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
-
-appSerilogBuilder.SetSerilog(builder.Logging);
-
+AddLogging(builder.Configuration, builder.Logging);
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseMiddleware<InfoLogMiddleware<ShopController>>();
+app.UseMiddleware<InfoLogMiddleware<ShopCategoryController>>();
 
 (app as IHost).UsePerfomanceCounters();
 
@@ -92,5 +82,22 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
+{
+    var logPath = $"{Utils.GetAppPath()}/Logs";
+    var logContextFile = "log.property.json";
+    var appSerilogBuilder = new SerilogConfigurationBuilder(configuration);
+    var serviceName = "Alchemist.Shop.RestAPI";
+
+    var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
+    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: "https://localhost:8051", EventIds.Perfomance.Id, serviceName);
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+
+    loggerConfiguration.SetSerilog(loggingBuilder);
+}
 
 public class ShopAPIProgram { }

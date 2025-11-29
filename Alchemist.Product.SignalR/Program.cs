@@ -1,7 +1,7 @@
 using Alchemist.Common;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.SignalR;
-using Serilog.Configuration.Extensions;
+using Serilog;
 
 public partial class Program
 {
@@ -16,8 +16,7 @@ public partial class Program
 
         builder.ConfigureLogging((hostContext, logging) =>
         {
-            var appSerilogBuilder = SetLog(hostContext.Configuration, hostContext.HostingEnvironment);
-            appSerilogBuilder.SetSerilog(logging);
+            AddLog(hostContext.Configuration, logging);
         });
 
         builder.ConfigureWebHostDefaults(webBuilder =>
@@ -28,14 +27,16 @@ public partial class Program
         return builder;
     }
 
-    private static SerilogConfigurationBuilder SetLog(IConfiguration configuration, IHostEnvironment env)
+    private static void AddLog(IConfiguration configuration, ILoggingBuilder loggingBuilder)
     {
         var logPath = $"{Utils.GetAppPath()}/Logs";
-        var logContextPath = $"{env.ContentRootPath}/log.property.json";
+        var logContextFile = "log.property.json";
         var serviceName = "SignalR";
-        var appSerilogBuilder = new SerilogConfigurationBuilder(configuration);
-        appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, serviceName);
-        appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{serviceName}", typeof(LogHubFilter).GetNameWithoutGenericArity());
-        return appSerilogBuilder;
+        var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+
+        loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
+        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(LogHubFilter).GetNameWithoutGenericArity());
+
+        loggerConfiguration.SetSerilog(loggingBuilder);
     }
 }
