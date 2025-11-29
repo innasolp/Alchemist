@@ -11,7 +11,7 @@ using Grpc.Server.Interceptors;
 using Grpc.Server.RequestInterceptor;
 using Http.RequestHandling.PerfomanceCounter;
 using Microsoft.EntityFrameworkCore;
-using Serilog.Configuration.Extensions;
+using Serilog;
 using Serilog.Loggers;
 
 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -32,26 +32,17 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 builder.Services.AddPerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>((logger) => new SerilogUrlLogger<PerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>>(logger));
 
 builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
-builder.Services.AddScoped<IAlchemyRepository,AlchemyRepository>();
+builder.Services.AddScoped<IAlchemyRepository, AlchemyRepository>();
 
 builder.Services.AddSingleton<ServerLoggingInterceptor<AlchemyService>>();
 builder.Services.AddSingleton<ServerRequestSenderInterceptor<AlchemyService>>();
 builder.Services.AddGrpc(options =>
 {
     options.Interceptors.Add<ServerRequestSenderInterceptor<AlchemyService>>();
-    options.Interceptors.Add<ServerLoggingInterceptor<AlchemyService>>();    
+    options.Interceptors.Add<ServerLoggingInterceptor<AlchemyService>>();
 });
 
-var logPath = $"{Utils.GetAppPath()}/Logs";
-var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
-var appSerilogBuilder = new SerilogConfigurationBuilder(builder.Configuration);
-appSerilogBuilder.AddServiceBaseConfigs(logContextPath, logPath, typeof(AlchemyService).Name);
-appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath,$"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextContainsLogConfig(logContextPath, $"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
-
-appSerilogBuilder.AddPerfomanceCounter(logContextPath, logPath, url: "https://localhost:8071", EventIds.Perfomance.Id, typeof(AlchemyService).Name);
-
-appSerilogBuilder.SetSerilog(builder.Logging);
+AddLogging(builder.Configuration, builder.Logging);
 
 builder.Services.AddAuthentication("https");
 
@@ -77,6 +68,21 @@ app.MapGrpcService<AlchemyService>();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 app.Run();
+
+static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
+{
+    var logPath = $"{Utils.GetAppPath()}/Logs";
+    var logContextFile = "log.property.json";
+    var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(AlchemyService).Name);
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
+
+    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: "https://localhost:8071", EventIds.Perfomance.Id, typeof(AlchemyService).Name);
+
+    loggerConfiguration.SetSerilog(loggingBuilder);
+}
 
 public partial class GrpcServiceProgramm
 {

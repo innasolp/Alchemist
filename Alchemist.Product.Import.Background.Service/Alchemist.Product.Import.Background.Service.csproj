@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.5" />
-    <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.0" />
+    <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.1" />
     <PackageReference Include="Http.DelegatingRequestSender" Version="1.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />

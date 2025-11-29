@@ -12,12 +12,9 @@ using Grpc.Core.Interceptors;
 using Http.DelegatingRequestSender;
 using Http.RequestHandling.PerfomanceCounter;
 using Message.RabbitMQ.DependencyInjection;
+using Serilog;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
-
-var appPath = Utils.GetAppPath();
-var logPath = $"{appPath}/Logs";
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +22,7 @@ builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
 builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
 
-builder.Services.AddGrpcServiceClient<IProductDataService,Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
+builder.Services.AddGrpcServiceClient<IProductDataService, Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
 builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
 builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
 
@@ -42,21 +39,7 @@ builder.Services.AddRabbitMQMessageReceiver(rabbitMQOptions);
 builder.Services.AddProductItemHandler(builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
 builder.Services.AddCategoryItemHandler(builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 
-var logContextPath = $"{builder.Environment.ContentRootPath}/log.property.json";
-var appLogConfBuilder = new SerilogConfigurationBuilder(builder.Configuration);
-appLogConfBuilder.AddServiceBaseConfigs(logContextPath, logPath, typeof(ImportItemHandlerService).Name);
-appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: "alchemygrpcservice", EventIds.Perfomance.Id, serviceName: "AlchemyGrpcClient");
-appLogConfBuilder.AddPerfomanceCounter(logContextPath, logPath, url: restApiHost, EventIds.Perfomance.Id, serviceName: "AlchemyRestAPIClient");
-
-appLogConfBuilder.AddContextPropertyConfig(logContextPath: $"{builder.Environment.ContentRootPath}/log.contextproperty.json",
-    logPath: $"{logPath}/Perfomance",
-    propertyName: "Host",
-    sourceContext: "Perfomance",
-    ["Url"],
-    [new SerilogPropertyExpression("=", [SerilogExpressions.EventId, EventIds.Perfomance.Id]),
-     new SerilogPropertyExpression("<>",[new ContextProperty("Host"), "localhost"])]);
-
-appLogConfBuilder.SetSerilog(builder.Logging);
+AddLogging(builder.Configuration, builder.Logging, "log.property.json", $"{Utils.GetAppPath()}/Logs", restApiHost);
 
 builder.Services.AddHostedService<ImportItemHandlerService>();
 
@@ -83,6 +66,22 @@ app.UseRouting();
 app.MapGet("/", () => "Hello ImportDBService!");
 
 await app.RunAsync();
+
+static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, string logContextFile, string logPath, string? restApiHost)
+{    
+    var appLogConfBuilder = new SerilogConfigurationBuilder(configuration);
+    var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ImportItemHandlerService).Name);
+    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: "alchemygrpcservice", EventIds.Perfomance.Id, serviceName: "AlchemyGrpcClient");
+    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: restApiHost, EventIds.Perfomance.Id, serviceName: "AlchemyRestAPIClient");
+
+    loggerConfiguration.AddContextPropertyConfig(logContextFile, $"{logPath}/Perfomance", "Host", "Perfomance",
+        [new PropertyExpression("=", [SerilogExpressions.EventId, EventIds.Perfomance.Id])],
+        ["Url"]);
+
+    loggerConfiguration.SetSerilog(loggingBuilder);
+}
 
 public class ImportDbServiceProgram
 { }

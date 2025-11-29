@@ -4,7 +4,7 @@ namespace Alchemist.Common;
 
 public class EnvironmentConfigurationRule : ICustomConfigurationRule
 {
-    public bool Check(string value)
+    public bool Check(string sectionName, string value)
     {
         return value?.ContainsLocalHost() == true;
     }
