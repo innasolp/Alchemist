@@ -12,6 +12,7 @@ using Alchemist.Product.Import.Background.Models;
 using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Messages.Common;
 using Alchemist.Import.Settings.DataAdapter;
+using System.Collections.Concurrent;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -29,7 +30,7 @@ public class ShopImportWorker : BackgroundService
 
     private List<IShopItem> ShopModels { get; } = [];
 
-    private readonly Dictionary<Guid, ServiceToken> _servicesTokens = [];
+    private readonly ConcurrentDictionary<Guid, ServiceToken> _servicesTokens = [];
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
         [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)] IMessageReceiver eventMessageReceiver,
@@ -112,10 +113,11 @@ public class ShopImportWorker : BackgroundService
             if (!ShopModels.Any(s => s.ShopName == shopModel.ShopName))
                 ShopModels.Add(shopModel);
 
-            if (!TryGetImportService(newShopSettings.Name, shopImportSettings, shopModel, out var service)) return;
+            if (!TryGetImportService(newShopSettings.Name, shopImportSettings, shopModel, out var service)
+                || service is null) return;
 
             var guid = Guid.NewGuid();
-            _servicesTokens.Add(guid, new ServiceToken(service, new CancellationTokenSource()));
+            _servicesTokens.TryAdd(guid, new ServiceToken(service, new CancellationTokenSource()));
 
             _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
 
@@ -136,7 +138,7 @@ public class ShopImportWorker : BackgroundService
         {
             var allShopImportSettings = await GetAllShopImportSettingsAsync();
 
-            await CreateServicesFromImportSettingsAsync(allShopImportSettings);           
+            await Task.WhenAll(allShopImportSettings.Select(s => TryCreateServiceFromImportSettingsAsync(s.Key, s.Value)));
 
             _logger.LogInformation("Import services initialized.");
             
@@ -164,19 +166,17 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task CreateServicesFromImportSettingsAsync(IDictionary<string, IShopImportSettings> allShopImportSettings)
+    private async Task TryCreateServiceFromImportSettingsAsync(string settingsKey, IShopImportSettings shopImportSettings)
     {
-        foreach (var shopImportSettings in allShopImportSettings)
-        {
-            var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings.Value);
-            ShopModels.Add(shopModel);
+        var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
+        ShopModels.Add(shopModel);
 
-            if(!TryGetImportService(shopImportSettings.Key, shopImportSettings.Value, shopModel, out var shopImportService))
-                continue;
+        if (!TryGetImportService(settingsKey, shopImportSettings, shopModel, out var shopImportService)
+            || shopImportService is null)
+            return;
 
-            var guid = Guid.NewGuid();
-            _servicesTokens.Add(guid, new ServiceToken(shopImportService, new CancellationTokenSource()));            
-        }
+        var guid = Guid.NewGuid();
+        _servicesTokens.TryAdd(guid, new ServiceToken(shopImportService, new CancellationTokenSource()));
     }
 
     private async Task StartEventMessageReceiverAsync(CancellationToken stoppingToken)
@@ -210,7 +210,7 @@ public class ShopImportWorker : BackgroundService
         return allShopImportSettings;
     }
 
-    private bool TryGetImportService(string name, IShopImportSettings shopImportSettings, IShopItem shopModel, out IImportService service)
+    private bool TryGetImportService(string name, IShopImportSettings shopImportSettings, IShopItem shopModel, out IImportService? service)
     {
         service = default;
 

@@ -13,7 +13,6 @@ using Http.RequestHandling.PerfomanceCounter;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 
 
@@ -87,7 +86,6 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
 {
     var logPath = $"{Utils.GetAppPath()}/Logs";
     var logContextFile = "log.property.json";
-    var appSerilogBuilder = new SerilogConfigurationBuilder(configuration);
     var serviceName = "Alchemist.Shop.RestAPI";
 
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);

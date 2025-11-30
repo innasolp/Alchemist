@@ -69,7 +69,6 @@ await app.RunAsync();
 
 static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, string logContextFile, string logPath, string? restApiHost)
 {    
-    var appLogConfBuilder = new SerilogConfigurationBuilder(configuration);
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ImportItemHandlerService).Name);

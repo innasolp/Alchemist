@@ -63,8 +63,8 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
                 return result;
             }
 
-            var product = await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand?.Name, cancellationToken)
-                                ?? await _productDataService.FindProductByName(productData.Product.Name, cancellationToken);
+            var product = await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand?.Name)
+                                ?? await _productDataService.FindProductByName(productData.Product.Name);
 
             if (product != null)
             {

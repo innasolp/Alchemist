@@ -168,7 +168,6 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
 {
     var logPath = $"{Utils.GetAppPath()}/Logs";
     var logContextFile = "log.property.json";
-    var appLogConfBuilder = new SerilogConfigurationBuilder(configuration);
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     AddShopImportLogging(logPath, environment, loggerConfiguration);
