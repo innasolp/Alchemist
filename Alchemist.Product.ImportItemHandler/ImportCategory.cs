@@ -1,5 +1,5 @@
-﻿using Alchemist.Common;
-using Alchemist.Import.Category.Interfaces;
+﻿using Alchemist.Import.Category.Interfaces;
+using Import.Interfaces;
 using Alchemist.Product.Interfaces;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -28,7 +28,11 @@ internal class ImportCategory : IImportCategoryItem
 
     int ICategory.Id => ItemId;
 
-    public int ShopId { get; set; }
+    public string ShopName { get; set; }
+
+    public string ShopUrl { get; set; }
+
+
     public string Category { get; set; }
 
     int? ICategory.ParentId => ItemParentId;
@@ -59,7 +63,6 @@ internal class ImportCategory : IImportCategoryItem
         ItemId = shopCategory.ItemId;
         ParentId = shopCategory.ParentId;
         Category = shopCategory.Category;
-        ShopId = shopCategory.ShopId;
 
         Url = itemCategory.Url;
         Name = itemCategory.Name;

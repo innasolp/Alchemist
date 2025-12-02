@@ -1,8 +1,8 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Category.Json;
 using Alchemist.Import.Category.Test.Infrastructure;
-using Alchemist.Test.Import.Service;
-using Alchemist.Test.Import.Service.Infrastructure;
+using Import.Service.Test.Infrastructure;
+using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Resources;
@@ -12,8 +12,6 @@ namespace Alchemist.Import.Category.Test;
 
 public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesTimerService>>
 {
-    protected override ShopImportCategoriesTimerServiceTest Service { get; }
-    
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
 
     private readonly CategoryLoadOptions _loadOptions = new() { SecondsInterval = 30 };
@@ -29,13 +27,17 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
         LoaderMock.SetupLoadCookies();
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
-        _categoryShopModelMock.Setup(s => s.ShopName).Returns(Guid.NewGuid().ToString());
+        _categoryShopModelMock.Setup(s => s.Name).Returns(Guid.NewGuid().ToString());
+        _categoryShopModelMock.Setup(s => s.SourceName).Returns(Guid.NewGuid().ToString());
+    }
 
-        Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
-            Guid.NewGuid().ToString(),
+    protected override ShopImportCategoriesTimerServiceTest CreateService(string name)
+    {
+        return new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
+            name,
             null,
             LoaderMock.Object,
-            _categoryShopModelMock.Object,            
+            _categoryShopModelMock.Object,
             _loadOptions,
             _categoryItemHandlerMock.Object
             );
@@ -43,10 +45,10 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
     private async Task ExecuteServiceAsync(string name, int executionDuration, int completeDuration)
     {
-        Service.SetName(name);
+        var service = CreateService(name);
 
         var token = new CancellationTokenSource();
-        var task = Service.Start(token.Token);
+        var task = service.Start(token.Token);
 
         await Task.Delay(executionDuration);
 
@@ -79,7 +81,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         await ExecuteServiceAsync(name, 5000, 1000);       
 
         LoggerMock.VerifyInfo(ImportCategoriesResourceManager.GetString("CategoryNameIdForShopWasLoaded"),
-            category.Name, category.Id, _categoryShopModelMock.Object.ShopName); 
+            category.Name, category.Id, _categoryShopModelMock.Object.SourceName); 
     }
 
     [Fact]

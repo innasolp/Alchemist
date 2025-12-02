@@ -1,5 +1,5 @@
-﻿using Alchemist.Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.Interfaces;
+using Import.Settings.Interfaces;
 using System.Collections;
 using System.Text.Json.Serialization;
 

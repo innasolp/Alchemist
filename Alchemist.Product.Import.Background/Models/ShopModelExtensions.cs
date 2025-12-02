@@ -1,8 +1,7 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Settings.Interfaces;
+using Alchemist.Import.Settings.Category;
+using Import.Settings.Interfaces;
+using Alchemist.Import.Settings.Product;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
@@ -10,7 +9,7 @@ namespace Alchemist.Product.Import.Background.Models;
 
 internal static class ShopModelExtensions
 {
-    internal static async Task<IShopItem> GetShopModelAsync(this IShopDataService shopDataService,
+    internal static async Task<IImportSource> GetShopModelAsync(this IShopDataService shopDataService,
         IShopImportSettings shopImportSettings, 
         ShopSettingType shopSettingType)
     {
@@ -19,7 +18,7 @@ internal static class ShopModelExtensions
             : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
     }
 
-    internal static async Task<IShopItem> GetShopModelAsync(this IShopDataService shopDataService,
+    internal static async Task<IImportSource> GetShopModelAsync(this IShopDataService shopDataService,
         IShopImportSettings shopImportSettings)
     {
         var shopSettingsType = shopImportSettings is IShopSettings shopSettings ? shopSettings.Type
@@ -77,7 +76,7 @@ internal static class ShopModelExtensions
     }
 
     private static async Task<T> GetShopModelCoreAsync<T>(this IShopDataService shopDataService, IShopImportSettings shopImportSettings)
-        where T : class, IShopModel, new()
+        where T : ShopModel, new()
     {
         var shop = (shopImportSettings is ShopSettings shopSettings
                 ? await shopDataService.GetShop(shopSettings.ShopId)
@@ -100,14 +99,13 @@ internal static class ShopModelExtensions
     }    
 
     private static T CreateShopModelCore<T>(IShop shop, IShopImportSettings shopImportSettings)
-        where T : class, IShopModel, new()
+        where T : ShopModel, new()
     {
         return new T
         {
-            ShopName = shop?.Name ?? shopImportSettings.ShopName,
-            ShopUrl = shop?.Url ?? shopImportSettings.ShopUrl,
-            Id = shop.Id,
-            Host = new Uri(shop?.Url ?? shopImportSettings.ShopUrl).Host
+            Name = shop?.Name ?? shopImportSettings.ShopName,
+            Url = shop?.Url ?? shopImportSettings.ShopUrl,
+            Id = shop.Id
         };
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Interfaces;
+﻿namespace Alchemist.Import.Products.Interfaces;
 
 public interface IPaginatorItem
 {

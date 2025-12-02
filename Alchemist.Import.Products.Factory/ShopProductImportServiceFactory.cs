@@ -1,9 +1,9 @@
-﻿using Alchemist.Import.Factory.BrowserService;
-using Alchemist.Import.Factory.Logging;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Service.Factory.Abstractions;
-using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Settings.Product;
+using Import.Factory.Interfaces;
+using Import.Factory.Service;
+using Import.Interfaces;
+using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Factory.Products;
@@ -11,14 +11,14 @@ namespace Alchemist.Import.Factory.Products;
 public abstract class ShopProductImportServiceFactory(ILogger logger,
     ILoaderServiceFactory browserServiceFactory,
     IProductItemHandler itemHandler,
-    IImportServiceLogFactory? logFactory = null) : ShopImportServiceFactory(logger, browserServiceFactory, logFactory)
+    IImportServiceLogFactory? logFactory = null) : ImportServiceFactory(logger, browserServiceFactory, logFactory)
 {
     private readonly IProductItemHandler _itemHandler = itemHandler;
 
 
     protected override IImportService Create(ILogger logger, 
         string name,
-        IShopItem shopModel, 
+        IImportSource shopModel, 
         IShopImportSettings shopImportSettings,
         ILoaderService browserService)
     {

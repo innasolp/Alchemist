@@ -1,5 +1,5 @@
-﻿using Alchemist.Import.Interfaces;
-using BrowserDataLoader.Interfaces;
+﻿using BrowserDataLoader.Interfaces;
+using Import.Interfaces;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -73,7 +73,7 @@ internal class BrowserServiceClient : ILoaderService
         await _webLoader.DisposeAsync();
     }
 
-    async Task<object> ILoaderService.GetData(string host, CancellationToken token = default)
+    async Task<object> ILoaderService.GetData(string host, CancellationToken token)
     {
         return await LoadCookies(host, token);        
     }

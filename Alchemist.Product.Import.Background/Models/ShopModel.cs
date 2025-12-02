@@ -1,7 +1,10 @@
 ﻿using Alchemist.Product.Interfaces;
+using Import.Settings.Interfaces;
 using System.ComponentModel;
 
 namespace Alchemist.Product.Import.Background.Models;
+
+interface IShopModel : IImportSource, IShop { }
 
 internal abstract class ShopModel : IShopModel
 {
@@ -19,12 +22,11 @@ internal abstract class ShopModel : IShopModel
         }
     }
 
-    public string ShopName { get; set; }
-    public string ShopUrl { get; set; }
-    public string Host { get; set; }
+    public string Name { get; set; }
+    public string Url { get; set; }
     public string? Caption { get; set; }
-    string IShop.Name { get => ShopName; set => ShopName = value; }
-    string IShop.Url { get => ShopUrl; set => ShopUrl = value; }
+    string IShop.Name { get => Name; set => Name = value; }
+    string IShop.Url { get => Url; set => Url = value; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string prop = "")

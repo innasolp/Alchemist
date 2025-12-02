@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Import.Settings.Interfaces;
 using Alchemist.Product.Interfaces;
 using System.Collections;
 using System.Text.Json.Serialization;

@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Import.Settings.Category;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Import.Settings.Test.Model;

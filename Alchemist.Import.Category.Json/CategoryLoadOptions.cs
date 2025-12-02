@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Html;
+﻿using Import.Html;
 
 namespace Alchemist.Import.Category.Json;
 

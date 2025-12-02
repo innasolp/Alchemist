@@ -1,5 +1,4 @@
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Service;
 using Alchemist.Product.Shop.GoldApple.Model;
 using Alchemist.Test.Product.Shop;
 using BrowserDataLoader.Firefox.Standart.Windows;

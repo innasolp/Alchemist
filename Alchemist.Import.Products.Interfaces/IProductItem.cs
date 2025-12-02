@@ -1,9 +1,9 @@
-﻿using Alchemist.Import.Interfaces;
+﻿namespace Alchemist.Import.Products.Interfaces;
 
-namespace Alchemist.Import.Products.Interfaces;
-
-public interface IProductItem : IItem
+public interface IProductItem 
 {
+    string Name { get; }
+
     string ItemId { get; }   
 
     string[]? Components { get; }

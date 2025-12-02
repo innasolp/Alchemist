@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.BrowserService.Factory\Alchemist.Import.Factory.BrowserService.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Factory.Interfaces\Import.Factory.Interfaces.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Interfaces\Import.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
   </ItemGroup>
 

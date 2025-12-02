@@ -1,5 +1,5 @@
 ﻿using Alchemist.Common;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Settings.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Message.SignalR.HubMessage.DependencyInjection;

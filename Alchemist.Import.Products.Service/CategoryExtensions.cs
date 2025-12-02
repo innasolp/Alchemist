@@ -1,5 +1,4 @@
 ﻿using Alchemist.Common;
-using Alchemist.Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 
 namespace Alchemist.Import.Products.Service;

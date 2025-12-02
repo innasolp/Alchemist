@@ -8,5 +8,7 @@ public interface ICategoryData
 
     IShopCategory ParentCategory { get; }
 
-    int ShopId { get; }
+    string ShopName { get; }
+
+    string ShopUrl { get; }
 }

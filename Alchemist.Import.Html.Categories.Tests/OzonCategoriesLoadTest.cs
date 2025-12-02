@@ -1,10 +1,11 @@
 using Alchemist.Import.Category.Json;
-using Alchemist.Import.Html.Factory;
+using Import.Html.Factory;
 using BrowserDataLoader.Interfaces;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
+using Import.Html;
 
 namespace Alchemist.Import.Html.Categories.Tests;
 

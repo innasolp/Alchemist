@@ -1,7 +1,6 @@
-﻿using Alchemist.Common;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Service;
+﻿using Alchemist.Import.Products.Interfaces;
+using Import.Interfaces;
+using Import.Service;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -9,13 +8,13 @@ using System.Text.Json;
 
 namespace Alchemist.Import.Products.Service;
 
-public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ImportService
+public abstract class ShopImportCategoryProductsService<TCategory, TProductItem> : ImportService, IListener<IProductShopCategory>
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
     protected record CategoryResult(TCategory Category, int SuccessProductCount, int UnsuccessProductCount);
 
-    protected sealed record ImportProduct(IProductItem ProductItem, IShopItem Shop) : IImportProduct
+    protected sealed record ImportProduct(IProductItem ProductItem, string SourceName, string SourceUrl) : IImportProduct
     {
     }
 
@@ -23,36 +22,48 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly SemaphoreSlim _loaderSemaphoreSlim = new(1, 1);
 
+    private readonly SemaphoreSlim _categoriesSemaphoreSlim = new(1, 1);
+
     protected ConcurrentQueue<IProductShopCategory> Categories { get; }
 
-    protected IProductShopModel ProductShopModel { get; }
+    private readonly string _productUrlFormat;
 
+    private readonly string _categoryUrlFormat;
+
+    private readonly string _sourceName;
     protected abstract int PageProductCount { get; }
-
     protected virtual int MaxUnsuccessRequestCount => 10;
 
     public ShopImportCategoryProductsService(ILogger logger,
-        IProductShopModel shopUrlModel,
+        string productUrlFormat,
+        string categoryUrlFormat,
+        string sourceName,
+        string url,
+        IEnumerable<IProductShopCategory> shopCategories,
         ILoaderService loader,
         IProductItemHandler itemHandler)
-        : base(logger, loader, shopUrlModel.Host)
+        : base(logger, loader, url)
     {
-        ProductShopModel = shopUrlModel;
+        _productUrlFormat = productUrlFormat;
+        _categoryUrlFormat = categoryUrlFormat;
+        _sourceName = sourceName;
         _itemHandler = itemHandler;
         Categories = new();
 
-        ProductShopModel.Categories.ToList().ForEach(c => Categories.Enqueue(c));
-        ProductShopModel.Categories.CollectionChanged += OnCategoriesAdd;
+        shopCategories.ToList().ForEach(c => Categories.Enqueue(c));
     }
 
-    private void OnCategoriesAdd(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    async Task IListener<IProductShopCategory>.On(IProductShopCategory message)
     {
-        if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems?.Count > 0)
+        try
         {
-            var newItems = e.NewItems.OfType<IProductShopCategory>().ToList();
-            newItems.ForEach(Categories.Enqueue);
-            foreach (var item in newItems)
-                Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, item.GetCategoryUrl());
+            await _categoriesSemaphoreSlim.WaitAsync();
+            Categories.Enqueue(message);
+            Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, message.GetCategoryUrl());
+        }
+        finally
+        {
+            _categoriesSemaphoreSlim.Release();
         }
     }
 
@@ -70,7 +81,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             var attemptsCount = 0;
 
             var categoryUrl = category.GetCategoryUrl();
-            var categoryPageUrl = string.Format(ProductShopModel.CategoryUrl, categoryUrl, page);
+            var categoryPageUrl = string.Format(_categoryUrlFormat, categoryUrl, page);
 
             while (isEndOfCategory != true)
             {
@@ -91,7 +102,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 else
                     attemptsCount = 0;
 
-                var nextCategoryPageUrl = CategoryPaging.GetNextPage(categoryPageResult.Value.Category, ProductShopModel.CategoryUrl, categoryUrl, page);
+                var nextCategoryPageUrl = CategoryPaging.GetNextPage(categoryPageResult.Value.Category, _categoryUrlFormat, categoryUrl, page);
 
                 successProductCount += categoryPageResult.Value.SuccessProductCount;
                 unsuccessProductCount += categoryPageResult.Value.UnsuccessProductCount;
@@ -188,7 +199,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         if (categoryResult.Status == ResultStatus.Success && categoryResult.Value != null
             && categoryResult.Value.CategoryProductItems == null && categoryResult is IPaginatorItem tokenCategory)
         {
-            var urlWithPageToken = tokenCategory.GetPageUrl(ProductShopModel.CategoryUrl, page);
+            var urlWithPageToken = tokenCategory.GetPageUrl(_categoryUrlFormat, page);
             categoryResult = await ProcessUrlTaskAsync(GetFromApiUrlAsync<TCategory>, urlWithPageToken, token);
         }
 
@@ -197,7 +208,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected async Task<ResultStatus> HandleProductItemAsync(TProductItem productItem, CancellationToken cancellationToken)
     {
-        var result = await ProcessUrlTaskAsync((i, token) => _itemHandler.HandleItem(new ImportProduct(i, ProductShopModel), token),
+        var result = await ProcessUrlTaskAsync((i, token) => _itemHandler.HandleItem(new ImportProduct(i, _sourceName, Host), token),
             i => i.ApiUrl, productItem, cancellationToken);
 
         Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, [productItem.Name, productItem.ApiUrl, result.Value]);

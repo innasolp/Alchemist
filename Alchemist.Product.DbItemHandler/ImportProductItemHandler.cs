@@ -7,7 +7,7 @@ using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.DbItemHandler;
 
-internal class ImportProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName)
+internal class ImportProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName, IShopCache shopCache)
     : IImportItemHandler
 {
     private class ImportProductProcessEventArgs(IProductData item, ItemProcessStatus processStatus, CancellationToken cancellationToken)
@@ -17,6 +17,8 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
     private readonly IProductDataService _productDataService = productDataService;
 
     private readonly IShopDataService _shopDataService = shopDataService;
+
+    private readonly IShopCache _shopCache = shopCache;
 
     public string EventName { get; private set; } = eventName;
 
@@ -36,11 +38,14 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
 
         try
         {
-            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(productData.ShopId, productData.ShopProduct?.ItemId ?? string.Empty)
+            var shop = await _shopCache.TryGetShopAsync(productData.ShopName, productData.ShopUrl)
+            ?? throw new InvalidDataException($"Shop with name {productData.ShopName} or url {productData.ShopUrl} not found.");
+
+            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(shop.Id, productData.ShopProduct?.ItemId ?? string.Empty)
                 ??
                 new ShopProduct
                 {
-                    ShopId = productData.ShopId,
+                    ShopId = shop.Id,
                     ItemId = productData.ShopProduct.ItemId,
                     ApiUrl = productData.ShopProduct.ApiUrl,
                     ItemUrl = productData.ShopProduct.ItemUrl
@@ -48,7 +53,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
 
             if (shopProduct.ProductId != 0)
             {
-                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(productData.ShopId, shopProduct.Id, productData.ShopCategory.ItemId);
+                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shop.Id, shopProduct.Id, productData.ShopCategory.ItemId);
                 //todo
                 //if(!categoryResult)
                 //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
@@ -68,14 +73,14 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
 
             if (product != null)
             {
-                if (await _productDataService.GetShopProductByShopAndProductId(productData.ShopId, product.Id) != null)
+                if (await _productDataService.GetShopProductByShopAndProductId(shop.Id, product.Id) != null)
                 {
                     await InvokeItemProcessedAsync(productData, ItemProcessStatus.AlreadyExists, cancellationToken);
                     return ItemProcessStatus.AlreadyExists;
                 }
             }
             else
-                product = await CreateProductFromModelAsync(productData, productData.ShopId);
+                product = await CreateProductFromModelAsync(productData, shop.Id);
 
             shopProduct.ProductId = product.Id;
             shopProduct.IsActual = true;
@@ -83,7 +88,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
             var newShopProduct = await _productDataService.CreateShopProduct(shopProduct);
 
             if (!await SetShopProductPriceForItemAsync(productData, newShopProduct.Id) ||
-                    !await SetShopProductCategoryIfNeedAsync(productData.ShopId, newShopProduct.Id, productData.ShopCategory.ItemId))
+                    !await SetShopProductCategoryIfNeedAsync(shop.Id, newShopProduct.Id, productData.ShopCategory.ItemId))
             {
                 await InvokeItemProcessedAsync(productData, ItemProcessStatus.Error, cancellationToken);
                 return await Task.FromResult(ItemProcessStatus.Error);

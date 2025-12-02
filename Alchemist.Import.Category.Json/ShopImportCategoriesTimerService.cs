@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Html;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Service;
+using Import.Html;
+using Import.Interfaces;
+using Import.Service;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ namespace Alchemist.Import.Category.Json;
 
 public class ShopImportCategoriesTimerService : ImportService
 {
-    protected sealed record ImportCategory(ICategory Category, ICategoryShopModel CategoryShopModel) : IImportCategory
+    protected sealed record ImportCategory(ICategory Category, string CategorySourceUrl, string SourceName, string SourceUrl) : IImportCategory
     {
     }
 
@@ -20,7 +20,9 @@ public class ShopImportCategoriesTimerService : ImportService
 
     public override string Name { get; }
 
-    protected ICategoryShopModel ShopModel { get; }
+    private readonly string _categorySourceUrl;
+
+    private readonly string _sourceName;
 
     private readonly int _defaultInterval = 3600;
 
@@ -38,14 +40,17 @@ public class ShopImportCategoriesTimerService : ImportService
         string name,
         IHtmlSearcher? htmlSearcher,
         ILoaderService loader,
-        ICategoryShopModel shop,
+        string categorySourceUrl,
+        string sourceName,
+        string url,
         CategoryLoadOptions categoryLoadOptions,
-       ICategoryItemHandler itemHandler) : base(logger, loader,  shop.Host)
+       ICategoryItemHandler itemHandler) : base(logger, loader,  url)
     {
         HtmlSearcher = htmlSearcher;
         CategoryLoadOptions = categoryLoadOptions;
         Name = name;
-        ShopModel = shop;
+        _categorySourceUrl = categorySourceUrl;
+        _sourceName = sourceName;
         _itemHandler = itemHandler;
 
         _timer = new(TimeSpan.FromSeconds(CategoryLoadOptions.SecondsInterval ?? _defaultInterval));
@@ -54,10 +59,12 @@ public class ShopImportCategoriesTimerService : ImportService
     public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
         string name,
    ILoaderService loader,
-   ICategoryShopModel shopUrlModel,
+   string categorySourceUrl,
+   string sourceName,
+   string url,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
-        : this(logger,name, null, loader, shopUrlModel, categoryLoadOptions, itemHandler)
+        : this(logger,name, null, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler)
     {
     }
 
@@ -83,27 +90,27 @@ public class ShopImportCategoriesTimerService : ImportService
         {            
             var nextTickResult = await ProcessTaskAsync(() => _timer.WaitForNextTickAsync(stoppingToken).AsTask());  
 
-            if(nextTickResult.Status == Common.ResultStatus.Success && nextTickResult.Value)
+            if(nextTickResult.Status == ResultStatus.Success && nextTickResult.Value)
              await LoadCategoriesAsync(stoppingToken);
         }
     }
 
     private async Task LoadCategoriesAsync(CancellationToken stoppingToken)
     {
-        var documentResult = await ProcessUrlTaskAsync(LoadJsonDocumentAsync, ShopModel.CategorySourceUrl, stoppingToken);
+        var documentResult = await ProcessUrlTaskAsync(LoadJsonDocumentAsync, _categorySourceUrl, stoppingToken);
         
-        if (documentResult.Status != Common.ResultStatus.Success || documentResult.Value == null)
+        if (documentResult.Status != ResultStatus.Success || documentResult.Value == null)
         {            
-            if (documentResult.Status == Common.ResultStatus.Cancelled)
+            if (documentResult.Status == ResultStatus.Cancelled)
                 Logger.LogInformation(ImportCategoryLogMessages.ServiceNotLoadedJsonDocFromUrlOperationWasCancelled,
-                    [Name, ShopModel.CategorySourceUrl]);
+                    [Name, _categorySourceUrl]);
             
-            else if (documentResult.Status == Common.ResultStatus.Error)
-                Logger.LogError(ImportCategoryLogMessages.JsonLoadFromUrlFailed, [ShopModel.CategorySourceUrl, documentResult.Exception.Message]);
+            else if (documentResult.Status == ResultStatus.Error)
+                Logger.LogError(ImportCategoryLogMessages.JsonLoadFromUrlFailed, [_categorySourceUrl, documentResult.Exception.Message]);
             
-            else if (documentResult.Status == Common.ResultStatus.Warning)
+            else if (documentResult.Status == ResultStatus.Warning)
                 Logger.LogInformation(ImportCategoryLogMessages.JsonDocumentNotLoadedFromUrlWithWarning,
-                    [ShopModel.CategorySourceUrl, documentResult.Exception.Message]);
+                    [_categorySourceUrl, documentResult.Exception.Message]);
 
             return;
         }
@@ -117,13 +124,13 @@ public class ShopImportCategoriesTimerService : ImportService
                 CategoryLoadOptions.CategoryPropertyPaths,
                 stoppingToken));
 
-        if (loadParentCategoriesResult.Status != Common.ResultStatus.Success)
+        if (loadParentCategoriesResult.Status != ResultStatus.Success)
         {
-            if (loadParentCategoriesResult.Status == Common.ResultStatus.Cancelled)           
+            if (loadParentCategoriesResult.Status == ResultStatus.Cancelled)           
                 Logger.LogInformation(ImportCategoryLogMessages.ServiceCancelledOnLoadingStartCategories, Name); 
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Warning)
+            else if (loadParentCategoriesResult.Status == ResultStatus.Warning)
                 Logger.LogWarning(ImportCategoryLogMessages.ServiceNotLoadedCategories, Name, loadParentCategoriesResult.Exception.Message);
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Error)
+            else if (loadParentCategoriesResult.Status == ResultStatus.Error)
                 Logger.LogError(ImportCategoryLogMessages.ServiceNotLoadedCategories, Name, loadParentCategoriesResult.Exception.Message);
            
             return;
@@ -137,13 +144,13 @@ public class ShopImportCategoriesTimerService : ImportService
 
         var parentCategories = new List<JsonCategory>(categories);
         var categoriesResult = await ProcessTaskAsync(() => Task.WhenAll(parentCategories.Select(c => LoadCategoryChildrentTreeAsync(c, CategoryLoadOptions.CategoriesApiUrlFormat, categories, stoppingToken))));
-        if (categoriesResult.Status != Common.ResultStatus.Success)
+        if (categoriesResult.Status != ResultStatus.Success)
         {
-            if (categoriesResult.Status == Common.ResultStatus.Cancelled)
+            if (categoriesResult.Status == ResultStatus.Cancelled)
                 Logger.LogInformation(ImportCategoryLogMessages.ServiceCancelledOnLoadingChildCategories, Name);
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Warning)
+            else if (loadParentCategoriesResult.Status == ResultStatus.Warning)
                 Logger.LogWarning(ImportCategoryLogMessages.ServiceNotLoadedChildCategories, Name, loadParentCategoriesResult.Exception.Message);
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Error)
+            else if (loadParentCategoriesResult.Status == ResultStatus.Error)
                 Logger.LogError(ImportCategoryLogMessages.ServiceNotLoadedChildCategories, Name, loadParentCategoriesResult.Exception.Message);
         }
 
@@ -156,14 +163,14 @@ public class ShopImportCategoriesTimerService : ImportService
 
         //todo if html?
         var categoriesJsonResult = await ProcessUrlTaskAsync(LoadJsonFromUrlAsync, url, token);
-        if (categoriesJsonResult.Status == Common.ResultStatus.Cancelled)
+        if (categoriesJsonResult.Status == ResultStatus.Cancelled)
             token.ThrowIfCancellationRequested();
 
-        if (categoriesJsonResult.Value == null || categoriesJsonResult.Status != Common.ResultStatus.Success)
+        if (categoriesJsonResult.Value == null || categoriesJsonResult.Status != ResultStatus.Success)
         {
-            if (categoriesJsonResult.Status == Common.ResultStatus.Warning)
+            if (categoriesJsonResult.Status == ResultStatus.Warning)
                 Logger.LogWarning(ImportCategoryLogMessages.ServiceCategoryFailedOnLoadingFromUrl, Name, parentCategory.Name, categoriesJsonResult.Exception.Message);
-            else if (categoriesJsonResult.Status == Common.ResultStatus.Error)
+            else if (categoriesJsonResult.Status == ResultStatus.Error)
                 Logger.LogError(ImportCategoryLogMessages.ServiceCategoryFailedOnLoadingFromUrl, Name, parentCategory.Name, categoriesJsonResult.Exception.Message);
 
             if (categoriesJsonResult.Exception != null)
@@ -242,12 +249,12 @@ public class ShopImportCategoriesTimerService : ImportService
             foreach (var category in newItems)
             {
                 Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasLoaded,
-                    category.Name, category.Id, ShopModel.ShopName);
+                    category.Name, category.Id, _sourceName);
 
-                await _itemHandler.HandleItem(new ImportCategory(category, ShopModel), _currentCancellationToken);
+                await _itemHandler.HandleItem(new ImportCategory(category, _categorySourceUrl, _sourceName, Host ), _currentCancellationToken);
 
                 Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
-                    category.Name, category.Id, ShopModel.ShopName);
+                    category.Name, category.Id, _sourceName);
             }
         }
         catch(OperationCanceledException operationCanceled) 

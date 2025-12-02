@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Import\Import.Html\Import.Html.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Service\Import.Service.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Html\Alchemist.Import.Html.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Service\Alchemist.Import.Service.csproj" />
   </ItemGroup>
 
   <ItemGroup>

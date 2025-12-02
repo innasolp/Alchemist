@@ -2,9 +2,6 @@ using Alchemist.BrowserService.Client;
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
-using Alchemist.Import.Factory.BrowserService;
-using Alchemist.Import.Factory.Logging;
-using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Log.Extensions;
@@ -24,7 +21,8 @@ using Alchemist.Product.ImportItemHandler;
 using CustomJsonConfigurationProvider;
 using CustomConfigurationProvider;
 using Serilog;
-
+using Import.Factory.Interfaces;
+using Import.Factory.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,8 +108,8 @@ static void AddShopSettingsAPIService(WebApplicationBuilder builder, out string 
 
 static void AddShopImporters(WebApplicationBuilder builder)
 {
-    builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopProductImportPath").Value}");
-    builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
+    builder.Services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopProductImportPath").Value}");
+    builder.Services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
 
     builder.Services.AddImportServiceLogFactory((logger, name, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
     { "ShopImportService", name },

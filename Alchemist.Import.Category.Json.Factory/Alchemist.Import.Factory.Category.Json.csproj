@@ -9,10 +9,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Category.Json\Alchemist.Import.Category.Json.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Abstractions\Alchemist.Import.Service.Factory.Abstractions.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Factory.Logging.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Interfaces\Alchemist.Import.Service.Factory.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Html.Factory\Alchemist.Import.Html.Factory.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Factory.Service\Import.Factory.Service.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Factory.Logging\Import.Factory.Logging.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Factory.Interfaces\Import.Factory.Interfaces.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Html.Factory\Import.Html.Factory.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Category\Alchemist.Import.Settings.Category.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

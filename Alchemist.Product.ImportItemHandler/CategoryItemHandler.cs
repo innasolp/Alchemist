@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.DataItem.Interfaces;
-using Alchemist.Product.Import.Background.ImportItems;
 using Message.Interfaces;
 
 namespace Alchemist.Product.ImportItemHandler;
@@ -10,7 +9,7 @@ internal class CategoryItemHandler(IMessageSender messageSender, string methodNa
 {
     protected override ICategoryData ConvertToImportEntity(IImportCategory item)
     {
-        return item.Category.ConvertToImportCategoryItem(item.CategoryShopModel);
+        return item.Category.ConvertToImportCategoryItem(item.SourceName, item.SourceUrl);
     }
 
     protected override string GetUrl(IImportCategory item)

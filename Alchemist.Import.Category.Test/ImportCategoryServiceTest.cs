@@ -1,19 +1,17 @@
 using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Category.Json;
 using Alchemist.Import.Category.Test.Infrastructure;
-using Alchemist.Import.Html;
-using Alchemist.Test.Import.Service;
+using Import.Html;
+using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
-using Alchemist.Test.Import.Service.Infrastructure; 
+using Import.Service.Test.Infrastructure; 
 
 namespace Alchemist.Import.Category.Test;
 
 public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesTimerService>>
 {
-    protected override ShopImportCategoriesTimerServiceTest Service { get; }
-
     private readonly Mock<IHtmlSearcher> _htmlSearcherMock = new();
 
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
@@ -25,12 +23,15 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     public ImportCategoryServiceTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
-        
-        Service = new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
-            Guid.NewGuid().ToString(),
+    }
+
+    protected override ShopImportCategoriesTimerServiceTest CreateService(string name)
+    {
+       return new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
+            name,
             null,
             LoaderMock.Object,
-            _categoryShopModelMock.Object,            
+            _categoryShopModelMock.Object,
             _loadOptions,
             _categoryItemHandlerMock.Object
             );

@@ -1,8 +1,12 @@
-﻿using Alchemist.Import.Interfaces;
+﻿using Import.Interfaces;
 
 namespace Alchemist.Import.Products.Interfaces;
 
-public interface IImportProductItem : IItem
+public interface IImportProductItem
 {
+    string Name { get; }
+
+    string Url { get; }
+
     string ShopName { get; }    
 }

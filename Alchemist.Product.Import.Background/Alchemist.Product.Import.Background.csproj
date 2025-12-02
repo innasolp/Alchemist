@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.3" />
-    <PackageReference Include="Message.Interfaces" Version="1.0.0.2" />
+    <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.4" />
+    <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
@@ -21,14 +21,16 @@
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Interfaces\Alchemist.Import.Service.Factory.Interfaces.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Factory.Interfaces\Import.Factory.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Category\Alchemist.Import.Settings.Category.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
     <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+    <ProjectReference Include="..\..\Import\Import.Settings.Interfaces\Import.Settings.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Import.ItemHandler.Interfaces\Alchemist.Product.DataItem.Interfaces.csproj" />
   </ItemGroup>

@@ -1,14 +1,14 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Category.Json;
-using Alchemist.Import.Factory.BrowserService;
-using Alchemist.Import.Factory.Logging;
-using Alchemist.Import.Html.Factory;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Service.Factory.Abstractions;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Html.Factory;
+using Import.Interfaces;
+using Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Import.Factory.Interfaces;
+using Import.Factory.Service;
+using Alchemist.Import.Settings.Category;
 
 namespace Alchemist.Import.Factory.Category.Json;
 
@@ -16,7 +16,7 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
     ILoaderServiceFactory browserServiceFactory,
     ICategoryItemHandler itemHandler, 
     IImportServiceLogFactory? logFactory = null) 
-    : ShopImportServiceFactory(logger, browserServiceFactory, logFactory)
+    : ImportServiceFactory(logger, browserServiceFactory, logFactory)
 {
     private readonly ICategoryItemHandler _itemHandler = itemHandler;
 
@@ -24,10 +24,13 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
 
     protected override IImportService Create(ILogger logger, 
         string name,
-        IShopItem shopModel,
+        IImportSource shopModel,
         IShopImportSettings shopImportSettings,
         ILoaderService browserService)
     {
+        if (shopModel is not ICategoryShopModel categoryShopModel)
+            throw new InvalidOperationException($"Invalid type {shopModel.GetType()}. Must be implementation of {typeof(ICategoryShopModel)}");
+
         var loadOptionsService = (shopImportSettings.GetService(nameof(CategoryLoadOptions))?.Value) 
             ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopImportSettings.ShopName}");
         var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
@@ -43,11 +46,13 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
             name,
             htmlSearcher,
             browserService,
-            shopModel as ICategoryShopModel,
+            categoryShopModel.CategorySourceUrl,
+            categoryShopModel.Name,
+            categoryShopModel.Url,
             categoryLoadOptions, _itemHandler);
     }
 
-    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)
     {
         if (logger is ILogger<ShopImportCategoriesTimerService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;

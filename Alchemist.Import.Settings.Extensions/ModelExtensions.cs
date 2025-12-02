@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Import.Settings.Interfaces;
 
 namespace Alchemist.Import.Settings.Extensions;
 

@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Category.Interfaces;
+﻿using Alchemist.Import.Settings.Category;
 
 
 namespace Alchemist.Product.Import.Background.Models;

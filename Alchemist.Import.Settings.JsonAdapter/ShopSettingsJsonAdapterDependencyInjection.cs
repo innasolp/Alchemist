@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Import.Settings.JsonAdapter;

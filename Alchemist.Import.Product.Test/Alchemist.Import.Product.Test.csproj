@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Import\Import.Service.Test\Import.Service.Test.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
-    <ProjectReference Include="..\Alchemist.Test.Import.Service\Alchemist.Test.Import.Service.csproj" />
   </ItemGroup>
 
   <ItemGroup>

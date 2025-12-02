@@ -8,9 +8,11 @@ internal class CategoryData : ICategoryData
 {
     public ShopCategory ShopCategory { get; set; }
 
-    public ShopCategory ParentCategory { get; set; }
+    public ShopCategory ParentCategory { get; set; }    
 
-    public int ShopId { get; set; }
+    public string ShopName { get; set; }
+
+    public string ShopUrl { get; set; }
 
     IShopCategory ICategoryData.ShopCategory => ShopCategory;
 

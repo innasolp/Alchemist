@@ -7,15 +7,18 @@ using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
 using Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 using Alchemist.Test.DBApiWebAppFactory;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
 internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer) 
-    : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8050, 8051)
+    : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8052, 8053)
 {
     private readonly TestServer _signalRServer = signalRServer;
 
     private readonly string _connectionString = connectionString;
+
+    public event Action<IServiceCollection> Configure;
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
@@ -34,6 +37,8 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
         base.ConfigureServices(services);
 
         services.SetSignalRHubTestSender(_signalRServer, ["events"]);
+
+        Configure?.Invoke(services);
     }
 }
 
