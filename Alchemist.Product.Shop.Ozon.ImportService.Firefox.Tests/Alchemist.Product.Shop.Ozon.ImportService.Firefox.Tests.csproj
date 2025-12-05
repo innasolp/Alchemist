@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.Shop.Ozon.ImportService\Alchemist.Product.Shop.Ozon.ImportService.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Shop.Ozon.Model\Alchemist.Product.Shop.Ozon.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Product.Shop\Alchemist.Test.Product.Shop.csproj" />
   </ItemGroup> 
 

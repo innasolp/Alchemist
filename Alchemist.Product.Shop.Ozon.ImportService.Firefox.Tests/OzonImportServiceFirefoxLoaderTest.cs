@@ -10,7 +10,6 @@ namespace Alchemist.Product.Shop.Ozon.ImportService.Firefox.Tests;
 
 public class OzonImportServiceFirefoxLoaderTest : ProductShopTest
 {
-    private readonly Moq.Mock<IProductShopModel> _shopUrlModelMock = new();
     private readonly IBrowserDataLoader _dataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
     private readonly IBrowserLauncher _launcher = new BrowserLauncher.Firefox.Windows.Standart.FirefoxStandartBrowserLauncher();
     private readonly IWebLoader _webLoader;
@@ -26,7 +25,6 @@ public class OzonImportServiceFirefoxLoaderTest : ProductShopTest
     public OzonImportServiceFirefoxLoaderTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _shopUrlModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategory>());
         _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader();        
     }
 

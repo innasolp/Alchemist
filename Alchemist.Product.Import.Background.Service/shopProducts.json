@@ -55,7 +55,8 @@
             "abt_data",
             "ADDRESSBOOKBAR_WEB_CLARIFICATION",
             "is_cookies_accepted",
-            "rfuid"
+            "rfuid",
+            "xcid"
           ],
 
           "DefaultCookies": {
@@ -76,11 +77,11 @@
 
       },
       "BrowserDataLoader": {
-        "ImplementationTypeName": "FirefoxStandartEdition",
+        "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
       },
       "BrowserLauncher": {
-        "ImplementationTypeName": "FirefoxStandartEdition",
+        "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
       },
       "WebLoader": {
@@ -95,7 +96,7 @@
     "ShopName": "GoldApple",
     "Caption": "Золотое яблоко",
     "ShopUrl": "https://goldapple.ru",
-    "ProductUrlFormat": "https://goldapple.ru/front/api/catalog/product-card/base?itemId={0}&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0",
+    "ProductUrlFormat": "https://goldapple.ru/front/api/catalog/product-card/base/v3?itemId={0}&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0",
     "CategoryUrlFormat": "https://goldapple.ru/front/api/catalog/products?categoryId={0}&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber={1}",
     "PageProductCount": 30,
     "Perfomance": true,

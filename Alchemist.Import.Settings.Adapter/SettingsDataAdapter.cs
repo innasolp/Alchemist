@@ -1,9 +1,9 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Interfaces;
 using Alchemist.Product.Entities;
 using System.Text.Json;
+using Import.Settings.Interfaces;
 
 namespace Alchemist.Import.Settings.DataAdapter;
 

@@ -1,28 +1,27 @@
-﻿using Alchemist.Import.Interfaces;
-using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
-using Alchemist.Test.Import.Service.Infrastructure;
+using Import.Interfaces;
+using Import.Service.Test.Infrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Product.Test.Infrastructure;
 
 public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
-    IProductShopModel shopUrlModel, 
+    string name,
+    IProductShopModel shopModel, 
     ILoaderService loader,
     IProductItemHandler itemHandler) 
-    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopUrlModel, loader, itemHandler), ITestService
+    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopModel.ProductUrl,
+            shopModel.CategoryUrlFormat,
+            shopModel.Name,
+            shopModel.Url,
+            shopModel.Categories, loader, itemHandler)
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
-    private string _name;
+    private readonly IProductShopModel _productShopModel = shopModel;
 
-    public override string Name => _name;
-    
-    public void SetName(string name)
-    {
-        _name = name;
-    }
-
+    public override string Name { get; } = name;
     private int _pageCount = 1000;
 
     protected override int PageProductCount => _pageCount;
@@ -32,14 +31,14 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
         _pageCount = pageCount;
     }
 
-    protected override string GetApiUrl(ICategoryProductItem productItem)
+    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
     {
-        return string.Format(ProductShopModel.ProductUrl, productItem.Name);
+        return string.Format(productUrlFormat, productItem.Name);
     }
 
     public string GetTestApiUrl(ICategoryProductItem productItem)
     {
-        return GetApiUrl(productItem);
+        return GetApiUrl(_productShopModel.ProductUrl, productItem);
     }
 
     protected override bool IsEndOfCategory(TCategory category)

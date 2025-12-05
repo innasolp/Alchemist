@@ -1,9 +1,9 @@
-﻿using Alchemist.Common;
+﻿using Import.Interfaces;
 using Message.Interfaces;
 using Microsoft.Extensions.Logging;
 
 
-namespace Alchemist.Product.Import.Background.ImportItems;
+namespace Alchemist.Product.ImportItemHandler;
 
 internal abstract class ItemProcessor<TProcessItem, TMessageItem>(ILogger logger, string eventName, IEnumerable<IMessageSender> itemMessageSenders)
 {

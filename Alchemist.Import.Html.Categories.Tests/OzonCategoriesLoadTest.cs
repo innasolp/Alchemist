@@ -1,10 +1,13 @@
-using Alchemist.Import.Category.Json;
-using Alchemist.Import.Html.Factory;
+using Import.Html.Factory;
 using BrowserDataLoader.Interfaces;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
+using Import.Html;
+using Alchemist.Import.Category.Interfaces;
+using Alchemist.Import.Category.Service;
+using Alchemist.Import.Category.Service.Json;
 
 namespace Alchemist.Import.Html.Categories.Tests;
 
@@ -15,6 +18,8 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
     private readonly string _shopCategoryApiUrlFormat = "https://www.ozon.ru/api/composer-api.bx/_action/v2/categoryChildV3?menuId=185&categoryId={0}";
     private readonly string[] _nodePath = ["data", "columns", "categories"];
 
+    private const string TimeWatchMessageFormat = "{0} load time {1} seconds";
+    
     private readonly Dictionary<string, PropertyPath> _categoryPropertyPathes = new()
     {
         { "Url", new PropertyPath("Url","url") },
@@ -59,118 +64,62 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
 
         return await Task.FromResult(document);
     }
-    
 
-    [Fact]
-    public async Task StandartLoadCategoriesListTest()
-    {        
-        var webLoader = await CreateWebLoaderAsync();        
 
-        var cookies = await _browserDataLoader.LoadCookies();
-        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
-        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
-
-        Assert.NotNull(document);
-        
-        var parentCategories = JsonCategory.LoadAllChildren(null, document.RootElement,
-            _nodePath,
-            _categoryPropertyPathes);
-
-        Assert.True(parentCategories.Count > 0);
-
-        var endCategories = new List<JsonCategory>();
-        foreach(var parentCategory in parentCategories)
-        {
-            var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
-            
-            var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
-
-            categoryStream.Close();
-
-            endCategories.AddRange(JsonCategory.LoadAllChildren(parentCategory, categoriesJson.RootElement, _nodePath, _categoryPropertyPathes));
-        }
-
-        Assert.True(endCategories.Count > 0);
-
-        _testOutputHelper.WriteLine($"parent categories {parentCategories.Count}");
-        _testOutputHelper.WriteLine($"all categories {endCategories.Count}");
-    }
 
     [Fact]
     public async Task LoadCategoriesToCollectionTestAsync()
     {
         var webLoader = await CreateWebLoaderAsync();
 
-        var cookies = await _browserDataLoader.LoadCookies();
-        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
-        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
+        var ((document, requestHeaders), timespan) = await TimeWatchHelper.ExecuteTaskWithTimeWatchAsync(async () =>
+        {
+            var cookies = await _browserDataLoader.LoadCookies();
+            var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
+            return (await GetJsonDocumentAsync(webLoader, requestHeaders), requestHeaders);
+        });
+
+        testOutputHelper.WriteLine(TimeWatchMessageFormat, "json", timespan.TotalSeconds);
+
 
         Assert.NotNull(document);
 
-        var categories = new ObservableCollection<JsonCategory>();
-
+        var categories = new ObservableCollection<ICategory>();
         var tokenSource = new CancellationTokenSource();
+        var jsonElementHelper = new JsonElementHelper();
 
-        await JsonCategoryAsync.LoadAllChildrenAsync(null, categories, document.RootElement,
-            _nodePath,
-            _categoryPropertyPathes,
-            tokenSource.Token);
+        timespan = await TimeWatchHelper.ExecuteTaskWithTimeWatchAsync(async () =>
+        {
+            await RecursiveCategory.LoadAllChildrenAsync(null, categories, document.RootElement, _nodePath,
+                _categoryPropertyPathes, jsonElementHelper, tokenSource.Token);
+        });
+
+        testOutputHelper.WriteLine(TimeWatchMessageFormat, "Parent categories", timespan.TotalSeconds);
 
         Assert.True(categories.Count > 0);
-        
-        var parentCategories = new List<JsonCategory>(categories);
-        foreach (var parentCategory in parentCategories)
+       
+
+        var parentCategories = new List<ICategory>(categories);
+
+        timespan = await TimeWatchHelper.ExecuteTaskWithTimeWatchAsync(async () =>
         {
-            var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
+            foreach (var parentCategory in parentCategories)
+            {
+                var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
+                using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
 
-            var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
+                var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
 
-            categoryStream.Close();
+                categoryStream.Close();
 
-            await JsonCategoryAsync.LoadAllChildrenAsync(parentCategory, categories, categoriesJson.RootElement, _nodePath, _categoryPropertyPathes, tokenSource.Token);
-        }
+                await RecursiveCategory.LoadAllChildrenAsync(parentCategory as RecursiveCategory, categories, categoriesJson.RootElement,
+                    _nodePath, _categoryPropertyPathes, jsonElementHelper, tokenSource.Token);
+            }
+        });
+
+        testOutputHelper.WriteLine(TimeWatchMessageFormat, "children categories", timespan.TotalSeconds);
 
         Assert.Equal(parentCategories.Count, categories.Count(c=>c.ParentId == null));
-
-        _testOutputHelper.WriteLine($"parent categories {parentCategories.Count}");
-        _testOutputHelper.WriteLine($"all categories {categories.Count}");
-    }
-
-    [Fact]
-    public async Task LoadCategoriesToCollectionTestSync()
-    {
-        var webLoader = await CreateWebLoaderAsync();        
-
-        var cookies = await _browserDataLoader.LoadCookies();
-        var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
-        var document = await GetJsonDocumentAsync(webLoader, requestHeaders);
-
-        Assert.NotNull(document);
-
-        var categories = new ObservableCollection<JsonCategory>();        
-
-        JsonCategory.LoadAllChildren(null, categories, document.RootElement,
-            _nodePath,
-            _categoryPropertyPathes);
-
-        Assert.True(categories.Count > 0);
-
-        var parentCategories = new List<JsonCategory>(categories);
-        foreach (var parentCategory in parentCategories)
-        {
-            var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-            using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
-
-            var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
-
-            categoryStream.Close();
-
-            JsonCategory.LoadAllChildren(parentCategory, categories, categoriesJson.RootElement, _nodePath, _categoryPropertyPathes);
-        }
-
-        Assert.Equal(parentCategories.Count, categories.Count(c => c.ParentId == null));
 
         _testOutputHelper.WriteLine($"parent categories {parentCategories.Count}");
         _testOutputHelper.WriteLine($"all categories {categories.Count}");

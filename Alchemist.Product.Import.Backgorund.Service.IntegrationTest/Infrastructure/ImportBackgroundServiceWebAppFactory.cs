@@ -1,7 +1,6 @@
 ﻿using Alchemist.BrowserService.Client;
-using Alchemist.Import.Factory.BrowserService;
 using Alchemist.Import.Settings.DataAdapter;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Settings.Interfaces;
 using Alchemist.Product.Import.Background;
 using Alchemist.Test.Host.Interfaces;
 using Alchemist.Test.Log;
@@ -19,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.ShopApiFactory;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Product.ImportItemHandler;
+using Import.Factory.Interfaces;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 

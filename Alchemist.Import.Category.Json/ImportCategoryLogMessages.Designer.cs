@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Alchemist.Import.Category.Json {
+namespace Alchemist.Import.Category.Service {
     using System;
     
     
@@ -19,7 +19,7 @@ namespace Alchemist.Import.Category.Json {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ImportCategoryLogMessages {
@@ -39,7 +39,7 @@ namespace Alchemist.Import.Category.Json {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Alchemist.Import.Category.Json.ImportCategoryLogMessages", typeof(ImportCategoryLogMessages).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Alchemist.Import.Category.Service.ImportCategoryLogMessages", typeof(ImportCategoryLogMessages).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,15 @@ namespace Alchemist.Import.Category.Json {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Categories for shop {0} {1} was not loaded. See error log..
+        /// </summary>
+        internal static string CategoriesWereNotLoaded {
+            get {
+                return ResourceManager.GetString("CategoriesWereNotLoaded", resourceCulture);
             }
         }
         
@@ -79,74 +88,38 @@ namespace Alchemist.Import.Category.Json {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Json document not loaded from url {0} with warning {1}..
+        ///   Looks up a localized string similar to Children for category {0} were not loaded. See error log..
         /// </summary>
-        internal static string JsonDocumentNotLoadedFromUrlWithWarning {
+        internal static string ChildrenForCategoryWereNotLoaded {
             get {
-                return ResourceManager.GetString("JsonDocumentNotLoadedFromUrlWithWarning", resourceCulture);
+                return ResourceManager.GetString("ChildrenForCategoryWereNotLoaded", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Json document loading from url {0} failed with error {1}..
+        ///   Looks up a localized string similar to Item handling error..
         /// </summary>
-        internal static string JsonLoadFromUrlFailed {
+        internal static string ItemHandlingError {
             get {
-                return ResourceManager.GetString("JsonLoadFromUrlFailed", resourceCulture);
+                return ResourceManager.GetString("ItemHandlingError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Service {0} cancelled on loading child categories.
+        ///   Looks up a localized string similar to Error on parsing {0}. {1}..
         /// </summary>
-        internal static string ServiceCancelledOnLoadingChildCategories {
+        internal static string ParseFromUrlFailed {
             get {
-                return ResourceManager.GetString("ServiceCancelledOnLoadingChildCategories", resourceCulture);
+                return ResourceManager.GetString("ParseFromUrlFailed", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Service {0} cancelled on loading start categories..
+        ///   Looks up a localized string similar to Error on parsing html {0}. {1}..
         /// </summary>
-        internal static string ServiceCancelledOnLoadingStartCategories {
+        internal static string ParseHtmlFromUrlFailed {
             get {
-                return ResourceManager.GetString("ServiceCancelledOnLoadingStartCategories", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service {0} category {1} failed on loading from url {2}. {3}..
-        /// </summary>
-        internal static string ServiceCategoryFailedOnLoadingFromUrl {
-            get {
-                return ResourceManager.GetString("ServiceCategoryFailedOnLoadingFromUrl", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service {0} not loaded categories. {1}..
-        /// </summary>
-        internal static string ServiceNotLoadedCategories {
-            get {
-                return ResourceManager.GetString("ServiceNotLoadedCategories", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service {0} not loaded child categories. {1}..
-        /// </summary>
-        internal static string ServiceNotLoadedChildCategories {
-            get {
-                return ResourceManager.GetString("ServiceNotLoadedChildCategories", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service {0} not loaded json document from url {1}, operation was cancelled..
-        /// </summary>
-        internal static string ServiceNotLoadedJsonDocFromUrlOperationWasCancelled {
-            get {
-                return ResourceManager.GetString("ServiceNotLoadedJsonDocFromUrlOperationWasCancelled", resourceCulture);
+                return ResourceManager.GetString("ParseHtmlFromUrlFailed", resourceCulture);
             }
         }
     }

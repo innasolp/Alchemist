@@ -44,17 +44,19 @@ public class ImportItemHandlerService(ILogger<ImportItemHandlerService> logger,
     {
         Task onHandleItemTask(object item) => OnHandleItem(item, stoppingToken);
 
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                if (_messageReceiver.IsConnected) continue;
+                if (_messageReceiver.IsConnected)
+                    continue;
 
                 await _messageReceiver.Start(stoppingToken);
 
                 _logger.LogInformation("Import service connected to messaging host.");
 
-                foreach(var itemHandler in _importItemHandlers)
+                foreach (var itemHandler in _importItemHandlers)
                     _messageReceiver.On(itemHandler.EventName, onHandleItemTask, itemHandler.ItemType);
             }
             catch (Exception ex)

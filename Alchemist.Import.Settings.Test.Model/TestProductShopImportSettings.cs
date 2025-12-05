@@ -1,6 +1,5 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Import.Settings.Product;
 using Alchemist.Product.Interfaces;
-using System.Net.Http.Headers;
 
 namespace Alchemist.Import.Settings.Test.Model;
 

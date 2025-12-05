@@ -1,10 +1,13 @@
-﻿using Alchemist.Import.Interfaces;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 
 namespace Alchemist.Import.Category.Interfaces;
 
-public interface ICategory : IItem, INotifyCollectionChanged
+public interface ICategory : INotifyCollectionChanged
 {
+    string Name { get; }
+
+    string Url { get; }
+
     int Id { get; }    
 
     string Description { get; }

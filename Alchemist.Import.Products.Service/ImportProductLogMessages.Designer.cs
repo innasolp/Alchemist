@@ -19,7 +19,7 @@ namespace Alchemist.Import.Products.Service {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ImportProductLogMessages {
@@ -70,38 +70,11 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Category {0} loaded with fatal error {1}..
+        ///   Looks up a localized string similar to Category not loaded from url {0}. See error log..
         /// </summary>
-        internal static string CategoryLoadingFault {
+        internal static string CategoryNotLoadedFromUrl {
             get {
-                return ResourceManager.GetString("CategoryLoadingFault", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category not loaded from url {0}..
-        /// </summary>
-        internal static string CategoryNotLoadedFromUrlWarning {
-            get {
-                return ResourceManager.GetString("CategoryNotLoadedFromUrlWarning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category not reloaded from url {0}..
-        /// </summary>
-        internal static string CategoryNotReloadedFromUrlWarning {
-            get {
-                return ResourceManager.GetString("CategoryNotReloadedFromUrlWarning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category {0} processed with fatal error {1}..
-        /// </summary>
-        internal static string CategoryProcessFault {
-            get {
-                return ResourceManager.GetString("CategoryProcessFault", resourceCulture);
+                return ResourceManager.GetString("CategoryNotLoadedFromUrl", resourceCulture);
             }
         }
         
@@ -115,65 +88,11 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Category url {0} were reprocessed successfull : {1} products were loaded.
-        /// </summary>
-        internal static string CategoryProductsForUrlWereReprocessedSuccesfullInfo {
-            get {
-                return ResourceManager.GetString("CategoryProductsForUrlWereReprocessedSuccesfullInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to All products in category url {0} were not loaded..
         /// </summary>
         internal static string CategoryProductsWereNotLoadedError {
             get {
                 return ResourceManager.GetString("CategoryProductsWereNotLoadedError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category {0} recompleted succsessfully. {1} product items handled..
-        /// </summary>
-        internal static string CategoryRecompletedInfo {
-            get {
-                return ResourceManager.GetString("CategoryRecompletedInfo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category {0} was not recompleted. Error {1}..
-        /// </summary>
-        internal static string CategoryRecompletedWarning {
-            get {
-                return ResourceManager.GetString("CategoryRecompletedWarning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category {0} rehandling was failed. Error {1}..
-        /// </summary>
-        internal static string CategoryRehandlingFailed {
-            get {
-                return ResourceManager.GetString("CategoryRehandlingFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category {0} reloading was failed. Error {1}..
-        /// </summary>
-        internal static string CategoryReloadingFailed {
-            get {
-                return ResourceManager.GetString("CategoryReloadingFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category url {0} is invalid : no product items..
-        /// </summary>
-        internal static string CategoryUrlIsInvalidWarning {
-            get {
-                return ResourceManager.GetString("CategoryUrlIsInvalidWarning", resourceCulture);
             }
         }
         
@@ -196,15 +115,6 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Category from url {0} was reprocessed: {1} products from {2} were loaded. .
-        /// </summary>
-        internal static string NotAllCategoryProductsForUrlWereReprocessedWarning {
-            get {
-                return ResourceManager.GetString("NotAllCategoryProductsForUrlWereReprocessedWarning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Product {0} from url {1} handled with status {2}..
         /// </summary>
         internal static string ProductFromUrlHandledWithStatusInfo {
@@ -214,11 +124,11 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product item from {0} is null..
+        ///   Looks up a localized string similar to Product from url {1} handling failed with error: {1}..
         /// </summary>
-        internal static string ProductFromUrlIsNullError {
+        internal static string ProductFromUrlHandlingFailed {
             get {
-                return ResourceManager.GetString("ProductFromUrlIsNullError", resourceCulture);
+                return ResourceManager.GetString("ProductFromUrlHandlingFailed", resourceCulture);
             }
         }
         
@@ -232,7 +142,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product was not loaded from url {0} , error: {1}..
+        ///   Looks up a localized string similar to Product was not loaded from url {0} . See error log..
         /// </summary>
         internal static string ProductWasNotLoadedFromUrlWithError {
             get {
@@ -241,11 +151,11 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product {0} was not loaded from url {1} with not fatal error {2} and would be reload..
+        ///   Looks up a localized string similar to Item {0} from url {1} was not deserialized. {2}..
         /// </summary>
-        internal static string ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded {
+        internal static string SerializationError {
             get {
-                return ResourceManager.GetString("ProductWasNotLoadedFromUrlWithWarningAndWouldBeReloaded", resourceCulture);
+                return ResourceManager.GetString("SerializationError", resourceCulture);
             }
         }
     }

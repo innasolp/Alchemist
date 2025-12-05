@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Factory.Abstractions\Alchemist.Import.Service.Factory.Abstractions.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Factory.Logging\Alchemist.Import.Factory.Logging.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
   </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Import.Factory.Service" Version="1.0.0.0" />
+	</ItemGroup>
 
 </Project>

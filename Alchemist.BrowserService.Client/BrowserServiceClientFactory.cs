@@ -1,7 +1,7 @@
-﻿using Alchemist.Import.Factory.BrowserService;
-using Alchemist.Import.Interfaces;
+﻿using Import.Factory.Interfaces;
+using Import.Interfaces;
 using Alchemist.Import.Settings.Extensions;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using System.Text.Json.Nodes;

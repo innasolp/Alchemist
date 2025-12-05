@@ -1,7 +1,7 @@
 ﻿using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.Import.Background.ImportItems;
+namespace Alchemist.Product.ImportItemHandler;
 
 internal class ProductData : IProductData
 {
@@ -25,5 +25,7 @@ internal class ProductData : IProductData
 
     public IShopCategory ShopCategory { get; set; }
 
-    public int ShopId { get; set; }
+    public string ShopName { get; set; }
+
+    public string ShopUrl { get; set; }
 }

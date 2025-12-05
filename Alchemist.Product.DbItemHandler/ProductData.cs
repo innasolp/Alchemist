@@ -26,7 +26,9 @@ internal class ProductData : IProductData
 
     public ShopCategory ShopCategory { get; set; }
 
-    public int ShopId { get; set; }
+    public string ShopName { get; set; }
+
+    public string ShopUrl { get; set; }
 
     IShopProduct IProductData.ShopProduct => ShopProduct;
 

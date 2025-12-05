@@ -1,11 +1,11 @@
-﻿using Alchemist.Import.Factory.BrowserService;
-using Alchemist.Import.Factory.Logging;
+﻿using Import.Factory.Interfaces;
 using Alchemist.Import.Factory.Products;
-using Alchemist.Import.Interfaces;
+using Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Settings.Interfaces;
 using Alchemist.Product.Shop.GoldApple.ImportService;
 using Microsoft.Extensions.Logging;
+using Alchemist.Import.Settings.Product;
 
 namespace Alchemist.Product.Shop.GoldApple.Factory;
 
@@ -26,12 +26,16 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
     {
         return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>, 
             name,
-            shopModel,           
+            shopModel.ProductUrl,           
+            shopModel.CategoryUrl,           
+            shopModel.Name,           
+            shopModel.Url,           
+            shopModel.Categories,           
             loaderService,             
             itemHandler);
     }
 
-    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IShopItem shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)
     {
         if(logger is ILogger< GoldAppleImportService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;

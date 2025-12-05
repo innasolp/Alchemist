@@ -24,5 +24,7 @@ public interface IProductData
 
     IShopCategory ShopCategory { get; }
 
-    int ShopId { get; }
+    public string ShopName { get; }
+
+    public string ShopUrl { get; }
 }

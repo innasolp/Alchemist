@@ -1,8 +1,9 @@
 ﻿using Alchemist.Common;
 using Alchemist.Exceptions;
+using Import.Interfaces;
 using Message.Interfaces;
 
-namespace Alchemist.Product.Import.Background.ImportItems;
+namespace Alchemist.Product.ImportItemHandler;
 
 internal abstract class ItemHandler<T, TItem, TMessageItem>(IMessageSender messageSender, string methodName, ItemProcessor<T, TMessageItem> itemProcessor) 
     : IItemHandler<T, ResultStatus>, IAsyncDisposable

@@ -24,6 +24,7 @@ public class ShopController(ILogger<ShopController> logger, IAlchemyRepository a
         {
             if (!_messageSender.IsConnected)
                 await _messageSender.Start();
+
             await _messageSender.Send(entity, methodName);
             _logger.LogInformation($"Call {methodName} {entity} ");
         }

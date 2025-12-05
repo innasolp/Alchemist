@@ -1,6 +1,6 @@
 ﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Settings.Interfaces;
 using Alchemist.Product.Interfaces;
+using Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 using SettingsDataAdapterFactory = System.Collections.Generic.IDictionary<Alchemist.Product.Interfaces.ShopSettingType, 

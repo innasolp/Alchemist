@@ -2,9 +2,6 @@ using Alchemist.BrowserService.Client;
 using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
-using Alchemist.Import.Factory.BrowserService;
-using Alchemist.Import.Factory.Logging;
-using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Log.Extensions;
@@ -24,7 +21,8 @@ using Alchemist.Product.ImportItemHandler;
 using CustomJsonConfigurationProvider;
 using CustomConfigurationProvider;
 using Serilog;
-
+using Import.Factory.Interfaces;
+using Import.Factory.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +41,9 @@ builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new 
 
 AddMessages(builder);
 
-AddShopImporters(builder);
+AddShopImporters(builder.Services, builder.Configuration);
+
+AddShopImportItemHandlers(builder.Services, builder.Configuration);
 
 AddLogging(builder.Configuration, builder.Logging, builder.Environment, restApiHost, settingsAPIHost);
 
@@ -108,18 +108,16 @@ static void AddShopSettingsAPIService(WebApplicationBuilder builder, out string 
     builder.Services.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(settingsHttpClientBuilder);
 }
 
-static void AddShopImporters(WebApplicationBuilder builder)
+static void AddShopImporters(IServiceCollection services, IConfiguration configuration)
 {
-    builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopProductImportPath").Value}");
-    builder.Services.AddServiceImplementationsFromPath(typeof(IShopImportServiceFactory), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("ShopCategoryImportPath").Value}");
+    services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopProductImportPath").Value}");
+    services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryImportPath").Value}");
 
-    builder.Services.AddImportServiceLogFactory((logger, name, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
+    services.AddImportServiceLogFactory((logger, name, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
     { "ShopImportService", name },
     { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } }));
 
-    builder.Services.AddPerfomanceCounter((logger) => new SerilogUrlLogger<IPerfomanceCounter>(logger));
-
-    AddShopImportItemHandlers(builder.Services, builder.Configuration);
+    services.AddPerfomanceCounter((logger) => new SerilogUrlLogger<IPerfomanceCounter>(logger));
 }
 
 static void AddShopImportItemHandlers(IServiceCollection services, IConfiguration configuration)

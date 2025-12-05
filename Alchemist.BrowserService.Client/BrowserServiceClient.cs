@@ -1,5 +1,5 @@
-﻿using Alchemist.Import.Interfaces;
-using BrowserDataLoader.Interfaces;
+﻿using BrowserDataLoader.Interfaces;
+using Import.Interfaces;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -48,7 +48,8 @@ internal class BrowserServiceClient : ILoaderService
 
     public async Task<IEnumerable<ICookieData>> LoadCookies(string host, CancellationToken token = default)
     {
-        var response = await _httpClient.GetAsync($"browserdata/getCookies/{_browserDataLoader}/{host}", token);
+        var hostPath = HttpUtility.UrlEncode(host);
+        var response = await _httpClient.GetAsync($"browserdata/getCookies/{_browserDataLoader}/{hostPath}", token);
         
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(new List<ICookieData>());
@@ -73,7 +74,7 @@ internal class BrowserServiceClient : ILoaderService
         await _webLoader.DisposeAsync();
     }
 
-    async Task<object> ILoaderService.GetData(string host, CancellationToken token = default)
+    async Task<object> ILoaderService.GetData(string host, CancellationToken token)
     {
         return await LoadCookies(host, token);        
     }

@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings.Interfaces;
+﻿using Alchemist.Import.Settings.Product;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Settings;

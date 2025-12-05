@@ -1,6 +1,7 @@
 using Alchemist.Import.Product.Test.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Test.Import.Service;
+using Import.Interfaces;
+using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -11,16 +12,18 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
 {
     public ImportShopProductServiceTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
-        ProductShopModelMock.Setup(s => s.Categories).Returns(new System.Collections.ObjectModel.ObservableCollection<IProductShopCategory>());
+        ProductShopModelMock.Setup(s => s.Categories).Returns([]);
+    }
 
-        Service = new TestImportProductService<TestCategory, TestProductItem>(
+    protected override TestImportProductService<TestCategory, TestProductItem> CreateService(string name)
+    {
+        return new TestImportProductService<TestCategory, TestProductItem>(
              LoggerMock.Object,
+             name,
              ProductShopModelMock.Object,
              LoaderMock.Object,
              ProductItemHandlerMock.Object);
     }
-
-    protected override TestImportProductService<TestCategory, TestProductItem> Service { get; }
 
     protected Mock<IProductShopModel> ProductShopModelMock { get; } = new Mock<IProductShopModel>();
 
@@ -48,15 +51,38 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     }
 
     [Fact]
-    public async Task ImportFailedWhenLoaderAlwaysNeedReseting()
+    public async Task LogResetingWarningIfLoaderServiceNeedReseting()
     {
         LoaderMock.Reset();
 
-        ProductShopModelMock.Setup(s => s.CategoryUrl).Returns("Category_{0}_page{1}");
+        ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns("Category_{0}_page{1}");        
+        var categoryMock = TestHelper.CreateCategoryMock();        
+        ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
+        
+        await LogResetingWarningIfLoaderServiceNeedResetingAsync();
+    }
 
+    [Fact]
+    public async Task LogServiceFailedErrorWhenUnhandledExceptionThrown()
+    {
+        LoaderMock.Reset();
+
+        ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns("Category_{0}_page{1}");
         var categoryMock = TestHelper.CreateCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
-        await ImportFailedWhenLoaderAlwaysNeedResetingAsync();
+        await LogServiceFailedErrorWhenUnhandledExceptionThrownAsync();
+    }
+
+    [Fact]
+    public async Task LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequest()
+    {
+        LoaderMock.Reset();
+
+        ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns("Category_{0}_page{1}");
+        var categoryMock = TestHelper.CreateCategoryMock();
+        ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
+
+        await LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequestAsync();
     }
 }

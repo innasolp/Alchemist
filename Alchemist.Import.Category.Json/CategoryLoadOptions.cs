@@ -1,6 +1,6 @@
-﻿using Alchemist.Import.Html;
+﻿using Import.Html;
 
-namespace Alchemist.Import.Category.Json;
+namespace Alchemist.Import.Category.Service;
 
 public class CategoryLoadOptions
 {

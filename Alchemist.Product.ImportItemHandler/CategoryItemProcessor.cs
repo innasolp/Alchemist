@@ -1,7 +1,5 @@
-﻿using Alchemist.Common;
-using Alchemist.Import.Category.Interfaces;
-using Alchemist.Product.Import.Background.ImportItems;
-using Alchemist.Product.Interfaces;
+﻿using Alchemist.Import.Category.Interfaces;
+using Import.Interfaces;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,9 +12,12 @@ internal class CategoryItemProcessor(ILogger<CategoryItemProcessor> logger,
 {
     protected override ImportCategory CreateMessageItem(IImportCategory item, ResultStatus status)
     {
-        var categoryModel = new ImportCategory { Category = item.Category.Name, ItemId = item.Category.Id, Status = status };
-
-        if (item.CategoryShopModel is IShop shop) categoryModel.ShopId = shop.Id;
+        var categoryModel = new ImportCategory { 
+            Category = item.Category.Name, 
+            ItemId = item.Category.Id,
+            ShopName = item.SourceName,
+            ShopUrl = item.SourceUrl,
+            Status = status };        
 
         return categoryModel;
     }

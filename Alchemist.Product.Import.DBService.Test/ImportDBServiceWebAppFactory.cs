@@ -20,6 +20,8 @@ public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServicePro
 
     private readonly ShopAPIWebAppFactory _shopAPIWebAppFactory;
 
+    internal ShopAPIWebAppFactory ShopAPIWebAppFactory => _shopAPIWebAppFactory;
+
     private readonly WebApplicationFactory<Startup> _signalRApplicationFactory;
 
     private readonly ITestHost _importItemsHost = new RabbitMQTestHost();
@@ -27,8 +29,6 @@ public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServicePro
     public IConfiguration? Configuration { get; private set; }
 
     public event Action<IServiceCollection> ConfigureServices;
-
-    private readonly HttpClient _shopAPIClient;
 
     public ImportDBServiceWebAppFactory()
     {   
@@ -43,9 +43,7 @@ public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServicePro
         _signalRApplicationFactory = new WebApplicationFactory<Startup>();
         _signalRApplicationFactory.CreateClient();
 
-        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);
-        _shopAPIClient = _shopAPIWebAppFactory.CreateClient();
-
+        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);       
     }
 
     public void StartGrpc()
@@ -69,14 +67,16 @@ public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServicePro
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
         Configuration = context.Configuration;
-
+        
         var joinableTaskFactory = new Microsoft.VisualStudio.Threading.JoinableTaskFactory(new Microsoft.VisualStudio.Threading.JoinableTaskContext());
         joinableTaskFactory.Run(async () =>
         {
             await _importItemsHost.Start();
         });
 
-        services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(_shopAPIClient));
+        var shopApiClient = _shopAPIWebAppFactory.CreateClient();
+        shopApiClient.BaseAddress = new Uri(_shopAPIWebAppFactory.ServerAddress);
+        services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(shopApiClient));
 
         SetReceiver(services);
 

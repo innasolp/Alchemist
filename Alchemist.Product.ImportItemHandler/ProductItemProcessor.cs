@@ -1,12 +1,10 @@
-﻿using Alchemist.Common;
+﻿using Import.Interfaces;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Product.Import.Background.Models;
-using Alchemist.Product.ImportItemHandler;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Product.Import.Background.ImportItems;
+namespace Alchemist.Product.ImportItemHandler;
 
 internal class ProductItemProcessor(ILogger<ProductItemProcessor> logger,
     [FromKeyedServices(ServiceKeys.ImportProductMessageSenderKey)] IEnumerable<IMessageSender> itemMessageSenders)
@@ -14,7 +12,11 @@ internal class ProductItemProcessor(ILogger<ProductItemProcessor> logger,
 {
     protected override ImportProduct CreateMessageItem(IImportProduct item, ResultStatus status)
     {
-        return new ImportProduct { Name = item.ProductItem.Name, ShopName = item.Shop.ShopName, Url = item.ProductItem.Url, Status = status };
+        return new ImportProduct { Name = item.ProductItem.Name, 
+            ShopName = item.SourceName, 
+            ShopUrl = item.SourceUrl, 
+            Url = item.ProductItem.Url, 
+            Status = status };
     }
 
     protected override string GetInfo(ImportProduct item) => $"product {item.Name}";

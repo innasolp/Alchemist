@@ -11,10 +11,11 @@
 		<PackageReference Include="WebLoader.Interfaces" Version="1.0.0.5" />
 		<PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0.4" />
 		<PackageReference Include="BrowserLauncher.Interfaces" Version="1.0.0.2" />
+		<PackageReference Include="Import.Interfaces" Version="1.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
+	  <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
 	</ItemGroup>
 
 </Project>

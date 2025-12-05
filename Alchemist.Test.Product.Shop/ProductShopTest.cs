@@ -1,6 +1,6 @@
-﻿using Alchemist.Import.Interfaces;
-using BrowserDataLoader.Interfaces;
+﻿using BrowserDataLoader.Interfaces;
 using BrowserLauncher.Interfaces;
+using Import.Interfaces;
 using Moq;
 
 namespace Alchemist.Test.Product.Shop;

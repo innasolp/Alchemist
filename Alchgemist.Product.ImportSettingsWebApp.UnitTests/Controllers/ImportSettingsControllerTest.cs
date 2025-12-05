@@ -1,5 +1,5 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Settings.Interfaces;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 using Alchemist.Product.ImportSettingsWebApp.Models;

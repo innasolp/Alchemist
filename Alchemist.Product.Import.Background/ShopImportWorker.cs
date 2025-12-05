@@ -4,22 +4,22 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Message.Interfaces;
 using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Interfaces;
+using Import.Settings.Interfaces;
 using Alchemist.Product.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Import.Background.Models;
-using Alchemist.Import.Service.Factory.Interfaces;
 using Alchemist.Messages.Common;
 using Alchemist.Import.Settings.DataAdapter;
 using System.Collections.Concurrent;
+using Import.Factory.Interfaces;
 
 namespace Alchemist.Product.Import.Background;
 
 public class ShopImportWorker : BackgroundService
 {
     private readonly ILogger<ShopImportWorker> _logger;
-    private readonly IEnumerable<IShopImportServiceFactory> _shopServiceFactories;
+    private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories;
     private readonly IMessageReceiver _eventMessageReceiver;
     private readonly IMessageSender _eventMessageSender;
     private readonly IShopDataService _shopDataService;
@@ -28,7 +28,7 @@ public class ShopImportWorker : BackgroundService
 
     private record ServiceToken(IImportService Service, CancellationTokenSource InnerTokenSource);   
 
-    private List<IShopItem> ShopModels { get; } = [];
+    private List<IImportSource> ShopModels { get; } = [];
 
     private readonly ConcurrentDictionary<Guid, ServiceToken> _servicesTokens = [];
 
@@ -38,7 +38,7 @@ public class ShopImportWorker : BackgroundService
         IShopDataService shopDataService,
         [FromKeyedServices(ShopImportWorkerKeys.InitImportSettings)]  IEnumerable<ISettingsAdapter> initSettingsAdapters,
         [FromKeyedServices(ShopImportWorkerKeys.ProcessedImportSettings)] IDictionary<ShopSettingType, ISettingsDataAdapter> processedSettingsAdapters,
-        IEnumerable<IShopImportServiceFactory> shopImportFactories
+        IEnumerable<IImportServiceFactory> shopImportFactories
         )
     {
         _logger = logger;
@@ -97,7 +97,7 @@ public class ShopImportWorker : BackgroundService
 
     private async Task OnShopSettingsCreatedAsync(ShopSettings newShopSettings)
     {
-        if (ShopModels.OfType<IShopModel>().Any(s => s.Id == newShopSettings.ShopId))
+        if (ShopModels.OfType<ShopModel>().Any(s => s.Id == newShopSettings.ShopId))
             return;
 
         _logger.LogInformation($"Handling of settings {newShopSettings.Name} for shop id={newShopSettings.ShopId} started.");
@@ -110,7 +110,7 @@ public class ShopImportWorker : BackgroundService
             var shopImportSettings = await adapter.GetShopImportSettings(newShopSettings.Id);
 
             var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
-            if (!ShopModels.Any(s => s.ShopName == shopModel.ShopName))
+            if (!ShopModels.Any(s => s.Name == shopModel.Name))
                 ShopModels.Add(shopModel);
 
             if (!TryGetImportService(newShopSettings.Name, shopImportSettings, shopModel, out var service)
@@ -119,7 +119,7 @@ public class ShopImportWorker : BackgroundService
             var guid = Guid.NewGuid();
             _servicesTokens.TryAdd(guid, new ServiceToken(service, new CancellationTokenSource()));
 
-            _logger.LogInformation($"New service for shop {shopModel.ShopName} added");
+            _logger.LogInformation($"New service for shop {shopModel.Name} added");
 
             await SendServiceMessageAsync(Messages.Common.Messages.ServiceCreated, 
                 new ServiceMessage { Guid = guid, Name = service.Name });
@@ -210,7 +210,7 @@ public class ShopImportWorker : BackgroundService
         return allShopImportSettings;
     }
 
-    private bool TryGetImportService(string name, IShopImportSettings shopImportSettings, IShopItem shopModel, out IImportService? service)
+    private bool TryGetImportService(string name, IShopImportSettings shopImportSettings, IImportSource shopModel, out IImportService? service)
     {
         service = default;
 

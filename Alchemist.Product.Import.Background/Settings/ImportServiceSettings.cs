@@ -1,5 +1,5 @@
 ﻿using Alchemist.Import.Settings.Extensions;
-using Alchemist.Import.Settings.Interfaces;
+using Import.Settings.Interfaces;
 using Alchemist.Product.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;

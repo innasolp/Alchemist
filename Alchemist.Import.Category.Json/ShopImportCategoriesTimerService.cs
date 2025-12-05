@@ -1,18 +1,20 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Html;
-using Alchemist.Import.Interfaces;
-using Alchemist.Import.Service;
+using Import.Html;
+using Import.Interfaces;
+using Import.Service;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.ObjectModel;
-using System.Text.Json;
-namespace Alchemist.Import.Category.Json;
 
-public class ShopImportCategoriesTimerService : ImportService
+namespace Alchemist.Import.Category.Service;
+
+public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
 {
-    protected sealed record ImportCategory(ICategory Category, ICategoryShopModel CategoryShopModel) : IImportCategory
+    protected sealed record ImportCategory(ICategory Category, string CategorySourceUrl, string SourceName, string SourceUrl) : IImportCategory
     {
     }
+
+    protected abstract IElementHelper<TElement> GetElementHelper();
 
     protected IHtmlSearcher? HtmlSearcher { get; }
 
@@ -20,7 +22,9 @@ public class ShopImportCategoriesTimerService : ImportService
 
     public override string Name { get; }
 
-    protected ICategoryShopModel ShopModel { get; }
+    private readonly string _categorySourceUrl;
+
+    private readonly string _sourceName;
 
     private readonly int _defaultInterval = 3600;
 
@@ -30,46 +34,52 @@ public class ShopImportCategoriesTimerService : ImportService
 
     private bool? _isStarted;
 
-    private readonly SemaphoreSlim _htmlLoaderSemaphoreSlim = new(1, 1);
+    private readonly SemaphoreSlim _htmlSearcherSemaphoreSlim = new(1, 1);
 
-    private readonly SemaphoreSlim _jsonLoaderSemaphoreSlim = new(1, 1);
-
-    public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+    public ShopImportCategoriesTimerService(ILogger logger,
         string name,
         IHtmlSearcher? htmlSearcher,
         ILoaderService loader,
-        ICategoryShopModel shop,
+        string categorySourceUrl,
+        string sourceName,
+        string url,
         CategoryLoadOptions categoryLoadOptions,
-       ICategoryItemHandler itemHandler) : base(logger, loader,  shop.Host)
+       ICategoryItemHandler itemHandler) : base(logger, loader, url)
     {
         HtmlSearcher = htmlSearcher;
         CategoryLoadOptions = categoryLoadOptions;
         Name = name;
-        ShopModel = shop;
+        _categorySourceUrl = categorySourceUrl;
+        _sourceName = sourceName;
         _itemHandler = itemHandler;
 
         _timer = new(TimeSpan.FromSeconds(CategoryLoadOptions.SecondsInterval ?? _defaultInterval));
     }
 
-    public ShopImportCategoriesTimerService(ILogger<ShopImportCategoriesTimerService> logger,
+    public ShopImportCategoriesTimerService(ILogger logger,
         string name,
    ILoaderService loader,
-   ICategoryShopModel shopUrlModel,
+   string categorySourceUrl,
+   string sourceName,
+   string url,
    CategoryLoadOptions categoryLoadOptions,
    ICategoryItemHandler itemHandler)
-        : this(logger,name, null, loader, shopUrlModel, categoryLoadOptions, itemHandler)
+        : this(logger, name, null, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler)
     {
     }
 
-    protected async Task<JsonDocument?> LoadJsonDocumentAsync(string url, CancellationToken cancellationToken)
+    protected async Task<(bool success, TElement? result)> TryLoadElementAsync(string url, CancellationToken cancellationToken)
     {
         if (HtmlSearcher != null)
         {
-            var values = await LoadHtmlFromUrlAsync(url, cancellationToken);
-            return values != null ? JsonDocument.Parse(values[0]) : null;
+            var (success, values) = await TryLoadHtmlFromUrlAsync(url, cancellationToken);
+
+            if (!success) return (false, default(TElement?));
+
+            return (true, LoadElementFromString(values[0]));
         }
         else
-            return await LoadJsonFromUrlAsync(url, cancellationToken);
+            return await TryLoadElementFromUrlAsync(url, cancellationToken);
     }
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
@@ -80,54 +90,34 @@ public class ShopImportCategoriesTimerService : ImportService
             await LoadCategoriesAsync(stoppingToken);
         }
         else if (!stoppingToken.IsCancellationRequested)
-        {            
-            var nextTickResult = await ProcessTaskAsync(() => _timer.WaitForNextTickAsync(stoppingToken).AsTask());  
+        {
+            var nextTickResult = await _timer.WaitForNextTickAsync(stoppingToken).AsTask();
 
-            if(nextTickResult.Status == Common.ResultStatus.Success && nextTickResult.Value)
-             await LoadCategoriesAsync(stoppingToken);
+            await LoadCategoriesAsync(stoppingToken);
         }
     }
 
     private async Task LoadCategoriesAsync(CancellationToken stoppingToken)
     {
-        var documentResult = await ProcessUrlTaskAsync(LoadJsonDocumentAsync, ShopModel.CategorySourceUrl, stoppingToken);
-        
-        if (documentResult.Status != Common.ResultStatus.Success || documentResult.Value == null)
-        {            
-            if (documentResult.Status == Common.ResultStatus.Cancelled)
-                Logger.LogInformation(ImportCategoryLogMessages.ServiceNotLoadedJsonDocFromUrlOperationWasCancelled,
-                    [Name, ShopModel.CategorySourceUrl]);
-            
-            else if (documentResult.Status == Common.ResultStatus.Error)
-                Logger.LogError(ImportCategoryLogMessages.JsonLoadFromUrlFailed, [ShopModel.CategorySourceUrl, documentResult.Exception.Message]);
-            
-            else if (documentResult.Status == Common.ResultStatus.Warning)
-                Logger.LogInformation(ImportCategoryLogMessages.JsonDocumentNotLoadedFromUrlWithWarning,
-                    [ShopModel.CategorySourceUrl, documentResult.Exception.Message]);
+        var (success, elementResult) = await TryLoadElementAsync(_categorySourceUrl, stoppingToken);
 
+        if (!success)
+        {
+            Logger.LogInformation(ImportCategoryLogMessages.CategoriesWereNotLoaded, _sourceName, Host);
             return;
         }
 
-        var categories = new ObservableCollection<JsonCategory>();
+        var categories = new ObservableCollection<ICategory>();
         categories.CollectionChanged += CategoryCollectionChanged;
 
+        var elementHelper = GetElementHelper();
 
-        var loadParentCategoriesResult = await ProcessTaskAsync(() => JsonCategoryAsync.LoadAllChildrenAsync(null, categories, documentResult.Value.RootElement,
+        await RecursiveCategory.LoadAllChildrenAsync(null, categories, elementResult,
                 CategoryLoadOptions.FirstNodePath,
                 CategoryLoadOptions.CategoryPropertyPaths,
-                stoppingToken));
+                elementHelper,
+                stoppingToken);
 
-        if (loadParentCategoriesResult.Status != Common.ResultStatus.Success)
-        {
-            if (loadParentCategoriesResult.Status == Common.ResultStatus.Cancelled)           
-                Logger.LogInformation(ImportCategoryLogMessages.ServiceCancelledOnLoadingStartCategories, Name); 
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Warning)
-                Logger.LogWarning(ImportCategoryLogMessages.ServiceNotLoadedCategories, Name, loadParentCategoriesResult.Exception.Message);
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Error)
-                Logger.LogError(ImportCategoryLogMessages.ServiceNotLoadedCategories, Name, loadParentCategoriesResult.Exception.Message);
-           
-            return;
-        }
 
         if (string.IsNullOrEmpty(CategoryLoadOptions.CategoriesApiUrlFormat))
         {
@@ -135,128 +125,126 @@ public class ShopImportCategoriesTimerService : ImportService
             return;
         }
 
-        var parentCategories = new List<JsonCategory>(categories);
-        var categoriesResult = await ProcessTaskAsync(() => Task.WhenAll(parentCategories.Select(c => LoadCategoryChildrentTreeAsync(c, CategoryLoadOptions.CategoriesApiUrlFormat, categories, stoppingToken))));
-        if (categoriesResult.Status != Common.ResultStatus.Success)
-        {
-            if (categoriesResult.Status == Common.ResultStatus.Cancelled)
-                Logger.LogInformation(ImportCategoryLogMessages.ServiceCancelledOnLoadingChildCategories, Name);
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Warning)
-                Logger.LogWarning(ImportCategoryLogMessages.ServiceNotLoadedChildCategories, Name, loadParentCategoriesResult.Exception.Message);
-            else if (loadParentCategoriesResult.Status == Common.ResultStatus.Error)
-                Logger.LogError(ImportCategoryLogMessages.ServiceNotLoadedChildCategories, Name, loadParentCategoriesResult.Exception.Message);
-        }
+        var parentCategories = new List<ICategory>(categories);
+        var categoriesResult = await Task.WhenAll(parentCategories.Select(async c => LoadCategoryChildrentTreeAsync(c as RecursiveCategory, 
+            CategoryLoadOptions.CategoriesApiUrlFormat, categories, elementHelper, stoppingToken)));
 
         categories.CollectionChanged -= CategoryCollectionChanged;
     }
 
-    private async Task LoadCategoryChildrentTreeAsync(JsonCategory parentCategory, string urlFormat, ICollection<JsonCategory> categories, CancellationToken token)
+    private async Task LoadCategoryChildrentTreeAsync(RecursiveCategory parentCategory, 
+        string urlFormat, 
+        ICollection<ICategory> categories, 
+        IElementHelper<TElement> elementHelper,
+        CancellationToken token)
     {
         var url = string.Format(urlFormat, parentCategory.Id);
 
-        //todo if html?
-        var categoriesJsonResult = await ProcessUrlTaskAsync(LoadJsonFromUrlAsync, url, token);
-        if (categoriesJsonResult.Status == Common.ResultStatus.Cancelled)
-            token.ThrowIfCancellationRequested();
+        var (success, categoriesResult) = await TryLoadElementFromUrlAsync(url, token);
 
-        if (categoriesJsonResult.Value == null || categoriesJsonResult.Status != Common.ResultStatus.Success)
+        if (!success)
         {
-            if (categoriesJsonResult.Status == Common.ResultStatus.Warning)
-                Logger.LogWarning(ImportCategoryLogMessages.ServiceCategoryFailedOnLoadingFromUrl, Name, parentCategory.Name, categoriesJsonResult.Exception.Message);
-            else if (categoriesJsonResult.Status == Common.ResultStatus.Error)
-                Logger.LogError(ImportCategoryLogMessages.ServiceCategoryFailedOnLoadingFromUrl, Name, parentCategory.Name, categoriesJsonResult.Exception.Message);
-
-            if (categoriesJsonResult.Exception != null)
-                throw categoriesJsonResult.Exception;
+            Logger.LogInformation(ImportCategoryLogMessages.ChildrenForCategoryWereNotLoaded, url);
+            return;
         }
 
-        await JsonCategoryAsync.LoadAllChildrenAsync(parentCategory, categories,
-            categoriesJsonResult.Value.RootElement,
-            CategoryLoadOptions.FirstNodePath,
-             CategoryLoadOptions.CategoryPropertyPaths,
-             token);        
-    }
-
-    private async Task<List<string>?> LoadHtmlFromUrlAsync(string url, CancellationToken token)
-    {
-        token.ThrowIfCancellationRequested();
-        await _htmlLoaderSemaphoreSlim.WaitAsync(token);
         try
         {
-            using var stream = await LoadFromUrlAsync(url, token);
+            await RecursiveCategory.LoadAllChildrenAsync(parentCategory,
+                categories,
+                categoriesResult,
+                CategoryLoadOptions.FirstNodePath,
+                 CategoryLoadOptions.CategoryPropertyPaths,
+                 elementHelper,
+                 token);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, ex.Message);
+            Logger.LogInformation(ImportCategoryLogMessages.ChildrenForCategoryWereNotLoaded, url);
+        }
+    }
+
+    private async Task<(bool success, List<string>? result)> TryLoadHtmlFromUrlAsync(string url, CancellationToken token)
+    {
+        var (success, stream) = await TryLoadFromUrlAsync(url, token);
+
+        if (!success)
+            return await Task.FromResult((false, default(List<string>)));
+
+        try
+        {
+            await _htmlSearcherSemaphoreSlim.WaitAsync(token);
             var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
-            stream.Close();
-            return await Task.FromResult(values);
+            return await Task.FromResult((true, values));
         }
-#if DEBUG
-        catch
+        catch (Exception ex)
         {
-            throw;
+            Logger.LogError(ex, ImportCategoryLogMessages.ParseHtmlFromUrlFailed, url, ex.Message);
+            return await Task.FromResult((false, default(List<string>)));
         }
-#endif  
         finally
         {
-            _htmlLoaderSemaphoreSlim.Release();
+            stream.Close();
+            _htmlSearcherSemaphoreSlim.Release();
         }
     }
 
-    private async Task<JsonDocument?> LoadJsonFromUrlAsync(string url, CancellationToken stoppingToken)
+    private async Task<(bool success, TElement? element)> TryLoadElementFromUrlAsync(string url, CancellationToken stoppingToken)
     {
-        stoppingToken.ThrowIfCancellationRequested();
+        var (success, stream) = await TryLoadFromUrlAsync(url, stoppingToken);
 
-        await _jsonLoaderSemaphoreSlim.WaitAsync(stoppingToken);
+        if (!success)        
+            return (false, default(TElement));
 
         try
-        { 
-            using var stream = await LoadFromUrlAsync(url, stoppingToken);
-            var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
-            return await Task.FromResult(categoriesJson);
-        }
-#if DEBUG
-        catch
         {
-            throw;
+            using (stream)
+            {
+                //var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
+                var categoriesElement = await LoadElementFromStreamAsync(stream, stoppingToken);
+                stream.Close();
+                return await Task.FromResult((true, categoriesElement));
+            }
         }
-#endif  
-        finally
+        catch (SerializationException ex)
         {
-            _jsonLoaderSemaphoreSlim.Release();
-        }       
+            Logger.LogError(ex, ImportCategoryLogMessages.ParseFromUrlFailed, url, ex.Message);
+            return await Task.FromResult((false, default(TElement)));
+        }
     }
 
-    private readonly CancellationToken _currentCancellationToken = default;
-    
-    private readonly SemaphoreSlim _categoryCollectionChangedSemaphore = new (1,1);
+    protected abstract Task<TElement> LoadElementFromStreamAsync(Stream stream, CancellationToken cancellationToken);
+
+    protected abstract TElement LoadElementFromString(string str);
+
+    private readonly SemaphoreSlim _categoryCollectionChangedSemaphore = new(1, 1);
 
     private async void CategoryCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add)return;
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add) return;
 
-        await _categoryCollectionChangedSemaphore.WaitAsync(_currentCancellationToken);
+        await _categoryCollectionChangedSemaphore.WaitAsync();
 
         try
         {
-            var newItems = e.NewItems?.OfType<JsonCategory>();
+            var newItems = e.NewItems?.OfType<RecursiveCategory>();
             if (newItems == null) return;
 
             foreach (var category in newItems)
             {
                 Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasLoaded,
-                    category.Name, category.Id, ShopModel.ShopName);
+                    category.Name, category.Id, _sourceName);
 
-                await _itemHandler.HandleItem(new ImportCategory(category, ShopModel), _currentCancellationToken);
+                await _itemHandler.HandleItem(new ImportCategory(category, _categorySourceUrl, _sourceName, Host));
 
                 Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
-                    category.Name, category.Id, ShopModel.ShopName);
+                    category.Name, category.Id, _sourceName);
             }
-        }
-        catch(OperationCanceledException operationCanceled) 
-        {
-            Logger.LogInformation(operationCanceled, "Item handling canceled.");
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Item handling error.");
+            Logger.LogError(ex, ImportCategoryLogMessages.ItemHandlingError);
         }
         finally
         {

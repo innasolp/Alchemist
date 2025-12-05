@@ -7,13 +7,14 @@
     <Configurations>Debug;Release;</Configurations>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Json.FileExtensions" Version="1.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.0" />
+	</ItemGroup>
+
 
 </Project>
