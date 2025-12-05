@@ -46,9 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Import\Import.Html.Factory\Import.Html.Factory.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Html\Import.Html.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Interfaces\Import.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Service.Json\Alchemist.Import.Category.Service.Json.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Test\Alchemist.Import.Category.Test.csproj" />
   </ItemGroup>

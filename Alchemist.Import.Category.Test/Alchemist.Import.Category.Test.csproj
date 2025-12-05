@@ -14,10 +14,10 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+	<PackageReference Include="Import.Service.Test" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Import\Import.Service.Test\Import.Service.Test.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Service.Json\Alchemist.Import.Category.Service.Json.csproj" />
   </ItemGroup>
 

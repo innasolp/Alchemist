@@ -7,9 +7,13 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Import\Import.Settings.Interfaces\Import.Settings.Interfaces.csproj" />
 		<ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.0" />
+	</ItemGroup>
+
 
 
 </Project>

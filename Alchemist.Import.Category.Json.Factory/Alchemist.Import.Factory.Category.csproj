@@ -8,12 +8,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Category.Json\Alchemist.Import.Category.Service.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Factory.Service\Import.Factory.Service.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Factory.Logging\Import.Factory.Logging.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Factory.Interfaces\Import.Factory.Interfaces.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Html.Factory\Import.Html.Factory.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Category\Alchemist.Import.Settings.Category.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
   </ItemGroup>
 
-</Project>
+	<ItemGroup>
+		<PackageReference Include="Import.Factory.Service" Version="1.0.0.0" />
+	</ItemGroup>
+
+
+	</Project>

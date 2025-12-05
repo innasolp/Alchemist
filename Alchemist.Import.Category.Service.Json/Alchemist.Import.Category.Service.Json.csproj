@@ -8,8 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Import\Import.Service\Import.Service.csproj" />
-	  <ProjectReference Include="..\..\Import\Import.Html\Import.Html.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Json\Alchemist.Import.Category.Service.csproj" />
   </ItemGroup>
 

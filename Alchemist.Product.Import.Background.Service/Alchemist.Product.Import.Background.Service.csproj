@@ -23,12 +23,12 @@
     <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.5" />
 	<PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
 	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.7" />
+	<PackageReference Include="Import.Factory.Logging" Version="1.0.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.BrowserService.Client\Alchemist.BrowserService.Client.csproj" />
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Factory.Logging\Import.Factory.Logging.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />

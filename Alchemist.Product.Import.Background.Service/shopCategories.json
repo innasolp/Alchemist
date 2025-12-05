@@ -122,7 +122,7 @@
   "GoldAppleCategories": {
     "ShopName": "Goldapple",
     "ShopUrl": "https://goldapple.ru",
-    "CategorySourceUrl": "https://goldapple.ru/front/api/catalog/navigation",
+    "CategorySourceUrl": "https://goldapple.ru/web/api/v3/catalog/navigation?locale=ru",
     "Caption": "Золотое яблоко",
     "Perfomance": true,
     "Services": {
@@ -253,5 +253,5 @@
         }
       }
     }
-    }
+  }
 }

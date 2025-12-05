@@ -9,11 +9,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.12.19" />
+	<PackageReference Include="Import.Interfaces" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Interfaces\Import.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

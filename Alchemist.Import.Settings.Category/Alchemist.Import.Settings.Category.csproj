@@ -5,10 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Import\Import.Factory.Interfaces\Import.Factory.Interfaces.csproj" />
-    <ProjectReference Include="..\..\Import\Import.Settings.Interfaces\Import.Settings.Interfaces.csproj" />
-  </ItemGroup>
 
 </Project>
