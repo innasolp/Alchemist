@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Product.Import.Background.ImportItems;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

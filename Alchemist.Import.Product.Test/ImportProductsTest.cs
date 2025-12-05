@@ -13,7 +13,7 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
 {
     protected ResourceManager ImportProductsResourceManager { get; }
 
-    protected Mock<IProductShopModel> ProductShopModelMock { get; } = new Mock<IProductShopModel>();
+    protected Mock<IProductShopModel> ProductShopModelMock { get; } = new ();
 
     protected Mock<IProductItemHandler> ProductItemHandlerMock { get; } = new Mock<IProductItemHandler>();
     

@@ -7,6 +7,6 @@ internal static class TestProductExtensions
 {
     public static string GetCategoryPageUrl(this IProductShopModel productShopModel, IProductShopCategory category, int page)
     {
-        return string.Format(productShopModel.CategoryUrl, category.GetCategoryUrl(), page);
+        return string.Format(productShopModel.CategoryUrlFormat, category.GetCategoryUrl(), page);
     }    
 }

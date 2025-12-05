@@ -1,7 +1,9 @@
 ﻿using Alchemist.Import.Products.Interfaces;
+using System.Collections.Specialized;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using System.Web;
 
 namespace Alchemist.Product.Shop.Ozon.Model;
 
@@ -73,28 +75,39 @@ public class Category : IJsonOnDeserialized, ICategoryProducts, IPaginatorItem
             Shared = JsonSerializer.Deserialize<Shared>(SharedContent);
         }
     }
-
-    //todo category in urlformat
-    string IPaginatorItem.GetPageUrl(string urlFormat, int page)
+    
+    string IPaginatorItem.GetPageUrl(string urlFormat, string item, int page)
     {
         return !string.IsNullOrEmpty(PrevPage)
             ? PrevPage
             : (!string.IsNullOrEmpty(InfiniteVirtualPaginator?.PrevPage)
                             ? InfiniteVirtualPaginator.PrevPage
-                            : string.Format(urlFormat, page));
+                            : string.Format(urlFormat, item, page));
     }
 
-    string IPaginatorItem.GetNextPageUrl(string urlFormat, int page)
+    private static string GetUrlFormat(string urlFormat, string item, int page)
     {
+        var uri = new Uri(string.Format(urlFormat, item, page));
+        var baseUrl = uri.GetLeftPart(UriPartial.Path);
+        NameValueCollection queryParameters = HttpUtility.ParseQueryString(uri.Query);
+        if (queryParameters.Count == 0)
+            return urlFormat;
+
+        var urlParameter = queryParameters.GetKey(0);
+        return $"{baseUrl}?{urlParameter}={{0}}";
+    }
+
+    string IPaginatorItem.GetNextPageUrl(string urlFormat,string item, int page)
+    {
+        var paginatorUrlFormat = GetUrlFormat(urlFormat, item, page);
+
         return !string.IsNullOrEmpty(NextPage)
-             ? NextPage
+             ? string.Format(paginatorUrlFormat, HttpUtility.UrlEncode(NextPage))
              : (!string.IsNullOrEmpty(InfiniteVirtualPaginator?.NextPage)
-                             ? InfiniteVirtualPaginator.NextPage
-                             : string.Format(urlFormat, page + 1));
+                             ? string.Format(paginatorUrlFormat, HttpUtility.UrlEncode(InfiniteVirtualPaginator.NextPage))
+                             : string.Format(urlFormat, item, page + 1));
     }
 }
-
-
 public class CategoryCatalog
 {
     [JsonPropertyName("totalFound")]

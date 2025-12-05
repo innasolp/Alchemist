@@ -2,8 +2,6 @@
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Entities;
-using Alchemist.Product.Import.Background.ImportItems;
-
 namespace Alchemist.Product.ImportItemHandler;
 
 internal static class ImportItemHelper

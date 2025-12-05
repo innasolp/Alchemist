@@ -117,34 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="JsonLoadFromUrlFailed" xml:space="preserve">
-    <value>Json document loading from url {0} failed with error {1}.</value>
-  </data>
-  <data name="ServiceNotLoadedJsonDocFromUrlOperationWasCancelled" xml:space="preserve">
-    <value>Service {0} not loaded json document from url {1}, operation was cancelled.</value>
-  </data>
-  <data name="JsonDocumentNotLoadedFromUrlWithWarning" xml:space="preserve">
-    <value>Json document not loaded from url {0} with warning {1}.</value>
-  </data>
-  <data name="ServiceNotLoadedCategories" xml:space="preserve">
-    <value>Service {0} not loaded categories. {1}.</value>
-  </data>
-  <data name="ServiceCancelledOnLoadingStartCategories" xml:space="preserve">
-    <value>Service {0} cancelled on loading start categories.</value>
-  </data>
-  <data name="ServiceCancelledOnLoadingChildCategories" xml:space="preserve">
-    <value>Service {0} cancelled on loading child categories</value>
-  </data>
-  <data name="ServiceNotLoadedChildCategories" xml:space="preserve">
-    <value>Service {0} not loaded child categories. {1}.</value>
-  </data>
-  <data name="ServiceCategoryFailedOnLoadingFromUrl" xml:space="preserve">
-    <value>Service {0} category {1} failed on loading from url {2}. {3}.</value>
-  </data>
   <data name="CategoryNameIdForShopWasLoaded" xml:space="preserve">
     <value>Category {0}-{1} for shop {2} was loaded.</value>
   </data>
   <data name="CategoryNameIdForShopWasHandled" xml:space="preserve">
     <value>Category {0}-{1} for shop {2} was handled.</value>
+  </data>
+  <data name="CategoriesWereNotLoaded" xml:space="preserve">
+    <value>Categories for shop {0} {1} was not loaded. See error log.</value>
+  </data>
+  <data name="ChildrenForCategoryWereNotLoaded" xml:space="preserve">
+    <value>Children for category {0} were not loaded. See error log.</value>
+  </data>
+  <data name="ParseHtmlFromUrlFailed" xml:space="preserve">
+    <value>Error on parsing html {0}. {1}.</value>
+  </data>
+  <data name="ItemHandlingError" xml:space="preserve">
+    <value>Item handling error.</value>
+  </data>
+  <data name="ParseFromUrlFailed" xml:space="preserve">
+    <value>Error on parsing {0}. {1}.</value>
   </data>
 </root>

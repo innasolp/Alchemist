@@ -2,6 +2,7 @@ using BrowserDataLoader.Interfaces;
 using BrowserLauncher.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 
 namespace Alchemist.BrowserService.Controllers;
 
@@ -71,11 +72,13 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
         if (browserDataLoader == null)
             return TypedResults.NotFound(browser);
 
+        var decodedHost = HttpUtility.UrlDecode(host);
+
         try
         {
             await _semaphoreSlim.WaitAsync();
 
-            var cookies = await browserDataLoader.LoadCookies(host);
+            var cookies = await browserDataLoader.LoadCookies(decodedHost);
             return cookies.Any()
                 ? TypedResults.Ok(cookies.Select(c => c.Convert()))
                 : TypedResults.NotFound();

@@ -1,4 +1,6 @@
-using Alchemist.Import.Category.Json;
+using Alchemist.Import.Category.Interfaces;
+using Alchemist.Import.Category.Service;
+using Alchemist.Import.Category.Service.Json;
 using BrowserDataLoader.Interfaces;
 using System.Collections.ObjectModel;
 using System.Text.Json;
@@ -58,12 +60,14 @@ public class GoldAppleCategoriesLoadTest
 
         Assert.NotNull(jsonDocument);
 
-        var categories = new ObservableCollection<JsonCategory>();
+        var categories = new ObservableCollection<ICategory>();
         var tokenSource = new CancellationTokenSource();
+        var elementHelper = new JsonElementHelper();
 
-        await JsonCategoryAsync.LoadAllChildrenAsync(null, categories, jsonDocument.RootElement,
+        await RecursiveCategory.LoadAllChildrenAsync(null, categories, jsonDocument.RootElement,
                _nodePath,
                _categoryPropertyPathes,
+               elementHelper,
                tokenSource.Token);
 
         Assert.True(categories.Count > 0);
@@ -75,37 +79,5 @@ public class GoldAppleCategoriesLoadTest
         _testOutputHelper.WriteLine($"all categories {categories.Count}");
 
         await Task.Delay(1000);
-    }
-    [Fact]
-    public async Task LoadCategoriesSync()
-    {
-        if (!_webLoader.IsStarted)
-            await InitializeAsync();
-
-        var cookies = await _dataLoader.LoadCookies();
-        var requestHeaders = HeadersHelper.LoadHeadersForRequest(requestHeadersFileName, cookies);
-
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders);
-        var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
-        stream.Close();
-
-        Assert.NotNull(jsonDocument);
-
-        var categories = new ObservableCollection<JsonCategory>();        
-
-        JsonCategory.LoadAllChildren(null, categories, jsonDocument.RootElement,
-               _nodePath,
-               _categoryPropertyPathes);
-
-        Assert.True(categories.Count > 0);
-
-        Assert.NotEmpty(categories.Where(c => c.ParentId > 0));
-        Assert.Equal(14, categories.Count(c => c.ParentId == null));
-
-        _testOutputHelper.WriteLine($"parent categories {categories.Count(c => c.ParentId == null)}");
-        _testOutputHelper.WriteLine($"all categories {categories.Count}");
-
-        await Task.Delay(1000);
-    }
-
+    }    
 }

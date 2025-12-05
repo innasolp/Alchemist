@@ -12,8 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\..\Import\Import.Interfaces\Import.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Category.Json.Factory\Alchemist.Import.Factory.Category.csproj" />
   </ItemGroup>
 
 </Project>

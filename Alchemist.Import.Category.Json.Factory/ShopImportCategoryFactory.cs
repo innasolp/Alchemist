@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Json;
 using Import.Html.Factory;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
@@ -9,18 +8,18 @@ using System.Text.Json;
 using Import.Factory.Interfaces;
 using Import.Factory.Service;
 using Alchemist.Import.Settings.Category;
+using Alchemist.Import.Category.Service;
+using Import.Html;
 
-namespace Alchemist.Import.Factory.Category.Json;
+namespace Alchemist.Import.Factory.Category;
 
-public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerService> logger,
+public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
     ILoaderServiceFactory browserServiceFactory,
     ICategoryItemHandler itemHandler, 
     IImportServiceLogFactory? logFactory = null) 
     : ImportServiceFactory(logger, browserServiceFactory, logFactory)
 {
     private readonly ICategoryItemHandler _itemHandler = itemHandler;
-
-    public override Type ServiceImplementationType => typeof(ShopImportCategoriesTimerService);    
 
     protected override IImportService Create(ILogger logger, 
         string name,
@@ -42,21 +41,19 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesTimerServ
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)
             : null;
 
-        return new ShopImportCategoriesTimerService(logger as ILogger<ShopImportCategoriesTimerService>, 
+        return CreateShopImportCategoriesTimerService(logger, 
             name,
             htmlSearcher,
             browserService,
-            categoryShopModel.CategorySourceUrl,
-            categoryShopModel.Name,
-            categoryShopModel.Url,
+            categoryShopModel,
             categoryLoadOptions, _itemHandler);
     }
 
-    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)
-    {
-        if (logger is ILogger<ShopImportCategoriesTimerService> serviceLogger)
-            return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;
-        else 
-            throw new InvalidDataException(logger.GetType().FullName);
-    }
+    protected abstract ShopImportCategoriesTimerService<TElement> CreateShopImportCategoriesTimerService(ILogger logger, 
+        string name, 
+        IHtmlSearcher htmlSearcher, 
+        ILoaderService loaderService,
+        ICategoryShopModel categoryShopModel,
+        CategoryLoadOptions categoryLoadOptions,
+        ICategoryItemHandler categoryItemHandler);
 }

@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Category.Json;
+﻿namespace Alchemist.Import.Category.Service;
 
 public class PropertyPath(string propertyName, string path, bool? loadStopIfNotExists = false)
 {

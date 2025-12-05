@@ -12,7 +12,7 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
     ILoaderService loader,
     IProductItemHandler itemHandler) 
     : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopModel.ProductUrl,
-            shopModel.CategoryUrl,
+            shopModel.CategoryUrlFormat,
             shopModel.Name,
             shopModel.Url,
             shopModel.Categories, loader, itemHandler)
@@ -31,14 +31,14 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
         _pageCount = pageCount;
     }
 
-    protected override string GetApiUrl(ICategoryProductItem productItem)
+    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
     {
-        return string.Format(_productShopModel.ProductUrl, productItem.Name);
+        return string.Format(productUrlFormat, productItem.Name);
     }
 
     public string GetTestApiUrl(ICategoryProductItem productItem)
     {
-        return GetApiUrl(productItem);
+        return GetApiUrl(_productShopModel.ProductUrl, productItem);
     }
 
     protected override bool IsEndOfCategory(TCategory category)

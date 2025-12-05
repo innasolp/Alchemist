@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Json;
 using Alchemist.Import.Category.Test.Infrastructure;
 using Import.Service.Test.Infrastructure;
 using Import.Service.Test;
@@ -7,10 +6,14 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System.Resources;
 using Xunit.Abstractions;
+using Import.Interfaces;
+using Microsoft.VisualStudio.Threading;
+using Alchemist.Import.Category.Service;
+using Alchemist.Import.Category.Service.Json;
 
 namespace Alchemist.Import.Category.Test;
 
-public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesTimerService>>
+public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesJsonTimerService>>
 {
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
 
@@ -22,13 +25,14 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
     public ImportCategoryJsonLoadingTest(ITestOutputHelper outputHelper) : base(outputHelper)
     {
-        ImportCategoriesResourceManager = new ResourceManager("Alchemist.Import.Category.Json.ImportCategoryLogMessages",
-                               typeof(ShopImportCategoriesTimerService).Assembly);
+        ImportCategoriesResourceManager = new ResourceManager("Alchemist.Import.Category.Service.ImportCategoryLogMessages",
+                               typeof(ShopImportCategoriesTimerService<>).Assembly);
 
         LoaderMock.SetupLoadCookies();
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
         _categoryShopModelMock.Setup(s => s.Name).Returns(Guid.NewGuid().ToString());
         _categoryShopModelMock.Setup(s => s.SourceName).Returns(Guid.NewGuid().ToString());
+        _categoryShopModelMock.Setup(s => s.SourceUrl).Returns(Guid.NewGuid().ToString());
     }
 
     protected override ShopImportCategoriesTimerServiceTest CreateService(string name)
@@ -59,6 +63,16 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         await task.WaitAsync(token.Token);
     }
 
+    private (Task, CancellationToken) StartService(string name)
+    {
+        var service = CreateService(name);
+
+        var token = new CancellationTokenSource();
+        var task = Task.Run(() => service.Start(token.Token));
+
+        return (task, token.Token);
+    }
+
     [Fact]
     public async Task LogInfoSuccessWhenCategoriesLoaded()
     {
@@ -73,12 +87,21 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
             { "Id",new PropertyPath("Id", "Id") } };
 
         var requestData = new object();
+        var loadAutoResetEvent = new AsyncAutoResetEvent();
         LoaderMock.SetupGetRequestData(requestData);
-        LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);        
+        LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category,
+            async (category)=>
+            {
+                var stream = await TestExtensions.LoadItemAsync(category);
+                loadAutoResetEvent.Set();
+                return stream;
+            });        
         
         var name = Guid.NewGuid().ToString();
 
-        await ExecuteServiceAsync(name, 5000, 1000);       
+        await ExecuteServiceAsync(name, 500, 500);
+
+        //var (task, token) = StartService(name);
 
         LoggerMock.VerifyInfo(ImportCategoriesResourceManager.GetString("CategoryNameIdForShopWasLoaded"),
             category.Name, category.Id, _categoryShopModelMock.Object.SourceName); 
@@ -90,19 +113,16 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         LoaderMock.Reset();
         LoaderMock.SetupStartSuccess();       
 
-        var exception = new Exception("Json loading failed");
+        var exception = new LoaderServiceException("Json loading failed");
         var requestData = new object();
         LoaderMock.SetupGetRequestData(requestData);
         LoaderMock.Setup(w=>w.Load(_categoryShopModelMock.Object.CategorySourceUrl, requestData, It.IsAny<CancellationToken>())).Throws(exception);
 
         var name = Guid.NewGuid().ToString();
 
-        await ExecuteServiceAsync(name, 1000, 1000);
+        await ExecuteServiceAsync(name, 500, 500);
 
-        LoggerMock.VerifyError(exception, LogResourceManager.GetString("ProcessUrlFailedError"),
-            _categoryShopModelMock.Object.CategorySourceUrl);
-
-        LoggerMock.VerifyError(ImportCategoriesResourceManager.GetString("JsonLoadFromUrlFailed"),
-            _categoryShopModelMock.Object.CategorySourceUrl, exception.Message);
+        LoggerMock.VerifyInfo(ImportCategoriesResourceManager.GetString("CategoriesWereNotLoaded"),
+            _categoryShopModelMock.Object.SourceName, _categoryShopModelMock.Object.SourceUrl);
     }
 }

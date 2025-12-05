@@ -1,40 +1,38 @@
 using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Json;
 using Alchemist.Import.Category.Test.Infrastructure;
-using Import.Html;
 using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
-using Import.Service.Test.Infrastructure; 
+using Import.Service.Test.Infrastructure;
+using Alchemist.Import.Category.Service;
+using Alchemist.Import.Category.Service.Json;
 
 namespace Alchemist.Import.Category.Test;
 
-public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesTimerService>>
+public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesJsonTimerService>>
 {
-    private readonly Mock<IHtmlSearcher> _htmlSearcherMock = new();
-
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
 
     private readonly CategoryLoadOptions _loadOptions = new() { SecondsInterval = 5 };
 
-    private readonly Mock<ICategoryItemHandler> _categoryItemHandlerMock = new();    
+    private readonly Mock<ICategoryItemHandler> _categoryItemHandlerMock = new();
 
-    public ImportCategoryServiceTest(ITestOutputHelper outputHelper):base(outputHelper)
+    public ImportCategoryServiceTest(ITestOutputHelper outputHelper) : base(outputHelper)
     {
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
     }
 
     protected override ShopImportCategoriesTimerServiceTest CreateService(string name)
     {
-       return new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
-            name,
-            null,
-            LoaderMock.Object,
-            _categoryShopModelMock.Object,
-            _loadOptions,
-            _categoryItemHandlerMock.Object
-            );
+        return new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
+             name,
+             null,
+             LoaderMock.Object,
+             _categoryShopModelMock.Object,
+             _loadOptions,
+             _categoryItemHandlerMock.Object
+             );
     }
 
     [Fact]
@@ -61,17 +59,33 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
         _loadOptions.CategoryPropertyPaths = new Dictionary<string, PropertyPath>() { { "Url", new PropertyPath("Url", "Url") },
             { "Description",new PropertyPath("Description", "Description") },
-            { "Children",new PropertyPath("Children", "Children") }, 
+            { "Children",new PropertyPath("Children", "Children") },
             { "Id",new PropertyPath("Id", "Id") } };
 
         await ImportStoppedWhenCancellationRequestedAsync();
     }
 
     [Fact]
-    public async Task ImportFailedWhenLoaderAlwaysNeedReseting()
+    public async Task LogResetingWarningIfLoaderServiceNeedReseting()
     {
-        LoaderMock.Reset();       
+        LoaderMock.Reset();
 
-        await ImportFailedWhenLoaderAlwaysNeedResetingAsync();
+        await LogResetingWarningIfLoaderServiceNeedResetingAsync();
+    }
+
+    [Fact]
+    public async Task LogServiceFailedErrorWhenUnhandledExceptionThrown()
+    {
+        LoaderMock.Reset();
+
+        await LogServiceFailedErrorWhenUnhandledExceptionThrownAsync();
+    }
+
+    [Fact]
+    public async Task LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequest()
+    {
+        LoaderMock.Reset();
+
+        await LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequestAsync();
     }
 }

@@ -38,7 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Service\Alchemist.Import.Service.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Shop.GoldApple.Model\Alchemist.Product.Shop.GoldApple.Model.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Product.Shop\Alchemist.Test.Product.Shop.csproj" />
   </ItemGroup>  

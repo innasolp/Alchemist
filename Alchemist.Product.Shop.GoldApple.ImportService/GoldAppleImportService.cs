@@ -27,7 +27,7 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
         return !(category.Data.Products?.Length > 0) ;
     }
 
-    protected override string GetApiUrl(ICategoryProductItem productItem)
+    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
     {
         return string.Format(productUrlFormat, productItem.Id);
     }

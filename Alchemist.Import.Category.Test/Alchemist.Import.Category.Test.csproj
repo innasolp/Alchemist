@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Import\Import.Service.Test\Import.Service.Test.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Category.Json\Alchemist.Import.Category.Json.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Category.Service.Json\Alchemist.Import.Category.Service.Json.csproj" />
   </ItemGroup>
 
   <ItemGroup>

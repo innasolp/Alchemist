@@ -15,13 +15,13 @@ public class OzonImportService(ILogger<OzonImportService> logger,
         IEnumerable<IProductShopCategory> shopCategories,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] ILoaderService loaderService,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler)
-    : ShopImportCategoryProductsService<Category, Model.Product>(logger, productUrlFormat, categoryUrlFormat, sourceName, url, shopCategories, loaderService, itemHandler)
+    : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger, productUrlFormat, categoryUrlFormat, sourceName, url, shopCategories, loaderService, itemHandler)
 {
     public override string Name { get; } = name;
 
     protected override int PageProductCount => 12;
 
-    protected override string GetApiUrl(ICategoryProductItem productItem)
+    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
     {
         var ozonCategoryItem = productItem as ProductItem;
         return ozonCategoryItem != null

@@ -58,16 +58,16 @@
       },
 
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesTimerService",
+        "ImplementationTypeName": "ShopImportCategoriesJsonTimerService",
         "AssemblyPath": "Import\\Categories\\Json",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
       "BrowserDataLoader": {
-        "ImplementationTypeName": "FirefoxStandartEdition",
+        "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
       },
       "BrowserLauncher": {
-        "ImplementationTypeName": "FirefoxStandartEdition",
+        "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
       },
       "WebLoader": {
@@ -204,7 +204,7 @@
         }
       },
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesTimerService",
+        "ImplementationTypeName": "ShopImportCategoriesJsonTimerService",
         "AssemblyPath": "Import\\Categories\\Json",
         "ServiceProviderPath": "Import\\Categories"
 
