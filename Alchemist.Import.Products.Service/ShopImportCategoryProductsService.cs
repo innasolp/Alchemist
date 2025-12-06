@@ -25,23 +25,37 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected string CategoryUrlFormat { get; }
 
+    private readonly string? _productHttpMethod;
+
+    private readonly string? _categoryHttpMethod;
+
     private readonly string _sourceName;
     protected abstract int PageProductCount { get; }
     protected virtual int MaxUnsuccessRequestCount => 10;
 
+    private object? ProductRequestData => string.IsNullOrEmpty(_productHttpMethod) || _productHttpMethod == "GET" 
+        ? LoadData : new object?[2] {_productHttpMethod, LoadData};
+    private object? CategoryRequestData => string.IsNullOrEmpty(_categoryHttpMethod) || _categoryHttpMethod == "GET"
+        ? LoadData : new object?[2] { _categoryHttpMethod, LoadData};
+
     public ShopImportCategoryProductsService(ILogger logger,
+        ILoaderService loader,
+        string url,
+        IEnumerable<IProductShopCategory> shopCategories,
+        IProductItemHandler itemHandler,
         string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
-        string url,
-        IEnumerable<IProductShopCategory> shopCategories,
-        ILoaderService loader,
-        IProductItemHandler itemHandler)
+        string? productHttpMethod = "GET",
+        string? categoryHttpMethod = "GET"
+        )
         : base(logger, loader, url)
     {
         _productUrlFormat = productUrlFormat;
         CategoryUrlFormat = categoryUrlFormat;
         _sourceName = sourceName;
+        _categoryHttpMethod = categoryHttpMethod;
+        _productHttpMethod = productHttpMethod;
         _itemHandler = itemHandler;
         Categories = new();
 
@@ -136,7 +150,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPageUrl, int categoryItemId, CancellationToken stoppingToken)
     {
-        var (success, category) = await TryGetFromApiUrlAsync<TCategory>(categoryPageUrl, stoppingToken);
+        var (success, category) = await TryGetFromApiUrlAsync<TCategory>(categoryPageUrl, CategoryRequestData, stoppingToken);
 
         if (!success)
         {
@@ -189,9 +203,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return true;
     }
 
-    protected virtual async Task<(bool success, T? result)> TryGetFromApiUrlAsync<T>(string apiUrl, CancellationToken token)
-    {
-        var (success, stream) = await TryLoadFromUrlAsync(apiUrl, token);
+    protected virtual async Task<(bool success, T? result)> TryGetFromApiUrlAsync<T>(string apiUrl, object? requestData, CancellationToken token)
+    {        
+        var (success, stream) = await TryLoadFromUrlAsync(apiUrl, requestData, cancellationToken : token);
 
         if (!success) return (false, default(T?));
 
@@ -219,7 +233,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected async Task<(bool success, TProductItem? productItem)> TryGetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)
     {
-        var (success, productItem) = await TryGetFromApiUrlAsync<TProductItem>(apiUrl, token);
+        var (success, productItem) = await TryGetFromApiUrlAsync<TProductItem>(apiUrl, ProductRequestData, token);
 
         if (!success) return (false, default(TProductItem?));
         

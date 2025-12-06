@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;
 using Import.Factory.Interfaces;
 using Import.Factory.Service;
@@ -22,13 +23,27 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
         IShopImportSettings shopImportSettings,
         ILoaderService browserService)
     {
-        return Create(logger, name, shopModel as IProductShopModel, shopImportSettings, _itemHandler, browserService);
+        if (shopImportSettings is not IProductShopImportSettings productShopImportSettings)
+            throw new InvalidDataException($"Invalid settings type {shopImportSettings.GetType().Name}");
+
+        if (shopModel is not IProductShopModel productShopModel)
+            throw new InvalidDataException($"Invalid shop model type {shopModel.GetType().Name}");
+
+        if (!shopImportSettings.TryGetServiceStringValue("ProductHttpMethod", out var productHttpMethod))
+            productHttpMethod = "GET";
+
+        if (!shopImportSettings.TryGetServiceStringValue("CategoryHttpMethod", out var categoryHttpMethod))
+            categoryHttpMethod = "GET";        
+
+        return Create(logger, name, productShopModel, productShopImportSettings, _itemHandler, browserService, productHttpMethod, categoryHttpMethod);
     }
 
     protected abstract IImportService Create(ILogger logger,
         string name,
         IProductShopModel shopModel,
-        IShopImportSettings shopImportSettings,
+        IProductShopImportSettings productShopImportSettings,
         IProductItemHandler productItemHandler, 
-        ILoaderService browserService);
+        ILoaderService browserService,
+        string? productHttpMethod,
+        string? categoryHttpMethod);
 }

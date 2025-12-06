@@ -1,7 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
 using Import.Interfaces;
-using Import.Service.Test.Infrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Product.Test.Infrastructure;
@@ -11,11 +10,11 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
     IProductShopModel shopModel, 
     ILoaderService loader,
     IProductItemHandler itemHandler) 
-    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, shopModel.ProductUrl,
+    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,loader, shopModel.Url,
+        shopModel.Categories,  itemHandler,
+        shopModel.ProductUrl,
             shopModel.CategoryUrlFormat,
-            shopModel.Name,
-            shopModel.Url,
-            shopModel.Categories, loader, itemHandler)
+            shopModel.Name)
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {

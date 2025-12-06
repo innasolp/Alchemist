@@ -101,8 +101,6 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
         await ExecuteServiceAsync(name, 500, 500);
 
-        //var (task, token) = StartService(name);
-
         LoggerMock.VerifyInfo(ImportCategoriesResourceManager.GetString("CategoryNameIdForShopWasLoaded"),
             category.Name, category.Id, _categoryShopModelMock.Object.SourceName); 
     }

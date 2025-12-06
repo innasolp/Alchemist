@@ -8,15 +8,28 @@ using Import.Interfaces;
 namespace Alchemist.Product.Shop.GoldApple.ImportService;
 
 public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string name,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string productUrlFormat,
-    string categoryUrlFormat,
-    string sourceName,
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string name,    
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] ILoaderService loader,
     string url,
     IEnumerable<IProductShopCategory> shopCategories,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] ILoaderService loader,
-    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductItemHandler productDataHandler)
-    : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger, productUrlFormat, categoryUrlFormat, sourceName, url, shopCategories, loader, productDataHandler)
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductItemHandler productDataHandler,
+    [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string productUrlFormat,
+    string categoryUrlFormat,
+    string sourceName, 
+    string? productHttpMethod = "GET",
+    string? categoryHttpMethod= "GET"
+    )
+    : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger,
+        loader,
+        url, 
+        shopCategories, 
+        productDataHandler,
+        productUrlFormat,
+        categoryUrlFormat, 
+        sourceName,
+        productHttpMethod,
+        categoryHttpMethod
+        )
 {
     public override string Name { get; } = name;
 

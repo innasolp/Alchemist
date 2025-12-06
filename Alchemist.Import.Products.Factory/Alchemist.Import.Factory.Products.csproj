@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
   </ItemGroup>
 

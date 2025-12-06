@@ -25,4 +25,6 @@ public class TestProductShopImportSettings : TestShopImportSettings, IProductSho
         set => RootCategories = value is TestCategoryUrl[] testCategoryUrls 
             ? testCategoryUrls
             : value != null ? value.OfType<TestCategoryUrl>().ToArray() : []; }
+    public string? ProductHttpMethod { get; set; }
+    public string? CategoryHttpMethod { get; set; }
 }

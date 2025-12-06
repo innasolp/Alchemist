@@ -17,18 +17,23 @@ public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
 {
     public override Type ServiceImplementationType => typeof(OzonImportService);
 
-    protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IShopImportSettings shopImportSettings,
-        IProductItemHandler itemHandler, ILoaderService browserService)
+    protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IProductShopImportSettings shopImportSettings,
+        IProductItemHandler itemHandler, ILoaderService loaderService,
+        string? productHttpMethod,
+        string? categoryHttpMethod)
     {
         return new OzonImportService(logger as ILogger<OzonImportService>,
             name,
-           shopModel.ProductUrl,
-            shopModel.CategoryUrl,
-            shopModel.Name,
+            loaderService,
             shopModel.Url,
             shopModel.Categories,
-            browserService,
-            itemHandler);
+            itemHandler,
+            shopImportSettings.ProductUrlFormat,
+            shopImportSettings.CategoryUrlFormat,
+            shopModel.Name,
+            productHttpMethod,
+            categoryHttpMethod
+            );
     }
 
     protected override ILogger GetLogger(ILogger logger,string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)

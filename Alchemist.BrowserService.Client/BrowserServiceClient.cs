@@ -1,48 +1,29 @@
 ﻿using BrowserDataLoader.Interfaces;
 using Import.Interfaces;
-using System.Net.Http.Headers;
+using System.Collections;
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Web;
 using WebLoader.Common;
 using WebLoader.Interfaces;
 
 namespace Alchemist.BrowserService.Client;
 
-internal class BrowserServiceClient : ILoaderService
+internal class BrowserServiceClient(HttpClient httpClient, string name, string host, IWebLoader webLoader,
+    string browserDataLoader, string browserDataLauncher, RequestHeaders requestHeaders) : ILoaderService
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = httpClient;
 
-    private readonly string _browserDataLoader;
+    private readonly string _browserDataLoader = browserDataLoader;
 
-    private readonly string _browserDataLauncher;
+    private readonly string _browserDataLauncher = browserDataLauncher;
 
-    private readonly IWebLoader _webLoader;
+    private readonly IWebLoader _webLoader = webLoader;
 
-    private readonly RequestHeaders? _requestHeaders;
+    private readonly RequestHeaders? _requestHeaders = requestHeaders;
 
-    private readonly string _host;
+    private readonly string _host = host;
 
-    public BrowserServiceClient(IHttpClientFactory httpClientFactory, string name, string apiHost, string host, IWebLoader webLoader, 
-        string browserDataLoader, string browserDataLauncher, JsonObject requestHeaders)
-    {
-        _httpClient = httpClientFactory.CreateClient(apiHost);
-        _httpClient.BaseAddress = new Uri(apiHost);
-        _httpClient.DefaultRequestHeaders.Accept.Clear();
-        _httpClient.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
-
-        _requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(requestHeaders.ToString());
-
-        Name = name;
-        _host = host;
-        _webLoader = webLoader;
-        _browserDataLoader = browserDataLoader;
-        _browserDataLauncher = browserDataLauncher;
-    }
-
-    public string Name { get; }
+    public string Name { get; } = name;
 
     bool ILoaderService.IsStarted => _webLoader?.IsStarted ?? false;
 
@@ -81,13 +62,26 @@ internal class BrowserServiceClient : ILoaderService
 
     public async Task<Stream> Load(string url, object? data, CancellationToken token = default)
     {
-        if (data is not IEnumerable<ICookieData> cookies)
+        var httpMethod = HttpMethod.Get;
+        IEnumerable<ICookieData>? cookies;
+        if (data is IEnumerable dataValues)
+        {
+            if(dataValues.OfType<string>().Any())
+                httpMethod = new HttpMethod(dataValues.OfType<string>().First());
+
+            cookies = dataValues.OfType<IEnumerable<ICookieData>>().FirstOrDefault();
+
+            if (cookies is null && dataValues is IEnumerable<ICookieData> cookieValues)
+                cookies = cookieValues;
+        }  
+        else
             throw new InvalidOperationException($"Invalid type of {data}");
 
         var headers = HeadersHelper.GetHeadersForRequest(_requestHeaders, cookies);
 
         try
         {
+            //todo add httpmethod
             return await _webLoader.LoadFromUrl(url, headers);
         }
         catch(WebLoaderException e)
@@ -99,12 +93,13 @@ internal class BrowserServiceClient : ILoaderService
         }
         catch(HttpRequestException e)
         {
+            var message = $"Request error {e.HttpRequestError}, status code {e.StatusCode}. {e.Message}";
             if(e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                throw new LoaderServiceException(e.Message, e, LoaderServiceAction.Wait);
+                throw new LoaderServiceException(message, e, LoaderServiceAction.Wait);
             else if(e.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                throw new LoaderServiceException(e.Message, e, LoaderServiceAction.Wait);
+                throw new LoaderServiceException(message, e, LoaderServiceAction.Wait);
             else
-                throw new LoaderServiceException(e.Message, e);
+                throw new LoaderServiceException(message, e);
         }
     }
 

@@ -90,7 +90,7 @@
         "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
       }
     }
-    },
+  },
 
   "GoldAppleProductsImport": {
     "ShopName": "GoldApple",
@@ -194,10 +194,10 @@
           "CookieIndex": 4,
           "CookiePrefixLength": 0
         }
+      },
+      "CategoryHttpMethod": {
+        "Value": "POST"
       }
     }
-
-    }
-
+  }
 }
-

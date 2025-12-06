@@ -8,14 +8,24 @@ namespace Alchemist.Product.Shop.Ozon.ImportService;
 
 public class OzonImportService(ILogger<OzonImportService> logger,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] string name,
+    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] ILoaderService loaderService, 
+    string url,  
+    IEnumerable<IProductShopCategory> shopCategories,
+    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler,
     string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
-        string url,
-        IEnumerable<IProductShopCategory> shopCategories,
-    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] ILoaderService loaderService,
-    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler)
-    : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger, productUrlFormat, categoryUrlFormat, sourceName, url, shopCategories, loaderService, itemHandler)
+      string? productHttpMethod = "GET",
+      string? categoryHTTPMethod= "GET"
+   )
+    : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger,
+        loaderService,
+        url,
+        shopCategories, 
+        itemHandler,
+        productUrlFormat, categoryUrlFormat, sourceName,
+        productHttpMethod,
+        categoryHTTPMethod)
 {
     public override string Name { get; } = name;
 

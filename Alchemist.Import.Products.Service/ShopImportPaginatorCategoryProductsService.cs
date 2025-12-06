@@ -5,8 +5,26 @@ using Microsoft.Extensions.Logging;
 namespace Alchemist.Import.Products.Service;
 
 public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TProductItem>
-    (ILogger logger, string productUrlFormat, string categoryUrlFormat, string sourceName, string url, IEnumerable<IProductShopCategory> shopCategories, ILoaderService loader, IProductItemHandler itemHandler) 
-    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, productUrlFormat, categoryUrlFormat, sourceName, url, shopCategories, loader, itemHandler)
+    (ILogger logger,
+    ILoaderService loader,
+    string url,    
+    IEnumerable<IProductShopCategory> shopCategories,    
+    IProductItemHandler itemHandler ,
+     string productUrlFormat,
+     string categoryUrlFormat,
+    string sourceName, 
+    string? productHttpMethod="GET",
+    string? categoryHttpMethod="GET") 
+    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,
+        loader,
+        url,
+        shopCategories,
+        itemHandler,
+        productUrlFormat,
+        categoryUrlFormat,
+        sourceName,
+        productHttpMethod,
+        categoryHttpMethod)
     where TCategory : class, ICategoryProducts, IPaginatorItem, new()
     where TProductItem : class, IProductItem, new()
 {
