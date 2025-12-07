@@ -14,7 +14,7 @@
 
     "Sec-Fetch-Dest": "document",
     "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-Site": "cross-site",
 
     "Sec-Fetch-User": "?1",
     "Upgrade-Insecure-Requests": "1",
@@ -32,7 +32,6 @@
     "__Secure-user-id",
     "abt_data",
     "ADDRESSBOOKBAR_WEB_CLARIFICATION",
-    "is_cookies_accepted",
     "rfuid",
     "xcid"
   ],

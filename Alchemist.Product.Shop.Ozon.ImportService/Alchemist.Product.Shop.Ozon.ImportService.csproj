@@ -17,9 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Ozon.Headers.Firefox.Standart.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Ozon.Headers.Chrome.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

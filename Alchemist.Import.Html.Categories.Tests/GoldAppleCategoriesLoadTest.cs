@@ -79,5 +79,5 @@ public class GoldAppleCategoriesLoadTest
         _testOutputHelper.WriteLine($"all categories {categories.Count}");
 
         await Task.Delay(1000);
-    }    
+    }
 }

@@ -2,6 +2,7 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Test.Model;
 using Json.FileExtensions;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using WebLoader.Common;
 
 namespace Alchemist.Import.ProductSettings.Tests;
@@ -25,9 +26,8 @@ public class SerializationTests
         Assert.NotNull(ozonSettings.GetWebLoader<TestImportServiceSettings>().AssemblyPath);
         Assert.NotNull(ozonSettings.GetWebLoader<TestImportServiceSettings>().ImplementationTypeName);
 
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(ozonSettings.GetRequestHeaders<TestImportServiceSettings>().Value);
+        var requestHeaders = JsonSerializer.Deserialize<JsonObject>(ozonSettings.GetRequestHeaders<TestImportServiceSettings>().Value);
         Assert.NotNull(requestHeaders);
-        Assert.NotNull(requestHeaders.Headers);
 
 
         var goldAppleSettings = shopProductsSettings.FirstOrDefault(s => s.Key == "GoldApple").Value;

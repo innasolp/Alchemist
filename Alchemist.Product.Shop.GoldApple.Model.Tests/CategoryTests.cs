@@ -23,8 +23,8 @@ namespace Alchemist.Product.Shop.GoldApple.Model.Tests
         [Fact]
         public void CategoryProductPricesNotNull()
         {
-            Assert.True(_category?.Data.Products.All(p => p.ProductItemPrice != null));
-            Assert.True(_category?.Data.Products.All(p => p.Price > 0));
+            Assert.True(_category?.Data.Products.All(p => p.Product.ProductItemPrice != null));
+            Assert.True(_category?.Data.Products.All(p => p.Product.Price > 0));
         }
     }
 }

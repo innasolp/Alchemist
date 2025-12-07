@@ -20,7 +20,7 @@
     <PackageReference Include="Serilog.Loggers" Version="1.0.0.2" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
-    <PackageReference Include="WebLoader.Interfaces" Version="1.0.0.5" />
+    <PackageReference Include="WebLoader.Interfaces" Version="1.0.1" />
 	<PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
 	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.7" />
 	<PackageReference Include="Import.Factory.Logging" Version="1.0.0.0" />
