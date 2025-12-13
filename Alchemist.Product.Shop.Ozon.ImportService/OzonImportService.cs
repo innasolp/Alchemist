@@ -16,7 +16,9 @@ public class OzonImportService(ILogger<OzonImportService> logger,
         string categoryUrlFormat,
         string sourceName,
       string? productHttpMethod = "GET",
-      string? categoryHTTPMethod= "GET"
+        string? productDataFormat = null,
+        string? categoryHttpMethod = "GET",
+        string? categoryDataFormat = null
    )
     : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger,
         loaderService,
@@ -25,7 +27,9 @@ public class OzonImportService(ILogger<OzonImportService> logger,
         itemHandler,
         productUrlFormat, categoryUrlFormat, sourceName,
         productHttpMethod,
-        categoryHTTPMethod)
+        productDataFormat,
+        categoryHttpMethod,
+        categoryDataFormat)
 {
     public override string Name { get; } = name;
 

@@ -12,9 +12,11 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
     IProductItemHandler itemHandler ,
      string productUrlFormat,
      string categoryUrlFormat,
-    string sourceName, 
-    string? productHttpMethod="GET",
-    string? categoryHttpMethod="GET") 
+    string sourceName,
+    string? productHttpMethod = "GET",
+        string? productDataFormat = null,
+        string? categoryHttpMethod = "GET",
+        string? categoryDataFormat = null) 
     : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,
         loader,
         url,
@@ -24,7 +26,9 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
         categoryUrlFormat,
         sourceName,
         productHttpMethod,
-        categoryHttpMethod)
+        productDataFormat,
+        categoryHttpMethod,
+        categoryDataFormat)
     where TCategory : class, ICategoryProducts, IPaginatorItem, new()
     where TProductItem : class, IProductItem, new()
 {

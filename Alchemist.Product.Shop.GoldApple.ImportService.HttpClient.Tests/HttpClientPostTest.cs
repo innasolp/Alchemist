@@ -38,6 +38,15 @@ public class HttpClientPostTest(ITestOutputHelper testOutputHelper) : ProductSho
 
     protected override IBrowserLauncher BrowserLauncher => _browserLauncher;
 
+    private async Task<Dictionary<string,string>> GetRequestHeadersAsync(string requestHeadersPath)
+    {
+        var data = await _browserServiceMock.Object.GetData("goldapple.ru");
+        if (data is not IEnumerable<ICookieData> cookies)
+            throw new InvalidDataException(data.GetType().Name);
+
+        return HeadersHelper.LoadHeadersForRequest(requestHeadersPath, cookies);
+    }
+
     [Fact]
     public async Task LoadCategoryProductsTest()
     {
@@ -46,11 +55,8 @@ public class HttpClientPostTest(ITestOutputHelper testOutputHelper) : ProductSho
         
 
         var requestHeadersPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{_requestHeadersFileName}";
-        var data = await _browserServiceMock.Object.GetData("goldapple.ru");
-        if (data is not IEnumerable<ICookieData> cookies)
-            throw new InvalidDataException(data.GetType().Name);
 
-        var requestHeaders = HeadersHelper.LoadHeadersForRequest(requestHeadersPath, cookies);
+        var requestHeaders = await GetRequestHeadersAsync(requestHeadersPath);
 
         var url = "https://goldapple.ru/front/api/catalog/cards-list?locale=ru";
         using var req = new HttpRequestMessage(HttpMethod.Post, url);
@@ -77,6 +83,35 @@ public class HttpClientPostTest(ITestOutputHelper testOutputHelper) : ProductSho
         utf8Stream.Close();
 
         Assert.NotEmpty(category.Data.Products);
+
+        await Task.Delay(2000);
+
+        var productUrlFormat = "https://goldapple.ru/front/api/catalog/product-card/base/v3?itemId={0}&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0";
+
+        var i = 0;
+        foreach (var product in category.Data.Products)
+        {
+            var productItemUrl = string.Format(productUrlFormat, product.Product.ItemId);
+
+            requestHeaders = await GetRequestHeadersAsync(requestHeadersPath);
+
+            using var productResponse = await httpClient.GetAsync(productItemUrl);
+
+            try
+            {
+                productResponse.EnsureSuccessStatusCode();
+
+                i++;
+
+                await Task.Delay(2000);
+            }
+            catch
+            {
+                _testOutputHelper.WriteLine($"try {i+1} url {productItemUrl}");
+
+                throw;
+            }
+        }
     }
 
     private static byte[] DecompressGZipByteArrayToUtf8Bytes(byte[] compressedGZipBytes)

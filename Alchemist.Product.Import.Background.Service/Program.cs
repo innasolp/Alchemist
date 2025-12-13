@@ -87,10 +87,11 @@ static void AddSettingsAdapters(WebApplicationBuilder builder)
 
 static void AddLoaderService(WebApplicationBuilder builder)
 {
-    builder.Services.AddKeyedSingleton(nameof(BrowserServiceClientFactory),
-           builder.Configuration.GetSection("BrowserServiceHost").Get<string>());
-    builder.Services.AddSingleton<ILoaderServiceFactory, BrowserServiceClientFactory>();
-    builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoader), $"{Utils.GetAppPath()}\\{builder.Configuration.GetSection("WebLoaderPath").Value}");
+    var browserApiHost = builder.Configuration.GetSection("BrowserServiceHost").Get<string>();
+    builder.Services.AddBrowserServiceClientFactory(browserApiHost);
+
+    var webLoaderPath = builder.Configuration.GetSection("WebLoaderPath").Value;
+    builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoader), $"{Utils.GetAppPath()}\\{webLoaderPath}");
 }
 
 static void AddShopAPIService(WebApplicationBuilder builder, out string restApiHost)

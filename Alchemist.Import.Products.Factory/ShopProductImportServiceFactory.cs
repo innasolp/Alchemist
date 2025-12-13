@@ -6,8 +6,15 @@ using Import.Factory.Service;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Alchemist.Import.Factory.Products;
+
+internal record struct RequestData(string HttpMethod, JsonObject? Data)
+{
+    public RequestData() : this("GET", null) { }
+}
 
 public abstract class ShopProductImportServiceFactory(ILogger logger,
     ILoaderServiceFactory browserServiceFactory,
@@ -28,14 +35,19 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
 
         if (shopModel is not IProductShopModel productShopModel)
             throw new InvalidDataException($"Invalid shop model type {shopModel.GetType().Name}");
+        
+        var categoryDataService = shopImportSettings.GetService("CategoryData");
+        var categoryData = categoryDataService != null && !string.IsNullOrEmpty(categoryDataService.Value)
+            ? JsonSerializer.Deserialize<RequestData>(categoryDataService.Value)
+            : default;
 
-        if (!shopImportSettings.TryGetServiceStringValue("ProductHttpMethod", out var productHttpMethod))
-            productHttpMethod = "GET";
+        var productDataService = shopImportSettings.GetService("ProductData");
+        var productData = productDataService != null && !string.IsNullOrEmpty(productDataService.Value)
+            ? JsonSerializer.Deserialize<RequestData>(productDataService.Value)
+            : default;
 
-        if (!shopImportSettings.TryGetServiceStringValue("CategoryHttpMethod", out var categoryHttpMethod))
-            categoryHttpMethod = "GET";        
-
-        return Create(logger, name, productShopModel, productShopImportSettings, _itemHandler, browserService, productHttpMethod, categoryHttpMethod);
+        return Create(logger, name, productShopModel, productShopImportSettings, _itemHandler, browserService,
+            productData.HttpMethod, productData.Data?.ToString(), categoryData.HttpMethod, categoryData.Data?.ToString());
     }
 
     protected abstract IImportService Create(ILogger logger,
@@ -45,5 +57,7 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
         IProductItemHandler productItemHandler, 
         ILoaderService browserService,
         string? productHttpMethod,
-        string? categoryHttpMethod);
+        string? productDataFormat,
+        string? categoryHttpMethod,
+        string? categoryDataFormat);
 }

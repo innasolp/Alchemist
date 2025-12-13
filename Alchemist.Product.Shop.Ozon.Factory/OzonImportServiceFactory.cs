@@ -20,7 +20,9 @@ public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
     protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IProductShopImportSettings shopImportSettings,
         IProductItemHandler itemHandler, ILoaderService loaderService,
         string? productHttpMethod,
-        string? categoryHttpMethod)
+        string? productDataFormat,
+        string? categoryHttpMethod,
+        string? categoryDataFormat)
     {
         return new OzonImportService(logger as ILogger<OzonImportService>,
             name,
@@ -32,7 +34,9 @@ public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
             shopImportSettings.CategoryUrlFormat,
             shopModel.Name,
             productHttpMethod,
-            categoryHttpMethod
+            productDataFormat,
+            categoryHttpMethod,
+            categoryDataFormat
             );
     }
 

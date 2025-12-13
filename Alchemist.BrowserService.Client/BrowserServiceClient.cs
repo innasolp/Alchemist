@@ -63,11 +63,15 @@ internal class BrowserServiceClient(HttpClient httpClient, string name, string h
     public async Task<Stream> Load(string url, object? data, CancellationToken token = default)
     {
         var httpMethod = HttpMethod.Get;
+        string? requestData = null;
         IEnumerable<ICookieData>? cookies;
         if (data is IEnumerable dataValues)
         {
-            if(dataValues.OfType<string>().Any())
+            if (dataValues.OfType<string>().Any())
+            {
                 httpMethod = new HttpMethod(dataValues.OfType<string>().First());
+                requestData = dataValues.OfType<string>().Last();
+            }
 
             cookies = dataValues.OfType<IEnumerable<ICookieData>>().FirstOrDefault();
 
@@ -82,7 +86,7 @@ internal class BrowserServiceClient(HttpClient httpClient, string name, string h
         try
         {
             //todo add httpmethod
-            return await _webLoader.LoadFromUrl(url, headers);
+            return await _webLoader.LoadFromUrl(url, headers, httpMethod, requestData);
         }
         catch(WebLoaderException e)
         {

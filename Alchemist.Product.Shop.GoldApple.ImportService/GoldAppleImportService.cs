@@ -15,9 +15,11 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] IProductItemHandler productDataHandler,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string productUrlFormat,
     string categoryUrlFormat,
-    string sourceName, 
+    string sourceName,
     string? productHttpMethod = "GET",
-    string? categoryHttpMethod= "GET"
+        string? productDataFormat = null,
+        string? categoryHttpMethod = "GET",
+        string? categoryDataFormat = null
     )
     : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger,
         loader,
@@ -28,7 +30,9 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
         categoryUrlFormat, 
         sourceName,
         productHttpMethod,
-        categoryHttpMethod
+        productDataFormat,
+        categoryHttpMethod,
+        categoryDataFormat
         )
 {
     public override string Name { get; } = name;

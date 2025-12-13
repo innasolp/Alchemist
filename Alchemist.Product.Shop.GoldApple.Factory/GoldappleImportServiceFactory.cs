@@ -24,7 +24,9 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
         IProductItemHandler itemHandler, 
         ILoaderService loaderService,
         string? productHttpMethod,
-        string? categoryHttpMethod)
+        string? productDataFormat,
+        string? categoryHttpMethod,
+        string? categoryDataFormat)
     {
         return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>,
              name,
@@ -36,7 +38,9 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
             shopImportSettings.CategoryUrlFormat,
             shopModel.Name,
             productHttpMethod,
-            categoryHttpMethod);
+            productDataFormat,
+            categoryHttpMethod,
+            categoryDataFormat);
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)

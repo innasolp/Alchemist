@@ -29,15 +29,23 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly string? _categoryHttpMethod;
 
+    private readonly string? _productDataFormat;
+
+    private readonly string? _categoryDataFormat;
+
     private readonly string _sourceName;
     protected abstract int PageProductCount { get; }
     protected virtual int MaxUnsuccessRequestCount => 10;
 
-    private object? ProductRequestData => string.IsNullOrEmpty(_productHttpMethod) || _productHttpMethod == "GET" 
-        ? LoadData : new object?[2] {_productHttpMethod, LoadData};
-    private object? CategoryRequestData => string.IsNullOrEmpty(_categoryHttpMethod) || _categoryHttpMethod == "GET"
-        ? LoadData : new object?[2] { _categoryHttpMethod, LoadData};
+    public object GetData(object loadData, string httpMethod, string dataFormat, params object[] parameters)
+    {
+        if (dataFormat is null) return new object[2] { httpMethod, loadData };
 
+        if (dataFormat.StartsWith("{")) dataFormat = $"{{{dataFormat}}}";
+
+        return new object[3] { httpMethod, loadData, string.Format(dataFormat, parameters) };
+    }
+   
     public ShopImportCategoryProductsService(ILogger logger,
         ILoaderService loader,
         string url,
@@ -47,15 +55,19 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         string categoryUrlFormat,
         string sourceName,
         string? productHttpMethod = "GET",
-        string? categoryHttpMethod = "GET"
+        string? productDataFormat = null,
+        string? categoryHttpMethod = "GET",
+        string? categoryDataFormat = null
         )
         : base(logger, loader, url)
     {
         _productUrlFormat = productUrlFormat;
         CategoryUrlFormat = categoryUrlFormat;
         _sourceName = sourceName;
-        _categoryHttpMethod = categoryHttpMethod;
         _productHttpMethod = productHttpMethod;
+        _productDataFormat = productDataFormat;
+        _categoryHttpMethod = categoryHttpMethod;
+        _categoryDataFormat = categoryDataFormat;
         _itemHandler = itemHandler;
         Categories = new();
 
@@ -94,7 +106,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             while (isEndOfCategory != true)
             {
-                var (success, categoryResult, categoryPageResult) = await TryProcessCategoryPageAsync(categoryPageUrl, category.ItemId, stoppingToken);
+                var (success, categoryResult, categoryPageResult) = await TryProcessCategoryPageAsync(categoryPageUrl, category.ItemId, page, stoppingToken);
 
                 if(!success)
                 {
@@ -148,9 +160,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return null;
     }
 
-    protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPageUrl, int categoryItemId, CancellationToken stoppingToken)
+    protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPageUrl, int categoryItemId, int page, CancellationToken stoppingToken)
     {
-        var (success, category) = await TryGetFromApiUrlAsync<TCategory>(categoryPageUrl, CategoryRequestData, stoppingToken);
+        var (success, category) = await TryGetFromApiUrlAsync<TCategory>(categoryPageUrl,
+            !string.IsNullOrEmpty(_categoryHttpMethod) ? GetData(LoadData, _categoryHttpMethod, _categoryDataFormat, categoryItemId, page) : LoadData,
+            stoppingToken);
 
         if (!success)
         {
@@ -233,7 +247,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected async Task<(bool success, TProductItem? productItem)> TryGetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)
     {
-        var (success, productItem) = await TryGetFromApiUrlAsync<TProductItem>(apiUrl, ProductRequestData, token);
+        var (success, productItem) = await TryGetFromApiUrlAsync<TProductItem>(apiUrl,
+            _productHttpMethod is not null ? GetData(LoadData, _productHttpMethod, _productDataFormat, categoryProductItem.Id) : LoadData,
+            token);
 
         if (!success) return (false, default(TProductItem?));
         
