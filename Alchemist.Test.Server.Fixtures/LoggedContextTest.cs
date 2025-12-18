@@ -37,8 +37,8 @@ public abstract class LoggedContextTest(ITestOutputHelper outputHelper)
 
     protected void OutputWarnings()
     {
-        var warnings = _logMessages.Where(m => m.LogLevel == LogLevel.Warning);
-        if (!warnings.Any()) return;
+        var warnings = _logMessages.Where(m => m.LogLevel == LogLevel.Warning).ToArray();
+        if (warnings.Length == 0) return;
         OutputHelper.WriteLine("Warnings:");
         foreach (var warning in warnings)
         {

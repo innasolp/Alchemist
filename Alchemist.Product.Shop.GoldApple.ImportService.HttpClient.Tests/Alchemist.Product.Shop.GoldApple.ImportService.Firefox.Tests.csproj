@@ -33,7 +33,9 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1" />
+    <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.3" />
+    <PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.1" />
+    <PackageReference Include="WebLoader.HttpClient" Version="1.0.1.3" />
 	<PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.2" />
   </ItemGroup>
 

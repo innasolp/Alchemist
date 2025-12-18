@@ -23,15 +23,15 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly string _productUrlFormat;
 
-    protected string CategoryUrlFormat { get; }
+    private readonly UrlFormatType _productUrlFormatType;
 
-    private readonly string? _productHttpMethod;
+    private readonly string _categoryUrlFormat;
 
-    private readonly string? _categoryHttpMethod;
+    private readonly UrlFormatType _categoryUrlFormatType;
 
-    private readonly string? _productDataFormat;
+    private readonly object? _productLoadData;
 
-    private readonly string? _categoryDataFormat;
+    private readonly object? _categoryLoadData;
 
     private readonly string _sourceName;
     protected abstract int PageProductCount { get; }
@@ -54,24 +54,25 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
-        string? productHttpMethod = "GET",
-        string? productDataFormat = null,
-        string? categoryHttpMethod = "GET",
-        string? categoryDataFormat = null
-        )
+        object? productLoadData = null,
+        object? categoryLoadData = null,
+        UrlFormatType productUrlFormatType = default,
+        UrlFormatType categoryUrlFormatType = default)
         : base(logger, loader, url)
     {
         _productUrlFormat = productUrlFormat;
-        CategoryUrlFormat = categoryUrlFormat;
+        _categoryUrlFormat = categoryUrlFormat;
+        _productUrlFormatType = productUrlFormatType;
+        _categoryUrlFormatType = categoryUrlFormatType;
+        
         _sourceName = sourceName;
-        _productHttpMethod = productHttpMethod;
-        _productDataFormat = productDataFormat;
-        _categoryHttpMethod = categoryHttpMethod;
-        _categoryDataFormat = categoryDataFormat;
         _itemHandler = itemHandler;
         Categories = new();
 
         shopCategories.ToList().ForEach(c => Categories.Enqueue(c));
+        _productLoadData = productLoadData;
+        _categoryLoadData = categoryLoadData;
+        
     }
 
     async Task IListener<IProductShopCategory>.On(IProductShopCategory message)
@@ -80,7 +81,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             await _categoriyListenerSemaphoreSlim.WaitAsync();
             Categories.Enqueue(message);
-            Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, [message.GetCategoryUrl()]);
+            Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, [message.GetCategoryUrlWithId()]);
         }
         finally
         {
@@ -101,8 +102,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             bool? isEndOfCategory = null;
             var attemptsCount = 0;
 
-            var categoryUrl = category.GetCategoryUrl();
-            var categoryPageUrl = GetCategoryPageUrl(CategoryUrlFormat, categoryUrl, page);
+            var categoryPageUrl = GetCategoryPageUrl(category, _categoryUrlFormat, _categoryUrlFormatType, page);
 
             while (isEndOfCategory != true)
             {
@@ -126,23 +126,48 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
                 isEndOfCategory = IsLastPage(categoryResult, page) == true || IsEndOfCategory(categoryResult);
 
-                var nextCategoryPageUrl = GetNextCategoryPageUrl(CategoryUrlFormat, categoryUrl, page + 1, categoryResult);
+                var nextCategoryPageUrl = GetNextCategoryPageUrl(category, _categoryUrlFormat, _categoryUrlFormatType, page + 1, categoryResult);
                 categoryPageUrl = nextCategoryPageUrl;
                 page++;
             }
 
-            Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, [categoryUrl, successProductCount, unsuccessProductCount]);
+            Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, [category.Category, successProductCount, unsuccessProductCount]);
         }
     }
 
-    protected virtual string GetCategoryPageUrl(string urlFormat, string itemId, int page, TCategory? category = null)
+    private static string PrepareItemUrl(string itemUrl)
     {
-        return string.Format(urlFormat, itemId, page);
+        itemUrl =  itemUrl.StartsWith("/") ? itemUrl[1..] : itemUrl;
+        return itemUrl.EndsWith("/") ? itemUrl[..^1] : itemUrl;
     }
 
-    protected virtual string GetNextCategoryPageUrl(string urlFormat, string itemId, int page, TCategory? category = null)
+    protected virtual string GetCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
     {
-        return string.Format(urlFormat, itemId, page + 1);
+        var args = new List<object>();
+
+        switch (urlFormatType)
+        {
+            case UrlFormatType.ItemId:
+                args = [productShopCategory.ItemId]; 
+                break;
+
+            case UrlFormatType.Url:
+                args = [PrepareItemUrl(productShopCategory.Category)];
+                break;
+
+            case UrlFormatType.UrlWithItemId:
+                args = [PrepareItemUrl(productShopCategory.Category), productShopCategory.ItemId];
+                break;
+        }
+
+        args.Add(page);
+
+        return string.Format(urlFormat, args: [.. args]);
+    }
+
+    protected virtual string GetNextCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
+    {
+        return GetCategoryPageUrl(productShopCategory,urlFormat, urlFormatType, page + 1, category);
     }
 
     protected bool? IsLastPage(TCategory category, int page)
@@ -163,7 +188,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPageUrl, int categoryItemId, int page, CancellationToken stoppingToken)
     {
         var (success, category) = await TryGetFromApiUrlAsync<TCategory>(categoryPageUrl,
-            !string.IsNullOrEmpty(_categoryHttpMethod) ? GetData(LoadData, _categoryHttpMethod, _categoryDataFormat, categoryItemId, page) : LoadData,
+            _categoryLoadData != null ? new object?[] { LoadData, _categoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } : LoadData,
             stoppingToken);
 
         if (!success)
@@ -221,7 +246,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {        
         var (success, stream) = await TryLoadFromUrlAsync(apiUrl, requestData, cancellationToken : token);
 
-        if (!success) return (false, default(T?));
+        if (!success || stream is null) return (false, default(T?));
 
         try
         {
@@ -248,7 +273,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     protected async Task<(bool success, TProductItem? productItem)> TryGetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)
     {
         var (success, productItem) = await TryGetFromApiUrlAsync<TProductItem>(apiUrl,
-            _productHttpMethod is not null ? GetData(LoadData, _productHttpMethod, _productDataFormat, categoryProductItem.Id) : LoadData,
+            _productLoadData is not null ? new object?[] { LoadData, _productLoadData, new string[] { $"{categoryProductItem.Id}" } } : LoadData,
             token);
 
         if (!success) return (false, default(TProductItem?));
@@ -264,5 +289,18 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected abstract bool IsEndOfCategory(TCategory category);
 
-    protected abstract string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem);
+    protected virtual string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
+    {
+        switch (_productUrlFormatType)
+        {
+            case UrlFormatType.Url:
+                return string.Format(productUrlFormat, PrepareItemUrl(productItem.ItemUrl));
+
+            case UrlFormatType.UrlWithItemId:
+                return string.Format(productUrlFormat, productItem.Id, PrepareItemUrl(productItem.ItemUrl));
+
+            default:
+                return string.Format(productUrlFormat, productItem.Id);
+        }
+    }
 }

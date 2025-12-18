@@ -91,7 +91,7 @@ static void AddLoaderService(WebApplicationBuilder builder)
     builder.Services.AddBrowserServiceClientFactory(browserApiHost);
 
     var webLoaderPath = builder.Configuration.GetSection("WebLoaderPath").Value;
-    builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoader), $"{Utils.GetAppPath()}\\{webLoaderPath}");
+    builder.Services.AddServiceImplementationsFromPath(typeof(IWebLoaderFactory), $"{Utils.GetAppPath()}\\{webLoaderPath}");
 }
 
 static void AddShopAPIService(WebApplicationBuilder builder, out string restApiHost)

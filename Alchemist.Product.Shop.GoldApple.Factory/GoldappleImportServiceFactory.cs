@@ -23,10 +23,8 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
         IProductShopImportSettings shopImportSettings, 
         IProductItemHandler itemHandler, 
         ILoaderService loaderService,
-        string? productHttpMethod,
-        string? productDataFormat,
-        string? categoryHttpMethod,
-        string? categoryDataFormat)
+    object? productLoadData = null,
+    object? categoryLoadData = null)
     {
         return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>,
              name,
@@ -37,10 +35,10 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
             shopImportSettings.ProductUrlFormat,
             shopImportSettings.CategoryUrlFormat,
             shopModel.Name,
-            productHttpMethod,
-            productDataFormat,
-            categoryHttpMethod,
-            categoryDataFormat);
+            productLoadData,
+            categoryLoadData,
+            shopImportSettings.ProductUrlFormatType,
+            shopImportSettings.CategoryUrlFormatType);
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)

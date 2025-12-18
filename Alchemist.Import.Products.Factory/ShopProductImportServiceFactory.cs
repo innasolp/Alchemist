@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;
 using Import.Factory.Interfaces;
@@ -7,14 +8,9 @@ using Import.Interfaces;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace Alchemist.Import.Factory.Products;
 
-internal record struct RequestData(string HttpMethod, JsonObject? Data)
-{
-    public RequestData() : this("GET", null) { }
-}
 
 public abstract class ShopProductImportServiceFactory(ILogger logger,
     ILoaderServiceFactory browserServiceFactory,
@@ -22,7 +18,6 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
     IImportServiceLogFactory? logFactory = null) : ImportServiceFactory(logger, browserServiceFactory, logFactory)
 {
     private readonly IProductItemHandler _itemHandler = itemHandler;
-
 
     protected override IImportService Create(ILogger logger, 
         string name,
@@ -36,18 +31,20 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
         if (shopModel is not IProductShopModel productShopModel)
             throw new InvalidDataException($"Invalid shop model type {shopModel.GetType().Name}");
         
-        var categoryDataService = shopImportSettings.GetService("CategoryData");
+        var categoryDataService = shopImportSettings.GetService("CategoryRequestOptions");
         var categoryData = categoryDataService != null && !string.IsNullOrEmpty(categoryDataService.Value)
-            ? JsonSerializer.Deserialize<RequestData>(categoryDataService.Value)
+            ? JsonSerializer.Deserialize<RequestOptions>(categoryDataService.Value)
             : default;
 
-        var productDataService = shopImportSettings.GetService("ProductData");
+        var productDataService = shopImportSettings.GetService("ProductRequestOptions");
         var productData = productDataService != null && !string.IsNullOrEmpty(productDataService.Value)
-            ? JsonSerializer.Deserialize<RequestData>(productDataService.Value)
+            ? JsonSerializer.Deserialize<RequestOptions>(productDataService.Value)
             : default;
 
-        return Create(logger, name, productShopModel, productShopImportSettings, _itemHandler, browserService,
-            productData.HttpMethod, productData.Data?.ToString(), categoryData.HttpMethod, categoryData.Data?.ToString());
+        return Create(logger, name,
+            productShopModel, productShopImportSettings,
+            _itemHandler, browserService,
+            productData, categoryData);
     }
 
     protected abstract IImportService Create(ILogger logger,
@@ -56,8 +53,6 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
         IProductShopImportSettings productShopImportSettings,
         IProductItemHandler productItemHandler, 
         ILoaderService browserService,
-        string? productHttpMethod,
-        string? productDataFormat,
-        string? categoryHttpMethod,
-        string? categoryDataFormat);
+    object? productLoadData = null,
+    object? categoryLoadData = null);
 }

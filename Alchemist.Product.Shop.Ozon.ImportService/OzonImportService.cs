@@ -15,10 +15,10 @@ public class OzonImportService(ILogger<OzonImportService> logger,
     string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
-      string? productHttpMethod = "GET",
-        string? productDataFormat = null,
-        string? categoryHttpMethod = "GET",
-        string? categoryDataFormat = null
+    object? productLoadData = null,
+    object? categoryLoadData = null,
+    UrlFormatType productUrlFormatType = default,
+    UrlFormatType categoryUrlFormatType = default
    )
     : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger,
         loaderService,
@@ -26,22 +26,14 @@ public class OzonImportService(ILogger<OzonImportService> logger,
         shopCategories, 
         itemHandler,
         productUrlFormat, categoryUrlFormat, sourceName,
-        productHttpMethod,
-        productDataFormat,
-        categoryHttpMethod,
-        categoryDataFormat)
+        productLoadData,
+        categoryLoadData,
+        productUrlFormatType,
+        categoryUrlFormatType)
 {
     public override string Name { get; } = name;
 
     protected override int PageProductCount => 12;
-
-    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
-    {
-        var ozonCategoryItem = productItem as ProductItem;
-        return ozonCategoryItem != null
-            ? string.Format(productUrlFormat, ozonCategoryItem.Name)
-            : throw new InvalidCastException("Item is not Ozon");
-    }
 
     protected override bool IsEndOfCategory(Category category)
     {

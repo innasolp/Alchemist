@@ -1,4 +1,5 @@
-﻿using Import.Settings.Interfaces;
+﻿using Alchemist.Import.Products.Interfaces;
+using Import.Settings.Interfaces;
 
 namespace Alchemist.Import.Settings.Product;
 
@@ -11,11 +12,15 @@ public interface ICategoryUrl
 
 public interface IProductShopImportSettings : IShopImportSettings
 {
-    public string? ProductUrlFormat { get; set; }
+    string? ProductUrlFormat { get; set; }
 
-    public string? CategoryUrlFormat { get; set; }
+    UrlFormatType ProductUrlFormatType { get; set; }
 
-    public int? PageProductCount { get; set; }
+    string? CategoryUrlFormat { get; set; }
 
-    public IEnumerable<ICategoryUrl>? RootCategories { get; set; }
+    UrlFormatType CategoryUrlFormatType { get; set; }
+
+    int? PageProductCount { get; set; }
+
+    IEnumerable<ICategoryUrl>? RootCategories { get; set; }
 }

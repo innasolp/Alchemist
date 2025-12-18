@@ -16,10 +16,10 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string productUrlFormat,
     string categoryUrlFormat,
     string sourceName,
-    string? productHttpMethod = "GET",
-        string? productDataFormat = null,
-        string? categoryHttpMethod = "GET",
-        string? categoryDataFormat = null
+    object? productLoadData = null,
+    object? categoryLoadData = null,
+    UrlFormatType productUrlFormatType = default,
+    UrlFormatType categoryUrlFormatType = default
     )
     : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger,
         loader,
@@ -29,10 +29,10 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
         productUrlFormat,
         categoryUrlFormat, 
         sourceName,
-        productHttpMethod,
-        productDataFormat,
-        categoryHttpMethod,
-        categoryDataFormat
+        productLoadData,
+        categoryLoadData,
+        productUrlFormatType,
+        categoryUrlFormatType
         )
 {
     public override string Name { get; } = name;
@@ -42,10 +42,5 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
     protected override bool IsEndOfCategory(CategoryProducts category)
     {
         return !(category.Data.Products?.Length > 0) ;
-    }
-
-    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
-    {
-        return string.Format(productUrlFormat, productItem.Id);
     }
 }

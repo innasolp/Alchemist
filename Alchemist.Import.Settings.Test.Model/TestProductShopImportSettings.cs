@@ -1,4 +1,5 @@
-﻿using Alchemist.Import.Settings.Product;
+﻿using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Settings.Product;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Import.Settings.Test.Model;
@@ -27,4 +28,6 @@ public class TestProductShopImportSettings : TestShopImportSettings, IProductSho
             : value != null ? value.OfType<TestCategoryUrl>().ToArray() : []; }
     public string? ProductHttpMethod { get; set; }
     public string? CategoryHttpMethod { get; set; }
+    public UrlFormatType ProductUrlFormatType { get ; set; }
+    public UrlFormatType CategoryUrlFormatType { get; set; }
 }

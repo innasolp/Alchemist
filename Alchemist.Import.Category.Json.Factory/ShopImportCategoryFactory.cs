@@ -27,6 +27,9 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
         IShopImportSettings shopImportSettings,
         ILoaderService browserService)
     {
+        if (shopImportSettings is not ICategoryShopImportSettings categoryShopImportSettings)
+            throw new InvalidDataException($"Invalid settings type {shopImportSettings.GetType().Name}");
+
         if (shopModel is not ICategoryShopModel categoryShopModel)
             throw new InvalidOperationException($"Invalid type {shopModel.GetType()}. Must be implementation of {typeof(ICategoryShopModel)}");
 
@@ -46,6 +49,7 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
             htmlSearcher,
             browserService,
             categoryShopModel,
+            categoryShopImportSettings,
             categoryLoadOptions, _itemHandler);
     }
 
@@ -54,6 +58,7 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
         IHtmlSearcher htmlSearcher, 
         ILoaderService loaderService,
         ICategoryShopModel categoryShopModel,
+        ICategoryShopImportSettings categoryShopImportSettings,
         CategoryLoadOptions categoryLoadOptions,
         ICategoryItemHandler categoryItemHandler);
 }

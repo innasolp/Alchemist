@@ -11,15 +11,15 @@ namespace Alchemist.BrowserService.Client;
 
 public class BrowserServiceClientFactory : ILoaderServiceFactory
 {
-    private readonly IEnumerable<IWebLoader> _webLoaders;
+    private readonly IEnumerable<IWebLoaderFactory> _webLoaderFactories;
 
     private readonly HttpClient _httpClient;
 
     public BrowserServiceClientFactory(IHttpClientFactory httpClientFactory,
-        IEnumerable<IWebLoader> webLoaders,
+        IEnumerable<IWebLoaderFactory> webLoaderFactories,
         [FromKeyedServices(nameof(BrowserServiceClientFactory))] string apiHost)
     {
-        _webLoaders = webLoaders;
+        _webLoaderFactories = webLoaderFactories;
 
         _httpClient = httpClientFactory.CreateClient(apiHost);
         _httpClient.BaseAddress = new Uri(apiHost);
@@ -33,19 +33,20 @@ public class BrowserServiceClientFactory : ILoaderServiceFactory
         var webLoaderSettings = shopImportSettings.GetWebLoader<IServiceSettings>() ??
             throw new InvalidDataException($"Webloader in settings {name} not exists.");
        
-         var webLoader = _webLoaders.FirstOrDefault(f => f.GetType().Name == webLoaderSettings.ImplementationTypeName
+         var webLoaderFactory = _webLoaderFactories.FirstOrDefault(f => f.GetType().Name == webLoaderSettings.ImplementationTypeName
             || f.GetType().Name.Contains(webLoaderSettings.ImplementationTypeName, StringComparison.InvariantCultureIgnoreCase))
-            ?? throw new InvalidDataException($"Web loader of type {webLoaderSettings.ImplementationTypeName} not found");
+            ?? throw new InvalidDataException($"Web loader factory for type {webLoaderSettings.ImplementationTypeName} not found");
 
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(shopImportSettings.GetRequestHeaders<IServiceSettings>().Value);
+        var requestHeadersService = shopImportSettings.GetRequestHeaders<IServiceSettings>();
+        var requestHeaders = requestHeadersService != null ? JsonSerializer.Deserialize<RequestHeaders>(requestHeadersService.Value) : null ;
 
         return new BrowserServiceClient(
             _httpClient,
             name,            
             shopImportSettings.ShopUrl,
-            webLoader,
-            shopImportSettings.GetBrowserDataLoader<IServiceSettings>().ImplementationTypeName,
-            shopImportSettings.GetBrowserLauncher<IServiceSettings>().ImplementationTypeName, 
+            webLoaderFactory.CreateWebLoader(),
+            shopImportSettings.GetBrowserDataLoader<IServiceSettings>()?.ImplementationTypeName,
+            shopImportSettings.GetBrowserLauncher<IServiceSettings>()?.ImplementationTypeName, 
             requestHeaders);
     }
 }

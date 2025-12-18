@@ -8,7 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Moq" Version="4.20.72" />
-		<PackageReference Include="WebLoader.Interfaces" Version="1.0.1" />
+		<PackageReference Include="WebLoader.Interfaces" Version="1.0.1.3" />
 		<PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0.4" />
 		<PackageReference Include="BrowserLauncher.Interfaces" Version="1.0.0.2" />
 		<PackageReference Include="Import.Interfaces" Version="1.0.0" />

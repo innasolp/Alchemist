@@ -13,10 +13,10 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
      string productUrlFormat,
      string categoryUrlFormat,
     string sourceName,
-    string? productHttpMethod = "GET",
-        string? productDataFormat = null,
-        string? categoryHttpMethod = "GET",
-        string? categoryDataFormat = null) 
+    object? productLoadData = null,
+    object? categoryLoadData = null,
+    UrlFormatType productUrlFormatType = default,
+    UrlFormatType categoryUrlFormatType = default) 
     : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,
         loader,
         url,
@@ -25,24 +25,24 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
         productUrlFormat,
         categoryUrlFormat,
         sourceName,
-        productHttpMethod,
-        productDataFormat,
-        categoryHttpMethod,
-        categoryDataFormat)
+        productLoadData,
+        categoryLoadData,
+        productUrlFormatType,
+        categoryUrlFormatType)
     where TCategory : class, ICategoryProducts, IPaginatorItem, new()
     where TProductItem : class, IProductItem, new()
 {
-    protected override string GetCategoryPageUrl(string urlFormat, string itemId, int page, TCategory? category = null)
-    {
-        return category == null 
-            ? base.GetCategoryPageUrl(urlFormat, itemId, page, category)
-            : category.GetPageUrl(CategoryUrlFormat, itemId, page);
-    }
-
-    protected override string GetNextCategoryPageUrl(string urlFormat, string itemId, int page, TCategory? category = null)
+    protected override string GetCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
     {
         return category == null
-            ? base.GetCategoryPageUrl(urlFormat, itemId, page, category)
-            : category.GetNextPageUrl(CategoryUrlFormat, itemId, page);
+           ? base.GetCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
+           : category.GetPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+    }
+
+    protected override string GetNextCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
+    {
+        return category == null
+           ? base.GetNextCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
+           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
     }
 }

@@ -2,7 +2,6 @@ using Alchemist.Product.Entities;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Threading;
 using Moq;
 using System.Collections;
 using System.Net.Http.Json;
