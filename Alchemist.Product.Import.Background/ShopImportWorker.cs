@@ -13,6 +13,7 @@ using Alchemist.Messages.Common;
 using Alchemist.Import.Settings.DataAdapter;
 using System.Collections.Concurrent;
 using Import.Factory.Interfaces;
+using Alchemist.Import.Settings;
 
 namespace Alchemist.Product.Import.Background;
 

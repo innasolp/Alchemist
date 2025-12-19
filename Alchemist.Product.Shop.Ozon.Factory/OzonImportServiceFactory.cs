@@ -38,7 +38,7 @@ public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
             );
     }
 
-    protected override ILogger GetLogger(ILogger logger,string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger,string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IImportSettings shopImportSettings)
     {
         if (logger is ILogger<OzonImportService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;

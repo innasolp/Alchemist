@@ -19,7 +19,7 @@ public abstract class TestShopImportSettings : IShopImportSettings, IShopSetting
 
     public Dictionary<string, TestImportServiceSettings> Services { get; set; } = [];    
 
-    IDictionary IShopImportSettings.Services => Services;
+    IDictionary IImportSettings.Services => Services;
 
     int? IShopSettings.ParentSettingsId
     {
