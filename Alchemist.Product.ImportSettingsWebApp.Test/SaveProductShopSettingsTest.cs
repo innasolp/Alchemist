@@ -1,4 +1,5 @@
-﻿using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
+﻿using Alchemist.Import.Products.Interfaces;
+using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.ShopWebAppFactory;
@@ -17,7 +18,8 @@ public class SaveProductShopSettingsTestImportSettingsWebAppFactory()
 {
 }
 
-public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProductShopSettingsTestImportSettingsWebAppFactory, (string, string, string)>
+public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProductShopSettingsTestImportSettingsWebAppFactory, 
+    (string, string, string, UrlFormatType, UrlFormatType)>
 {
     private readonly SaveProductShopSettingsTestImportSettingsWebAppFactory _webAppFactory;
     private readonly ITestOutputHelper _outputHelper;
@@ -35,11 +37,18 @@ public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProduc
         await this.ExpectProductShopSettingsLoadedAsync();
     }
 
-    protected override async Task ExpectInputFieldsAsync((string, string, string) inputs)
+    protected override async Task ExpectInputFieldsAsync(
+        (string,
+        string,
+        string,
+        UrlFormatType,
+        UrlFormatType) inputs)
     {
         await Expect(Page.Locator($"#ShopSettingsName")).ToHaveValueAsync(inputs.Item1);
         await Expect(Page.Locator($"#ProductUrlFormat")).ToHaveValueAsync(inputs.Item2);
         await Expect(Page.Locator($"#CategoryUrlFormat")).ToHaveValueAsync(inputs.Item3);
+        await Expect(Page.Locator($"#ProductUrlFormatType")).ToHaveValueAsync(((int)inputs.Item4).ToString());
+        await Expect(Page.Locator($"#CategoryUrlFormatType")).ToHaveValueAsync(((int)inputs.Item5).ToString());
     }
 
     protected override async Task ExpectPageLoadedAsync()
@@ -50,7 +59,7 @@ public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProduc
         await this.ExpectProductShopSettingsLoadedAsync();
     }
 
-    protected override async Task<(string, string, string)> FillInputFieldsAsync()
+    protected override async Task<(string, string, string, UrlFormatType, UrlFormatType)> FillInputFieldsAsync()
     {
         return await this.FillProductInputFieldsAsync();
     }

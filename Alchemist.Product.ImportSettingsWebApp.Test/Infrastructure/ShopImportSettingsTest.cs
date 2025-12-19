@@ -91,7 +91,7 @@ public abstract class ShopImportSettingsTest<TWebAppFactory, TInput> : PageTest,
         await Expect(Page.GetByText($"The WebLoader field is required.")).ToBeVisibleAsync();
     }
 
-    protected virtual async Task UploadFormJsonAsync(string fileName, string serviceTypeName)
+    protected virtual async Task ExpectUploadFormJsonAsync(string fileName, string serviceTypeName)
     {
         await ExpectPageLoadedAsync();       
 
