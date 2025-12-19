@@ -3,8 +3,8 @@
     "ShopName": "Ozon",
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
-    "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fproduct%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
-    "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2Fcategory%2F{0}%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D{1}%26page%3D{1}",
+    "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
+    "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2F{0}%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D{1}%26page%3D{1}",
     "Perfomance": true,
     "RootCategories": [
       {
@@ -42,7 +42,7 @@
             "Upgrade-Insecure-Requests": "1",
 
 
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
           },
 
           "Cookies": [
@@ -90,32 +90,36 @@
         "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
       }
     }
-    },
+  },
 
   "GoldAppleProductsImport": {
     "ShopName": "GoldApple",
     "Caption": "Золотое яблоко",
     "ShopUrl": "https://goldapple.ru",
-    "ProductUrlFormat": "https://goldapple.ru/front/api/catalog/product-card/base/v3?itemId={0}&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0",
-    "CategoryUrlFormat": "https://goldapple.ru/front/api/catalog/products?categoryId={0}&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber={1}",
+    "ProductUrlFormat": "https://goldapple.ru/{0}",
+    "ProductUrlFormatType": "Url",
+    "CategoryUrlFormat": "https://goldapple.ru/{0}",
+    "CategoryUrlFormatType": "Url",
     "PageProductCount": 30,
     "Perfomance": true,
+    "RootCategories": [
+      {
+        "Item": 1000000004,
+        "Url": "/uhod/"
+      }
+    ],
     "Services": {
       "ImportService": {
         "ImplementationTypeName": "GoldAppleImportService",
         "AssemblyPath": "Import\\Products\\GoldApple"
-      },
-      "BrowserDataLoader": {
-        "ImplementationTypeName": "FirefoxStandart",
-        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
       },
       "BrowserLauncher": {
         "ImplementationTypeName": "FirefoxStandart",
         "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
       },
       "WebLoader": {
-        "ImplementationTypeName": "Firefox",
-        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox"
+        "ImplementationTypeName": "Chromium",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
       },
       "RequestHeaders": {
         "Value": {
@@ -140,7 +144,7 @@
             "Sec-Fetch-User": "?1",
             "TE": "trailers",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
           },
 
           "Cookies": [
@@ -149,12 +153,10 @@
             "_ga_QE5MQ8XJJK",
             "_gcl_au",
             "_sp_id.925f",
-            "_sp_ses.925f",
             "_spx",
             "_ym_d",
             "_ym_isad",
             "_ym_uid",
-            "_ym_visorc",
             "acs_3",
             "adrcid",
             "adrdel",
@@ -169,8 +171,6 @@
             "fgsscw-goldapple",
             "ga-device-id",
             "ga-lang",
-            "isAddressConfirmed",
-            "ga-session-assets",
             "gsscw-goldapple",
             "mage-cache-sessid",
             "mindboxDeviceUUID",
@@ -194,10 +194,17 @@
           "CookieIndex": 4,
           "CookiePrefixLength": 0
         }
+      },
+      "CategoryRequestOptions": {
+        "Value": {
+          "ApiUrlFormat": "https://goldapple.ru/front/api/catalog/cards-list"
+        }
+      },
+      "ProductRequestOptions": {
+        "Value": {
+          "ApiUrlFormat": "https://goldapple.ru/front/api/catalog/product-card/base/v3"
+        }
       }
     }
-
-    }
-
+  }
 }
-

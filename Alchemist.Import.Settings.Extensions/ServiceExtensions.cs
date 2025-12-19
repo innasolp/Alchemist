@@ -80,4 +80,15 @@ public static class ServiceExtensions
         return shopImportSettings.GetService(nameof(PrimaryServiceName.WebLoader));
     }
 
+    public static bool TryGetServiceStringValue(this IShopImportSettings shopImportSettings, string serviceName, out string? value)
+    {
+        value = default;
+        if (!shopImportSettings.Services.Contains(serviceName) || shopImportSettings.GetService(serviceName) is not IJsonValue jsonValue
+            || jsonValue?.ValueObj?.ValueKind != System.Text.Json.JsonValueKind.String
+            || jsonValue.Value?.ContainsKey("Value") != true)
+            return false;
+
+        value = jsonValue.Value["Value"].GetValue<string>();
+        return true;
+    }
 }

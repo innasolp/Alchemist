@@ -25,6 +25,11 @@ public abstract class ProductBase
     public string Brand { get; set; }
 }
 
+public class ProductCardItem
+{
+    [JsonPropertyName("product")]
+    public ProductInCategory Product { get; set; }
+}
 
 public class ProductInCategory : ProductBase, IJsonOnDeserialized, ICategoryProductItem
 {

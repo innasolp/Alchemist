@@ -10,9 +10,9 @@ public static class JsonExtensions
     {
         if (jsonValue.ValueObj == null) return;
 
-        if (jsonValue.ValueObj.Value.ValueKind == JsonValueKind.String)
+        if (jsonValue.ValueObj.Value.ValueKind == JsonValueKind.String && jsonValue.ValueObj != null)
         {
-            jsonValue.Value = JsonSerializer.Deserialize<JsonObject>(jsonValue.ValueObj.Value.GetString());
+            jsonValue.Value = JsonObject.Parse($"{{\"Value\":\"{jsonValue.ValueObj.Value.GetString()}\"}}") as JsonObject;
         }
         else if (jsonValue.ValueObj.Value.ValueKind == JsonValueKind.Object)
         {

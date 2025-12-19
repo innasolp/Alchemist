@@ -6,9 +6,9 @@ public class ProductCategoryData
     [JsonPropertyName("url")]
     public string BaseUrl { get; set; }
 
-    [JsonPropertyName("count")]
+    [JsonPropertyName("productCount")]
     public int Count { get; set; }
 
-    [JsonPropertyName("products")]
-    public ProductInCategory[] Products { get; set; }
+    [JsonPropertyName("cards")]
+    public ProductCardItem[] Products { get; set; }
 }

@@ -180,6 +180,6 @@ public class CategoryShopSettingsTest : ShopImportSettingsTest<CategoryShopSetti
         var fileName = "productsettings.json";
         var serviceTypeName = "IImportService";
 
-        await UploadFormJsonAsync(fileName, serviceTypeName);
+        await ExpectUploadFormJsonAsync(fileName, serviceTypeName);
     }
 }

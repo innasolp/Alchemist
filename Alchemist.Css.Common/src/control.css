@@ -29,3 +29,8 @@
     margin-top: 15px;
     margin-bottom: 10px;
 }
+
+.form-dropdown {
+    width: 250px;
+    height: 35px;
+}

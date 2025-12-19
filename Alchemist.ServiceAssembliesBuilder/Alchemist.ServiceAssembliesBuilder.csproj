@@ -9,8 +9,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.4" GeneratePathProperty="true" />
-		<PackageReference Include="WebLoader.HttpClient" Version="1.0.0.6" />
-		<PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.0.8" GeneratePathProperty="true" />
+		<PackageReference Include="WebLoader.HttpClient" Version="1.0.1.3" />
+		<PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.3" GeneratePathProperty="true" />
+		<PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.1" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.2" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserLauncher.Firefox.Windows.DevEdition" Version="1.0.0.2" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserDataLoader.Firefox.DevEdition.Windows" Version="1.0.0.4" GeneratePathProperty="true" />
@@ -62,11 +63,14 @@
 
 	<Target Name="RemoveWebLoaderHttpClientDir" BeforeTargets="Build">
 		<RemoveDir Directories="$(SolutionDir)Libs\WebLoader\HttpClient" />
-	</Target>
-	
+	</Target>	
 
 	<Target Name="RemoveWebLoaderPlaywrightFirefoxDir" BeforeTargets="Build">
 		<RemoveDir Directories="$(SolutionDir)Libs\WebLoader\Playwright\Firefox" />
+	</Target>
+	
+	<Target Name="RemoveWebLoaderChromiumPatchrightDir" BeforeTargets="Build">
+		<RemoveDir Directories="$(SolutionDir)Libs\WebLoader\Playwright\ChromiumPatchright" />
 	</Target>
 
 	<Target Name="CopyWebLoaderPlaywrightFirefox" AfterTargets="Build">
@@ -80,6 +84,19 @@
 		<Copy SourceFiles="@(CopyFirefoxPlaywrightFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox\.playwright\%(RecursiveDir)"></Copy>
 		<Copy SourceFiles="@(CopyFirefoxPlaywrightNodeFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox\.playwright\node\%(RecursiveDir)"></Copy>
 		<Copy SourceFiles="@(CopyFirefoxPlaywrightPackageFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\Firefox\.playwright\package\%(RecursiveDir)"></Copy>
+	</Target>
+	
+	<Target Name="CopyWebLoaderChromiumPatchright" AfterTargets="Build">
+		<ItemGroup>
+			<CopyWebLoaderChromiumPatchrightFiles Include="$(PkgWebLoader_Playwright_ChromiumPatchright)\dependencies\*.dll"></CopyWebLoaderChromiumPatchrightFiles>
+			<CopyChromiumPatchrightFiles Include="$(PkgWebLoader_Playwright_ChromiumPatchright)\dependencies\.playwright\**\*.*"></CopyChromiumPatchrightFiles>
+			<CopyChromiumPatchrightNodeFiles Include="$(PkgWebLoader_Playwright_ChromiumPatchright)\dependencies\node\**\*.*"></CopyChromiumPatchrightNodeFiles>
+			<CopyChromiumPatchrightPackageFiles Include="$(PkgWebLoader_Playwright_ChromiumPatchright)\dependencies\package\**\*.*"></CopyChromiumPatchrightPackageFiles>
+		</ItemGroup>
+		<Copy SourceFiles="@(CopyWebLoaderChromiumPatchrightFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\ChromiumPatchright"></Copy>
+		<Copy SourceFiles="@(CopyChromiumPatchrightFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\ChromiumPatchright\.playwright\%(RecursiveDir)"></Copy>
+		<Copy SourceFiles="@(CopyChromiumPatchrightNodeFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\ChromiumPatchright\.playwright\node\%(RecursiveDir)"></Copy>
+		<Copy SourceFiles="@(CopyChromiumPatchrightPackageFiles)" DestinationFolder="$(SolutionDir)Libs\WebLoader\Playwright\ChromiumPatchright\.playwright\package\%(RecursiveDir)"></Copy>
 	</Target>
 
 </Project>

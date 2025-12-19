@@ -8,13 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
-	<PackageReference Include="WebLoader.Interfaces" Version="1.0.0.5" />
+	<PackageReference Include="WebLoader.Interfaces" Version="1.0.1.3" />
+	<PackageReference Include="WebLoader.common" Version="1.0.0.2" />
 	<PackageReference Include="BrowserDataloader.Interfaces" Version="1.0.0.4" />
 	<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
   </ItemGroup>
 
 </Project>

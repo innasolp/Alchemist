@@ -5,22 +5,44 @@ using Microsoft.Extensions.Logging;
 namespace Alchemist.Import.Products.Service;
 
 public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TProductItem>
-    (ILogger logger, string productUrlFormat, string categoryUrlFormat, string sourceName, string url, IEnumerable<IProductShopCategory> shopCategories, ILoaderService loader, IProductItemHandler itemHandler) 
-    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger, productUrlFormat, categoryUrlFormat, sourceName, url, shopCategories, loader, itemHandler)
+    (ILogger logger,
+    ILoaderService loader,
+    string url,    
+    IEnumerable<IProductShopCategory> shopCategories,    
+    IProductItemHandler itemHandler ,
+     string productUrlFormat,
+     string categoryUrlFormat,
+    string sourceName,
+    object? productLoadData = null,
+    object? categoryLoadData = null,
+    UrlFormatType productUrlFormatType = default,
+    UrlFormatType categoryUrlFormatType = default) 
+    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,
+        loader,
+        url,
+        shopCategories,
+        itemHandler,
+        productUrlFormat,
+        categoryUrlFormat,
+        sourceName,
+        productLoadData,
+        categoryLoadData,
+        productUrlFormatType,
+        categoryUrlFormatType)
     where TCategory : class, ICategoryProducts, IPaginatorItem, new()
     where TProductItem : class, IProductItem, new()
 {
-    protected override string GetCategoryPageUrl(string urlFormat, string itemId, int page, TCategory? category = null)
-    {
-        return category == null 
-            ? base.GetCategoryPageUrl(urlFormat, itemId, page, category)
-            : category.GetPageUrl(CategoryUrlFormat, itemId, page);
-    }
-
-    protected override string GetNextCategoryPageUrl(string urlFormat, string itemId, int page, TCategory? category = null)
+    protected override string GetCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
     {
         return category == null
-            ? base.GetCategoryPageUrl(urlFormat, itemId, page, category)
-            : category.GetNextPageUrl(CategoryUrlFormat, itemId, page);
+           ? base.GetCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
+           : category.GetPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+    }
+
+    protected override string GetNextCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
+    {
+        return category == null
+           ? base.GetNextCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
+           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
     }
 }

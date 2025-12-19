@@ -23,5 +23,5 @@ internal class RequestHeaders
     [JsonPropertyName("DefaultCookies")]
     public Dictionary<string, string> DefaultCookieValues { get; set; }
 
-    public string CookieHeaderKey { get; } = "cookie";
+    public string CookieHeaderKey { get; } = "cookie"; 
 }

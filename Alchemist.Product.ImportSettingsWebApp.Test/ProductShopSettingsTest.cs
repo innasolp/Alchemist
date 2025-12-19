@@ -1,4 +1,5 @@
-﻿using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
+﻿using Alchemist.Import.Products.Interfaces;
+using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.ShopWebAppFactory;
@@ -19,7 +20,7 @@ public class ProductShopSettingsTestImportSettingsWebAppFactory()
 }
 
 public class ProductShopSettingsTest
-    : ShopImportSettingsTest<ProductShopSettingsTestImportSettingsWebAppFactory, (string,string,string)>
+    : ShopImportSettingsTest<ProductShopSettingsTestImportSettingsWebAppFactory, (string, string, string, UrlFormatType, UrlFormatType)>
 {
     private record CategoryUrl(int item, string url);
 
@@ -42,7 +43,7 @@ public class ProductShopSettingsTest
         await this.ExpectProductShopSettingsLoadedAsync();
     }
 
-    protected override async Task<(string, string, string)> FillInputFieldsAsync()
+    protected override async Task<(string, string, string, UrlFormatType, UrlFormatType)> FillInputFieldsAsync()
     {
         return await this.FillProductInputFieldsAsync();
     }
@@ -249,6 +250,6 @@ public class ProductShopSettingsTest
         var fileName = "productsettings.json";
         var serviceTypeName = "IImportService";
 
-        await UploadFormJsonAsync(fileName, serviceTypeName);
+        await ExpectUploadFormJsonAsync(fileName, serviceTypeName);
     }
 }

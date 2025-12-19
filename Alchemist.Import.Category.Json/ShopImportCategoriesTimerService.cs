@@ -36,6 +36,8 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
 
     private readonly SemaphoreSlim _htmlSearcherSemaphoreSlim = new(1, 1);
 
+    private object? RequestData => LoadData;
+
     public ShopImportCategoriesTimerService(ILogger logger,
         string name,
         IHtmlSearcher? htmlSearcher,
@@ -167,7 +169,7 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
 
     private async Task<(bool success, List<string>? result)> TryLoadHtmlFromUrlAsync(string url, CancellationToken token)
     {
-        var (success, stream) = await TryLoadFromUrlAsync(url, token);
+        var (success, stream) = await TryLoadFromUrlAsync(url, RequestData, token);
 
         if (!success)
             return await Task.FromResult((false, default(List<string>)));
@@ -192,7 +194,7 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
 
     private async Task<(bool success, TElement? element)> TryLoadElementFromUrlAsync(string url, CancellationToken stoppingToken)
     {
-        var (success, stream) = await TryLoadFromUrlAsync(url, stoppingToken);
+        var (success, stream) = await TryLoadFromUrlAsync(url, RequestData, stoppingToken);
 
         if (!success)        
             return (false, default(TElement));

@@ -19,7 +19,13 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesJsonTimer
 {
     public override Type ServiceImplementationType => typeof(ShopImportCategoriesJsonTimerService);
 
-    protected override ShopImportCategoriesTimerService<JsonElement> CreateShopImportCategoriesTimerService(ILogger logger, string name, IHtmlSearcher htmlSearcher, ILoaderService loaderService, ICategoryShopModel categoryShopModel, CategoryLoadOptions categoryLoadOptions, ICategoryItemHandler categoryItemHandler)
+    protected override ShopImportCategoriesTimerService<JsonElement> CreateShopImportCategoriesTimerService(ILogger logger, string name,
+        IHtmlSearcher htmlSearcher, 
+        ILoaderService loaderService, 
+        ICategoryShopModel categoryShopModel,
+        ICategoryShopImportSettings categoryShopImportSettings,
+        CategoryLoadOptions categoryLoadOptions, 
+        ICategoryItemHandler categoryItemHandler)
     {
         if (logger is not ILogger<ShopImportCategoriesJsonTimerService> categoryJsonLogger)
             throw new InvalidDataException(logger.GetType().FullName);
@@ -27,7 +33,7 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesJsonTimer
         return new ShopImportCategoriesJsonTimerService(categoryJsonLogger,
             name,
             loaderService,
-            categoryShopModel.CategorySourceUrl,
+            categoryShopImportSettings.CategorySourceUrl,
             categoryShopModel.Name,
             categoryShopModel.Url,
             categoryLoadOptions,

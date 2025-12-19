@@ -55,6 +55,8 @@ internal static class ModelExtensions
         return target.ShopSettingsIsEquals(source)
          && target.ProductUrlFormat.EqualsWithEmpty(source.ProductUrlFormat)
             && target.CategoryUrlFormat.EqualsWithEmpty(source.CategoryUrlFormat)
+         && target.ProductUrlFormatType == source.ProductUrlFormatType
+            && target.CategoryUrlFormatType == source.CategoryUrlFormatType
             && target.PageProductCount.Equals(source.PageProductCount);
     }
 
@@ -75,6 +77,8 @@ internal static class ModelExtensions
 
         if (!(target.ProductUrlFormat.EqualsWithEmpty(source.ProductUrlFormat)
             && target.CategoryUrlFormat.EqualsWithEmpty(source.CategoryUrlFormat)
+            && target.ProductUrlFormatType == source.ProductUrlFormatType
+            && target.CategoryUrlFormatType == source.CategoryUrlFormatType
             && target.PageProductCount.Equals(source.PageProductCount))) return false;
 
         if (!target.Services.ServicesAreEquals(source.Services)) return false;
@@ -139,6 +143,8 @@ internal static class ModelExtensions
     {
         target.ProductUrlFormat = source.ProductUrlFormat;
         target.CategoryUrlFormat = source.CategoryUrlFormat;
+        target.ProductUrlFormatType = source.ProductUrlFormatType;
+        target.CategoryUrlFormatType = source.CategoryUrlFormatType;
         target.PageProductCount = source.PageProductCount;
 
         target.UpdateCategorySources(source.RootCategories);

@@ -20,19 +20,25 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
     protected override IImportService Create(ILogger logger,
         string name,
         IProductShopModel shopModel,
-        IShopImportSettings shopImportSettings, 
+        IProductShopImportSettings shopImportSettings, 
         IProductItemHandler itemHandler, 
-        ILoaderService loaderService)
+        ILoaderService loaderService,
+    object? productLoadData = null,
+    object? categoryLoadData = null)
     {
-        return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>, 
-            name,
-            shopModel.ProductUrl,           
-            shopModel.CategoryUrl,           
-            shopModel.Name,           
-            shopModel.Url,           
-            shopModel.Categories,           
-            loaderService,             
-            itemHandler);
+        return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>,
+             name,
+            loaderService,
+            shopModel.Url,
+            shopModel.Categories,
+            itemHandler,
+            shopImportSettings.ProductUrlFormat,
+            shopImportSettings.CategoryUrlFormat,
+            shopModel.Name,
+            productLoadData,
+            categoryLoadData,
+            shopImportSettings.ProductUrlFormatType,
+            shopImportSettings.CategoryUrlFormatType);
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)

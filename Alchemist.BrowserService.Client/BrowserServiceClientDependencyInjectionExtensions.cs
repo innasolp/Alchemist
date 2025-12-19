@@ -11,8 +11,8 @@ public static class BrowserServiceClientDependencyInjectionExtensions
         return services.AddSingleton<ILoaderServiceFactory>((serviceProvider) =>
         {
             var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-            var webLoaders = serviceProvider.GetServices<IWebLoader>();
-            return new BrowserServiceClientFactory(httpClientFactory, webLoaders, apiHost);
+            var webLoaderFactories = serviceProvider.GetServices<IWebLoaderFactory>();
+            return new BrowserServiceClientFactory(httpClientFactory, webLoaderFactories, apiHost);
         });
     }
 }

@@ -8,26 +8,32 @@ namespace Alchemist.Product.Shop.Ozon.ImportService;
 
 public class OzonImportService(ILogger<OzonImportService> logger,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] string name,
+    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] ILoaderService loaderService, 
+    string url,  
+    IEnumerable<IProductShopCategory> shopCategories,
+    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler,
     string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
-        string url,
-        IEnumerable<IProductShopCategory> shopCategories,
-    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] ILoaderService loaderService,
-    [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler)
-    : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger, productUrlFormat, categoryUrlFormat, sourceName, url, shopCategories, loaderService, itemHandler)
+    object? productLoadData = null,
+    object? categoryLoadData = null,
+    UrlFormatType productUrlFormatType = default,
+    UrlFormatType categoryUrlFormatType = default
+   )
+    : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger,
+        loaderService,
+        url,
+        shopCategories, 
+        itemHandler,
+        productUrlFormat, categoryUrlFormat, sourceName,
+        productLoadData,
+        categoryLoadData,
+        productUrlFormatType,
+        categoryUrlFormatType)
 {
     public override string Name { get; } = name;
 
     protected override int PageProductCount => 12;
-
-    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
-    {
-        var ozonCategoryItem = productItem as ProductItem;
-        return ozonCategoryItem != null
-            ? string.Format(productUrlFormat, ozonCategoryItem.Name)
-            : throw new InvalidCastException("Item is not Ozon");
-    }
 
     protected override bool IsEndOfCategory(Category category)
     {
