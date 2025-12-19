@@ -4,6 +4,7 @@ using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
@@ -50,7 +51,7 @@ public abstract class ShopImportSettingsModel : IShopImportSettings, IShopSettin
     ShopSettingType IShopSettings.Type { get => ShopSettingType; set {; } }
 
     [JsonIgnore]
-    IDictionary IShopImportSettings.Services => Services;
+    IDictionary IImportSettings.Services => Services;
     
     string IShopImportSettings.ShopName { get; set; }
     string IShopImportSettings.ShopUrl { get; set; }

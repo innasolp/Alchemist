@@ -11,7 +11,6 @@ using System.Text.Json;
 
 namespace Alchemist.Import.Factory.Products;
 
-
 public abstract class ShopProductImportServiceFactory(ILogger logger,
     ILoaderServiceFactory browserServiceFactory,
     IProductItemHandler itemHandler,
@@ -22,7 +21,7 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
     protected override IImportService Create(ILogger logger, 
         string name,
         IImportSource shopModel, 
-        IShopImportSettings shopImportSettings,
+        IImportSettings shopImportSettings,
         ILoaderService browserService)
     {
         if (shopImportSettings is not IProductShopImportSettings productShopImportSettings)

@@ -24,7 +24,7 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
     protected override IImportService Create(ILogger logger, 
         string name,
         IImportSource shopModel,
-        IShopImportSettings shopImportSettings,
+        IImportSettings shopImportSettings,
         ILoaderService browserService)
     {
         if (shopImportSettings is not ICategoryShopImportSettings categoryShopImportSettings)
@@ -34,7 +34,7 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
             throw new InvalidOperationException($"Invalid type {shopModel.GetType()}. Must be implementation of {typeof(ICategoryShopModel)}");
 
         var loadOptionsService = (shopImportSettings.GetService(nameof(CategoryLoadOptions))?.Value) 
-            ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopImportSettings.ShopName}");
+            ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopModel.Name}");
         var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
         
         var htmlSearchOptionsService = shopImportSettings.GetService(nameof(HtmlSearchFactoryOptions))?.Value;

@@ -3,6 +3,7 @@ using Import.Settings.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Message.SignalR.HubMessage.DependencyInjection;
+using Alchemist.Import.Settings;
 
 namespace Alchemist.Product.Import.Background;
 

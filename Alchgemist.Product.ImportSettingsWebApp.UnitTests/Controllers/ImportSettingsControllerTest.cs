@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
-using Import.Settings.Interfaces;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 using Alchemist.Product.ImportSettingsWebApp.Models;
@@ -8,6 +7,7 @@ using Alchgemist.Product.ImportSettingsWebApp.UnitTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Alchemist.Import.Settings;
 
 namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 

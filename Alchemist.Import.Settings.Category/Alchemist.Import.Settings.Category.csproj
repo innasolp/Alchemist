@@ -5,10 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-	
-	<ItemGroup>
-		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.0" />
-	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
+  </ItemGroup>
 
 
 </Project>

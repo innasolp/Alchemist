@@ -8,10 +8,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
   </ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.0" />
+		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.1" />
 	</ItemGroup>
 
 </Project>

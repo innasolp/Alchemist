@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.0" />
+	  <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
 	</ItemGroup>
 
 

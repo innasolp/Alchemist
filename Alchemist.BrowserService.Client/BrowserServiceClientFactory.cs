@@ -1,4 +1,5 @@
-﻿using Alchemist.Import.Settings.Extensions;
+﻿using Alchemist.Import.Settings;
+using Alchemist.Import.Settings.Extensions;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
@@ -28,8 +29,11 @@ public class BrowserServiceClientFactory : ILoaderServiceFactory
             new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
-    public ILoaderService Create(string name, IShopImportSettings shopImportSettings)
+    public ILoaderService Create(string name, IImportSettings importSettings)
     {
+        if(importSettings is not IShopImportSettings shopImportSettings)
+            throw new InvalidDataException($"invalid settings type {importSettings.GetType().Name}.");
+
         var webLoaderSettings = shopImportSettings.GetWebLoader<IServiceSettings>() ??
             throw new InvalidDataException($"Webloader in settings {name} not exists.");
        
@@ -42,7 +46,7 @@ public class BrowserServiceClientFactory : ILoaderServiceFactory
 
         return new BrowserServiceClient(
             _httpClient,
-            name,            
+            name,
             shopImportSettings.ShopUrl,
             webLoaderFactory.CreateWebLoader(),
             shopImportSettings.GetBrowserDataLoader<IServiceSettings>()?.ImplementationTypeName,

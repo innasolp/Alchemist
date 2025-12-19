@@ -2,6 +2,7 @@
 using Alchemist.Product.Interfaces;
 using System.Collections;
 using System.Text.Json.Serialization;
+using Alchemist.Import.Settings;
 
 namespace Alchemist.Product.Import.Background.Settings;
 
@@ -19,7 +20,7 @@ public abstract class ShopImportSettings : IShopImportSettings, IShopSettings
     
     public Dictionary<string,ImportServiceSettings> Services { get; set; } = [];
 
-    IDictionary IShopImportSettings.Services => Services;
+    IDictionary IImportSettings.Services => Services;
 
     int? IShopSettings.ParentSettingsId 
     { 

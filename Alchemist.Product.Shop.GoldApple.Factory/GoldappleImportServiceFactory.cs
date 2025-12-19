@@ -41,7 +41,7 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
             shopImportSettings.CategoryUrlFormatType);
     }
 
-    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IShopImportSettings shopImportSettings)
+    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IImportSettings shopImportSettings)
     {
         if(logger is ILogger< GoldAppleImportService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;

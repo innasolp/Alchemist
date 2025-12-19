@@ -1,6 +1,4 @@
-﻿using Import.Settings.Interfaces;
-
-namespace Alchemist.Import.Settings.Category;
+﻿namespace Alchemist.Import.Settings.Category;
 
 public interface ICategoryShopImportSettings: IShopImportSettings
 {

@@ -10,7 +10,7 @@ public static class ServiceExtensions
         return primaryServiceNames.Any(n => serviceName == n);
     }
 
-    public static TService? GetService<TService>(this IShopImportSettings shopImportSettings, string name)
+    public static TService? GetService<TService>(this IImportSettings shopImportSettings, string name)
         where TService : class, IServiceSettings
     {
         var key = shopImportSettings.Services.Keys.OfType<string>().FirstOrDefault(k => k == name);
@@ -20,67 +20,67 @@ public static class ServiceExtensions
         return shopImportSettings.Services.Values.OfType<TService>().FirstOrDefault(v => v.ServiceTypeName == name);
     }
 
-    public static IServiceSettings? GetService(this IShopImportSettings shopImportSettings, string name)    
+    public static IServiceSettings? GetService(this IImportSettings shopImportSettings, string name)    
     {
         return shopImportSettings.GetService<IServiceSettings>(name);
     }
 
-    public static TService? GetImportService<TService>(this IShopImportSettings shopImportSettings)
+    public static TService? GetImportService<TService>(this IImportSettings shopImportSettings)
         where TService : class, IServiceSettings
     {
         return shopImportSettings.GetService<TService>(nameof(PrimaryServiceName.ImportService));
     }   
 
-    public static IServiceSettings? GetImportService(this IShopImportSettings shopImportSettings)      
+    public static IServiceSettings? GetImportService(this IImportSettings shopImportSettings)      
     {
         return shopImportSettings.GetService(nameof(PrimaryServiceName.ImportService));
     }   
 
-    public static TService? GetBrowserDataLoader<TService>(this IShopImportSettings shopImportSettings)
+    public static TService? GetBrowserDataLoader<TService>(this IImportSettings shopImportSettings)
         where TService : class, IServiceSettings
     {
         return shopImportSettings.GetService<TService>(nameof(PrimaryServiceName.BrowserDataLoader));
     }
 
-    public static IServiceSettings? GetBrowserDataLoader(this IShopImportSettings shopImportSettings)
+    public static IServiceSettings? GetBrowserDataLoader(this IImportSettings shopImportSettings)
     {
         return shopImportSettings.GetService(nameof(PrimaryServiceName.BrowserDataLoader));
     }
 
-    public static TService? GetBrowserLauncher<TService>(this IShopImportSettings shopImportSettings)
+    public static TService? GetBrowserLauncher<TService>(this IImportSettings shopImportSettings)
         where TService : class, IServiceSettings
     {
         return shopImportSettings.GetService<TService>(nameof(PrimaryServiceName.BrowserLauncher));
     }
 
-    public static IServiceSettings? GetBrowserLauncher(this IShopImportSettings shopImportSettings)    
+    public static IServiceSettings? GetBrowserLauncher(this IImportSettings shopImportSettings)    
     {
         return shopImportSettings.GetService(nameof(PrimaryServiceName.BrowserLauncher));
     }
 
-    public static TService? GetRequestHeaders<TService>(this IShopImportSettings shopImportSettings)
+    public static TService? GetRequestHeaders<TService>(this IImportSettings shopImportSettings)
         where TService : class, IServiceSettings
     {
         return shopImportSettings.GetService<TService>(nameof(PrimaryServiceName.RequestHeaders));
     }
 
-    public static IServiceSettings? GetRequestHeaders(this IShopImportSettings shopImportSettings)
+    public static IServiceSettings? GetRequestHeaders(this IImportSettings shopImportSettings)
     {
         return shopImportSettings.GetService(nameof(PrimaryServiceName.RequestHeaders));
     }
 
-    public static TService? GetWebLoader<TService>(this IShopImportSettings shopImportSettings)
+    public static TService? GetWebLoader<TService>(this IImportSettings shopImportSettings)
         where TService : class, IServiceSettings
     {
         return shopImportSettings.GetService<TService>(nameof(PrimaryServiceName.WebLoader));
     }
 
-    public static IServiceSettings? GetWebLoader(this IShopImportSettings shopImportSettings)    
+    public static IServiceSettings? GetWebLoader(this IImportSettings shopImportSettings)    
     {
         return shopImportSettings.GetService(nameof(PrimaryServiceName.WebLoader));
     }
 
-    public static bool TryGetServiceStringValue(this IShopImportSettings shopImportSettings, string serviceName, out string? value)
+    public static bool TryGetServiceStringValue(this IImportSettings shopImportSettings, string serviceName, out string? value)
     {
         value = default;
         if (!shopImportSettings.Services.Contains(serviceName) || shopImportSettings.GetService(serviceName) is not IJsonValue jsonValue
