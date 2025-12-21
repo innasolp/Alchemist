@@ -1,11 +1,12 @@
-﻿using Alchemist.Import.Category.Interfaces;
+﻿using Alchemist.BackgroundTaskQueue;
+using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.DataItem.Interfaces;
 using Message.Interfaces;
 
 namespace Alchemist.Product.ImportItemHandler;
 
-internal class CategoryItemHandler(IMessageSender messageSender, string methodName, CategoryItemProcessor categoryItemProcessor)
-    : ItemHandler<IImportCategory, ICategoryData, ImportCategory>(messageSender, methodName, categoryItemProcessor), ICategoryItemHandler
+internal class CategoryQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue, IMessageSender messageSender, string methodName) 
+    : QueueItemHandler<IImportCategory, ICategoryData>(backgroundTaskQueue, messageSender, methodName), ICategoryItemHandler
 {
     protected override ICategoryData ConvertToImportEntity(IImportCategory item)
     {
