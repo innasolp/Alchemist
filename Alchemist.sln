@@ -395,6 +395,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.Playwright.Chromi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Settings", "Alchemist.Import.Settings\Alchemist.Import.Settings.csproj", "{2225A228-F0A5-4FA4-A985-02586A99042E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BackgroundTaskQueue", "Alchemist.BackgroundTaskQueue\Alchemist.BackgroundTaskQueue.csproj", "{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BackgroundTaskQueueService", "Alchemist.BackgroundTaskQueueService\Alchemist.BackgroundTaskQueueService.csproj", "{2590A476-819F-4D59-9739-57A581FBF2D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -1712,6 +1716,30 @@ Global
 		{2225A228-F0A5-4FA4-A985-02586A99042E}.import_shops|Any CPU.Build.0 = Release|Any CPU
 		{2225A228-F0A5-4FA4-A985-02586A99042E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2225A228-F0A5-4FA4-A985-02586A99042E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2590A476-819F-4D59-9739-57A581FBF2D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1888,6 +1916,8 @@ Global
 		{F963D2E6-7663-A8AD-3555-F5E7C7FCB2CA} = {B34A2054-0477-4A0A-9064-0181CFFB6682}
 		{6E2A0A96-04A9-A34F-8779-C099CC2BA55A} = {D57540CD-C3BF-4BF4-BBAD-C7D537FB5726}
 		{2225A228-F0A5-4FA4-A985-02586A99042E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7} = {2B9E318A-ACF8-4407-8738-E4E5424F52A3}
+		{2590A476-819F-4D59-9739-57A581FBF2D0} = {2B9E318A-ACF8-4407-8738-E4E5424F52A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

@@ -23,6 +23,8 @@ using CustomConfigurationProvider;
 using Serilog;
 using Import.Factory.Interfaces;
 using Import.Factory.Logging;
+using Alchemist.BackgroundTaskQueueService;
+using Alchemist.BackgroundTaskQueue;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +50,7 @@ AddShopImportItemHandlers(builder.Services, builder.Configuration);
 AddLogging(builder.Configuration, builder.Logging, builder.Environment, restApiHost, settingsAPIHost);
 
 builder.Services.AddHostedService<ShopImportWorker>();
+builder.Services.AddHostedService<BackgroundTaskQueuedHostedService>();
 
 builder.Services.AddAuthentication("https");
 
@@ -129,8 +132,9 @@ static void AddShopImportItemHandlers(IServiceCollection services, IConfiguratio
     services.AddImportProductMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
     services.AddImportCategoryMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
 
-    services.AddProductItemHandler("importqueue", configuration.GetSection("RabbitMQProductEvent").Get<string>());
-    services.AddCategoryItemHandler("importqueue", configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
+    services.AddUnboundedBackgroundQueue();
+    services.AddProductQueueItemHandler("importqueue", configuration.GetSection("RabbitMQProductEvent").Get<string>());
+    services.AddCategoryQueueItemHandler("importqueue", configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 }
 
 static void AddShopImportLogging(string logPath, IWebHostEnvironment environment, LoggerConfiguration loggerConfiguration)
@@ -172,6 +176,7 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     AddShopImportLogging(logPath, environment, loggerConfiguration);
 
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ShopImportWorker).Name);
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(BackgroundTaskQueuedHostedService).Name);
 
     AddPerfomanceLogging(loggerConfiguration, logPath, restApiHost, settingsAPIHost, logContextFile);
 

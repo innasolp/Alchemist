@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alchemist.BackgroundTaskQueueService\Alchemist.BackgroundTaskQueueService.csproj" />
     <ProjectReference Include="..\Alchemist.BrowserService.Client\Alchemist.BrowserService.Client.csproj" />
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
