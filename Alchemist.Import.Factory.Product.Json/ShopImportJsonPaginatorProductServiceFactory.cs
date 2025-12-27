@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Factory.Products;
+using Alchemist.Import.Product.Json.Service;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;
@@ -22,6 +23,17 @@ public class ShopImportJsonPaginatorProductServiceFactory(ILogger<ShopImportJson
         var categoryJsonSettingsService = productShopImportSettings.GetService("CategoryJsonSettings");
         var categoryJsonSettings = categoryJsonSettingsService.GetServiceValue<JsonSettings>();
 
+        var importProductJsonServiceOptions = new ImportProductJsonServiceOptions
+        {
+            ProductJsonSettings = productJsonSettings,
+            CategoryJsonSettings = categoryJsonSettings,
+            PageProductCount = productShopImportSettings.PageProductCount,
+            ProductLoadData = productLoadData,
+            CategoryLoadData = categoryLoadData,
+            ProductUrlFormatType = productShopImportSettings.ProductUrlFormatType,
+            CategoryUrlFormatType = productShopImportSettings.CategoryUrlFormatType
+        };
+
         return new ShopImportJsonPaginatorCategoryProductsService(logger as ILogger<ShopImportJsonPaginatorCategoryProductsService>,
             browserService,
             shopModel.Url,
@@ -32,13 +44,7 @@ public class ShopImportJsonPaginatorProductServiceFactory(ILogger<ShopImportJson
             productShopImportSettings.ProductUrlFormat,
             productShopImportSettings.CategoryUrlFormat,
             shopModel.Name,
-            productJsonSettings,
-            categoryJsonSettings,
-            productShopImportSettings.PageProductCount,
-            productLoadData,
-            categoryLoadData,
-            productShopImportSettings.ProductUrlFormatType,
-            productShopImportSettings.CategoryUrlFormatType);
+            importProductJsonServiceOptions);
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource importSource, IImportSettings importSettings)

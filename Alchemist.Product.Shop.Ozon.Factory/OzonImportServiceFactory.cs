@@ -1,11 +1,12 @@
-﻿using Import.Factory.Interfaces;
-using Alchemist.Import.Factory.Products;
-using Import.Interfaces;
+﻿using Alchemist.Import.Factory.Products;
 using Alchemist.Import.Products.Interfaces;
-using Import.Settings.Interfaces;
-using Alchemist.Product.Shop.Ozon.ImportService;
-using Microsoft.Extensions.Logging;
+using Alchemist.Import.Products.Service;
 using Alchemist.Import.Settings.Product;
+using Alchemist.Product.Shop.Ozon.ImportService;
+using Import.Factory.Interfaces;
+using Import.Interfaces;
+using Import.Settings.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Product.Shop.Ozon.Factory;
 
@@ -17,24 +18,30 @@ public class OzonImportServiceFactory(ILogger<OzonImportService> logger,
 {
     public override Type ServiceImplementationType => typeof(OzonImportService);
 
-    protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IProductShopImportSettings shopImportSettings,
+    protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IProductShopImportSettings productShopImportSettings,
         IProductItemHandler itemHandler, ILoaderService loaderService,
     object? productLoadData = null,
     object? categoryLoadData = null)
     {
+        var importProductServiceOptions = new ImportProductServiceOptions
+        {
+            PageProductCount = productShopImportSettings.PageProductCount,
+            ProductLoadData = productLoadData,
+            CategoryLoadData = categoryLoadData,
+            ProductUrlFormatType = productShopImportSettings.ProductUrlFormatType,
+            CategoryUrlFormatType = productShopImportSettings.CategoryUrlFormatType
+        };
+
         return new OzonImportService(logger as ILogger<OzonImportService>,
             name,
             loaderService,
             shopModel.Url,
             shopModel.Categories,
             itemHandler,
-            shopImportSettings.ProductUrlFormat,
-            shopImportSettings.CategoryUrlFormat,
-            shopModel.Name,
-            productLoadData,
-            categoryLoadData,
-            shopImportSettings.ProductUrlFormatType,
-            shopImportSettings.CategoryUrlFormatType
+            productShopImportSettings.ProductUrlFormat,
+            productShopImportSettings.CategoryUrlFormat,
+            shopModel.Name, 
+            importProductServiceOptions
             );
     }
 

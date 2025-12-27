@@ -13,9 +13,7 @@ public class ShopImportJsonCategoryProductsService<TCategory, TProduct>
     : ShopImportCategoryProductsService<TCategory,TProduct>
     where TCategory : class, IJsonItem, ICategoryProducts, new()
     where TProduct : class, IJsonItem, IProductItem, new()
-{
-    private readonly IJsonSettings _productJsonSettings;
-    private readonly IJsonSettings _categoryJsonSettings;
+{   
 
     private readonly JsonLoader _productJsonLoader;
     private readonly JsonLoader _categoryJsonLoader;
@@ -29,22 +27,13 @@ public class ShopImportJsonCategoryProductsService<TCategory, TProduct>
         string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
-        IJsonSettings productJsonSettings,
-        IJsonSettings categoryJsonSettings,
-        int? pageProductCount = null,
-        object? productLoadData = null,
-        object? categoryLoadData = null,
-        UrlFormatType productUrlFormatType = UrlFormatType.Url,
-        UrlFormatType categoryUrlFormatType = UrlFormatType.Url)
-        : base(logger, loader, url, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, pageProductCount, productLoadData, categoryLoadData, productUrlFormatType, categoryUrlFormatType)
+        ImportProductJsonServiceOptions importProductJsonServiceOptions)
+        : base(logger, loader, url, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, importProductJsonServiceOptions)
     {
         Name = serviceName;
         
-        _productJsonSettings = productJsonSettings;
-        _categoryJsonSettings = categoryJsonSettings;
-
-        _productJsonLoader = new JsonLoader(_productJsonSettings);
-        _categoryJsonLoader = new JsonLoader(_categoryJsonSettings);
+        _productJsonLoader = new JsonLoader(importProductJsonServiceOptions.ProductJsonSettings);
+        _categoryJsonLoader = new JsonLoader(importProductJsonServiceOptions.CategoryJsonSettings);
         _categoryJsonLoader.AddPathHandler(new PriceJsonPathHandler());
         _categoryJsonLoader.AddPathHandler(new CurrencyJsonPathHandler());
     }

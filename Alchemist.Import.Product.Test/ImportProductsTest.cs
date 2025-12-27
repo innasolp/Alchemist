@@ -37,6 +37,6 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
              ProductShopModelMock.Object,
              LoaderMock.Object,
              ProductItemHandlerMock.Object,
-             pageProductCount : _pageProductCount);
+             _pageProductCount);
     }
 }

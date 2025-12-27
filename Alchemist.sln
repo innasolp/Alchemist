@@ -1811,7 +1811,6 @@ Global
 		{C04FE95B-886E-4325-8F0B-54F87EA8661D}.debug libs|Any CPU.Build.0 = Debug|Any CPU
 		{C04FE95B-886E-4325-8F0B-54F87EA8661D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C04FE95B-886E-4325-8F0B-54F87EA8661D}.import_core|Any CPU.ActiveCfg = Release|Any CPU
-		{C04FE95B-886E-4325-8F0B-54F87EA8661D}.import_core|Any CPU.Build.0 = Release|Any CPU
 		{C04FE95B-886E-4325-8F0B-54F87EA8661D}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
 		{C04FE95B-886E-4325-8F0B-54F87EA8661D}.import_settings|Any CPU.Build.0 = Release|Any CPU
 		{C04FE95B-886E-4325-8F0B-54F87EA8661D}.import_shops|Any CPU.ActiveCfg = Debug|Any CPU

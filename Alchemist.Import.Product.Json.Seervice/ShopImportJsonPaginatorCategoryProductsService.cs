@@ -13,14 +13,8 @@ public class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TPr
     IProductItemHandler itemHandler, 
     string productUrlFormat, 
     string categoryUrlFormat, 
-    string sourceName, 
-    IJsonSettings productJsonSettings,
-    IJsonSettings categoryJsonSettings, 
-    int? pageProductCount = null, 
-    object? productLoadData = null, 
-    object? categoryLoadData = null,
-    UrlFormatType productUrlFormatType = UrlFormatType.Url,
-    UrlFormatType categoryUrlFormatType = UrlFormatType.Url)
+    string sourceName,
+    ImportProductJsonServiceOptions importProductJsonServiceOptions)
     : ShopImportJsonCategoryProductsService<TPagingCategory, TProduct>(logger,
         loader, 
         url,
@@ -29,14 +23,7 @@ public class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TPr
         itemHandler,
         productUrlFormat, 
         categoryUrlFormat, 
-        sourceName,
-        productJsonSettings, 
-        categoryJsonSettings, 
-        pageProductCount, 
-        productLoadData, 
-        categoryLoadData,
-        productUrlFormatType, 
-        categoryUrlFormatType)
+        sourceName, importProductJsonServiceOptions)
     where TPagingCategory : class, IPaginatorItem, IJsonItem, ICategoryProducts, new()
     where TProduct : class, IJsonItem, IProductItem, new()
 {

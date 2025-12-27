@@ -9,25 +9,20 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
     string name,
     IProductShopModel shopModel, 
     ILoaderService loader,
-    IProductItemHandler itemHandler, int pageProductCount = 1000) 
+    IProductItemHandler itemHandler
+    , int pageProductCount = 1000) 
     : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,loader, shopModel.Url,
         shopModel.Categories,  itemHandler,
         shopModel.ProductUrl,
             shopModel.CategoryUrlFormat,
             shopModel.Name,
-            pageProductCount : pageProductCount)
+            new ImportProductServiceOptions { PageProductCount = pageProductCount })
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
     private readonly IProductShopModel _productShopModel = shopModel;
 
-    public override string Name { get; } = name;
-    //private const int PageProductCountDefault = 1000;
-
-    //public void SetPageProductCount(int pageCount)
-    //{
-    //    _pageCount = pageCount;
-    //}
+    public override string Name { get; } = name;    
 
     protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
     {

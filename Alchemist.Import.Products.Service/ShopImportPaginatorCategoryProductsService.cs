@@ -13,11 +13,7 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
      string productUrlFormat,
      string categoryUrlFormat,
     string sourceName,
-    int? pageProductCount = null,
-    object? productLoadData = null,
-    object? categoryLoadData = null,
-    UrlFormatType productUrlFormatType = default,
-    UrlFormatType categoryUrlFormatType = default) 
+    ImportProductServiceOptions importProductServiceOptions) 
     : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,
         loader,
         url,
@@ -25,12 +21,7 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
         itemHandler,
         productUrlFormat,
         categoryUrlFormat,
-        sourceName,
-        pageProductCount,
-        productLoadData,
-        categoryLoadData,
-        productUrlFormatType,
-        categoryUrlFormatType)
+        sourceName, importProductServiceOptions)
     where TCategory : class, ICategoryProducts, IPaginatorItem, new()
     where TProductItem : class, IProductItem, new()
 {

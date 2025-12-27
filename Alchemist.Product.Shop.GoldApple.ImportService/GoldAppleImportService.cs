@@ -16,10 +16,7 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
     [FromKeyedServices(GoldAppleConstants.GolAppleKey)] string productUrlFormat,
     string categoryUrlFormat,
     string sourceName,
-    object? productLoadData = null,
-    object? categoryLoadData = null,
-    UrlFormatType productUrlFormatType = default,
-    UrlFormatType categoryUrlFormatType = default
+    ImportProductServiceOptions importProductServiceOptions
     )
     : ShopImportCategoryProductsService<CategoryProducts, ProductData>(logger,
         loader,
@@ -29,11 +26,7 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
         productUrlFormat,
         categoryUrlFormat, 
         sourceName,
-        24,
-        productLoadData,
-        categoryLoadData,
-        productUrlFormatType,
-        categoryUrlFormatType
+        importProductServiceOptions
         )
 {
     public override string Name { get; } = name;

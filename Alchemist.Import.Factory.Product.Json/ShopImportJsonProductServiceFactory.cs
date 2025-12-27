@@ -24,6 +24,17 @@ public class ShopImportJsonProductServiceFactory(ILogger<ShopImportJsonCategoryP
         var categoryJsonSettingsService = productShopImportSettings.GetService("CategoryJsonSettings");
         var categoryJsonSettings = categoryJsonSettingsService.GetServiceValue<JsonSettings>();
 
+        var importProductJsonServiceOptions = new ImportProductJsonServiceOptions
+        { 
+            ProductJsonSettings = productJsonSettings,
+            CategoryJsonSettings = categoryJsonSettings,
+            PageProductCount = productShopImportSettings.PageProductCount,
+            ProductLoadData = productLoadData,
+            CategoryLoadData = categoryLoadData,
+            ProductUrlFormatType = productShopImportSettings.ProductUrlFormatType,
+            CategoryUrlFormatType = productShopImportSettings.CategoryUrlFormatType
+        };
+
         return new ShopImportJsonCategoryProductsService(logger as ILogger<ShopImportJsonCategoryProductsService>,
             browserService,
             shopModel.Url,
@@ -33,14 +44,9 @@ public class ShopImportJsonProductServiceFactory(ILogger<ShopImportJsonCategoryP
             productItemHandler,
             productShopImportSettings.ProductUrlFormat,
             productShopImportSettings.CategoryUrlFormat,
-            shopModel.Name,
-            productJsonSettings,
-            categoryJsonSettings,
-            productShopImportSettings.PageProductCount,
-             productLoadData,
-            categoryLoadData,
-            productShopImportSettings.ProductUrlFormatType,
-            productShopImportSettings.CategoryUrlFormatType);
+            shopModel.Name, 
+            importProductJsonServiceOptions
+            );
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource importSource, IImportSettings importSettings)

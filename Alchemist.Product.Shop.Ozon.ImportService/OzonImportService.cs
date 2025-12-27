@@ -14,11 +14,8 @@ public class OzonImportService(ILogger<OzonImportService> logger,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler,
     string productUrlFormat,
         string categoryUrlFormat,
-        string sourceName,
-    object? productLoadData = null,
-    object? categoryLoadData = null,
-    UrlFormatType productUrlFormatType = default,
-    UrlFormatType categoryUrlFormatType = default
+        string sourceName, 
+        ImportProductServiceOptions importProductServiceOptions
    )
     : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger,
         loaderService,
@@ -27,11 +24,7 @@ public class OzonImportService(ILogger<OzonImportService> logger,
         itemHandler,
         productUrlFormat, categoryUrlFormat,
         sourceName,
-        12,
-        productLoadData,
-        categoryLoadData,
-        productUrlFormatType,
-        categoryUrlFormatType)
+        importProductServiceOptions)
 {
     public override string Name { get; } = name;
 
