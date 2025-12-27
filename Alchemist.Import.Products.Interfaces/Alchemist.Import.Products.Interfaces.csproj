@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Import\Alchemist.Import.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 
 public interface IPaginatorItem
 {
-    string GetPageUrl(string urlFormat, string item, int page);
+    string? GetPageUrl(string urlFormat, string item, int page);
 
-    string GetNextPageUrl(string urlFormat, string item, int page);
+    string? GetNextPageUrl(string urlFormat, string item, int page);
 }

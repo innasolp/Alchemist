@@ -1,13 +1,13 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 
 
-namespace Alchemist.Import.Product.Test.Infrastructure;
+namespace Alchemist.Import.ProductService.Test.Infrastructure;
 
 public class TestCategory : ICategoryProducts
 {
     public TestCategoryProduct[] CategoryProductItems { get; set; }
 
-    public int TotalCount { get; set; }
+    public int? TotalCount { get; set; }
 
     ICategoryProductItem[] ICategoryProducts.CategoryProductItems => CategoryProductItems;
 }
@@ -24,7 +24,8 @@ public class TestCategoryProduct : ICategoryProductItem
 
     public string Name { get; set; }
 
-    public int CategoryItemId { get; set; } 
+    public int CategoryItemId { get; set; }
+    public string Brand { get ; set; }
 }
 
 public class TestProductItem : IProductItem

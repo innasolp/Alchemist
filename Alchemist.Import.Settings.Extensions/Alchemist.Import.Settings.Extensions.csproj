@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
   </ItemGroup>
 	

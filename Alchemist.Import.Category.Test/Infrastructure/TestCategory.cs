@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using System.Collections.Specialized;
 
-namespace Alchemist.Import.Category.Test.Infrastructure;
+namespace Alchemist.Import.CategoryService.Test.Infrastructure;
 
 public class TestCategory : ICategory
 {

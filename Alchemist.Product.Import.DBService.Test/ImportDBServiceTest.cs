@@ -1,7 +1,7 @@
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Data.Repository;
+using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Entities;
-using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Product.Interfaces;
 using Alchemist.Test.Server.Fixtures;
 using Message.Interfaces;

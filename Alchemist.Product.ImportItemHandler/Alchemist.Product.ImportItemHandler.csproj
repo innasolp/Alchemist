@@ -9,12 +9,10 @@
 	<ItemGroup>
 		<PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Alchemist.BackgroundTaskQueue\Alchemist.BackgroundTaskQueue.csproj" />
-	  <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
 	  <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
 	  <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
 	  <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />

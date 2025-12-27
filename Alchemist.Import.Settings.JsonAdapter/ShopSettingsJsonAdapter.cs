@@ -1,17 +1,11 @@
-﻿using Import.Settings.Interfaces;
-using Json.FileExtensions;
+﻿using Json.FileExtensions;
 
 namespace Alchemist.Import.Settings.JsonAdapter;
 
-public class ShopSettingsJsonAdapter<TShopImportSettings> : ISettingsAdapter
+public class ShopSettingsJsonAdapter<TShopImportSettings>(string jsonFilePath) : ISettingsAdapter
     where TShopImportSettings : class, IShopImportSettings
 {
-    private readonly string _jsonFilePath;
-
-    public ShopSettingsJsonAdapter(string jsonFilePath)
-    {
-        _jsonFilePath = jsonFilePath;
-    }
+    private readonly string _jsonFilePath = jsonFilePath;
 
     public async Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName)
     {

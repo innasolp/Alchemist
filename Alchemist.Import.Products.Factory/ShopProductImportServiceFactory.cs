@@ -7,7 +7,6 @@ using Import.Factory.Service;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace Alchemist.Import.Factory.Products;
 
@@ -31,14 +30,10 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
             throw new InvalidDataException($"Invalid shop model type {shopModel.GetType().Name}");
         
         var categoryDataService = shopImportSettings.GetService("CategoryRequestOptions");
-        var categoryData = categoryDataService != null && !string.IsNullOrEmpty(categoryDataService.Value)
-            ? JsonSerializer.Deserialize<RequestOptions>(categoryDataService.Value)
-            : default;
+        var categoryData = categoryDataService?.GetServiceValue<RequestOptions>();
 
         var productDataService = shopImportSettings.GetService("ProductRequestOptions");
-        var productData = productDataService != null && !string.IsNullOrEmpty(productDataService.Value)
-            ? JsonSerializer.Deserialize<RequestOptions>(productDataService.Value)
-            : default;
+        var productData = productDataService?.GetServiceValue<RequestOptions>();
 
         return Create(logger, name,
             productShopModel, productShopImportSettings,

@@ -84,8 +84,8 @@ static void AddSettingsAdapters(WebApplicationBuilder builder)
         ShopImportWorkerKeys.ProcessedImportSettings);
     builder.Services.AddSettingsDataAdapterToCollection<CategoryShopImportSettings, ImportServiceSettings>(ShopSettingType.Category,
         ShopImportWorkerKeys.ProcessedImportSettings);
-    builder.Services.AddKeyedSettingsJsonAdapter<ProductShopImportSettings>("shopProducts.json", ShopImportWorkerKeys.InitImportSettings);
-    builder.Services.AddKeyedSettingsJsonAdapter<CategoryShopImportSettings>("shopCategories.json", ShopImportWorkerKeys.InitImportSettings);
+    builder.Services.AddKeyedSettingsJsonAdapter<ProductShopImportSettings>("ImportSettings/shopProducts.json", ShopImportWorkerKeys.InitImportSettings);
+    builder.Services.AddKeyedSettingsJsonAdapter<CategoryShopImportSettings>("ImportSettings/shopCategories.json", ShopImportWorkerKeys.InitImportSettings);
 }
 
 static void AddLoaderService(WebApplicationBuilder builder)

@@ -29,6 +29,7 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
         productUrlFormat,
         categoryUrlFormat, 
         sourceName,
+        24,
         productLoadData,
         categoryLoadData,
         productUrlFormatType,
@@ -37,10 +38,8 @@ public class GoldAppleImportService(ILogger<GoldAppleImportService> logger,
 {
     public override string Name { get; } = name;
 
-    protected override int PageProductCount => 24;
-
-    protected override bool IsEndOfCategory(CategoryProducts category)
+    protected override bool? IsEndOfCategory(CategoryProducts category, int processProductCount)
     {
-        return !(category.Data.Products?.Length > 0) ;
+        return !(category.Data.Products?.Length > 0);
     }
 }

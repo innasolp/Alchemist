@@ -25,7 +25,9 @@ public class OzonImportService(ILogger<OzonImportService> logger,
         url,
         shopCategories, 
         itemHandler,
-        productUrlFormat, categoryUrlFormat, sourceName,
+        productUrlFormat, categoryUrlFormat,
+        sourceName,
+        12,
         productLoadData,
         categoryLoadData,
         productUrlFormatType,
@@ -33,10 +35,8 @@ public class OzonImportService(ILogger<OzonImportService> logger,
 {
     public override string Name { get; } = name;
 
-    protected override int PageProductCount => 12;
-
-    protected override bool IsEndOfCategory(Category category)
+    protected override bool? IsEndOfCategory(Category category, int processProductCount)
     {
-        return category.CategoryContent == null;
+        return base.IsEndOfCategory(category, processProductCount) ?? category.CategoryContent == null; ;
     }
 }

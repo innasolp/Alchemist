@@ -33,6 +33,7 @@ public class ProductItem : ICategoryProductItem, IJsonOnDeserialized
     [JsonPropertyName("topRightButtons")]
     public TopRightButton[]? TopRightButtons { get; set; }
     int ICategoryProductItem.CategoryItemId { get; set; }
+    string ICategoryProductItem.Brand { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     public void OnDeserialized()
     {

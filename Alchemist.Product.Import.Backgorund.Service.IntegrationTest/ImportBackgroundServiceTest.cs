@@ -1,7 +1,6 @@
 using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 using Alchemist.Product.Import.Background;
-using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SettingsAPIFactory;
 using Message.Interfaces;

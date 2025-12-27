@@ -1,13 +1,11 @@
-﻿using Alchemist.Import.Product.Test.Infrastructure;
-using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Products.Service;
+﻿using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.ProductService.Test.Infrastructure;
 using Import.Interfaces;
-using Import.Service;
 using Import.Service.Test.Infrastructure;
 using Moq;
 using Xunit.Abstractions;
 
-namespace Alchemist.Import.Product.Test;
+namespace Alchemist.Import.ProductService.Test;
 
 public class ImportShopProductCategoryProcessTest : ImportProductsTest
 {
@@ -52,9 +50,9 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
 
         LoaderMock.SetupLoadItem(categoryUrl, requestData, categoryProducts);
 
+        SetPageProductCount(pageCount); 
         var service = CreateService(name);
-        service.SetPageProductCount(pageCount); 
-
+        
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(service.GetTestApiUrl, TestHelper.CreateProductItem);
         LoaderMock.SetupLoadItemsThrowsExceptions(productItems.Keys, getItemException, requestData);
 
@@ -86,9 +84,9 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         LoaderMock.Setup(w => w.Load(It.IsNotIn(categoryUrl), requestData, It.IsAny<CancellationToken>())).Returns(
             (string url, object requestData, CancellationToken token) => TestExtensions.LoadItemAsync(new TestCategory() { CategoryProductItems = [] }));
 
+        SetPageProductCount(pageCount);
         var service = CreateService(name);
-        service.SetPageProductCount(pageCount);
-
+        
         var productItems = categoryProducts.CategoryProductItems.ToDictionary(service.GetTestApiUrl, TestHelper.CreateProductItem);
         LoaderMock.SetupLoadItemsSuccessfull(productItems, requestData);
 
@@ -139,7 +137,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         
         await token.CancelAsync();
         
-        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == categoryUrl), It.IsAny<object>(), It.IsAny<CancellationToken>()));
+        LoaderMock.Verify(l => l.Load(It.Is<string>(v => v.Contains(categoryUrl)), It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
         foreach (var item in categoryProducts.CategoryProductItems)
         {

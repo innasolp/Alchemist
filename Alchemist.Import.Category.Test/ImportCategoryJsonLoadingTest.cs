@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Test.Infrastructure;
 using Import.Service.Test.Infrastructure;
 using Import.Service.Test;
 using Microsoft.Extensions.Logging;
@@ -10,8 +9,9 @@ using Import.Interfaces;
 using Microsoft.VisualStudio.Threading;
 using Alchemist.Import.Category.Service;
 using Alchemist.Import.Category.Service.Json;
+using Alchemist.Import.CategoryService.Test.Infrastructure;
 
-namespace Alchemist.Import.Category.Test;
+namespace Alchemist.Import.CategoryService.Test;
 
 public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesJsonTimerService>>
 {

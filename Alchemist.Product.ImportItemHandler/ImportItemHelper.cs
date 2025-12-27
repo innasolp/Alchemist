@@ -6,7 +6,7 @@ namespace Alchemist.Product.ImportItemHandler;
 
 internal static class ImportItemHelper
 {
-    public static ImportItem.Interfaces.IProductData ConvertToImportProductItem(this IProductItem productItem, string shopName, string shopUrl)
+    public static IProductData ConvertToImportProductItem(this IProductItem productItem, string shopName, string shopUrl)
     {
         return new ProductData
         {

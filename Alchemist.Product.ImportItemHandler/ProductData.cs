@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.ImportItem.Interfaces;
+﻿using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.ImportItemHandler;
