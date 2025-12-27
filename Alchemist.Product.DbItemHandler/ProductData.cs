@@ -1,5 +1,5 @@
-﻿using Alchemist.Product.Entities;
-using Alchemist.Product.ImportItem.Interfaces;
+﻿using Alchemist.Product.DataItem.Interfaces;
+using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.DbItemHandler;

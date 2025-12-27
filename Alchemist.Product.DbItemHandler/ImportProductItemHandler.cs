@@ -1,8 +1,8 @@
 ﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Exceptions;
+using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Entities;
-using Alchemist.Product.ImportItem.Interfaces;
 using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.DbItemHandler;

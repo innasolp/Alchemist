@@ -21,21 +21,15 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected ConcurrentQueue<IProductShopCategory> Categories { get; }
 
-    private readonly string _productUrlFormat;
+    private readonly string _productUrlFormat;    
 
-    private readonly UrlFormatType _productUrlFormatType;
+    private readonly string _categoryUrlFormat; 
 
-    private readonly string _categoryUrlFormat;
+    private readonly string _sourceName;    
 
-    private readonly UrlFormatType _categoryUrlFormatType;
-
-    private readonly object? _productLoadData;
-
-    private readonly object? _categoryLoadData;
-
-    private readonly string _sourceName;
-    protected abstract int PageProductCount { get; }
     protected virtual int MaxUnsuccessRequestCount => 10;
+
+    protected ImportProductServiceOptions ImportProductServiceOptions { get; }
 
     public object GetData(object loadData, string httpMethod, string dataFormat, params object[] parameters)
     {
@@ -54,25 +48,19 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
-        object? productLoadData = null,
-        object? categoryLoadData = null,
-        UrlFormatType productUrlFormatType = default,
-        UrlFormatType categoryUrlFormatType = default)
+        ImportProductServiceOptions importProductServiceOptions)
         : base(logger, loader, url)
     {
+        ImportProductServiceOptions = importProductServiceOptions;            
+
         _productUrlFormat = productUrlFormat;
         _categoryUrlFormat = categoryUrlFormat;
-        _productUrlFormatType = productUrlFormatType;
-        _categoryUrlFormatType = categoryUrlFormatType;
         
         _sourceName = sourceName;
         _itemHandler = itemHandler;
         Categories = new();
 
-        shopCategories.ToList().ForEach(c => Categories.Enqueue(c));
-        _productLoadData = productLoadData;
-        _categoryLoadData = categoryLoadData;
-        
+        shopCategories.ToList().ForEach(c => Categories.Enqueue(c));               
     }
 
     async Task IListener<IProductShopCategory>.On(IProductShopCategory message)
@@ -102,7 +90,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             bool? isEndOfCategory = null;
             var attemptsCount = 0;
 
-            var categoryPageUrl = GetCategoryPageUrl(category, _categoryUrlFormat, _categoryUrlFormatType, page);
+            var categoryPageUrl = GetCategoryPageUrl(category, _categoryUrlFormat, ImportProductServiceOptions.CategoryUrlFormatType, page);
 
             while (isEndOfCategory != true)
             {
@@ -124,9 +112,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 successProductCount += categoryPageResult.SuccessCount;
                 unsuccessProductCount += categoryPageResult.UnsuccessCount;
 
-                isEndOfCategory = IsLastPage(categoryResult, page) == true || IsEndOfCategory(categoryResult);
+                isEndOfCategory = IsLastPage(categoryResult, page) == true
+                    || IsEndOfCategory(categoryResult, successProductCount+ unsuccessProductCount) == true;
 
-                var nextCategoryPageUrl = GetNextCategoryPageUrl(category, _categoryUrlFormat, _categoryUrlFormatType, page + 1, categoryResult);
+                var nextCategoryPageUrl = GetNextCategoryPageUrl(category, _categoryUrlFormat, ImportProductServiceOptions.CategoryUrlFormatType, page + 1, categoryResult);
                 categoryPageUrl = nextCategoryPageUrl;
                 page++;
             }
@@ -173,11 +162,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     protected bool? IsLastPage(TCategory category, int page)
     {
         var totalCount = category.TotalCount;
-        if (totalCount > 0)
+        if (totalCount > 0 && ImportProductServiceOptions.PageProductCount > 0)
         {
-            var totalPageCount = totalCount % PageProductCount > 0
-                ? totalCount / PageProductCount + 1
-                : totalCount / PageProductCount;
+            var totalPageCount = totalCount % ImportProductServiceOptions.PageProductCount > 0
+                ? totalCount / ImportProductServiceOptions.PageProductCount + 1
+                : totalCount / ImportProductServiceOptions.PageProductCount;
 
             return page >= totalPageCount;
         }
@@ -188,7 +177,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPageUrl, int categoryItemId, int page, CancellationToken stoppingToken)
     {
         var (success, category) = await TryGetFromApiUrlAsync<TCategory>(categoryPageUrl,
-            _categoryLoadData != null ? new object?[] { LoadData, _categoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } : LoadData,
+            ImportProductServiceOptions.CategoryLoadData != null 
+                ? new object?[] { LoadData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } 
+                : LoadData,
             stoppingToken);
 
         if (!success)
@@ -243,6 +234,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     }
 
     protected virtual async Task<(bool success, T? result)> TryGetFromApiUrlAsync<T>(string apiUrl, object? requestData, CancellationToken token)
+        where T:class
     {        
         var (success, stream) = await TryLoadFromUrlAsync(apiUrl, requestData, cancellationToken : token);
 
@@ -252,7 +244,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             using (stream)
             {
-                var item = await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: token);
+                var item = await DeserializeItemFromStream<T>(stream, cancellationToken: token);
                 stream.Close();
                 return (true, item);
             }
@@ -270,10 +262,18 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 #endif         
     }
 
+    protected virtual async Task<T?> DeserializeItemFromStream<T>(Stream stream, CancellationToken cancellationToken = default)
+        where T:class
+    {
+        return await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: cancellationToken);
+    }
+
     protected async Task<(bool success, TProductItem? productItem)> TryGetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)
     {
         var (success, productItem) = await TryGetFromApiUrlAsync<TProductItem>(apiUrl,
-            _productLoadData is not null ? new object?[] { LoadData, _productLoadData, new string[] { $"{categoryProductItem.Id}" } } : LoadData,
+            ImportProductServiceOptions.ProductLoadData is not null 
+                ? new object?[] { LoadData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } } 
+                : LoadData,
             token);
 
         if (!success) return (false, default(TProductItem?));
@@ -283,15 +283,19 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         productItem.Currency = categoryProductItem.Currency;
         productItem.ApiUrl = apiUrl;
         productItem.CategoryId = categoryProductItem.CategoryItemId;
+        productItem.Brand = categoryProductItem.Brand;
 
         return (true, productItem);
     }
 
-    protected abstract bool IsEndOfCategory(TCategory category);
+    protected virtual bool? IsEndOfCategory(TCategory category, int processProductCount)
+    {
+        return category.TotalCount >= processProductCount;
+    }
 
     protected virtual string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
     {
-        switch (_productUrlFormatType)
+        switch (ImportProductServiceOptions.ProductUrlFormatType)
         {
             case UrlFormatType.Url:
                 return string.Format(productUrlFormat, PrepareItemUrl(productItem.ItemUrl));

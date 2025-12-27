@@ -10,5 +10,5 @@ public class CategoryProducts: ICategoryProducts
 
     ICategoryProductItem[] ICategoryProducts.CategoryProductItems => [.. Data.Products.Select(c=>c.Product)];
 
-    int ICategoryProducts.TotalCount => Data.Count;
+    int? ICategoryProducts.TotalCount => Data.Count;
 }

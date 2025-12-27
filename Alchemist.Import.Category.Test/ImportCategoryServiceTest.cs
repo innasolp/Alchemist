@@ -1,5 +1,4 @@
 using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Test.Infrastructure;
 using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -7,8 +6,9 @@ using Xunit.Abstractions;
 using Import.Service.Test.Infrastructure;
 using Alchemist.Import.Category.Service;
 using Alchemist.Import.Category.Service.Json;
+using Alchemist.Import.CategoryService.Test.Infrastructure;
 
-namespace Alchemist.Import.Category.Test;
+namespace Alchemist.Import.CategoryService.Test;
 
 public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesJsonTimerService>>
 {

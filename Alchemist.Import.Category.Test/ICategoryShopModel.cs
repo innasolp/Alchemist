@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Category.Test;
+﻿namespace Alchemist.Import.CategoryService.Test;
 
 public interface ICategoryShopModel
 {

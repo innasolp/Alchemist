@@ -1,0 +1,24 @@
+{
+  "PropertyNodePathes": {
+    "TotalCount": [
+      "seo/script/[.innerHTML]/.value/offers/offerCount"
+    ],
+    "CategoryProductItems": [
+      "widgetStates/tileGridDesktop%/.value/items"
+    ]
+  },
+  "ItemJsonSettings": {
+    "CategoryProductItems": {
+      "PropertyNodePathes": {
+        "Name": [
+          "mainState/[type=textAtom]/textAtom/text"
+        ],
+        "Id": [
+          "sku"
+        ],
+        "ItemUrl": [ "action/link" ],
+        "Brand": [ "mainState/[type=labelList]/labelList/items/title" ]
+      }
+    }
+  }
+}

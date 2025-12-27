@@ -14,29 +14,22 @@ public class OzonImportService(ILogger<OzonImportService> logger,
     [FromKeyedServices(OzonImportServiceConstants.OzonKey)] IProductItemHandler itemHandler,
     string productUrlFormat,
         string categoryUrlFormat,
-        string sourceName,
-    object? productLoadData = null,
-    object? categoryLoadData = null,
-    UrlFormatType productUrlFormatType = default,
-    UrlFormatType categoryUrlFormatType = default
+        string sourceName, 
+        ImportProductServiceOptions importProductServiceOptions
    )
     : ShopImportPaginatorCategoryProductsService<Category, Model.Product>(logger,
         loaderService,
         url,
         shopCategories, 
         itemHandler,
-        productUrlFormat, categoryUrlFormat, sourceName,
-        productLoadData,
-        categoryLoadData,
-        productUrlFormatType,
-        categoryUrlFormatType)
+        productUrlFormat, categoryUrlFormat,
+        sourceName,
+        importProductServiceOptions)
 {
     public override string Name { get; } = name;
 
-    protected override int PageProductCount => 12;
-
-    protected override bool IsEndOfCategory(Category category)
+    protected override bool? IsEndOfCategory(Category category, int processProductCount)
     {
-        return category.CategoryContent == null;
+        return base.IsEndOfCategory(category, processProductCount) ?? category.CategoryContent == null; ;
     }
 }

@@ -1,12 +1,11 @@
-using Alchemist.Import.Product.Test.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
-using Import.Interfaces;
+using Alchemist.Import.ProductService.Test.Infrastructure;
 using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
 
-namespace Alchemist.Import.Product.Test;
+namespace Alchemist.Import.ProductService.Test;
 
 public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImportProductService<TestCategory, TestProductItem>, ILogger>
 {

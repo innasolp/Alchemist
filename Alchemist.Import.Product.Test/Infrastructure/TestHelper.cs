@@ -1,7 +1,7 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Moq;
 
-namespace Alchemist.Import.Product.Test.Infrastructure;
+namespace Alchemist.Import.ProductService.Test.Infrastructure;
 
 internal static class TestHelper
 {

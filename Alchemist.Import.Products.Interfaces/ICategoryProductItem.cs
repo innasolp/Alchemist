@@ -13,4 +13,6 @@ public interface ICategoryProductItem
     string Name { get; }
 
     int CategoryItemId { get; set; }
+
+    string Brand { get; set; }
 }

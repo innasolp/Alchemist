@@ -25,7 +25,7 @@ public class Category : IJsonOnDeserialized, ICategoryProducts, IPaginatorItem
     ICategoryProductItem[] ICategoryProducts.CategoryProductItems { get => CategoryContent?.Items.OfType<ICategoryProductItem>().ToArray() ?? []; }
 
     [JsonIgnore]
-    int ICategoryProducts.TotalCount => Shared?.Catalog?.TotalFound ?? 0;
+    int? ICategoryProducts.TotalCount => Shared?.Catalog?.TotalFound ?? 0;
 
     [JsonPropertyName("layout")]
     public LayoutItem[] LayoutItems { get; set; } = [];

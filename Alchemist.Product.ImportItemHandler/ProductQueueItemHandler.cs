@@ -1,6 +1,6 @@
 ﻿using Alchemist.BackgroundTaskQueue;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Product.ImportItem.Interfaces;
+using Alchemist.Product.DataItem.Interfaces;
 using Message.Interfaces;
 
 namespace Alchemist.Product.ImportItemHandler;

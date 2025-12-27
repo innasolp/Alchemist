@@ -102,7 +102,7 @@ public class ProductData : IProductItem
 
     string[] IProductItem.Components => Data.Components;
 
-    string IProductItem.Brand => Data.Brand;
+    string IProductItem.Brand { get => Data.Brand; set { Data.Brand = value; } }
 
     string? IProductItem.Country => Data.Country;
 

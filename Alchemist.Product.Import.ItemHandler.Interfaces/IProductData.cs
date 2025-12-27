@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.ImportItem.Interfaces;
+namespace Alchemist.Product.DataItem.Interfaces;
 
 public interface IProductData
 {

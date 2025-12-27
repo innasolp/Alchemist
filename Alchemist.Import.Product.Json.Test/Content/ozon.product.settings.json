@@ -1,0 +1,31 @@
+{
+  "PropertyNodePathes": {
+    "ProductType": [
+      "widgetStates/%Characteristics%/.value/characteristics/[id=Type_0]/values/[id=Type_0]/text",
+      "widgetStates/webCharacteristics%/.value/characteristics/[.short]/[key=Type]/values/[key=Type_0]/text"
+    ],
+    "Name": [
+      "widgetStates/webProductHeading%/.value/title",
+      "widgetStates/webCharacteristics%/.value/productTitle"
+    ],
+    "Description": [
+      "seo/script/[.innerHTML]/.value/[.description]",
+      "widgetStates/webDescription%/.value/richAnnotation"
+    ],
+    "ItemId": [
+      "pageInfo/analyticsInfo/sku"
+    ],
+    "Components": [
+      "widgetStates/webDescription%/.value/characteristics/[title=Состав]/content"
+    ],
+    "Country": [
+      "widgetStates/webCharacteristics%/.value/characteristics/[.short]/[key=Country]/values/[key=Country_0]/text"
+    ],
+    "Purposes": [
+      "widgetStates/webCharacteristics%/.value/characteristics/[.short]/[key=SkinDestination]/values/text"
+    ],
+    "Articul": [
+      "pageInfo/analyticsInfo/sku"
+    ]
+  }
+}

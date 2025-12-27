@@ -26,7 +26,7 @@ public class JsonElementHelper : IElementHelper<JsonElement>
 
     public bool IsEmpty(JsonElement element)
     {
-       return element.GetPropertyCount() == 0;
+       return !element.EnumerateObject().Any();
     }
 
     public bool TryGetByProperty(JsonElement element, string property, out JsonElement result)

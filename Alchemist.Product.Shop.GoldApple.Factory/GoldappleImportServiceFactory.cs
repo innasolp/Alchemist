@@ -6,6 +6,7 @@ using Import.Settings.Interfaces;
 using Alchemist.Product.Shop.GoldApple.ImportService;
 using Microsoft.Extensions.Logging;
 using Alchemist.Import.Settings.Product;
+using Alchemist.Import.Products.Service;
 
 namespace Alchemist.Product.Shop.GoldApple.Factory;
 
@@ -20,25 +21,31 @@ public class GoldappleImportServiceFactory(ILogger<GoldAppleImportService> logge
     protected override IImportService Create(ILogger logger,
         string name,
         IProductShopModel shopModel,
-        IProductShopImportSettings shopImportSettings, 
+        IProductShopImportSettings productShopImportSettings, 
         IProductItemHandler itemHandler, 
         ILoaderService loaderService,
     object? productLoadData = null,
     object? categoryLoadData = null)
     {
+        var importProductServiceOptions = new ImportProductServiceOptions
+        {
+            PageProductCount = productShopImportSettings.PageProductCount,
+            ProductLoadData = productLoadData,
+            CategoryLoadData = categoryLoadData,
+            ProductUrlFormatType = productShopImportSettings.ProductUrlFormatType,
+            CategoryUrlFormatType = productShopImportSettings.CategoryUrlFormatType
+        };
+
         return new GoldAppleImportService(logger as ILogger<GoldAppleImportService>,
              name,
             loaderService,
             shopModel.Url,
             shopModel.Categories,
             itemHandler,
-            shopImportSettings.ProductUrlFormat,
-            shopImportSettings.CategoryUrlFormat,
+            productShopImportSettings.ProductUrlFormat,
+            productShopImportSettings.CategoryUrlFormat,
             shopModel.Name,
-            productLoadData,
-            categoryLoadData,
-            shopImportSettings.ProductUrlFormatType,
-            shopImportSettings.CategoryUrlFormatType);
+            importProductServiceOptions);
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IImportSettings shopImportSettings)

@@ -5,7 +5,7 @@ using Import.Html;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Import.Category.Test.Infrastructure;
+namespace Alchemist.Import.CategoryService.Test.Infrastructure;
 
 public class ShopImportCategoriesTimerServiceTest(ILogger<ShopImportCategoriesJsonTimerService> logger,
     string name,

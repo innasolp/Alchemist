@@ -4,7 +4,6 @@ using Import.Interfaces;
 using Import.Settings.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 using Import.Factory.Interfaces;
 using Import.Factory.Service;
 using Alchemist.Import.Settings.Category;
@@ -33,12 +32,12 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
         if (shopModel is not ICategoryShopModel categoryShopModel)
             throw new InvalidOperationException($"Invalid type {shopModel.GetType()}. Must be implementation of {typeof(ICategoryShopModel)}");
 
-        var loadOptionsService = (shopImportSettings.GetService(nameof(CategoryLoadOptions))?.Value) 
+        var loadOptionsService = shopImportSettings.GetService(nameof(CategoryLoadOptions)) 
             ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopModel.Name}");
-        var categoryLoadOptions = JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
+        var categoryLoadOptions = loadOptionsService.GetServiceValue<CategoryLoadOptions>();//  JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
         
-        var htmlSearchOptionsService = shopImportSettings.GetService(nameof(HtmlSearchFactoryOptions))?.Value;
-        var htmlSearchFactoryOptions = htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
+        var htmlSearchOptionsService = shopImportSettings.GetService(nameof(HtmlSearchFactoryOptions));
+        var htmlSearchFactoryOptions = htmlSearchOptionsService.GetServiceValue<HtmlSearchFactoryOptions>();// htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
 
         var htmlSearcher = htmlSearchFactoryOptions != null 
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)

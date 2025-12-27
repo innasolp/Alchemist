@@ -30,7 +30,7 @@ public class Product : IJsonOnDeserialized, IProductItem
 
     string[]? IProductItem.Components => WebDescription?.Components ?? WebCharacteristics?.Components;
 
-    string IProductItem.Brand => WebCharacteristics.Brand ?? WebSeller?.Name;
+    string IProductItem.Brand { get => WebCharacteristics.Brand ?? WebSeller?.Name; set {; } }
 
     string? IProductItem.Country => WebCharacteristics.Country;
 

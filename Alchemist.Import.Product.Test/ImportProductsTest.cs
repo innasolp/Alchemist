@@ -1,16 +1,18 @@
-﻿using Alchemist.Import.Product.Test.Infrastructure;
-using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Service;
+using Alchemist.Import.ProductService.Test.Infrastructure;
 using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Resources;
 using Xunit.Abstractions;
 
-namespace Alchemist.Import.Product.Test;
+namespace Alchemist.Import.ProductService.Test;
 
 public abstract class ImportProductsTest : ImportServiceTest<TestImportProductService<TestCategory, TestProductItem>, ILogger>
 {
+    private int _pageProductCount = 1000;
+
     protected ResourceManager ImportProductsResourceManager { get; }
 
     protected Mock<IProductShopModel> ProductShopModelMock { get; } = new ();
@@ -25,6 +27,8 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
         ProductShopModelMock.Setup(s => s.Categories).Returns([]); 
     }
 
+    protected void SetPageProductCount(int pageProductCount)=> _pageProductCount = pageProductCount;
+
     protected override TestImportProductService<TestCategory, TestProductItem> CreateService(string name)
     {
         return new TestImportProductService<TestCategory, TestProductItem>(
@@ -32,6 +36,7 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
             name,
              ProductShopModelMock.Object,
              LoaderMock.Object,
-             ProductItemHandlerMock.Object);
+             ProductItemHandlerMock.Object,
+             _pageProductCount);
     }
 }

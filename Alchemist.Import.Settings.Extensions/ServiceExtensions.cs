@@ -1,4 +1,5 @@
 ﻿using Import.Settings.Interfaces;
+using System.Text.Json;
 
 namespace Alchemist.Import.Settings.Extensions;
 
@@ -90,5 +91,20 @@ public static class ServiceExtensions
 
         value = jsonValue.Value["Value"].GetValue<string>();
         return true;
+    }
+
+    public static T GetServiceValue<T>(this IServiceSettings service)
+    {
+        var filePath = !string.IsNullOrEmpty(service.AssemblyPath) 
+            ? service.AssemblyPath 
+            : !string.IsNullOrEmpty(service.ServiceProviderPath) ? service.ServiceProviderPath : string.Empty;
+        
+        if(!string.IsNullOrEmpty(filePath))
+        {
+            var text = File.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<T>(text);
+        }
+
+        return JsonSerializer.Deserialize<T>(service.Value);
     }
 }

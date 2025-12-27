@@ -1,5 +1,4 @@
 ﻿using Alchemist.BackgroundTaskQueue;
-using Alchemist.Common;
 using Import.Interfaces;
 using Message.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -9,9 +8,9 @@ namespace Alchemist.Product.ImportItemHandler;
 internal abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue backgroundTaskQueue, 
     IMessageSender messageSender, 
     string processMethodName) 
-    : IItemHandler<T, ResultStatus>
+    : Import.IItemHandler<T, ResultStatus>
 {
-    public event AsyncEventHandler<ItemProcessEventArgs<T, ResultStatus>> ItemProcessed;
+    public event Import.AsyncEventHandler<Import.ItemProcessEventArgs<T, ResultStatus>> ItemProcessed;
 
     private readonly IBackgroundTaskQueue _backgroundTaskQueue = backgroundTaskQueue;
 
@@ -50,7 +49,7 @@ internal abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue back
 
     private async Task InvokeItemProcessedAsync(T item, ResultStatus itemProcessStatus, CancellationToken cancellationToken = default)
     {
-        var task = ItemProcessed?.Invoke(this, new ItemProcessEventArgs<T, ResultStatus>(item, itemProcessStatus, cancellationToken));
+        var task = ItemProcessed?.Invoke(this, new Import.ItemProcessEventArgs<T, ResultStatus>(item, itemProcessStatus, cancellationToken));
         if (task != null) await task;
     }
 

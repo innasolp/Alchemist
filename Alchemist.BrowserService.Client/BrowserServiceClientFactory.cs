@@ -42,7 +42,7 @@ public class BrowserServiceClientFactory : ILoaderServiceFactory
             ?? throw new InvalidDataException($"Web loader factory for type {webLoaderSettings.ImplementationTypeName} not found");
 
         var requestHeadersService = shopImportSettings.GetRequestHeaders<IServiceSettings>();
-        var requestHeaders = requestHeadersService != null ? JsonSerializer.Deserialize<RequestHeaders>(requestHeadersService.Value) : null ;
+        var requestHeaders = requestHeadersService.GetServiceValue<RequestHeaders>();
 
         return new BrowserServiceClient(
             _httpClient,

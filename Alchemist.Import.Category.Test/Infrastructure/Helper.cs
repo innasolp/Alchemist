@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Category.Test.Infrastructure;
+﻿namespace Alchemist.Import.CategoryService.Test.Infrastructure;
 
 public static class Helper
 {
