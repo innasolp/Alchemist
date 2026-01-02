@@ -37,7 +37,7 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
         var categoryLoadOptions = loadOptionsService.GetServiceValue<CategoryLoadOptions>();//  JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
         
         var htmlSearchOptionsService = shopImportSettings.GetService(nameof(HtmlSearchFactoryOptions));
-        var htmlSearchFactoryOptions = htmlSearchOptionsService.GetServiceValue<HtmlSearchFactoryOptions>();// htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
+        var htmlSearchFactoryOptions = htmlSearchOptionsService?.GetServiceValue<HtmlSearchFactoryOptions>();// htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
 
         var htmlSearcher = htmlSearchFactoryOptions != null 
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)

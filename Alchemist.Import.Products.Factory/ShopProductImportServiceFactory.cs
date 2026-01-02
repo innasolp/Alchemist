@@ -30,10 +30,10 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
             throw new InvalidDataException($"Invalid shop model type {shopModel.GetType().Name}");
         
         var categoryDataService = shopImportSettings.GetService("CategoryRequestOptions");
-        var categoryData = categoryDataService?.GetServiceValue<RequestOptions>();
+        var categoryData = categoryDataService?.GetServiceValue<ImportRequestOptions>();
 
         var productDataService = shopImportSettings.GetService("ProductRequestOptions");
-        var productData = productDataService?.GetServiceValue<RequestOptions>();
+        var productData = productDataService?.GetServiceValue<ImportRequestOptions>();
 
         return Create(logger, name,
             productShopModel, productShopImportSettings,

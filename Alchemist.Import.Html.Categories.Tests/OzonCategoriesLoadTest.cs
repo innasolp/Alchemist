@@ -49,7 +49,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
 
         var token = new CancellationTokenSource();
 
-        using var stream = await webLoader.LoadFromUrl(_shopUrl, requestHeaders);
+        using var stream = await webLoader.LoadFromUrl(_shopUrl, new RequestOptions { Headers = requestHeaders });
         var values = await htmlSearcher.GetValues(stream, new HtmlSearchOptions
         {
             Tag = "div",
@@ -74,7 +74,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
 
         var ((document, requestHeaders), timespan) = await TimeWatchHelper.ExecuteTaskWithTimeWatchAsync(async () =>
         {
-            var cookies = await _browserDataLoader.LoadCookies();
+            var cookies = await _browserDataLoader.LoadCookies("www.ozon.ru");
             var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersStandartFileName, cookies);
             return (await GetJsonDocumentAsync(webLoader, requestHeaders), requestHeaders);
         });
@@ -106,7 +106,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
             foreach (var parentCategory in parentCategories)
             {
                 var url = string.Format(_shopCategoryApiUrlFormat, parentCategory.Id);
-                using var categoryStream = await webLoader.LoadFromUrl(url, requestHeaders);
+                using var categoryStream = await webLoader.LoadFromUrl(url, new RequestOptions { Headers = requestHeaders });
 
                 var categoriesJson = await JsonDocument.ParseAsync(categoryStream);
 

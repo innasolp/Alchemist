@@ -1,12 +1,10 @@
-﻿using System.Text.Json.Nodes;
-
-namespace Alchemist.Import.Settings;
+﻿namespace Alchemist.Import.Settings;
 
 public class RequestOptions
 {
-    public string? HttpMethod { get; set; } = "GET";
+    public string? RouteUrlFormat { get; set; } = null;
 
-    public JsonObject? Data { get; set; }
+    public int? TimeouteMillseconds { get; set; } = null;
 
-    public string? ApiUrlFormat { get; set; }
+    public Dictionary<string, object>? Parameters { get; set; } = null;
 }

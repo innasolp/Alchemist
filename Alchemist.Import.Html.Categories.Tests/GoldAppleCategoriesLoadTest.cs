@@ -51,10 +51,10 @@ public class GoldAppleCategoriesLoadTest
             await InitializeAsync();
 
         
-        var cookies = await _dataLoader.LoadCookies();
+        var cookies = await _dataLoader.LoadCookies("www.goldapple.ru");
         var requestHeaders = HeadersHelper.LoadHeadersForRequest(requestHeadersFileName, cookies);
 
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, requestHeaders);
+        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, new RequestOptions { Headers = requestHeaders });
         var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
         stream.Close();       
 

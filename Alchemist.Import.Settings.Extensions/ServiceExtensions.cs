@@ -95,9 +95,12 @@ public static class ServiceExtensions
 
     public static T GetServiceValue<T>(this IServiceSettings service)
     {
+        if(!string.IsNullOrEmpty(service.Value))
+            return JsonSerializer.Deserialize<T>(service.Value);
+
         var filePath = !string.IsNullOrEmpty(service.AssemblyPath) 
             ? service.AssemblyPath 
-            : !string.IsNullOrEmpty(service.ServiceProviderPath) ? service.ServiceProviderPath : string.Empty;
+            : service.ServiceProviderPath;
         
         if(!string.IsNullOrEmpty(filePath))
         {
@@ -105,6 +108,6 @@ public static class ServiceExtensions
             return JsonSerializer.Deserialize<T>(text);
         }
 
-        return JsonSerializer.Deserialize<T>(service.Value);
+        return default;
     }
 }

@@ -57,7 +57,7 @@ public class PlaywrightFirefoxTest : ProductShopTest
 
         await webLoader.Start();
 
-        var stream = await webLoader.LoadFromUrl(_categoryUrl, requestHeaders, HttpMethod.Post, content);
+        var stream = await webLoader.LoadFromApiRequestAsync(_categoryUrl,HttpMethod.Post, requestHeaders, content);
         var category = await JsonSerializer.DeserializeAsync<CategoryProducts>(stream);
         stream.Close();
 
@@ -82,7 +82,7 @@ public class PlaywrightFirefoxTest : ProductShopTest
 
         await webLoader.Start();
 
-        var stream = await webLoader.LoadFromUrl(_productUrl, requestHeaders);
+        var stream = await webLoader.LoadFromApiRequestAsync(_productUrl, headers: requestHeaders);
         var productData = await JsonSerializer.DeserializeAsync<ProductData>(stream);
         stream.Close();
 

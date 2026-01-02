@@ -7,54 +7,7 @@
     "Perfomance": true,
     "Services": {
       "RequestHeaders": {
-        "Value": {
-
-          "Headers": {
-
-            "Accept": "application/json",
-
-            "Accept-encoding": "gzip, deflate, br, zstd",
-
-            "Accept-language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-
-            "Connection": "keep-alive",
-
-            "Content-Type": "application/json",
-
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
-
-          },
-
-          "Cookies": [
-            "__Secure-ab-group",
-            "__Secure-access-token",
-            "__Secure-ETC",
-            "__Secure-ext_xcid",
-            "__Secure-refresh-token",
-            "__Secure-user-id",
-            "abt_data",
-            "ADDRESSBOOKBAR_WEB_CLARIFICATION",
-            "rfuid"
-          ],
-
-          "DefaultCookies": {
-            "guest": "true",
-            "__Secure-ab-group": "20",
-            "is_cookies_accepted": "true",
-            "x-o3-app-name": "dweb_client",
-            "x-o3-app-version": "release_12-11-2024_e50d834c",
-            "x-o3-manifest-version": "e50d834cbd00d3f5a18cfc32f4f848c27cca4e72",
-            "x-o3-parent-requestid": "ae0f8c40c4a37c877ef01c18bea18bde"
-          },
-
-          "CookieIndex": 5,
-          "CookiePrefixLength": 0
-        }
+        "AssemblyPath": "ImportSettings/ozon.product.chromium.requestheaders.json"
       },
 
       "ImportService": {
@@ -63,17 +16,13 @@
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
       "BrowserDataLoader": {
-        "ImplementationTypeName": "FirefoxStandart",
-        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
-      },
-      "BrowserLauncher": {
-        "ImplementationTypeName": "FirefoxStandart",
-        "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
+        "ImplementationTypeName": "ChromiumPatchright",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Playwright\\ChromiumPatchright"
       },
       "WebLoader": {
-        "ImplementationTypeName": "Firefox",
-        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
-        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
+        "ImplementationTypeName": "ChromiumPatchright",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright",
+        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
       },
       "CategoryLoadOptions": {
         "ServiceTypeName": "CategoryLoadOptions",

@@ -4,25 +4,16 @@ using Moq;
 namespace Alchemist.BrowserService.UnitTest;
 
 internal class BrowserDataLoaderMock : Mock<IBrowserDataLoader>, IBrowserDataLoader
-{
-    public async Task<int> ClearAllCookies()
+{    
+    public async Task<int> ClearCookiesForHost(string host, CancellationToken cancellationToken = default)
     {
-        return await Object.ClearAllCookies();
+        return await Object.ClearCookiesForHost(host, cancellationToken);
     }
 
-    public async Task<int> ClearCookiesForHost(string host)
+    public async Task<IEnumerable<ICookieData>> LoadCookies(string host, bool distinct = true, CancellationToken cancellationToken = default,
+        params object[] parameters)
     {
-        return await Object.ClearCookiesForHost(host);
-    }
-
-    public async Task<IEnumerable<ICookieData>> LoadCookies(string host, bool distinct = true)
-    {
-       return await Object.LoadCookies(host, distinct);
-    }
-
-    public async Task<IEnumerable<ICookieData>> LoadCookies()
-    {
-        return await Object.LoadCookies();
+       return await Object.LoadCookies(host, distinct, cancellationToken, parameters);
     }
 }
 
