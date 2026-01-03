@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings;
+﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Alchemist.Test.SettingsAPIFactory;

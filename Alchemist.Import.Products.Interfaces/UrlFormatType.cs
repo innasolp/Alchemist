@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alchemist.Import.Settings;
+namespace Alchemist.Import.Products.Interfaces;
 
 [JsonConverter(typeof(JsonStringEnumConverter<UrlFormatType>))]
 public enum UrlFormatType

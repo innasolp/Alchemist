@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings;
+﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Product;
 using Alchemist.Product.Interfaces;
 using System.ComponentModel.DataAnnotations;
