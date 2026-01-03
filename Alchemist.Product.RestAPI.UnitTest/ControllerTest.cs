@@ -47,5 +47,5 @@ public abstract class ControllerTest<TController, TEntity>
         _testOutputHelper.WriteLine("Sender started.");
     }
 
-    private async Task Send<T>(T message, string eventName) { }
+    private async Task Send<T>(T message, string eventName, CancellationToken cancellationToken = default) { }
 }

@@ -54,13 +54,15 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
             });
 
         WebAppFactory.StartGrpc();
-
+        
         var messageReceiver = WebAppFactory.Services.GetRequiredService<IMessageReceiver>();
         var connectionResetEvent = SetAutoResetEventOnConnectionChanged(messageReceiver);
         if (!messageReceiver.IsConnected)        
             await connectionResetEvent.WaitAsync();
 
-        var eventName = WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>();
+        await Task.Delay(1000);
+
+        var eventName = WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>(); 
         var testSender = WebAppFactory.CreateTestSender();
         await testSender.Start();
         await testSender.Send(productMessageMock.Object, eventName);
@@ -69,7 +71,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
 
         _alchemyRepositoryMock.Verify(r => r.GetShopByName(productMessageMock.Object.ShopName));
 
-        await Task.Delay(1000);
+        await Task.Delay(500);
 
         _alchemyRepositoryMock.Verify(r => r.GetShopProductByShopAndItemId(shop.Id, productMessageMock.Object.ShopProduct.ItemId));
 

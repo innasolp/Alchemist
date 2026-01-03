@@ -63,9 +63,9 @@ public class SettingsControllerGetTest
     [Fact]
     public async Task GetShopSettingsByShopIdReturnsBadRequestWhenShopIdIsInvalidAsync()
     {
-        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _settingsController.GetShopSettingsByShopId(0, 1));
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _settingsController.GetShopSettingsByShopId(-2, 1));
         var badRequest = Assert.IsType<BadRequest<int>>(result.Result);
-        Assert.Equal(0, badRequest.Value);
+        Assert.Equal(-2, badRequest.Value);
     }
     
     [Fact]

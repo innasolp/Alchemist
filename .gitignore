@@ -14,7 +14,8 @@
 
 *.tmp
 
-*.user
+*.csproj.user
+*.esproj.user
 
 
 */bin/debug

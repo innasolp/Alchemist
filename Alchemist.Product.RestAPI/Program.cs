@@ -42,7 +42,6 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopController>>();
 builder.Services.AddSingleton<InfoLogMiddleware<ShopController>>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopCategoryController>>();
-builder.Services.AddSingleton<InfoLogMiddleware<ShopCategoryController>>();
 
 builder.Services.AddProblemDetails();
 
@@ -54,7 +53,6 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseMiddleware<InfoLogMiddleware<ShopController>>();
-app.UseMiddleware<InfoLogMiddleware<ShopCategoryController>>();
 
 (app as IHost).UsePerfomanceCounters();
 

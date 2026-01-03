@@ -20,8 +20,6 @@
     <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

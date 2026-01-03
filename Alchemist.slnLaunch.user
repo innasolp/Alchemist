@@ -1,0 +1,146 @@
+[
+  {
+    "Name": "Import background",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.GrpcService\\Alchemist.Product.GrpcService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.Background.Service\\Alchemist.Product.Import.Background.Service.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.DBService\\Alchemist.Product.Import.DBService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.BrowserService\\Alchemist.BrowserService.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Import Webapp",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.WebApp\\Alchemist.Product.Import.WebApp.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Shop WebApp",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
+  },
+  {
+    "Name": "WebApps",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.WebApp\\Alchemist.Product.Import.WebApp.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https_api"
+      }
+    ]
+  },
+  {
+    "Name": "Settings WebApp",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https_api"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.ImportSettingsWebApp\\Alchemist.Product.ImportSettingsWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
+  },
+  {
+    "Name": "Web App",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https_api"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.ImportSettingsWebApp\\Alchemist.Product.ImportSettingsWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "httpsapi"
+      },
+      {
+        "Path": "Alchemist.Product.WebApp\\Alchemist.Product.WebApp.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

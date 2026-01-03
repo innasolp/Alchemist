@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -10,10 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="shopProducts.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    <Content Include="GoldApple.Headers.Firefox.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
@@ -22,13 +20,15 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
-    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="WebLoader.Common" Version="1.0.0.3" />
+	  <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.5" />
+	  <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.5" />
+	  <PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.3" />
+	  <PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.2" />
+	  <PackageReference Include="WebLoader.HttpClient" Version="1.0.1.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Test.Model\Alchemist.Import.Settings.Test.Model.csproj" />
+    <ProjectReference Include="..\Product.Import.Test\Product.Import.Test.csproj" />
   </ItemGroup>
 
   <ItemGroup>
