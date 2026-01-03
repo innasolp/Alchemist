@@ -1,0 +1,25 @@
+{
+  "PropertyNodePathes": {
+    "TotalCount": [
+      "data/productCount"
+    ],
+    "CategoryProductItems": [
+      "data/cards"
+    ]
+  },
+  "ItemJsonSettings": {
+    "CategoryProductItems": {
+      "PropertyNodePathes": {
+        "Name": [
+          "product/name"
+        ],
+        "Id": [
+          "product/itemId"
+        ],
+        "ItemUrl": [ "product/url" ],
+        "Price": [ "product/price/actual/amount" ],
+        "Currency": [ "product/price/actual/currency" ]
+      }
+    }
+  }
+}

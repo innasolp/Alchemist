@@ -1,0 +1,33 @@
+{
+  "PropertyNodePathes": {
+    "ProductType": [
+      "data/shortDescription",
+      "data/productType"
+    ],
+    "Brand": [
+      "data/brand"
+    ],
+    "Name": [
+      "data/name"
+    ],
+    "Description": [
+      "data/productDescription/content",
+      "data/productDescription/[type=Description]/content"
+    ],
+    "ItemId": [
+      "data/itemId"
+    ],
+    "Components": [
+      "data/productDescription/[text=Состав]/content"
+    ],
+    "Country": [
+      "data/productDescription/[type=Brand]/subtitle"
+    ],
+    "Purposes": [
+      "data/productDescription/[type=Description]/attributes/[key=назначение]/value"
+    ],
+    "Articul": [
+      "data/itemId"
+    ]
+  }
+}

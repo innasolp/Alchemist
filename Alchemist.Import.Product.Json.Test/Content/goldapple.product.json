@@ -1,0 +1,306 @@
+{
+  "data": {
+    "id": "19000327142",
+    "itemId": "19000327142",
+    "name": "AGE LUMINA",
+    "mainVariantItemId": "19000327142",
+    "type": "Product",
+    "isAdult": false,
+    "configurable": false,
+    "brand": "Ten Science",
+    "brandUrl": "/brands/ten-science",
+    "productType": "Очищающая крем-маска для лица",
+    "breadcrumbs": [
+      {
+        "text": "Главная",
+        "href": "/"
+      },
+      {
+        "text": "уход",
+        "href": "/uhod"
+      },
+      {
+        "text": "космецевтика",
+        "href": "/uhod/kosmecevtika"
+      },
+      {
+        "text": "очищение и отшелушивание",
+        "href": "/uhod/kosmecevtika/ochischenie-i-otshelushivanie"
+      }
+    ],
+    "brandCategoryId": 1000144094,
+    "scope": "product",
+    "beautiesPrelaunch": false,
+    "brandZoneInfo": { "isBrandZone": false },
+    "productDescription": [
+      {
+        "type": "Description",
+        "value": "Description_0",
+        "text": "Описание",
+        "title": "TEN SCIENCE AGE LUMINA",
+        "subtitle": "артикул: 19000327142",
+        "content": "<p>Мягкая и шелковистая текстура, сочетающая в себе 2 формулы: очищающий крем и маску. Для глубокого очищения и еженедельного ухода за кожей лица, оказывает мягкое отшелушивающее действие, делает кожу увлажненной, заметно более яркой и упругой, а цвет лица ровным. </p>\n<p>Богатый состав: <br />\nКомплекс отборных гликолевой, фитиновой и эллаговой кислот, цветочных АНА-кислот, витаминов А+С+Е;<br />\nЭксклюзивный морской протеин, обладающий омолаживающим действием; <br />\nЧайное масло, Масло ши.</p>",
+        "attributes": [
+          {
+            "key": "тип продукта",
+            "value": "маски для лица"
+          },
+          {
+            "key": "для кого",
+            "value": "универсально"
+          },
+          {
+            "key": "тип масок",
+            "value": "кремовые"
+          },
+          {
+            "key": "назначение",
+            "value": "очищение, отшелушивание, выравнивание тона, увлажнение, питание, против признаков старения"
+          },
+          {
+            "key": "тип кожи",
+            "value": "для всех типов кожи"
+          },
+          {
+            "key": "область применения",
+            "value": "лицо, шея и декольте"
+          },
+          {
+            "key": "объём",
+            "value": "250 мл"
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "value": "Text_1",
+        "text": "Применение",
+        "title": "",
+        "subtitle": "",
+        "content": "<p>Как очищающее средство: <br />\nПосле снятия макияжа с глаз нанесите на лицо, шею и область декольте и массируйте в течение нескольких минут, затем смойте теплой водой. </p>\n<p>В качестве маски: <br />\nОдин или два раза в неделю наносите ровным слоем на лицо, шею и область декольте. Оставьте на 10-15 минут, затем смойте теплой водой.</p>"
+      },
+      {
+        "type": "Text",
+        "value": "Text_2",
+        "text": "Состав",
+        "title": "",
+        "subtitle": "",
+        "content": "Aqua (water), hydrogenated polyisobutene, glycerin, palmitic acid, stearic acid, peg-7 glyceryl cocoate, caprylic/capric triglyceride, triethanolamine, ci 77891 (titanium dioxide), butyrospermum parkii (shea) butter, cetearyl alcohol, kaolin, niacinamide, phenoxyethanol, ceteareth-20, acrylates/c10-30 alkyl acrylate crosspolymer, polysorbate 20, retinyl palmitate, tocopheryl acetate, helianthus annuus (sunflower) seed oil, mica, glycolic acid, ethylhexylglycerin, hibiscus sabdariffa flower extract, ascorbyl tetraisopalmitate, ci 77163 (bismuth oxychloride), sodium dehydroacetate, phytic acid, pseudoalteromonas ferment extract, camellia sinensis leaf extract, ellagic acid, salicylic acid, bht, sodium hydroxide, ascorbyl palmitate."
+      },
+      {
+        "type": "Brand",
+        "value": "Brand_3",
+        "text": "Бренд",
+        "title": "Ten Science",
+        "subtitle": "Италия",
+        "content": "<p>TEN SCIENCE - ТЕХНОЛОГИИ И ПРИРОДА ОБЪЕДИНЯЮТСЯ ДЛЯ НОВОЙ ФОРМУЛЫ НАУЧНО УЛУЧШЕННОЙ КРАСОТЫ.</p>\n<p>Технологии и природа лежат в основе всех формул средств для лица, благодаря тесному взаимодействию между самыми передовыми технологическими комплексами и самыми эффективными и ценными натуральными активными ингредиентами, которые можно найти на земле и в море. <br />\nНаши ингредиенты экологически чистые: получены исключительно с помощью технологических процессов, которые сохраняют экосистему и основаны на экологической устойчивости, с полным уважением к природе. <br />\nВсе продукты TEN SCIENCE гипоаллергенны, дерматологически протестированы и прошли строгие клинические испытания. <br />\nTEN SCIENCE предлагает решения с конкретными результатами, которые видны и измеримы. <br />\nВыбирая TEN SCIENCE, вы получаете комплексный, понятный и надежный подход к красоте. <br />\nЭто качество, эффективность и надежность трансформируются в безопасность: все продукты TEN SCIENCE гипоаллергенны, дерматологически протестированы и прошли строгие клинические испытания.</p>",
+        "links": [
+          {
+            "title": "Перейти в каталог бренда",
+            "url": "/brands/ten-science"
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "value": "Text_4",
+        "text": "Дополнительная информация",
+        "title": "",
+        "subtitle": "",
+        "content": "страна происхождения<br>Италия<br><br>изготовитель:<br>BEAUTY & BUSINESS s.p.a.<br><br>"
+      }
+    ],
+    "attributes": {
+      "units": {
+        "label": "объём",
+        "unit": "мл",
+        "options": [
+          {
+            "value": "250",
+            "text": "250",
+            "image": null
+          }
+        ]
+      }
+    },
+    "attributesSelectedDefault": {
+      "units": "250",
+      "colors": ""
+    },
+    "variants": [
+      {
+        "itemId": "19000327142",
+        "attributesValue": {
+          "units": "250",
+          "colors": ""
+        },
+        "imageUrls": [
+          {
+            "url": "https://pcdn.goldapple.ru/p/p/19000327142/web/696d674d61696e5064708ddc59c8f08433b${screen}.${format}",
+            "format": [ "webp", "jpg" ],
+            "screen": [ "fullhd" ]
+          },
+          {
+            "url": "https://pcdn.goldapple.ru/p/p/19000327142/web/696d67416464315064708ddc59c8f1220b1${screen}.${format}",
+            "format": [ "webp", "jpg" ],
+            "screen": [ "fullhd" ]
+          },
+          {
+            "url": "https://pcdn.goldapple.ru/p/p/19000327142/web/696d67416464325064708ddc59c8f08c7a7${screen}.${format}",
+            "format": [ "webp", "jpg" ],
+            "screen": [ "fullhd" ]
+          },
+          {
+            "url": "https://pcdn.goldapple.ru/p/p/19000327142/web/696d67416464335064708ddc59c8f0caa7b${screen}.${format}",
+            "format": [ "webp", "jpg" ],
+            "screen": [ "fullhd" ]
+          }
+        ],
+        "url": "/19000327142-age-lumina",
+        "inStock": true,
+        "dolyameInfo": {
+          "minPrice": {
+            "currency": "RUB",
+            "amount": 1000,
+            "denominator": 1
+          },
+          "maxPrice": {
+            "currency": "RUB",
+            "amount": 70000,
+            "denominator": 1
+          },
+          "landingPageUrl": "https://goldapple.ru/bnpl?webview=1"
+        },
+        "dolyame": [
+          {
+            "currency": "RUB",
+            "amount": 2180,
+            "denominator": 1
+          },
+          {
+            "currency": "RUB",
+            "amount": 2180,
+            "denominator": 1
+          },
+          {
+            "currency": "RUB",
+            "amount": 2180,
+            "denominator": 1
+          },
+          {
+            "currency": "RUB",
+            "amount": 2180,
+            "denominator": 1
+          }
+        ],
+        "needOnlineConsultation": false,
+        "hasSubscription": false,
+        "price": {
+          "regular": {
+            "currency": "RUB",
+            "amount": 8720,
+            "denominator": 1
+          },
+          "loyalty": {
+            "currency": "RUB",
+            "amount": 7848,
+            "denominator": 1
+          },
+          "actual": {
+            "currency": "RUB",
+            "amount": 8720,
+            "denominator": 1
+          },
+          "old": {
+            "currency": "RUB",
+            "amount": 7848,
+            "denominator": 1
+          },
+          "viewOptions": {
+            "priceFrom": false,
+            "crossPrice": true,
+            "useDiscount": false,
+            "discountPercent": 10,
+            "type": "bestLoyalty"
+          }
+        },
+        "name": "AGE LUMINA",
+        "productBonuses": {
+          "bonuses": {
+            "total": {
+              "value": {
+                "amount": 78,
+                "denominator": 1,
+                "currency": "",
+                "decimalSeparator": ",",
+                "groupingSeparator": ""
+              }
+            }
+          }
+        },
+        "labels": [],
+        "tags": [],
+        "favourite": false
+      }
+    ],
+    "availableInOtherCountry": false,
+    "bubbles": [
+      {
+        "title": "Ten Science",
+        "imageUrl": {
+          "url": "https://pcdn.goldapple.ru/p/ci/68627c84d718d92793d99755/default/6369633638363237633834643731386439323739336439393735368ddb7cdcc7adf78${screen}.${format}",
+          "format": [ "webp", "png" ],
+          "screen": [ "fullhd" ]
+        },
+        "link": "/brands/ten-science",
+        "isAdult": false,
+        "bubbleCategoryId": 1000144094,
+        "categoryId": 1000142364,
+        "character": "TS",
+        "type": "brand"
+      },
+      {
+        "title": "очищение и отшелушивание Ten Science",
+        "imageUrl": {
+          "url": "https://pcdn.goldapple.ru/p/ci/66852bbe634b20020bb21c76/default/6369633636383532626265363334623230303230626232316337378dc9b4d3adb279c${screen}.${format}",
+          "format": [ "webp", "png" ],
+          "screen": [ "fullhd" ]
+        },
+        "link": "/uhod/kosmecevtika/ochischenie-i-otshelushivanie?brandobjectid=896346",
+        "isAdult": false,
+        "bubbleCategoryId": 1000142364,
+        "categoryId": 1000142364,
+        "character": "ОИ",
+        "type": "deepestCategoryBrand"
+      },
+      {
+        "title": "очищение и отшелушивание",
+        "imageUrl": {
+          "url": "https://pcdn.goldapple.ru/p/ci/66852bbe634b20020bb21c76/default/6369633636383532626265363334623230303230626232316337378dc9b4d3adb279c${screen}.${format}",
+          "format": [ "webp", "png" ],
+          "screen": [ "fullhd" ]
+        },
+        "link": "/uhod/kosmecevtika/ochischenie-i-otshelushivanie",
+        "isAdult": false,
+        "bubbleCategoryId": 1000142364,
+        "categoryId": 1000142364,
+        "character": "ОИ",
+        "type": "deepestCategory"
+      },
+      {
+        "title": "космецевтика",
+        "imageUrl": {
+          "url": "https://pcdn.goldapple.ru/p/ci/63ef40ffcf417f4278a5e3ca/default/6369633637646331303735363133383865616566323462386238378dd67ae9d67f3a3${screen}.${format}",
+          "format": [ "webp", "png" ],
+          "screen": [ "fullhd" ]
+        },
+        "link": "/uhod/kosmecevtika",
+        "isAdult": false,
+        "bubbleCategoryId": 1000006322,
+        "categoryId": 1000142364,
+        "character": "К",
+        "type": "wideCategory"
+      }
+    ]
+  }
+}

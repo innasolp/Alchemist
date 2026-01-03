@@ -15,6 +15,7 @@ public class Product : JsonItem, IProductItem
           { nameof(Country), typeof(string) },
           { nameof(Comment), typeof(string) },
           { nameof(ProductType), typeof(string) },
+          { nameof(Brand), typeof(string) },
           { nameof(Purposes), typeof(string[]) },
           { nameof(Articul), typeof(string[]) }
     });
@@ -43,7 +44,11 @@ public class Product : JsonItem, IProductItem
         set => SetPropertyValue(nameof(Components), value);
     }
 
-    public string Brand {get; set;}
+    public string? Brand
+    {
+        get => GetPropertyValue<string>(nameof(Brand));
+        set => SetPropertyValue(nameof(Brand), value);
+    }
 
     public string? Country
     {
