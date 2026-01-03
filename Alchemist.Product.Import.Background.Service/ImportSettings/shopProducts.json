@@ -65,12 +65,18 @@
     ],
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "GoldAppleImportService",
-        "AssemblyPath": "Import\\Products\\GoldApple"
+        "ImplementationTypeName": "ShopImportJsonCategoryProductsService",
+        "AssemblyPath": "Import\\Products\\Json"
       },
       "WebLoader": {
         "ImplementationTypeName": "Chromium",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "ProductJsonSettings": {
+        "AssemblyPath": "ImportSettings/goldapple.product.settings.json"
+      },
+      "CategoryJsonSettings": {
+        "AssemblyPath": "ImportSettings/goldapple.category.settings.json"
       },
       "CategoryRequestOptions": {
         "Value": {

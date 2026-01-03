@@ -1,0 +1,2994 @@
+{
+  "data": {
+    "url": "/uhod/uhod-za-licom/ochischenie-i-demakijazh",
+    "cardsCount": 5715,
+    "productCount": 5715,
+    "pagination": {
+      "nextPage": true,
+      "previousPage": true
+    },
+    "cards": [
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 1831,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 1281,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 1281,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 1831,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 30
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000424056",
+          "mainVariantItemId": "19000424056",
+          "name": "Turn-over 28 Advanced Rich",
+          "productType": "Очищающий крем для лица",
+          "type": "Product",
+          "brand": "ISA Knox",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000424056/web/696d674d61696e5f32316138656565383238663534383332616634336330396336343064663263388ddea2ecf25685e${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000424056/web/696d67416464315f33333831633566373733643334653637613231366137336233633962623163358de46492627d242${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "200" ],
+              "currentUnitValue": "200",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "30%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000424056-turn-over-28-advanced-rich",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 457,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 457,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 457,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 460,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 4900,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 3920,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 3920,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 4900,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 20
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000399562",
+          "mainVariantItemId": "19000399562",
+          "name": "Hydro-aid relaxing water",
+          "productType": "Очищающий лосьон для лица",
+          "type": "Product",
+          "brand": "likedew",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000399562/web/696d674d61696e8ddc5d0adaf4a32${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000399562/web/696d67416464318ddc5d0adfbeb30${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000399562/web/696d67416464328ddc5d0adafd2b3${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000399562/web/696d67416464338ddc5d0adaf6bd6${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "100" ],
+              "currentUnitValue": "100",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "20%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000399562-hydro-aid-relaxing-water",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 1225,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 1225,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 1225,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 1225,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 893,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 660,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 660,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 893,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 26
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000368681",
+          "mainVariantItemId": "19000368681",
+          "name": "Malinka",
+          "productType": "Энзимная пудра",
+          "type": "Product",
+          "brand": "THE U",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000368681/web/696d674d61696e5f65303235353834343264303334303664616261366636353830356135356662348dde142030219ec${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000368681/web/696d67416464315f32376561353561643838356234303338393330303564303961333661393737348dde1420ade92ec${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000368681/web/696d67416464325f64396435393335623034623534333138386538616636346539356466666236328dde1421290a58c${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000368681/web/696d67416464335f63623230666532663130323934663931393666393639336165616262656432638dde1421afa9c80${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "50" ],
+              "currentUnitValue": "50",
+              "name": "г"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "26%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            },
+            {
+              "id": "hit",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f686974/6c6162656c3634633238366566316131666231663031383937323134338db8eb27234c6d8.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000368681-malinka",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.7,
+            "reviewsCount": 718
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 579,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 272,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 272,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 579,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 53
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000112878",
+          "mainVariantItemId": "19000112878",
+          "name": "CALMING CICA TREE MICELLAR CLEANSING FOAM",
+          "productType": "Пенка для умывания",
+          "type": "Product",
+          "brand": "Neogen",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112878/web/696d674d61696e8ddc520cae0842c${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112878/web/696d67416464318ddc520caf38465${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112878/web/696d67416464328ddc520caf7d917${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112878/web/696d67416464338ddc520cad04d41${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "50" ],
+              "currentUnitValue": "50",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "53%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000112878-calming-cica-tree-micellar-cleansing-foam",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.5,
+            "reviewsCount": 153
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 1459,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 758,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 758,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 1459,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 48
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000012137",
+          "mainVariantItemId": "19000012137",
+          "name": "Stop-Acne Enzyme Powder",
+          "productType": "Энзимная Пудра для умывания с азелаиновой кислотой",
+          "type": "Product",
+          "brand": "ARAVIA Professional",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000012137/web/696d674d61696e8ddc48c98b8d419${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000012137/web/696d67416464318ddc48c983593be${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000012137/web/696d67416464328ddc48c985debd6${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000012137/web/696d67416464338ddc48c98503254${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "150" ],
+              "currentUnitValue": "150",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "48%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000012137-stop-acne-enzyme-powder",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.7,
+            "reviewsCount": 1518
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 364,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 364,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 364,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 367,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 1480,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 740,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 740,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 1480,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 50
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000429356",
+          "mainVariantItemId": "19000429356",
+          "name": "Calming Relief Gel Wash Off Pack",
+          "productType": "Очищающая гелевая маска для лица",
+          "type": "Product",
+          "brand": "Pyunkang Yul",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000429356/web/696d674d61696e5f32653136623034643433613934613431623262366136353266616435323339378dddf1f84d9bb7b${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000429356/web/696d67416464315f32616661643436393361353334393235616265363864663135343434393165388dddf1f90eba006${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000429356/web/696d67416464325f30323633333465663530393534613132386537656532346438386537333031668dddf1f9d18246d${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000429356/web/696d67416464335f33343038323738316537373334303938393762633265363264616463366130328dddf1fa9a49327${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000429356/web/696d67416464345f33336466303166333436373934376338393230363938643637353165383936388dddf1fb4f2acd2${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "100" ],
+              "currentUnitValue": "100",
+              "name": "г"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "50%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000429356-calming-relief-gel-wash-off-pack",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.8,
+            "reviewsCount": 13
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 370,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 370,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 370,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 370,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 226,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 135,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 135,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 226,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 40
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "16874400014",
+          "mainVariantItemId": "16874400014",
+          "name": "голубая очищающая",
+          "productType": "Глиняная маска для лица",
+          "type": "Product",
+          "brand": "Рецепты бабушки Агафьи",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/16874400014/web/696d674d61696e8ddc3dac224148f${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/16874400014/web/696d67416464318ddc3dac233eca3${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/16874400014/web/696d67416464328ddc3dac23f5c4d${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/16874400014/web/696d67416464338ddc3dac22c3084${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "100" ],
+              "currentUnitValue": "100",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "40%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            },
+            {
+              "id": "hit",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f686974/6c6162656c3634633238366566316131666231663031383937323134338db8eb27234c6d8.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/16874400014-golubaja-ochischajuschaja",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.7,
+            "reviewsCount": 1054
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 823,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 403,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 403,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 823,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 51
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19760305590",
+          "mainVariantItemId": "19760305590",
+          "name": "Oblepikha C-BERRICA",
+          "productType": "Очищающие пилинг-диски для идеальной кожи",
+          "type": "Product",
+          "brand": "Natura Siberica",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19760305590/web/696d674d61696e8ddc45194e25a39${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19760305590/web/696d67416464318ddc45194eb50f6${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19760305590/web/696d67416464328ddc45194d6e127${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19760305590/web/696d67416464338ddc45194e3c899${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "20" ],
+              "currentUnitValue": "20",
+              "name": "шт"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "51%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19760305590-oblepikha-c-berrica",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.6,
+            "reviewsCount": 430
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 3710,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 2597,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 2597,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 3710,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 30
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000327135",
+          "mainVariantItemId": "19000327135",
+          "name": "FACE ESSENTIALS",
+          "productType": "очищающее молочко для лица",
+          "type": "Product",
+          "brand": "Ten Science",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000327135/web/696d674d61696e8ddc59c86ec7a6f${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000327135/web/696d67416464318ddc59c86f36aca${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000327135/web/696d67416464328ddc59c86f25857${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000327135/web/696d67416464338ddc59c86fb3c36${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "200" ],
+              "currentUnitValue": "200",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "30%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000327135-face-essentials",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 927,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 927,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 927,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 929,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 973,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 447,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 447,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 973,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 54
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "89230500001",
+          "mainVariantItemId": "89230500001",
+          "name": "Hyaluronic",
+          "productType": "Пенка для умывания лица",
+          "type": "Product",
+          "brand": "LIBREDERM",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/89230500001/web/696d674d61696e8ddc3dc34ffdf6d${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/89230500001/web/696d67416464318ddc3dc350284fa${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/89230500001/web/696d67416464328ddc3dc352cd0fd${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/89230500001/web/696d67416464338ddc3dc3502f54a${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "160" ],
+              "currentUnitValue": "160",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "54%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            },
+            {
+              "id": "hit",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f686974/6c6162656c3634633238366566316131666231663031383937323134338db8eb27234c6d8.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/89230500001-gialuronovaja",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.7,
+            "reviewsCount": 671
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 2866,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 1433,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 1433,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 2866,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 50
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000121241",
+          "mainVariantItemId": "19000121241",
+          "name": "DER. CLEAR Purifying Cleansing Oil",
+          "productType": "Гидрофильное масло для лица",
+          "type": "Product",
+          "brand": "RNW",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000121241/web/696d674d61696e8ddc527794e30e6${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000121241/web/696d67416464318ddc5277949cae8${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000121241/web/696d67416464328ddc52779525802${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000121241/web/696d67416464338ddc5277950f5c4${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "200" ],
+              "currentUnitValue": "200",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "50%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000121241-der-clear-purifying-cleansing-oil",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.5,
+            "reviewsCount": 65
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "shortVideos": [
+            {
+              "videoUrl": {
+                "url": "https://vcdn.goldapple.ru/p/p/19000121241/s/680631642f22de9532b4b48c${screen}.${format}",
+                "format": [ "mp4" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "videoThumbnail": {
+                "url": "https://pcdn.goldapple.ru/p/p/19000121241/video/s/680631642f22de9532b4b48d${screen}.${format}",
+                "format": [ "webp", "jpg" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "position": 0
+            }
+          ],
+          "dolyame": [
+            {
+              "amount": 716,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 716,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 716,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 718,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 578,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 312,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 312,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 578,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 46
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000145149",
+          "mainVariantItemId": "19000145149",
+          "name": "vitamin c",
+          "productType": "Энзимная пудра для умывания",
+          "type": "Product",
+          "brand": "Likato Professional",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000145149/web/696d674d61696e8ddc535b4ff0041${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000145149/web/696d67416464315f39386530306537663234326534636261386634333761303338383336326430668de46d1a7205ae8${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000145149/web/696d67416464325f35656536646536363163363834613761623038633366343332666139613337388de46d19c16c228${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "120" ],
+              "currentUnitValue": "120",
+              "name": "г"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "46%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000145149-sensitive",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.6,
+            "reviewsCount": 1035
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 350,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 245,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 245,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 350,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 30
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000247289",
+          "mainVariantItemId": "19000247289",
+          "name": "Micellar water",
+          "productType": "Мицеллярная вода",
+          "type": "Product",
+          "brand": "La Fabrique",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000247289/web/696d674d61696e8ddc571b40e45ed${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "200" ],
+              "currentUnitValue": "200",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "30%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000247289-micellar-water",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 934,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 467,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 467,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 934,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 50
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000198817",
+          "mainVariantItemId": "19000198817",
+          "name": "Pure Cleansing Oil",
+          "productType": "Гидрофильное масло для снятия макияжа",
+          "type": "Product",
+          "brand": "Ma:nyo",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198817/web/696d674d61696e8ddc55cf9564632${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198817/web/696d67416464318ddc55cf97d1004${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198817/web/696d67416464328ddc55cf99765cc${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198817/web/696d67416464338ddc55cf95fe6e1${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "25" ],
+              "currentUnitValue": "25",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "50%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000198817-pure-cleansing-oil",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.1,
+            "reviewsCount": 219
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "shortVideos": [
+            {
+              "videoUrl": {
+                "url": "https://vcdn.goldapple.ru/p/p/19000198817/s/68ad73b3584906bd43ad3e0e${screen}.${format}",
+                "format": [ "mp4" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "videoThumbnail": {
+                "url": "https://pcdn.goldapple.ru/p/p/19000198817/video/s/68ad73b3584906bd43ad3e0f${screen}.${format}",
+                "format": [ "webp", "jpg" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "position": 0
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 1916,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 1226,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 1226,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 1916,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 36
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000431335",
+          "mainVariantItemId": "19000431335",
+          "name": "Soothing",
+          "productType": "Гель для умывания",
+          "type": "Product",
+          "brand": "Гельтек",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000431335/web/696d674d61696e5f66623566303862303934633834343266613037383363343764376238343865668ddd113a643667e${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000431335/web/696d67416464315f35643636313561303935386134646364393534353864616239346433396163378ddd113ae98c59f${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000431335/web/696d67416464325f34633063613066373563663734363065396230326633663436313266613338398ddd113b720ad09${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000431335/web/696d67416464335f31343136663235643663353734323731623434373065636563393433313232348ddd113bf4f63ff${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 2,
+              "values": [ "200", "390" ],
+              "currentUnitValue": "390",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "36%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000431335-soothing",
+          "configurable": true,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.8,
+            "reviewsCount": 329
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 479,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 479,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 479,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 479,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 747,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 515,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 515,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 747,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 31
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000113808",
+          "mainVariantItemId": "19000113808",
+          "name": "CLEANSING STORY Cucumber Deep Cleansing Foam",
+          "productType": "Очищающая пенка для умывания лица",
+          "type": "Product",
+          "brand": "Welcos",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000113808/web/696d674d61696e8ddc5176bc957ba${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000113808/web/696d67416464318ddc5176bd5a519${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000113808/web/696d67416464328ddc5176bdcb759${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000113808/web/696d67416464338ddc5176c6a74fb${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "120" ],
+              "currentUnitValue": "120",
+              "name": "г"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "31%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000113808-cleansing-story-foam-cleansing-cucumber",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.7,
+            "reviewsCount": 71
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "shortVideos": [
+            {
+              "videoUrl": {
+                "url": "https://vcdn.goldapple.ru/p/p/19000113808/s/67a1ea9e6d372aba05c20d16${screen}.${format}",
+                "format": [ "mp4" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "videoThumbnail": {
+                "url": "https://pcdn.goldapple.ru/p/p/19000113808/video/s/67a1ea9e6d372aba05c20d17${screen}.${format}",
+                "format": [ "webp", "jpg" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "position": 0
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 464,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 259,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 259,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 464,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 44
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "7100800002",
+          "mainVariantItemId": "7100800002",
+          "name": "Facemed+",
+          "productType": "Очищающая мицеллярная вода 3в1",
+          "type": "Product",
+          "brand": "Eveline",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/7100800002/web/696d674d61696e8ddc43e11660b3a${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "400" ],
+              "currentUnitValue": "400",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "44%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            },
+            {
+              "id": "hit",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f686974/6c6162656c3634633238366566316131666231663031383937323134338db8eb27234c6d8.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/7100800002-facemed",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.9,
+            "reviewsCount": 587
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 8900,
+              "denominator": 1
+            },
+            "loyalty": {
+              "currency": "RUB",
+              "amount": 8010,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 8010,
+              "denominator": 1
+            },
+            "old": null,
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 10
+            },
+            "hasLoyalty": true
+          },
+          "itemId": "19000261440",
+          "mainVariantItemId": "19000261440",
+          "name": "Purimask Scrubbing rebalancing mask",
+          "productType": "Себорегулирующая маска-скраб для лица",
+          "type": "Product",
+          "brand": "BEAUTY SPA NATURAL RESOURCES",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000261440/web/696d674d61696e8ddc5a27f9128dd${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000261440/web/696d67416464318ddc5a27f9f30b5${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000261440/web/696d67416464328ddc5a27f98c535${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000261440/web/696d67416464338ddc5a27fa26c8a${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "100" ],
+              "currentUnitValue": "100",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000261440-purimask",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 2225,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 2225,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 2225,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 2225,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 1265,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 1138,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 1138,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 1265,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 10
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000047568",
+          "mainVariantItemId": "19000047568",
+          "name": "Stellar Polish Peel",
+          "productType": "Рефил смываемой маски-скраба",
+          "type": "Product",
+          "brand": "OKOLO",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000047568/web/696d674d61696e8ddc4b92ded1dd0${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000047568/web/696d67416464318ddc4b92dec8f80${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000047568/web/696d67416464328ddc4b92decb2a6${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000047568/web/696d67416464338ddc4b92dee6124${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "50" ],
+              "currentUnitValue": "50",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "10%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000047568-stellar-polish-peel-refill",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.9,
+            "reviewsCount": 56
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 316,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 316,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 316,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 317,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 2848,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 1424,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 1424,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 2848,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 50
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000112864",
+          "mainVariantItemId": "19000112864",
+          "name": "REAL FRESH CLEANSING OIL GREEN TEA",
+          "productType": "Гидрофильное масло для лица",
+          "type": "Product",
+          "brand": "Neogen",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112864/web/696d674d61696e8ddc520c6bec841${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112864/web/696d67416464318ddc520c6bb1a90${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112864/web/696d67416464328ddc520c6bda226${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000112864/web/696d67416464338ddc520c6db4b45${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "285" ],
+              "currentUnitValue": "285",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "Fast del",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f466173742064656c/6c6162656c3633643133313839336330343263353230636561346462638dafed9dd294ecd.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            },
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "50%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000112864-real-fresh-cleansing-oil-green-tea",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.1,
+            "reviewsCount": 55
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "shortVideos": [
+            {
+              "videoUrl": {
+                "url": "https://vcdn.goldapple.ru/p/p/19000112864/s/6849463bcf2f8752c48fcc9f${screen}.${format}",
+                "format": [ "mp4" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "videoThumbnail": {
+                "url": "https://pcdn.goldapple.ru/p/p/19000112864/video/s/6849463bcf2f8752c48fcca0${screen}.${format}",
+                "format": [ "webp", "jpg" ],
+                "screen": [ "fullhd", "mobile" ]
+              },
+              "position": 0
+            }
+          ],
+          "dolyame": [
+            {
+              "amount": 712,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 712,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 712,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 712,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 2230,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 1784,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 1784,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 2230,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 20
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000449335",
+          "mainVariantItemId": "19000449335",
+          "name": "GREEN PEEL QUICK",
+          "productType": "Очищающие пэды для лица",
+          "type": "Product",
+          "brand": "MONDAY MUSEUM",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000449335/web/696d674d61696e5f66666439303066353038636534663239623037613737323533346565333764668ddff448d93eebd${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000449335/web/696d67416464315f30376663373637643665343534626132393832343765373335356636613764398de05a204027d9e${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000449335/web/696d67416464325f33383464656265616565393934626131626332353335396234396536613863338de05a1fbaa1f26${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000449335/web/696d67416464335f32313737363064646662633534323934383636656635636563376531376131398de05a1f1e90902${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "60" ],
+              "currentUnitValue": "60",
+              "name": "шт"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "20%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000449335-green-peel-quick",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 5,
+            "reviewsCount": 1
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 557,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 557,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 557,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 559,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 2220,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 1665,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 1665,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 2220,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 25
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000212656",
+          "mainVariantItemId": "19000212656",
+          "name": "ОСВЕТЛЯЮЩИЙ",
+          "productType": "Очищающий мусс для лица",
+          "type": "Product",
+          "brand": "Senso Naturale",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000212656/web/696d674d61696e8ddc5640a10d90d${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000212656/web/696d67416464318ddc5640a12c6b4${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "28" ],
+              "currentUnitValue": "28",
+              "name": "г"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "25%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            },
+            {
+              "id": "exclusive",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f6578636c7573697665/6c6162656c3634643635626533383633393863663730326431376330618db9a848bfd71f5.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000212656-osvetlausij",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 416,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 416,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 416,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 417,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 3156,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 2177,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 2177,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 3156,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 31
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000198832",
+          "mainVariantItemId": "19000198832",
+          "name": "Herb Cica Pack",
+          "productType": "Успокаивающая маска для лица",
+          "type": "Product",
+          "brand": "Ma:nyo",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198832/web/696d674d61696e8ddc57e0c5d6e1e${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198832/web/696d67416464318ddc57e0c66744f${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198832/web/696d67416464328ddc57e0c69255f${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000198832/web/696d67416464338ddc57e0c5eadd2${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "75" ],
+              "currentUnitValue": "75",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "31%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            },
+            {
+              "id": "hit",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f686974/6c6162656c3634633238366566316131666231663031383937323134338db8eb27234c6d8.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000198832-herb-green-cica-pack",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.6,
+            "reviewsCount": 33
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 789,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 789,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 789,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 789,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      },
+      {
+        "cardType": "product",
+        "cardSizeScreen": {
+          "fullhd": "S",
+          "tablet": "S",
+          "mobile": "S"
+        },
+        "product": {
+          "price": {
+            "regular": {
+              "currency": "RUB",
+              "amount": 1063,
+              "denominator": 1
+            },
+            "discount": {
+              "currency": "RUB",
+              "amount": 754,
+              "denominator": 1
+            },
+            "actual": {
+              "currency": "RUB",
+              "amount": 754,
+              "denominator": 1
+            },
+            "old": {
+              "currency": "RUB",
+              "amount": 1063,
+              "denominator": 1
+            },
+            "viewOptions": {
+              "priceFrom": true,
+              "crossPrice": false,
+              "useDiscount": false,
+              "discountPercent": 29
+            },
+            "hasLoyalty": false
+          },
+          "itemId": "19000315738",
+          "mainVariantItemId": "19000315738",
+          "name": "Barrier bubble",
+          "productType": "Пенка для умывания",
+          "type": "Product",
+          "brand": "THE U",
+          "imageUrls": [
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000315738/web/696d674d61696e8ddc593b25c2eb0${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000315738/web/696d67416464318ddc593b26a1cf8${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000315738/web/696d67416464328ddc593b260633f${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            },
+            {
+              "url": "https://pcdn.goldapple.ru/p/p/19000315738/web/696d67416464338ddc593b2700bdb${screen}.${format}",
+              "format": [ "webp", "jpg" ],
+              "screen": [ "fullhd" ]
+            }
+          ],
+          "favourite": false,
+          "attributes": {
+            "units": {
+              "count": 1,
+              "values": [ "150" ],
+              "currentUnitValue": "150",
+              "name": "мл"
+            },
+            "colors": {
+              "count": 0,
+              "values": [],
+              "name": ""
+            }
+          },
+          "labels": [
+            {
+              "id": "discount",
+              "group": "standard",
+              "backgroundColor": "#ba0c14",
+              "text": "29%",
+              "textColor": "#ffffff",
+              "textGravity": [ "bottom", "middle" ]
+            },
+            {
+              "id": "hit",
+              "group": "standard",
+              "resource": {
+                "resourceUrl": {
+                  "url": "https://pcdn.goldapple.ru/p/sl/5374616e646172645f686974/6c6162656c3634633238366566316131666231663031383937323134338db8eb27234c6d8.png",
+                  "format": [],
+                  "screen": []
+                },
+                "resourceType": "image"
+              }
+            }
+          ],
+          "isAdult": false,
+          "inStock": true,
+          "url": "/19000315738-barrier-bubble",
+          "configurable": false,
+          "needOnlineConsultation": false,
+          "availableInCountry": true,
+          "reviews": {
+            "rating": 4.7,
+            "reviewsCount": 831
+          },
+          "beautiesPrelaunch": false,
+          "hasSubscription": false,
+          "dolyame": [
+            {
+              "amount": 265,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 265,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 265,
+              "currency": "RUB",
+              "denominator": 1
+            },
+            {
+              "amount": 268,
+              "currency": "RUB",
+              "denominator": 1
+            }
+          ],
+          "scope": "product"
+        }
+      }
+    ]
+  }
+}

@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Content\goldapple.product.json" />
     <None Remove="Content\ozon.category.json" />
     <None Remove="Content\ozon.category.settings.json" />
     <None Remove="Content\ozon.product.full.json" />
@@ -17,6 +18,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Content\goldapple.category.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\goldapple.product.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\goldapple.product.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\goldapple.category.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\ozon.category.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

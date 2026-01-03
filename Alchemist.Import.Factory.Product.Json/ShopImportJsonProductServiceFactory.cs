@@ -1,7 +1,6 @@
 ﻿using Alchemist.Import.Factory.Products;
 using Alchemist.Import.Product.Json.Service;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Products.Json;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;
 using Import.Factory.Interfaces;
@@ -51,7 +50,7 @@ public class ShopImportJsonProductServiceFactory(ILogger<ShopImportJsonCategoryP
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource importSource, IImportSettings importSettings)
     {
-        if (logger is ILogger<ShopImportJsonCategoryProductsService<CategoryProducts, Import.Products.Json.Product>> serviceLogger)
+        if (logger is ILogger<ShopImportJsonCategoryProductsService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, importSource, importSettings) ?? serviceLogger;
         else
             throw new InvalidDataException(logger.GetType().FullName);
