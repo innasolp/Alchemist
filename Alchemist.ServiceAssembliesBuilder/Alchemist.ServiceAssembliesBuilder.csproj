@@ -15,7 +15,6 @@
 		<PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.2" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserLauncher.Firefox.Windows.DevEdition" Version="1.0.0.2" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserDataLoader.Firefox.DevEdition.Windows" Version="1.0.0.5" GeneratePathProperty="true" />
-		<PackageReference Include="BrowserDataLoader.Playwright.ChromiumPatchright" Version="1.0.0.0" GeneratePathProperty="true" />
 	</ItemGroup>
 
 	<Target Name="RemoveBrowserDataLoaderDir" BeforeTargets="Build">

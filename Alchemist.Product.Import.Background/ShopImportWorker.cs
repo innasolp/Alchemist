@@ -114,7 +114,7 @@ public class ShopImportWorker : BackgroundService
             if (!ShopModels.Any(s => s.Name == shopModel.Name))
                 ShopModels.Add(shopModel);
 
-            if (!TryGetImportService(newShopSettings.Name, shopImportSettings, shopModel, out var service)
+            if (!TryCreateImportService(newShopSettings.Name, shopImportSettings, shopModel, out var service)
                 || service is null) return;
 
             var guid = Guid.NewGuid();
@@ -172,12 +172,14 @@ public class ShopImportWorker : BackgroundService
         var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
         ShopModels.Add(shopModel);
 
-        if (!TryGetImportService(settingsKey, shopImportSettings, shopModel, out var shopImportService)
+        if (!TryCreateImportService(settingsKey, shopImportSettings, shopModel, out var shopImportService)
             || shopImportService is null)
             return;
 
         var guid = Guid.NewGuid();
         _servicesTokens.TryAdd(guid, new ServiceToken(shopImportService, new CancellationTokenSource()));
+
+        _logger.LogInformation($"New service for shop {shopModel.Name} added");
     }
 
     private async Task StartEventMessageReceiverAsync(CancellationToken stoppingToken)
@@ -211,7 +213,7 @@ public class ShopImportWorker : BackgroundService
         return allShopImportSettings;
     }
 
-    private bool TryGetImportService(string name, IShopImportSettings shopImportSettings, IImportSource shopModel, out IImportService? service)
+    private bool TryCreateImportService(string name, IShopImportSettings shopImportSettings, IImportSource shopModel, out IImportService? service)
     {
         service = default;
 

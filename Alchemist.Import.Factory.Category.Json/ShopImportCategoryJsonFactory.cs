@@ -32,6 +32,7 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesJsonTimer
 
         return new ShopImportCategoriesJsonTimerService(categoryJsonLogger,
             name,
+            htmlSearcher,
             loaderService,
             categoryShopImportSettings.CategorySourceUrl,
             categoryShopModel.Name,

@@ -5,7 +5,7 @@ using System.Collections;
 using System.Net.Http.Json;
 using System.Web;
 using WebLoader.Interfaces;
-using HostRequestOptions = Alchemist.Import.Settings.RequestOptions;
+using ImportRequestOptions = Alchemist.Import.Settings.RequestOptions;
 using WebLoaderRequestOptions = WebLoader.Interfaces.RequestOptions;
 
 namespace Alchemist.BrowserService.Client;
@@ -14,7 +14,7 @@ internal class BrowserServiceClient(HttpClient httpClient,
     string name,
     string host,
     IWebLoader webLoader,
-    HostRequestOptions? hostRequestOptions = null,
+    ImportRequestOptions? hostRequestOptions = null,
     string? browserDataLoader = null, 
     string? browserDataLauncher = null,
     RequestHeaders? requestHeaders = null) : ILoaderService
@@ -27,7 +27,7 @@ internal class BrowserServiceClient(HttpClient httpClient,
 
     private readonly IWebLoader _webLoader = webLoader;
 
-    private readonly HostRequestOptions? _hostRequestOptions = hostRequestOptions;
+    private readonly ImportRequestOptions? _hostRequestOptions = hostRequestOptions;
 
     private readonly RequestHeaders? _requestHeaders = requestHeaders;
 
@@ -71,7 +71,9 @@ internal class BrowserServiceClient(HttpClient httpClient,
         if (!string.IsNullOrWhiteSpace(_browserDataLoader))
             return await LoadCookies(host, token);
 
-        await LoadHostPage(host);
+        if(_hostRequestOptions != null)
+            await LoadHostPage(host);
+
         return Array.Empty<ICookieData>();
     }    
 

@@ -37,6 +37,12 @@
     <ProjectReference Include="..\Alchemist.Product.ImportItemHandler\Alchemist.Product.ImportItemHandler.csproj" />
     <ProjectReference Include="..\Alchemist.Product.RestAPIClient\Alchemist.Product.RestAPIClient.csproj" />
     <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="ImportSettings\Ozon.categories.requestheaders.Firefox.Standart.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>  
 
   <!--<Target Name="CopyDIDir" AfterTargets="Build">

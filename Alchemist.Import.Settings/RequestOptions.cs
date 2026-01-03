@@ -7,4 +7,10 @@ public class RequestOptions
     public int? TimeouteMillseconds { get; set; } = null;
 
     public Dictionary<string, object>? Parameters { get; set; } = null;
+
+    public bool IsApi { get; set; } = false;
+
+    public string? HttpMethod { get; set; } = null;
+
+    public object? Data { get; set; } = null;
 }

@@ -6,23 +6,26 @@
     "CategorySourceUrl": "https://www.ozon.ru",
     "Perfomance": true,
     "Services": {
-      "RequestHeaders": {
-        "AssemblyPath": "ImportSettings/ozon.product.chromium.requestheaders.json"
-      },
-
       "ImportService": {
         "ImplementationTypeName": "ShopImportCategoriesJsonTimerService",
         "AssemblyPath": "Import\\Categories\\Json",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
       "BrowserDataLoader": {
-        "ImplementationTypeName": "ChromiumPatchright",
-        "AssemblyPath": "Libs\\BrowserDataLoader\\Playwright\\ChromiumPatchright"
+        "ImplementationTypeName": "FirefoxStandart",
+        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
+      },
+      "BrowserLauncher": {
+        "ImplementationTypeName": "FirefoxStandart",
+        "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
       },
       "WebLoader": {
-        "ImplementationTypeName": "ChromiumPatchright",
-        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright",
-        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+        "ImplementationTypeName": "Firefox",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
+        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
+      },
+      "RequestHeaders": {
+        "AssemblyPath": "ImportSettings/Ozon.categories.requestheaders.Firefox.Standart.json"
       },
       "CategoryLoadOptions": {
         "ServiceTypeName": "CategoryLoadOptions",
@@ -175,7 +178,7 @@
         "ServiceTypeName": "CategoryLoadOptions",
         "AssemblyPath": "Import\\Categories\\Json",
         "Value": {
-          "FirstNodePath": [ "data" ],
+          "FirstNodePath": [ "data", "general" ],
           "SecondsInterval": 1800,
           "CategoryPropertyPaths": {
             "Url": {
@@ -193,10 +196,6 @@
             "Id": {
               "PropertyName": "Id",
               "Path": "id"
-            },
-            "IsParented": {
-              "PropertyName": "IsParented",
-              "Path": "parent"
             }
           }
         }
