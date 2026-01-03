@@ -244,7 +244,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             using (stream)
             {
-                var item = await DeserializeItemFromStream<T>(stream, cancellationToken: token);
+                var item = await DeserializeItemFromStream<T>(stream, cancellationToken: token);        
                 stream.Close();
                 return (true, item);
             }

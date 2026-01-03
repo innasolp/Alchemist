@@ -49,7 +49,9 @@ public class BrowserDataLoadingControllerTest
         if (_browserDataLoaders.FirstOrDefault(b => b is BrowserDataLoaderMock2) is not BrowserDataLoaderMock2 browserDataLoader)
             throw new InvalidOperationException();
 
-        browserDataLoader.Setup(b => b.LoadCookies()).Returns(Task.FromResult((IEnumerable<ICookieData>)[]));
+        browserDataLoader.Setup(b => b.LoadCookies(It.IsAny<string>(),
+            It.IsAny<bool>(),
+            It.IsAny<CancellationToken>())).Returns(Task.FromResult((IEnumerable<ICookieData>)[]));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.GetCookies(nameof(BrowserDataLoaderMock2), "url"));
         Assert.IsType<NotFound>(result.Result);
@@ -61,7 +63,7 @@ public class BrowserDataLoadingControllerTest
         if (_browserDataLoaders.FirstOrDefault(b => b is BrowserDataLoaderMock1) is not BrowserDataLoaderMock1 browserDataLoader)
             throw new InvalidOperationException();
 
-        browserDataLoader.Setup(b => b.LoadCookies(It.IsAny<string>(), It.IsAny<bool>())).Returns(Task.FromResult((IEnumerable<ICookieData>) [
+        browserDataLoader.Setup(b => b.LoadCookies(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult((IEnumerable<ICookieData>) [
             new Mock<ICookieData>().Object,
             new Mock<ICookieData>().Object]));
 
@@ -102,7 +104,7 @@ public class BrowserDataLoadingControllerTest
             throw new InvalidOperationException();
 
         var cookieCount = new Random().Next();
-        browserDataLoader.Setup(b => b.ClearCookiesForHost("url")).Returns(Task.FromResult(cookieCount));
+        browserDataLoader.Setup(b => b.ClearCookiesForHost("url", It.IsAny<CancellationToken>())).Returns(Task.FromResult(cookieCount));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.ClearCookiesForHost(nameof(BrowserDataLoaderMock1), "url"));
         var okResult = Assert.IsAssignableFrom<Ok<int>>(result.Result);

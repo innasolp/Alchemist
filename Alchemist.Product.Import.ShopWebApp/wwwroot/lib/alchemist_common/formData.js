@@ -21,35 +21,37 @@ function getFormData(formSelector) {
     return object;
 }
 
-function fetchData(data, action, method = 'post', onSuccess = null, onError = null) {
-
+function fetchData(data,
+    action,
+    method = 'post',
+    contentType = 'application/x-www-form-urlencoded; charset=UTF-8',
+    onSuccess = null,
+    onError = null)
+{
     try {
 
         fetch(action, {
             method: method,
             body: data,
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'Content-Type': contentType,
             }
         })
             .then(response => {
 
-                var r = response.clone();
-
-                var jsonResult = r.json();
+                var r = response.clone();                
 
                 if (r.ok) {
                     if (onSuccess != null)
-                        onSuccess(jsonResult);
+                        onSuccess(r);
 
-                    console.log(jsonResult);
+                    console.log(r);
                 }
                 else {
                     if (onError != null)
-                        onError(jsonResult);
+                        onError(r);
                     console.error(r);
-                }
-                response.json();
+                }                
             });
     }
     catch (error) {
@@ -58,12 +60,14 @@ function fetchData(data, action, method = 'post', onSuccess = null, onError = nu
     }
 }
 
-function postData(url, data = null, onSuccess = null, onError = null, contentType = "application/x-www-form-urlencoded; charset=UTF-8", processData = false) {
+function postData(url, data = null, onSuccess = null, onError = null,
+    contentType = "application/x-www-form-urlencoded; charset=UTF-8",
+    processData = false) {
     $.ajax({
         method: 'POST',
         url: url,
         data: data,
-        contentType: contentType,
+        contentType: contentType,        
         processData: processData,
         success: function (result) {
             console.log(`post ${url} successed`);
@@ -79,8 +83,41 @@ function postData(url, data = null, onSuccess = null, onError = null, contentTyp
     });
 }
 
+async function postDataAsync(url, data = null, contentType = "multipart/form-data") {
+    try {
+        return await $.ajax({
+            method: 'POST',
+            url: url,
+            data: data,
+            contentType: contentType,
+            processData: false,
+            async : true
+        });
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
 function postFormData(url, formData, onSuccess = null, onError = null) {
-    postData(url, formData, onSuccess, onError, false, false);
+    postData(url, formData, onSuccess, onError, false);
+}
+
+async function postFormDataAsync(url, formData) {
+    const response =  await fetch(url, {
+        method: "POST",
+        body: formData, // body data type must match "Content-Type" header
+    });
+    return await response.json();
+}
+
+function postJsonData(url, jsonData, onSuccess = null, onError = null) {
+    postData(url, jsonData, onSuccess, onError, 'application/json');
+}
+
+async function postJsonDataAsync(url, jsonData) {
+    return await postDataAsync(url, jsonData, 'application/json');
 }
 
 function save(formSelector, url, data, onValidationError = null, onSuccess = null, onError = null) {
@@ -116,11 +153,12 @@ function validateForm(formSelector, onValidationSuccess = null, onValidationErro
         return;
     }
 
-    var pendingRequest = formSelector.data('validator').pendingRequest;
-    if (pendingRequest == 0)
-        if(onValidationSuccess != null) onValidationSuccess();
-    else
-        setTimeout(() => {
+    if (!formSelector.data('validator').pendingRequest) {
+        if (onValidationSuccess != null) onValidationSuccess();
+        return;
+    }
+
+    setTimeout(() => {
             if (formSelector.valid()) {
                 if (onValidationSuccess != null) onValidationSuccess();
             }
@@ -145,4 +183,51 @@ function setDivToForm(formDiv, div, formId) {
     var newDiv = $(div[0].outerHTML);
     form.append(newDiv);
     div.remove();
+}
+
+function tryFillFormDataByUrlParams(formData, paramNames) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.size > 0) {
+
+        for (var i = 0; i < paramNames.length; i++) {
+            if (!urlParams.has(paramNames[i])) continue;
+
+            const value = urlParams.get(paramNames[i]);
+            formData.append(paramNames[i], value);
+        }
+        return true;
+    }
+    return false;
+}
+
+function tryFillFormDataByPathNameParameters(formData, paramNames) {
+    const url = new URL(window.location.href);
+    const pathname = url.pathname;
+    const pathSegments = pathname.split('/').filter(segment => segment !== '');
+
+    if (pathSegments.length < paramNames.length) return false;
+
+    const shift = pathSegments.length - paramNames.length;
+    for (var i = 0; i < paramNames.length; i++) {
+        formData.append(paramNames[i], pathSegments[i + shift]);
+    }
+    return true;
+}
+
+function getFormDataCopy(formData) {
+
+    const copiedFormData = new FormData();
+
+    for (const [key, value] of formData.entries()) {
+        // Check if the value is a File or Blob to preserve its type and filename
+        if (value instanceof File) {
+            copiedFormData.append(key, value, value.name);
+        } else if (value instanceof Blob) {
+            copiedFormData.append(key, value); // Filename might be "blob" by default
+        } else {
+            copiedFormData.append(key, value);
+        }
+    }
+
+    return copiedFormData;
 }

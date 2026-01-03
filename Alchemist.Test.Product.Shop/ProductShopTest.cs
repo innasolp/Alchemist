@@ -16,7 +16,7 @@ public abstract class ProductShopTest
     public ProductShopTest()
     {
         _browserServiceMock.Setup(s => s.GetData(It.IsAny<string>(), It.IsAny<CancellationToken>())).
-            Returns(async (string host, CancellationToken token) => await BrowserDataLoader.LoadCookies());
+            Returns(async (string host, CancellationToken token) => await BrowserDataLoader.LoadCookies(host));
 
         _browserServiceMock.Setup(s=>s.UpdateData(It.IsAny<string>(), It.IsAny<CancellationToken>())).
             Returns(async (string url, CancellationToken token) => await BrowserLauncher.OpenUrl(url));

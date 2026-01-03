@@ -23,7 +23,7 @@ public class PlaywrightFirefoxLoaderTest(ITestOutputHelper testOutputHelper) : P
 
     private async Task LoadCookiesAsync()
     {
-        var cookies = await _dataLoader.LoadCookies();
+        var cookies = await _dataLoader.LoadCookies("www.ozon.ru");
         Assert.True(cookies.Count() > 0);
         Assert.True(cookies.All(c=>c.Value != null));
     }
@@ -43,7 +43,7 @@ public class PlaywrightFirefoxLoaderTest(ITestOutputHelper testOutputHelper) : P
 
         await webLoader.Start();
 
-        var stream = await webLoader.LoadFromUrl(_productUrl, requestHeaders);
+        var stream = await webLoader.LoadFromApiRequestAsync(_productUrl, headers: requestHeaders);
         var product = await JsonSerializer.DeserializeAsync<Model.Product>(stream);
         stream.Close();
 
@@ -71,7 +71,7 @@ public class PlaywrightFirefoxLoaderTest(ITestOutputHelper testOutputHelper) : P
 
         await webLoader.Start();
 
-        var stream = await webLoader.LoadFromUrl(_categoryUrl, requestHeaders);
+        var stream = await webLoader.LoadFromApiRequestAsync(_categoryUrl, headers: requestHeaders);
         var category = await JsonSerializer.DeserializeAsync<Model.Category>(stream);
         stream.Close();
 

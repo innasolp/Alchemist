@@ -78,7 +78,7 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
         {
             await _semaphoreSlim.WaitAsync();
 
-            var cookies = await browserDataLoader.LoadCookies(decodedHost);
+            var cookies = await browserDataLoader.LoadCookies(decodedHost, parameters : [2000] );
             return cookies.Any()
                 ? TypedResults.Ok(cookies.Select(c => c.Convert()))
                 : TypedResults.NotFound();

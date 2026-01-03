@@ -34,10 +34,10 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
 
         var loadOptionsService = shopImportSettings.GetService(nameof(CategoryLoadOptions)) 
             ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopModel.Name}");
-        var categoryLoadOptions = loadOptionsService.GetServiceValue<CategoryLoadOptions>();//  JsonSerializer.Deserialize<CategoryLoadOptions>(loadOptionsService);
+        var categoryLoadOptions = loadOptionsService.GetServiceValue<CategoryLoadOptions>();
         
         var htmlSearchOptionsService = shopImportSettings.GetService(nameof(HtmlSearchFactoryOptions));
-        var htmlSearchFactoryOptions = htmlSearchOptionsService.GetServiceValue<HtmlSearchFactoryOptions>();// htmlSearchOptionsService != null ? JsonSerializer.Deserialize<HtmlSearchFactoryOptions>(htmlSearchOptionsService) : null;
+        var htmlSearchFactoryOptions = htmlSearchOptionsService?.GetServiceValue<HtmlSearchFactoryOptions>();
 
         var htmlSearcher = htmlSearchFactoryOptions != null 
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)

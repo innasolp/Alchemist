@@ -48,3 +48,4 @@ node_modules/
 /.github/workflows
 
 /Alchemist.Product.Import.Background.Service/chromium_patchright
+/Alchemist.BrowserService/BrowserDataLoader.Playwright.ChromiumPatchright*
