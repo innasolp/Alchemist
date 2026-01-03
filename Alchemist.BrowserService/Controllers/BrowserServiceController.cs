@@ -60,7 +60,7 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
         NotFound<string>,
         NotFound,
         Ok<IEnumerable<ICookieData>>>>
-        GetCookies(string browser, string host)
+        GetCookies(string browser, string host, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(browser))
             return TypedResults.BadRequest($"{nameof(browser)} is empty");
@@ -78,7 +78,7 @@ public class BrowserServiceController(ILogger<BrowserServiceController> logger,
         {
             await _semaphoreSlim.WaitAsync();
 
-            var cookies = await browserDataLoader.LoadCookies(decodedHost, parameters : [2000] );
+            var cookies = await browserDataLoader.LoadCookies(decodedHost, cancellationToken: cancellationToken, parameters : [2000] );
             return cookies.Any()
                 ? TypedResults.Ok(cookies.Select(c => c.Convert()))
                 : TypedResults.NotFound();

@@ -63,11 +63,12 @@ public class BrowserDataLoadingControllerTest
         if (_browserDataLoaders.FirstOrDefault(b => b is BrowserDataLoaderMock1) is not BrowserDataLoaderMock1 browserDataLoader)
             throw new InvalidOperationException();
 
-        browserDataLoader.Setup(b => b.LoadCookies(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult((IEnumerable<ICookieData>) [
-            new Mock<ICookieData>().Object,
-            new Mock<ICookieData>().Object]));
+        browserDataLoader.Setup(b => b.LoadCookies(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>(), It.IsAny<object[]>()))
+            .Returns( (string host, bool distinct = true, CancellationToken cancellationToken=default, params object[] parameters)=>
+            Task.FromResult((IEnumerable<ICookieData>) 
+            [new Mock<ICookieData>().Object, new Mock<ICookieData>().Object]));
 
-        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.GetCookies(nameof(BrowserDataLoaderMock1), "url"));
+        var result = Assert.IsAssignableFrom<INestedHttpResult>(await _browserServiceController.GetCookies(browserDataLoader.GetType().Name, "url"));
         var okResult = Assert.IsAssignableFrom<Ok<IEnumerable<ICookieData>>>(result.Result);
         Assert.Equal(2, okResult.Value?.Count());
     }
