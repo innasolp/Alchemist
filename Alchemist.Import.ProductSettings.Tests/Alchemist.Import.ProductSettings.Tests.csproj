@@ -23,13 +23,11 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="WebLoader.Common" Version="1.0.0.2" />
+    <PackageReference Include="WebLoader.Common" Version="1.0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Test.Model\Alchemist.Import.Settings.Test.Model.csproj" />
   </ItemGroup>
 

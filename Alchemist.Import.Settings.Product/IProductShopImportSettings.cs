@@ -1,6 +1,4 @@
-﻿using Alchemist.Import.Products.Interfaces;
-
-namespace Alchemist.Import.Settings.Product;
+﻿namespace Alchemist.Import.Settings.Product;
 
 public interface ICategoryUrl
 {

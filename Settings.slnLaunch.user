@@ -1,0 +1,69 @@
+[
+  {
+    "Name": "Shop WebApp",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "ImportSettings WebApp",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.ImportSettingsWebApp\\Alchemist.Product.ImportSettingsWebApp.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "WebApp",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.ImportSettingsWebApp\\Alchemist.Product.ImportSettingsWebApp.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.WebApp\\Alchemist.Product.WebApp.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

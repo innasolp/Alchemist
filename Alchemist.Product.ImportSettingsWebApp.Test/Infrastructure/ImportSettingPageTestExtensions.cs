@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Settings;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
