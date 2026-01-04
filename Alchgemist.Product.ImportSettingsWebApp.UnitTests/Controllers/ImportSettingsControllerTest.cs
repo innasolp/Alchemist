@@ -55,7 +55,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
     {
         var product = NewProductSettings(1);
         _productAdapter
-            .Setup(a => a.GetShopImportSettings(1))
+            .Setup(a => a.GetShopImportSettings(1, CancellationToken.None))
             .ReturnsAsync(product);
 
         var controller = CreateController();
@@ -72,7 +72,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
         Assert.True(controller.HttpContext.Session.TryGetValue(SessionKeys.ShopImportSettingsKey, out _));
         Assert.Equal((int)ShopSettingType.Product, controller.HttpContext.Session.GetInt32(SessionKeys.ShopSettingsTypeKey));
 
-        _productAdapter.Verify(a => a.GetShopImportSettings(1), Times.Once);
+        _productAdapter.Verify(a => a.GetShopImportSettings(1, CancellationToken.None), Times.Once);
         _categoryAdapter.VerifyNoOtherCalls();
     }
 
@@ -117,7 +117,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
     [Fact]
     public async Task ProductSettingsIsChangedAsync_OkTrue_WhenNoExistingSettings()
     {        
-        _productAdapter.Setup(a => a.GetShopImportSettings(10)).ReturnsAsync((IShopImportSettings?)null);
+        _productAdapter.Setup(a => a.GetShopImportSettings(10, CancellationToken.None)).ReturnsAsync((IShopImportSettings?)null);
         var controller = CreateController();
 
         var data = NewProductSettings(10);
@@ -125,7 +125,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
 
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(true, ok.Value);
-        _productAdapter.Verify(a => a.GetShopImportSettings(10), Times.Once);
+        _productAdapter.Verify(a => a.GetShopImportSettings(10, CancellationToken.None), Times.Once);
     }
 
     
@@ -136,7 +136,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
 
         var existing = NewProductSettings(3);
         existing.Services["ImportService"] = NewService("ImportService", name: "ImportService");
-        _productAdapter.Setup(a => a.GetShopImportSettings(3)).ReturnsAsync(existing);
+        _productAdapter.Setup(a => a.GetShopImportSettings(3, CancellationToken.None)).ReturnsAsync(existing);
 
         var sessionModel = NewProductSettings(3);
         sessionModel.Services["ImportService"] = NewService("ImportService", name: "DifferentServiceName");
@@ -169,13 +169,13 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
         existing.PageProductCount = 5;
 
         // existing has no services to start
-        _productAdapter.Setup(a => a.GetShopImportSettings(4)).ReturnsAsync(existing);
+        _productAdapter.Setup(a => a.GetShopImportSettings(4, CancellationToken.None)).ReturnsAsync(existing);
 
         // Capture the saved object to assert on it
         ProductShopImportSettingsModel? saved = null;
         _productAdapter
-            .Setup(a => a.Save(It.IsAny<IShopImportSettings>()))
-            .Callback<IShopImportSettings>(m => saved = Assert.IsType<ProductShopImportSettingsModel>(m))
+            .Setup(a => a.Save(It.IsAny<IShopImportSettings>(), It.IsAny<CancellationToken>()))
+            .Callback<IShopImportSettings, CancellationToken>((m, token) => saved = Assert.IsType<ProductShopImportSettingsModel>(m))
             .ReturnsAsync(existing);
 
         // session contains one service, which should be applied to existing when saving
@@ -194,8 +194,8 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(true, ok.Value);
 
-        _productAdapter.Verify(a => a.GetShopImportSettings(4), Times.Once);
-        _productAdapter.Verify(a => a.Save(It.IsAny<IShopImportSettings>()), Times.Once);
+        _productAdapter.Verify(a => a.GetShopImportSettings(4, CancellationToken.None), Times.Once);
+        _productAdapter.Verify(a => a.Save(It.IsAny<IShopImportSettings>(), It.IsAny<CancellationToken>()), Times.Once);
         _categoryAdapter.VerifyNoOtherCalls();
 
         Assert.NotNull(saved);
@@ -236,7 +236,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
         var product = NewProductSettings(1);
         product.RootCategories = new List<CategoryUrlModel>();
 
-        _productAdapter.Setup(a => a.GetShopImportSettings(1)).ReturnsAsync(product);
+        _productAdapter.Setup(a => a.GetShopImportSettings(1, CancellationToken.None)).ReturnsAsync(product);
 
         var controller = CreateController();
 
@@ -260,7 +260,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
         var product = NewProductSettings(1);
         product.RootCategories = new List<CategoryUrlModel> { existing };
 
-        _productAdapter.Setup(a => a.GetShopImportSettings(1)).ReturnsAsync(product);
+        _productAdapter.Setup(a => a.GetShopImportSettings(1, CancellationToken.None)).ReturnsAsync(product);
 
         var controller = CreateController();
 
@@ -283,7 +283,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
         var product = NewProductSettings(2);
         product.RootCategories = new List<CategoryUrlModel>();
 
-        _productAdapter.Setup(a => a.GetShopImportSettings(2)).ReturnsAsync(product);
+        _productAdapter.Setup(a => a.GetShopImportSettings(2, CancellationToken.None)).ReturnsAsync(product);
 
         var controller = CreateController();
 
@@ -301,7 +301,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
         var product = NewProductSettings(3);
         product.RootCategories = new List<CategoryUrlModel> { existing };
 
-        _productAdapter.Setup(a => a.GetShopImportSettings(3)).ReturnsAsync(product);
+        _productAdapter.Setup(a => a.GetShopImportSettings(3, CancellationToken.None)).ReturnsAsync(product);
 
         var controller = CreateController();
 

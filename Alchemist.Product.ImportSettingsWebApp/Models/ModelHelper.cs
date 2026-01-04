@@ -15,19 +15,19 @@ internal static class ModelHelper
     }
 
     internal static async Task<ShopImportSettingsModel> GetShopImportSettingsModel(this SettingsDataAdapterContainer settingsDataAdapter,
-        int? shopId, ShopSettingType shopSettingsType)
+        int? shopId, ShopSettingType shopSettingsType, CancellationToken cancellationToken = default)
     {
         return shopId != null
-            ? await settingsDataAdapter.GetShopImportSettingsAsync((int)shopId, shopSettingsType)
+            ? await settingsDataAdapter.GetShopImportSettingsAsync((int)shopId, shopSettingsType, cancellationToken)
                 ?? CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType)
             : CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType);
     }
 
     internal static async Task<ShopImportSettingsModel> GetShopImportSettingsModel(this SettingsFacade settingsDataAdapter,
-        int? shopId, ShopSettingType shopSettingsType)
+        int? shopId, ShopSettingType shopSettingsType, CancellationToken cancellationToken = default)
     {
         return shopId != null
-            ? await settingsDataAdapter.GetShopImportSettingsAsync((int)shopId, shopSettingsType)
+            ? await settingsDataAdapter.GetShopImportSettingsAsync((int)shopId, shopSettingsType, cancellationToken)
                 ?? CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType)
             : CreateShopImportSettingsModel(shopId ?? 0, shopSettingsType);
     }

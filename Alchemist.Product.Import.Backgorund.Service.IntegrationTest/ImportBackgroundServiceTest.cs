@@ -94,7 +94,6 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
             await Task.FromResult(true);
         }
 
-
         var messageReceiver = WebAppFactory.Services.GetRequiredKeyedService<IMessageReceiver>(ShopImportWorkerKeys.EventMessageReceiverKey);
         messageReceiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, onShopSettingsCreatedAsync);
 

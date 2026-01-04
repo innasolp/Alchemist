@@ -25,9 +25,9 @@ public class ShopApiController(IShopDataService shopDataService) : Controller
     private readonly ShopFacade _shopFacade = new(shopDataService);
     
     [HttpPost("ShopList", Name = "ShopList")]
-    public async Task<IActionResult> ShopList(ShopApiData data)
+    public async Task<IActionResult> ShopList(ShopApiData data, CancellationToken cancellationToken = default)
     {
-        var shops = await _shopFacade.GetShops();
+        var shops = await _shopFacade.GetShops(cancellationToken);
         var selectedShop = ModelHelper.GetSelectedShop(shops, data.ShopId);
         var shopListModel = ModelHelper.GetShopItemModels(shops, selectedShop?.Id, data.HRefFormat);
 

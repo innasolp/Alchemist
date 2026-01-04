@@ -34,16 +34,16 @@ public class ShopWebAppFactory : TestWebAppKestrelFactory<ShopWebAppProgram>
             shop.Id = i;
         }
 
-        _shopAPIClient.Setup(s => s.GetShops()).Returns(Task.FromResult(shops));
-        _shopAPIClient.Setup(s => s.GetShop(It.IsAny<int>())).
-            Returns((int id) => Task.FromResult(shops.FirstOrDefault(s => s.Id == id)));
-        _shopAPIClient.Setup(s => s.CreateShop(It.IsAny<IShop>())).ReturnsAsync((IShop shop) =>
+        _shopAPIClient.Setup(s => s.GetShops(It.IsAny<CancellationToken>())).Returns(Task.FromResult(shops));
+        _shopAPIClient.Setup(s => s.GetShop(It.IsAny<int>(), It.IsAny<CancellationToken>())).
+            Returns((int id, CancellationToken token) => Task.FromResult(shops.FirstOrDefault(s => s.Id == id)));
+        _shopAPIClient.Setup(s => s.CreateShop(It.IsAny<IShop>(), It.IsAny<CancellationToken>())).ReturnsAsync((IShop shop, CancellationToken token) =>
         {
             shop.Id = shops.Count + 1;
             shops.Add(shop);
             return shop;
         });
-        _shopAPIClient.Setup(s => s.UpdateShop(It.IsAny<IShop>())).ReturnsAsync((IShop shop) =>
+        _shopAPIClient.Setup(s => s.UpdateShop(It.IsAny<IShop>(), It.IsAny<CancellationToken>())).ReturnsAsync((IShop shop, CancellationToken token) =>
         {
             var currentShop = shops.FirstOrDefault(s => s.Id == shop.Id);
             if (currentShop == null) return default;

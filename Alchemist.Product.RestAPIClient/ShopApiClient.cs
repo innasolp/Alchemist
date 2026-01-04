@@ -2,7 +2,6 @@
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -10,7 +9,7 @@ namespace Alchemist.Product.RestAPIClient;
 
 public class ShopApiClient : IShopDataService
 {
-    private readonly HttpClient _httpClient;    
+    private readonly HttpClient _httpClient;
 
     public ShopApiClient([FromKeyedServices("ShopApiHttpClient")] HttpClient httpClient)
     {
@@ -29,90 +28,90 @@ public class ShopApiClient : IShopDataService
             new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
-    public async Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory)
+    public async Task<IShopCategory?> AddShopCategory(IShopCategory shopCategory, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/ShopCategory", shopCategory.To<ShopCategory>());
+        var response = await _httpClient.PutAsJsonAsync($"api/ShopCategory", shopCategory.To<ShopCategory>(), cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopCategory>();
+        return await response.Content.ReadFromJsonAsync<ShopCategory>(cancellationToken: cancellationToken);
     }
 
-    public async Task<IShop> CreateShop(IShop shop)
+    public async Task<IShop> CreateShop(IShop shop, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop.To<Shop>());
+        var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop.To<Shop>(), cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>();
+        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
     }
 
-    public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId)
+    public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/getAllChildren/{parentId}");
+        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/getAllChildren/{parentId}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(new List<IShopCategory>());
+            return [];
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<List<ShopCategory>>();
-        return await Task.FromResult(result.OfType<IShopCategory>().ToList());
+        var result = await response.Content.ReadFromJsonAsync<List<ShopCategory>>(cancellationToken: cancellationToken);
+        return [.. (result ?? []).OfType<IShopCategory>()];
     }
 
-    public async Task<IShop?> GetShop(int id)
+    public async Task<IShop?> GetShop(int id, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Shop/{id}");
+        var response = await _httpClient.GetAsync($"api/Shop/{id}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(Shop));
+            return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>();
+        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
     }
 
-    public async Task<IShop?> GetShopByName(string name)
+    public async Task<IShop?> GetShopByName(string name, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Shop/byName?name={name}");
+        var response = await _httpClient.GetAsync($"api/Shop/byName?name={Uri.EscapeDataString(name)}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(Shop));
+            return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>();
+        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
     }
 
-    public async Task<IShop?> GetShopByUrl(string url)
+    public async Task<IShop?> GetShopByUrl(string url, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Shop/byUrl/url={url}");
+        var response = await _httpClient.GetAsync($"api/Shop/byUrl?url={Uri.EscapeDataString(url)}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(Shop));
+            return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>();
+        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
     }
 
-    public async Task<List<IShopCategory>> GetShopCategories(int shopId)
+    public async Task<List<IShopCategory>> GetShopCategories(int shopId, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/{shopId}");
+        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/{shopId}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(new List<IShopCategory>());
+            return [];
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<List<ShopCategory>>();
-        return await Task.FromResult(result.OfType<IShopCategory>().ToList());
+        var result = await response.Content.ReadFromJsonAsync<List<ShopCategory>>(cancellationToken: cancellationToken);
+        return [.. (result ?? []).OfType<IShopCategory>()];
     }
 
-    public async Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId)
+    public async Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/byShopIdAndItemId/{shopId}/{itemId}");
+        var response = await _httpClient.GetAsync($"api/ShopCategory/shopCategories/byShopIdAndItemId/{shopId}/{itemId}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(ShopCategory));
+            return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopCategory>();
+        return await response.Content.ReadFromJsonAsync<ShopCategory>(cancellationToken: cancellationToken);
     }
 
-    public async Task<List<IShop>> GetShops()
+    public async Task<List<IShop>> GetShops(CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Shop/Shops");
+        var response = await _httpClient.GetAsync($"api/Shop/Shops", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(new List<IShop>());
+            return [];
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<List<Shop>>();
-        return await Task.FromResult(result.OfType<IShop>().ToList());
+        var result = await response.Content.ReadFromJsonAsync<List<Shop>>(cancellationToken: cancellationToken);
+        return [.. (result ?? []).OfType<IShop>()];
     }
 
-    public async Task<IShop> UpdateShop(IShop shop)
+    public async Task<IShop> UpdateShop(IShop shop, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/Shop/Update", shop.To<Shop>());
+        var response = await _httpClient.PostAsJsonAsync($"api/Shop/Update", shop.To<Shop>(), cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>();
+        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
     }
 }

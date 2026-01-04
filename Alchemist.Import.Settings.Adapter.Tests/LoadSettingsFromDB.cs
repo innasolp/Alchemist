@@ -49,11 +49,16 @@ public class LoadSettingsFromDB
 
         InitializeSettings();
 
-        _shopSettingsDataServiceMock.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>())).Returns(GetShopImportSettingsByShopIdAndSettingsType);
-        _shopSettingsDataServiceMock.Setup(s => s.GetShopSettings(It.IsAny<int>())).Returns(GetShopImportSettingsById);
-        _shopSettingsDataServiceMock.Setup(s => s.GetShopSettings(It.IsAny<string>())).Returns(GetShopImportSettingsByName);
-        _shopSettingsDataServiceMock.Setup(s => s.GetChildSettings(It.IsAny<int>())).Returns(GetChildSettings);
-        _shopSettingsDataServiceMock.Setup(s => s.GetAllParentShopSettings()).Returns(GetAllParentdSettings);
+        _shopSettingsDataServiceMock.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>(), It.IsAny<CancellationToken>()))
+            .Returns(GetShopImportSettingsByShopIdAndSettingsType);
+        _shopSettingsDataServiceMock.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns(GetShopImportSettingsById);
+        _shopSettingsDataServiceMock.Setup(s => s.GetShopSettings(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(GetShopImportSettingsByName);
+        _shopSettingsDataServiceMock.Setup(s => s.GetChildSettings(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns(GetChildSettings);
+        _shopSettingsDataServiceMock.Setup(s => s.GetAllParentShopSettings(It.IsAny<CancellationToken>()))
+            .Returns(GetAllParentdSettings);
     }
 
     private void InitializeSettings()
@@ -88,27 +93,27 @@ public class LoadSettingsFromDB
         }
     }
 
-    private async Task<IShopSettings?> GetShopImportSettingsByShopIdAndSettingsType(int shopId, ShopSettingType shopSettingType )
+    private async Task<IShopSettings?> GetShopImportSettingsByShopIdAndSettingsType(int shopId, ShopSettingType shopSettingType, CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(_shopSettings.FirstOrDefault(s => s.ShopId == shopId && s.Type == shopSettingType));
     }
 
-    private async Task<IShopSettings?> GetShopImportSettingsById(int id)
+    private async Task<IShopSettings?> GetShopImportSettingsById(int id, CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(_shopSettings.FirstOrDefault(s => s.Id == id));
     }
 
-    private async Task<IShopSettings?> GetShopImportSettingsByName(string name)
+    private async Task<IShopSettings?> GetShopImportSettingsByName(string name, CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(_shopSettings.FirstOrDefault(s => s.Name == name));
     }
 
-    private async Task<List<IShopSettings>?> GetChildSettings(int parentId)
+    private async Task<List<IShopSettings>?> GetChildSettings(int parentId, CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentId).ToList());
     }
 
-    private async Task<List<IShopSettings>> GetAllParentdSettings()
+    private async Task<List<IShopSettings>> GetAllParentdSettings(CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == null).ToList());
     }

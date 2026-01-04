@@ -12,7 +12,8 @@ public class ShopCategoryControllerPostTest:ControllerTest<ShopCategoryControlle
 {
     public ShopCategoryControllerPostTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _alchemyRepository.Setup(r => r.AddShopCategory(It.IsAny<IShopCategory>())).Returns((IShopCategory shopCategory) =>
+        _alchemyRepository.Setup(r => r.AddShopCategory(It.IsAny<IShopCategory>(), It.IsAny<CancellationToken>()))
+            .Returns((IShopCategory shopCategory, CancellationToken cancellationToken = default) =>
         {
             var newShopCategory = shopCategory.To<ShopCategory>();
             newShopCategory.Id += 1;

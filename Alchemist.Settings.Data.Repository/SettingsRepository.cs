@@ -5,130 +5,141 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alchemist.Settings.Data.Repository;
 
-public class SettingsRepository(AlchemyContext context) : ISettingsRepository
+public class SettingsRepository : ISettingsRepository
 {
-    protected AlchemyContext Context { get; set; } = context;
+    protected AlchemyContext Context { get; }
 
-    public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
+    public SettingsRepository(AlchemyContext context) => Context = context;
+
+    public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.ShopId == shopId && s.Type == settingType && s.IsActual != false);
+        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.ShopId == shopId && s.Type == settingType && s.IsActual != false, cancellationToken);
     }
 
-    public async Task<IShopSettings?> GetShopSettings(int id)
+    public async Task<IShopSettings?> GetShopSettings(int id, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.Id == id);
+        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
-    private async Task<int> SetShopSettingsActuality(int shopId, ShopSettingType shopSettingType, int actualId)
+    private async Task<int> SetShopSettingsActuality(int shopId, ShopSettingType shopSettingType, int actualId, CancellationToken cancellationToken = default)
     {
         var result = await Context.ShopSettings.Where(s => s.ShopId == shopId
-        && s.Id != actualId
-        && s.Type == shopSettingType && s.Type != ShopSettingType.Service
-        && s.IsActual != false).ExecuteUpdateAsync(settings =>
-            settings.SetProperty(s => s.IsActual, s => false));
+            && s.Id != actualId
+            && s.Type == shopSettingType && s.Type != ShopSettingType.Service
+            && s.IsActual != false)
+            .ExecuteUpdateAsync(settings =>
+                settings.SetProperty(s => s.IsActual, s => false),
+            cancellationToken);
 
-        await Context.SaveChangesAsync();
+        // ExecuteUpdateAsync applies changes directly; SaveChangesAsync is not required,
+        // but keep a consistent pattern if additional change tracking exists.
+        await Context.SaveChangesAsync(cancellationToken);
 
         return result;
     }
 
-    private async Task<IShopSettings> AddOrUpdateShopSettings(IShopSettings shopSettings)
+    private async Task<IShopSettings> AddOrUpdateShopSettings(IShopSettings shopSettings, CancellationToken cancellationToken = default)
     {
         shopSettings.IsActual = true;
+
         var result = await Context.ShopSettings.Where(s => s.Id == shopSettings.Id)
            .ExecuteUpdateAsync(settings =>
-            settings.SetProperty(s => s.IsActual, s => shopSettings.IsActual)
-            .SetProperty(s => s.JsonValue, s => shopSettings.JsonValue)
-            .SetProperty(s => s.ParentSettingsId, s => shopSettings.ParentSettingsId)
-            .SetProperty(s => s.Type, s => shopSettings.Type)
-            .SetProperty(s => s.ShopId, s => shopSettings.ShopId)
-            .SetProperty(s => s.Name, s => shopSettings.Name)
-           );
+                settings.SetProperty(s => s.IsActual, s => shopSettings.IsActual)
+                        .SetProperty(s => s.JsonValue, s => shopSettings.JsonValue)
+                        .SetProperty(s => s.ParentSettingsId, s => shopSettings.ParentSettingsId)
+                        .SetProperty(s => s.Type, s => shopSettings.Type)
+                        .SetProperty(s => s.ShopId, s => shopSettings.ShopId)
+                        .SetProperty(s => s.Name, s => shopSettings.Name),
+            cancellationToken);
 
-        if (result > 0) return shopSettings;
+        if (result > 0)
+            return shopSettings;
 
         var entity = shopSettings.To<ShopSettings>();
-        var added = Context.ShopSettings.Add(entity);
+        Context.ShopSettings.Add(entity);
 
-        await Context.SaveChangesAsync();
+        await Context.SaveChangesAsync(cancellationToken);
 
-        return await Task.FromResult(entity);
+        return entity;
     }
 
-    public async Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings)
+    public async Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings, CancellationToken cancellationToken = default)
     {
-        using var dbContextTransaction = context.Database.BeginTransaction();
+        await using var dbContextTransaction = await Context.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            await SetShopSettingsActuality(shopSettings.ShopId, shopSettings.Type, shopSettings.Id);
+            await SetShopSettingsActuality(shopSettings.ShopId, shopSettings.Type, shopSettings.Id, cancellationToken);
 
-            var result = await AddOrUpdateShopSettings(shopSettings);            
+            var result = await AddOrUpdateShopSettings(shopSettings, cancellationToken);
 
-            dbContextTransaction.Commit();
+            await dbContextTransaction.CommitAsync(cancellationToken);
 
-            return await Task.FromResult(result);
+            return result;
         }
         catch
         {
-            dbContextTransaction.Rollback();
-            return await Task.FromResult(default(IShopSettings));
+            await dbContextTransaction.RollbackAsync(cancellationToken);
+            return default;
         }
     }
 
-    public async Task<bool> UpdateShopSettings(IShopSettings shopSettings)
+    public async Task<bool> UpdateShopSettings(IShopSettings shopSettings, CancellationToken cancellationToken = default)
     {
         await Context.ShopSettings.Where(s => s.Id == shopSettings.Id)
             .ExecuteUpdateAsync(settings => settings.SetProperty(s => s.IsActual, s => shopSettings.IsActual)
-            .SetProperty(s => s.JsonValue, s => shopSettings.JsonValue)
-            .SetProperty(s => s.ParentSettingsId, s => shopSettings.ParentSettingsId)
-            .SetProperty(s => s.Type, s => shopSettings.Type)
-            .SetProperty(s => s.ShopId, s => shopSettings.ShopId));
+                .SetProperty(s => s.JsonValue, s => shopSettings.JsonValue)
+                .SetProperty(s => s.ParentSettingsId, s => shopSettings.ParentSettingsId)
+                .SetProperty(s => s.Type, s => shopSettings.Type)
+                .SetProperty(s => s.ShopId, s => shopSettings.ShopId),
+            cancellationToken);
 
-        var result = await Context.SaveChangesAsync();
+        var result = await Context.SaveChangesAsync(cancellationToken);
 
-        return await Task.FromResult(result > 0);
+        return result > 0;
     }
 
-    public async Task<List<IShopSettings>> GetChildSettings(int parentSettingsId)
+    public async Task<List<IShopSettings>> GetChildSettings(int parentSettingsId, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToListAsync<IShopSettings>();
+        var list = await Context.ShopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToListAsync(cancellationToken);
+        return [.. list.OfType<IShopSettings>()];
     }
 
-    public async Task<List<IShopSettings>> SaveShopSettings(IShopSettings parentShopSettings, IEnumerable<IShopSettings> childrenSettings)
+    public async Task<List<IShopSettings>> SaveShopSettings(IShopSettings parentShopSettings, IEnumerable<IShopSettings> childrenSettings, CancellationToken cancellationToken = default)
     {
-        using var dbContextTransaction = context.Database.BeginTransaction();
+        await using var dbContextTransaction = await Context.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            await SetShopSettingsActuality(parentShopSettings.ShopId, parentShopSettings.Type, parentShopSettings.Id);
+            await SetShopSettingsActuality(parentShopSettings.ShopId, parentShopSettings.Type, parentShopSettings.Id, cancellationToken);
 
-            var shopSettings = await AddOrUpdateShopSettings(parentShopSettings);
+            var shopSettings = await AddOrUpdateShopSettings(parentShopSettings, cancellationToken);
 
             var handledServices = new List<IShopSettings> { shopSettings };
             foreach (var service in childrenSettings)
             {
                 service.ParentSettingsId = shopSettings.Id;
                 service.Type = ShopSettingType.Service;
-                handledServices.Add(await AddOrUpdateShopSettings(service));
-            }            
+                handledServices.Add(await AddOrUpdateShopSettings(service, cancellationToken));
+            }
 
-            dbContextTransaction.Commit();
+            await dbContextTransaction.CommitAsync(cancellationToken);
 
-            return await Task.FromResult(handledServices);
+            return handledServices;
         }
         catch
         {
-            dbContextTransaction.Rollback();
-            return await Task.FromResult(new List<IShopSettings>());
+            await dbContextTransaction.RollbackAsync(cancellationToken);
+            return [];
         }
     }
 
-    public async Task<IShopSettings?> GetShopSettings(string shopSettingsName)
+    public async Task<IShopSettings?> GetShopSettings(string shopSettingsName, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.Name == shopSettingsName);
+        return await Context.ShopSettings.FirstOrDefaultAsync(s => s.Name == shopSettingsName, cancellationToken);
     }
 
-    public async Task<List<IShopSettings>> GetAllParentShopSettings()
+    public async Task<List<IShopSettings>> GetAllParentShopSettings(CancellationToken cancellationToken = default)
     {
-        return await Context.ShopSettings.Where(s => s.ParentSettingsId == null).ToListAsync<IShopSettings>();
+        var list = await Context.ShopSettings.Where(s => s.ParentSettingsId == null).ToListAsync(cancellationToken);
+        return [.. list.OfType<IShopSettings>()];
     }
 }

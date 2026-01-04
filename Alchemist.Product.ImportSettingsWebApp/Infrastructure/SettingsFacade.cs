@@ -14,43 +14,46 @@ internal abstract class SettingsFacade(ISettingsDataAdapter productSettingsDataA
 
     protected Controller Controller { get; } = controller;
 
-    public async Task<ShopImportSettingsModel?> GetShopImportSettingsAsync(int shopId, ShopSettingType shopSettingType)
+    public async Task<ShopImportSettingsModel?> GetShopImportSettingsAsync(int shopId, ShopSettingType shopSettingType,
+        CancellationToken cancellationToken = default)
     {
         switch (shopSettingType)
         {
             case ShopSettingType.Product:
-                return await _productSettingsDataAdapter.GetShopImportSettings(shopId) as ShopImportSettingsModel;
+                return await _productSettingsDataAdapter.GetShopImportSettings(shopId, cancellationToken) as ShopImportSettingsModel;
 
             case ShopSettingType.Category:
-                return await _categorySettingsDataAdapter.GetShopImportSettings(shopId) as ShopImportSettingsModel;
+                return await _categorySettingsDataAdapter.GetShopImportSettings(shopId, cancellationToken) as ShopImportSettingsModel;
 
             default:
                 throw new InvalidOperationException($"Invalid shopSettingType {shopSettingType}");
         }
     }
 
-    protected async Task SaveAsync(ShopImportSettingsModel shopImportSettings)
+    protected async Task SaveAsync(ShopImportSettingsModel shopImportSettings, CancellationToken cancellationToken = default)
     {
         switch (shopImportSettings.ShopSettingType)
         {
             case ShopSettingType.Product:
-                await _productSettingsDataAdapter.Save(shopImportSettings);
+                await _productSettingsDataAdapter.Save(shopImportSettings, cancellationToken);
                 break;
 
             case ShopSettingType.Category:
-                await _categorySettingsDataAdapter.Save(shopImportSettings);
+                await _categorySettingsDataAdapter.Save(shopImportSettings, cancellationToken);
                 break;
         }
     }
 
-    public async Task<ShopImportSettingsModel> GetCurrentShopImportSettingsAsync(int shopId, ShopSettingType shopSettingType)
+    public async Task<ShopImportSettingsModel> GetCurrentShopImportSettingsAsync(int shopId,
+        ShopSettingType shopSettingType, 
+        CancellationToken cancellationToken = default)
     {
-        var shopImportSettings = await Controller.HttpContext.Session.GetShopImportSettingsFromSessionAsync();
+        var shopImportSettings = await Controller.HttpContext.Session.GetShopImportSettingsFromSessionAsync(cancellationToken: cancellationToken);
         if (shopImportSettings != null &&
                 shopImportSettings.ShopId == shopId && shopImportSettings.ShopSettingType == shopSettingType)
             return shopImportSettings;
 
-        shopImportSettings = await GetShopImportSettingsAsync(shopId, shopSettingType);
+        shopImportSettings = await GetShopImportSettingsAsync(shopId, shopSettingType, cancellationToken);
         if (shopImportSettings == null)
         {
             shopImportSettings = ModelHelper.CreateShopImportSettingsModel(shopId, shopSettingType);

@@ -2,7 +2,7 @@
 
 public interface ISettingsAdapter
 {
-    Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName);
+    Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName, CancellationToken cancellationToken = default);
 
-    Task<Dictionary<string, IShopImportSettings>> GetAllShopImportSettings();
+    Task<Dictionary<string, IShopImportSettings>> GetAllShopImportSettings(CancellationToken cancellationToken = default);
 }

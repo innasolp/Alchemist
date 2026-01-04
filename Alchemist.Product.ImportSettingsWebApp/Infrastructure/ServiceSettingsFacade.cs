@@ -26,19 +26,22 @@ internal class ServiceSettingsFacade(ISettingsDataAdapter productSettingsDataAda
 
         return service;
     }
-    public async Task<ServiceSettingsModel> GetServiceSettingsAsync(string serviceName, int shopId, ShopSettingType shopSettingsType)
+    public async Task<ServiceSettingsModel> GetServiceSettingsAsync(string serviceName, int shopId, ShopSettingType shopSettingsType, 
+        CancellationToken cancellationToken = default)
     {
-        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType);
+        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType, cancellationToken);
         return GetServiceSettings(shopImportSettings, serviceName, null);
     }
 
-    public async Task<ServiceSettingsModel> GetServiceSettingsAsync(Guid guid, int shopId, ShopSettingType shopSettingsType)
+    public async Task<ServiceSettingsModel> GetServiceSettingsAsync(Guid guid, int shopId, ShopSettingType shopSettingsType, 
+        CancellationToken cancellationToken = default)
     {
-        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType);
+        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType, cancellationToken);
         return GetServiceSettings(shopImportSettings, null, guid);
     }
 
-    private ServiceSettingsModel AddNewService(ShopImportSettingsModel shopImportSettings, string? serviceName, ServiceSettingsModel data)
+    private static ServiceSettingsModel AddNewService(ShopImportSettingsModel shopImportSettings, string? serviceName, 
+        ServiceSettingsModel data)
     {
         var newService = new ServiceSettingsModel { Name = serviceName ?? data.Name };
         newService.Update(data);
@@ -48,9 +51,10 @@ internal class ServiceSettingsFacade(ISettingsDataAdapter productSettingsDataAda
 
     private async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType,
         string serviceName, Guid? guid, ServiceSettingsModel data, 
-        Func<ShopImportSettingsModel, ServiceSettingsModel?> getExistingService)
+        Func<ShopImportSettingsModel, ServiceSettingsModel?> getExistingService
+        , CancellationToken cancellationToken = default)
     {
-        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType);
+        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType, cancellationToken);
 
         if (shopImportSettings == null //todo
             || shopImportSettings.ShopImportSettingsIsEmpty())
@@ -78,21 +82,23 @@ internal class ServiceSettingsFacade(ISettingsDataAdapter productSettingsDataAda
         return result;
     }
 
-    public async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, string name, ServiceSettingsModel data)
+    public async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, string name, 
+        ServiceSettingsModel data,
+        CancellationToken cancellationToken = default)
     {
-        return await SetServiceSettingsAsync(shopId, shopSettingsType, name, null, data,
-            (shopImportSettings)=>shopImportSettings.GetService<ServiceSettingsModel>(name));
+        return await SetServiceSettingsAsync(shopId, shopSettingsType, name, null, data, (shopImportSettings)=>shopImportSettings.GetService<ServiceSettingsModel>(name), cancellationToken);
     }
 
-    public async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, Guid guid, ServiceSettingsModel data)
+    public async Task<ServiceSettingsModel> SetServiceSettingsAsync(int shopId, ShopSettingType shopSettingsType, Guid guid,
+        ServiceSettingsModel data,
+        CancellationToken cancellationToken = default)
     {
-        return await SetServiceSettingsAsync(shopId, shopSettingsType, data.Name, guid, data,
-            (shopImportSettings) => shopImportSettings.GetService(guid));
+        return await SetServiceSettingsAsync(shopId, shopSettingsType, data.Name, guid, data, (shopImportSettings) => shopImportSettings.GetService(guid), cancellationToken);
     }
 
-    public async Task<bool> IsChanged(int shopId, ShopSettingType shopSettingsType, ServiceSettingsModel data)
+    public async Task<bool> IsChanged(int shopId, ShopSettingType shopSettingsType, ServiceSettingsModel data, CancellationToken cancellationToken = default)
     {
-        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType);
+        var shopImportSettings = await GetCurrentShopImportSettingsAsync(shopId, shopSettingsType, cancellationToken);
         if (shopImportSettings == null)
             return !data.IsEmpty();
 

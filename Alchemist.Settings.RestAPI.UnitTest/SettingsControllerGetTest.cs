@@ -41,20 +41,20 @@ public class SettingsControllerGetTest
     {
         _settingsController = new SettingsController(_logger, _settingsRepository.Object, _messageSender.Object);
 
-        _settingsRepository.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>()))
-            .Returns((int shopId, ShopSettingType shopSettingType) =>
+        _settingsRepository.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<ShopSettingType>(), It.IsAny<CancellationToken>()))
+            .Returns((int shopId, ShopSettingType shopSettingType, CancellationToken cancellationToken = default) =>
             {
                 return Task.FromResult((IShopSettings)_shopSettings.FirstOrDefault(s => s.ShopId == shopId && s.Type == shopSettingType));
             });
         
-        _settingsRepository.Setup(s => s.GetShopSettings(It.IsAny<int>()))
-            .Returns((int id) =>
+        _settingsRepository.Setup(s => s.GetShopSettings(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns((int id, CancellationToken cancellationToken = default) =>
             {
                 return Task.FromResult((IShopSettings)_shopSettings.FirstOrDefault(s => s.Id == id));
             });
 
-        _settingsRepository.Setup(s => s.GetChildSettings(It.IsAny<int>()))
-            .Returns((int parentSettingsId) =>
+        _settingsRepository.Setup(s => s.GetChildSettings(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns((int parentSettingsId, CancellationToken cancellationToken = default) =>
             {
                 return Task.FromResult(_shopSettings.Where(s => s.ParentSettingsId == parentSettingsId).OfType<IShopSettings>().ToList());
             });

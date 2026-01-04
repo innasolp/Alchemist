@@ -14,18 +14,18 @@ public class ShopControllerPostTest: ControllerTest<ShopController, Shop>
 
     public ShopControllerPostTest(ITestOutputHelper testOutputHelper):base(testOutputHelper)
     {
-        _alchemyRepository.Setup(r => r.CreateShop(It.IsAny<Shop>())).Returns(CreateShop);
-        _alchemyRepository.Setup(r => r.UpdateShop(It.IsAny<Shop>())).Returns(UpdateShop);
+        _alchemyRepository.Setup(r => r.CreateShop(It.IsAny<Shop>(), It.IsAny<CancellationToken>())).Returns(CreateShop);
+        _alchemyRepository.Setup(r => r.UpdateShop(It.IsAny<Shop>(), It.IsAny<CancellationToken>())).Returns(UpdateShop);
     }
 
-    private async Task<IShop> CreateShop(IShop shop)
+    private async Task<IShop> CreateShop(IShop shop, CancellationToken cancellationToken = default)
     {
         var newShop = shop.To<Shop>();
         newShop.Id += 1;
         return await Task.FromResult(newShop);
     }
     
-    private async Task<IShop> UpdateShop(IShop shop)
+    private async Task<IShop> UpdateShop(IShop shop, CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(shop.To<Shop>());
     }

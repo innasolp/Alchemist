@@ -4,22 +4,23 @@ namespace Alchemist.DataService.Interfaces;
 
 public interface IShopDataService
 {
-    Task<List<IShop>> GetShops();
-    Task<IShop> CreateShop(IShop shop);
+    Task<List<IShop>> GetShops(CancellationToken cancellationToken = default);
 
-    Task<IShop> UpdateShop(IShop shop);
+    Task<IShop> CreateShop(IShop shop, CancellationToken cancellationToken = default);
 
-    Task<IShop?> GetShop(int id);    
+    Task<IShop> UpdateShop(IShop shop, CancellationToken cancellationToken = default);
 
-    Task<IShopCategory> AddShopCategory(IShopCategory shopCategory);
+    Task<IShop?> GetShop(int id, CancellationToken cancellationToken = default);    
 
-    Task<List<IShopCategory>> GetShopCategories(int shopId);
+    Task<IShopCategory> AddShopCategory(IShopCategory shopCategory, CancellationToken cancellationToken = default);
 
-    Task<IShop?> GetShopByName(string name);
+    Task<List<IShopCategory>> GetShopCategories(int shopId, CancellationToken cancellationToken = default);
 
-    Task<IShop?> GetShopByUrl(string url);
+    Task<IShop?> GetShopByName(string name, CancellationToken cancellationToken = default);
 
-    Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId);
+    Task<IShop?> GetShopByUrl(string url, CancellationToken cancellationToken = default);
 
-    Task<List<IShopCategory>> GetAllCategoryChildren(int parentId);
+    Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId, CancellationToken cancellationToken = default);
+
+    Task<List<IShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default);
 }

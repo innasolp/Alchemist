@@ -7,342 +7,292 @@ namespace Alchemist.Product.Data.Repository;
 
 public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAsyncDisposable
 {
-    protected AlchemyContext Context { get; set; } = context;
+    protected AlchemyContext Context { get; } = context;
 
-    public async Task<IBrand> CreateBrand(IBrand brand)
+    public async Task<IBrand> CreateBrand(IBrand brand, CancellationToken cancellationToken = default)
     {
         var brandEntity = brand.To<Brand>();
-        return await Context.Create(brandEntity);
+        return await Context.Create(brandEntity, cancellationToken);
     }
 
-    public async Task<IComponent> CreateComponent(IComponent component)
+    public async Task<IComponent> CreateComponent(IComponent component, CancellationToken cancellationToken = default)
     {
         var componentEntity = component.To<Component>();
-        return await Context.Create(componentEntity);
+        return await Context.Create(componentEntity, cancellationToken);
     }
 
-    public async Task<IComponentGroup> CreateComponentGroup(IComponentGroup componentGroup)
+    public async Task<IComponentGroup> CreateComponentGroup(IComponentGroup componentGroup, CancellationToken cancellationToken = default)
     {
         var componentGroupEntity = componentGroup.To<ComponentGroup>();
-        return await Context.Create(componentGroupEntity);
+        return await Context.Create(componentGroupEntity, cancellationToken);
     }
 
-    public async Task<ICountry> CreateCountry(ICountry country)
+    public async Task<ICountry> CreateCountry(ICountry country, CancellationToken cancellationToken = default)
     {
         var countryEntity = country.To<Country>();
-        return await Context.Create(countryEntity);
+        return await Context.Create(countryEntity, cancellationToken);
     }
 
-    public async Task<IProduct> CreateProduct(IProduct product)
+    public async Task<IProduct> CreateProduct(IProduct product, CancellationToken cancellationToken = default)
     {
         var productEntity = product.To<Product>();
-        return await Context.Create(productEntity);
+        return await Context.Create(productEntity, cancellationToken);
     }
 
-    public async Task<IPurposeType> CreatePurposeType(IPurposeType purposeType)
+    public async Task<IPurposeType> CreatePurposeType(IPurposeType purposeType, CancellationToken cancellationToken = default)
     {
         var purposeTypeEntity = purposeType.To<PurposeType>();
-        return await Context.Create(purposeTypeEntity);
+        return await Context.Create(purposeTypeEntity, cancellationToken);
     }
 
-    public async Task<IShop> CreateShop(IShop shop)
+    public async Task<IShop> CreateShop(IShop shop, CancellationToken cancellationToken = default)
     {
         var shopEntity = shop.To<Shop>();
-        return await Context.Create(shopEntity);
+        return await Context.Create(shopEntity, cancellationToken);
     }
 
-    public List<IBrand> GetBrands()
+    public List<IBrand> GetBrands() => [.. Context.Brands.ToList().OfType<IBrand>()];
+
+    public async Task<IComponent?> GetComponent(int id, CancellationToken cancellationToken = default)
     {
-        return [.. Context.Brands.OfType<IBrand>()];
-    }
+        return await Context.GetById<Component, int>(id, cancellationToken);
+    }    
 
-    public async Task<IComponent?> GetComponent(int id)
+    public async Task<IProduct?> GetProduct(long id, CancellationToken cancellationToken = default)
     {
-        return await Context.GetById<Component, int>(id);
-    }
+        return await Context.GetById<Product, long>(id, cancellationToken);
+    }    
 
-    public List<IComponentGroup> GetComponentGroups()
+    public async Task<IShop?> GetShop(int id, CancellationToken cancellationToken = default)
     {
-        return [.. Context.ComponentGroups.OfType<IComponentGroup>()];
+        return await Context.GetById<Shop, int>(id, cancellationToken);
     }
 
-    public List<IComponentGroup> GetComponentGroupsByParent(int parentGroupId)
+    public async Task<List<IShop>> GetShops(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await Context.Shops.ToListAsync(cancellationToken).ContinueWith(t => t.Result.OfType<IShop>().ToList(), cancellationToken);
     }
 
-    public List<IComponentGroup> GetComponentGroupsByPurposeType(int purposeTypeId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public List<IComponent> GetComponents()
-    {
-        return [.. Context.Components.OfType<IComponent>()];
-    }
-
-    public List<IComponent> GetComponentsByGroup(int groupId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public List<IComponent> GetComponentsByPurposeType(short purposeTypeId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public List<ICountry> GetCountries()
-    {
-        return [.. Context.Countries.OfType<ICountry>()];
-    }
-
-    public async Task<IProduct?> GetProduct(long id)
-    {
-        return await Context.GetById<Product, long>(id);
-    }
-
-    public List<IProduct> GetProductsByShop(int shopId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public List<IProductType> GetProductTypes()
-    {
-        return [.. Context.ProductTypes.OfType<IProductType>()];
-    }
-
-    public List<IPurposeType> GetPurposeTypes()
-    {
-        return [.. Context.PurposeTypes.OfType<IPurposeType>()];
-    }
-
-    public async Task<IShop?> GetShop(int id)
-    {
-        return await Context.GetById<Shop, int>(id);
-    }
-
-    public async Task<List<IShop>> GetShops()
-    {
-        return await Context.Shops.OfType<IShop>().ToListAsync();
-    }
-
-    public async Task<IProductType> CreateProductType(IProductType productType)
+    public async Task<IProductType> CreateProductType(IProductType productType, CancellationToken cancellationToken = default)
     {
         var productTypeEntity = productType.To<ProductType>();
-        return await Context.Create(productTypeEntity);
+        return await Context.Create(productTypeEntity, cancellationToken);
     }
 
-    public async Task<List<IShopCategory>> GetShopCategories(int shopId)
+    public async Task<List<IShopCategory>> GetShopCategories(int shopId, CancellationToken cancellationToken = default)
     {
-        var shopCategories = await Context.ShopCategories.Where(su => su.ShopId == shopId).OfType<IShopCategory>().ToListAsync();
-        return shopCategories;
+        var shopCategories = await Context.ShopCategories.Where(su => su.ShopId == shopId).ToListAsync(cancellationToken);
+        return [.. shopCategories.OfType<IShopCategory>()];
     }
 
-    public async Task<IShopCategory> AddShopCategory(IShopCategory shopCategory)
+    public async Task<IShopCategory> AddShopCategory(IShopCategory shopCategory, CancellationToken cancellationToken = default)
     {
         var shopCategoryEntity = shopCategory.To<ShopCategory>();
-        return await Context.Create(shopCategoryEntity);
+        return await Context.Create(shopCategoryEntity, cancellationToken);
     }
 
-    public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId)
+    public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId, CancellationToken cancellationToken = default)
     {
         var shopProductCategoryEntity = new ShopProductCategory { ShopProductId = shopProductId, ShopCategoryId = shopCategoryId };
-        return await Context.Create(shopProductCategoryEntity);
+        return await Context.Create(shopProductCategoryEntity, cancellationToken);
     }
 
-    public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId)
+    public async Task<bool> CheckShopProductCategory(long shopProductId, int shopCategoryId, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopProductCategories.AnyAsync(s => s.ShopProductId == shopProductId && s.ShopCategoryId == s.ShopCategoryId);
+        return await Context.ShopProductCategories.AnyAsync(s => s.ShopProductId == shopProductId && s.ShopCategoryId == shopCategoryId, cancellationToken);
     }
 
-    public async Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId)
+    public async Task<List<IShopProductCategory>> GetShopProductCategories(long shopProductId, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopProductCategories.Where(s => s.ShopProductId == shopProductId).OfType<IShopProductCategory>().ToListAsync();
+        var list = await Context.ShopProductCategories.Where(s => s.ShopProductId == shopProductId).ToListAsync(cancellationToken);
+        return [.. list.OfType<IShopProductCategory>()];
     }
 
-    public async Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopProductCategory)
+    public async Task<IShopProductCategory> AddShopProductCategory(IShopProductCategory shopProductCategory, CancellationToken cancellationToken = default)
     {
         var shopProductCategoryEntity = shopProductCategory.To<ShopProductCategory>();
-        return await Context.Create(shopProductCategoryEntity);
+        return await Context.Create(shopProductCategoryEntity, cancellationToken);
     }
 
-    public async Task<IShop?> GetShopByName(string name)
+    public async Task<IShop?> GetShopByName(string name, CancellationToken cancellationToken = default)
     {
-        var shops = await Context.Shops.Where(s => s.Name.ToLower() == name.ToLower()).ToListAsync();
+        //StringComparison not available in EF Core queries
+        var shops = await Context.Shops.Where(s => s.Name.ToUpper() == name.ToUpper()).ToListAsync(cancellationToken);
         if (shops.Count > 1)
-            throw new Exception(string.Format($"multiple shops with name {name}"));
-        return await Task.FromResult(shops.FirstOrDefault());
+            throw new Exception($"multiple shops with name {name}");
+        return shops.FirstOrDefault();
     }
 
-    public async Task<IShop?> GetShopByUrl(string url)
+    public async Task<IShop?> GetShopByUrl(string url, CancellationToken cancellationToken = default)
     {
-        var shops = await Context.Shops.Where(s => s.Url.ToLower() == url.ToLower()).ToListAsync();
+        //StringComparison not available in EF Core queries
+        var shops = await Context.Shops.Where(s => s.Url.ToUpper() ==url.ToUpper()).ToListAsync(cancellationToken);
         if (shops.Count > 1)
-            throw new Exception(string.Format($"multiple shops with url {0}"));
-        return await Task.FromResult(shops.FirstOrDefault());
+            throw new Exception($"multiple shops with url {url}");
+        return shops.FirstOrDefault();
     }
 
-    public async Task<IShopProduct> CreateShopProduct(IShopProduct shopProduct)
+    public async Task<IShopProduct> CreateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default)
     {
         var shopProductEntity = shopProduct.To<ShopProduct>();
-        return await Context.Create(shopProductEntity);
+        return await Context.Create(shopProductEntity, cancellationToken);
     }
 
-    public async Task<IProductType?> FindProductTypeByName(string name)
+    public async Task<IProductType?> FindProductTypeByName(string name, CancellationToken cancellationToken = default)
     {
-        return await Context.FindByName<ProductType, short>(name);
+        return await Context.FindByName<ProductType, short>(name, cancellationToken);
     }
 
-    public async Task<IPurposeType?> FindPurposeTypeByName(string name)
+    public async Task<IPurposeType?> FindPurposeTypeByName(string name, CancellationToken cancellationToken = default)
     {
-        return await Context.FindByName<PurposeType, short>(name);
+        return await Context.FindByName<PurposeType, short>(name, cancellationToken);
     }
 
-    public async Task<ICountry?> FindCountryByName(string name)
+    public async Task<ICountry?> FindCountryByName(string name, CancellationToken cancellationToken = default)
     {
-        return await Context.FindByName<Country, short>(name);
+        return await Context.FindByName<Country, short>(name, cancellationToken);
     }
 
-    public async Task<IBrand?> FindBrandByName(string name)
+    public async Task<IBrand?> FindBrandByName(string name, CancellationToken cancellationToken = default)
     {
-        return await Context.FindByName<Brand, int>(name);
+        return await Context.FindByName<Brand, int>(name, cancellationToken);
     }
 
-    public async Task<IComponent?> FindComponentByName(string name)
+    public async Task<IComponent?> FindComponentByName(string name, CancellationToken cancellationToken = default)
     {
-        return await Context.FindByName<Component, int>(name);
+        return await Context.FindByName<Component, int>(name, cancellationToken);
     }
 
-    public async Task<IProduct?> FindProductByName(string name)
+    public async Task<IProduct?> FindProductByName(string name, CancellationToken cancellationToken = default)
     {
-        return await Context.FindByName<Product, long>(name, (p) => [p.Transcript ?? ""]);
+        return await Context.FindByName<Product, long>(name, p => [p.Transcript ?? string.Empty], cancellationToken);
     }
 
-    public async Task<IProduct?> FindProductByNameAndBrand(string name, string brand)
+    public async Task<IProduct?> FindProductByNameAndBrand(string name, string brand, CancellationToken cancellationToken = default)
     {
-        var brands = await Context.Brands.Where(b => b.Name.Trim().ToUpper() == brand.Trim().ToUpper()).ToListAsync();
+        //StringComparison not available in EF Core queries
+        var brands = await Context.Brands.Where(b => b.Name.Trim().ToUpper() == brand.Trim().ToUpper()).ToListAsync(cancellationToken);
         if (brands.Count == 0) return default;
-        var products = await Context.Products.Where(p => p.Name.Trim().ToUpper() == name.Trim().ToUpper()).ToListAsync();
-        products = [.. products.Where(p => brands.Any(b => b.Id == p.Id))];
+        var products = await Context.Products.Where(p => p.Name.Trim().ToUpper() == name.Trim().ToUpper()).ToListAsync(cancellationToken);
+        products = [.. products.Where(p => brands.Any(b => b.Id == p.BrandId))];
         return products.Count > 1
             ? throw new WarningException($"multiple products with name {name} and brand {brand}", products.FirstOrDefault())
-            : (IProduct?)await Task.FromResult(products.FirstOrDefault());
+            : (IProduct?)products.FirstOrDefault();
     }
 
-    public async Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl)
+    public async Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ApiUrl.Trim() == apiUrl.Trim()).FirstOrDefaultAsync();
+        return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ApiUrl.Trim() == apiUrl.Trim()).FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId)
+    public async Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ItemId.Trim() == itemId.Trim()).FirstOrDefaultAsync();
+        return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ItemId.Trim() == itemId.Trim()).FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId)
+    public async Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ProductId == productId).FirstOrDefaultAsync();
+        return await Context.ShopProducts.Where(sp => sp.ShopId == shopId && sp.ProductId == productId).FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<bool> UpdateShopProduct(IShopProduct shopProduct)
+    public async Task<bool> UpdateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default)
     {
         var shopProductEntity = shopProduct.To<ShopProduct>();
         var updated = Context.ShopProducts.Update(shopProductEntity);
-        var savedCount = await Context.SaveChangesAsync();
-        return await Task.FromResult(savedCount >= 1);
+        var savedCount = await Context.SaveChangesAsync(cancellationToken);
+        return savedCount >= 1;
     }
 
-    public async Task<IProductComponent> SetProductComponent(IProductComponent productComponent)
+    public async Task<IProductComponent> SetProductComponent(IProductComponent productComponent, CancellationToken cancellationToken = default)
     {
-        var existed = await Context.ProductComponents.FindAsync(productComponent.ProductId, productComponent.ComponentId);
+        var existed = await Context.ProductComponents.FindAsync([productComponent.ProductId, productComponent.ComponentId], cancellationToken);
 
         if (existed == null)
         {
             var entity = productComponent.To<ProductComponent>();
-            return await Context.Create(entity);
+            return await Context.Create(entity, cancellationToken);
         }
         else if (existed.SequalNumber != productComponent.SequalNumber)
         {
             existed.SequalNumber = productComponent.SequalNumber;
-            var updated = Context.Update(existed);
-            var savedCount = await Context.SaveChangesAsync();
-            return await Task.FromResult(existed);
+            Context.Update(existed);
+            await Context.SaveChangesAsync(cancellationToken);
+            return existed;
         }
 
-        return await Task.FromResult(existed);
+        return existed;
     }
 
-    public async Task<ICurrency?> GetCurrencyByName(string name)
+    public async Task<ICurrency?> GetCurrencyByName(string name, CancellationToken cancellationToken = default)
     {
-        return await Context.FindByName<Currency, short>(name);
+        return await Context.FindByName<Currency, short>(name, cancellationToken);
     }
 
-    public async Task<ICurrency> CreateCurrency(ICurrency currency)
+    public async Task<ICurrency> CreateCurrency(ICurrency currency, CancellationToken cancellationToken = default)
     {
         var currencyEntity = currency.To<Currency>();
-        return await Context.Create(currencyEntity);
+        return await Context.Create(currencyEntity, cancellationToken);
     }
 
-    public async Task<ICurrency?> GetCurrencyByCode(short code)
+    public async Task<ICurrency?> GetCurrencyByCode(short code, CancellationToken cancellationToken = default)
     {
-        var entities = Context.Currencies.Where(e => e.Code == code).ToList();
+        var entities = await Context.Currencies.Where(e => e.Code == code).ToListAsync(cancellationToken);
         return entities.Count > 1
             ? throw new WarningException($"multiple currencies with code {code}", entities.FirstOrDefault())
-            : (ICurrency?)await Task.FromResult(entities.FirstOrDefault());
+            : (ICurrency?)entities.FirstOrDefault();
     }
 
-    public async Task<bool> UpdateShopProductPrice(IShopProductPrice shopProductPrice)
+    public async Task<bool> UpdateShopProductPrice(IShopProductPrice shopProductPrice, CancellationToken cancellationToken = default)
     {
         var entity = shopProductPrice.To<ShopProductPrice>();
-        var updated = Context.ShopProductPrices.Update(entity);
-        var savedCount = await Context.SaveChangesAsync();
-        return await Task.FromResult(savedCount >= 1);
+        Context.ShopProductPrices.Update(entity);
+        var savedCount = await Context.SaveChangesAsync(cancellationToken);
+        return savedCount >= 1;
     }
 
-    public async Task<IShopProductPrice> CreateShopProductPrice(IShopProductPrice shopProductPrice)
+    public async Task<IShopProductPrice> CreateShopProductPrice(IShopProductPrice shopProductPrice, CancellationToken cancellationToken = default)
     {
         var entity = shopProductPrice.To<ShopProductPrice>();
-        return await Context.Create(entity);
+        return await Context.Create(entity, cancellationToken);
     }
 
-    public async Task<IShopProductPrice?> GetShopProductPrice(long shopProductId)
+    public async Task<IShopProductPrice?> GetShopProductPrice(long shopProductId, CancellationToken cancellationToken = default)
     {
-        return await Context.ShopProductPrices.FirstOrDefaultAsync(spp => spp.ShopProductId == shopProductId);
+        return await Context.ShopProductPrices.FirstOrDefaultAsync(spp => spp.ShopProductId == shopProductId, cancellationToken);
     }
 
-    public async Task<IShopCategory?> GetShopCategory(int shopId, int itemId)
+    public async Task<IShopCategory?> GetShopCategory(int shopId, int itemId, CancellationToken cancellationToken = default)
     {
-        var shopCategory = await Context.ShopCategories.FirstOrDefaultAsync(sc => sc.ShopId == shopId && sc.ItemId == itemId);
-        return shopCategory;
+        return await Context.ShopCategories.FirstOrDefaultAsync(sc => sc.ShopId == shopId && sc.ItemId == itemId, cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
     {
         await Context.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 
-    public async Task<IShop> UpdateShop(IShop shop)
+    public async Task<IShop> UpdateShop(IShop shop, CancellationToken cancellationToken = default)
     {
         var shopEntity = shop.To<Shop>();
         var updated = Context.Shops.Update(shopEntity);
-        var savedCount = await Context.SaveChangesAsync();
+        await Context.SaveChangesAsync(cancellationToken);
         return updated.Entity;
     }
 
     private readonly SemaphoreSlim _addCategoryChildrenSemaphore = new(1, 1);
-    public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId)
+
+    public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
     {
         var children = await Context.ShopCategories
-            .Where(c => c.ParentId == parentId).ToListAsync();
-
-        var tokenSource = new CancellationTokenSource();
+            .Where(c => c.ParentId == parentId).ToListAsync(cancellationToken);
 
         var result = new List<IShopCategory>();
 
         foreach (var child in children)
         {
-            var categoryChildren = await GetCategoryChildrenTree(child.Id, tokenSource.Token);
-            await AddCategoryChildren(result, categoryChildren, tokenSource.Token);
+            var categoryChildren = await GetCategoryChildrenTree(child.Id, cancellationToken);
+            await AddCategoryChildren(result, categoryChildren, cancellationToken);
         }
 
         return [.. children.Union(result)];
@@ -351,13 +301,19 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
     private async Task AddCategoryChildren(List<IShopCategory> categories, IEnumerable<IShopCategory> children, CancellationToken token)
     {
         await _addCategoryChildrenSemaphore.WaitAsync(token);
-        categories.AddRange(children);
-        _addCategoryChildrenSemaphore.Release();
+        try
+        {
+            categories.AddRange(children);
+        }
+        finally
+        {
+            _addCategoryChildrenSemaphore.Release();
+        }
     }
 
     private async Task<List<IShopCategory>> GetCategoryChildrenTree(int parentId, CancellationToken token)
     {
-        var children = await Context.ShopCategories.Where(c => c.ParentId == parentId).ToListAsync(cancellationToken: token);
+        var children = await Context.ShopCategories.Where(c => c.ParentId == parentId).ToListAsync(token);
 
         var next = new List<IShopCategory>();
 
@@ -370,28 +326,33 @@ public class AlchemyRepository(AlchemyContext context) : IAlchemyRepository, IAs
         return [.. next.Union(children)];
     }
 
-    public async Task<List<IPurposeType>> GetProductPurposes(long productId)
+    public async Task<List<IPurposeType>> GetProductPurposes(long productId, CancellationToken cancellationToken = default)
     {
-        var purposeTypes = await Context.ProductPurposes.Where(pp => pp.ProductId == productId).Join(Context.PurposeTypes, pp => pp.PurposeTypeId, pt => pt.Id,
-                 (pp, pt) => new PurposeType { Id = pt.Id, Name = pt.Name }).ToListAsync();
+        var purposeTypes = await Context.ProductPurposes
+            .Where(pp => pp.ProductId == productId)
+            .Join(Context.PurposeTypes, pp => pp.PurposeTypeId, pt => pt.Id,
+                  (pp, pt) => new PurposeType { Id = pt.Id, Name = pt.Name })
+            .ToListAsync(cancellationToken);
 
-        return await Task.FromResult(purposeTypes.OfType<IPurposeType>().ToList());
+        return [.. purposeTypes.OfType<IPurposeType>()];
     }
 
-    public async Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose)
+    public async Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose, CancellationToken cancellationToken = default)
     {
         var existed = await Context.ProductPurposes.FirstOrDefaultAsync(
-            pp => pp.ProductId == productPurpose.ProductId && pp.PurposeTypeId == productPurpose.PurposeTypeId);
+            pp => pp.ProductId == productPurpose.ProductId && pp.PurposeTypeId == productPurpose.PurposeTypeId,
+            cancellationToken);
 
         if (existed == null)
         {
             var entity = productPurpose.To<ProductPurpose>();
-            return await Context.Create(entity);
+            return await Context.Create(entity, cancellationToken);
         }
         else
         {
             var updated = Context.Update(existed);
-            return await Task.FromResult(updated.Entity);
+            await Context.SaveChangesAsync(cancellationToken);
+            return updated.Entity;
         }
     }
 }

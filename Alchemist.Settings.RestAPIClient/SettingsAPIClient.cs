@@ -30,98 +30,91 @@ public class SettingsAPIClient : IShopSettingsDataService
             new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
-    //public SettingsAPIClient(HttpClient httpClient)
-    //{
-    //    _httpClient = httpClient;
-    //    _httpClient.DefaultRequestHeaders.Accept.Clear();
-    //    _httpClient.DefaultRequestHeaders.Accept.Add(
-    //        new MediaTypeWithQualityHeaderValue("application/json"));
-    //}
-    //public SettingsAPIClient(IHttpClientFactory httpClientFactory, [FromKeyedServices(nameof(SettingsAPIClient))] string apiHost)
-    //    :this(httpClientFactory.CreateClient(apiHost))
-    //{
-    //}
-
-    public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType)
+    public async Task<IShopSettings?> GetShopSettings(int shopId, ShopSettingType settingType, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/byShopId/{shopId}/{(int)settingType}");
+        var response = await _httpClient.GetAsync($"api/Settings/byShopId/{shopId}/{(int)settingType}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(ShopSettings));
+            return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopSettings?>();
+        return await response.Content.ReadFromJsonAsync<ShopSettings?>(cancellationToken: cancellationToken);
     }
 
-    public async Task<IShopSettings?> GetShopSettings(int id)
+    public async Task<IShopSettings?> GetShopSettings(int id, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/byId/{id}");
+        var response = await _httpClient.GetAsync($"api/Settings/byId/{id}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(ShopSettings));
+            return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopSettings?>();
+        return await response.Content.ReadFromJsonAsync<ShopSettings?>(cancellationToken: cancellationToken);
     }
 
-    public async Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings)
+    public async Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/Settings", shopSettings.To<ShopSettings>());
+        var response = await _httpClient.PostAsJsonAsync($"api/Settings", shopSettings.To<ShopSettings>(), cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopSettings>();
+        return await response.Content.ReadFromJsonAsync<ShopSettings>(cancellationToken: cancellationToken);
     }
 
-    public async Task<List<IShopSettings>> SaveShopSettings(IShopSettings parentShopSettings, IEnumerable<IShopSettings> childrenSettings)
+    public async Task<List<IShopSettings>> SaveShopSettings(IShopSettings parentShopSettings, IEnumerable<IShopSettings> childrenSettings, CancellationToken cancellationToken = default)
     {
-        var shopSettingsWithServices = new ArrayList() { 
-            parentShopSettings.To<ShopSettings>(), 
-            childrenSettings.Select(s => s.To<ShopSettings>()).ToArray() };
-        
-        var response = await _httpClient.PostAsJsonAsync($"api/Settings/save", shopSettingsWithServices);
+        var shopSettingsWithServices = new ArrayList()
+        {
+            parentShopSettings.To<ShopSettings>(),
+            childrenSettings.Select(s => s.To<ShopSettings>()).ToArray()
+        };
+
+        var response = await _httpClient.PostAsJsonAsync($"api/Settings/save", shopSettingsWithServices, cancellationToken);
         response.EnsureSuccessStatusCode();
-        
-        var result = await response.Content.ReadFromJsonAsync<ArrayList>();
+
+        var result = await response.Content.ReadFromJsonAsync<ArrayList>(cancellationToken: cancellationToken);
         if (result != null && result.Count >= 2)
         {
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
             var resultShopSettings = JsonSerializer.Deserialize<ShopSettings>(result[0].ToString(), options);
-            var data = new List<IShopSettings> { resultShopSettings };
+            var data = new List<IShopSettings>();
+            if (resultShopSettings != null)
+                data.Add(resultShopSettings);
 
-            var resultServices = JsonSerializer.Deserialize<ShopSettings[]>(result[1].ToString(), options);
+            var resultServices = JsonSerializer.Deserialize<ShopSettings[]>(result[1].ToString(), options) ?? [];
             data.AddRange(resultServices);
 
-            return await Task.FromResult(data);
+            return data;
         }
 
-        return await Task.FromResult(default(List<IShopSettings>));
+        return [];
     }
 
-    public async Task<bool> UpdateShopSettings(IShopSettings shopSettings)
+    public async Task<bool> UpdateShopSettings(IShopSettings shopSettings, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/Settings/update", shopSettings.To<ShopSettings>());
+        var response = await _httpClient.PutAsJsonAsync($"api/Settings/update", shopSettings.To<ShopSettings>(), cancellationToken);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<List<IShopSettings>> GetChildSettings(int parentSettingsId, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync($"api/Settings/childSettings/{parentSettingsId}", cancellationToken);
         response.EnsureSuccessStatusCode();
-        return true;
+        var list = await response.Content.ReadFromJsonAsync<List<ShopSettings>>(cancellationToken: cancellationToken);
+        return [.. (list ?? []).OfType<IShopSettings>()];
     }
 
-    public async Task<List<IShopSettings>> GetChildSettings(int parentSettingsId)
+    public async Task<IShopSettings?> GetShopSettings(string shopSettingsName, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/childSettings/{parentSettingsId}");
-        response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<List<ShopSettings>>())?.OfType<IShopSettings>().ToList() ?? [];
-    }
-
-    public async Task<IShopSettings?> GetShopSettings(string shopSettingsName)
-    {
-        var response = await _httpClient.GetAsync($"api/Settings/byName?name={shopSettingsName}");
+        var response = await _httpClient.GetAsync($"api/Settings/byName?name={Uri.EscapeDataString(shopSettingsName)}", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(ShopSettings));
+            return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ShopSettings?>();
+        return await response.Content.ReadFromJsonAsync<ShopSettings?>(cancellationToken: cancellationToken);
     }
 
-    public async Task<List<IShopSettings>> GetAllParentShopSettings()
+    public async Task<List<IShopSettings>> GetAllParentShopSettings(CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"api/Settings/allParents");
+        var response = await _httpClient.GetAsync($"api/Settings/allParents", cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            return await Task.FromResult(default(List<IShopSettings>));
+            return [];
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<List<ShopSettings>>())?.OfType<IShopSettings>().ToList() ?? [];
+        var list = await response.Content.ReadFromJsonAsync<List<ShopSettings>>(cancellationToken: cancellationToken);
+        return [.. (list ?? []).OfType<IShopSettings>()];
     }
 }

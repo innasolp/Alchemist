@@ -7,25 +7,25 @@ internal class ShopFacade(IShopDataService shopDataService)
 {
     private readonly IShopDataService _shopDataService = shopDataService;
 
-    public async Task<List<ShopModel>> GetShops()
+    public async Task<List<ShopModel>> GetShops(CancellationToken cancellationToken = default)
     {
-        var uploadedShops = await _shopDataService.GetShops();
+        var uploadedShops = await _shopDataService.GetShops(cancellationToken);
         var result = new List<ShopModel>();
         uploadedShops.ForEach(s => result.Add(s.To<ShopModel>()));
         return result;
     }
 
-    public async Task<ShopModel> GetShop(int shopId)
+    public async Task<ShopModel> GetShop(int shopId, CancellationToken cancellationToken = default)
     {
-        var shop = await _shopDataService.GetShop(shopId);
+        var shop = await _shopDataService.GetShop(shopId, cancellationToken);
         return shop?.To<ShopModel>() ?? new ShopModel();
     }
 
-    public async Task<ShopModel> SaveShop(IShop shop)
+    public async Task<ShopModel> SaveShop(IShop shop, CancellationToken cancellationToken = default)
     {  
         var savedShop = shop.Id == 0
-          ? await _shopDataService.CreateShop(shop) :
-            await _shopDataService.UpdateShop(shop);
+          ? await _shopDataService.CreateShop(shop, cancellationToken) :
+            await _shopDataService.UpdateShop(shop, cancellationToken);
 
         return savedShop.To<ShopModel>();
     }
