@@ -13,19 +13,19 @@ public static class ItemHandlerDependencyInjectionExtensions
         {
             var productDataService = serviceProvider.GetRequiredService<IProductDataService>();
             var shopDataService = serviceProvider.GetRequiredService<IShopDataService>();
-            var shopCache = serviceProvider.GetRequiredService<IShopCache>();
-            return new ImportProductItemHandler(productDataService, shopDataService, eventName, shopCache);
+            var shopCachedRepository = serviceProvider.GetRequiredService<IShopCachedRepository>();
+            return new ImportProductItemHandler(productDataService, shopDataService, eventName, shopCachedRepository);
         });
     }
 
     private static void AddShopCacheToServicesIfNeed(IServiceCollection services)
     {
-        var sd = services.FirstOrDefault(s => s.ServiceType == typeof(IShopCache));
+        var sd = services.FirstOrDefault(s => s.ServiceType == typeof(IShopCachedRepository));
         if (sd == null)
-            services.AddSingleton<IShopCache>((serviceProvider) =>
+            services.AddSingleton<IShopCachedRepository>((serviceProvider) =>
             {
                 var shopDataService = serviceProvider.GetRequiredService<IShopDataService>();
-                return new ShopCache(shopDataService);
+                return new ShopCachedRepository(shopDataService);
             });
     }
 
@@ -36,8 +36,8 @@ public static class ItemHandlerDependencyInjectionExtensions
         return services.AddSingleton<IImportItemHandler, ImportCategoryItemHandler>((serviceProvider) =>
         {
             var shopDataService = serviceProvider.GetRequiredService<IShopDataService>();
-            var shopCache = serviceProvider.GetRequiredService<IShopCache>();
-            return new ImportCategoryItemHandler(shopDataService, eventName, shopCache);
+            var shopCachedRepository = serviceProvider.GetRequiredService<IShopCachedRepository>();
+            return new ImportCategoryItemHandler(shopDataService, eventName, shopCachedRepository);
         });
     }
 }

@@ -22,7 +22,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopByUrlReturnsNotFoundWhenShopNameNotExistsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShopByUrl(It.IsAny<string>()));
+        var setup = _alchemyRepository.Setup(r => r.GetShopByUrl(It.IsAny<string>(), It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(IShop)));
 
         var url = "http://test";
@@ -37,7 +37,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
         var url = "http://test";
         var shop = new Shop() { Name = "test", Id= new Random().Next(100), Url = url };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShopByUrl(url));
+        var setup = _alchemyRepository.Setup(r => r.GetShopByUrl(url, It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult((IShop)shop));
         
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShopByUrl(url));
@@ -57,7 +57,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopByNameReturnsNotFoundWhenShopNameNotExistsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShopByName(It.IsAny<string>()));
+        var setup = _alchemyRepository.Setup(r => r.GetShopByName(It.IsAny<string>(), It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(IShop)));
 
         var name = "test";
@@ -72,7 +72,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
         var name = "test";
         var shop = new Shop() { Name = name, Id = new Random().Next(100) };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShopByName(name));
+        var setup = _alchemyRepository.Setup(r => r.GetShopByName(name, It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult((IShop)shop));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShopByName(name));
@@ -99,7 +99,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopByIdReturnsNotFoundWhenShopIdNotExistsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShop(It.IsAny<int>()));
+        var setup = _alchemyRepository.Setup(r => r.GetShop(It.IsAny<int>(), It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(IShop)));
 
         var id = new Random().Next(1000);
@@ -114,7 +114,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
         var name = "test";
         var shop = new Shop() { Name = name, Id = new Random().Next(100) };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShop(shop.Id));
+        var setup = _alchemyRepository.Setup(r => r.GetShop(shop.Id, It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult((IShop)shop));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShop(shop.Id));
@@ -126,7 +126,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopsReturnsNotFoundWhenNoShopsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShops());
+        var setup = _alchemyRepository.Setup(r => r.GetShops(It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(List<IShop>)));
        
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShops());
@@ -141,7 +141,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
             new Shop() { Name = Guid.NewGuid().ToString(), Id = new Random().Next(100) }
          };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShops());
+        var setup = _alchemyRepository.Setup(r => r.GetShops(It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(shops));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShops());

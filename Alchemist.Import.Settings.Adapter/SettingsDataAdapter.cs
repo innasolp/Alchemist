@@ -16,19 +16,19 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
 
     private readonly ShopSettingType _shopSettingType = shopSettingType;
 
-    public async Task<IShopImportSettings?> GetShopImportSettings(int shopId)
+    public async Task<IShopImportSettings?> GetShopImportSettings(int shopId, CancellationToken cancellationToken = default)
     {
-        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, _shopSettingType);
+        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopId, _shopSettingType, cancellationToken);
         if (shopSettings == null) return null;
-        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
+        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id, cancellationToken);
         return GetShopImportSettings(shopSettings, services);
     }
 
-    public async Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName)
+    public async Task<IShopImportSettings?> GetShopImportSettings(string shopSettingsName, CancellationToken cancellationToken = default)
     {
-        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopSettingsName);
+        var shopSettings = await _shopSettingsDataService.GetShopSettings(shopSettingsName, cancellationToken);
         if (shopSettings == null) return null;
-        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
+        var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id, cancellationToken);
         return GetShopImportSettings(shopSettings, services);
     }
 
@@ -62,7 +62,7 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         target.Name = source.Name;
     }
 
-    public async Task<TShopImportSettings> Save(TShopImportSettings shopSettingsModel)
+    public async Task<TShopImportSettings> Save(TShopImportSettings shopSettingsModel, CancellationToken cancellationToken = default)
     {
         var shopSettings = shopSettingsModel.To<ShopSettings>() as IShopSettings;
         shopSettings.JsonValue = JsonSerializer.Serialize(shopSettingsModel,
@@ -78,7 +78,7 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
             services.Add(service);
         }
 
-        var result = await _shopSettingsDataService.SaveShopSettings(shopSettings, services);
+        var result = await _shopSettingsDataService.SaveShopSettings(shopSettings, services,cancellationToken);
 
         var savedShopSettings = result.First();
         var savedServices = result.TakeLast(result.Count - 1);
@@ -87,13 +87,13 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         return savedShopImportSettings;
     }
 
-    public async Task<Dictionary<string,IShopImportSettings>> GetAllShopImportSettings()
+    public async Task<Dictionary<string,IShopImportSettings>> GetAllShopImportSettings(CancellationToken cancellationToken = default)
     {
-        var allParents = await _shopSettingsDataService.GetAllParentShopSettings();
+        var allParents = await _shopSettingsDataService.GetAllParentShopSettings(cancellationToken);
         var allShopImportSettings = new Dictionary<string,IShopImportSettings>();
         foreach (var shopSettings in allParents)
         {
-            var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id);
+            var services = await _shopSettingsDataService.GetChildSettings(shopSettings.Id, cancellationToken);
             var shopImportSettings = GetShopImportSettings(shopSettings, services);
             
             if(shopImportSettings != null)
@@ -102,11 +102,11 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         return allShopImportSettings;
     }
 
-    async Task<IShopImportSettings> ISettingsDataAdapter.Save(IShopImportSettings shopSettingsModel)
+    async Task<IShopImportSettings> ISettingsDataAdapter.Save(IShopImportSettings shopSettingsModel, CancellationToken cancellationToken)
     {
         if (shopSettingsModel is not TShopImportSettings shopImportSettings)
             throw new InvalidOperationException($"Shop settings type {shopSettingsModel.GetType().Name} not implement {typeof(TShopImportSettings).Name}.");
 
-        return await Save(shopImportSettings);
+        return await Save(shopImportSettings, cancellationToken);
     }
 }

@@ -46,8 +46,8 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
         var shop = new Shop { Id = 1, Name = productMessageMock.Object.ShopName, Url = productMessageMock.Object.ShopUrl };
 
         var shopCreateResetEvent = new AsyncAutoResetEvent();
-        _alchemyRepositoryMock.Setup(r => r.GetShopByName(productMessageMock.Object.ShopName))
-            .Returns(async (string name) =>
+        _alchemyRepositoryMock.Setup(r => r.GetShopByName(productMessageMock.Object.ShopName, It.IsAny<CancellationToken>()))
+            .Returns(async (string name, CancellationToken cancellationToken = default) =>
             {
                 shopCreateResetEvent.Set();
                 return await Task.FromResult(shop as IShop);
@@ -69,11 +69,11 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
 
         await shopCreateResetEvent.WaitAsync();
 
-        _alchemyRepositoryMock.Verify(r => r.GetShopByName(productMessageMock.Object.ShopName));
+        _alchemyRepositoryMock.Verify(r => r.GetShopByName(productMessageMock.Object.ShopName, It.IsAny<CancellationToken>()));
 
         await Task.Delay(500);
 
-        _alchemyRepositoryMock.Verify(r => r.GetShopProductByShopAndItemId(shop.Id, productMessageMock.Object.ShopProduct.ItemId));
+        _alchemyRepositoryMock.Verify(r => r.GetShopProductByShopAndItemId(shop.Id, productMessageMock.Object.ShopProduct.ItemId, It.IsAny<CancellationToken>()));
 
         WebAppFactory.GrpcWebAppFactory.ConfigureServices -= setTestRepository;
     }
@@ -94,7 +94,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
             Name = $"Product_{Guid.NewGuid()}",
             Articul = Guid.NewGuid().ToString()
         });
-        productDataMock.Setup(p => p.ShopProduct).Returns(new Entities.ShopProduct
+        productDataMock.Setup(p => p.ShopProduct).Returns(new ShopProduct
         {
             ShopId = 1,
             ApiUrl = Guid.NewGuid().ToString(),

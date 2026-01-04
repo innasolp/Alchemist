@@ -56,16 +56,17 @@ public class ShopActionControllerTest
             shop.Id = i;
         }
 
-        _shopDataServiceMock.Setup(s => s.GetShops()).Returns(Task.FromResult(shops));
-        _shopDataServiceMock.Setup(s => s.GetShop(It.IsAny<int>())).
-            Returns((int id) => Task.FromResult(shops.FirstOrDefault(s => s.Id == id)));
-        _shopDataServiceMock.Setup(s => s.CreateShop(It.IsAny<IShop>())).ReturnsAsync((IShop shop) =>
+        _shopDataServiceMock.Setup(s => s.GetShops(It.IsAny<CancellationToken>())).Returns(Task.FromResult(shops));
+        _shopDataServiceMock.Setup(s => s.GetShop(It.IsAny<int>(), It.IsAny<CancellationToken>())).
+            Returns((int id, CancellationToken cancellationToken) => Task.FromResult(shops.FirstOrDefault(s => s.Id == id)));
+        _shopDataServiceMock.Setup(s => s.CreateShop(It.IsAny<IShop>(), It.IsAny<CancellationToken>())).ReturnsAsync((IShop shop, CancellationToken token) =>
         {
             shop.Id = shops.Count + 1;
             shops.Add(shop);
             return shop;
         });
-        _shopDataServiceMock.Setup(s => s.UpdateShop(It.IsAny<IShop>())).ReturnsAsync((IShop shop) =>
+        _shopDataServiceMock.Setup(s => s.UpdateShop(It.IsAny<IShop>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IShop shop, CancellationToken cancellationToken) =>
         {
             var currentShop = shops.FirstOrDefault(s => s.Id == shop.Id);
             if (currentShop == null) return default;

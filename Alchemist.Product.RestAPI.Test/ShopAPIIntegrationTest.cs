@@ -50,6 +50,7 @@ public class ShopAPIIntegrationTest : ShopAPITestFixture<ShopAPISignlRMockWebApp
         Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
 
         var getNewResponse = await _httpClient.GetAsync($"api/Shop/byName?name={shop.Name}");
+        getNewResponse.EnsureSuccessStatusCode();
         var shopNew = await getNewResponse.Content.ReadFromJsonAsync<Shop>();
         Assert.NotNull(shopNew);
         Assert.Equal(shop.Name, shopNew.Name);

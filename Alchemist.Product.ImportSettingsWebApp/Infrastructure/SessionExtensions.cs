@@ -15,7 +15,7 @@ public static class SessionExtensions
         session.Set(SessionKeys.ShopImportSettingsKey, bytes);
     }
 
-    public static async Task<ShopImportSettingsModel?> GetShopImportSettingsFromSessionAsync(this ISession session)
+    public static async Task<ShopImportSettingsModel?> GetShopImportSettingsFromSessionAsync(this ISession session, CancellationToken cancellationToken = default)
     {
         var shopSettingType = session.GetInt32(SessionKeys.ShopSettingsTypeKey);
 
@@ -25,8 +25,8 @@ public static class SessionExtensions
         {
             using var stream = new MemoryStream(bytes);
             return (ShopSettingType)shopSettingType == ShopSettingType.Product
-                 ? await JsonSerializer.DeserializeAsync<ProductShopImportSettingsModel>(stream)
-                 : await JsonSerializer.DeserializeAsync<CategoryShopImportSettingsModel>(stream);
+                 ? await JsonSerializer.DeserializeAsync<ProductShopImportSettingsModel>(stream, cancellationToken : cancellationToken)
+                 : await JsonSerializer.DeserializeAsync<CategoryShopImportSettingsModel>(stream, cancellationToken : cancellationToken);
         }
 
         return null;

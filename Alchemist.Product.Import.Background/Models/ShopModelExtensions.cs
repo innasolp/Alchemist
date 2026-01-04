@@ -12,15 +12,17 @@ internal static class ShopModelExtensions
 {
     internal static async Task<IImportSource> GetShopModelAsync(this IShopDataService shopDataService,
         IShopImportSettings shopImportSettings, 
-        ShopSettingType shopSettingType)
+        ShopSettingType shopSettingType,
+        CancellationToken cancellationToken = default)
     {
         return shopSettingType == ShopSettingType.Product
-            ? await shopDataService.GetProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
-            : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);
+            ? await shopDataService.GetProductShopModelAsync(shopImportSettings as IProductShopImportSettings, cancellationToken)
+            : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings, cancellationToken: cancellationToken);
     }
 
     internal static async Task<IImportSource> GetShopModelAsync(this IShopDataService shopDataService,
-        IShopImportSettings shopImportSettings)
+        IShopImportSettings shopImportSettings,
+        CancellationToken cancellationToken = default)
     {
         var shopSettingsType = shopImportSettings is IShopSettings shopSettings ? shopSettings.Type
              : shopImportSettings is IProductShopImportSettings ? ShopSettingType.Product :
@@ -28,14 +30,16 @@ internal static class ShopModelExtensions
               : throw new InvalidOperationException($"{shopImportSettings.GetType().Name} unavailable shop settings type");
 
         return shopSettingsType == ShopSettingType.Product
-            ? await shopDataService.GetProductShopModelAsync(shopImportSettings as IProductShopImportSettings)
-            : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings);        
+            ? await shopDataService.GetProductShopModelAsync(shopImportSettings as IProductShopImportSettings, cancellationToken: cancellationToken)
+            : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings, cancellationToken: cancellationToken);        
 
     }
 
-    private static async Task<IProductShopModel> GetProductShopModelAsync(this IShopDataService shopDataService, IProductShopImportSettings shopImportSettings)
+    private static async Task<IProductShopModel> GetProductShopModelAsync(this IShopDataService shopDataService,
+        IProductShopImportSettings shopImportSettings, 
+        CancellationToken cancellationToken = default)
     {
-        var productShopModel = await shopDataService.GetShopModelCoreAsync<ProductShopModel>(shopImportSettings);
+        var productShopModel = await shopDataService.GetShopModelCoreAsync<ProductShopModel>(shopImportSettings, cancellationToken);
 
         productShopModel.ProductUrl = shopImportSettings.ProductUrlFormat;
         productShopModel.CategoryUrl = shopImportSettings.CategoryUrlFormat;
@@ -48,10 +52,10 @@ internal static class ShopModelExtensions
 
                 foreach (var c in shopImportSettings.RootCategories)
                 {
-                    var shopCategory = await shopDataService.GetShopCategoryByShopIdAndItemId(productShopModel.Id, c.Item);
+                    var shopCategory = await shopDataService.GetShopCategoryByShopIdAndItemId(productShopModel.Id, c.Item, cancellationToken);
                     if (shopCategory != null)
                     {
-                        var children = await shopDataService.GetAllCategoryChildren(shopCategory.Id);
+                        var children = await shopDataService.GetAllCategoryChildren(shopCategory.Id, cancellationToken);
                         var children2 = new List<IShopCategory>(children);
                         shopCategories.AddRange(children.Where(child => !children2.Any(c2 => c2.ParentId == child.Id)));
                     }
@@ -64,7 +68,7 @@ internal static class ShopModelExtensions
             }
             else
             {
-                var allShopCategories = await shopDataService.GetShopCategories(productShopModel.Id);
+                var allShopCategories = await shopDataService.GetShopCategories(productShopModel.Id, cancellationToken);
                 var categories2 = new List<IShopCategory>(allShopCategories);
                 var lastShopCategories = allShopCategories.Where(c => !categories2.Any(c2 => c2.ParentId == c.Id)).ToList();
                 lastShopCategories.ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId }));
@@ -76,23 +80,27 @@ internal static class ShopModelExtensions
         return productShopModel;
     }
 
-    private static async Task<T> GetShopModelCoreAsync<T>(this IShopDataService shopDataService, IShopImportSettings shopImportSettings)
+    private static async Task<T> GetShopModelCoreAsync<T>(this IShopDataService shopDataService, 
+        IShopImportSettings shopImportSettings,
+        CancellationToken cancellationToken = default)
         where T : ShopModel, new()
     {
         var shop = (shopImportSettings is ShopSettings shopSettings
-                ? await shopDataService.GetShop(shopSettings.ShopId)
-                : await shopDataService.GetShopByName(shopImportSettings.ShopName)
-                ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl))
-                ?? await shopDataService.CreateShop(new Shop { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl });
+                ? await shopDataService.GetShop(shopSettings.ShopId, cancellationToken)
+                : await shopDataService.GetShopByName(shopImportSettings.ShopName, cancellationToken)
+                ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl, cancellationToken))
+                ?? await shopDataService.CreateShop(new Shop { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
 
         var shopModel = CreateShopModelCore<T>(shop, shopImportSettings);
 
         return await Task.FromResult(shopModel);
     }
 
-    private static async Task<ICategoryShopModel> GetCategoryShopModelAsync(this IShopDataService shopDataService, ICategoryShopImportSettings shopImportSettings)
+    private static async Task<ICategoryShopModel> GetCategoryShopModelAsync(this IShopDataService shopDataService,
+        ICategoryShopImportSettings shopImportSettings,
+        CancellationToken cancellationToken = default)
     {
-        var categoryShopModel = await shopDataService.GetShopModelCoreAsync<CategoryShopModel>(shopImportSettings);
+        var categoryShopModel = await shopDataService.GetShopModelCoreAsync<CategoryShopModel>(shopImportSettings, cancellationToken);
 
         categoryShopModel.CategorySourceUrl = shopImportSettings.CategorySourceUrl;
 

@@ -19,7 +19,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductTypeRequest.Name));
 
         var productType = new ProductType { Name = request.Name };
-        var newProductType = await _repository.CreateProductType(productType);       
+        var newProductType = await _repository.CreateProductType(productType, context.CancellationToken);       
         var reply = new ProductTypeReply() { Id = newProductType.Id, Name = newProductType.Name };
         return await Task.FromResult(reply);
     }
@@ -30,7 +30,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreatePurposeTypeRequest.Name));
 
         var purposeType = new PurposeType { Name = request.Name };
-        var newPurposeType = await _repository.CreatePurposeType(purposeType);
+        var newPurposeType = await _repository.CreatePurposeType(purposeType, context.CancellationToken);
         var reply = new PurposeTypeReply() { Id = newPurposeType.Id, Name = newPurposeType.Name };
         return await Task.FromResult(reply);
     }
@@ -41,7 +41,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateCountryRequest.Name));
 
         var country = new Country { Name = request.Name, Transcript = request.Transcript };
-        var newCountry = await _repository.CreateCountry(country);
+        var newCountry = await _repository.CreateCountry(country, context.CancellationToken);
         var reply = new CountryReply() { Id = newCountry.Id, Name = newCountry.Name, Transcript = newCountry.Transcript };
         return await Task.FromResult(reply);
     }
@@ -55,7 +55,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateBrandRequest.Countryid), "Invalid value");
 
         var brand = new Brand { Name = request.Name, CountryId = (short?)request.Countryid, Comment = request.Comment };
-        var entity = await _repository.CreateBrand(brand);
+        var entity = await _repository.CreateBrand(brand, context.CancellationToken);
         var reply = new BrandReply() { Id = entity.Id, Name = entity.Name, Countryid = entity.CountryId, Comment = entity.Comment };
         return await Task.FromResult(reply);
     }
@@ -66,7 +66,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateComponentRequest.Name));
 
         var component = request.FromMessage<Component>();
-        var entity = await _repository.CreateComponent(component);
+        var entity = await _repository.CreateComponent(component, context.CancellationToken);
         var reply = entity.ToMessage<ComponentReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
@@ -77,7 +77,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Id <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetByIdInt32Request.Id), "Invalid value");
 
-        var component = await _repository.GetComponent(request.Id)
+        var component = await _repository.GetComponent(request.Id, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound,$"Component with id={request.Id} not found"));
         var reply = component.ToMessage<ComponentReply>();
         reply.Id = component.Id;
@@ -93,7 +93,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductRequest.Producttypeid), "InvalidValue");
 
         var product = request.FromMessage<Entities.Product>();
-        var entity =  await _repository.CreateProduct(product);
+        var entity =  await _repository.CreateProduct(product, context.CancellationToken);
         var reply = entity.ToMessage<ProductReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
@@ -107,7 +107,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateShopProductRequest.Shopid), "InvalidValue");
 
         var shopProduct = request.FromMessage<ShopProduct>();
-        var entity = await _repository.CreateShopProduct(shopProduct);
+        var entity = await _repository.CreateShopProduct(shopProduct, context.CancellationToken);
         var reply = entity.ToMessage<ShopProductReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
@@ -122,7 +122,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(ShopProductCategoryRequest.Shopcategoryid), "InvalidValue");
 
         var shopProductCategory = request.FromMessage<ShopProductCategory>();
-        var entity = await _repository.AddShopProductCategory(shopProductCategory);
+        var entity = await _repository.AddShopProductCategory(shopProductCategory, context.CancellationToken);
         var reply = entity.ToMessage<ShopProductCategoryReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
@@ -136,7 +136,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Shopcategoryid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(ShopProductCategoryRequest.Shopcategoryid), "InvalidValue");
 
-        var result = await _repository.CheckShopProductCategory(request.Shopproductid, request.Shopcategoryid);
+        var result = await _repository.CheckShopProductCategory(request.Shopproductid, request.Shopcategoryid, context.CancellationToken);
         return await Task.FromResult(new BoolValue { Value = result });
     }
 
@@ -145,7 +145,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Id <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetByIdInt64Request.Id), "InvalidValue");        
 
-        var shopProductCategories = await _repository.GetShopProductCategories(request.Id)
+        var shopProductCategories = await _repository.GetShopProductCategories(request.Id, context.CancellationToken)
              ?? throw new RpcException(new Status(StatusCode.NotFound, $"categories for shop product with id '{request.Id}' not found"));
         var replyList = await shopProductCategories.ToListReply< ShopProductCategoryListReply, ShopProductCategoryReply,IShopProductCategory>((s) =>
         {
@@ -166,7 +166,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         string? message = null;
         try
         {
-            brand = await _repository.FindBrandByName(request.Name)
+            brand = await _repository.FindBrandByName(request.Name, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Brand with name '{request.Name}' not found"));
         }
         catch (WarningException warning)
@@ -193,7 +193,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         IComponent component;
         try
         {
-            component = await _repository.FindComponentByName(request.Name)
+            component = await _repository.FindComponentByName(request.Name, context.CancellationToken)
                 ?? throw new RpcException(new Status(StatusCode.NotFound, $"Component with name '{request.Name}' not found"));
         }
         catch(WarningException warning)
@@ -214,7 +214,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         ICountry country;
         try 
         { 
-            country = await _repository.FindCountryByName(request.Name)
+            country = await _repository.FindCountryByName(request.Name, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Country with name '{request.Name}' not found"));
         }
         catch (WarningException warning)
@@ -233,7 +233,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         IProduct product;
         try
         {
-            product = await _repository.FindProductByName(request.Name)
+            product = await _repository.FindProductByName(request.Name, context.CancellationToken)
                ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product with name '{request.Name}' not found"));
         }
         catch (WarningException warning)
@@ -254,7 +254,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Brand))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindProductByNameAndBrandRequest.Brand));
 
-        var product = await _repository.FindProductByNameAndBrand(request.Name, request.Brand)
+        var product = await _repository.FindProductByNameAndBrand(request.Name, request.Brand, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product with name '{request.Name}' and brand {request.Brand} not found"));
         var reply = product.ToMessage<ProductReply>();
         reply.Id = product.Id;
@@ -266,7 +266,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        var productType = await _repository.FindProductTypeByName(request.Name)
+        var productType = await _repository.FindProductTypeByName(request.Name, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product type with name '{request.Name}' not found"));
         return  await Task.FromResult(new ProductTypeReply { Id = productType.Id, Name = productType.Name });
     }
@@ -276,7 +276,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        var purposeType = await _repository.FindPurposeTypeByName(request.Name)
+        var purposeType = await _repository.FindPurposeTypeByName(request.Name, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Purpose type with name '{request.Name}' not found"));
         return  await Task.FromResult(new PurposeTypeReply { Id = purposeType.Id, Name = purposeType.Name });
     }
@@ -289,7 +289,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Shopid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndApiUrlRequest.Shopid), "Invalid value");
 
-        var shopProduct = await _repository.GetShopProductByShopAndApiUrl(request.Shopid, request.Apiurl)
+        var shopProduct = await _repository.GetShopProductByShopAndApiUrl(request.Shopid, request.Apiurl, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
         var reply = shopProduct.ToMessage<ShopProductReply>();
         reply.Id = shopProduct.Id;
@@ -304,7 +304,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Itemid))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndItemIdRequest.Itemid));
 
-        var shopProduct = await _repository.GetShopProductByShopAndItemId(request.Shopid, request.Itemid)
+        var shopProduct = await _repository.GetShopProductByShopAndItemId(request.Shopid, request.Itemid, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
         var reply = shopProduct.ToMessage<ShopProductReply>();
         reply.Id = shopProduct.Id;
@@ -319,7 +319,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Productid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndProductIdRequest.Productid), "InvalidValue");
 
-        var shopProduct = await _repository.GetShopProductByShopAndProductId(request.Shopid, request.Productid)
+        var shopProduct = await _repository.GetShopProductByShopAndProductId(request.Shopid, request.Productid, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
         var reply = shopProduct.ToMessage<ShopProductReply>();
         reply.Id = shopProduct.Id;
@@ -338,7 +338,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(SetProductComponentRequest.SequalNumber), "Invalid value");
 
         var productComponent =request.FromMessage<ProductComponent>();
-        var entity = await _repository.SetProductComponent(productComponent);
+        var entity = await _repository.SetProductComponent(productComponent, context.CancellationToken);
         var reply = entity.ToMessage<ProductComponentReply>();
         return await Task.FromResult(reply);
     }
@@ -359,7 +359,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
 
         var shopProduct = request.FromMessage<ShopProduct>();
         shopProduct.Id = request.Id;
-        var result = await _repository.UpdateShopProduct(shopProduct);
+        var result = await _repository.UpdateShopProduct(shopProduct, context.CancellationToken);
         return await Task.FromResult(new BoolValue { Value = result });
     }
 
@@ -368,7 +368,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        var currency = await _repository.GetCurrencyByName(request.Name)
+        var currency = await _repository.GetCurrencyByName(request.Name, context.CancellationToken)
              ?? throw new RpcException(new Status(StatusCode.NotFound, $"Currency type with name '{request.Name}' not found"));
         var reply = currency.ToMessage<CurrencyReply>();
         reply.Id = currency.Id;
@@ -380,7 +380,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Code <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetCurrencyByCodeRequest.Code), "Invalid value");
 
-        var currency = await _repository.GetCurrencyByCode((short)request.Code)
+        var currency = await _repository.GetCurrencyByCode((short)request.Code, context.CancellationToken)
              ?? throw new RpcException(new Status(StatusCode.NotFound, $"Currency type with code '{request.Code}' not found"));
         var reply = currency.ToMessage<CurrencyReply>();
         reply.Id = currency.Id;
@@ -393,7 +393,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateCurrencyRequest.Name));
 
         var currency = request.FromMessage<Currency>();
-        var entity = await _repository.CreateCurrency(currency);
+        var entity = await _repository.CreateCurrency(currency, context.CancellationToken);
         var reply = entity.ToMessage<CurrencyReply>();
         reply.Id = currency.Id;
         return await Task.FromResult(reply);
@@ -408,7 +408,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateShopProductPriceRequest.Price), "Invalid value");
 
         var shopProductPrice = request.FromMessage<ShopProductPrice>();
-        var entity = await _repository.CreateShopProductPrice(shopProductPrice);
+        var entity = await _repository.CreateShopProductPrice(shopProductPrice, context.CancellationToken);
         var reply = entity.ToMessage<ShopProductPriceReply>();
         reply.Id = entity.Id; 
         return await Task.FromResult(reply);
@@ -424,7 +424,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
 
         var shopProductPrice = request.FromMessage<ShopProductPrice>();
         shopProductPrice.Id = request.Id;
-        var result = await _repository.UpdateShopProductPrice(shopProductPrice);
+        var result = await _repository.UpdateShopProductPrice(shopProductPrice, context.CancellationToken);
         return await Task.FromResult(new BoolValue { Value = result });
     }
 
@@ -433,7 +433,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Id <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetByIdInt64Request.Id), "Invalid value");
 
-        var shopProductPrice = await _repository.GetShopProductPrice(request.Id)
+        var shopProductPrice = await _repository.GetShopProductPrice(request.Id, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Shop product price id={request.Id}' not found")); ;
         var reply = shopProductPrice.ToMessage<ShopProductPriceReply>();
         reply.Id = shopProductPrice.Id;
@@ -445,7 +445,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
         if (request.Productid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetProductPurposesRequest.Productid), "Invalid value");
 
-        var purposeTypes = await _repository.GetProductPurposes(request.Productid);
+        var purposeTypes = await _repository.GetProductPurposes(request.Productid, context.CancellationToken);
         
         var reply = await purposeTypes.ToListReply<PurposeTypeListReply, PurposeTypeReply, IPurposeType>(
             (purpose) => new PurposeTypeReply { Id = purpose.Id, Name = purpose.Name  }
@@ -463,7 +463,7 @@ public class AlchemyService(IAlchemyRepository db) : AlchemyGrpcService.AlchemyG
             throw GrpcStatuses.GetBadRequestRpcException(nameof(SetProductPurposeRequest.Purposetypeid), "Invalid value");
 
         var productPurpose = new ProductPurpose { ProductId = request.Productid, PurposeTypeId = (short)request.Purposetypeid };
-        var entity = await _repository.SetProductPurpose(productPurpose);
+        var entity = await _repository.SetProductPurpose(productPurpose, context.CancellationToken);
         var reply = new ProductPurposeReply { Productid = entity.ProductId, Purposetypeid = entity.PurposeTypeId };
 
         return await Task.FromResult(reply);

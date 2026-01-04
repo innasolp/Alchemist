@@ -1,11 +1,9 @@
-﻿using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
+﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Alchemist.Product.Interfaces;
-using Alchemist.Messages.Common;
 
 namespace Alchemist.Product.RestAPI.Controllers;
 
@@ -17,12 +15,15 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
     private readonly IAlchemyRepository _alchemyRepository = alchemyRepository;
     private readonly IMessageSender _messageSender = messageSender;
 
-    private async Task SendMessage<T>(T entity, string methodName)
+    private async Task SendMessage<T>(T entity, string methodName, CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return;
+
         try
         {
-            await _messageSender.Start();
-            await _messageSender.Send(entity, methodName);
+            await _messageSender.Start(cancellationToken);
+            await _messageSender.Send(entity, methodName, cancellationToken);
             _logger.LogInformation($"Call {methodName} {entity} ");
         }
         catch (Exception ex)
@@ -32,32 +33,38 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
     }
 
     [HttpPut(Name = nameof(AddShopCategory))]
-    public async Task<Results<BadRequest, BadRequest<ShopCategory>, Created<ShopCategory>>> AddShopCategory(ShopCategory shopCategory)
+    public async Task<Results<BadRequest, BadRequest<ShopCategory>, Created<ShopCategory>>> AddShopCategory(ShopCategory shopCategory, CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.BadRequest();
+
         if (shopCategory == null)
             return TypedResults.BadRequest();
 
         if (shopCategory.ShopId <= 0 || shopCategory.ItemId <= 0 || shopCategory.Category == null)
             return TypedResults.BadRequest(shopCategory);
 
-        var newShopCategory = (await _alchemyRepository.AddShopCategory(shopCategory)).To<ShopCategory>();
+        var newShopCategory = (await _alchemyRepository.AddShopCategory(shopCategory, cancellationToken)).To<ShopCategory>();
 
-        await SendMessage(newShopCategory, Messages.Common.Messages.CategoryAdded);
+        await SendMessage(newShopCategory, Messages.Common.Messages.CategoryAdded, cancellationToken);
 
         var location = Url.Action(nameof(AddShopCategory), new { id = newShopCategory.Id }) ?? $"/{newShopCategory.Id}";
         return TypedResults.Created(location, newShopCategory);
     }
 
     [HttpGet("shopCategories/byShopIdAndItemId/{shopId:int}/{itemId:int}", Name = nameof(GetShopCategoryByShopIdAndItemId))]
-    public async Task<Results<BadRequest<int>, NotFound<Tuple<int, int>>, Ok<ShopCategory>>> GetShopCategoryByShopIdAndItemId(int shopId, int itemId)
+    public async Task<Results<BadRequest<int>, NotFound<Tuple<int, int>>, Ok<ShopCategory>>> GetShopCategoryByShopIdAndItemId(int shopId, int itemId, CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.NotFound(new Tuple<int, int>(shopId, itemId));
+
         if (shopId <= 0)
             return TypedResults.BadRequest(shopId);
 
         if (itemId <= 0)
             return TypedResults.BadRequest(itemId);
 
-        var shopCategory = await _alchemyRepository.GetShopCategory(shopId, itemId);
+        var shopCategory = await _alchemyRepository.GetShopCategory(shopId, itemId, cancellationToken);
 
         return shopCategory != null ?
             TypedResults.Ok(shopCategory.To<ShopCategory>()) :
@@ -65,12 +72,15 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
     }
 
     [HttpGet("shopCategories/{shopId:int}", Name = nameof(GetShopCategories))]
-    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<List<ShopCategory>>>> GetShopCategories(int shopId)
+    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<List<ShopCategory>>>> GetShopCategories(int shopId, CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.NotFound(shopId);
+
         if (shopId <= 0)
             return TypedResults.BadRequest(shopId);
 
-        var shopCategories = await _alchemyRepository.GetShopCategories(shopId);
+        var shopCategories = await _alchemyRepository.GetShopCategories(shopId, cancellationToken);
 
         return shopCategories != null && shopCategories.Count != 0 ?
             TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :
@@ -78,12 +88,15 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
     }
 
     [HttpGet("shopCategories/getAllChildren/{parentId:int}", Name = nameof(GetAllCategoryChildren))]
-    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<List<ShopCategory>>>> GetAllCategoryChildren(int parentId)
+    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<List<ShopCategory>>>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.NotFound(parentId);
+
         if (parentId <= 0)
             return TypedResults.BadRequest(parentId);
 
-        var shopCategories = await _alchemyRepository.GetAllCategoryChildren(parentId);
+        var shopCategories = await _alchemyRepository.GetAllCategoryChildren(parentId, cancellationToken);
 
         return shopCategories != null && shopCategories.Count != 0 ?
             TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :

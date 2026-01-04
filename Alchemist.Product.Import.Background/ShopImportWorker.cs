@@ -51,9 +51,9 @@ public class ShopImportWorker : BackgroundService
 
         _shopServiceFactories = shopImportFactories;
 
-        _eventMessageReceiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        _eventMessageReceiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);
 
-        _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);       
+        _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);
 
         _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, OnStopServiceAsync);
     }
@@ -87,7 +87,8 @@ public class ShopImportWorker : BackgroundService
         else
             await SendServiceMessageAsync(Messages.Common.Messages.ServiceEventError,
                 new ServiceErrorMessage
-                { Guid = guid, EventName = Messages.Common.Messages.ServiceStart, Message = $"Service with guid {guid} not found" });
+                { Guid = guid, EventName = Messages.Common.Messages.ServiceStart, Message = $"Service with guid {guid} not found" },
+                cancellationToken : stoppingToken);
     }
 
     private void OnShopCategoryAdded(ShopCategory shopCategory)
@@ -137,9 +138,9 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            var allShopImportSettings = await GetAllShopImportSettingsAsync();
+            var allShopImportSettings = await GetAllShopImportSettingsAsync(stoppingToken);
 
-            await Task.WhenAll(allShopImportSettings.Select(s => TryCreateServiceFromImportSettingsAsync(s.Key, s.Value)));
+            await Task.WhenAll(allShopImportSettings.Select(s => TryCreateServiceFromImportSettingsAsync(s.Key, s.Value, stoppingToken)));
 
             _logger.LogInformation("Import services initialized.");
             
@@ -167,9 +168,9 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task TryCreateServiceFromImportSettingsAsync(string settingsKey, IShopImportSettings shopImportSettings)
+    private async Task TryCreateServiceFromImportSettingsAsync(string settingsKey, IShopImportSettings shopImportSettings, CancellationToken cancellationToken = default)
     {
-        var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
+        var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings, cancellationToken);
         ShopModels.Add(shopModel);
 
         if (!TryCreateImportService(settingsKey, shopImportSettings, shopModel, out var shopImportService)
@@ -200,12 +201,12 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task<Dictionary<string, IShopImportSettings>> GetAllShopImportSettingsAsync()
+    private async Task<Dictionary<string, IShopImportSettings>> GetAllShopImportSettingsAsync(CancellationToken cancellationToken = default)
     {
         var allShopImportSettings = new Dictionary<string, IShopImportSettings>();
         foreach (var adapter in _initSettingsAdapters)
         {
-            var shopImportSettings = await adapter.GetAllShopImportSettings();
+            var shopImportSettings = await adapter.GetAllShopImportSettings(cancellationToken);
             var newSettings = shopImportSettings.Where(s => !allShopImportSettings.Any(s2 => s2.Key == s.Key));
             newSettings.ToList().ForEach(s => allShopImportSettings.Add(s.Key, s.Value));            
         }

@@ -18,24 +18,23 @@ public class ShopCategoryControllerGetTest : ControllerTest<ShopCategoryControll
         ];
 
     public ShopCategoryControllerGetTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
-        
-
-        _alchemyRepository.Setup(r => r.GetShopCategory(It.IsAny<int>(), It.IsAny<int>())).Returns((int shopId, int itemId) =>
+    {  
+        _alchemyRepository.Setup(r => r.GetShopCategory(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns((int shopId, int itemId, CancellationToken cancellationToken = default) =>
         {
             return Task.FromResult((IShopCategory)_shopCategories.FirstOrDefault(sc => sc.ShopId == shopId && sc.ItemId == itemId));
         });
         
-        _alchemyRepository.Setup(r => r.GetShopCategories(It.IsAny<int>())).Returns((int shopId) =>
+        _alchemyRepository.Setup(r => r.GetShopCategories(It.IsAny<int>(), It.IsAny<CancellationToken>())).Returns((int shopId, CancellationToken cancellationToken = default) =>
         {
             var result = _shopCategories.Where(sc => sc.ShopId == shopId).OfType<IShopCategory>().ToList();
             return Task.FromResult(result);
         });
 
-        _alchemyRepository.Setup(r => r.GetAllCategoryChildren(It.IsAny<int>())).Returns(GetAllCategoryChildren);
+        _alchemyRepository.Setup(r => r.GetAllCategoryChildren(It.IsAny<int>(), It.IsAny<CancellationToken>())).Returns(GetAllCategoryChildren);
     }
 
-    private async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId)
+    private async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
     {
         var children = _shopCategories.Where(c => c.ParentId == parentId).ToList<IShopCategory>();
         var next = new List<IShopCategory>(children);

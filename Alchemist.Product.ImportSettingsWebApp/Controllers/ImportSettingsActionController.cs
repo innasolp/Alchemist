@@ -20,9 +20,9 @@ public class ImportSettingsActionController : Controller
 
     [Route($"/{ControllerPrefix.Action}/{{shopId:int}}/{{shopSettingsType:ShopSettingType}}")]
     [HttpPost]
-    public async Task<IActionResult> ImportSettingsAsync(int shopId, ShopSettingType shopSettingsType)
+    public async Task<IActionResult> ImportSettingsAsync(int shopId, ShopSettingType shopSettingsType, CancellationToken cancellationToken = default)
     {
-        var importSettings = await _facade.GetShopImportSettingsModel(shopId, shopSettingsType);
+        var importSettings = await _facade.GetShopImportSettingsModel(shopId, shopSettingsType, cancellationToken: cancellationToken);
 
         HttpContext.Session.SetImportSettingToSession(importSettings);
 
@@ -31,12 +31,12 @@ public class ImportSettingsActionController : Controller
 
     [Route($"/{ControllerPrefix.Action}/Set/{{shopId:int}}/Product")]
     [HttpPost]
-    public async Task<IActionResult> LoadProductShopImportSettings(int shopId, [FromBody]ProductShopImportSettingsModel data)
+    public async Task<IActionResult> LoadProductShopImportSettings(int shopId, [FromBody]ProductShopImportSettingsModel data, CancellationToken cancellationToken = default)
     {
         if (data == null)
             return BadRequest("Empty json for product shopsettings.");
 
-        if(await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product) 
+        if(await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product, cancellationToken)
             is not ProductShopImportSettingsModel currentProductSettings)
             throw new InvalidOperationException("Invalid shopId");
 
@@ -49,12 +49,12 @@ public class ImportSettingsActionController : Controller
 
     [Route($"/{ControllerPrefix.Action}/Set/{{shopId:int}}/Category")]
     [HttpPost]
-    public async Task<IActionResult> LoadCategoryShopImportSettings(int shopId, [FromBody]CategoryShopImportSettingsModel data)
+    public async Task<IActionResult> LoadCategoryShopImportSettings(int shopId, [FromBody]CategoryShopImportSettingsModel data, CancellationToken cancellationToken = default)
     {
         if (data == null)
             return BadRequest("Empty json for category shopsettings.");
 
-        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Category)
+        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Category, cancellationToken)
             is not CategoryShopImportSettingsModel currentCategorySettings)
             throw new InvalidOperationException("Invalid shopId");
 
@@ -68,12 +68,12 @@ public class ImportSettingsActionController : Controller
     [Route($"/{ControllerPrefix.Action}/Product/IsChanged")]
     [Route($"/{ControllerPrefix.Action}/1/IsChanged")]
     [HttpPost]
-    public async Task<IActionResult> ProductSettingsIsChangedAsync(ProductShopImportSettingsModel data)
+    public async Task<IActionResult> ProductSettingsIsChangedAsync(ProductShopImportSettingsModel data, CancellationToken cancellationToken = default)
     {
         if (data == null)
             return BadRequest("Empty json for product shopsettings.");
 
-        var result = await _facade.IsProductShopSettingsChangedAsync(data);
+        var result = await _facade.IsProductShopSettingsChangedAsync(data, cancellationToken);
 
         return Ok(result);
     }
@@ -81,34 +81,34 @@ public class ImportSettingsActionController : Controller
     [Route($"/{ControllerPrefix.Action}/Category/IsChanged")]
     [Route($"/{ControllerPrefix.Action}/2/IsChanged")]
     [HttpPost]
-    public async Task<IActionResult> CategorySettingsIsChangedAsync(CategoryShopImportSettingsModel data)
+    public async Task<IActionResult> CategorySettingsIsChangedAsync(CategoryShopImportSettingsModel data, CancellationToken cancellationToken = default)
     {
         if (data == null)
             return BadRequest("Empty json for category shopsettings.");
 
-        var result = await _facade.IsCategoryShopSettingsChangedAsync(data);
+        var result = await _facade.IsCategoryShopSettingsChangedAsync(data, cancellationToken);
 
         return Ok(result);
     }
 
     [Route($"/{ControllerPrefix.Action}/Product/Save")]
     [HttpPost]
-    public async Task<IActionResult> ProductSettingsSave(ProductShopImportSettingsModel data)
+    public async Task<IActionResult> ProductSettingsSave(ProductShopImportSettingsModel data, CancellationToken cancellationToken = default)
     {
         if (data == null) return BadRequest("Empty json for product shopsettings.");
         
-        await _facade.SaveProductShopSettings(data);
+        await _facade.SaveProductShopSettings(data, cancellationToken);
 
         return Ok(true);
     }
 
     [Route($"/{ControllerPrefix.Action}/Category/Save")]
     [HttpPost]
-    public async Task<IActionResult> CategorySettingsSave(CategoryShopImportSettingsModel data)
+    public async Task<IActionResult> CategorySettingsSave(CategoryShopImportSettingsModel data, CancellationToken cancellationToken = default)
     {
         if (data == null) return BadRequest("Empty json for category shopsettings.");
 
-        await _facade.SaveCategoryShopSettings(data);
+        await _facade.SaveCategoryShopSettings(data, cancellationToken);
 
         return Ok(true);
     }
@@ -124,11 +124,11 @@ public class ImportSettingsActionController : Controller
 
     [Route($"/{ControllerPrefix.Action}/Product/{{shopId:int}}/CategoryUrl/Set")]
     [HttpPost]
-    public async Task<IActionResult> SetRootCategory(int shopId, [FromForm]CategoryUrlModel data)
+    public async Task<IActionResult> SetRootCategory(int shopId, [FromForm]CategoryUrlModel data, CancellationToken cancellationToken = default)
     {
         if (data == null) return BadRequest("Empty json for category url.");
 
-        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product) is not ProductShopImportSettingsModel productShopSettings)
+        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product, cancellationToken) is not ProductShopImportSettingsModel productShopSettings)
             return BadRequest("Invalid shopId");
 
         var result = productShopSettings.SetRootCategory(data);
@@ -140,11 +140,11 @@ public class ImportSettingsActionController : Controller
 
     [Route($"/{ControllerPrefix.Action}/Product/{{shopId:int}}/CategoryUrl/IsChanged")]
     [HttpPost]
-    public async Task<IActionResult> RootCategoryIsChanged(int shopId, [FromBody]CategoryUrlModel data)
+    public async Task<IActionResult> RootCategoryIsChanged(int shopId, [FromBody]CategoryUrlModel data, CancellationToken cancellationToken = default)
     {
         if (data == null) return BadRequest("Empty json for category url.");
 
-        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product) 
+        if (await _facade.GetCurrentShopImportSettingsAsync(shopId, ShopSettingType.Product, cancellationToken)
             is not ProductShopImportSettingsModel productShopSettings)
             return BadRequest("Invalid shopId");
 

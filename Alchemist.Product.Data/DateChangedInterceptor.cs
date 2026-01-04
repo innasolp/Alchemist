@@ -9,11 +9,11 @@ public class DateChangedInterceptor : SaveChangesInterceptor
     {
         var context = eventData.Context;
         if (context == null) return result;
-        await SetDates(context);
+        await SetDates(context, cancellationToken);
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private static async Task SetDates(DbContext context)
+    private static async Task SetDates(DbContext context, CancellationToken cancellationToken = default)
     {
         foreach (var entry in context.ChangeTracker.Entries().Where(e => e.State == EntityState.Added && e.Entity is IAddedTsEnity).
             Select(e => e.Entity).OfType<IAddedTsEnity>())
@@ -23,7 +23,7 @@ public class DateChangedInterceptor : SaveChangesInterceptor
 
         foreach (var entry in context.ChangeTracker.Entries().Where(e => e.State == EntityState.Modified && e.Entity is IUpdatedTsEntity entity))           
         {
-            if(entry.Entity is IAddedTsEnity addedTsEnity && (await entry.GetDatabaseValuesAsync())?["AddedTs"] is DateTime addedTs)            
+            if(entry.Entity is IAddedTsEnity addedTsEnity && (await entry.GetDatabaseValuesAsync(cancellationToken))?["AddedTs"] is DateTime addedTs)            
                 addedTsEnity.AddedTs = addedTs;            
             
             (entry.Entity as IUpdatedTsEntity).UpdatedTs = DateTime.Now;            

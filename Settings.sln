@@ -141,8 +141,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Test.SignalRWebAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Product.RestAPI", "Alchemist.Product.RestAPI\Alchemist.Product.RestAPI.csproj", "{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.ServiceAssembliesBuilder", "Alchemist.ServiceAssembliesBuilder\Alchemist.ServiceAssembliesBuilder.csproj", "{103B1FB9-C97D-457D-A0F8-224BFE753AAB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.AssemblyExtensions", "..\DependencyInjection\DependencyInjections.AssemblyExtensions\DependencyInjection.AssemblyExtensions.csproj", "{C463F9DC-A250-4170-A792-689831E8AA12}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.ContextFileSink", "..\Logging\Serilog.ContextFileSink\Serilog.ContextFileSink.csproj", "{E482EA7E-6395-3722-74B6-C77C8F8FD1BF}"
@@ -753,14 +751,6 @@ Global
 		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.import_shops|Any CPU.ActiveCfg = import_shops|Any CPU
 		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC2D01A8-890C-A97C-8673-1DF4E9E10E86}.Release|Any CPU.Build.0 = Release|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.import_core|Any CPU.ActiveCfg = Release|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.import_settings|Any CPU.ActiveCfg = Debug|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{103B1FB9-C97D-457D-A0F8-224BFE753AAB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C463F9DC-A250-4170-A792-689831E8AA12}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
 		{C463F9DC-A250-4170-A792-689831E8AA12}.debug libs|Any CPU.Build.0 = Debug|Any CPU
 		{C463F9DC-A250-4170-A792-689831E8AA12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

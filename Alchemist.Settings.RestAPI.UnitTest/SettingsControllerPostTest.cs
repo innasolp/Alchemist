@@ -50,14 +50,16 @@ public class SettingsControllerPostTest
         _settingsController.Url = _urlHelper.Object;
         _urlHelper.Setup(url => url.Action(It.IsAny<UrlActionContext>())).Returns("");
 
-        _settingsRepository.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>())).Returns((IShopSettings s) =>
+        _settingsRepository.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<CancellationToken>()))
+            .Returns((IShopSettings s, CancellationToken cancellationToken = default) =>
         {
             var newSettings = s.To<ShopSettings>();
             _shopSettings.Add(newSettings);
             return Task.FromResult((IShopSettings)newSettings);
         });
 
-        _settingsRepository.Setup(s => s.UpdateShopSettings(It.IsAny<IShopSettings>())).Returns((IShopSettings s) =>
+        _settingsRepository.Setup(s => s.UpdateShopSettings(It.IsAny<IShopSettings>(), It.IsAny<CancellationToken>()))
+            .Returns((IShopSettings s, CancellationToken cancellationToken = default) =>
         {
             var settings = _shopSettings.FirstOrDefault(st => st.Id == s.Id);
             if (settings == null) return Task.FromResult(false);
@@ -66,8 +68,8 @@ public class SettingsControllerPostTest
             return Task.FromResult(true);
         });
 
-        _settingsRepository.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>()))
-            .Returns((IShopSettings s, IEnumerable<IShopSettings> services) =>
+        _settingsRepository.Setup(s => s.SaveShopSettings(It.IsAny<IShopSettings>(), It.IsAny<IEnumerable<IShopSettings>>(), It.IsAny<CancellationToken>()))
+            .Returns((IShopSettings s, IEnumerable<IShopSettings> services, CancellationToken cancellationToken = default) =>
         {
             var result = new List<IShopSettings>();
             var newSettings = s.To<ShopSettings>();

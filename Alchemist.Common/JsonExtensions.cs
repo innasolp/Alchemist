@@ -29,12 +29,13 @@ public static class JsonExtensions
                 }
         };
 
-    public static async Task<T?> ReadFromJsonFileAsync<T>(this string path, JsonSerializerOptions? options = null) where T : class
+    public static async Task<T?> ReadFromJsonFileAsync<T>(this string path, JsonSerializerOptions? options = null,
+        CancellationToken cancellationToken = default) where T : class
     {
         using FileStream s = File.OpenRead(path);
         var result = options != null
-            ? await JsonSerializer.DeserializeAsync<T>(s, options)
-            : await JsonSerializer.DeserializeAsync<T>(s);
+            ? await JsonSerializer.DeserializeAsync<T>(s, options, cancellationToken)
+            : await JsonSerializer.DeserializeAsync<T>(s, cancellationToken : cancellationToken);
         s.Close();
         return await Task.FromResult(result);
     }

@@ -3,6 +3,7 @@ using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.VisualStudio.Threading;
+using System.Collections.Concurrent;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
@@ -38,7 +39,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
 
         var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         var serviceCreatedAutoResetEvent = new AsyncAutoResetEvent();
-        var guids = new List<Guid>();
+        var guids = new BlockingCollection<Guid>();
         var semaphoreSlim = new SemaphoreSlim(1, 1);
 
         Func<ServiceMessage, Task> serviceCreatedAsync = async (serviceMessage) =>
@@ -74,11 +75,11 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             await messageReceiver.Stop();            
         }
     }
-    private async Task OnServiceCreatedAsync(ServiceMessage serviceMessage, SemaphoreSlim semaphoreSlim, List<Guid> guids,
+    private async Task OnServiceCreatedAsync(ServiceMessage serviceMessage, SemaphoreSlim semaphoreSlim, BlockingCollection<Guid> guids,
         CancellationToken cancellationToken = default)
     {
         await semaphoreSlim.WaitAsync(cancellationToken);
-        guids.Add(serviceMessage.Guid);
+        guids.TryAdd(serviceMessage.Guid);
         OutputHelper.WriteLine($"Guid {serviceMessage.Guid};Name {serviceMessage.Name}");
         semaphoreSlim.Release();
     }
@@ -88,13 +89,21 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
     {
         var webAppFactory = CreateWebAppFactory([8054, 8055, 8204, 8205, 8306, 8307]);
 
-        var serviceGuids = new List<Guid>();
+        var serviceGuids = new BlockingCollection<Guid>();
         var firstServiceCreatedAutoResetEvent = new AsyncAutoResetEvent(false);
+        var serviceStoppedAutoResetEvent = new AsyncAutoResetEvent(false);
+        var waitingServiceStoppedTokenSource = new CancellationTokenSource();
+
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         async Task serviceCreatedAsync(ServiceMessage serviceMessage)
         {
             await OnServiceCreatedAsync(serviceMessage, semaphoreSlim, serviceGuids);
             firstServiceCreatedAutoResetEvent.Set();
+        }
+
+        async Task serviceStoppedAsync(Guid guid)
+        {
+            serviceStoppedAutoResetEvent.Set();
         }
 
         var testMessageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(webAppFactory.Services, webAppFactory.SignalRTestServer, "events");
@@ -120,9 +129,12 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             }
 
             var guid = serviceGuids.First();
+            testMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, serviceStoppedAsync);
             await testMessageSender.Send(guid, Messages.Common.Messages.ServiceStop);
+            waitingServiceStoppedTokenSource.CancelAfter(20000);
+            await serviceStoppedAutoResetEvent.WaitAsync(waitingServiceStoppedTokenSource.Token);
 
-            await Task.Delay(3000);
+            await Task.Delay(1000);
 
             var messages = new List<TestLogMessage>(LogMessages);
             Assert.Contains(messages, l => l.LogLevel == Microsoft.Extensions.Logging.LogLevel.Information
