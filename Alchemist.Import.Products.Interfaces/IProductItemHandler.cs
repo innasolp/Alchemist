@@ -6,6 +6,8 @@ public interface IImportProduct
 {
     IProductItem ProductItem { get; }
 
+    Stream Stream { get; }
+
     string SourceName { get; }
 
     string SourceUrl { get; }

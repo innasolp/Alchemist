@@ -25,7 +25,7 @@ public class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TPr
         categoryUrlFormat, 
         sourceName, importProductJsonServiceOptions)
     where TPagingCategory : class, IPaginatorItem, IJsonItem, ICategoryProducts, new()
-    where TProduct : class, IJsonItem, IProductItem, new()
+    where TProduct : class, IProductItem, new()
 {
     protected override string GetCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TPagingCategory? category = null)
     {

@@ -12,10 +12,8 @@ namespace Alchemist.Import.Product.Json.Service;
 public class ShopImportJsonCategoryProductsService<TCategory, TProduct>
     : ShopImportCategoryProductsService<TCategory,TProduct>
     where TCategory : class, IJsonItem, ICategoryProducts, new()
-    where TProduct : class, IJsonItem, IProductItem, new()
-{   
-
-    private readonly JsonLoader _productJsonLoader;
+    where TProduct : class, IProductItem, new()
+{ 
     private readonly JsonLoader _categoryJsonLoader;
 
     public ShopImportJsonCategoryProductsService(ILogger logger,
@@ -32,7 +30,6 @@ public class ShopImportJsonCategoryProductsService<TCategory, TProduct>
     {
         Name = serviceName;
         
-        _productJsonLoader = new JsonLoader(importProductJsonServiceOptions.ProductJsonSettings);
         _categoryJsonLoader = new JsonLoader(importProductJsonServiceOptions.CategoryJsonSettings);
         _categoryJsonLoader.AddPathHandler(new PriceJsonPathHandler());
         _categoryJsonLoader.AddPathHandler(new CurrencyJsonPathHandler());
@@ -40,16 +37,10 @@ public class ShopImportJsonCategoryProductsService<TCategory, TProduct>
 
     public override string Name { get; }
 
-    protected override async Task<T?> DeserializeItemFromStream<T>(Stream stream, CancellationToken cancellationToken = default)
+    protected override async Task<TCategory?> DeserializeCategoryFromStream<T>(Stream stream, CancellationToken cancellationToken = default)
         where T : class
     {
-        if ( typeof(T) == typeof(TCategory))
-            return (await LoadFromJson<TCategory>(stream, _categoryJsonLoader, cancellationToken)) as T;
-
-        if (typeof(T) == typeof(TProduct))
-            return (await LoadFromJson<TProduct>(stream, _productJsonLoader, cancellationToken)) as T;
-
-        return await base.DeserializeItemFromStream<T>(stream, cancellationToken);
+        return await LoadFromJson<TCategory>(stream, _categoryJsonLoader, cancellationToken);
     }
 
     private static async Task<T> LoadFromJson<T>(Stream stream, IJsonLoader jsonLoader, CancellationToken cancellationToken=default)

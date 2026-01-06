@@ -1,11 +1,12 @@
 ﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Exceptions;
-using Alchemist.Product.DataItem.Interfaces;
+using Alchemist.Product.CategoryData;
+using Alchemist.Product.DbItemHandler;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.DbItemHandler;
+namespace Alchemist.Product.Category.DbItemHandler;
 
 internal class ImportCategoryItemHandler(IShopDataService shopDataService, string eventName, IShopCachedRepository shopCache) : IImportItemHandler
 {
@@ -17,7 +18,7 @@ internal class ImportCategoryItemHandler(IShopDataService shopDataService, strin
 
     private readonly IShopCachedRepository _shopCache = shopCache;
 
-    Type IImportItemHandler.ItemType => typeof(CategoryData);
+    Type IImportItemHandler.ItemType => typeof(CategoryData.CategoryData);
 
     public string EventName { get; private set; } = eventName;
 
@@ -55,9 +56,7 @@ internal class ImportCategoryItemHandler(IShopDataService shopDataService, strin
             await InvokeItemProcessedAsync(categoryData, ItemProcessStatus.AlreadyExists, cancellationToken);
             return ItemProcessStatus.AlreadyExists;
         }
-    }
-
-    
+    }    
 
     private Task InvokeItemProcessedAsync(ICategoryData item, ItemProcessStatus itemProcessStatus, CancellationToken cancellationToken = default)
     {

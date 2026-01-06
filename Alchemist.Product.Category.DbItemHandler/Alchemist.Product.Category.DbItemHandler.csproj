@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.CategoryData.Interfaces\Alchemist.Product.CategoryData.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.DbItemHandler\Alchemist.Product.DbItemHandler.csproj" />
   </ItemGroup>
 
 </Project>

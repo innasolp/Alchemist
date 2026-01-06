@@ -1,16 +1,16 @@
 ﻿using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Exceptions;
-using Alchemist.Product.DataItem.Interfaces;
+using Alchemist.Product.DbItemHandler;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.DbItemHandler;
+namespace Alchemist.Product.BeautyAndHealth.DbItemHandler;
 
-internal class ImportProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName, IShopCachedRepository shopCache)
+internal class BeautyAndHealthProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName, IShopCachedRepository shopCache)
     : IImportItemHandler
 {
-    private class ImportProductProcessEventArgs(IProductData item, ItemProcessStatus processStatus, CancellationToken cancellationToken)
+    private class ImportProductProcessEventArgs(IBeautyAndHealthProductData item, ItemProcessStatus processStatus, CancellationToken cancellationToken)
        : ItemProcessEventArgs<object, ItemProcessStatus>(item, processStatus, cancellationToken)
     { }
 
@@ -22,7 +22,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
 
     public string EventName { get; private set; } = eventName;
 
-    Type IImportItemHandler.ItemType => typeof(ProductData);
+    Type IImportItemHandler.ItemType => typeof(BeautyAndHealthProductData);
 
     private event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>>? _itemProcessed;
     public event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>> ItemProcessed
@@ -33,8 +33,8 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
 
     public async Task<ItemProcessStatus> HandleItem(object item, CancellationToken cancellationToken = default)
     {
-        if (item is not IProductData productData)
-            throw new InvalidDataException($"Item type {item.GetType().Name} is invalid. Expected type must implement {nameof(IProductData)}");
+        if (item is not IBeautyAndHealthProductData productData)
+            throw new InvalidDataException($"Item type {item.GetType().Name} is invalid. Expected type must implement {nameof(IBeautyAndHealthProductData)}");
 
         try
         {
@@ -105,7 +105,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         }
     }
 
-    private Task InvokeItemProcessedAsync(IProductData item, ItemProcessStatus itemProcessStatus, CancellationToken cancellationToken)
+    private Task InvokeItemProcessedAsync(IBeautyAndHealthProductData item, ItemProcessStatus itemProcessStatus, CancellationToken cancellationToken)
     {
         return _itemProcessed?.Invoke(this, new ImportProductProcessEventArgs(item, itemProcessStatus, cancellationToken)) ?? Task.FromResult(false);
     }
@@ -123,7 +123,8 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         return await Task.FromResult(true);
     }
 
-    private async Task<bool> SetShopProductPriceForItemAsync(IProductData item, long shopProductId, CancellationToken cancellationToken = default)
+    private async Task<bool> SetShopProductPriceForItemAsync(IBeautyAndHealthProductData item, long shopProductId,
+        CancellationToken cancellationToken = default)
     {
         var shopProductPrice = await _productDataService.GetShopProductPrice(shopProductId, cancellationToken);
         if (shopProductPrice == null)
@@ -147,7 +148,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         }
     }
 
-    private async Task<IProduct> CreateProductFromModelAsync(IProductData productItem, int shopId, CancellationToken cancellationToken = default)
+    private async Task<IProduct> CreateProductFromModelAsync(IBeautyAndHealthProductData productItem, int shopId, CancellationToken cancellationToken = default)
     {
         var brand = !string.IsNullOrWhiteSpace(productItem.Brand.Name) ? await GetBrandAsync(productItem, cancellationToken) : null;
 
@@ -204,7 +205,7 @@ internal class ImportProductItemHandler(IProductDataService productDataService, 
         }
     }
 
-    private async Task<IBrand?> GetBrandAsync(IProductData productItem, CancellationToken cancellationToken = default)
+    private async Task<IBrand?> GetBrandAsync(IBeautyAndHealthProductData productItem, CancellationToken cancellationToken = default)
     {
         var brand = await _productDataService.FindBrandByName(productItem.Brand.Name, cancellationToken);
         if (brand == null)

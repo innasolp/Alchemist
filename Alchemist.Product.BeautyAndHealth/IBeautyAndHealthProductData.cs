@@ -1,8 +1,8 @@
 ﻿using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.DataItem.Interfaces;
+namespace Alchemist.Product.BeautyAndHealth;
 
-public interface IProductData
+public interface IBeautyAndHealthProductData
 {
     IShopProduct ShopProduct { get; }
 

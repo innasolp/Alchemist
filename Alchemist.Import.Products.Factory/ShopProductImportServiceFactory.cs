@@ -12,10 +12,10 @@ namespace Alchemist.Import.Factory.Products;
 
 public abstract class ShopProductImportServiceFactory(ILogger logger,
     ILoaderServiceFactory browserServiceFactory,
-    IProductItemHandler itemHandler,
+    IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,
     IImportServiceLogFactory? logFactory = null) : ImportServiceFactory(logger, browserServiceFactory, logFactory)
 {
-    private readonly IProductItemHandler _itemHandler = itemHandler;
+    private readonly IEnumerable<IProductItemHandlerFactory> _itemHandlerFactories = itemHandlerFactories;
 
     protected override IImportService Create(ILogger logger, 
         string name,
@@ -35,10 +35,22 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
         var productDataService = shopImportSettings.GetService("ProductRequestOptions");
         var productData = productDataService?.GetServiceValue<RequestOptions>();
 
-        return Create(logger, name,
-            productShopModel, productShopImportSettings,
-            _itemHandler, browserService,
-            productData, categoryData);
+        var itemHandlerService = shopImportSettings.GetRequiredService("ItemHandler");
+
+        IProductItemHandler? itemHandler;
+        if (!string.IsNullOrEmpty(itemHandlerService.ImplementationTypeName))
+        {
+            var itemHanndlerFactory = _itemHandlerFactories.FirstOrDefault(f => f.GetType().Name.Contains(itemHandlerService.ImplementationTypeName));
+            itemHandler = itemHanndlerFactory?.Create(shopImportSettings);
+        }
+        else
+            itemHandler = _itemHandlerFactories.FirstOrDefault()?.Create(shopImportSettings); 
+
+       return Create(logger, name,
+                productShopModel, productShopImportSettings,
+                itemHandler,
+                browserService,
+                productData, categoryData);
     }
 
     protected abstract IImportService Create(ILogger logger,

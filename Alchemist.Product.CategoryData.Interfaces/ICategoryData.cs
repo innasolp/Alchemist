@@ -1,12 +1,12 @@
 ﻿using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.DataItem.Interfaces;
+namespace Alchemist.Product.CategoryData;
 
 public interface ICategoryData
 {
     IShopCategory ShopCategory { get; }
 
-    IShopCategory ParentCategory { get; }
+    IShopCategory? ParentCategory { get; }
 
     string ShopName { get; }
 

@@ -1,9 +1,8 @@
-﻿using Alchemist.Product.DataItem.Interfaces;
-using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.Interfaces;
 
-namespace Alchemist.Product.ImportItemHandler;
+namespace Alchemist.Product.BeautyAndHealth;
 
-internal class ProductData : IProductData
+public class BeautyAndHealthProductData : IBeautyAndHealthProductData
 {
     public IShopProduct ShopProduct { get; set; }
 

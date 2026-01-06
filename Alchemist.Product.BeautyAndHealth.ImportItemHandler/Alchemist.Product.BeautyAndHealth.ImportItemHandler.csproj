@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Import.Products.Factory\Alchemist.Import.Factory.Products.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.BeautyAndHealth\Alchemist.Product.BeautyAndHealth.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.ImportItemHandler\Alchemist.Product.ImportItemHandler.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Json.CustomSerialization" Version="1.0.0" />
+	</ItemGroup>
+
+</Project>

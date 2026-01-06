@@ -17,7 +17,6 @@ using Message.RabbitMQ.DependencyInjection;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using WebLoader.Interfaces;
-using Alchemist.Product.ImportItemHandler;
 using CustomJsonConfigurationProvider;
 using CustomConfigurationProvider;
 using Serilog;
@@ -25,6 +24,8 @@ using Import.Factory.Interfaces;
 using Import.Factory.Logging;
 using Alchemist.BackgroundTaskQueueService;
 using Alchemist.BackgroundTaskQueue;
+using Alchemist.Product.BeautyAndHealth.ImportItemHandler;
+using Alchemist.Product.Category.ImportItemHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -133,7 +134,7 @@ static void AddShopImportItemHandlers(IServiceCollection services, IConfiguratio
     services.AddImportCategoryMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
 
     services.AddUnboundedBackgroundQueue();
-    services.AddProductQueueItemHandler("importqueue", configuration.GetSection("RabbitMQProductEvent").Get<string>());
+    services.AddProductQueueItemHandlerFactory("importqueue", configuration.GetSection("RabbitMQProductEvent").Get<string>());
     services.AddCategoryQueueItemHandler("importqueue", configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 }
 

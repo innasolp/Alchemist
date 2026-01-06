@@ -21,9 +21,27 @@ public static class ServiceExtensions
         return shopImportSettings.Services.Values.OfType<TService>().FirstOrDefault(v => v.ServiceTypeName == name);
     }
 
+    public static TService GetRequiredService<TService>(this IImportSettings shopImportSettings, string name)
+        where TService : class, IServiceSettings
+    {
+        var key = shopImportSettings.Services.Keys.OfType<string>().FirstOrDefault(k => k == name);
+        if (key != null && shopImportSettings.Services[key] is TService service)
+            return service;
+
+        service = shopImportSettings.Services.Values.OfType<TService>().FirstOrDefault(v => v.ServiceTypeName == name);
+
+        return service ??
+            throw new InvalidOperationException($"Service with name {name} not found.");
+    }
+
     public static IServiceSettings? GetService(this IImportSettings shopImportSettings, string name)    
     {
         return shopImportSettings.GetService<IServiceSettings>(name);
+    }
+
+    public static IServiceSettings GetRequiredService(this IImportSettings shopImportSettings, string name)    
+    {
+        return shopImportSettings.GetRequiredService<IServiceSettings>(name);
     }
 
     public static TService? GetImportService<TService>(this IImportSettings shopImportSettings)

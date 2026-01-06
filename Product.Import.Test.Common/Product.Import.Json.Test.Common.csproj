@@ -7,8 +7,12 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Json.CustomSerialization" Version="1.0.0"/>
+		<PackageReference Include="Json.CustomSerialization" Version="1.0.0" />
 		<PackageReference Include="xunit" Version="2.5.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
 	</ItemGroup>
 
 </Project>

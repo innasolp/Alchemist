@@ -23,6 +23,9 @@
         "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright",
         "ServiceProviderPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
       },
+      "ItemHandler": {
+        "ImplementationTypeName": "BeautyAndHealthProduct"
+      },
       "ProductJsonSettings": {
         "AssemblyPath": "ImportSettings/ozon.product.settings.json"
       },
@@ -71,6 +74,9 @@
       "WebLoader": {
         "ImplementationTypeName": "Chromium",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "ItemHandler": {
+        "ImplementationTypeName": "BeautyAndHealthProduct"
       },
       "ProductJsonSettings": {
         "AssemblyPath": "ImportSettings/goldapple.product.settings.json"

@@ -2,9 +2,9 @@
 using Json.CustomSerialization;
 using System.Collections.ObjectModel;
 
-namespace Alchemist.Import.Products.Json;
+namespace Product.Import.Json.Test.Common;
 
-public class Product : JsonItem, IProductItem
+public class TestProduct : JsonItem, IProductItem
 {
     private static readonly ReadOnlyDictionary<string, Type> _propertyTypes = new(new Dictionary<string, Type>()
     {
@@ -84,7 +84,7 @@ public class Product : JsonItem, IProductItem
 
     public double Price { get; set; }
 
-    public string Url { get; set; }
+    public string Path { get; set; }
 
     public string ApiUrl { get; set; }
 

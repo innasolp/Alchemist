@@ -1,4 +1,5 @@
-using Alchemist.Product.DataItem.Interfaces;
+using Alchemist.Product.BeautyAndHealth;
+using Alchemist.Product.CategoryData;
 using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 using Alchemist.Product.Import.Background;
 using Alchemist.Test.Server.Fixtures;
@@ -53,7 +54,7 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         void onHandleCategoryMessage(object obj) => asyncAutoResetEvent.Set();
 
         await importReceiver.Start();
-        importReceiver.On("product", onHandleProductMessage, typeof(Mock<IProductData>));
+        importReceiver.On("product", onHandleProductMessage, typeof(Mock<IBeautyAndHealthProductData>));
         importReceiver.On("category", onHandleCategoryMessage, typeof(Mock<ICategoryData>));
 
         var httpClient = WebAppFactory.CreateClient();
