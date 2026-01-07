@@ -10,6 +10,7 @@ internal static class TestHelper
         var categoryMock = new Mock<IProductShopCategory>();
         categoryMock.Setup(c => c.ItemId).Returns(new Random().Next(10000));
         categoryMock.Setup(c => c.Category).Returns(Guid.NewGuid().ToString());
+        categoryMock.Setup(c => c.Path).Returns(Guid.NewGuid().ToString());
         return categoryMock;
     }
 

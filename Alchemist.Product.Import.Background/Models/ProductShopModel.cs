@@ -1,7 +1,10 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Product;
+using System.Collections.ObjectModel;
 
 namespace Alchemist.Product.Import.Background.Models;
+
+interface IProductShopModel : IShopModel, IProductShopSource { }
 
 internal class ProductShopModel : ShopModel, IProductShopModel
 {
@@ -33,9 +36,9 @@ internal class ProductShopModel : ShopModel, IProductShopModel
         }
     }
 
-    public List<IProductShopCategory> Categories { get; } = [];
+    public ObservableCollection<IProductShopCategory> Categories { get; } = [];
 
     public int? PageProductCount { get; set; }
     
-    IEnumerable<IProductShopCategory> IProductShopModel.Categories => Categories;
+    IEnumerable<IProductShopCategory> IProductShopSource.Categories => Categories;
 }

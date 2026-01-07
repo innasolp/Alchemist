@@ -68,11 +68,16 @@ internal class ImportCategoryItemHandler(IShopDataService shopDataService, strin
         var parentCategory = categoryItem.ParentCategory?.ItemId > 0 
             ? await _shopDataService.GetShopCategoryByShopIdAndItemId(shopId, categoryItem.ParentCategory.ItemId, cancellationToken) 
             : null;
-        var shopCatergory = new ShopCategory { 
+
+        var shopCategory = new ShopCategory
+        {
             ShopId = shopId,
             Category = categoryItem.ShopCategory.Category,
             ItemId = categoryItem.ShopCategory.ItemId,
-            ParentId = parentCategory?.Id };
-        return await _shopDataService.AddShopCategory(shopCatergory, cancellationToken);
+            Url = categoryItem.ShopCategory.Url,
+            ParentId = parentCategory?.Id
+        };
+
+        return await _shopDataService.AddShopCategory(shopCategory, cancellationToken);
     }
 }

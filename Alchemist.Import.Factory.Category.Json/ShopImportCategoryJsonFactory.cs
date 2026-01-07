@@ -22,7 +22,7 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesJsonTimer
     protected override ShopImportCategoriesTimerService<JsonElement> CreateShopImportCategoriesTimerService(ILogger logger, string name,
         IHtmlSearcher htmlSearcher, 
         ILoaderService loaderService, 
-        ICategoryShopModel categoryShopModel,
+        ICategoryShopSource categoryShopModel,
         ICategoryShopImportSettings categoryShopImportSettings,
         CategoryLoadOptions categoryLoadOptions, 
         ICategoryItemHandler categoryItemHandler)

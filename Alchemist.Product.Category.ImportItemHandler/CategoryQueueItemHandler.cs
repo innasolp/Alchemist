@@ -25,9 +25,9 @@ internal class CategoryQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue
         return new CategoryData.CategoryData
         {
             ParentCategory = categoryItem.ItemParent != null
-                ? new ShopCategory { Category = categoryItem.ItemParent.Name, ItemId = categoryItem.ItemParent.Id }
+                ? new ShopCategory { Category = categoryItem.ItemParent.Name, ItemId = categoryItem.ItemParent.Id, Url = categoryItem.ItemParent.Url }
                 : null,
-            ShopCategory = new ShopCategory { Category = categoryItem.Name, ItemId = categoryItem.Id },
+            ShopCategory = new ShopCategory { Category = categoryItem.Name, ItemId = categoryItem.Id, Url = categoryItem.Url  },
             ShopName = shopName,
             ShopUrl = shopUrl
         };

@@ -1,19 +1,20 @@
-using Alchemist.Product.Entities;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using Message.Interfaces;
 using Alchemist.DataService.Interfaces;
+using Alchemist.Import.Products.Interfaces;
+using Alchemist.Import.Settings;
+using Alchemist.Import.Settings.DataAdapter;
+using Alchemist.Import.Settings.Extensions;
+using Alchemist.Messages.Common;
+using Alchemist.Product.Entities;
+using Alchemist.Product.Import.Background.Models;
+using Alchemist.Product.Interfaces;
+using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
-using Alchemist.Import.Settings.Extensions;
-using Alchemist.Product.Import.Background.Models;
-using Alchemist.Messages.Common;
-using Alchemist.Import.Settings.DataAdapter;
+using Message.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using Import.Factory.Interfaces;
-using Alchemist.Import.Settings;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -27,11 +28,13 @@ public class ShopImportWorker : BackgroundService
     private readonly IEnumerable<ISettingsAdapter> _initSettingsAdapters;
     private readonly IDictionary<ShopSettingType, ISettingsDataAdapter> _processedSettingsAdapters;
 
-    private record ServiceToken(IImportService Service, CancellationTokenSource InnerTokenSource);   
+    private record ServiceToken(IImportService Service, int shopId, CancellationTokenSource InnerTokenSource);   
 
     private List<IImportSource> ShopModels { get; } = [];
 
     private readonly ConcurrentDictionary<Guid, ServiceToken> _servicesTokens = [];
+
+    private readonly SemaphoreSlim _shopCategorySemaphore = new(1, 1);
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
         [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)] IMessageReceiver eventMessageReceiver,
@@ -91,10 +94,29 @@ public class ShopImportWorker : BackgroundService
                 cancellationToken : stoppingToken);
     }
 
-    private void OnShopCategoryAdded(ShopCategory shopCategory)
+    private async Task OnShopCategoryAdded(ShopCategory shopCategory)
     {
-        var shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
-        shop?.Categories.Add(new ProductShopCategoryModel { Category = shopCategory.Category, ItemId = shopCategory.ItemId });
+        if (string.IsNullOrEmpty(shopCategory.Url)) return;
+
+        await _shopCategorySemaphore.WaitAsync();
+
+        try
+        {
+            var shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
+            if (shop?.RootCategories.Any(c => c.ItemId == shopCategory.ItemId) != true)
+                return;
+
+            var productShopCategory = shopCategory.ToProductShopCategoryModel();
+            shop?.Categories.Add(productShopCategory);
+
+            if (_servicesTokens.FirstOrDefault(s => s.Value.shopId == shop.Id && s.Value.Service is IListener<IProductShopCategory> shopCategoryListener).Value.Service
+                is IListener<IProductShopCategory> shopCategoryListener)
+                await shopCategoryListener.On(productShopCategory);
+        }
+        finally
+        {
+            _shopCategorySemaphore.Release();
+        }
     }
 
     private async Task OnShopSettingsCreatedAsync(ShopSettings newShopSettings)
@@ -112,16 +134,16 @@ public class ShopImportWorker : BackgroundService
             var shopImportSettings = await adapter.GetShopImportSettings(newShopSettings.Id);
 
             var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings);
-            if (!ShopModels.Any(s => s.Name == shopModel.Name))
+            if (!ShopModels.Any(s => s.Name == ((IImportSource)shopModel).Name))
                 ShopModels.Add(shopModel);
 
             if (!TryCreateImportService(newShopSettings.Name, shopImportSettings, shopModel, out var service)
                 || service is null) return;
 
             var guid = Guid.NewGuid();
-            _servicesTokens.TryAdd(guid, new ServiceToken(service, new CancellationTokenSource()));
+            _servicesTokens.TryAdd(guid, new ServiceToken(service, shopModel.Id, new CancellationTokenSource()));
 
-            _logger.LogInformation($"New service for shop {shopModel.Name} added");
+            _logger.LogInformation($"New service for shop {((IImportSource)shopModel).Name} added");
 
             await SendServiceMessageAsync(Messages.Common.Messages.ServiceCreated, 
                 new ServiceMessage { Guid = guid, Name = service.Name });
@@ -178,9 +200,9 @@ public class ShopImportWorker : BackgroundService
             return;
 
         var guid = Guid.NewGuid();
-        _servicesTokens.TryAdd(guid, new ServiceToken(shopImportService, new CancellationTokenSource()));
+        _servicesTokens.TryAdd(guid, new ServiceToken(shopImportService, shopModel.Id, new CancellationTokenSource()));
 
-        _logger.LogInformation($"New service for shop {shopModel.Name} added");
+        _logger.LogInformation($"New service for shop {((IImportSource)shopModel).Name} added");
     }
 
     private async Task StartEventMessageReceiverAsync(CancellationToken stoppingToken)

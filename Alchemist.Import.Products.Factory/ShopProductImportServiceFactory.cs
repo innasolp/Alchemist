@@ -26,7 +26,7 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
         if (shopImportSettings is not IProductShopImportSettings productShopImportSettings)
             throw new InvalidDataException($"Invalid settings type {shopImportSettings.GetType().Name}");
 
-        if (shopModel is not IProductShopModel productShopModel)
+        if (shopModel is not IProductShopSource productShopModel)
             throw new InvalidDataException($"Invalid shop model type {shopModel.GetType().Name}");
         
         var categoryDataService = shopImportSettings.GetService("CategoryRequestOptions");
@@ -55,7 +55,7 @@ public abstract class ShopProductImportServiceFactory(ILogger logger,
 
     protected abstract IImportService Create(ILogger logger,
         string name,
-        IProductShopModel shopModel,
+        IProductShopSource shopModel,
         IProductShopImportSettings productShopImportSettings,
         IProductItemHandler productItemHandler, 
         ILoaderService browserService,

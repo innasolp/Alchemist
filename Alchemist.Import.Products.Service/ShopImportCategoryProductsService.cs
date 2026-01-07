@@ -69,7 +69,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             await _categoriyListenerSemaphoreSlim.WaitAsync();
             Categories.Enqueue(message);
-            Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, [message.GetCategoryUrlWithId()]);
+            Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, [message.Path]);
         }
         finally
         {
@@ -79,7 +79,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        while (!Categories.IsEmpty && !stoppingToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested)
         {
             if (!Categories.TryDequeue(out var category))
                 continue;
@@ -141,7 +141,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 break;
 
             case UrlFormatType.Url:
-                args = [PrepareItemUrl(productShopCategory.Category)];
+                args = [productShopCategory.Path];
                 break;
 
             case UrlFormatType.UrlWithItemId:
