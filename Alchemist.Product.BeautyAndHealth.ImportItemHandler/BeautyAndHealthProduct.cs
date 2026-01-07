@@ -1,10 +1,9 @@
-﻿using Alchemist.Import.Products.Interfaces;
-using Json.CustomSerialization;
+﻿using Json.CustomSerialization;
 using System.Collections.ObjectModel;
 
 namespace Alchemist.Product.BeautyAndHealth.ImportItemHandler;
 
-internal class BeautyAndHealthProduct : JsonItem, IProductItem
+internal class BeautyAndHealthProduct : JsonItem
 {
     private static readonly ReadOnlyDictionary<string, Type> _propertyTypes = new(new Dictionary<string, Type>()
     {
@@ -26,9 +25,9 @@ internal class BeautyAndHealthProduct : JsonItem, IProductItem
         set => SetPropertyValue(nameof(Name), value);
     }
 
-    public string Description
+    public string? Description
     {
-        get => GetPropertyValue<string>(nameof(Description));
+        get => GetPropertyValue<string?>(nameof(Description));
         set => SetPropertyValue(nameof(Description), value);
     }
 
@@ -52,13 +51,13 @@ internal class BeautyAndHealthProduct : JsonItem, IProductItem
 
     public string? Country
     {
-        get => GetPropertyValue<string>(nameof(Country));
+        get => GetPropertyValue<string?>(nameof(Country));
         set => SetPropertyValue(nameof(Country), value);
     }
 
-    public string Comment
+    public string? Comment
     {
-        get => GetPropertyValue<string>(nameof(Comment));
+        get => GetPropertyValue<string?>(nameof(Comment));
         set => SetPropertyValue(nameof(Comment), value);
     }
 
@@ -68,9 +67,9 @@ internal class BeautyAndHealthProduct : JsonItem, IProductItem
         set => SetPropertyValue(nameof(ProductType), value);
     }
 
-    public string[] Purposes
+    public string[]? Purposes
     {
-        get => GetPropertyValue<string[]>(nameof(Purposes));
+        get => GetPropertyValue<string[]?>(nameof(Purposes));
         set => SetPropertyValue(nameof(Purposes), value);
     }
 
@@ -80,7 +79,7 @@ internal class BeautyAndHealthProduct : JsonItem, IProductItem
         set => SetPropertyValue(nameof(Articul), value);
     }
 
-    public string Currency { get; set; }
+    public string? Currency { get; set; }
 
     public double Price { get; set; }
 

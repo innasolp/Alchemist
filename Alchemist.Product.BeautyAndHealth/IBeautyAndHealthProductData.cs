@@ -10,7 +10,7 @@ public interface IBeautyAndHealthProductData
 
     IProductType ProductType { get; }
 
-    IBrand Brand { get; }
+    IBrand? Brand { get; }
 
     ICountry? Country { get; }
 

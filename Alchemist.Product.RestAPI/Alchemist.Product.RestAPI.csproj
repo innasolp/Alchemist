@@ -18,7 +18,7 @@
     <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.1" />
-    <PackageReference Include="Serilog.Loggers" Version="1.0.0.1" />
+    <PackageReference Include="Serilog.Loggers" Version="1.0.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
 	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.1" />
   </ItemGroup>

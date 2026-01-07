@@ -1,30 +1,51 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Alchemist.Product.Entities;
+using Alchemist.Product.Interfaces;
 
 namespace Alchemist.Product.BeautyAndHealth;
 
 public class BeautyAndHealthProductData : IBeautyAndHealthProductData
 {
-    public IShopProduct ShopProduct { get; set; }
+    public ShopProduct ShopProduct { get; set; }
 
-    public IProduct Product { get; set; }
+    public Entities.Product Product { get; set; }
 
-    public IProductType ProductType { get; set; }
+    public ProductType ProductType { get; set; }
 
-    public IBrand Brand { get; set; }
+    public Brand? Brand { get; set; }
 
-    public ICountry? Country { get; set; }
+    public Country? Country { get; set; }
 
-    public ICurrency Currency { get; set; }
+    public Currency Currency { get; set; }
 
-    public IEnumerable<IPurposeType> PurposeTypes { get; set; }
+    public List<PurposeType> PurposeTypes { get; set; }
 
-    public IEnumerable<IComponent> Components { get; set; }
+    public List<Component> Components { get; set; }
 
-    public IShopProductPrice ShopProductPrice { get; set; }
+    public ShopProductPrice ShopProductPrice { get; set; }
 
-    public IShopCategory ShopCategory { get; set; }
+    public ShopCategory ShopCategory { get; set; }
 
     public string ShopName { get; set; }
 
     public string ShopUrl { get; set; }
+
+    IShopProduct IBeautyAndHealthProductData.ShopProduct => ShopProduct;
+
+    IProduct IBeautyAndHealthProductData.Product => Product;
+
+    IProductType IBeautyAndHealthProductData.ProductType => ProductType;
+
+    IBrand? IBeautyAndHealthProductData.Brand => Brand;
+
+    ICountry? IBeautyAndHealthProductData.Country => Country;
+
+    ICurrency IBeautyAndHealthProductData.Currency => Currency;
+
+    IEnumerable<IPurposeType> IBeautyAndHealthProductData.PurposeTypes => PurposeTypes;
+
+    IEnumerable<IComponent> IBeautyAndHealthProductData.Components => Components;
+
+    IShopProductPrice IBeautyAndHealthProductData.ShopProductPrice => ShopProductPrice;
+
+    IShopCategory IBeautyAndHealthProductData.ShopCategory => ShopCategory;
 }

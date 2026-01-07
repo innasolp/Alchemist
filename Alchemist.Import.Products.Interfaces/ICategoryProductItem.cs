@@ -14,5 +14,5 @@ public interface ICategoryProductItem
 
     int CategoryItemId { get; set; }
 
-    string Brand { get; set; }
+    string? Brand { get; set; }
 }

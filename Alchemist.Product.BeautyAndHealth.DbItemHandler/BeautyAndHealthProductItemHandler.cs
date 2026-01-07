@@ -68,9 +68,11 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
                 return result;
             }
 
-            var product = await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand?.Name, cancellationToken)
-                                ?? await _productDataService.FindProductByName(productData.Product.Name, cancellationToken);
-
+            var product = !string.IsNullOrEmpty(productData.Brand?.Name)
+                ? await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand.Name, cancellationToken)
+                    ?? await _productDataService.FindProductByName(productData.Product.Name, cancellationToken)
+                : await _productDataService.FindProductByName(productData.Product.Name, cancellationToken);
+            
             if (product != null)
             {
                 if (await _productDataService.GetShopProductByShopAndProductId(shop.Id, product.Id, cancellationToken) != null)
@@ -150,7 +152,7 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
 
     private async Task<IProduct> CreateProductFromModelAsync(IBeautyAndHealthProductData productItem, int shopId, CancellationToken cancellationToken = default)
     {
-        var brand = !string.IsNullOrWhiteSpace(productItem.Brand.Name) ? await GetBrandAsync(productItem, cancellationToken) : null;
+        var brand = !string.IsNullOrWhiteSpace(productItem.Brand?.Name) ? await GetBrandAsync(productItem.Brand.Name, productItem.Country.Name, cancellationToken) : null;
 
         var productType = await _productDataService.FindProductTypeByName(productItem.ProductType.Name, cancellationToken) ??
             await _productDataService.CreateProductType(new ProductType { Name = productItem.ProductType.Name }, cancellationToken);
@@ -205,17 +207,17 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
         }
     }
 
-    private async Task<IBrand?> GetBrandAsync(IBeautyAndHealthProductData productItem, CancellationToken cancellationToken = default)
+    private async Task<IBrand?> GetBrandAsync(string brandName, string? countryName, CancellationToken cancellationToken = default)
     {
-        var brand = await _productDataService.FindBrandByName(productItem.Brand.Name, cancellationToken);
+        var brand = await _productDataService.FindBrandByName(brandName, cancellationToken);
         if (brand == null)
         {
-            var country = !string.IsNullOrEmpty(productItem.Country.Name) ?
-            (await _productDataService.FindCountryByName(productItem.Country.Name, cancellationToken)
-                ?? await _productDataService.CreateCountry(new Country { Name = productItem.Country.Name.Trim().RemoveSpecialCharacters() }, cancellationToken))
+            var country = !string.IsNullOrEmpty(countryName) ?
+            (await _productDataService.FindCountryByName(countryName, cancellationToken)
+                ?? await _productDataService.CreateCountry(new Country { Name = countryName.Trim().RemoveSpecialCharacters() }, cancellationToken))
                 : null;
 
-            brand = await _productDataService.CreateBrand(new Brand() { CountryId = country?.Id, Name = productItem.Brand.Name.Trim() }, cancellationToken);
+            brand = await _productDataService.CreateBrand(new Brand() { CountryId = country?.Id, Name = brandName.Trim() }, cancellationToken);
         }
 
         return brand;
