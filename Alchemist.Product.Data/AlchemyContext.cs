@@ -261,6 +261,9 @@ public partial class AlchemyContext : DbContext
             entity.Property(e => e.ShopId).HasColumnName("shop_id");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
             entity.Property(e => e.ItemId).HasColumnName("item_id");
+            entity.Property(e => e.Url)
+                .HasMaxLength(255)
+                .HasColumnName("url");
 
             entity.SetChangedTsColumns();
         });

@@ -18,7 +18,7 @@ internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportJsonCategor
 {
     public override Type ServiceImplementationType => typeof(ShopImportJsonCategoryProductsService);
 
-    protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, object? productLoadData = null, object? categoryLoadData = null)
+    protected override IImportService Create(ILogger logger, string name, IProductShopSource shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, object? productLoadData = null, object? categoryLoadData = null)
     {
         var categoryJsonSettingsService = productShopImportSettings.GetService("CategoryJsonSettings");
         var categoryJsonSettings = categoryJsonSettingsService.GetServiceValue<JsonSettings>();

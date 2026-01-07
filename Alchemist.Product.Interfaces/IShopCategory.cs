@@ -11,4 +11,6 @@ public interface IShopCategory
     public int? ParentId { get; set; }
 
     public int ItemId { get; set; }
+
+    public string? Url { get; set; }
 }

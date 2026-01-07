@@ -3,7 +3,7 @@ using Import.Settings.Interfaces;
 
 namespace Alchemist.Import.Settings.Product;
 
-public interface IProductShopModel : IImportSource
+public interface IProductShopSource : IImportSource
 {
     IEnumerable<IProductShopCategory> Categories { get; }
 }
