@@ -4,7 +4,7 @@
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
     "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
-    "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2F{0}%2F%3Flayout_container%3DcategorySearchMegapagination%26layout_page_index%3D{1}%26page%3D{1}",
+    "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}%2F%3Flayout_page_index%3D{1}%26page%3D{1}",
     "Perfomance": true,
     "PageProductCount": 12,
     "RootCategories": [
@@ -22,6 +22,9 @@
         "ImplementationTypeName": "ChromiumPatchright",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright",
         "ServiceProviderPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "ItemHandler": {
+        "ImplementationTypeName": "BeautyAndHealthProduct"
       },
       "ProductJsonSettings": {
         "AssemblyPath": "ImportSettings/ozon.product.settings.json"
@@ -53,9 +56,9 @@
     "ShopUrl": "https://goldapple.ru",
     "ProductUrlFormat": "https://goldapple.ru/{0}",
     "ProductUrlFormatType": "Url",
-    "CategoryUrlFormat": "https://goldapple.ru/{0}",
+    "CategoryUrlFormat": "https://goldapple.ru{0}?p={1}",
     "CategoryUrlFormatType": "Url",
-    "PageProductCount": 30,
+    "PageProductCount": 20,
     "Perfomance": true,
     "RootCategories": [
       {
@@ -71,6 +74,9 @@
       "WebLoader": {
         "ImplementationTypeName": "Chromium",
         "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "ItemHandler": {
+        "ImplementationTypeName": "BeautyAndHealthProduct"
       },
       "ProductJsonSettings": {
         "AssemblyPath": "ImportSettings/goldapple.product.settings.json"

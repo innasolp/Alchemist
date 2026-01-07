@@ -138,7 +138,8 @@ public static class IntefaceExtensions
             Category = @in.Category,
             ShopId = @in.ShopId,
             ItemId = @in.ItemId,
-            ParentId = @in.ParentId
+            ParentId = @in.ParentId,
+            Url = @in.Url
         };
     }
     

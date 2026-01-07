@@ -29,8 +29,8 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
         if (shopImportSettings is not ICategoryShopImportSettings categoryShopImportSettings)
             throw new InvalidDataException($"Invalid settings type {shopImportSettings.GetType().Name}");
 
-        if (shopModel is not ICategoryShopModel categoryShopModel)
-            throw new InvalidOperationException($"Invalid type {shopModel.GetType()}. Must be implementation of {typeof(ICategoryShopModel)}");
+        if (shopModel is not ICategoryShopSource categoryShopModel)
+            throw new InvalidOperationException($"Invalid type {shopModel.GetType()}. Must be implementation of {typeof(ICategoryShopSource)}");
 
         var loadOptionsService = shopImportSettings.GetService(nameof(CategoryLoadOptions)) 
             ?? throw new InvalidDataException($"CategoryLoadOptions not exists for {shopModel.Name}");
@@ -56,7 +56,7 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
         string name, 
         IHtmlSearcher htmlSearcher, 
         ILoaderService loaderService,
-        ICategoryShopModel categoryShopModel,
+        ICategoryShopSource categoryShopModel,
         ICategoryShopImportSettings categoryShopImportSettings,
         CategoryLoadOptions categoryLoadOptions,
         ICategoryItemHandler categoryItemHandler);

@@ -14,3 +14,10 @@ public interface IItemHandler<TItem, TStatus>
 
     event AsyncEventHandler<ItemProcessEventArgs<TItem, TStatus>> ItemProcessed;
 }
+
+public interface IItemHandler : IItemHandler<object, ItemProcessStatus>
+{
+    Type ItemType { get; }
+
+    string EventName { get; }
+}

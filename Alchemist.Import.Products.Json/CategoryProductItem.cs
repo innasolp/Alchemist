@@ -50,9 +50,9 @@ public class CategoryProductItem : JsonItem, ICategoryProductItem
 
     public int CategoryItemId{ get; set; }
 
-    public string Brand
+    public string? Brand
     {
-        get => GetPropertyValue<string>(nameof(Brand));
+        get => GetPropertyValue<string?>(nameof(Brand));
         set => SetPropertyValue(nameof(Brand), value);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 
-
 namespace Alchemist.Import.ProductService.Test.Infrastructure;
 
 public class TestCategory : ICategoryProducts
@@ -50,7 +49,7 @@ public class TestProductItem : IProductItem
 
     public string Currency { get; set; }
     public double Price { get; set; }
-    public string Url { get; set; }
+    public string Path { get; set; }
     public string ApiUrl { get; set; }
     public int CategoryId { get; set; }
 }

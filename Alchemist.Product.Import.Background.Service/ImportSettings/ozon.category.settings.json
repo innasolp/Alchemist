@@ -23,7 +23,7 @@
           "sku"
         ],
         "ItemUrl": [ "action/link" ],
-        "Brand": [ "mainState/[type=labelList]/labelList/items/title" ],
+        "Brand": [ "mainState/[type=labelList]/labelList/items/[.testInfo]/[automatizationId=tile-list-paid-brand]/.parent/.parent/title" ],
         "Price": [ "mainState/[type=priceV2]/priceV2/price/[textStyle=PRICE]/text/.price" ],
         "Currency":[ "mainState/[type=priceV2]/priceV2/price/[textStyle=PRICE]/text/.currency" ]
       }

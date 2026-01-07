@@ -11,7 +11,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
-    protected sealed record ImportProduct(IProductItem ProductItem, string SourceName, string SourceUrl) : IImportProduct
+    protected sealed record ImportProduct(IProductItem ProductItem, string SourceName, string SourceUrl, Stream Stream) : IImportProduct
     {
     }
 
@@ -69,7 +69,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             await _categoriyListenerSemaphoreSlim.WaitAsync();
             Categories.Enqueue(message);
-            Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, [message.GetCategoryUrlWithId()]);
+            Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, [message.Path]);
         }
         finally
         {
@@ -79,7 +79,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        while (!Categories.IsEmpty && !stoppingToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested)
         {
             if (!Categories.TryDequeue(out var category))
                 continue;
@@ -141,7 +141,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 break;
 
             case UrlFormatType.Url:
-                args = [PrepareItemUrl(productShopCategory.Category)];
+                args = [productShopCategory.Path];
                 break;
 
             case UrlFormatType.UrlWithItemId:
@@ -176,7 +176,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPageUrl, int categoryItemId, int page, CancellationToken stoppingToken)
     {
-        var (success, category) = await TryGetFromApiUrlAsync<TCategory>(categoryPageUrl,
+        var (success, category) = await TryGetCategoryFromApiUrlAsync<TCategory>(categoryPageUrl,
             ImportProductServiceOptions.CategoryLoadData != null 
                 ? new object?[] { LoadData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } 
                 : LoadData,
@@ -209,20 +209,29 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
-        var url = GetApiUrl(_productUrlFormat, categoryProductItem);
-        var (success, productItem) = await TryGetProductItemFromCategoryItemAsync(categoryProductItem, url, cancellationToken);
+        var apiUrl = GetApiUrl(_productUrlFormat, categoryProductItem);
 
+        var (success, stream) = await TryLoadFromUrlAsync(apiUrl,
+            ImportProductServiceOptions.ProductLoadData is not null
+                ? new object?[] { LoadData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } }
+                : LoadData,
+            cancellationToken);
+        
         if(!success)
         {
-            Logger.LogInformation(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, url);
+            Logger.LogInformation(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, apiUrl);
             return false;
-        }
+        }        
+        
+        if (!success || stream == default) return false;
 
-        Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, productItem.Name, url);
+        var productItem = GetProductItemFromCategoryItem(categoryProductItem, apiUrl);        
+
+        Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, productItem.Name, apiUrl);
 
         try
         {
-            var result = await _itemHandler.HandleItem(new ImportProduct(productItem, _sourceName, Host), cancellationToken);
+            var result = await _itemHandler.HandleItem(new ImportProduct(productItem, _sourceName, Host, stream), cancellationToken);
             Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, [productItem.Name, productItem.ApiUrl, result]);
         }
         catch(Exception e)
@@ -233,26 +242,26 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return true;
     }
 
-    protected virtual async Task<(bool success, T? result)> TryGetFromApiUrlAsync<T>(string apiUrl, object? requestData, CancellationToken token)
+    protected virtual async Task<(bool success, TCategory? result)> TryGetCategoryFromApiUrlAsync<T>(string apiUrl, object? requestData, CancellationToken token)
         where T:class
     {        
         var (success, stream) = await TryLoadFromUrlAsync(apiUrl, requestData, cancellationToken : token);
 
-        if (!success || stream is null) return (false, default(T?));
+        if (!success || stream is null) return (false, default(TCategory?));
 
         try
         {
             using (stream)
             {
-                var item = await DeserializeItemFromStream<T>(stream, cancellationToken: token);        
+                var item = await DeserializeCategoryFromStream<T>(stream, cancellationToken: token);        
                 stream.Close();
                 return (true, item);
             }
         }
         catch (JsonException ex)
         {
-            Logger.LogError(ex, ImportProductLogMessages.SerializationError, [typeof(T).Name, apiUrl, ex.Message]);
-            return (false, default(T?));
+            Logger.LogError(ex, ImportProductLogMessages.SerializationError, [typeof(TCategory).Name, apiUrl, ex.Message]);
+            return (false, default(TCategory?));
         }
 #if DEBUG
         catch(Exception e)
@@ -262,30 +271,27 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 #endif         
     }
 
-    protected virtual async Task<T?> DeserializeItemFromStream<T>(Stream stream, CancellationToken cancellationToken = default)
+    protected virtual async Task<TCategory?> DeserializeCategoryFromStream<T>(Stream stream, CancellationToken cancellationToken = default)
         where T:class
     {
-        return await JsonSerializer.DeserializeAsync<T>(stream, cancellationToken: cancellationToken);
+        return await JsonSerializer.DeserializeAsync<TCategory>(stream, cancellationToken: cancellationToken);
     }
 
-    protected async Task<(bool success, TProductItem? productItem)> TryGetProductItemFromCategoryItemAsync(ICategoryProductItem categoryProductItem, string apiUrl, CancellationToken token)
-    {
-        var (success, productItem) = await TryGetFromApiUrlAsync<TProductItem>(apiUrl,
-            ImportProductServiceOptions.ProductLoadData is not null 
-                ? new object?[] { LoadData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } } 
-                : LoadData,
-            token);
+    protected TProductItem GetProductItemFromCategoryItem(ICategoryProductItem categoryProductItem, string apiUrl)
+    {  
+        var productItem = new TProductItem
+        {
+            Path = categoryProductItem.ItemUrl,
+            ItemId = categoryProductItem.Id,
+            Name = categoryProductItem.Name,
+            Price = categoryProductItem.Price,
+            Currency = categoryProductItem.Currency,
+            ApiUrl = apiUrl,
+            CategoryId = categoryProductItem.CategoryItemId,
+            Brand = categoryProductItem.Brand
+        };
 
-        if (!success) return (false, default(TProductItem?));
-        
-        productItem.Url = categoryProductItem.ItemUrl;
-        productItem.Price = categoryProductItem.Price;
-        productItem.Currency = categoryProductItem.Currency;
-        productItem.ApiUrl = apiUrl;
-        productItem.CategoryId = categoryProductItem.CategoryItemId;
-        productItem.Brand = categoryProductItem.Brand;
-
-        return (true, productItem);
+        return productItem;
     }
 
     protected virtual bool? IsEndOfCategory(TCategory category, int processProductCount)

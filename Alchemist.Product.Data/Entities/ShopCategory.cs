@@ -16,4 +16,5 @@ public partial class ShopCategory
 
     public DateTime? UpdatedTs { get; set; }
 
+    public string? Url { get; set; }
 }

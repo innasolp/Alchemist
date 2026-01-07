@@ -15,7 +15,6 @@
     <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Import.ItemHandler.Interfaces\Alchemist.Product.DataItem.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

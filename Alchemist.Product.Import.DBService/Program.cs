@@ -2,7 +2,8 @@ using Alchemist.Common;
 using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Log.Extensions;
-using Alchemist.Product.DbItemHandler;
+using Alchemist.Product.BeautyAndHealth.DbItemHandler;
+using Alchemist.Product.Category.DbItemHandler;
 using Alchemist.Product.Import.DBService;
 using Alchemist.Product.RestAPIClient;
 using CustomConfigurationProvider;
@@ -36,7 +37,7 @@ builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new 
 var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
 builder.Services.AddRabbitMQMessageReceiver(rabbitMQOptions);
 
-builder.Services.AddProductItemHandler(builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
+builder.Services.AddBeautyAndHealthProductItemHandler(builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
 builder.Services.AddCategoryItemHandler(builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 
 AddLogging(builder.Configuration, builder.Logging, "log.property.json", $"{Utils.GetAppPath()}/Logs", restApiHost);

@@ -10,22 +10,21 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Factory.Product.Json;
 
-public class ShopImportJsonPaginatorProductServiceFactory(ILogger<ShopImportJsonPaginatorCategoryProductsService> logger, ILoaderServiceFactory browserServiceFactory, IProductItemHandler itemHandler, IImportServiceLogFactory? logFactory = null) 
-    : ShopProductImportServiceFactory(logger, browserServiceFactory, itemHandler, logFactory)
+internal class ShopImportJsonPaginatorProductServiceFactory(ILogger<ShopImportJsonPaginatorCategoryProductsService> logger, 
+    ILoaderServiceFactory browserServiceFactory,
+    IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,
+    IImportServiceLogFactory? logFactory = null) 
+    : ShopProductImportServiceFactory(logger, browserServiceFactory, itemHandlerFactories, logFactory)
 {
     public override Type ServiceImplementationType => typeof(ShopImportJsonPaginatorCategoryProductsService);
 
-    protected override IImportService Create(ILogger logger, string name, IProductShopModel shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, object? productLoadData = null, object? categoryLoadData = null)
+    protected override IImportService Create(ILogger logger, string name, IProductShopSource shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, object? productLoadData = null, object? categoryLoadData = null)
     {
-        var productJsonSettingsService = productShopImportSettings.GetService("ProductJsonSettings");
-        var productJsonSettings = productJsonSettingsService.GetServiceValue<JsonSettings>();
-
         var categoryJsonSettingsService = productShopImportSettings.GetService("CategoryJsonSettings");
         var categoryJsonSettings = categoryJsonSettingsService.GetServiceValue<JsonSettings>();
 
         var importProductJsonServiceOptions = new ImportProductJsonServiceOptions
         {
-            ProductJsonSettings = productJsonSettings,
             CategoryJsonSettings = categoryJsonSettings,
             PageProductCount = productShopImportSettings.PageProductCount,
             ProductLoadData = productLoadData,

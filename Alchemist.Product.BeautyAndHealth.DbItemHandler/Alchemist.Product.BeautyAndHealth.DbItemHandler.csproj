@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Product.BeautyAndHealth\Alchemist.Product.BeautyAndHealth.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.DbItemHandler\Alchemist.Product.DbItemHandler.csproj" />
+  </ItemGroup>
+
+</Project>

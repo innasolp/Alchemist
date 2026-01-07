@@ -2,7 +2,7 @@
 
 namespace Alchemist.Product.DbItemHandler;
 
-internal interface IShopCachedRepository 
+public interface IShopCachedRepository 
 {
     Task<IShop?> TryGetShopAsync(string shopName, string shopUrl, CancellationToken cancellationToken = default);
 }

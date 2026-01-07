@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Product.ImportItemHandler;
 
-internal abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue backgroundTaskQueue, 
+public abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue backgroundTaskQueue, 
     IMessageSender messageSender, 
     string processMethodName) 
     : Import.IItemHandler<T, ResultStatus>
@@ -32,7 +32,9 @@ internal abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue back
             if (!_processMessageSender.IsConnected)
                 await _processMessageSender.Start(cancellationToken);
 
-            var importEntity = ConvertToImportEntity(item);
+            var importEntity = await ConvertToImportEntity(item);
+
+            logger.LogInformation($"Item {GetUrl(item)} converted successfully.");
 
             await _processMessageSender.Send(importEntity, _processMethodName, cancellationToken);
             
@@ -55,5 +57,5 @@ internal abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue back
 
     protected abstract string GetUrl(T item);
 
-    protected abstract TDataItem ConvertToImportEntity(T item);
+    protected abstract Task<TDataItem> ConvertToImportEntity(T item);
 }

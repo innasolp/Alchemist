@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Factory.Product.Json;
 
-public class ShopImportJsonCategoryProductsService(ILogger<ShopImportJsonCategoryProductsService> logger, 
+internal class ShopImportJsonCategoryProductsService(ILogger<ShopImportJsonCategoryProductsService> logger, 
     ILoaderService loader, 
     string url, 
     string serviceName,
@@ -16,6 +16,6 @@ public class ShopImportJsonCategoryProductsService(ILogger<ShopImportJsonCategor
     string categoryUrlFormat,
     string sourceName, 
     ImportProductJsonServiceOptions importProductJsonServiceOptions) 
-    : ShopImportJsonCategoryProductsService<CategoryProducts, Import.Products.Json.Product>(logger, loader, url, serviceName, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, importProductJsonServiceOptions)
+    : ShopImportJsonCategoryProductsService<CategoryProducts, Product>(logger, loader, url, serviceName, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, importProductJsonServiceOptions)
 {
 }

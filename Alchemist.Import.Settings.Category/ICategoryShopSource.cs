@@ -2,6 +2,6 @@
 
 namespace Alchemist.Import.Settings.Category;
 
-public interface ICategoryShopModel : IImportSource
+public interface ICategoryShopSource : IImportSource
 {    
 }

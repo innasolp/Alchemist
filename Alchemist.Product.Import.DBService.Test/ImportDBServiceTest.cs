@@ -1,6 +1,7 @@
 using Alchemist.DataService.Interfaces;
+using Alchemist.Product.BeautyAndHealth;
+using Alchemist.Product.CategoryData;
 using Alchemist.Product.Data.Repository;
-using Alchemist.Product.DataItem.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Alchemist.Test.Server.Fixtures;
@@ -40,13 +41,13 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
         WebAppFactory.GrpcWebAppFactory.ConfigureServices += setTestRepository;
         WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;        
 
-        var productMessageMock = new Mock<IProductData>();
-        FillTestProductData(productMessageMock);
+        var categoryMessageMock = new Mock<ICategoryData>();
+        FillTestCategoryData(categoryMessageMock);
 
-        var shop = new Shop { Id = 1, Name = productMessageMock.Object.ShopName, Url = productMessageMock.Object.ShopUrl };
+        var shop = new Shop { Id = 1, Name = categoryMessageMock.Object.ShopName, Url = categoryMessageMock.Object.ShopUrl };
 
         var shopCreateResetEvent = new AsyncAutoResetEvent();
-        _alchemyRepositoryMock.Setup(r => r.GetShopByName(productMessageMock.Object.ShopName, It.IsAny<CancellationToken>()))
+        _alchemyRepositoryMock.Setup(r => r.GetShopByName(categoryMessageMock.Object.ShopName, It.IsAny<CancellationToken>()))
             .Returns(async (string name, CancellationToken cancellationToken = default) =>
             {
                 shopCreateResetEvent.Set();
@@ -62,18 +63,18 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
 
         await Task.Delay(1000);
 
-        var eventName = WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>(); 
+        var eventName = WebAppFactory.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>(); 
         var testSender = WebAppFactory.CreateTestSender();
         await testSender.Start();
-        await testSender.Send(productMessageMock.Object, eventName);
+        await testSender.Send(categoryMessageMock.Object, eventName);
 
         await shopCreateResetEvent.WaitAsync();
 
-        _alchemyRepositoryMock.Verify(r => r.GetShopByName(productMessageMock.Object.ShopName, It.IsAny<CancellationToken>()));
+        _alchemyRepositoryMock.Verify(r => r.GetShopByName(categoryMessageMock.Object.ShopName, It.IsAny<CancellationToken>()));
 
         await Task.Delay(500);
 
-        _alchemyRepositoryMock.Verify(r => r.GetShopProductByShopAndItemId(shop.Id, productMessageMock.Object.ShopProduct.ItemId, It.IsAny<CancellationToken>()));
+        _alchemyRepositoryMock.Verify(r => r.GetShopCategory(shop.Id, categoryMessageMock.Object.ShopCategory.ItemId, It.IsAny<CancellationToken>()));
 
         WebAppFactory.GrpcWebAppFactory.ConfigureServices -= setTestRepository;
     }
@@ -88,7 +89,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
         return autoResetEvent;
     }
 
-    private static void FillTestProductData(Mock<IProductData> productDataMock)
+    private static void FillTestProductData(Mock<IBeautyAndHealthProductData> productDataMock)
     {
         productDataMock.Setup(p => p.Product).Returns(new Entities.Product {
             Name = $"Product_{Guid.NewGuid()}",
@@ -103,5 +104,17 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
         });
         productDataMock.Setup(p => p.ShopName).Returns(Guid.NewGuid().ToString());
         productDataMock.Setup(p => p.ShopUrl).Returns(Guid.NewGuid().ToString());
+    }
+
+    private static void FillTestCategoryData(Mock<ICategoryData> categoryDataMock)
+    {
+        categoryDataMock.Setup(p => p.ShopCategory).Returns(new ShopCategory {
+            Category = $"Product_{Guid.NewGuid()}",
+            ShopId =1,
+            ItemId = 10
+        });
+        
+        categoryDataMock.Setup(p => p.ShopName).Returns(Guid.NewGuid().ToString());
+        categoryDataMock.Setup(p => p.ShopUrl).Returns(Guid.NewGuid().ToString());
     }
 }

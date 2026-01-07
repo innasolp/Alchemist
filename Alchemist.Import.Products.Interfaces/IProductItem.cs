@@ -2,29 +2,17 @@
 
 public interface IProductItem
 {
-    string Name { get; }
+    string Name { get; set; }
 
-    string ItemId { get; }   
-
-    string[]? Components { get; }
+    string ItemId { get; set; }   
 
     string Brand { get; set; }
-
-    string? Country { get; }
-
-    string Comment { get; }
-
-    string ProductType { get; }
-
-    string[] Purposes { get; }
-
-    string Articul { get; }
 
     string Currency { get; set; }
 
     double Price { get; set; }
 
-    string Url { get; set; }
+    string Path { get; set; }
 
     string ApiUrl { get; set; }
 

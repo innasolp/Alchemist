@@ -7,7 +7,7 @@ public partial class GoldappleLoadProductByJsonSettingsTest
     [Fact]
     public void LoadGoldappleProductFromJson()
     {
-        var product = TestHelper.GetItemFromJson<Alchemist.Import.Products.Json.Product>("Content/goldapple.product.json", "Content/goldapple.product.settings.json");
+        var product = TestHelper.GetItemFromJson<TestProduct>("Content/goldapple.product.json", "Content/goldapple.product.settings.json");
 
         Assert.NotNull(product);
         Assert.Equal("Очищающая крем-маска для лица", product.ProductType, ignoreCase: true);
