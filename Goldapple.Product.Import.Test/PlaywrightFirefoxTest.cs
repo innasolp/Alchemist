@@ -11,7 +11,7 @@ namespace Goldapple.Product.Import.Test;
 
 public class PlaywrightFirefoxTest : ProductShopTest
 {
-    private readonly string _categoryUrl = "https://goldapple.ru/front/api/catalog/cards-list?locale=ru";// "https://goldapple.ru/front/api/catalog/products?categoryId=1000000252&cityId=555e7d61-d9a7-4ba6-9770-6caa8198c483&cityDistrict=%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9&geoPolygons[]=EKB-000000288&geoPolygons[]=EKB-000000749&pageNumber=3";
+    private readonly string _categoryUrl = "https://goldapple.ru/front/api/catalog/cards-list?locale=ru";
     private readonly string _productUrl = "https://goldapple.ru/front/api/catalog/product-card/base?itemId=99730300001&cityId=0c5b2444-70a0-4932-980c-b4dc0d3f02b5&customerGroupId=0";
 
     private readonly ITestOutputHelper _testOutputHelper;
@@ -51,7 +51,7 @@ public class PlaywrightFirefoxTest : ProductShopTest
             cityId = "555e7d61-d9a7-4ba6-9770-6caa8198c483"
         };
 
-        var webLoader = new PlaywrightFirefoxLoader();
+        await using var webLoader = new PlaywrightFirefoxLoader();
 
         await webLoader.Start();
 
@@ -70,7 +70,7 @@ public class PlaywrightFirefoxTest : ProductShopTest
 
         var requestHeaders = HeadersHelper.LoadHeadersForRequest(_requestHeadersPath, cookies);
 
-        var webLoader = new PlaywrightFirefoxLoader();
+        await using var webLoader = new PlaywrightFirefoxLoader();
 
         await webLoader.Start();
 

@@ -23,7 +23,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
          
         Assert.True(success);
 
-        stream.Close();
+        stream?.Close();
 
         await webLoader.Close();
     }
@@ -41,7 +41,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
 
         Assert.True(success);
 
-        stream.Close();
+        stream?.Close();
 
         await webLoader.Close();
     }
