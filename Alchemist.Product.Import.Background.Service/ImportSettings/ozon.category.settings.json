@@ -10,7 +10,8 @@
       "prevPage"
     ],
     "NextPage": [
-      "nextPage"
+      "nextPage",
+      "widgetStates/infiniteVirtualPaginator%/.value/nextPage"
     ]
   },
   "ItemJsonSettings": {

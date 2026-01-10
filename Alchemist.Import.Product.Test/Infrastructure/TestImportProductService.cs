@@ -38,4 +38,6 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
     {
         return !(category.CategoryProductItems?.Length > 0);
     }
+
+    protected override string PreparePath(string path) => path;
 }

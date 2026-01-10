@@ -29,13 +29,15 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
     {
         return category == null
            ? base.GetCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
-           : category.GetPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+           : category.GetPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
+           ?? base.GetCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category);
     }
 
     protected override string GetNextCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
     {
         return category == null
            ? base.GetNextCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
-           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
+           ?? category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page); ;
     }
 }

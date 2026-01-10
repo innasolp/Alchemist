@@ -15,12 +15,12 @@ public class PagingCategoryProducts : CategoryProducts, IPaginatorItem
 
     string? IPaginatorItem.GetNextPageUrl(string urlFormat, string item, int page)
     {
-        return NextPage;
+        return string.Format(urlFormat, System.Web.HttpUtility.UrlEncode(NextPage));
     }
 
     string? IPaginatorItem.GetPageUrl(string urlFormat, string item, int page)
     {
-        return PrevPage;
+        return string.Format(urlFormat, System.Web.HttpUtility.UrlEncode(PrevPage));
     }
 
     public string? PrevPage

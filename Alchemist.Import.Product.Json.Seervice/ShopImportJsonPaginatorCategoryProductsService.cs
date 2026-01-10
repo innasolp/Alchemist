@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Product.Json.Service;
 
-public class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TProduct>(ILogger logger,
+public abstract class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TProduct>(ILogger logger,
     ILoaderService loader, 
     string url,
     string serviceName,
@@ -39,7 +39,7 @@ public class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TPr
     {
         return category == null
            ? base.GetNextCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
-           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
-              ?? category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+           : category?.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
+              ?? base.GetNextCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category);
     }
 }

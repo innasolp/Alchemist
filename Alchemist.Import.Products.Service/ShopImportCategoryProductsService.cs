@@ -108,12 +108,17 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 else
                     attemptsCount = 0;
 
-                
-                successProductCount += categoryPageResult.SuccessCount;
-                unsuccessProductCount += categoryPageResult.UnsuccessCount;
+                if (categoryPageResult == null)
+                {
+                    categoryPageUrl = GetCategoryPageUrl(category, _categoryUrlFormat, ImportProductServiceOptions.CategoryUrlFormatType, page, categoryResult);
+                    continue;
+                }
 
-                isEndOfCategory = IsLastPage(categoryResult, page) == true
-                    || IsEndOfCategory(categoryResult, successProductCount+ unsuccessProductCount) == true;
+                successProductCount += categoryPageResult?.SuccessCount ?? 0;
+                unsuccessProductCount += categoryPageResult?.UnsuccessCount ?? 0;
+
+                isEndOfCategory = categoryResult != null && (IsLastPage(categoryResult, page) == true
+                    || IsEndOfCategory(categoryResult, successProductCount+ unsuccessProductCount) == true);
 
                 var nextCategoryPageUrl = GetNextCategoryPageUrl(category, _categoryUrlFormat, ImportProductServiceOptions.CategoryUrlFormatType, page + 1, categoryResult);
                 categoryPageUrl = nextCategoryPageUrl;
@@ -141,11 +146,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 break;
 
             case UrlFormatType.Url:
-                args = [productShopCategory.Path];
+                args = [PreparePath(productShopCategory.Path)];
                 break;
 
             case UrlFormatType.UrlWithItemId:
-                args = [PrepareItemUrl(productShopCategory.Category), productShopCategory.ItemId];
+                args = [PreparePath(productShopCategory.Category), productShopCategory.ItemId];
                 break;
         }
 
@@ -153,6 +158,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         return string.Format(urlFormat, args: [.. args]);
     }
+
+    protected abstract string PreparePath(string path);
 
     protected virtual string GetNextCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
     {
@@ -187,6 +194,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             Logger.LogInformation(ImportProductLogMessages.CategoryNotLoadedFromUrl, categoryPageUrl);
             return (false, default(TCategory), default(CountResult));
         }
+
+        if(!(category?.CategoryProductItems?.Length > 0))
+            return (true, category, default);
 
         var successCount = 0;
         foreach (var categoryProductItem in category.CategoryProductItems)
@@ -296,7 +306,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual bool? IsEndOfCategory(TCategory category, int processProductCount)
     {
-        return category.TotalCount >= processProductCount;
+        return category.TotalCount <= processProductCount;
     }
 
     protected virtual string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
@@ -304,10 +314,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         switch (ImportProductServiceOptions.ProductUrlFormatType)
         {
             case UrlFormatType.Url:
-                return string.Format(productUrlFormat, PrepareItemUrl(productItem.ItemUrl));
+                return string.Format(productUrlFormat, PreparePath(productItem.ItemUrl));
 
             case UrlFormatType.UrlWithItemId:
-                return string.Format(productUrlFormat, productItem.Id, PrepareItemUrl(productItem.ItemUrl));
+                return string.Format(productUrlFormat, productItem.Id, PreparePath(productItem.ItemUrl));
 
             default:
                 return string.Format(productUrlFormat, productItem.Id);
