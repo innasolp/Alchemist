@@ -152,7 +152,9 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
 
     private async Task<IProduct> CreateProductFromModelAsync(IBeautyAndHealthProductData productItem, int shopId, CancellationToken cancellationToken = default)
     {
-        var brand = !string.IsNullOrWhiteSpace(productItem.Brand?.Name) ? await GetBrandAsync(productItem.Brand.Name, productItem.Country.Name, cancellationToken) : null;
+        var brand = !string.IsNullOrWhiteSpace(productItem.Brand?.Name) 
+            ? await GetBrandAsync(productItem.Brand.Name, productItem.Country?.Name, cancellationToken) 
+            : null;
 
         var productType = await _productDataService.FindProductTypeByName(productItem.ProductType.Name, cancellationToken) ??
             await _productDataService.CreateProductType(new ProductType { Name = productItem.ProductType.Name }, cancellationToken);
