@@ -3,8 +3,8 @@
     "ShopName": "Ozon",
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
-    "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2F{0}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2%26sh%3DT6fQeg2vGw%26start_page_id%3Dd65cebfe071458bee7a2c2c9494e2f9d",
-    "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}%2F%3Flayout_page_index%3D{1}%26page%3D{1}",
+    "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}%26layout_container%3DpdpPage2column%26layout_page_index%3D2",
+    "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}",
     "Perfomance": true,
     "PageProductCount": 12,
     "RootCategories": [
@@ -15,7 +15,7 @@
     ],
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportJsonPaginatorCategoryProductsService",
+        "ImplementationTypeName": "ShopImportHttpJsonPaginatorCategoryProductsService",
         "AssemblyPath": "Import\\Products\\Json"
       },
       "WebLoader": {
@@ -34,17 +34,17 @@
       },
       "HostRequestOptions": {
         "Value": {
-          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2"
+          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions"
         }
       },
       "CategoryRequestOptions": {
         "Value": {
-          "IsApi": true
+          "LoadingType": "Api"
         }
       },
       "ProductRequestOptions": {
         "Value": {
-          "IsApi": true
+          "LoadingType": "Api"
         }
       }
     }
@@ -68,7 +68,7 @@
     ],
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportJsonCategoryProductsService",
+        "ImplementationTypeName": "ShopImportHttpJsonCategoryProductsService",
         "AssemblyPath": "Import\\Products\\Json"
       },
       "WebLoader": {
