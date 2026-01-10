@@ -128,8 +128,10 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
         }
 
         var parentCategories = new List<ICategory>(categories);
-        var categoriesResult = await Task.WhenAll(parentCategories.Select(async c => LoadCategoryChildrentTreeAsync(c as RecursiveCategory, 
-            CategoryLoadOptions.CategoriesApiUrlFormat, categories, elementHelper, stoppingToken)));
+        var loadChildCategoriesTasks = parentCategories.Select(c => LoadCategoryChildrentTreeAsync(c as RecursiveCategory,
+            CategoryLoadOptions.CategoriesApiUrlFormat, categories, elementHelper, stoppingToken));
+        
+        await Task.WhenAll(loadChildCategoriesTasks);
 
         categories.CollectionChanged -= CategoryCollectionChanged;
     }
