@@ -29,8 +29,8 @@ internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportHttpJsonCat
             PageProductCount = productShopImportSettings.PageProductCount,
             ProductLoadData = productLoadData,
             CategoryLoadData = categoryLoadData,
-            ProductUrlFormatType = productShopImportSettings.ProductUrlFormatType,
-            CategoryUrlFormatType = productShopImportSettings.CategoryUrlFormatType
+            ProductPathFormatType = productShopImportSettings.ProductUrlFormatType,
+            CategoryPathFormatType = productShopImportSettings.CategoryUrlFormatType
         };
 
         return new ShopImportHttpJsonCategoryProductsService(logger as ILogger<ShopImportHttpJsonCategoryProductsService>,

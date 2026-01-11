@@ -10,7 +10,7 @@ public interface IImportProduct
 
     string SourceName { get; }
 
-    string SourceUrl { get; }
+    string SourcePath { get; }
 }
 
 public interface IProductItemHandler : IItemHandler<IImportProduct, ResultStatus>

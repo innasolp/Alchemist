@@ -10,7 +10,7 @@ public class ImportProductServiceOptions
 
     public object? CategoryLoadData { get; set; }
 
-    public UrlFormatType ProductUrlFormatType { get; set; }
+    public PathFormatType ProductPathFormatType { get; set; }
 
-    public UrlFormatType CategoryUrlFormatType { get; set; }
+    public PathFormatType CategoryPathFormatType { get; set; }
 }

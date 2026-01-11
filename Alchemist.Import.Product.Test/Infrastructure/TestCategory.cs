@@ -15,7 +15,7 @@ public class TestCategoryProduct : ICategoryProductItem
 {
     public string Id { get; set; }
 
-    public string ItemUrl { get; set; }
+    public string ItemPath { get; set; }
 
     public string Currency { get; set; }
 
@@ -50,6 +50,6 @@ public class TestProductItem : IProductItem
     public string Currency { get; set; }
     public double Price { get; set; }
     public string Path { get; set; }
-    public string ApiUrl { get; set; }
+    public string AbsolutePath { get; set; }
     public int CategoryId { get; set; }
 }

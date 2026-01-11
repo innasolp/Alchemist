@@ -4,7 +4,7 @@ public interface ICategoryProductItem
 {
     string Id { get; }
 
-    string ItemUrl { get; }
+    string ItemPath { get; }
 
     string Currency { get; }
 

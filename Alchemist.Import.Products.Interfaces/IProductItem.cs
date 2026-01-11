@@ -14,7 +14,7 @@ public interface IProductItem
 
     string Path { get; set; }
 
-    string ApiUrl { get; set; }
+    string AbsolutePath { get; set; }
 
     int CategoryId { get; set; }
 }

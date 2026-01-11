@@ -4,7 +4,9 @@
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
     "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}%26layout_container%3DpdpPage2column%26layout_page_index%3D2",
+    "ProductUrlFormatType": "Path",
     "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}",
+    "CategoryUrlFormatType": "Path",
     "Perfomance": true,
     "PageProductCount": 12,
     "RootCategories": [
@@ -51,13 +53,11 @@
   },
 
   "GoldAppleProductsImport": {
-    "ShopName": "GoldApple",
+    "ShopName": "Goldapple",
     "Caption": "Золотое яблоко",
     "ShopUrl": "https://goldapple.ru",
-    "ProductUrlFormat": "https://goldapple.ru/{0}",
-    "ProductUrlFormatType": "Url",
+    "ProductUrlFormat": "https://goldapple.ru{0}",
     "CategoryUrlFormat": "https://goldapple.ru{0}?p={1}",
-    "CategoryUrlFormatType": "Url",
     "PageProductCount": 20,
     "Perfomance": true,
     "RootCategories": [

@@ -16,7 +16,7 @@ public class GoldappleLoadCategoryFromJsonSettingsTest
         Assert.True(category.CategoryProductItems.All(c=>c != null));
         Assert.True(category.CategoryProductItems.All(c=>!string.IsNullOrEmpty(c.Name)));
         Assert.True(category.CategoryProductItems.All(c=>!string.IsNullOrEmpty(c.Id)));
-        Assert.True(category.CategoryProductItems.All(c=>!string.IsNullOrEmpty(c.ItemUrl)));
+        Assert.True(category.CategoryProductItems.All(c=>!string.IsNullOrEmpty(c.ItemPath)));
 
         Assert.True(category.CategoryProductItems.All(c => c.Price > 0));
         Assert.True(category.CategoryProductItems.All(c => !string.IsNullOrEmpty(c.Currency)));

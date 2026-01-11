@@ -15,12 +15,12 @@ internal class ProductQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue,
 
     protected override async Task<IBeautyAndHealthProductData> ConvertToImportEntity(IImportProduct item)
     {
-        return await ConvertToImportProductItem(item.ProductItem, item.SourceName, item.SourceUrl, item.Stream);
+        return await ConvertToImportProductItem(item.ProductItem, item.SourceName, item.SourcePath, item.Stream);
     }
 
     protected override string GetUrl(IImportProduct item)
     {
-        return item.ProductItem.ApiUrl;
+        return item.ProductItem.AbsolutePath;
     }
 
     private async Task<IBeautyAndHealthProductData> ConvertToImportProductItem(IProductItem productItem, string shopName, string shopUrl, Stream stream)
@@ -32,7 +32,7 @@ internal class ProductQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue,
         return new BeautyAndHealthProductData
         {
             Product = new Entities.Product { Name = productItem.Name, Articul = beautyAndHealthProduct.Articul },
-            ShopProduct = new ShopProduct { ApiUrl = productItem.ApiUrl, ItemUrl = productItem.ItemId, ItemId = productItem.ItemId },
+            ShopProduct = new ShopProduct { ApiUrl = productItem.AbsolutePath, ItemUrl = productItem.ItemId, ItemId = productItem.ItemId },
             ShopProductPrice = new ShopProductPrice { Price = productItem.Price },
             Brand = !string.IsNullOrEmpty(productItem.Brand) ? new Brand { Name = productItem.Brand } : null,
             Country = !string.IsNullOrEmpty(beautyAndHealthProduct.Country) ? new Country { Name = beautyAndHealthProduct.Country } : null,

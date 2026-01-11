@@ -13,11 +13,11 @@ public interface IProductShopImportSettings : IShopImportSettings
 {
     string? ProductUrlFormat { get; set; }
 
-    UrlFormatType ProductUrlFormatType { get; set; }
+    PathFormatType ProductUrlFormatType { get; set; }
 
     string? CategoryUrlFormat { get; set; }
 
-    UrlFormatType CategoryUrlFormatType { get; set; }
+    PathFormatType CategoryUrlFormatType { get; set; }
 
     int? PageProductCount { get; set; }
 
