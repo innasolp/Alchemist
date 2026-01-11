@@ -1,25 +1,19 @@
-using Alchemist.Import.Category.Interfaces;
+﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Category.Service;
 using Alchemist.Import.Category.Service.Json;
-using BrowserDataLoader.Interfaces;
-using Product.Import.Test;
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using WebLoader.Interfaces;
+using WebLoader.Playwright.ChromiumPatchright;
 using Xunit.Abstractions;
 
 namespace Goldapple.Product.Import.Category.Test;
 
-public class PlaywrightFirefoxTest(ITestOutputHelper testOutputHelper)
+public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
 {
-    private readonly IBrowserDataLoader _dataLoader = new BrowserDataLoader.Firefox.Standart.Windows.FirefoxStandartDataLoader();
+    private readonly string _shopCategoriesApiUrl = "https://goldapple.ru/web/api/v3/catalog/navigation";
+    private readonly string _shopUrl = "https://goldapple.ru";
 
-    private readonly IWebLoader _webLoader = new WebLoader.Playwright.Firefox.PlaywrightFirefoxLoader();
-    
-    private readonly string _shopCategoriesUrl = "https://goldapple.ru/web/api/v3/catalog/navigation";    
-
-    private readonly string requestHeadersFileName = "GoldApple.Headers.Firefox.json";
-    string[] _nodePath = ["general"];
+    private readonly string[] _nodePath = ["general"];
 
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
@@ -34,14 +28,17 @@ public class PlaywrightFirefoxTest(ITestOutputHelper testOutputHelper)
     [Fact]
     public async Task LoadCategoriesAsync()
     {
-        var result = await _webLoader.Start();
+        JsonDocument? jsonDocument;
 
-        var cookies = await _dataLoader.LoadCookies("www.goldapple.ru");
-        var requestHeaders = HeadersHelper.LoadHeadersForRequest(requestHeadersFileName, cookies);
+        await using var webLoader = new ChromiumPatchrightWebLoader();
+        var result = await webLoader.Start();
 
-        using var stream = await _webLoader.LoadFromUrl(_shopCategoriesUrl, new RequestOptions { Headers = requestHeaders });
-        var jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
-        stream.Close();       
+        var (success, stream) = await webLoader.TryLoadFromRoute(_shopUrl, (url) => url.Contains(_shopCategoriesApiUrl),
+            timeoutInMilliseconds: 10000);
+        using (stream)
+
+            jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
+        stream.Close();
 
         Assert.NotNull(jsonDocument);
 
@@ -63,6 +60,6 @@ public class PlaywrightFirefoxTest(ITestOutputHelper testOutputHelper)
         _testOutputHelper.WriteLine($"parent categories {categories.Count(c => c.ParentId == null)}");
         _testOutputHelper.WriteLine($"all categories {categories.Count}");
 
-        await Task.Delay(1000);
+        await webLoader.Close();
     }
 }

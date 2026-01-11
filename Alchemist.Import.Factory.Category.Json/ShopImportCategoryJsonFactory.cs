@@ -25,7 +25,8 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesJsonTimer
         ICategoryShopSource categoryShopModel,
         ICategoryShopImportSettings categoryShopImportSettings,
         CategoryLoadOptions categoryLoadOptions, 
-        ICategoryItemHandler categoryItemHandler)
+        ICategoryItemHandler categoryItemHandler,
+        object? categoryLoadData = null)
     {
         if (logger is not ILogger<ShopImportCategoriesJsonTimerService> categoryJsonLogger)
             throw new InvalidDataException(logger.GetType().FullName);
@@ -38,7 +39,8 @@ public class ShopImportCategoryJsonFactory(ILogger<ShopImportCategoriesJsonTimer
             categoryShopModel.Name,
             categoryShopModel.Url,
             categoryLoadOptions,
-            categoryItemHandler);
+            categoryItemHandler,
+            categoryLoadData);
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IImportSettings shopImportSettings)

@@ -1,14 +1,15 @@
 ﻿using Alchemist.Import.Category.Interfaces;
+using Alchemist.Import.Category.Service;
+using Alchemist.Import.Settings;
+using Alchemist.Import.Settings.Category;
+using Alchemist.Import.Settings.Extensions;
+using Import.Factory.Interfaces;
+using Import.Factory.Service;
+using Import.Html;
 using Import.Html.Factory;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
-using Alchemist.Import.Settings.Extensions;
 using Microsoft.Extensions.Logging;
-using Import.Factory.Interfaces;
-using Import.Factory.Service;
-using Alchemist.Import.Settings.Category;
-using Alchemist.Import.Category.Service;
-using Import.Html;
 
 namespace Alchemist.Import.Factory.Category;
 
@@ -43,13 +44,16 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
             ? HtmlSearchFactory.CreateSearcher(htmlSearchFactoryOptions.SearchMatchType, htmlSearchFactoryOptions.SearchElementType)
             : null;
 
+        var categoryDataService = shopImportSettings.GetService("RequestOptions");
+        var categoryLoadData = categoryDataService?.GetServiceValue<RequestOptions>();
+
         return CreateShopImportCategoriesTimerService(logger, 
             name,
             htmlSearcher,
             browserService,
             categoryShopModel,
             categoryShopImportSettings,
-            categoryLoadOptions, _itemHandler);
+            categoryLoadOptions, _itemHandler, categoryLoadData);
     }
 
     protected abstract ShopImportCategoriesTimerService<TElement> CreateShopImportCategoriesTimerService(ILogger logger, 
@@ -59,5 +63,6 @@ public abstract class ShopImportCategoryFactory<TElement>(ILogger logger,
         ICategoryShopSource categoryShopModel,
         ICategoryShopImportSettings categoryShopImportSettings,
         CategoryLoadOptions categoryLoadOptions,
-        ICategoryItemHandler categoryItemHandler);
+        ICategoryItemHandler categoryItemHandler,
+        object? categoryLoadData = null);
 }

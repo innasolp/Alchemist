@@ -36,7 +36,7 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
 
     private readonly SemaphoreSlim _htmlSearcherSemaphoreSlim = new(1, 1);
 
-    private object? RequestData => LoadData;
+    private readonly object? _categoryLoadData;
 
     public ShopImportCategoriesTimerService(ILogger logger,
         string name,
@@ -46,7 +46,8 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
         string sourceName,
         string url,
         CategoryLoadOptions categoryLoadOptions,
-       ICategoryItemHandler itemHandler) : base(logger, loader, url)
+       ICategoryItemHandler itemHandler,
+       object? categoryLoadData = null) : base(logger, loader, url)
     {
         HtmlSearcher = htmlSearcher;
         CategoryLoadOptions = categoryLoadOptions;
@@ -56,6 +57,7 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
         _itemHandler = itemHandler;
 
         _timer = new(TimeSpan.FromSeconds(CategoryLoadOptions.SecondsInterval ?? _defaultInterval));
+        _categoryLoadData = categoryLoadData;
     }
 
     public ShopImportCategoriesTimerService(ILogger logger,
@@ -65,23 +67,28 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
    string sourceName,
    string url,
    CategoryLoadOptions categoryLoadOptions,
-   ICategoryItemHandler itemHandler)
-        : this(logger, name, null, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler)
+   ICategoryItemHandler itemHandler,
+        object? categoryLoadData = null)
+        : this(logger, name, null, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler, categoryLoadData)
     {
     }
 
-    protected async Task<(bool success, TElement? result)> TryLoadElementAsync(string url, CancellationToken cancellationToken)
+    protected async Task<(bool success, TElement? result)> TryLoadElementAsync(string url, CancellationToken cancellationToken = default)
     {
+        var categoryLoadData = LoadData != null
+                ? new object?[] { LoadData, _categoryLoadData }
+                : LoadData;
+
         if (HtmlSearcher != null)
         {
-            var (success, values) = await TryLoadHtmlFromUrlAsync(url, cancellationToken);
+            var (success, values) = await TryLoadHtmlFromUrlAsync(url, categoryLoadData, cancellationToken);
 
             if (!success) return (false, default(TElement?));
 
             return (true, LoadElementFromString(values[0]));
         }
         else
-            return await TryLoadElementFromUrlAsync(url, cancellationToken);
+            return await TryLoadElementFromUrlAsync(url, categoryLoadData, cancellationToken);
     }
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
@@ -142,9 +149,9 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
         IElementHelper<TElement> elementHelper,
         CancellationToken token)
     {
-        var url = string.Format(urlFormat, parentCategory.Id);
+        var url = string.Format(urlFormat, parentCategory.Id);        
 
-        var (success, categoriesResult) = await TryLoadElementFromUrlAsync(url, token);
+        var (success, categoriesResult) = await TryLoadElementFromUrlAsync(url, LoadData, token);
 
         if (!success)
         {
@@ -169,34 +176,37 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
         }
     }
 
-    private async Task<(bool success, List<string>? result)> TryLoadHtmlFromUrlAsync(string url, CancellationToken token)
+    private async Task<(bool success, List<string>? result)> TryLoadHtmlFromUrlAsync(string url, object? requestData = null, CancellationToken token = default)
     {
-        var (success, stream) = await TryLoadFromUrlAsync(url, RequestData, token);
+        var (success, stream) = await TryLoadFromUrlAsync(url, requestData, token);
 
-        if (!success)
-            return await Task.FromResult((false, default(List<string>)));
+        using (stream)
+        {
+            if (!success)
+                return await Task.FromResult((false, default(List<string>)));
 
-        try
-        {
-            await _htmlSearcherSemaphoreSlim.WaitAsync(token);
-            var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
-            return await Task.FromResult((true, values));
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, ImportCategoryLogMessages.ParseHtmlFromUrlFailed, url, ex.Message);
-            return await Task.FromResult((false, default(List<string>)));
-        }
-        finally
-        {
-            stream.Close();
-            _htmlSearcherSemaphoreSlim.Release();
+            try
+            {
+                await _htmlSearcherSemaphoreSlim.WaitAsync(token);
+                var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
+                return await Task.FromResult((true, values));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, ImportCategoryLogMessages.ParseHtmlFromUrlFailed, url, ex.Message);
+                return await Task.FromResult((false, default(List<string>)));
+            }
+            finally
+            {
+                stream?.Close();
+                _htmlSearcherSemaphoreSlim.Release();
+            }
         }
     }
 
-    private async Task<(bool success, TElement? element)> TryLoadElementFromUrlAsync(string url, CancellationToken stoppingToken)
+    private async Task<(bool success, TElement? element)> TryLoadElementFromUrlAsync(string url, object? requestData = null, CancellationToken stoppingToken = default)
     {
-        var (success, stream) = await TryLoadFromUrlAsync(url, RequestData, stoppingToken);
+        var (success, stream) = await TryLoadFromUrlAsync(url, requestData, stoppingToken);
 
         if (!success)        
             return (false, default(TElement));
@@ -205,7 +215,6 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
         {
             using (stream)
             {
-                //var categoriesJson = await JsonDocument.ParseAsync(stream, cancellationToken: stoppingToken);
                 var categoriesElement = await LoadElementFromStreamAsync(stream, stoppingToken);
                 stream.Close();
                 return await Task.FromResult((true, categoriesElement));
