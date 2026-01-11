@@ -15,8 +15,9 @@ public class ShopImportCategoriesJsonTimerService : ShopImportCategoriesTimerSer
         string sourceName,
         string url,
         CategoryLoadOptions categoryLoadOptions, 
-        ICategoryItemHandler itemHandler) 
-        : base(logger, name, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler)
+        ICategoryItemHandler itemHandler,
+        object? categoryLoadData = null) 
+        : base(logger, name, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler, categoryLoadData)
     {
     }
 
@@ -28,8 +29,9 @@ public class ShopImportCategoriesJsonTimerService : ShopImportCategoriesTimerSer
         string sourceName, 
         string url, 
         CategoryLoadOptions categoryLoadOptions,
-        ICategoryItemHandler itemHandler) 
-        : base(logger, name, htmlSearcher, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler)
+        ICategoryItemHandler itemHandler,
+        object? categoryLoadData = null) 
+        : base(logger, name, htmlSearcher, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler, categoryLoadData)
     {
     }
 

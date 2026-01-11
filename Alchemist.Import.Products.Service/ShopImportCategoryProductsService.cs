@@ -30,15 +30,6 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     protected virtual int MaxUnsuccessRequestCount => 10;
 
     protected ImportProductServiceOptions ImportProductServiceOptions { get; }
-
-    public object GetData(object loadData, string httpMethod, string dataFormat, params object[] parameters)
-    {
-        if (dataFormat is null) return new object[2] { httpMethod, loadData };
-
-        if (dataFormat.StartsWith("{")) dataFormat = $"{{{dataFormat}}}";
-
-        return new object[3] { httpMethod, loadData, string.Format(dataFormat, parameters) };
-    }
    
     public ShopImportCategoryProductsService(ILogger logger,
         ILoaderService loader,
