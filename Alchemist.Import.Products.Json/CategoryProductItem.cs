@@ -10,7 +10,7 @@ public class CategoryProductItem : JsonItem, ICategoryProductItem
     {
           { nameof(ICategoryProductItem.Name), typeof(string) },
           { nameof(ICategoryProductItem.Id), typeof(string) },
-          { nameof(ICategoryProductItem.ItemUrl), typeof(string) },
+          { nameof(ICategoryProductItem.ItemPath), typeof(string) },
           { nameof(ICategoryProductItem.Currency), typeof(string) },
           { nameof(ICategoryProductItem.Price), typeof(double) },
           { nameof(ICategoryProductItem.Brand), typeof(string) }
@@ -30,10 +30,10 @@ public class CategoryProductItem : JsonItem, ICategoryProductItem
         set => SetPropertyValue(nameof(Id), value);
     }
 
-    public string ItemUrl
+    public string ItemPath
     {
-        get => GetPropertyValue<string>(nameof(ItemUrl));
-        set => SetPropertyValue(nameof(ItemUrl), value);
+        get => GetPropertyValue<string>(nameof(ItemPath));
+        set => SetPropertyValue(nameof(ItemPath), value);
     }
 
     public string Currency

@@ -28,6 +28,6 @@ public class TestProductShopImportSettings : TestShopImportSettings, IProductSho
             : value != null ? value.OfType<TestCategoryUrl>().ToArray() : []; }
     public string? ProductHttpMethod { get; set; }
     public string? CategoryHttpMethod { get; set; }
-    public UrlFormatType ProductUrlFormatType { get ; set; }
-    public UrlFormatType CategoryUrlFormatType { get; set; }
+    public PathFormatType ProductUrlFormatType { get ; set; }
+    public PathFormatType CategoryUrlFormatType { get; set; }
 }

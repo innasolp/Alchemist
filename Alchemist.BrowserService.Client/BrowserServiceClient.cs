@@ -101,13 +101,14 @@ internal class BrowserServiceClient(HttpClient httpClient,
 
         try
         {
-            if (!string.IsNullOrEmpty(requestOptions?.RouteUrlFormat))
-                return await LoadFromRouteUrl(url, requestOptions.RouteUrlFormat, parameters, requestOptions.TimeouteMillseconds, headers, cancellationToken);
+            if (!string.IsNullOrEmpty(requestOptions?.RouteUrlFormat) &&               
+                (requestOptions?.LoadingType == LoadingType.Request || requestOptions?.LoadingType == LoadingType.Route || requestOptions?.LoadingType == null) )
+                return await LoadFromRouteUrl(url, requestOptions.RouteUrlFormat, requestOptions?.LoadingType, parameters, requestOptions?.TimeouteMillseconds, headers, cancellationToken);
 
-            if (requestOptions?.IsApi == false)
-                return await _webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions.TimeouteMillseconds });
-            
-            return await LoadFromApi(url, requestOptions, parameters, headers);
+            if (requestOptions?.LoadingType == LoadingType.Api)
+                return await LoadFromApi(url, requestOptions, parameters, headers);
+                
+            return await _webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions?.TimeouteMillseconds });            
         }
         catch (WebLoader.Common.WebLoaderException e)
         {
@@ -128,7 +129,7 @@ internal class BrowserServiceClient(HttpClient httpClient,
         }
     }
 
-    private async Task<Stream> LoadFromApi(string url, ImportRequestOptions? requestOptions, IEnumerable<string> parameters, Dictionary<string, string>? headers = null)
+    private async Task<Stream> LoadFromApi(string url, ImportRequestOptions? requestOptions, IEnumerable<string>? parameters, Dictionary<string, string>? headers = null)
     {
         var httpMethod = !string.IsNullOrEmpty(requestOptions?.HttpMethod) ? new HttpMethod(requestOptions.HttpMethod) : HttpMethod.Get;
 
@@ -136,7 +137,7 @@ internal class BrowserServiceClient(HttpClient httpClient,
         if (requestOptions?.Data is not null)
         {
             var dataFormat = requestOptions.Data.ToString();
-            if (dataFormat.StartsWith("{")) dataFormat = $"{{{dataFormat}}}";
+            if (dataFormat.StartsWith("{") == true) dataFormat = $"{{{dataFormat}}}";
             requestData = parameters?.Any() == true ? string.Format(dataFormat, args: [.. parameters]) : dataFormat;
         }
 
@@ -146,6 +147,7 @@ internal class BrowserServiceClient(HttpClient httpClient,
 
     private async Task<Stream> LoadFromRouteUrl(string url,
         string routeUrlFormat,
+        LoadingType? loadingType = null,
         IEnumerable<string>? parameters = null, 
         int? timeoutInMilliseconds = null,
         Dictionary<string, string>? headers = null, 
@@ -156,7 +158,12 @@ internal class BrowserServiceClient(HttpClient httpClient,
             : routeUrlFormat;
 
         var (success, result) = await _webLoader.TryLoadFromRoute(url, routeUrl,
-            new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = timeoutInMilliseconds }
+            new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = timeoutInMilliseconds,
+                Parameters = new Dictionary<string, object>() 
+                { 
+                    { "RouteType", loadingType?.ToString() ?? LoadingType.Route.ToString() }
+                } 
+            }
             , cancellationToken: cancellationToken);
 
         if (!success)

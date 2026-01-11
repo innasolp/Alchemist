@@ -25,17 +25,19 @@ public abstract class ShopImportPaginatorCategoryProductsService<TCategory, TPro
     where TCategory : class, ICategoryProducts, IPaginatorItem, new()
     where TProductItem : class, IProductItem, new()
 {
-    protected override string GetCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
+    protected override string GetCategoryPagePath(IProductShopCategory productShopCategory, string urlFormat, PathFormatType urlFormatType, int page, TCategory? category = null)
     {
         return category == null
-           ? base.GetCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
-           : category.GetPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+           ? base.GetCategoryPagePath(productShopCategory, urlFormat, urlFormatType, page, category)
+           : category.GetPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
+           ?? base.GetCategoryPagePath(productShopCategory, urlFormat, urlFormatType, page, category);
     }
 
-    protected override string GetNextCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TCategory? category = null)
+    protected override string GetNextCategoryPagePath(IProductShopCategory productShopCategory, string urlFormat, PathFormatType urlFormatType, int page, TCategory? category = null)
     {
         return category == null
-           ? base.GetNextCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
-           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+           ? base.GetNextCategoryPagePath(productShopCategory, urlFormat, urlFormatType, page, category)
+           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
+           ?? category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page); ;
     }
 }

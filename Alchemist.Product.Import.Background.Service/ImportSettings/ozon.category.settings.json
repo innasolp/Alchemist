@@ -10,7 +10,8 @@
       "prevPage"
     ],
     "NextPage": [
-      "nextPage"
+      "nextPage",
+      "widgetStates/infiniteVirtualPaginator%/.value/nextPage"
     ]
   },
   "ItemJsonSettings": {
@@ -22,7 +23,7 @@
         "Id": [
           "sku"
         ],
-        "ItemUrl": [ "action/link" ],
+        "ItemPath": [ "action/link" ],
         "Brand": [ "mainState/[type=labelList]/labelList/items/[.testInfo]/[automatizationId=tile-list-paid-brand]/.parent/.parent/title" ],
         "Price": [ "mainState/[type=priceV2]/priceV2/price/[textStyle=PRICE]/text/.price" ],
         "Currency":[ "mainState/[type=priceV2]/priceV2/price/[textStyle=PRICE]/text/.currency" ]

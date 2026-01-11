@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Goldapple.Product.Import.Category.Test;
 
-public class GoldAppleCategoriesLoadTest
+public class PlaywrightFirefoxTest
 {
     private readonly IBrowserDataLoader _dataLoader;
 
@@ -31,7 +31,7 @@ public class GoldAppleCategoriesLoadTest
             {"Children",new PropertyPath("Children","children") }
         };
 
-    public GoldAppleCategoriesLoadTest(ITestOutputHelper testOutputHelper)
+    public PlaywrightFirefoxTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
 

@@ -11,8 +11,6 @@ namespace Alchemist.Import.ProductService.Test;
 
 public abstract class ImportProductsTest : ImportServiceTest<TestImportProductService<TestCategory, TestProductItem>, ILogger>
 {
-    private int _pageProductCount = 1000;
-
     protected ResourceManager ImportProductsResourceManager { get; }
 
     protected Mock<IProductShopModel> ProductShopModelMock { get; } = new ();
@@ -26,9 +24,7 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
        
         ProductShopModelMock.Setup(s => s.Categories).Returns([]); 
     }
-
-    protected void SetPageProductCount(int pageProductCount)=> _pageProductCount = pageProductCount;
-
+    
     protected override TestImportProductService<TestCategory, TestProductItem> CreateService(string name)
     {
         return new TestImportProductService<TestCategory, TestProductItem>(
@@ -37,6 +33,17 @@ public abstract class ImportProductsTest : ImportServiceTest<TestImportProductSe
              ProductShopModelMock.Object,
              LoaderMock.Object,
              ProductItemHandlerMock.Object,
-             _pageProductCount);
+             1000);
+    }
+
+    protected TestImportProductService<TestCategory, TestProductItem> CreateService(string name, int pageProductCount)
+    {
+        return new TestImportProductService<TestCategory, TestProductItem>(
+            LoggerMock.Object,
+            name,
+             ProductShopModelMock.Object,
+             LoaderMock.Object,
+             ProductItemHandlerMock.Object,
+             pageProductCount);
     }
 }

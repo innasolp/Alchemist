@@ -11,21 +11,14 @@
         "AssemblyPath": "Import\\Categories\\Json",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
-      "BrowserDataLoader": {
-        "ImplementationTypeName": "FirefoxStandart",
-        "AssemblyPath": "Libs\\BrowserDataLoader\\Firefox\\Standart"
-      },
-      "BrowserLauncher": {
-        "ImplementationTypeName": "FirefoxStandart",
-        "AssemblyPath": "Libs\\BrowserLauncher\\Firefox\\Standart"
-      },
       "WebLoader": {
-        "ImplementationTypeName": "Firefox",
-        "AssemblyPath": "Libs\\webLoader\\Playwright\\Firefox",
-        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\Firefox"
+        "ImplementationTypeName": "Chromium",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
       },
-      "RequestHeaders": {
-        "AssemblyPath": "ImportSettings/Ozon.categories.requestheaders.Firefox.Standart.json"
+      "HostRequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions"
+        }
       },
       "CategoryLoadOptions": {
         "ServiceTypeName": "CategoryLoadOptions",
@@ -101,7 +94,7 @@
             "Sec-Fetch-User": "?1",
             "TE": "trailers",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0"
           },
 
           "Cookies": [

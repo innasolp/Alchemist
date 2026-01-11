@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Product.Json.Service;
 
-public class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TProduct>(ILogger logger,
+public abstract class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TProduct>(ILogger logger,
     ILoaderService loader, 
     string url,
     string serviceName,
@@ -27,19 +27,19 @@ public class ShopImportJsonPaginatorCategoryProductsService<TPagingCategory, TPr
     where TPagingCategory : class, IPaginatorItem, IJsonItem, ICategoryProducts, new()
     where TProduct : class, IProductItem, new()
 {
-    protected override string GetCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TPagingCategory? category = null)
+    protected override string GetCategoryPagePath(IProductShopCategory productShopCategory, string urlFormat, PathFormatType urlFormatType, int page, TPagingCategory? category = null)
     {
         return category == null
-           ? base.GetCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
+           ? base.GetCategoryPagePath(productShopCategory, urlFormat, urlFormatType, page, category)
            : category.GetPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
-              ?? base.GetCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category);
+              ?? base.GetCategoryPagePath(productShopCategory, urlFormat, urlFormatType, page, category);
     }
 
-    protected override string GetNextCategoryPageUrl(IProductShopCategory productShopCategory, string urlFormat, UrlFormatType urlFormatType, int page, TPagingCategory? category = null)
+    protected override string GetNextCategoryPagePath(IProductShopCategory productShopCategory, string urlFormat, PathFormatType urlFormatType, int page, TPagingCategory? category = null)
     {
         return category == null
-           ? base.GetNextCategoryPageUrl(productShopCategory, urlFormat, urlFormatType, page, category)
-           : category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
-              ?? category.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page);
+           ? base.GetNextCategoryPagePath(productShopCategory, urlFormat, urlFormatType, page, category)
+           : category?.GetNextPageUrl(urlFormat, $"{productShopCategory.ItemId}", page)
+              ?? base.GetNextCategoryPagePath(productShopCategory, urlFormat, urlFormatType, page, category);
     }
 }

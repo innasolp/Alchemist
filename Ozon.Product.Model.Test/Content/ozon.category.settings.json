@@ -16,7 +16,7 @@
         "Id": [
           "sku"
         ],
-        "ItemUrl": [ "action/link" ],
+        "ItemPath": [ "action/link" ],
         "Brand": [ "mainState/[type=labelList]/labelList/items/title" ]
       }
     }

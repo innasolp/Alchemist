@@ -22,7 +22,7 @@ public class ProductShopImportSettings : ShopImportSettings, IProductShopImportS
 
     public override ShopSettingType ShopSettingType => ShopSettingType.Product;
 
-    public UrlFormatType ProductUrlFormatType { get; set; }
-    public UrlFormatType CategoryUrlFormatType { get; set; }
+    public PathFormatType ProductUrlFormatType { get; set; }
+    public PathFormatType CategoryUrlFormatType { get; set; }
     IEnumerable<ICategoryUrl>? IProductShopImportSettings.RootCategories { get => RootCategories; set => RootCategories = (CategoryUrl[])value; }
 }

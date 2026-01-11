@@ -16,7 +16,7 @@
         "Id": [
           "product/itemId"
         ],
-        "ItemUrl": [ "product/url" ],
+        "ItemPath": [ "product/url" ],
         "Price": [ "product/price/actual/amount" ],
         "Currency": [ "product/price/actual/currency" ]
       }

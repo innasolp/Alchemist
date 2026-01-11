@@ -86,7 +86,7 @@ public class TestProduct : JsonItem, IProductItem
 
     public string Path { get; set; }
 
-    public string ApiUrl { get; set; }
+    public string AbsolutePath { get; set; }
 
     public int CategoryId { get; set; }
 

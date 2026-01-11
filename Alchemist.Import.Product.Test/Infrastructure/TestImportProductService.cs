@@ -24,18 +24,20 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
 
     public override string Name { get; } = name;    
 
-    protected override string GetApiUrl(string productUrlFormat, ICategoryProductItem productItem)
+    protected override string GetProductAbsolutePath(string productUrlFormat, ICategoryProductItem productItem)
     {
         return string.Format(productUrlFormat, productItem.Name);
     }
 
     public string GetTestApiUrl(ICategoryProductItem productItem)
     {
-        return GetApiUrl(_productShopModel.ProductUrl, productItem);
+        return GetProductAbsolutePath(_productShopModel.ProductUrl, productItem);
     }
 
     protected override bool? IsEndOfCategory(TCategory category, int processProductCount)
     {
         return !(category.CategoryProductItems?.Length > 0);
     }
+
+    protected override string PreparePath(string path) => path;
 }

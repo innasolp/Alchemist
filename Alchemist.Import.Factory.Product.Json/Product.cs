@@ -10,6 +10,6 @@ internal class Product : IProductItem
     public string Currency { get; set; }
     public double Price { get; set; }
     public string Path { get; set; }
-    public string ApiUrl { get; set; }
+    public string AbsolutePath { get; set; }
     public int CategoryId { get; set; }
 }

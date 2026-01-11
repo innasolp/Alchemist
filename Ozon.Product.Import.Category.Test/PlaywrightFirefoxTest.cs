@@ -12,7 +12,7 @@ using Product.Import.Test;
 
 namespace Ozon.Product.Import.Category.Test;
 
-public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
+public class PlaywrightFirefoxTest(ITestOutputHelper testOutputHelper)
 {    
     private readonly string _requestHeadersStandartFileName = "Ozon.Headers.Firefox.Standart.json";   
 
@@ -71,7 +71,7 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
     [Fact]
     public async Task LoadCategoriesToCollectionTestAsync()
     {
-        var webLoader = await CreateWebLoaderAsync();
+        await using var webLoader = await CreateWebLoaderAsync();
 
         var ((document, requestHeaders), timespan) = await TimeWatchHelper.ExecuteTaskWithTimeWatchAsync(async () =>
         {
@@ -117,6 +117,8 @@ public class OzonCategoriesLoadTest(ITestOutputHelper testOutputHelper)
                     _nodePath, _categoryPropertyPathes, jsonElementHelper, tokenSource.Token);
             }
         });
+
+        await webLoader.Close();
 
         testOutputHelper.WriteLine(TimeWatchMessageFormat, "children categories", timespan.TotalSeconds);
 

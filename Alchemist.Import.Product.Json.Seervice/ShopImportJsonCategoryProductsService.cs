@@ -9,7 +9,7 @@ using System.Text.Json.Nodes;
 
 namespace Alchemist.Import.Product.Json.Service;
 
-public class ShopImportJsonCategoryProductsService<TCategory, TProduct>
+public abstract class ShopImportJsonCategoryProductsService<TCategory, TProduct>
     : ShopImportCategoryProductsService<TCategory,TProduct>
     where TCategory : class, IJsonItem, ICategoryProducts, new()
     where TProduct : class, IProductItem, new()

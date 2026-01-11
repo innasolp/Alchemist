@@ -10,13 +10,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Factory.Product.Json;
 
-internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportJsonCategoryProductsService> logger,
+internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportHttpJsonCategoryProductsService> logger,
     ILoaderServiceFactory browserServiceFactory,
     IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,
     IImportServiceLogFactory? logFactory = null) 
     : ShopProductImportServiceFactory(logger, browserServiceFactory, itemHandlerFactories, logFactory)
 {
-    public override Type ServiceImplementationType => typeof(ShopImportJsonCategoryProductsService);
+    public override Type ServiceImplementationType => typeof(ShopImportHttpJsonCategoryProductsService);
 
     protected override IImportService Create(ILogger logger, string name, IProductShopSource shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, object? productLoadData = null, object? categoryLoadData = null)
     {
@@ -29,11 +29,11 @@ internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportJsonCategor
             PageProductCount = productShopImportSettings.PageProductCount,
             ProductLoadData = productLoadData,
             CategoryLoadData = categoryLoadData,
-            ProductUrlFormatType = productShopImportSettings.ProductUrlFormatType,
-            CategoryUrlFormatType = productShopImportSettings.CategoryUrlFormatType
+            ProductPathFormatType = productShopImportSettings.ProductUrlFormatType,
+            CategoryPathFormatType = productShopImportSettings.CategoryUrlFormatType
         };
 
-        return new ShopImportJsonCategoryProductsService(logger as ILogger<ShopImportJsonCategoryProductsService>,
+        return new ShopImportHttpJsonCategoryProductsService(logger as ILogger<ShopImportHttpJsonCategoryProductsService>,
             browserService,
             shopModel.Url,
             //todo
@@ -49,7 +49,7 @@ internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportJsonCategor
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource importSource, IImportSettings importSettings)
     {
-        if (logger is ILogger<ShopImportJsonCategoryProductsService> serviceLogger)
+        if (logger is ILogger<ShopImportHttpJsonCategoryProductsService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, importSource, importSettings) ?? serviceLogger;
         else
             throw new InvalidDataException(logger.GetType().FullName);

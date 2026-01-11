@@ -67,8 +67,13 @@ internal static class ShopModelExtensions
                     if (shopCategory != null)
                     {
                         var children = await shopDataService.GetAllCategoryChildren(shopCategory.Id, cancellationToken);
-                        var children2 = new List<IShopCategory>(children);
-                        shopCategories.AddRange(children.Where(child => !children2.Any(c2 => c2.ParentId == child.Id)));
+                        if (children.Count != 0)
+                        {
+                            var children2 = new List<IShopCategory>(children);
+                            shopCategories.AddRange(children.Where(child => !children2.Any(c2 => c2.ParentId == child.Id)));
+                        }
+                        else
+                            shopCategories.Add(shopCategory);
                     }
                 }
 

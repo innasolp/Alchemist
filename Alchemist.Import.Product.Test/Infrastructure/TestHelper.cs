@@ -14,9 +14,8 @@ internal static class TestHelper
         return categoryMock;
     }
 
-    public static TestCategory CreateCategoryWithProducts()
-    {
-        var productCount = new Random().Next(10, 20);
+    public static TestCategory CreateCategoryWithProducts(int productCount)
+    {        
         var productsCategory = new TestCategory
         {
             CategoryProductItems = new TestCategoryProduct[productCount],
@@ -28,7 +27,7 @@ internal static class TestHelper
             productsCategory.CategoryProductItems[i] = new TestCategoryProduct()
             {
                 Name = Guid.NewGuid().ToString(),
-                ItemUrl = Guid.NewGuid().ToString(),
+                ItemPath = Guid.NewGuid().ToString(),
                 Id = Guid.NewGuid().ToString()
             };
         }
