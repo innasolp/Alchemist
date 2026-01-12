@@ -4,18 +4,17 @@ using Import.Interfaces;
 using System.Collections;
 using System.Net.Http.Json;
 using System.Web;
-using WebLoader.Interfaces;
 using ImportRequestOptions = Alchemist.Import.Settings.RequestOptions;
 using WebLoaderRequestOptions = WebLoader.Interfaces.RequestOptions;
 
 namespace Alchemist.BrowserService.Client;
 
-internal class BrowserServiceClient(HttpClient httpClient, 
+internal class BrowserServiceClient(HttpClient httpClient,
     string name,
     string host,
-    IWebLoader webLoader,
+    IRateLimiterWebLoader ratelimiterWebLoader,
     ImportRequestOptions? hostRequestOptions = null,
-    string? browserDataLoader = null, 
+    string? browserDataLoader = null,
     string? browserDataLauncher = null,
     RequestHeaders? requestHeaders = null) : ILoaderService
 {
@@ -25,23 +24,25 @@ internal class BrowserServiceClient(HttpClient httpClient,
 
     private readonly string? _browserDataLauncher = browserDataLauncher;
 
-    private readonly IWebLoader _webLoader = webLoader;
-
     private readonly ImportRequestOptions? _hostRequestOptions = hostRequestOptions;
 
     private readonly RequestHeaders? _requestHeaders = requestHeaders;
 
     private readonly string _host = host;
 
+    private readonly IRateLimiterWebLoader _rateLimiterWebLoader = ratelimiterWebLoader;
+
     public string Name { get; } = name;
 
-    bool ILoaderService.IsStarted => _webLoader?.IsStarted ?? false;
+    private readonly Guid _connectionId = Guid.NewGuid();
+
+    bool ILoaderService.IsStarted => _rateLimiterWebLoader.IsStarted(_connectionId);
 
     public async Task<IEnumerable<ICookieData>> LoadCookies(string host, CancellationToken token = default)
     {
         var hostPath = HttpUtility.UrlEncode(host);
         var response = await _httpClient.GetAsync($"browserdata/getCookies/{_browserDataLoader}/{hostPath}", token);
-        
+
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return await Task.FromResult(new List<ICookieData>());
 
@@ -51,19 +52,19 @@ internal class BrowserServiceClient(HttpClient httpClient,
     }
 
     public async Task LaunchBrowser(string url, CancellationToken token = default)
-    {   
+    {
         var encodedBrowserLauncher = HttpUtility.UrlEncode(_browserDataLauncher);
         var encodedHost = HttpUtility.UrlEncode(url);
         var requestUrl = $"browserdata/launch?browser={encodedBrowserLauncher}&url={encodedHost}";
 
         var response = await _httpClient.PostAsync(requestUrl, null, token);
-        response.EnsureSuccessStatusCode();       
-    }    
+        response.EnsureSuccessStatusCode();
+    }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         _httpClient.Dispose();
-        await _webLoader.DisposeAsync();
+        await _rateLimiterWebLoader.DisposeAsync();
     }
 
     async Task<object> ILoaderService.GetData(string host, CancellationToken token)
@@ -71,11 +72,11 @@ internal class BrowserServiceClient(HttpClient httpClient,
         if (!string.IsNullOrWhiteSpace(_browserDataLoader))
             return await LoadCookies(host, token);
 
-        if(_hostRequestOptions != null)
-            await LoadHostPage(host);
+        if (_hostRequestOptions != null)
+            await LoadHostPage(host, cancellationToken: token);
 
         return Array.Empty<ICookieData>();
-    }    
+    }
 
     public async Task<Stream> Load(string url, object? data, CancellationToken cancellationToken = default)
     {
@@ -95,20 +96,23 @@ internal class BrowserServiceClient(HttpClient httpClient,
         else
             throw new InvalidOperationException($"Invalid type of {data}");
 
-        var headers = _requestHeaders != null && cookies?.Any() == true 
-            ? HeadersHelper.GetHeadersForRequest(_requestHeaders, cookies) 
+        var headers = _requestHeaders != null && cookies?.Any() == true
+            ? HeadersHelper.GetHeadersForRequest(_requestHeaders, cookies)
             : [];
 
         try
         {
-            if (!string.IsNullOrEmpty(requestOptions?.RouteUrlFormat) &&               
-                (requestOptions?.LoadingType == LoadingType.Request || requestOptions?.LoadingType == LoadingType.Route || requestOptions?.LoadingType == null) )
+            if (!string.IsNullOrEmpty(requestOptions?.RouteUrlFormat) &&
+                (requestOptions?.LoadingType == LoadingType.Request || requestOptions?.LoadingType == LoadingType.Route || requestOptions?.LoadingType == null))
                 return await LoadFromRouteUrl(url, requestOptions.RouteUrlFormat, requestOptions?.LoadingType, parameters, requestOptions?.TimeouteMillseconds, headers, cancellationToken);
 
             if (requestOptions?.LoadingType == LoadingType.Api)
-                return await LoadFromApi(url, requestOptions, parameters, headers);
-                
-            return await _webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions?.TimeouteMillseconds });            
+                return await LoadFromApi(url, requestOptions, parameters, headers, cancellationToken);
+
+            return await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
+                (webLoader, cancellationToken) =>
+                webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions?.TimeouteMillseconds }),
+                cancellationToken);
         }
         catch (WebLoader.Common.WebLoaderException e)
         {
@@ -127,9 +131,19 @@ internal class BrowserServiceClient(HttpClient httpClient,
             else
                 throw new LoaderServiceException(message, e);
         }
+#if DEBUG
+        catch(Exception e)
+        {
+            throw;
+        }
+#endif 
     }
 
-    private async Task<Stream> LoadFromApi(string url, ImportRequestOptions? requestOptions, IEnumerable<string>? parameters, Dictionary<string, string>? headers = null)
+    private async Task<Stream> LoadFromApi(string url,
+        ImportRequestOptions? requestOptions, 
+        IEnumerable<string>? parameters, 
+        Dictionary<string, string>? headers = null,
+        CancellationToken cancellationToken = default)
     {
         var httpMethod = !string.IsNullOrEmpty(requestOptions?.HttpMethod) ? new HttpMethod(requestOptions.HttpMethod) : HttpMethod.Get;
 
@@ -141,30 +155,39 @@ internal class BrowserServiceClient(HttpClient httpClient,
             requestData = parameters?.Any() == true ? string.Format(dataFormat, args: [.. parameters]) : dataFormat;
         }
 
-        return await _webLoader.LoadFromApiUrl(url, httpMethod, requestData,
-            new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions?.TimeouteMillseconds });
+        return await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
+                (webLoader, cancellationToken) =>
+                webLoader.LoadFromApiUrl(url, httpMethod, requestData,
+            new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions?.TimeouteMillseconds }),
+                cancellationToken);
     }
 
     private async Task<Stream> LoadFromRouteUrl(string url,
         string routeUrlFormat,
         LoadingType? loadingType = null,
-        IEnumerable<string>? parameters = null, 
+        IEnumerable<string>? parameters = null,
         int? timeoutInMilliseconds = null,
-        Dictionary<string, string>? headers = null, 
+        Dictionary<string, string>? headers = null,
         CancellationToken cancellationToken = default)
     {
-        var routeUrl = parameters?.Any() == true 
+        var routeUrl = parameters?.Any() == true
             ? string.Format(routeUrlFormat, [.. parameters])
             : routeUrlFormat;
 
-        var (success, result) = await _webLoader.TryLoadFromRoute(url, routeUrl,
-            new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = timeoutInMilliseconds,
-                Parameters = new Dictionary<string, object>() 
-                { 
-                    { "RouteType", loadingType?.ToString() ?? LoadingType.Route.ToString() }
-                } 
-            }
-            , cancellationToken: cancellationToken);
+        var (success, result) = await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
+                (webLoader, cancellationToken) =>
+                webLoader.TryLoadFromRoute(url, routeUrl,
+                    new WebLoaderRequestOptions
+                    {
+                        Headers = headers,
+                        TimeoutInMilliseconds = timeoutInMilliseconds,
+                        Parameters = new Dictionary<string, object>()
+                        {
+                            { "RouteType", loadingType?.ToString() ?? LoadingType.Route.ToString() }
+                        }
+                    }
+                    , cancellationToken: cancellationToken), 
+                cancellationToken);
 
         if (!success)
         {
@@ -191,47 +214,52 @@ internal class BrowserServiceClient(HttpClient httpClient,
         var response = await _httpClient.PostAsync(url, null, token);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadAsStringAsync(token);
-        return int.TryParse(result, out var deleted) ? deleted : 0;    
+        return int.TryParse(result, out var deleted) ? deleted : 0;
     }
 
     public async Task Reset(CancellationToken token = default)
     {
-        await _webLoader.Reset(_host);
+        await _rateLimiterWebLoader.Reset(_host);
 
-        if(!string.IsNullOrEmpty(_browserDataLoader))
+        if (!string.IsNullOrEmpty(_browserDataLoader))
             await ClearCookiesForHost(_host, token);
     }
 
     public async Task Start(CancellationToken token = default)
     {
-        await _webLoader.Start();
+        if (!_rateLimiterWebLoader.IsConnected(_connectionId))
+            await _rateLimiterWebLoader.AddToPool(_connectionId, token);
+
+        await _rateLimiterWebLoader.Start(_connectionId);
     }
 
     public async Task Close(CancellationToken token = default)
     {
-        await _webLoader.Close();
+        await _rateLimiterWebLoader.Close(_connectionId, token);
     }
 
     async Task ILoaderService.UpdateData(string url, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrWhiteSpace(_browserDataLauncher))            
+        if (!string.IsNullOrWhiteSpace(_browserDataLauncher))
             await LaunchBrowser(url, cancellationToken);
         else
-            await LoadHostPage(url);
+            await LoadHostPage(url, cancellationToken);
     }
 
-    public async Task<Stream> LoadHostPage(string url)
+    public async Task<Stream> LoadHostPage(string url, CancellationToken cancellationToken = default)
     {
         return _hostRequestOptions?.RouteUrlFormat is null
-            ? await _webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { TimeoutInMilliseconds = _hostRequestOptions?.TimeouteMillseconds })
-            : await _webLoader.WaitForUrl(url,
-            _hostRequestOptions.RouteUrlFormat,
-            new WebLoaderRequestOptions
-            {
-                TimeoutInMilliseconds = _hostRequestOptions.TimeouteMillseconds,
-                Parameters = _hostRequestOptions.Parameters?.TryGetValue("RouteType", out var routeType) == true
-                   ? new Dictionary<string, object>() { { "RouteType", routeType } }
-                   : default
-            });
+            ? await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
+                (webLoader, cancellationToken) => 
+                webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { TimeoutInMilliseconds = _hostRequestOptions?.TimeouteMillseconds }), cancellationToken)
+            : await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
+                (webLoader, cancellationToken) => webLoader.WaitForUrl(url, _hostRequestOptions.RouteUrlFormat,
+                    new WebLoaderRequestOptions
+                    {
+                        TimeoutInMilliseconds = _hostRequestOptions.TimeouteMillseconds,
+                        Parameters = _hostRequestOptions.Parameters?.TryGetValue("RouteType", out var routeType) == true
+                           ? new Dictionary<string, object>() { { "RouteType", routeType } }
+                           : default
+                    }), cancellationToken);
     }
 }

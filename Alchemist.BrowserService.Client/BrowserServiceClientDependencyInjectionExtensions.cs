@@ -1,6 +1,5 @@
 ﻿using Import.Factory.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using WebLoader.Interfaces;
 
 namespace Alchemist.BrowserService.Client;
 
@@ -8,11 +7,14 @@ public static class BrowserServiceClientDependencyInjectionExtensions
 {
     public static IServiceCollection AddBrowserServiceClientFactory(this IServiceCollection services, string apiHost)
     {
+        if (!services.OfType<ServiceDescriptor>().Any(sd => sd.ServiceType == typeof(IRateLimiterWebLoaderHostFactory)))
+            services.AddSingleton<IRateLimiterWebLoaderHostFactory, RateLimiterWebLoaderHostFactory>();
+
         return services.AddSingleton<ILoaderServiceFactory>((serviceProvider) =>
         {
             var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-            var webLoaderFactories = serviceProvider.GetServices<IWebLoaderFactory>();
-            return new BrowserServiceClientFactory(httpClientFactory, webLoaderFactories, apiHost);
+            var webloaderHostFactory = serviceProvider.GetRequiredService<IRateLimiterWebLoaderHostFactory>();
+            return new BrowserServiceClientFactory(httpClientFactory, webloaderHostFactory, apiHost);
         });
     }
 }
