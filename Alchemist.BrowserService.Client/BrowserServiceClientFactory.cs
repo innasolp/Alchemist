@@ -5,23 +5,20 @@ using Import.Interfaces;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Headers;
-using System.Text.Json;
-using WebLoader.Interfaces;
 
 namespace Alchemist.BrowserService.Client;
 
 public class BrowserServiceClientFactory : ILoaderServiceFactory
 {
-    private readonly IEnumerable<IWebLoaderFactory> _webLoaderFactories;
-
     private readonly HttpClient _httpClient;
 
+    private readonly IRateLimiterWebLoaderHostFactory _webLoaderHostFactory;
+
     public BrowserServiceClientFactory(IHttpClientFactory httpClientFactory,
-        IEnumerable<IWebLoaderFactory> webLoaderFactories,
+        IRateLimiterWebLoaderHostFactory webLoaderHostFactory,
         [FromKeyedServices(nameof(BrowserServiceClientFactory))] string apiHost)
     {
-        _webLoaderFactories = webLoaderFactories;
-
+        _webLoaderHostFactory = webLoaderHostFactory;
         _httpClient = httpClientFactory.CreateClient(apiHost);
         _httpClient.BaseAddress = new Uri(apiHost);
         _httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -37,23 +34,23 @@ public class BrowserServiceClientFactory : ILoaderServiceFactory
         var webLoaderSettings = shopImportSettings.GetWebLoader<IServiceSettings>() ??
             throw new InvalidDataException($"Webloader in settings {name} not exists.");
        
-        var webLoaderFactory = _webLoaderFactories.FirstOrDefault(f => f.GetType().Name == webLoaderSettings.ImplementationTypeName
-            || f.GetType().Name.Contains(webLoaderSettings.ImplementationTypeName, StringComparison.InvariantCultureIgnoreCase))
-            ?? throw new InvalidDataException($"Web loader factory for type {webLoaderSettings.ImplementationTypeName} not found");
-
         var requestHeadersService = shopImportSettings.GetRequestHeaders<IServiceSettings>();
         var requestHeaders = requestHeadersService?.GetServiceValue<RequestHeaders>();
 
-        var hostRequestOptions = shopImportSettings.GetService("HostRequestOptions")?.GetServiceValue<Import.Settings.RequestOptions>();    
+        var hostRequestOptions = shopImportSettings.GetService("HostRequestOptions")?.GetServiceValue<RequestOptions>();
 
+        var rateLimiterOptions = shopImportSettings.GetService("RateLimiterOptions")?.GetServiceValue<RateLimiterOptions>();
+        var webLoader = _webLoaderHostFactory.GetRateLimiterWebLoader(webLoaderSettings, shopImportSettings.ShopUrl, rateLimiterOptions);
+
+        
         return new BrowserServiceClient(
             _httpClient,
             name,
             shopImportSettings.ShopUrl,
-            webLoaderFactory.CreateWebLoader(),
+            webLoader,
             hostRequestOptions,
             shopImportSettings.GetBrowserDataLoader<IServiceSettings>()?.ImplementationTypeName,
-            shopImportSettings.GetBrowserLauncher<IServiceSettings>()?.ImplementationTypeName, 
+            shopImportSettings.GetBrowserLauncher<IServiceSettings>()?.ImplementationTypeName,
             requestHeaders);
     }
 }
