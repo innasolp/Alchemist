@@ -7,7 +7,7 @@ using WebLoader.Interfaces;
 
 namespace Alchemist.BrowserService.Client;
 
-internal class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rateLimiterOptions = null) : IRateLimiterWebLoader
+public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rateLimiterOptions = null) : IRateLimiterWebLoader
 {
     private readonly RateLimiterOptions? _rateLimiterOptions = rateLimiterOptions;
 

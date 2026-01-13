@@ -3,13 +3,14 @@ using BrowserDataLoader.Interfaces;
 using Import.Interfaces;
 using System.Collections;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Web;
 using ImportRequestOptions = Alchemist.Import.Settings.RequestOptions;
 using WebLoaderRequestOptions = WebLoader.Interfaces.RequestOptions;
 
 namespace Alchemist.BrowserService.Client;
 
-internal class BrowserServiceClient(HttpClient httpClient,
+public class BrowserServiceClient(HttpClient httpClient,
     string name,
     string host,
     IRateLimiterWebLoader ratelimiterWebLoader,
@@ -80,9 +81,9 @@ internal class BrowserServiceClient(HttpClient httpClient,
 
     public async Task<Stream> Load(string url, object? data, CancellationToken cancellationToken = default)
     {
-        IEnumerable<ICookieData>? cookies;
-        IEnumerable<string>? parameters;
-        ImportRequestOptions? requestOptions;
+        IEnumerable<ICookieData>? cookies = default;
+        IEnumerable<string>? parameters = default;
+        ImportRequestOptions? requestOptions = default;
         if (data is IEnumerable dataValues)
         {
             requestOptions = dataValues.OfType<ImportRequestOptions>().FirstOrDefault();
@@ -93,7 +94,7 @@ internal class BrowserServiceClient(HttpClient httpClient,
             if (cookies is null && dataValues is IEnumerable<ICookieData> cookieValues)
                 cookies = cookieValues;
         }
-        else
+        else if(data is not null)
             throw new InvalidOperationException($"Invalid type of {data}");
 
         var headers = _requestHeaders != null && cookies?.Any() == true
@@ -147,12 +148,12 @@ internal class BrowserServiceClient(HttpClient httpClient,
     {
         var httpMethod = !string.IsNullOrEmpty(requestOptions?.HttpMethod) ? new HttpMethod(requestOptions.HttpMethod) : HttpMethod.Get;
 
-        string? requestData = null;
+        object? requestData = null;
         if (requestOptions?.Data is not null)
         {
             var dataFormat = requestOptions.Data.ToString();
-            if (dataFormat.StartsWith("{") == true) dataFormat = $"{{{dataFormat}}}";
-            requestData = parameters?.Any() == true ? string.Format(dataFormat, args: [.. parameters]) : dataFormat;
+            if (dataFormat?.StartsWith("{") == true && IsValidJson(dataFormat)) dataFormat = $"{{{dataFormat}}}";
+            requestData = parameters?.Any() == true ? string.Format(dataFormat, args: [.. parameters]) : requestOptions?.Data;
         }
 
         return await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
@@ -160,6 +161,22 @@ internal class BrowserServiceClient(HttpClient httpClient,
                 webLoader.LoadFromApiUrl(url, httpMethod, requestData,
             new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions?.TimeouteMillseconds }),
                 cancellationToken);
+    }
+
+    private static bool IsValidJson(string jsonString)
+    {
+        try
+        {
+            // Attempt to parse the string into a JsonDocument
+            // or a specific object type.
+            JsonDocument.Parse(jsonString);
+            return true;
+        }
+        catch (JsonException)
+        {
+            // If parsing fails, it's not a valid JSON string
+            return false;
+        }
     }
 
     private async Task<Stream> LoadFromRouteUrl(string url,

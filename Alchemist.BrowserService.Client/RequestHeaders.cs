@@ -2,7 +2,7 @@
 
 namespace Alchemist.BrowserService.Client;
 
-internal class RequestHeaders 
+public class RequestHeaders 
 {
     [JsonPropertyName("Headers")]
     public Dictionary<string, string> Headers { get; set; }
