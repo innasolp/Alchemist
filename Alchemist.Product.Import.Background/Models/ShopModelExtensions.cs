@@ -108,7 +108,7 @@ internal static class ShopModelExtensions
                 ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl, cancellationToken))
                 ?? await shopDataService.CreateShop(new Shop { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
 
-        var shopModel = CreateShopModelCore<T>(shop, shopImportSettings);
+        var shopModel = GetShopModelCore<T>(shop, shopImportSettings);
 
         return await Task.FromResult(shopModel);
     }
@@ -124,7 +124,7 @@ internal static class ShopModelExtensions
         return categoryShopModel;
     }    
 
-    private static T CreateShopModelCore<T>(IShop shop, IShopImportSettings shopImportSettings)
+    private static T GetShopModelCore<T>(IShop shop, IShopImportSettings shopImportSettings)
         where T : ShopModel, new()
     {
         return new T

@@ -27,11 +27,15 @@ public partial class Currency:IEntity<short>, ICurrency, IAddedTsEnity { }
 
 public partial class ShopProductPrice : IShopProductPrice, IAddedTsEnity, IUpdatedTsEntity { }
 
-public interface IEntity<TId>
+public interface IEntity
+{
+    string Name { get; set; }
+}
+
+public interface IEntity<TId> : IEntity
     where TId : struct
 {
     TId Id { get; set; }
-    string Name { get; set; }
 }
 
 public static class ContextExtensions

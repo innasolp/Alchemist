@@ -53,17 +53,18 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
 
             if (shopProduct.ProductId != 0)
             {
+                await SetShopProductPriceForItemAsync(productData, shopProduct.Id, cancellationToken);
+                
                 var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shop.Id, shopProduct.Id, productData.ShopCategory.ItemId, cancellationToken);
                 //todo
                 //if(!categoryResult)
                 //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
 
-                var setPriceResult = await SetShopProductPriceForItemAsync(productData, shopProduct.Id, cancellationToken);
                 //todo
                 //if (!result)
                 //    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");            
 
-                var result = !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
+                var result = !setCategoryResult ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
 
                 return result;
             }
@@ -89,8 +90,9 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
 
             var newShopProduct = await _productDataService.CreateShopProduct(shopProduct, cancellationToken);
 
-            if (!await SetShopProductPriceForItemAsync(productData, newShopProduct.Id, cancellationToken) ||
-                    !await SetShopProductCategoryIfNeedAsync(shop.Id, newShopProduct.Id, productData.ShopCategory.ItemId, cancellationToken))
+            var shopProductPrice = await SetShopProductPriceForItemAsync(productData, newShopProduct.Id, cancellationToken);
+
+            if (!await SetShopProductCategoryIfNeedAsync(shop.Id, newShopProduct.Id, productData.ShopCategory.ItemId, cancellationToken))
             {
                 await InvokeItemProcessedAsync(productData, ItemProcessStatus.Error, cancellationToken);
                 return await Task.FromResult(ItemProcessStatus.Error);
@@ -125,7 +127,7 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
         return await Task.FromResult(true);
     }
 
-    private async Task<bool> SetShopProductPriceForItemAsync(IBeautyAndHealthProductData item, long shopProductId,
+    private async Task<IShopProductPrice> SetShopProductPriceForItemAsync(IBeautyAndHealthProductData item, long shopProductId,
         CancellationToken cancellationToken = default)
     {
         var shopProductPrice = await _productDataService.GetShopProductPrice(shopProductId, cancellationToken);
@@ -134,13 +136,12 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
             var currency = await _productDataService.GetCurrencyByName(item.Currency.Name, cancellationToken)
                 ?? await _productDataService.CreateCurrency(new Currency { Name = item.Currency.Name }, cancellationToken);
 
-            await _productDataService.CreateShopProductPrice(new ShopProductPrice
+            return await _productDataService.CreateShopProductPrice(new ShopProductPrice
             {
                 ShopProductId = shopProductId,
                 Price = item.ShopProductPrice.Price,
                 CurrencyId = currency.Id
             }, cancellationToken);
-            return await Task.FromResult(true);
         }
         else
         {

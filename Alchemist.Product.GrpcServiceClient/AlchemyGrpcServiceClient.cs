@@ -307,20 +307,24 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return await Task.FromResult(newProductComponent);
     }
 
-    public async Task<bool> UpdateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default)
+    public async Task<IShopProduct> UpdateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default)
     {
         var request = shopProduct.ToMessage<UpdateShopProductRequest>();
         request.Id = shopProduct.Id;
-        var result = await _serviceClient.UpdateShopProductAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
-        return await Task.FromResult(result.Value);
+        var reply = await _serviceClient.UpdateShopProductAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var result = reply.FromMessage<ShopProduct>();
+        result.Id = reply.Id;
+        return await Task.FromResult(result);
     }
 
-    public async Task<bool> UpdateShopProductPrice(IShopProductPrice shopProductPrice, CancellationToken cancellationToken = default)
+    public async Task<IShopProductPrice> UpdateShopProductPrice(IShopProductPrice shopProductPrice, CancellationToken cancellationToken = default)
     {
         var request = shopProductPrice.ToMessage<UpdateShopProductPriceRequest>();
         request.Id = shopProductPrice.Id;
-        var result = await _serviceClient.UpdateShopProductPriceAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
-        return await Task.FromResult(result.Value);
+        var reply = await _serviceClient.UpdateShopProductPriceAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var result = reply.FromMessage<ShopProductPrice>();
+        result.Id = reply.Id;
+        return result;
     }
 
     public async Task<List<IPurposeType>> GetProductPurposes(long productId, CancellationToken cancellationToken = default)

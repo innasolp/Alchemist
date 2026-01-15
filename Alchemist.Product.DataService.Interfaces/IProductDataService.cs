@@ -30,7 +30,7 @@ public interface IProductDataService
     Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId, CancellationToken cancellationToken = default);
     Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId, CancellationToken cancellationToken = default);
 
-    Task<bool> UpdateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default);
+    Task<IShopProduct> UpdateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default);
 
     Task<IShopProduct> CreateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default);
 
@@ -47,7 +47,7 @@ public interface IProductDataService
     Task<ICurrency?> GetCurrencyByName(string name, CancellationToken cancellationToken = default);
     Task<ICurrency?> GetCurrencyByCode(short code, CancellationToken cancellationToken = default);
 
-    Task<bool> UpdateShopProductPrice(IShopProductPrice shopProductPrice, CancellationToken cancellationToken = default);
+    Task<IShopProductPrice> UpdateShopProductPrice(IShopProductPrice shopProductPrice, CancellationToken cancellationToken = default);
 
     Task<IShopProductPrice> CreateShopProductPrice(IShopProductPrice shopProductPrice, CancellationToken cancellationToken = default);
     Task<IShopProductPrice?> GetShopProductPrice(long shopProductId, CancellationToken cancellationToken = default);

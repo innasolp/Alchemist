@@ -1,6 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-
-namespace Alchemist.Product.GrpcService.Extensions;
+﻿namespace Alchemist.Product.GrpcService.Extensions;
 
 public interface IShopProductMessage
 {
