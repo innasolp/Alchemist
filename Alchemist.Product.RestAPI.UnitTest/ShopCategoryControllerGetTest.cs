@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Xunit.Abstractions;
 using Moq;
 using Alchemist.Product.Interfaces;
-using Alchemist.Product.Entities;
+using Alchemist.Product.Data;
 
 namespace Alchemist.Product.RestAPI.UnitTest;
 
@@ -19,19 +19,19 @@ public class ShopCategoryControllerGetTest : ControllerTest<ShopCategoryControll
 
     public ShopCategoryControllerGetTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {  
-        _alchemyRepository.Setup(r => r.GetShopCategory(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _mediatr.Setup(r => r.GetShopCategory(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns((int shopId, int itemId, CancellationToken cancellationToken = default) =>
         {
             return Task.FromResult((IShopCategory)_shopCategories.FirstOrDefault(sc => sc.ShopId == shopId && sc.ItemId == itemId));
         });
         
-        _alchemyRepository.Setup(r => r.GetShopCategories(It.IsAny<int>(), It.IsAny<CancellationToken>())).Returns((int shopId, CancellationToken cancellationToken = default) =>
+        _mediatr.Setup(r => r.GetShopCategories(It.IsAny<int>(), It.IsAny<CancellationToken>())).Returns((int shopId, CancellationToken cancellationToken = default) =>
         {
             var result = _shopCategories.Where(sc => sc.ShopId == shopId).OfType<IShopCategory>().ToList();
             return Task.FromResult(result);
         });
 
-        _alchemyRepository.Setup(r => r.GetAllCategoryChildren(It.IsAny<int>(), It.IsAny<CancellationToken>())).Returns(GetAllCategoryChildren);
+        _mediatr.Setup(r => r.GetAllCategoryChildren(It.IsAny<int>(), It.IsAny<CancellationToken>())).Returns(GetAllCategoryChildren);
     }
 
     private async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
@@ -46,7 +46,7 @@ public class ShopCategoryControllerGetTest : ControllerTest<ShopCategoryControll
 
     protected override ShopCategoryController CreateController()
     {
-        return new ShopCategoryController(_logger, _alchemyRepository.Object, _messageSender.Object);
+        return new ShopCategoryController(_logger, _mediatr.Object, _messageSender.Object);
     }
 
     [Fact]

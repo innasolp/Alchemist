@@ -1,4 +1,4 @@
-﻿using Alchemist.DataService.Interfaces;
+﻿using MediatR;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -13,7 +13,7 @@ public abstract class ControllerTest<TController, TEntity>
 {
     protected readonly ILogger<TController> _logger = new Logger<TController>(new LoggerFactory());
 
-    protected readonly Mock<IAlchemyRepository> _alchemyRepository = new();
+    protected readonly Mock<IMediator> _mediatr = new();
 
     protected readonly Mock<IMessageSender> _messageSender = new();
 

@@ -5,7 +5,7 @@ using UnitOfWork;
 
 namespace Alchemist.Product.UnitOfWork;
 
-public class ProductPurposeRepository(AlchemyContext context) : Repository<ProductPurpose, AlchemyContext>(context), IProductPurposeRepository
+public class ProductPurposeRepository(AlchemyContext context) : EFRepository<ProductPurpose, AlchemyContext>(context), IProductPurposeRepository
 {
     public async Task<ProductPurpose> SetProductPurpose(ProductPurpose productPurpose, CancellationToken cancellationToken = default)
     {

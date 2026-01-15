@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http;
-using Alchemist.Product.Entities;
 using Moq;
 using Alchemist.Product.Interfaces;
 using Xunit.Abstractions;
@@ -8,26 +7,26 @@ using Alchemist.Product.RestAPI.Controllers;
 
 namespace Alchemist.Product.RestAPI.UnitTest;
 
-public class ShopControllerPostTest: ControllerTest<ShopController, Shop>
+public class ShopControllerPostTest: ControllerTest<ShopController, Data.Shop>
 {
-    protected override ShopController CreateController() => new ShopController(_logger, _alchemyRepository.Object, _messageSender.Object);
+    protected override ShopController CreateController() => new ShopController(_logger, _mediatr.Object, _messageSender.Object);
 
     public ShopControllerPostTest(ITestOutputHelper testOutputHelper):base(testOutputHelper)
     {
-        _alchemyRepository.Setup(r => r.CreateShop(It.IsAny<Shop>(), It.IsAny<CancellationToken>())).Returns(CreateShop);
-        _alchemyRepository.Setup(r => r.UpdateShop(It.IsAny<Shop>(), It.IsAny<CancellationToken>())).Returns(UpdateShop);
+        _mediatr.Setup(r => r.CreateShop(It.IsAny<Data.Shop>(), It.IsAny<CancellationToken>())).Returns(CreateShop);
+        _mediatr.Setup(r => r.UpdateShop(It.IsAny<Data.Shop>(), It.IsAny<CancellationToken>())).Returns(UpdateShop);
     }
 
     private async Task<IShop> CreateShop(IShop shop, CancellationToken cancellationToken = default)
     {
-        var newShop = shop.To<Shop>();
+        var newShop = shop.To<Data.Shop>();
         newShop.Id += 1;
         return await Task.FromResult(newShop);
     }
     
     private async Task<IShop> UpdateShop(IShop shop, CancellationToken cancellationToken = default)
     {
-        return await Task.FromResult(shop.To<Shop>());
+        return await Task.FromResult(shop.To<Data.Shop>());
     }
 
     [Fact]
@@ -40,40 +39,40 @@ public class ShopControllerPostTest: ControllerTest<ShopController, Shop>
     [Fact]
     public async Task CreateShopReturnsBadRequestWhenShopNameIsEmptyAsync()
     {
-        var shop = new Shop
+        var shop = new Data.Shop
         {
             Url = Guid.NewGuid().ToString(),
             Id = 1
         };
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.CreateShop(shop));
-        var badRequest = Assert.IsType<BadRequest<Shop>>(result.Result);
+        var badRequest = Assert.IsType<BadRequest<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, badRequest.Value.Id);
     }
 
     [Fact]
     public async Task CreateShopReturnsBadRequestWhenShopUrlIsEmptyAsync()
     {
-        var shop = new Shop
+        var shop = new Data.Shop
         {
             Name = Guid.NewGuid().ToString(),
             Id = 1
         };
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.CreateShop(shop));
-        var badRequest = Assert.IsType<BadRequest<Shop>>(result.Result);
+        var badRequest = Assert.IsType<BadRequest<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, badRequest.Value.Id);
     }    
 
     [Fact]
     public async Task CreateShopReturnsCreatedWhenShopIsValidAsync()
     {
-        var shop = new Shop
+        var shop = new Data.Shop
         {
             Name = Guid.NewGuid().ToString(),
             Url = Guid.NewGuid().ToString(),
             Id = 0
         };
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.CreateShop(shop));
-        var badRequest = Assert.IsType<Created<Shop>>(result.Result);
+        var badRequest = Assert.IsType<Created<Data.Shop>>(result.Result);
         Assert.NotEqual(shop.Id, badRequest.Value.Id);
         Assert.Equal(shop.Name, badRequest.Value.Name);
         Assert.Equal(shop.Url, badRequest.Value.Url);
@@ -82,14 +81,14 @@ public class ShopControllerPostTest: ControllerTest<ShopController, Shop>
     [Fact]
     public async Task UpdateShopReturnsBadRequestWhenShopIdLessOrEqualsThenZeroAsync()
     {
-        var shop = new Shop
+        var shop = new Data.Shop
         {
             Name = Guid.NewGuid().ToString(),
             Url = Guid.NewGuid().ToString(),
             Id = -5
         };
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.UpdateShop(shop));
-        var badRequest = Assert.IsType<BadRequest<Shop>>(result.Result);
+        var badRequest = Assert.IsType<BadRequest<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, badRequest.Value.Id);
     }
 
@@ -103,40 +102,40 @@ public class ShopControllerPostTest: ControllerTest<ShopController, Shop>
     [Fact]
     public async Task UpdateShopReturnsBadRequestWhenShopNameIsEmptyAsync()
     {
-        var shop = new Shop
+        var shop = new Data.Shop
         {
             Url = Guid.NewGuid().ToString(),
             Id = 1
         };
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.UpdateShop(shop));
-        var badRequest = Assert.IsType<BadRequest<Shop>>(result.Result);
+        var badRequest = Assert.IsType<BadRequest<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, badRequest.Value.Id);
     }
 
     [Fact]
     public async Task UpdateShopReturnsBadRequestWhenShopUrlIsEmptyAsync()
     {
-        var shop = new Shop
+        var shop = new Data.Shop
         {
             Name = Guid.NewGuid().ToString(),
             Id = 1
         };
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.UpdateShop(shop));
-        var badRequest = Assert.IsType<BadRequest<Shop>>(result.Result);
+        var badRequest = Assert.IsType<BadRequest<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, badRequest.Value.Id);
     }
 
     [Fact]
     public async Task UpdateShopReturnsAcceptedWhenShopIsValidAsync()
     {
-        var shop = new Shop
+        var shop = new Data.Shop
         {
             Name = Guid.NewGuid().ToString(),
             Url = Guid.NewGuid().ToString(),
             Id = new Random().Next(100)
         };
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.UpdateShop(shop));
-        var badRequest = Assert.IsType<Accepted<Shop>>(result.Result);
+        var badRequest = Assert.IsType<Accepted<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, badRequest.Value.Id);
         Assert.Equal(shop.Name, badRequest.Value.Name);
         Assert.Equal(shop.Url, badRequest.Value.Url);

@@ -2,7 +2,7 @@
 
 namespace UnitOfWork;
 
-public class Repository<T, TDbContext>(TDbContext dbContext) : IRepository<T>
+public class EFRepository<T, TDbContext>(TDbContext dbContext) : IRepository<T>
     where TDbContext : DbContext
     where T:class
 {

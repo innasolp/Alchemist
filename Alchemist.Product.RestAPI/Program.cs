@@ -14,6 +14,7 @@ using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Loggers;
+using Shop.Module;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,14 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
-builder.Services.AddScoped<IAlchemyRepository, AlchemyRepository>();
+builder.Host.AddProductInfrastructure();
+
+var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterGenericHandlers = true;
+    cfg.RegisterServicesFromAssemblies(assemblies);
+});
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);

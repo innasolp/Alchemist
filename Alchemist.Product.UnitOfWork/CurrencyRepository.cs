@@ -5,7 +5,7 @@ using UnitOfWork;
 
 namespace Alchemist.Product.UnitOfWork;
 
-public class CurrencyRepository(AlchemyContext context) : Repository<Currency, AlchemyContext>(context), ICurrencyRepository
+public class CurrencyRepository(AlchemyContext context) : EFRepository<Currency, AlchemyContext>(context), ICurrencyRepository
 {
     public async Task<Currency?> GetCurrencyByCode(short code, CancellationToken cancellationToken = default)
     {

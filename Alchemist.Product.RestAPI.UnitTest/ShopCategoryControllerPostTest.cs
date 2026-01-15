@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.Entities;
+﻿using Alchemist.Product.Data;
 using Alchemist.Product.Interfaces;
 using Alchemist.Product.RestAPI.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +12,7 @@ public class ShopCategoryControllerPostTest:ControllerTest<ShopCategoryControlle
 {
     public ShopCategoryControllerPostTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _alchemyRepository.Setup(r => r.AddShopCategory(It.IsAny<IShopCategory>(), It.IsAny<CancellationToken>()))
+        _mediatr.Setup(r => r.AddShopCategory(It.IsAny<IShopCategory>(), It.IsAny<CancellationToken>()))
             .Returns((IShopCategory shopCategory, CancellationToken cancellationToken = default) =>
         {
             var newShopCategory = shopCategory.To<ShopCategory>();
@@ -23,7 +23,7 @@ public class ShopCategoryControllerPostTest:ControllerTest<ShopCategoryControlle
 
     protected override ShopCategoryController CreateController()
     {
-        return new ShopCategoryController(_logger, _alchemyRepository.Object, _messageSender.Object);
+        return new ShopCategoryController(_logger, _mediatr.Object, _messageSender.Object);
     }
 
     [Fact]

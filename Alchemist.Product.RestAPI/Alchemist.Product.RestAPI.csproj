@@ -30,7 +30,7 @@
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Repository\Alchemist.Product.Data.Repository.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
+    <ProjectReference Include="..\Shop.Module\Shop.Module.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,3 @@
-using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
 using Alchemist.Product.RestAPI.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -8,9 +7,9 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.RestAPI.UnitTest;
 
-public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : ControllerTest<ShopController, Shop>(testOutputHelper)
+public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : ControllerTest<ShopController, Data.Shop>(testOutputHelper)
 {
-    protected override ShopController CreateController() => new(_logger, _alchemyRepository.Object, _messageSender.Object);
+    protected override ShopController CreateController() => new(_logger, _mediatr.Object, _messageSender.Object);
 
     [Fact]
     public async Task GetShopByUrlReturnsBadRequestWhenShopNameIsEmptyAsync()
@@ -22,7 +21,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopByUrlReturnsNotFoundWhenShopNameNotExistsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShopByUrl(It.IsAny<string>(), It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShopByUrl(It.IsAny<string>(), It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(IShop)));
 
         var url = "http://test";
@@ -35,13 +34,13 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     public async Task GetShopByUrlReturnsOkWhenShopExistsAsync()
     {
         var url = "http://test";
-        var shop = new Shop() { Name = "test", Id= new Random().Next(100), Url = url };
+        var shop = new Data.Shop() { Name = "test", Id= new Random().Next(100), Url = url };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShopByUrl(url, It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShopByUrl(url, It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult((IShop)shop));
         
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShopByUrl(url));
-        var ok = Assert.IsType<Ok<Shop>>(result.Result);
+        var ok = Assert.IsType<Ok<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, ok.Value.Id);
         Assert.Equal(shop.Name, ok.Value.Name);
         Assert.Equal(shop.Url, ok.Value.Url);
@@ -57,7 +56,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopByNameReturnsNotFoundWhenShopNameNotExistsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShopByName(It.IsAny<string>(), It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShopByName(It.IsAny<string>(), It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(IShop)));
 
         var name = "test";
@@ -70,13 +69,13 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     public async Task GetShopByNameReturnsOkWhenShopExistsAsync()
     {
         var name = "test";
-        var shop = new Shop() { Name = name, Id = new Random().Next(100) };
+        var shop = new Data.Shop() { Name = name, Id = new Random().Next(100) };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShopByName(name, It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShopByName(name, It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult((IShop)shop));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShopByName(name));
-        var ok = Assert.IsType<Ok<Shop>>(result.Result);
+        var ok = Assert.IsType<Ok<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, ok.Value.Id);
         Assert.Equal(shop.Name, ok.Value.Name);
     }
@@ -99,7 +98,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopByIdReturnsNotFoundWhenShopIdNotExistsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShop(It.IsAny<int>(), It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShop(It.IsAny<int>(), It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(IShop)));
 
         var id = new Random().Next(1000);
@@ -112,13 +111,13 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     public async Task GetShopByIdReturnsOkWhenShopExistsAsync()
     {
         var name = "test";
-        var shop = new Shop() { Name = name, Id = new Random().Next(100) };
+        var shop = new Data.Shop() { Name = name, Id = new Random().Next(100) };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShop(shop.Id, It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShop(shop.Id, It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult((IShop)shop));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShop(shop.Id));
-        var ok = Assert.IsType<Ok<Shop>>(result.Result);
+        var ok = Assert.IsType<Ok<Data.Shop>>(result.Result);
         Assert.Equal(shop.Id, ok.Value.Id);
         Assert.Equal(shop.Name, ok.Value.Name);
     }
@@ -126,7 +125,7 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     [Fact]
     public async Task GetShopsReturnsNotFoundWhenNoShopsAsync()
     {
-        var setup = _alchemyRepository.Setup(r => r.GetShops(It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShops(It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(default(List<IShop>)));
        
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShops());
@@ -137,15 +136,15 @@ public class ShopControllerGetTest(ITestOutputHelper testOutputHelper) : Control
     public async Task GetShopsReturnsOkWhenShopsAnyAsync()
     {
         var shops = new List<IShop>{
-            new Shop() { Name = Guid.NewGuid().ToString(), Id = new Random().Next(100) },
-            new Shop() { Name = Guid.NewGuid().ToString(), Id = new Random().Next(100) }
+            new Data.Shop() { Name = Guid.NewGuid().ToString(), Id = new Random().Next(100) },
+            new Data.Shop() { Name = Guid.NewGuid().ToString(), Id = new Random().Next(100) }
          };
 
-        var setup = _alchemyRepository.Setup(r => r.GetShops(It.IsAny<CancellationToken>()));
+        var setup = _mediatr.Setup(r => r.GetShops(It.IsAny<CancellationToken>()));
         setup.Returns(Task.FromResult(shops));
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await Controller.GetShops());
-        var ok = Assert.IsType<Ok<List<Shop>>>(result.Result);
+        var ok = Assert.IsType<Ok<List<Data.Shop>>>(result.Result);
         Assert.Equal(shops.Count, ok.Value.Count);
         Assert.Equal(shops, ok.Value, (s1, s2) => s1.Id == s2.Id);
     }

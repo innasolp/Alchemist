@@ -6,7 +6,7 @@ using UnitOfWork;
 
 namespace Alchemist.Product.UnitOfWork;
 
-public class ShopProductCategoryRepository(AlchemyContext context) : Repository<ShopProductCategory, AlchemyContext>(context), IShopProductCategoryRepository
+public class ShopProductCategoryRepository(AlchemyContext context) : EFRepository<ShopProductCategory, AlchemyContext>(context), IShopProductCategoryRepository
 {
     public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId, CancellationToken cancellationToken = default)
     {

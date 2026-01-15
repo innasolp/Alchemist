@@ -5,7 +5,7 @@ using UnitOfWork;
 
 namespace Alchemist.Product.UnitOfWork;
 
-public class ShopProductRepository(AlchemyContext context) : Repository<ShopProduct, AlchemyContext>(context), IShopProductRepository
+public class ShopProductRepository(AlchemyContext context) : EFRepository<ShopProduct, AlchemyContext>(context), IShopProductRepository
 {
     public Task<ShopProduct?> GetShopProductByShopAndItemUrl(int shopId, string itemUrl, CancellationToken cancellationToken = default)
     {

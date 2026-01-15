@@ -42,7 +42,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
     {
         _messages.Clear();
 
-        var shop = new Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
+        var shop = new Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
         var response = await _shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
         Assert.True(response.IsSuccessStatusCode);
 
@@ -55,7 +55,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
     {
         _messages.Clear();
 
-        var shop = new Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
+        var shop = new Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
         var response = await _shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
         Assert.False(response.IsSuccessStatusCode);
 

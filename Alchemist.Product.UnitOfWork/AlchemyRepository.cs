@@ -3,7 +3,7 @@ using UnitOfWork;
 
 namespace Alchemist.Product.UnitOfWork;
 
-public class AlchemyRepository<T>(AlchemyContext alchemyContext) : Repository<T, AlchemyContext>(alchemyContext), IRepository<T>
+public class AlchemyRepository<T>(AlchemyContext alchemyContext) : EFRepository<T, AlchemyContext>(alchemyContext), IRepository<T>
     where T:class
 {
 }

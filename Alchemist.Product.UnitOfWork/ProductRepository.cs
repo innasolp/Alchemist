@@ -5,7 +5,7 @@ using UnitOfWork;
 
 namespace Alchemist.Product.UnitOfWork;
 
-public class ProductRepository(AlchemyContext context) : Repository<Data.Product, AlchemyContext>(context), IProductRepository
+public class ProductRepository(AlchemyContext context) : EFRepository<Data.Product, AlchemyContext>(context), IProductRepository
 {
     public async Task<Data.Product?> FindProductByNameAndBrand(string name, string brand, CancellationToken cancellationToken = default)
     {

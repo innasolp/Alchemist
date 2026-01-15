@@ -4,7 +4,7 @@ using UnitOfWork;
 
 namespace Alchemist.Product.UnitOfWork;
 
-public class ProductComponentRepository(AlchemyContext context) : Repository<ProductComponent, AlchemyContext>(context), IProductComponentRepository
+public class ProductComponentRepository(AlchemyContext context) : EFRepository<ProductComponent, AlchemyContext>(context), IProductComponentRepository
 {
     public async Task<ProductComponent> SetProductComponent(ProductComponent productComponent, CancellationToken cancellationToken = default)
     {

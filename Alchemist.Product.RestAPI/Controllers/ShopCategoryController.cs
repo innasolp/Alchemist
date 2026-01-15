@@ -1,18 +1,20 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Entities;
-using Message.Interfaces;
+﻿using Message.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Alchemist.Product.Interfaces;
+using MediatR;
+using Alchemist.Product.Data;
+using Mediator.Infrastructure.Command;
+using Shop.Infrastructure;
 
 namespace Alchemist.Product.RestAPI.Controllers;
 
 [Route("api/ShopCategory")]
 [ApiController]
-public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlchemyRepository alchemyRepository, IMessageSender messageSender) : ControllerBase
+public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMediator mediator, IMessageSender messageSender) : ControllerBase
 {
     private readonly ILogger<ShopCategoryController> _logger = logger;
-    private readonly IAlchemyRepository _alchemyRepository = alchemyRepository;
+    private readonly IMediator _mediator = mediator;
     private readonly IMessageSender _messageSender = messageSender;
 
     private async Task SendMessage<T>(T entity, string methodName, CancellationToken cancellationToken = default)
@@ -44,7 +46,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
         if (shopCategory.ShopId <= 0 || shopCategory.ItemId <= 0 || shopCategory.Category == null)
             return TypedResults.BadRequest(shopCategory);
 
-        var newShopCategory = (await _alchemyRepository.AddShopCategory(shopCategory, cancellationToken)).To<ShopCategory>();
+        var newShopCategory = await _mediator.Send(new CreateCommand<ShopCategory>(shopCategory), cancellationToken);
 
         await SendMessage(newShopCategory, Messages.Common.Messages.CategoryAdded, cancellationToken);
 
@@ -64,7 +66,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
         if (itemId <= 0)
             return TypedResults.BadRequest(itemId);
 
-        var shopCategory = await _alchemyRepository.GetShopCategory(shopId, itemId, cancellationToken);
+        var shopCategory = await _mediator.Send(new GetShopCategoryByShopIdAndItemIdRequest(shopId, itemId), cancellationToken);
 
         return shopCategory != null ?
             TypedResults.Ok(shopCategory.To<ShopCategory>()) :
@@ -80,7 +82,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
         if (shopId <= 0)
             return TypedResults.BadRequest(shopId);
 
-        var shopCategories = await _alchemyRepository.GetShopCategories(shopId, cancellationToken);
+        var shopCategories = await _mediator.Send(new GetShopCategoriesRequest(shopId), cancellationToken);
 
         return shopCategories != null && shopCategories.Count != 0 ?
             TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :
@@ -96,7 +98,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IAlc
         if (parentId <= 0)
             return TypedResults.BadRequest(parentId);
 
-        var shopCategories = await _alchemyRepository.GetAllCategoryChildren(parentId, cancellationToken);
+        var shopCategories = await _mediator.Send(new GetAllCategoryChildrenRequest(parentId), cancellationToken);
 
         return shopCategories != null && shopCategories.Count != 0 ?
             TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :

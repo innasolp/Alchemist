@@ -12,7 +12,7 @@ public abstract class ShopAPIWebAppFactory : DbContextWebAppFactory<ShopAPIProgr
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        dbContext.Shops.Add(new Shop { Name = "TestShop", Url = "https://testshop1" });
+        dbContext.Shops.Add(new Data.Shop { Name = "TestShop", Url = "https://testshop1" });
         dbContext.SaveChanges();
     }
 

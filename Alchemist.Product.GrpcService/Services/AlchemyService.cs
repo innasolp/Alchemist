@@ -52,22 +52,14 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
     {
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateBrandRequest.Name));
-        
+
         if (request.Countryid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateBrandRequest.Countryid), "Invalid value");
 
-        try
-        {
-
-            var brand = new Brand { Name = request.Name, CountryId = (short?)request.Countryid, Comment = request.Comment };
-            var entity = await _mediator.Send(new CreateCommand<Brand>(brand), context.CancellationToken);
-            var reply = new BrandReply() { Id = entity.Id, Name = entity.Name, Countryid = entity.CountryId, Comment = entity.Comment };
-            return await Task.FromResult(reply);
-        }
-        catch(Exception e)
-        {
-            throw;
-        }
+        var brand = new Brand { Name = request.Name, CountryId = (short?)request.Countryid, Comment = request.Comment };
+        var entity = await _mediator.Send(new CreateCommand<Brand>(brand), context.CancellationToken);
+        var reply = new BrandReply() { Id = entity.Id, Name = entity.Name, Countryid = entity.CountryId, Comment = entity.Comment };
+        return await Task.FromResult(reply);
     }
 
     public override async Task<ComponentReply> CreateComponent(CreateComponentRequest request, ServerCallContext context)
@@ -172,24 +164,16 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
-        try
-        {
-            var brand = await _mediator.Send(new FindByNameRequest<Brand>(request.Name, e=>e.Name), context.CancellationToken)                
+        var brand = await _mediator.Send(new FindByNameRequest<Brand>(request.Name, e => e.Name), context.CancellationToken)
                  ?? throw new RpcException(new Status(StatusCode.NotFound, $"Brand with name '{request.Name}' not found")); ;
 
-            return await Task.FromResult(new BrandReply
-            {
-                Id = brand.Id,
-                Name = brand.Name,
-                Countryid = brand.CountryId,
-                Comment = brand.Comment
-            });
-
-        }
-        catch(Exception e)
+        return await Task.FromResult(new BrandReply
         {
-            throw;
-        }
+            Id = brand.Id,
+            Name = brand.Name,
+            Countryid = brand.CountryId,
+            Comment = brand.Comment
+        });
     }
 
     public override async Task<ComponentReply> FindComponentByName(FindByNameRequest request, ServerCallContext context)

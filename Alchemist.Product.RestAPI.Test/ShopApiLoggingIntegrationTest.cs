@@ -45,7 +45,7 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
     {
         _messages.Clear();
 
-        var shop = new Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
+        var shop = new Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
         var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop);
 
         Assert.Equal(2, _messages.Count(m => m.eventId == 5001 && m.categoryName.Contains("PerfomanceCounter") && m.logLevel == LogLevel.Information));
