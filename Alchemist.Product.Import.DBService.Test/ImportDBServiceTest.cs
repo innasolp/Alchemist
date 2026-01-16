@@ -44,7 +44,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
         var categoryMessageMock = new Mock<ICategoryData>();
         FillTestCategoryData(categoryMessageMock);
 
-        var shop = new Shop { Id = 1, Name = categoryMessageMock.Object.ShopName, Url = categoryMessageMock.Object.ShopUrl };
+        var shop = new Data.Shop { Id = 1, Name = categoryMessageMock.Object.ShopName, Url = categoryMessageMock.Object.ShopUrl };
 
         var shopCreateResetEvent = new AsyncAutoResetEvent();
         _alchemyRepositoryMock.Setup(r => r.GetShopByName(categoryMessageMock.Object.ShopName, It.IsAny<CancellationToken>()))

@@ -127,12 +127,12 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         }
     }
 
-    private async Task<Shop> CreateNewShopAsync()
+    private async Task<Data.Shop> CreateNewShopAsync()
     {
-        var shop = new Shop { Name = "Test", Url = $"https://{Guid.NewGuid().ToString()}" };
+        var shop = new Data.Shop { Name = "Test", Url = $"https://{Guid.NewGuid().ToString()}" };
         var response = await WebAppFactory.ShopApiClient.PutAsJsonAsync($"api/Shop", shop);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>();
+        return await response.Content.ReadFromJsonAsync<Data.Shop>();
     }
 
     private async Task<ShopSettings> CreateNewShopSettingsAsync(int shopId)

@@ -28,7 +28,7 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
     protected override void FillTestData(AlchemyContext dbContext)
     {
         _initialShops.AddRange(ShopTestRepository.CreateShopsTestData(4));
-        _initialShops.ForEach(s => dbContext.Shops.Add(s.To<Shop>()));
+        _initialShops.ForEach(s => dbContext.Shops.Add(s.To<Product.Data.Shop>()));
         dbContext.SaveChanges();
     }
 

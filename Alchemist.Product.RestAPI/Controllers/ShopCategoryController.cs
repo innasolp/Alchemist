@@ -37,9 +37,6 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
     [HttpPut(Name = nameof(AddShopCategory))]
     public async Task<Results<BadRequest, BadRequest<ShopCategory>, Created<ShopCategory>>> AddShopCategory(ShopCategory shopCategory, CancellationToken cancellationToken = default)
     {
-        if (cancellationToken.IsCancellationRequested)
-            return TypedResults.BadRequest();
-
         if (shopCategory == null)
             return TypedResults.BadRequest();
 
@@ -57,9 +54,6 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
     [HttpGet("shopCategories/byShopIdAndItemId/{shopId:int}/{itemId:int}", Name = nameof(GetShopCategoryByShopIdAndItemId))]
     public async Task<Results<BadRequest<int>, NotFound<Tuple<int, int>>, Ok<ShopCategory>>> GetShopCategoryByShopIdAndItemId(int shopId, int itemId, CancellationToken cancellationToken = default)
     {
-        if (cancellationToken.IsCancellationRequested)
-            return TypedResults.NotFound(new Tuple<int, int>(shopId, itemId));
-
         if (shopId <= 0)
             return TypedResults.BadRequest(shopId);
 
@@ -76,9 +70,6 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
     [HttpGet("shopCategories/{shopId:int}", Name = nameof(GetShopCategories))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<List<ShopCategory>>>> GetShopCategories(int shopId, CancellationToken cancellationToken = default)
     {
-        if (cancellationToken.IsCancellationRequested)
-            return TypedResults.NotFound(shopId);
-
         if (shopId <= 0)
             return TypedResults.BadRequest(shopId);
 
@@ -92,9 +83,6 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
     [HttpGet("shopCategories/getAllChildren/{parentId:int}", Name = nameof(GetAllCategoryChildren))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<List<ShopCategory>>>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
     {
-        if (cancellationToken.IsCancellationRequested)
-            return TypedResults.NotFound(parentId);
-
         if (parentId <= 0)
             return TypedResults.BadRequest(parentId);
 

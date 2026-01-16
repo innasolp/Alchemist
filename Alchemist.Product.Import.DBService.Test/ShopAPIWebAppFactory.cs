@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
-using Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 using Alchemist.Test.DBApiWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
 
@@ -23,7 +22,7 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
     protected override void FillTestData(AlchemyContext dbContext)
     {
         var shops = TestRepository.GetShopsTestData(4);
-        shops.ForEach(s => dbContext.Shops.Add(s.To<Shop>()));
+        shops.ForEach(s => dbContext.Shops.Add(s.To<Data.Shop>()));
         dbContext.SaveChanges();
     }
 

@@ -107,7 +107,7 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
         if (shop.Id <=0 ||  string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Url))
             return TypedResults.BadRequest(shop);
 
-        var updatedShop = await _mediator.Send( new UpdateCommand<Data.Shop>(shop), cancellationToken);        
+        var updatedShop = await _mediator.Send(new UpdateCommand<Data.Shop>(shop), cancellationToken);        
 
         var location = Url.Action(nameof(UpdateShop), new { id = updatedShop.Id }) ?? $"/{updatedShop.Id}";
         return TypedResults.Accepted(location, updatedShop);
