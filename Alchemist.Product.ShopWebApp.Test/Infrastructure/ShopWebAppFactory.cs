@@ -1,10 +1,10 @@
 ﻿using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Interfaces;
-using Alchemist.Product.RestAPIClient;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shop.API.Client;
 
 namespace Alchemist.Product.ShopWebApp.Test.Infrastructure;
 

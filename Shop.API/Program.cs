@@ -1,20 +1,18 @@
 using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Product.Data.Repository;
-using Alchemist.Product.RestAPI.Controllers;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
-using Http.RequestHandling.PerfomanceCounter;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using Serilog;
-using Serilog.Loggers;
+using Shop.API.Controllers;
 using Shop.Module;
+using Swashbuckle.AspNetCore.Swagger;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +41,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<SwaggerOptions>(options =>
+{
+    options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+});
 
 builder.Services.AddAuthentication("https");
 
@@ -53,16 +55,12 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopCategoryControll
 
 builder.Services.AddProblemDetails();
 
-builder.Services.AddPerfomanceCounter<InfoLogMiddleware<ShopController>>((logger) => new SerilogUrlLogger<PerfomanceCounter<InfoLogMiddleware<ShopController>>>(logger));
-
 AddLogging(builder.Configuration, builder.Logging);
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseMiddleware<InfoLogMiddleware<ShopController>>();
-
-(app as IHost).UsePerfomanceCounters();
 
 app.UseAuthentication();
 
@@ -72,10 +70,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    app.UseSwagger(options =>
-    {
-        options.SerializeAsV2 = true;
-    });
+    //app.UseSwagger(options =>
+    //{
+    //    options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+    //});
 }
 
 app.UseHsts();
@@ -97,7 +95,6 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
-    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: "https://localhost:8051", EventIds.Perfomance.Id, serviceName);
     loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
     loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
 

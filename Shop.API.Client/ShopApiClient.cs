@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
-namespace Alchemist.Product.RestAPIClient;
+namespace Shop.API.Client;
 
 public class ShopApiClient : IShopDataService
 {
@@ -37,9 +37,9 @@ public class ShopApiClient : IShopDataService
 
     public async Task<IShop> CreateShop(IShop shop, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop.To<Shop>(), cancellationToken);
+        var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop.To<Alchemist.Product.Entities.Shop>(), cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
+        return await response.Content.ReadFromJsonAsync<Alchemist.Product.Entities.Shop>(cancellationToken: cancellationToken);
     }
 
     public async Task<List<IShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
@@ -58,7 +58,7 @@ public class ShopApiClient : IShopDataService
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
+        return await response.Content.ReadFromJsonAsync<Alchemist.Product.Entities.Shop>(cancellationToken: cancellationToken);
     }
 
     public async Task<IShop?> GetShopByName(string name, CancellationToken cancellationToken = default)
@@ -67,7 +67,7 @@ public class ShopApiClient : IShopDataService
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
+        return await response.Content.ReadFromJsonAsync<Alchemist.Product.Entities.Shop>(cancellationToken: cancellationToken);
     }
 
     public async Task<IShop?> GetShopByUrl(string url, CancellationToken cancellationToken = default)
@@ -76,7 +76,7 @@ public class ShopApiClient : IShopDataService
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return default;
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
+        return await response.Content.ReadFromJsonAsync<Alchemist.Product.Entities.Shop>(cancellationToken: cancellationToken);
     }
 
     public async Task<List<IShopCategory>> GetShopCategories(int shopId, CancellationToken cancellationToken = default)
@@ -104,14 +104,14 @@ public class ShopApiClient : IShopDataService
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             return [];
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<List<Shop>>(cancellationToken: cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<List<Alchemist.Product.Entities.Shop>>(cancellationToken: cancellationToken);
         return [.. (result ?? []).OfType<IShop>()];
     }
 
     public async Task<IShop> UpdateShop(IShop shop, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/Shop/Update", shop.To<Shop>(), cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync($"api/Shop/Update", shop.To<Alchemist.Product.Entities.Shop>(), cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Shop>(cancellationToken: cancellationToken);
+        return await response.Content.ReadFromJsonAsync<Alchemist.Product.Entities.Shop>(cancellationToken: cancellationToken);
     }
 }

@@ -5,7 +5,6 @@ using Alchemist.Log.Extensions;
 using Alchemist.Product.BeautyAndHealth.DbItemHandler;
 using Alchemist.Product.Category.DbItemHandler;
 using Alchemist.Product.Import.DBService;
-using Alchemist.Product.RestAPIClient;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Grpc.Client.RequestInterceptor;
@@ -16,6 +15,7 @@ using Message.RabbitMQ.DependencyInjection;
 using Serilog;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
+using Shop.API.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 

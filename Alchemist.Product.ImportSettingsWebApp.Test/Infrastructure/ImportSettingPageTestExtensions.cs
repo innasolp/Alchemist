@@ -140,7 +140,7 @@ internal static class ImportSettingPageTestExtensions
         await pageTest.Page.Locator(".service-settings-modal").Locator(".close").ClickAsync();
     }
 
-    internal static async Task<(string, string, string, UrlFormatType, UrlFormatType)> FillProductInputFieldsAsync(this PageTest pageTest)
+    internal static async Task<(string, string, string, PathFormatType, PathFormatType)> FillProductInputFieldsAsync(this PageTest pageTest)
     {
         var name = Guid.NewGuid().ToString();
         await pageTest.Page.Locator($"#ShopSettingsName").FillAsync(name);
@@ -151,7 +151,7 @@ internal static class ImportSettingPageTestExtensions
         var categoryUrlFormat = Guid.NewGuid().ToString();
         await pageTest.Page.Locator($"#CategoryUrlFormat").FillAsync(categoryUrlFormat);
 
-        var formatTypes = Enum.GetValues<UrlFormatType>();
+        var formatTypes = Enum.GetValues<PathFormatType>();
 
         int productUrlFormatTypeOption = new Random().Next(0, formatTypes.Length - 1);
         await pageTest.Page.Locator("#ProductUrlFormatType").SelectOptionAsync([productUrlFormatTypeOption.ToString()]);

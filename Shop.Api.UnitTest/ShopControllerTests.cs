@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Alchemist.Product.Data;
-using Alchemist.Product.RestAPI.Controllers;
 using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Request;
 using MediatR;
@@ -13,6 +12,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Shop.API.Controllers;
 using Shop.UnitOfWork;
 using Xunit;
 

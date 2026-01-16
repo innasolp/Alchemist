@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace Alchemist.Product.RestAPI.Test.Infrastructure;
+namespace Shop.API.Test.Infrastructure;
 
 public class ShopAPISignlRMockWebAppFactory : ShopAPIWebAppFactory
 { 

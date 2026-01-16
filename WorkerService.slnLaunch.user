@@ -19,7 +19,7 @@
         "Action": "Start"
       },
       {
-        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Path": "Alchemist.Product.RestAPI\\Shop.API.csproj",
         "Action": "Start"
       },
       {

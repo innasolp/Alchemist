@@ -6,8 +6,9 @@ using MediatR;
 using Alchemist.Product.Data;
 using Mediator.Infrastructure.Command;
 using Shop.Infrastructure;
+using Alchemist.Messages.Common;
 
-namespace Alchemist.Product.RestAPI.Controllers;
+namespace Shop.API.Controllers;
 
 [Route("api/ShopCategory")]
 [ApiController]
@@ -45,7 +46,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
 
         var newShopCategory = await _mediator.Send(new CreateCommand<ShopCategory>(shopCategory), cancellationToken);
 
-        await SendMessage(newShopCategory, Messages.Common.Messages.CategoryAdded, cancellationToken);
+        await SendMessage(newShopCategory, Messages.CategoryAdded, cancellationToken);
 
         var location = Url.Action(nameof(AddShopCategory), new { id = newShopCategory.Id }) ?? $"/{newShopCategory.Id}";
         return TypedResults.Created(location, newShopCategory);

@@ -20,7 +20,7 @@ public class ProductShopSettingsTestImportSettingsWebAppFactory()
 }
 
 public class ProductShopSettingsTest
-    : ShopImportSettingsTest<ProductShopSettingsTestImportSettingsWebAppFactory, (string, string, string, UrlFormatType, UrlFormatType)>
+    : ShopImportSettingsTest<ProductShopSettingsTestImportSettingsWebAppFactory, (string, string, string, PathFormatType, PathFormatType)>
 {
     private record CategoryUrl(int item, string url);
 
@@ -43,7 +43,7 @@ public class ProductShopSettingsTest
         await this.ExpectProductShopSettingsLoadedAsync();
     }
 
-    protected override async Task<(string, string, string, UrlFormatType, UrlFormatType)> FillInputFieldsAsync()
+    protected override async Task<(string, string, string, PathFormatType, PathFormatType)> FillInputFieldsAsync()
     {
         return await this.FillProductInputFieldsAsync();
     }

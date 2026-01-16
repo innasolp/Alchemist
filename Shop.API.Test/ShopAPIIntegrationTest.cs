@@ -1,8 +1,8 @@
-using Alchemist.Product.RestAPI.Test.Infrastructure;
+using Shop.API.Test.Infrastructure;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 
-namespace Alchemist.Product.RestAPI.Test;
+namespace Shop.API.Test;
 
 public class ShopAPIIntegrationTest : ShopAPITestFixture<ShopAPISignlRMockWebAppFactory>
 {
@@ -21,7 +21,7 @@ public class ShopAPIIntegrationTest : ShopAPITestFixture<ShopAPISignlRMockWebApp
         response.EnsureSuccessStatusCode();
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         
-        var shop = await response.Content.ReadFromJsonAsync<Data.Shop>();
+        var shop = await response.Content.ReadFromJsonAsync<Alchemist.Product.Data.Shop>();
         Assert.NotNull(shop);
         Assert.Equal(name, shop.Name);
     }
@@ -43,14 +43,14 @@ public class ShopAPIIntegrationTest : ShopAPITestFixture<ShopAPISignlRMockWebApp
     [Fact]
     public async Task CreateShopSuccessAsync()
     {
-        var shop = new Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
+        var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
         var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop);
 
         Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
 
         var getNewResponse = await _httpClient.GetAsync($"api/Shop/byName?name={shop.Name}");
         getNewResponse.EnsureSuccessStatusCode();
-        var shopNew = await getNewResponse.Content.ReadFromJsonAsync<Data.Shop>();
+        var shopNew = await getNewResponse.Content.ReadFromJsonAsync<Alchemist.Product.Data.Shop>();
         Assert.NotNull(shopNew);
         Assert.Equal(shop.Name, shopNew.Name);
     }
@@ -58,7 +58,7 @@ public class ShopAPIIntegrationTest : ShopAPITestFixture<ShopAPISignlRMockWebApp
     [Fact]
     public async Task ResponseInternalErrorOnCreateShopWithExistsIdAsync()
     {
-        var shop = new Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
+        var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
         var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop);
 
         Assert.Equal(System.Net.HttpStatusCode.InternalServerError, response.StatusCode);

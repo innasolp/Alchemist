@@ -138,7 +138,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var selectedShopLocator = Page.Locator("a[class='shop_item selected']");
         await Expect(selectedShopLocator).ToHaveCountAsync(0);
 
-        var newShop = new Shop();
+        var newShop = new Entities.Shop();
         await ExpectShopEditFormFilledByShopFieldValuesAsync(newShop);
     }
 
@@ -159,7 +159,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var shop = shops[new Random().Next(0, shops.Count)];
         await GoToShopAsync(shop.Id);
 
-        var editedShop = new Shop();
+        var editedShop = new Entities.Shop();
         SetRandomValues(editedShop);
 
         var nextShop = GetRandomShop(shops, shop.Id);
@@ -177,7 +177,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
         var nextShop = GetRandomShop(shops, shop.Id);
 
-        var editedShop = new Shop();
+        var editedShop = new Entities.Shop();
         SetRandomValues(editedShop);
 
         var confirmation = await ExpectConfirmationOnNextShopSelectingWhenPreviousEditedWithoutSavingAsync(editedShop, nextShop.Id);
@@ -203,7 +203,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
         var nextShop = GetRandomShop(shops, shop.Id);
 
-        var editedShop = new Shop();
+        var editedShop = new Entities.Shop();
         SetRandomValues(editedShop);
 
         var confirmation = await ExpectConfirmationOnNextShopSelectingWhenPreviousEditedWithoutSavingAsync(editedShop, nextShop.Id);
@@ -224,7 +224,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var shop = shops[new Random().Next(0, shops.Count)];
         await GoToShopAsync(shop.Id);
 
-        var editedShop = new Shop();
+        var editedShop = new Entities.Shop();
         SetRandomValues(editedShop);
 
         await FillShopEditFormFieldsAsync(editedShop);
@@ -247,7 +247,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
         await GoToNewShopAsync();
 
-        var newShop = new Shop();
+        var newShop = new Entities.Shop();
         SetRandomValues(newShop);
         await FillShopEditFormFieldsAsync(newShop);
 
@@ -264,7 +264,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var shop = shops[new Random().Next(0, shops.Count)];
         await GoToShopAsync(shop.Id);
 
-        var editedShop = new Shop();
+        var editedShop = new Entities.Shop();
         await FillShopEditFormFieldsAsync(editedShop);
 
         await ExpectSaveClickAsync();

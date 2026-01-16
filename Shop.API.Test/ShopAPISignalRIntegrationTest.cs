@@ -1,14 +1,13 @@
-﻿using Alchemist.Product.Data;
-using Alchemist.Product.RestAPI.Test.Infrastructure;
-using Alchemist.Product.SignalR;
+﻿using Alchemist.Product.SignalR;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.Extensions.Logging;
+using Shop.API.Test.Infrastructure;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 
-namespace Alchemist.Product.RestAPI.Test;
+namespace Shop.API.Test;
 
 public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>, Startup>
 {
@@ -42,7 +41,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
     {
         _messages.Clear();
 
-        var shop = new Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
+        var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
         var response = await _shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
         Assert.True(response.IsSuccessStatusCode);
 
@@ -55,7 +54,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
     {
         _messages.Clear();
 
-        var shop = new Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
+        var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
         var response = await _shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
         Assert.False(response.IsSuccessStatusCode);
 

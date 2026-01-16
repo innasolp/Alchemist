@@ -5,9 +5,10 @@ using MediatR;
 using Mediator.Infrastructure.Request;
 using Shop.Infrastructure;
 using Mediator.Infrastructure.Command;
+using Alchemist.Messages.Common;
 
 
-namespace Alchemist.Product.RestAPI.Controllers;
+namespace Shop.API.Controllers;
 
 [ApiController]
 [Route("api/Shop")]
@@ -38,18 +39,20 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
     }
 
     [HttpGet("byName", Name = nameof(GetShopByName))]
-    public async Task<Results<BadRequest, NotFound<string>, Ok<Data.Shop>>> GetShopByName(string name, CancellationToken cancellationToken = default)
+    public async Task<Results<BadRequest, NotFound<string>, Ok<Alchemist.Product.Data.Shop>>> 
+        GetShopByName(string name, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(name))
             return TypedResults.BadRequest();
 
-        var shop = await _mediator.Send(new FindByNameRequest<Data.Shop>(name, s=>s.Name), cancellationToken);
+        var shop = await _mediator.Send(new FindByNameRequest<Alchemist.Product.Data.Shop>(name, s=>s.Name), cancellationToken);
 
         return shop != null ? TypedResults.Ok(shop) : TypedResults.NotFound(name);
     }
 
     [HttpGet("byUrl", Name = nameof(GetShopByUrl))]
-    public async Task<Results<BadRequest, NotFound<string>, Ok<Data.Shop>>> GetShopByUrl(string url, CancellationToken cancellationToken = default)
+    public async Task<Results<BadRequest, NotFound<string>, Ok<Alchemist.Product.Data.Shop>>> 
+        GetShopByUrl(string url, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(url))
             return TypedResults.BadRequest();
@@ -60,12 +63,12 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
     }
 
     [HttpGet("{id:int}", Name = nameof(GetShop))]
-    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<Data.Shop>>> GetShop(int id, CancellationToken cancellationToken = default)
+    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<Alchemist.Product.Data.Shop>>> GetShop(int id, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
             return TypedResults.BadRequest(id);
 
-        var shop = await _mediator.Send(new GetByIdRequest<Data.Shop>(id), cancellationToken);
+        var shop = await _mediator.Send(new GetByIdRequest<Alchemist.Product.Data.Shop>(id), cancellationToken);
 
         return shop != null
             ? TypedResults.Ok(shop) 
@@ -73,16 +76,17 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
     }
     
     [HttpGet("Shops", Name = nameof(GetShops))]
-    public async Task<Results<NotFound, Ok<List<Data.Shop>>>> GetShops(CancellationToken cancellationToken = default)
+    public async Task<Results<NotFound, Ok<List<Alchemist.Product.Data.Shop>>>> GetShops(CancellationToken cancellationToken = default)
     {
-        var shops = await _mediator.Send(new GetAllRequest<Data.Shop>(), cancellationToken);
+        var shops = await _mediator.Send(new GetAllRequest<Alchemist.Product.Data.Shop>(), cancellationToken);
         return shops != null && shops.Count > 0 ? 
             TypedResults.Ok(shops) :
             TypedResults.NotFound();
     }
 
     [HttpPut(Name = nameof(CreateShop))]
-    public async Task<Results<BadRequest, BadRequest<Data.Shop>, Created<Data.Shop>>> CreateShop(Data.Shop shop, CancellationToken cancellationToken = default)
+    public async Task<Results<BadRequest, BadRequest<Alchemist.Product.Data.Shop>, Created<Alchemist.Product.Data.Shop>>> 
+        CreateShop(Alchemist.Product.Data.Shop shop, CancellationToken cancellationToken = default)
     {
         if (shop == null)
             return TypedResults.BadRequest();
@@ -90,16 +94,17 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
         if (string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Url))
             return TypedResults.BadRequest(shop);
 
-        var newShop = await _mediator.Send(new CreateCommand<Data.Shop>(shop), cancellationToken);
+        var newShop = await _mediator.Send(new CreateCommand<Alchemist.Product.Data.Shop>(shop), cancellationToken);
         
-        await SendMessage(newShop, Messages.Common.Messages.ShopCreated, cancellationToken);
+        await SendMessage(newShop, Messages.ShopCreated, cancellationToken);
 
         var location = Url.Action(nameof(CreateShop), new { id = newShop.Id }) ?? $"/{newShop.Id}";
         return TypedResults.Created(location, newShop);
     }
 
     [HttpPost("Update", Name = nameof(UpdateShop))]
-    public async Task<Results<BadRequest, BadRequest<Data.Shop>, Accepted<Data.Shop>>> UpdateShop(Data.Shop shop, CancellationToken cancellationToken = default)
+    public async Task<Results<BadRequest, BadRequest<Alchemist.Product.Data.Shop>, Accepted<Alchemist.Product.Data.Shop>>>
+        UpdateShop(Alchemist.Product.Data.Shop shop, CancellationToken cancellationToken = default)
     {
         if (shop == null)
             return TypedResults.BadRequest();
@@ -107,7 +112,7 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
         if (shop.Id <=0 ||  string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Url))
             return TypedResults.BadRequest(shop);
 
-        var updatedShop = await _mediator.Send(new UpdateCommand<Data.Shop>(shop), cancellationToken);        
+        var updatedShop = await _mediator.Send(new UpdateCommand<Alchemist.Product.Data.Shop>(shop), cancellationToken);        
 
         var location = Url.Action(nameof(UpdateShop), new { id = updatedShop.Id }) ?? $"/{updatedShop.Id}";
         return TypedResults.Accepted(location, updatedShop);

@@ -8,7 +8,6 @@ using Alchemist.Log.Extensions;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.Import.Background.Settings;
 using Alchemist.Product.Interfaces;
-using Alchemist.Product.RestAPIClient;
 using Alchemist.Settings.RestAPIClient;
 using DependencyInjection.AssemblyExtensions;
 using Http.DelegatingRequestSender;
@@ -26,6 +25,7 @@ using Alchemist.BackgroundTaskQueueService;
 using Alchemist.BackgroundTaskQueue;
 using Alchemist.Product.BeautyAndHealth.ImportItemHandler;
 using Alchemist.Product.Category.ImportItemHandler;
+using Shop.API.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
 using Alchemist.Test.DBApiWebAppFactory;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Alchemist.Product.Import.DBService.Test;
 

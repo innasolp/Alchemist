@@ -233,7 +233,7 @@ public class ShopActionControllerTest
         SetupShops();
 
         var shop = await GetRandomShop();
-        var shopCopy = shop.To<Shop>();
+        var shopCopy = shop.To<Entities.Shop>();
 
         var result = Assert.IsAssignableFrom<OkObjectResult>(await _shopController.IsChanged(shopCopy.To<ShopModel>()));
         var isChanged = Assert.IsType<bool>(result.Value);
