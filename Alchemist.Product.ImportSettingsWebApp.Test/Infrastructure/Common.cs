@@ -28,18 +28,18 @@ internal static class Common
         {
             var shopId = shopIds[i];
             var productSettings = SettingsTestRepository.CreateProductShopSettings(shopId);
-            var productSettingsEntry = dbContext.ShopSettings.Add(productSettings.To<ShopSettings>());
+            var productSettingsEntry = dbContext.ShopSettings.Add(productSettings.To<Data.ShopSettings>());
 
             var categorySettings = SettingsTestRepository.CreateCategoryShopSettings(shopId);
-            var categorySettingsEntry = dbContext.ShopSettings.Add(categorySettings.To<ShopSettings>());
+            var categorySettingsEntry = dbContext.ShopSettings.Add(categorySettings.To<Data.ShopSettings>());
 
             dbContext.SaveChanges();
 
             var productServices = SettingsTestRepository.CreateShopSettingsServicesTestData(productSettingsEntry.Entity);
-            productServices.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
+            productServices.ForEach(s => dbContext.ShopSettings.Add(s.To<Data.ShopSettings>()));
 
             var categoryServices = SettingsTestRepository.CreateShopSettingsServicesTestData(categorySettingsEntry.Entity);
-            categoryServices.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
+            categoryServices.ForEach(s => dbContext.ShopSettings.Add(s.To<Data.ShopSettings>()));
 
             dbContext.SaveChanges();
         }

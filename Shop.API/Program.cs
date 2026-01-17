@@ -6,6 +6,7 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
+using Mediator.Module.EF;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -25,7 +26,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
-builder.Host.AddProductInfrastructure();
+builder.Host.AddMediatorInfrastructure<ShopModule>();
 
 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 builder.Services.AddMediatR(cfg =>
@@ -69,11 +70,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    //app.UseSwagger(options =>
-    //{
-    //    options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
-    //});
 }
 
 app.UseHsts();

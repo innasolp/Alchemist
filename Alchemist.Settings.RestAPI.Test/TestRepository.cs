@@ -1,8 +1,6 @@
 ﻿using Alchemist.Import.Settings.Extensions;
-using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
+using Alchemist.Product.Data;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
 
@@ -10,30 +8,30 @@ namespace Alchemist.Settings.RestAPI.Test;
 
 public static class TestRepository
 {
-    public static ShopSettings CreateCategoryShopSettings(int shopId, string shopName)
+    public static Product.Data.ShopSettings CreateCategoryShopSettings(int shopId, string shopName)
     {
-        var shopSettings = new ShopSettings
+        var shopSettings = new Product.Data.ShopSettings
         {
             ShopId = shopId,
             Type = ShopSettingType.Category,
             Name = $"{shopName}_category"
         };
 
-        ((IShopSettings)shopSettings).JsonValue = JsonSerializer.Serialize(new { CategorySourceUrl = $"https://category_{shopName}" });
+        shopSettings.JsonValue = JsonSerializer.Serialize(new { CategorySourceUrl = $"https://category_{shopName}" });
 
         return shopSettings;
     }
 
-    public static ShopSettings CreateProductShopSettings(int shopId, string shopName)
+    public static Product.Data.ShopSettings CreateProductShopSettings(int shopId, string shopName)
     {
-        var shopSettings = new ShopSettings
+        var shopSettings = new Product.Data.ShopSettings
         {
             ShopId = shopId,
             Type = ShopSettingType.Category,
             Name = $"{shopName}_product"
         };
 
-        ((IShopSettings)shopSettings).JsonValue = JsonSerializer.Serialize(new
+        shopSettings.JsonValue = JsonSerializer.Serialize(new
             {
                 ProductUrlFormat = $"https://product_{Guid.NewGuid()}",
                 CategoryUrlFormat = $"https://product_category_{shopName}",
@@ -43,9 +41,9 @@ public static class TestRepository
         return shopSettings;
     }
 
-    public static List<ShopSettings> CreateShopSettingsServicesTestData(int shopId, int parentId)
+    public static List<Product.Data.ShopSettings> CreateShopSettingsServicesTestData(int shopId, int parentId)
     {
-        var serviceSettings = new List<ShopSettings>();
+        var serviceSettings = new List<Product.Data.ShopSettings>();
         var primaryServiceNames = SettingsCommon.GetPrimaryServiceNames().ToList();
         primaryServiceNames.RemoveAll(n => n == nameof(PrimaryServiceName.RequestHeaders));
         foreach (var primaryServiceName in primaryServiceNames)
@@ -57,7 +55,7 @@ public static class TestRepository
         return serviceSettings;
     }
 
-    private static ShopSettings CreateShopSettingsService(string serviceName, int shopId, int parentId)
+    private static Product.Data.ShopSettings CreateShopSettingsService(string serviceName, int shopId, int parentId)
     {
         var serviceSettings = new
         {
@@ -66,9 +64,9 @@ public static class TestRepository
             ServiceTypeName = $"ServiceType{Guid.NewGuid()}"
         };
 
-        var jsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(serviceSettings));
+        var jsonValue = JsonSerializer.Serialize(serviceSettings);
 
-        var shopSetting = new ShopSettings
+        var shopSetting = new Product.Data.ShopSettings
         {
             ShopId = shopId,
             ParentSettingsId = parentId,

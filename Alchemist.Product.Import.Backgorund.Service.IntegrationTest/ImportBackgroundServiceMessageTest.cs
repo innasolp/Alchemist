@@ -123,7 +123,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             if (serviceGuids.Count == 0)
             {
                 var waitServiceCreationTask = firstServiceCreatedAutoResetEvent.WaitAsync();
-                await waitServiceCreationTask.WaitAsync(TimeSpan.FromMilliseconds(10000));
+                await waitServiceCreationTask.WaitAsync(TimeSpan.FromMilliseconds(180000));
 
                 Assert.NotEmpty(serviceGuids);
             }

@@ -1,16 +1,18 @@
 ﻿using Alchemist.Import.Settings.Extensions;
-using Alchemist.Product.Interfaces;
-using System.Reflection;
+using Alchemist.Product.Data;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using SettingsCommon = Alchemist.Import.Settings.Extensions.Common;
-using ShopSettings = Alchemist.Product.Entities.ShopSettings;
 
 namespace Alchemist.Test.SettingsAPIFactory;
 
 public static class SettingsTestRepository
 {
-    public static IShopSettings CreateProductShopSettings(int shopId)
+    public static Product.Data.ShopSettings CreateProductShopSettings(int shopId)
+    {
+        return CreateProductShopSettings(shopId, Guid.NewGuid().ToString());
+    }
+
+    public static Product.Data.ShopSettings CreateProductShopSettings(int shopId, string name)
     {
         var productShopImportSettings = new
         {
@@ -18,24 +20,23 @@ public static class SettingsTestRepository
             CategoryUrlFormat = $"https://product_category_url{Guid.NewGuid()}"
         };
         var json = JsonSerializer.Serialize(productShopImportSettings);
-        var jsonValue = JsonSerializer.Deserialize<JsonObject>(json);
 
-        var shopSettings = new ShopSettings
+        var shopSettings = new Product.Data.ShopSettings
         {
             ShopId = shopId,
             Type = ShopSettingType.Product,
-            Name = Guid.NewGuid().ToString(),
-            JsonValue = jsonValue
+            Name = name,
+            JsonValue = json
         };
         return shopSettings;
     }
 
-    public static IShopSettings CreateCategoryShopSettings(int shopId)
+    public static Product.Data.ShopSettings CreateCategoryShopSettings(int shopId)
     {
         var categoryShopImportSettings = new { CategorySourceUrl = $"https://url{Guid.NewGuid()}" };
-        var jsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(categoryShopImportSettings));
+        var jsonValue = JsonSerializer.Serialize(categoryShopImportSettings);
 
-        var productShopSettings = new ShopSettings
+        var productShopSettings = new Product.Data.ShopSettings
         {
             ShopId = shopId,
             Type = ShopSettingType.Category,
@@ -45,9 +46,9 @@ public static class SettingsTestRepository
         return productShopSettings;
     }
 
-    public static List<IShopSettings> CreateShopSettingsServicesTestData(IShopSettings shopSetting)
+    public static List<Product.Data.ShopSettings> CreateShopSettingsServicesTestData(Product.Data.ShopSettings shopSetting)
     {
-        var serviceSettings = new List<IShopSettings>();
+        var serviceSettings = new List<Product.Data.ShopSettings>();
         var primaryServiceNames = SettingsCommon.GetPrimaryServiceNames().ToList();
         primaryServiceNames.RemoveAll(n => n == nameof(PrimaryServiceName.RequestHeaders));
         foreach (var primaryServiceName in primaryServiceNames)
@@ -58,21 +59,10 @@ public static class SettingsTestRepository
             serviceSettings.Add(primaryService);
         }
 
-        //var requestHeaders = new ShopSettings { Name = nameof(PrimaryServiceName.RequestHeaders) };
-        //var fileName = "Ozon.Headers.Firefox.json";
-        //var filePath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/Content/{fileName}";
-
-        //using var s = File.OpenRead(filePath);
-
-
-
-        //requestHeaders.JsonValue = JsonSerializer.Deserialize<JsonObject>(s);
-        //serviceSettings.Add(requestHeaders);
-
         return serviceSettings;
     }
 
-    private static IShopSettings CreateShopSettingsService(string serviceName)
+    private static Product.Data.ShopSettings CreateShopSettingsService(string serviceName)
     {
         var serviceSettings = new
         {
@@ -81,9 +71,9 @@ public static class SettingsTestRepository
             ServiceTypeName = $"ServiceType{Guid.NewGuid()}"
         };
 
-        var jsonValue = JsonSerializer.Deserialize<JsonObject>(JsonSerializer.Serialize(serviceSettings));
+        var jsonValue = JsonSerializer.Serialize(serviceSettings);
 
-        var shopSetting = new ShopSettings 
+        var shopSetting = new Product.Data.ShopSettings 
         {            
             Name = serviceName,
             Type = ShopSettingType.Service,

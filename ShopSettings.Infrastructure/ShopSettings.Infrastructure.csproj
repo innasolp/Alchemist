@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
+    <ProjectReference Include="..\Mediator.Infrastructure\Mediator.Infrastructure.csproj" />
+    <ProjectReference Include="..\ShopSettings.UnitOfWork\ShopSettings.UnitOfWork.csproj" />
   </ItemGroup>
 
 </Project>

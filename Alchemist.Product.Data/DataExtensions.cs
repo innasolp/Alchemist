@@ -21,7 +21,10 @@ public partial class ShopProductCategory : IShopProductCategory, IAddedTsEnity, 
 public partial class PurposeComponentGroup : IPurposeComponentGroup, IAddedTsEnity, IUpdatedTsEntity { }
 public partial class ProductPurpose : IProductPurpose, IAddedTsEnity, IUpdatedTsEntity { }
 
-public partial class ShopSettings : IShopSettings, IAddedTsEnity, IUpdatedTsEntity { }
+public partial class ShopSettings : IShopSettings, IAddedTsEnity, IUpdatedTsEntity
+{
+    Interfaces.ShopSettingType IShopSettings.Type { get => (Interfaces.ShopSettingType)(int)Type; set => Type = (ShopSettingType)(int)value; }
+}
 
 public partial class Currency:IEntity<short>, ICurrency, IAddedTsEnity { }
 

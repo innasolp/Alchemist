@@ -8,13 +8,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Autofac.Module\Mediator.Module.EF.csproj" />
-    <ProjectReference Include="..\Shop.Infrastructure\Shop.Infrastructure.csproj" />
+    <ProjectReference Include="..\ShopSettings.Infrastructure\ShopSettings.Infrastructure.csproj" />
   </ItemGroup>
-	
+
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="9.0.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
+		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
 	</ItemGroup>
 
 

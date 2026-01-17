@@ -4,7 +4,8 @@ using MediatR;
 
 namespace Shop.Infrastructure;
 
-public class GetShopCategoryByShopIdAndItemIdRequestHandler(IShopCategoryRepository repository) : IRequestHandler<GetShopCategoryByShopIdAndItemIdRequest, ShopCategory>
+public class GetShopCategoryByShopIdAndItemIdRequestHandler(IShopCategoryRepository repository) 
+    : IRequestHandler<GetShopCategoryByShopIdAndItemIdRequest, ShopCategory>
 {
     private readonly IShopCategoryRepository _repository = repository;
 

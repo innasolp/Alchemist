@@ -8,11 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
-    <PackageReference Include="Http.Info" Version="1.0.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+    <PackageReference Include="Http.ErrorHandling" Version="1.0.0.2" />
+    <PackageReference Include="Http.Info" Version="1.0.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
 	<PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.4" />
-	<PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
 	<PackageReference Include="Serilog.Loggers" Version="1.0.0.1" />
 	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.1" />
   </ItemGroup>
@@ -22,10 +21,7 @@
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
-    <ProjectReference Include="..\Alchemist.Settings.Data.Repository\Alchemist.Settings.Data.Repository.csproj" />
+    <ProjectReference Include="..\ShopSettings.Module\ShopSettings.Module.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ namespace Alchemist.Product.Data;
 
 public partial class AlchemyContext : DbContext
 {
-    private readonly DateChangedInterceptor _dateChangedInterceptor = new DateChangedInterceptor();
+    private readonly DateChangedInterceptor _dateChangedInterceptor = new();
     public AlchemyContext()
     {
         Database.EnsureCreated();

@@ -1,21 +1,24 @@
 ﻿using Autofac;
-using Mediator.Infrastructure;
-using MediatR;
 using Microsoft.EntityFrameworkCore.Storage;
 using Shop.UnitOfWork;
 using UnitOfWork;
+using Mediator.Module.EF;
+using Shop.Infrastructure;
 
 namespace Shop.Module;
 
-public class ShopModule : Autofac.Module
+public class ShopModule : MediatorModule
 {
-    protected override void Load(ContainerBuilder builder)
+    public override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
+    {
+        cfg.RegisterServicesFromAssemblyContaining<GetAllCategoryChildrenRequest>();
+    }
+
+    protected override void RegisterTypes(ContainerBuilder builder)
     {
         builder.RegisterType(typeof(ShopUnitOfWork)).As(typeof(IUnitOfWork<IDbContextTransaction>));
         builder.RegisterGeneric(typeof(ShopRepository<>)).As(typeof(IRepository<>));
-        builder.RegisterGeneric(typeof(EFCreateCommandHandler<,>)).As(typeof(IRequestHandler<,>));
-        builder.RegisterGeneric(typeof(EFUpdateCommandHandler<,>)).As(typeof(IRequestHandler<,>));
-        builder.RegisterGeneric(typeof(GetByIdRequestHandler<,>)).As(typeof(IRequestHandler<,>));
-        builder.RegisterGeneric(typeof(FindByNameRequestHandler<,>)).As(typeof(IRequestHandler<,>));
+        builder.RegisterType(typeof(ShopRepository)).As(typeof(IShopRepository));
+        builder.RegisterType(typeof(ShopCategoryRepository)).As(typeof(IShopCategoryRepository));
     }
 }

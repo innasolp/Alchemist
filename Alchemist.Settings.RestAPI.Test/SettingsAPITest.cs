@@ -1,4 +1,3 @@
-using Alchemist.Product.Entities;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
         var response = await httpClient.GetAsync($"api/Settings/byName?name={settingsName}");
         response.EnsureSuccessStatusCode();
 
-        var shopSettings = await response.Content.ReadFromJsonAsync<ShopSettings>();
+        var shopSettings = await response.Content.ReadFromJsonAsync<Product.Data.ShopSettings>();
         Assert.Equal(settingsName, shopSettings.Name);
     }
 
@@ -36,7 +35,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
 
         var receiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         await receiver.Start();
-        receiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        receiver.On<Product.Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
 
         var productShopSettings = TestRepository.CreateProductShopSettings(WebAppFactory.Shops[1].Id, WebAppFactory.Shops[1].Name); 
 
@@ -46,7 +45,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
 
             response.EnsureSuccessStatusCode();
 
-            var savedShopSettings = await response.Content.ReadFromJsonAsync<ShopSettings>();
+            var savedShopSettings = await response.Content.ReadFromJsonAsync<Product.Data.ShopSettings>();
 
             Assert.NotEqual(0, savedShopSettings.Id);
 
@@ -65,9 +64,9 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
         }
     }
 
-    private async Task OnShopSettingsCreatedAsync(ShopSettings settings)
+    private async Task OnShopSettingsCreatedAsync(Product.Data.ShopSettings settings)
     {
-        _loggerMock.Object.LogInformation(string.Format(ShopSettingsCreatedMessageFormat, settings.Id));    
+        _loggerMock.Object.LogInformation(string.Format(ShopSettingsCreatedMessageFormat, settings.Id));
     }
 
     private void VerifyInfoLog(string message)
@@ -89,7 +88,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
 
         var response = await httpClient.PostAsJsonAsync($"api/Settings", productShopSettings);
         response.EnsureSuccessStatusCode();
-        var savedShopSettings = await response.Content.ReadFromJsonAsync<ShopSettings>();
+        var savedShopSettings = await response.Content.ReadFromJsonAsync<Product.Data.ShopSettings>();
 
         var services = TestRepository.CreateShopSettingsServicesTestData(productShopSettings.ShopId, savedShopSettings.Id);
 
@@ -102,11 +101,11 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
 
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        var resultShopSettings = JsonSerializer.Deserialize<ShopSettings>(result[0].ToString(), options);
+        var resultShopSettings = JsonSerializer.Deserialize<Product.Data.ShopSettings>(result[0].ToString(), options);
         Assert.Equal(savedShopSettings.Id, resultShopSettings.Id);
         Assert.Equal(productShopSettings.Name, resultShopSettings.Name);
 
-        var resultServices = JsonSerializer.Deserialize<ShopSettings[]>(result[1].ToString(), options);
+        var resultServices = JsonSerializer.Deserialize<Product.Data.ShopSettings[]>(result[1].ToString(), options);
         Assert.True(resultServices.All(s => s.Id != 0));
         Assert.Equal(services.Count, resultServices.Length);
         Assert.True(services.All(s => resultServices.Any(rs => rs.Name == s.Name && rs.ParentSettingsId == savedShopSettings.Id)));
@@ -118,6 +117,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
         var httpClient = WebAppFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/Settings/byId/1");
+        response.EnsureSuccessStatusCode();
 
         Assert.Contains(LogMessages, m => m.LogLevel == LogLevel.Information && m.Message.Contains("api/Settings/byId/1"));
     }    
