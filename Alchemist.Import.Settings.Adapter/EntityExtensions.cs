@@ -72,7 +72,7 @@ public static class EntityExtensions
         return new ShopSettings
         {
             Id = shopSettings.Id,
-            JsonValue = JsonSerializer.Deserialize<JsonObject>(json),
+            JsonValue = json,
             ShopId = shopSettings.ShopId,
             Type = shopSettings.Type,
             Name = shopSettings.Name,

@@ -10,11 +10,16 @@ using Alchemist.Product.Interfaces;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
+using Mapster;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -54,7 +59,7 @@ public class ShopImportWorker : BackgroundService
 
         _shopServiceFactories = shopImportFactories;
 
-        _eventMessageReceiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);
+        _eventMessageReceiver.On(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync, typeof(object));
 
         _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);
 
@@ -119,8 +124,19 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task OnShopSettingsCreatedAsync(ShopSettings newShopSettings)
+    private async Task OnShopSettingsCreatedAsync(object newShopSettingsDto)
     {
+        var json = newShopSettingsDto is IEnumerable arr ? arr.OfType<object>().First().ToString() : newShopSettingsDto.ToString();
+        var jsonElement = JsonSerializer.Deserialize<JsonObject>(json);
+
+        var options = new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase                        
+        };
+
+        var newShopSettings = JsonSerializer.Deserialize<ShopSettings>(json, options);
+        
         if (ShopModels.OfType<ShopModel>().Any(s => s.Id == newShopSettings.ShopId))
             return;
 

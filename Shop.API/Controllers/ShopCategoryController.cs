@@ -64,7 +64,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
         var shopCategory = await _mediator.Send(new GetShopCategoryByShopIdAndItemIdRequest(shopId, itemId), cancellationToken);
 
         return shopCategory != null ?
-            TypedResults.Ok(shopCategory.To<ShopCategory>()) :
+            TypedResults.Ok(shopCategory) :
             TypedResults.NotFound(new Tuple<int, int>(shopId, itemId));
     }
 
@@ -77,7 +77,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
         var shopCategories = await _mediator.Send(new GetShopCategoriesRequest(shopId), cancellationToken);
 
         return shopCategories != null && shopCategories.Count != 0 ?
-            TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :
+            TypedResults.Ok(shopCategories) :
             TypedResults.NotFound(shopId);
     }
 
@@ -90,7 +90,7 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
         var shopCategories = await _mediator.Send(new GetAllCategoryChildrenRequest(parentId), cancellationToken);
 
         return shopCategories != null && shopCategories.Count != 0 ?
-            TypedResults.Ok(shopCategories.Select(sc => sc.To<ShopCategory>()).ToList()) :
+            TypedResults.Ok(shopCategories) :
             TypedResults.NotFound(parentId);
     }
 }

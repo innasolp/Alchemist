@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
 using Alchemist.Test.DBApiWebAppFactory;
+using Mapster;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
@@ -21,7 +22,7 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
     protected override void FillTestData(AlchemyContext dbContext)
     {
         var shops = TestRepository.GetShopsTestData(4);
-        shops.ForEach(s => dbContext.Shops.Add(s.To<Data.Shop>()));
+        shops.ForEach(s => dbContext.Shops.Add(s.Adapt<Data.Shop>()));
         dbContext.SaveChanges();
     }
 

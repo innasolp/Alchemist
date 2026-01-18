@@ -14,6 +14,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Alchemist.Product.Infrastructure\Alchemist.Product.Infrastructure.csproj" />
+	  <ProjectReference Include="..\Autofac.Module\Mediator.Module.EF.csproj" />
 	</ItemGroup>
 
 </Project>

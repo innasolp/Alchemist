@@ -6,7 +6,9 @@ using BrowserLauncher.Interfaces;
 using DependencyInjection.AssemblyExtensions;
 using Http.ErrorHandling;
 using Http.Info;
+using Microsoft.OpenApi;
 using Serilog;
+using Swashbuckle.AspNetCore.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,10 @@ builder.Services.AddAuthentication("https");
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<SwaggerOptions>(options =>
+{
+    options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+});
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler<BrowserServiceController>>();
 builder.Services.AddSingleton<InfoLogMiddleware<BrowserServiceController>>();
@@ -39,11 +45,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    app.UseSwagger(options =>
-    {
-        options.SerializeAsV2 = true;
-    });
 }
 
 app.UseHsts();

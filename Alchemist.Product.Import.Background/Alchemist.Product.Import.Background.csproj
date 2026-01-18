@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
 	<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.1" />
+	<PackageReference Include="Mapster" Version="7.4.0" />
   </ItemGroup>
 
   <ItemGroup>

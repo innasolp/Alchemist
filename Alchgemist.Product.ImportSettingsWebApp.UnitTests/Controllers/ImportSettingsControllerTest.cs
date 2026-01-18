@@ -46,8 +46,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
     {
         Name = name,
         ServiceTypeName = "Type",
-        ShopId = 1,
-        JsonValue = null
+        ShopId = 1
     };
 
     [Fact]

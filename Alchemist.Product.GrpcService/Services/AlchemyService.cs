@@ -8,6 +8,7 @@ using Grpc.Message.Extensions;
 using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Request;
 using MediatR;
+using Mapster;
 
 namespace Alchemist.Product.GrpcService.Services;
 
@@ -67,9 +68,9 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateComponentRequest.Name));
 
-        var component = request.FromMessage<Component>();
+        var component = request.Adapt<Component>();
         var entity = await _mediator.Send(new CreateCommand<Component>(component), context.CancellationToken);
-        var reply = entity.ToMessage<ComponentReply>();
+        var reply = entity.Adapt<ComponentReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
     }
@@ -81,7 +82,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var component = await _mediator.Send(new GetByIdRequest<int, Component>(request.Id), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound,$"Component with id={request.Id} not found"));
-        var reply = component.ToMessage<ComponentReply>();
+        var reply = component.Adapt<ComponentReply>();
         reply.Id = component.Id;
         return await Task.FromResult(reply);
     }
@@ -94,9 +95,9 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (request.Producttypeid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductRequest.Producttypeid), "InvalidValue");
 
-        var product = request.FromMessage<Data.Product>();
+        var product = request.Adapt<Data.Product>();
         var entity = await _mediator.Send(new CreateCommand<Data.Product>(product), context.CancellationToken);
-        var reply = entity.ToMessage<ProductReply>();
+        var reply = entity.Adapt<ProductReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
     }
@@ -108,9 +109,9 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (request.Shopid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateShopProductRequest.Shopid), "InvalidValue");
 
-        var shopProduct = request.FromMessage<ShopProduct>();
+        var shopProduct = request.Adapt<ShopProduct>();
         var entity = await _mediator.Send(new CreateCommand<ShopProduct>(shopProduct), context.CancellationToken);
-        var reply = entity.ToMessage<ShopProductReply>();
+        var reply = entity.Adapt<ShopProductReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
     }
@@ -123,9 +124,9 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (request.Shopcategoryid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(ShopProductCategoryRequest.Shopcategoryid), "InvalidValue");
 
-        var shopProductCategory = request.FromMessage<ShopProductCategory>();
+        var shopProductCategory = request.Adapt<ShopProductCategory>();
         var entity = await _mediator.Send(new CreateCommand<ShopProductCategory>(shopProductCategory), context.CancellationToken);
-        var reply = entity.ToMessage<ShopProductCategoryReply>();
+        var reply = entity.Adapt<ShopProductCategoryReply>();
         reply.Id = entity.Id;
         return await Task.FromResult(reply);
     }
@@ -151,7 +152,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
              ?? throw new RpcException(new Status(StatusCode.NotFound, $"categories for shop product with id '{request.Id}' not found"));
         var replyList = await shopProductCategories.ToListReply< ShopProductCategoryListReply, ShopProductCategoryReply,ShopProductCategory>((s) =>
         {
-            var reply = s.ToMessage<ShopProductCategoryReply>();
+            var reply = s.Adapt<ShopProductCategoryReply>();
             reply.Id = s.Id;
             return reply;
         });
@@ -167,13 +168,8 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         var brand = await _mediator.Send(new FindByNameRequest<Brand>(request.Name, e => e.Name), context.CancellationToken)
                  ?? throw new RpcException(new Status(StatusCode.NotFound, $"Brand with name '{request.Name}' not found")); ;
 
-        return await Task.FromResult(new BrandReply
-        {
-            Id = brand.Id,
-            Name = brand.Name,
-            Countryid = brand.CountryId,
-            Comment = brand.Comment
-        });
+
+        return brand.Adapt<BrandReply>();
     }
 
     public override async Task<ComponentReply> FindComponentByName(FindByNameRequest request, ServerCallContext context)
@@ -184,7 +180,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         var component = await _mediator.Send(new FindByNameRequest<Component>(request.Name, e => e.Name), context.CancellationToken)
                 ?? throw new RpcException(new Status(StatusCode.NotFound, $"Component with name '{request.Name}' not found"));        
 
-        var reply = component.ToMessage<ComponentReply>();
+        var reply = component.Adapt<ComponentReply>();
         reply.Id = component.Id;
         return  await Task.FromResult(reply);
     }
@@ -209,7 +205,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         var product = await _mediator.Send(new FindByNameRequest<Data.Product>(request.Name, e => e.Name), context.CancellationToken)
                ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product with name '{request.Name}' not found"));
 
-        var reply = product.ToMessage<ProductReply>();
+        var reply = product.Adapt<ProductReply>();
         reply.Id = product.Id;
         return  await Task.FromResult(reply);
     }
@@ -224,7 +220,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var product = await _mediator.Send(new Infrastructure.FindProductByNameAndBrandRequest(request.Name, request.Brand), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Product with name '{request.Name}' and brand {request.Brand} not found"));
-        var reply = product.ToMessage<ProductReply>();
+        var reply = product.Adapt<ProductReply>();
         reply.Id = product.Id;
         return await Task.FromResult(reply);
     }
@@ -259,7 +255,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var shopProduct = await _mediator.Send(new GetShopProductByShopAndItemUrlRequest(request.Shopid, request.Apiurl), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
-        var reply = shopProduct.ToMessage<ShopProductReply>();
+        var reply = shopProduct.Adapt<ShopProductReply>();
         reply.Id = shopProduct.Id;
         return await Task.FromResult(reply);
     }
@@ -274,7 +270,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var shopProduct = await _mediator.Send(new Infrastructure.GetShopProductByShopAndItemIdRequest(request.Shopid, request.Itemid), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
-        var reply = shopProduct.ToMessage<ShopProductReply>();
+        var reply = shopProduct.Adapt<ShopProductReply>();
         reply.Id = shopProduct.Id;
         return await Task.FromResult(reply);
     }
@@ -289,7 +285,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var shopProduct = await _mediator.Send(new Infrastructure.GetShopProductByShopAndProductIdRequest(request.Shopid, request.Productid), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
-        var reply = shopProduct.ToMessage<ShopProductReply>();
+        var reply = shopProduct.Adapt<ShopProductReply>();
         reply.Id = shopProduct.Id;
         return await Task.FromResult(reply);
     }
@@ -305,9 +301,9 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (request.SequalNumber <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(SetProductComponentRequest.SequalNumber), "Invalid value");
 
-        var productComponent =request.FromMessage<ProductComponent>();
+        var productComponent =request.Adapt<ProductComponent>();
         var entity = await _mediator.Send(new SetProductComponentCommand(productComponent), context.CancellationToken);
-        var reply = entity.ToMessage<ProductComponentReply>();
+        var reply = entity.Adapt<ProductComponentReply>();
         return await Task.FromResult(reply);
     }
 
@@ -325,10 +321,10 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (string.IsNullOrEmpty(request.Apiurl))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductRequest.Apiurl));
 
-        var shopProduct = request.FromMessage<ShopProduct>();
+        var shopProduct = request.Adapt<ShopProduct>();
         shopProduct.Id = request.Id;
         var result = await _mediator.Send(new UpdateCommand<ShopProduct>(shopProduct), context.CancellationToken);
-        var reply = result.ToMessage<ShopProductReply>();
+        var reply = result.Adapt<ShopProductReply>();
         reply.Id = result.Id;
         return await Task.FromResult(reply);
     }
@@ -340,7 +336,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var currency = await _mediator.Send(new FindByNameRequest<Currency>(request.Name, e => e.Name), context.CancellationToken)
              ?? throw new RpcException(new Status(StatusCode.NotFound, $"Currency type with name '{request.Name}' not found"));
-        var reply = currency.ToMessage<CurrencyReply>();
+        var reply = currency.Adapt<CurrencyReply>();
         reply.Id = currency.Id;
         return await Task.FromResult(reply);
     }
@@ -352,7 +348,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var currency = await _mediator.Send(new Infrastructure.GetCurrencyByCodeRequest((short)request.Code), context.CancellationToken)
              ?? throw new RpcException(new Status(StatusCode.NotFound, $"Currency type with code '{request.Code}' not found"));
-        var reply = currency.ToMessage<CurrencyReply>();
+        var reply = currency.Adapt<CurrencyReply>();
         reply.Id = currency.Id;
         return await Task.FromResult(reply);
     }
@@ -362,9 +358,9 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (string.IsNullOrEmpty(request.Name))
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateCurrencyRequest.Name));
 
-        var currency = request.FromMessage<Currency>();
+        var currency = request.Adapt<Currency>();
         var entity = await _mediator.Send(new CreateCommand<Currency>(currency), context.CancellationToken);
-        var reply = entity.ToMessage<CurrencyReply>();
+        var reply = entity.Adapt<CurrencyReply>();
         reply.Id = currency.Id;
         return await Task.FromResult(reply);
     }
@@ -377,9 +373,9 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (request.Price <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateShopProductPriceRequest.Price), "Invalid value");
 
-        var shopProductPrice = request.FromMessage<ShopProductPrice>();
+        var shopProductPrice = request.Adapt<ShopProductPrice>();
         var entity = await _mediator.Send(new CreateCommand<ShopProductPrice>(shopProductPrice), context.CancellationToken);
-        var reply = entity.ToMessage<ShopProductPriceReply>();
+        var reply = entity.Adapt<ShopProductPriceReply>();
         reply.Id = entity.Id; 
         return await Task.FromResult(reply);
     }
@@ -392,7 +388,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         if (request.Price <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductPriceRequest.Price), "Invalid value");
 
-        var shopProductPrice = request.FromMessage<ShopProductPrice>();
+        var shopProductPrice = request.Adapt<ShopProductPrice>();
         shopProductPrice.Id = request.Id;
         var result = await _mediator.Send(new UpdateCommand<ShopProductPrice>(shopProductPrice), context.CancellationToken);
         return await Task.FromResult(new ShopProductPriceReply 
@@ -406,7 +402,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var shopProductPrice = await _mediator.Send(new GetByIdRequest<long, ShopProductPrice>(request.Id), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Shop product price id={request.Id}' not found")); ;
-        var reply = shopProductPrice.ToMessage<ShopProductPriceReply>();
+        var reply = shopProductPrice.Adapt<ShopProductPriceReply>();
         reply.Id = shopProductPrice.Id;
         return await Task.FromResult(reply);
     }

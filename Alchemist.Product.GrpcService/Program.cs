@@ -3,15 +3,19 @@ using Alchemist.Log.Extensions;
 using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.GrpcService.Services;
+using Alchemist.Product.Module;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Grpc.Server.Interceptors;
 using Grpc.Server.RequestInterceptor;
 using Http.RequestHandling.PerfomanceCounter;
+using Mapster;
+using MapsterMapper;
+using Mediator.Module.EF;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Loggers;
-using Alchemist.Product.Module;
+using System.Security.AccessControl;
 
 internal class Program
 {
@@ -29,6 +33,10 @@ internal class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddMapster();
+        TypeAdapterConfig.GlobalSettings.Default.NameMatchingStrategy(NameMatchingStrategy.IgnoreCase);
+
+
         builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
         builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
@@ -36,15 +44,7 @@ internal class Program
 
         builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
-        builder.Host.AddProductInfrastructure();
-
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        builder.Services.AddMediatR(cfg =>
-        {
-            cfg.RegisterGenericHandlers = true;
-            cfg.RegisterServicesFromAssemblies(assemblies);
-        });
-
+        builder.Host.AddMediatorInfrastructure<ProductModule>();      
 
         builder.Services.AddSingleton<ServerLoggingInterceptor<AlchemyService>>();
         builder.Services.AddSingleton<ServerRequestSenderInterceptor<AlchemyService>>();

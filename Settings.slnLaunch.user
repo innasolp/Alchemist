@@ -4,6 +4,15 @@
     "Projects": [
       {
         "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Shop.API\\Shop.API.csproj",
         "Action": "Start"
       }
     ]
@@ -26,7 +35,8 @@
       },
       {
         "Path": "Alchemist.Product.ImportSettingsWebApp\\Alchemist.Product.ImportSettingsWebApp.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "https"
       },
       {
         "Path": "Shop.API\\Shop.API.csproj",

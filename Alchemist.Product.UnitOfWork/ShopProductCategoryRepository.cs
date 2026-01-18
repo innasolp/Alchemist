@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.Interfaces;
 using Alchemist.Product.UnitOfWork.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using UnitOfWork;
@@ -8,7 +7,7 @@ namespace Alchemist.Product.UnitOfWork;
 
 public class ShopProductCategoryRepository(AlchemyContext context) : EFRepository<ShopProductCategory, AlchemyContext>(context), IShopProductCategoryRepository
 {
-    public async Task<IShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId, CancellationToken cancellationToken = default)
+    public async Task<ShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId, CancellationToken cancellationToken = default)
     {
         var shopProductCategoryEntity = new ShopProductCategory { ShopProductId = shopProductId, ShopCategoryId = shopCategoryId };
         return await Context.Create(shopProductCategoryEntity, cancellationToken);

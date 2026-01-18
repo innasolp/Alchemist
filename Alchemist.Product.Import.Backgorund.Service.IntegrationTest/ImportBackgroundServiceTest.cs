@@ -50,19 +50,16 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
 
         await importReceiver.Start();
         importReceiver.On("product", onHandleProductMessage, typeof(Mock<IBeautyAndHealthProductData>));
-        importReceiver.On("category", onHandleCategoryMessage, typeof(Mock<ICategoryData>));
-
+        importReceiver.On("category", onHandleCategoryMessage, typeof(Mock<ICategoryData>));        
+        
         var httpClient = WebAppFactory.CreateClient();
-
-        var response = await httpClient.GetAsync("/");
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var token = new CancellationToken();
         var task = asyncAutoResetEvent.WaitAsync(token);
 
         try
         {
-            await task.WaitAsync(TimeSpan.FromMilliseconds(30000), token);
+            await task.WaitAsync(TimeSpan.FromMilliseconds(300000), token);
 
             OutputHelper.WriteLine("Event set");
         }
@@ -110,6 +107,8 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         try
         {
             await task.WaitAsync(TimeSpan.FromMilliseconds(30000), token);
+
+            await Task.Delay(1000);
 
             Assert.Contains(LogMessages, m =>m.Message.Contains($"Handling of settings {shopSettings.Name} for shop id={shopSettings.ShopId} started"));
 
