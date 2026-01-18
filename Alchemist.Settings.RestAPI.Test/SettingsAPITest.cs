@@ -92,7 +92,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
 
         var services = TestRepository.CreateShopSettingsServicesTestData(productShopSettings.ShopId, savedShopSettings.Id);
 
-        var data = new ArrayList() { savedShopSettings, services.ToArray() };
+        var data = new  { ShopSettings = savedShopSettings, Services = services.ToArray() };
         var saveSettingsWithServicesResponse = await httpClient.PostAsJsonAsync($"api/Settings/save", data);
         saveSettingsWithServicesResponse.EnsureSuccessStatusCode();
 

@@ -41,8 +41,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.GrpcService.Extensions\Alchemist.Product.GrpcService.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Module\Alchemist.Product.Module.csproj" />

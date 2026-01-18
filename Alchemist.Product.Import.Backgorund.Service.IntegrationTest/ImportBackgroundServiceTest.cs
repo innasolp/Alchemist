@@ -1,5 +1,6 @@
 using Alchemist.Product.BeautyAndHealth;
 using Alchemist.Product.CategoryData;
+using Alchemist.Product.Data;
 using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SettingsAPIFactory;
@@ -135,7 +136,7 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
     {
         var shopSettings = SettingsTestRepository.CreateProductShopSettings(shopId, name);
         var services = SettingsTestRepository.CreateShopSettingsServicesTestData(shopSettings);
-        var settingsData = new ArrayList() { shopSettings, services.ToArray() };
+        var settingsData = new  { ShopSettings = shopSettings, Services = services.ToArray() };
         var settingsPutResponse = await WebAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData);
         settingsPutResponse.EnsureSuccessStatusCode();
 

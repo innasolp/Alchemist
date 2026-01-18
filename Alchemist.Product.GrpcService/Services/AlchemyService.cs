@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.GrpcService.Extensions;
 using Alchemist.Product.Infrastructure;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -150,13 +149,13 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
 
         var shopProductCategories = await _mediator.Send(new GetShopProductCategoriesRequest(request.Id), context.CancellationToken)
              ?? throw new RpcException(new Status(StatusCode.NotFound, $"categories for shop product with id '{request.Id}' not found"));
-        var replyList = await shopProductCategories.ToListReply< ShopProductCategoryListReply, ShopProductCategoryReply,ShopProductCategory>((s) =>
+        var replyList = await shopProductCategories.ToListReply<ShopProductCategoryListReply, ShopProductCategoryReply, ShopProductCategory>((s) =>
         {
             var reply = s.Adapt<ShopProductCategoryReply>();
             reply.Id = s.Id;
             return reply;
         });
-        
+
         return await Task.FromResult(replyList);
     }
 
