@@ -335,6 +335,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{24857E79-D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopSettings.API.UnitTest", "ShopSettings.API.UnitTest\ShopSettings.API.UnitTest.csproj", "{E918CAC3-0B91-F9FC-60BD-EB9A7548E77C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{70E2525E-8AD6-4A8D-8C42-82B395C831A8}"
+	ProjectSection(SolutionItems) = preProject
+		alchemist.test.runsettings = alchemist.test.runsettings
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU

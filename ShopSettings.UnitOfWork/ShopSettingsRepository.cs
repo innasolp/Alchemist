@@ -71,6 +71,8 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
 
         var shopSettings = await AddOrUpdateShopSettings(parentShopSettings, cancellationToken);
 
+        await Context.SaveChangesAsync(cancellationToken);
+
         var handledServices = new List<Alchemist.Product.Data.ShopSettings> { shopSettings };
         foreach (var service in childrenSettings)
         {

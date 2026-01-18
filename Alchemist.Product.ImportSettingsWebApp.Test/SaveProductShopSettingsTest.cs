@@ -22,12 +22,11 @@ public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProduc
     (string, string, string, PathFormatType, PathFormatType)>
 {
     private readonly SaveProductShopSettingsTestImportSettingsWebAppFactory _webAppFactory;
-    private readonly ITestOutputHelper _outputHelper;
 
     public SaveProductShopSettingsTest(SaveProductShopSettingsTestImportSettingsWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
+        :base(outputHelper)
     {
         _webAppFactory = webAppFactory;
-        _outputHelper = outputHelper;
 
         _webAppFactory.CreateClient();
     }

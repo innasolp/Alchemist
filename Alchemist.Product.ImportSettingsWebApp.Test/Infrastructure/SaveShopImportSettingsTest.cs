@@ -1,45 +1,57 @@
 ﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
+using Xunit.Abstractions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 
-public abstract class SaveShopImportSettingsTest<TWebAppFactory, TInput> : ShopImportSettingsTest<TWebAppFactory, TInput>
+public abstract class SaveShopImportSettingsTest<TWebAppFactory, TInput>(ITestOutputHelper testOutputHelper) : ShopImportSettingsTest<TWebAppFactory, TInput>
     where TWebAppFactory : ImportSettingsWebAppFactory
 {
+    protected ITestOutputHelper TestOutputHelper { get; } = testOutputHelper;
+
     protected abstract Task ExpectSettingsLoadedAsync();
 
     protected abstract Task ExpectInputFieldsAsync(TInput inputs);
 
     protected virtual async Task FieldsEqualsInputValuesWhenSettingsSavedAsync()
     {
-        await ExpectPageLoadedAsync();
+        try
+        {
+            await ExpectPageLoadedAsync();
 
-        await this.ExpectSelectShopAsync(locator => locator.Last);
+            await this.ExpectSelectShopAsync(locator => locator.Last);
 
-        var (importServiceType, importServiceImplementationType, importServiceAssemblyPath) = await this.SetServiceSettingsAsync("import-service");
-        var (webLoaderServiceType, webLoaderImplementationType, webLoaderAssemblyPath) = await this.SetServiceSettingsAsync("web-loader");
+            var (importServiceType, importServiceImplementationType, importServiceAssemblyPath) = await this.SetServiceSettingsAsync("import-service");
+            var (webLoaderServiceType, webLoaderImplementationType, webLoaderAssemblyPath) = await this.SetServiceSettingsAsync("web-loader");
 
-        var inputs = await FillInputFieldsAsync();
+            var inputs = await FillInputFieldsAsync();
 
-        await Page.Locator("#saveImportSettingsBtn").ClickAsync();
+            await Page.Locator("#saveImportSettingsBtn").ClickAsync();
 
-        await Expect(Page.Locator("#saveImportSettingsBtn")).ToBeEnabledAsync();
+            await Expect(Page.Locator("#saveImportSettingsBtn")).ToBeEnabledAsync();
 
-        var url = Page.Url;
+            var url = Page.Url;
 
-        await this.ExpectSelectNextShopAsync();
+            await this.ExpectSelectNextShopAsync();
 
-        await Page.GotoAsync(url);
+            await Page.GotoAsync(url);
 
-        await ExpectSettingsLoadedAsync();
+            await ExpectSettingsLoadedAsync();
 
-        await ExpectInputFieldsAsync(inputs);
+            await ExpectInputFieldsAsync(inputs);
 
-        await this.SetServiceButtonClickAsync("import-service");
-        await this.ExpectServiceSettingsFieldsAsync(importServiceType, importServiceImplementationType, importServiceAssemblyPath);
-        await this.CloseServiceSettingsAsync();
+            await this.SetServiceButtonClickAsync("import-service");
+            await this.ExpectServiceSettingsFieldsAsync(importServiceType, importServiceImplementationType, importServiceAssemblyPath);
+            await this.CloseServiceSettingsAsync();
 
-        await this.SetServiceButtonClickAsync("web-loader");
-        await this.ExpectServiceSettingsFieldsAsync(webLoaderServiceType, webLoaderImplementationType, webLoaderAssemblyPath);
+            await this.SetServiceButtonClickAsync("web-loader");
+            await this.ExpectServiceSettingsFieldsAsync(webLoaderServiceType, webLoaderImplementationType, webLoaderAssemblyPath);
+        }
+        catch
+        {
+            foreach (var msg in _consoleMessages.Where(m => m.Type == "error"))
+                TestOutputHelper.WriteLine($"{msg.Location} {msg.Text}");
+
+            throw;
+        }
     }
-
 }

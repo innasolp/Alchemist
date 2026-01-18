@@ -9,10 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using ShopSettings.Infrastructure;
 using System.Collections;
 using System.Net;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Settings.RestAPI.Controllers;
 
@@ -20,6 +16,8 @@ namespace Alchemist.Settings.RestAPI.Controllers;
 [Route("api/Settings")]
 public class SettingsController(ILogger<SettingsController> logger, IMediator mediator, IMessageSender messageSender) : ControllerBase
 {
+    public record ShopSettingsWithServices(Product.Data.ShopSettings ShopSettings, Product.Data.ShopSettings[] Services);
+
     private readonly IMediator _mediator = mediator;
 
     private readonly ILogger<SettingsController> _logger = logger;
@@ -107,42 +105,24 @@ public class SettingsController(ILogger<SettingsController> logger, IMediator me
         return shopSettingsId == 0 
             ? TypedResults.Created(location, savedShopSettings)
             : TypedResults.Accepted(location, savedShopSettings);
-    }
+    }   
+
 
     [HttpPost("save", Name = nameof(SaveShopSettingsWithServices))]
-    public async Task<Results<BadRequest, BadRequest<string>,  BadRequest<ArrayList>, StatusCodeHttpResult, Created<ArrayList>, Accepted<ArrayList>>>
-        SaveShopSettingsWithServices(ArrayList shopSettingsWithServices, CancellationToken cancellationToken = default)
+    public async Task<Results<BadRequest, BadRequest<string>,  BadRequest<ShopSettingsWithServices>, StatusCodeHttpResult, Created<ArrayList>, Accepted<ArrayList>>>
+        SaveShopSettingsWithServices(ShopSettingsWithServices shopSettingsWithServices, CancellationToken cancellationToken = default)
     {
-        if (shopSettingsWithServices == null || shopSettingsWithServices.Count == 0)
-            return TypedResults.BadRequest();
+        if (shopSettingsWithServices == null || shopSettingsWithServices.ShopSettings == null)
+            return TypedResults.BadRequest();  
 
-        if (shopSettingsWithServices.Count < 2 || shopSettingsWithServices.Contains(null))
+        if (shopSettingsWithServices.ShopSettings.ShopId == 0 || shopSettingsWithServices.ShopSettings.JsonValue == null
+            || shopSettingsWithServices.Services == null || shopSettingsWithServices.Services.Any(s => s.JsonValue == null))
             return TypedResults.BadRequest(shopSettingsWithServices);
 
-        Product.Data.ShopSettings shopSettings;
-        var services = new List<Product.Data.ShopSettings>();
+        var initId = shopSettingsWithServices.ShopSettings.Id;
 
-        try
-        {
-            var data = DeserializeShopSettings(shopSettingsWithServices);
-            shopSettings = data.Item1;
-            services.AddRange(data.Item2);
-        }
-        catch (Exception e)
-        {
-            return TypedResults.BadRequest(shopSettingsWithServices);
-        }
-
-        if (cancellationToken.IsCancellationRequested)
-            return TypedResults.BadRequest(shopSettingsWithServices);
-
-        if (shopSettings == null || shopSettings.ShopId == 0 || shopSettings.JsonValue == null
-            || services == null || services.Any(s => s.JsonValue == null))
-            return TypedResults.BadRequest(shopSettingsWithServices);
-
-        var initId = shopSettings.Id;
-
-        var allData = await _mediator.Send(new SaveShopSettingsWithChildrenCommand(shopSettings, services), cancellationToken);
+        var allData = await _mediator.Send(
+            new SaveShopSettingsWithChildrenCommand(shopSettingsWithServices.ShopSettings, shopSettingsWithServices.Services), cancellationToken);
         var shopSettingResult = allData.FirstOrDefault(s => s.Type != ShopSettingType.Service);
         if (shopSettingResult == null)
             return TypedResults.StatusCode((int)HttpStatusCode.InternalServerError);
@@ -154,47 +134,7 @@ public class SettingsController(ILogger<SettingsController> logger, IMediator me
         var result = new ArrayList { shopSettingResult, allData.Where(d => d.Type == ShopSettingType.Service).ToArray() };
         return initId == 0 ? TypedResults.Created(location, result) : TypedResults.Accepted(location, result);
     }
-
-    private static Tuple<Product.Data.ShopSettings, IEnumerable<Product.Data.ShopSettings>> DeserializeShopSettings(ArrayList shopSettingsWithServices)
-    {
-        var serializationOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            WriteIndented = true
-        };
-
-        var serviceSerializationOptions = new JsonSerializerOptions(serializationOptions)
-        {
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers = { JsonExtensions.IgnorePropertiesForSerialize(typeof(Product.Data.ShopSettings),
-                nameof(Product.Data.ShopSettings.JsonValue)) }
-            }
-        };
-
-        Product.Data.ShopSettings shopSettings;
-        var services = new List<Product.Data.ShopSettings>();
-
-        shopSettings = JsonSerializer.Deserialize<Product.Data.ShopSettings>(shopSettingsWithServices[0].ToString(), serializationOptions);
-
-        var jsonServices = JsonSerializer.Deserialize<JsonObject[]>(shopSettingsWithServices[1].ToString(), serializationOptions);
-        foreach (var jsonService in jsonServices)
-        {
-            if (!jsonService.TryGetPropertyValue("jsonValue", out var jsonValue) || jsonValue == null)
-                throw new InvalidDataException(jsonService.ToString());
-
-            jsonService.Remove("jsonValue");
-            var service = JsonSerializer.Deserialize<Product.Data.ShopSettings>(jsonService.ToString(), serviceSerializationOptions);
-            service.JsonValue = JsonSerializer.Serialize(jsonValue.ToString());
-
-            services.Add(service);
-        }
-
-        return new Tuple<Product.Data.ShopSettings, IEnumerable<Product.Data.ShopSettings>>(shopSettings, services);
-    }
-
+    
     [HttpPut("update", Name = nameof(UpdateShopSettings))]
     public async Task<Results<BadRequest, BadRequest<Product.Data.ShopSettings>, Accepted<Product.Data.ShopSettings>, NotFound<Product.Data.ShopSettings>>> 
         UpdateShopSettings(Product.Data.ShopSettings shopSettings, CancellationToken cancellationToken = default)
