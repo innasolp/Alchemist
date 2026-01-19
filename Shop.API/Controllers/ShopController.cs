@@ -1,42 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Message.Interfaces;
 using MediatR;
 using Mediator.Infrastructure.Request;
 using Shop.Infrastructure;
 using Mediator.Infrastructure.Command;
-using Alchemist.Messages.Common;
 
 
 namespace Shop.API.Controllers;
 
 [ApiController]
 [Route("api/Shop")]
-public class ShopController(ILogger<ShopController> logger, IMediator mediator, IMessageSender messageSender) 
+public class ShopController(ILogger<ShopController> logger, IMediator mediator) 
     : ControllerBase
 {
     private readonly ILogger<ShopController> _logger = logger;
-    private readonly IMediator _mediator = mediator;
-    private readonly IMessageSender _messageSender = messageSender;
-
-    private async Task SendMessage<T>(T entity, string methodName, CancellationToken cancellationToken = default)
-    {
-        if (cancellationToken.IsCancellationRequested)
-            return;
-
-        try
-        {
-            if (!_messageSender.IsConnected)
-                await _messageSender.Start(cancellationToken);
-
-            await _messageSender.Send(entity, methodName, cancellationToken);
-            _logger.LogInformation($"Call {methodName} {entity} ");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, ex.Message);
-        }
-    }
+    private readonly IMediator _mediator = mediator;    
 
     [HttpGet("byName", Name = nameof(GetShopByName))]
     public async Task<Results<BadRequest, NotFound<string>, Ok<Alchemist.Product.Data.Shop>>> 
@@ -95,8 +73,6 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
             return TypedResults.BadRequest(shop);
 
         var newShop = await _mediator.Send(new CreateCommand<Alchemist.Product.Data.Shop>(shop), cancellationToken);
-        
-        await SendMessage(newShop, Messages.ShopCreated, cancellationToken);
 
         var location = Url.Action(nameof(CreateShop), new { id = newShop.Id }) ?? $"/{newShop.Id}";
         return TypedResults.Created(location, newShop);

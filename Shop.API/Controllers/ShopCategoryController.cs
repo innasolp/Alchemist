@@ -1,38 +1,18 @@
-﻿using Message.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Alchemist.Product.Data;
 using Mediator.Infrastructure.Command;
 using Shop.Infrastructure;
-using Alchemist.Messages.Common;
 
 namespace Shop.API.Controllers;
 
 [Route("api/ShopCategory")]
 [ApiController]
-public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMediator mediator, IMessageSender messageSender) : ControllerBase
+public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMediator mediator) : ControllerBase
 {
     private readonly ILogger<ShopCategoryController> _logger = logger;
-    private readonly IMediator _mediator = mediator;
-    private readonly IMessageSender _messageSender = messageSender;
-
-    private async Task SendMessage<T>(T entity, string methodName, CancellationToken cancellationToken = default)
-    {
-        if (cancellationToken.IsCancellationRequested)
-            return;
-
-        try
-        {
-            await _messageSender.Start(cancellationToken);
-            await _messageSender.Send(entity, methodName, cancellationToken);
-            _logger.LogInformation($"Call {methodName} {entity} ");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, ex.Message);
-        }
-    }
+    private readonly IMediator _mediator = mediator;    
 
     [HttpPut(Name = nameof(AddShopCategory))]
     public async Task<Results<BadRequest, BadRequest<ShopCategory>, Created<ShopCategory>>> AddShopCategory(ShopCategory shopCategory, CancellationToken cancellationToken = default)
@@ -44,8 +24,6 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
             return TypedResults.BadRequest(shopCategory);
 
         var newShopCategory = await _mediator.Send(new CreateCommand<ShopCategory>(shopCategory), cancellationToken);
-
-        await SendMessage(newShopCategory, Messages.CategoryAdded, cancellationToken);
 
         var location = Url.Action(nameof(AddShopCategory), new { id = newShopCategory.Id }) ?? $"/{newShopCategory.Id}";
         return TypedResults.Created(location, newShopCategory);

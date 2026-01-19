@@ -10,7 +10,7 @@ public interface IShopSettingsDataService
 
     Task<IShopSettings?> SaveShopSettings(IShopSettings shopSettings, CancellationToken cancellationToken = default);
 
-    Task<List<IShopSettings>> SaveShopSettings(IShopSettings shopSettings, IEnumerable<IShopSettings> services, CancellationToken cancellationToken = default);
+    Task<(IShopSettings ShopSettings, IEnumerable<IShopSettings> Services)> SaveShopSettings(IShopSettings shopSettings, IEnumerable<IShopSettings> services, CancellationToken cancellationToken = default);
 
     Task<bool> UpdateShopSettings(IShopSettings shopSettings, CancellationToken cancellationToken = default);
 

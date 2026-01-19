@@ -28,13 +28,6 @@ builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFacto
 
 builder.Host.AddMediatorInfrastructure<ShopModule>();
 
-var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterGenericHandlers = true;
-    cfg.RegisterServicesFromAssemblies(assemblies);
-});
-
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
 

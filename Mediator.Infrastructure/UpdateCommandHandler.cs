@@ -11,8 +11,10 @@ public class UpdateCommandHandler<T, TUpdateCommand, TRepository, TTransaction, 
 {
     protected TRepository Repository { get; } = repository;
 
-    protected override Task<T> HandlerRequest(TUpdateCommand request, CancellationToken cancellationToken)
+    protected override async Task<T> HandlerRequest(TUpdateCommand request, CancellationToken cancellationToken)
     {
-        return Repository.Update(request.Entity, cancellationToken);
+        var result = await Repository.Update(request.Entity, cancellationToken);
+        await UnitOfWork.SaveChangesAsync(cancellationToken);
+        return result;
     }
 }

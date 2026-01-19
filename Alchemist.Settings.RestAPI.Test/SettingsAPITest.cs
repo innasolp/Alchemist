@@ -2,7 +2,6 @@ using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Collections;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Xunit.Abstractions;
@@ -12,6 +11,8 @@ namespace Alchemist.Settings.RestAPI.Test;
 public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
     : LoggedContextTestFixture<SettingsAPIWebAppFactory, SettingsAPIProgram>(webAppFactory, outputHelper)
 {
+    private record ShopSettingsWithServices(Product.Data.ShopSettings ShopSettings, Product.Data.ShopSettings[] Services);
+
     private Mock<ILogger> _loggerMock = new();
 
     private  const string ShopSettingsCreatedMessageFormat = "Shop settings created with id={0}";   
@@ -96,19 +97,16 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
         var saveSettingsWithServicesResponse = await httpClient.PostAsJsonAsync($"api/Settings/save", data);
         saveSettingsWithServicesResponse.EnsureSuccessStatusCode();
 
-        var result = await saveSettingsWithServicesResponse.Content.ReadFromJsonAsync<ArrayList>();
-        Assert.Equal(2, result?.Count);
-
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        var result = await saveSettingsWithServicesResponse.Content.ReadFromJsonAsync<ShopSettingsWithServices>(options);
+        Assert.NotNull(result);
+        
+        Assert.Equal(savedShopSettings.Id, result.ShopSettings.Id);
+        Assert.Equal(productShopSettings.Name, result.ShopSettings.Name);
 
-        var resultShopSettings = JsonSerializer.Deserialize<Product.Data.ShopSettings>(result[0].ToString(), options);
-        Assert.Equal(savedShopSettings.Id, resultShopSettings.Id);
-        Assert.Equal(productShopSettings.Name, resultShopSettings.Name);
-
-        var resultServices = JsonSerializer.Deserialize<Product.Data.ShopSettings[]>(result[1].ToString(), options);
-        Assert.True(resultServices.All(s => s.Id != 0));
-        Assert.Equal(services.Count, resultServices.Length);
-        Assert.True(services.All(s => resultServices.Any(rs => rs.Name == s.Name && rs.ParentSettingsId == savedShopSettings.Id)));
+        Assert.True(result.Services.All(s => s.Id != 0));
+        Assert.Equal(services.Count, result.Services.Length);
+        Assert.True(services.All(s => result.Services.Any(rs => rs.Name == s.Name && rs.ParentSettingsId == savedShopSettings.Id)));
     }
 
     [Fact]

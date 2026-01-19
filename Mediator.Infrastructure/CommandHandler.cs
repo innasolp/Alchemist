@@ -22,8 +22,6 @@ public abstract class CommandHandler<T, TCommand, TTransaction, TUnitOfWork>(TUn
 
             await UnitOfWork.CommitTransactionAsync(transaction, cancellationToken);
 
-            await UnitOfWork.SaveChangesAsync(cancellationToken);
-
             return result;
         }
         catch
