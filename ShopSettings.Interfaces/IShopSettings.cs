@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Product.Interfaces;
+namespace ShopSettings.Interfaces;
 
 [JsonConverter(typeof(JsonStringEnumConverter<ShopSettingType>))]
 public enum ShopSettingType : short

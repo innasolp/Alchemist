@@ -1,5 +1,5 @@
-﻿using Alchemist.DataService.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Shop.Interfaces;
 
 namespace Alchemist.Product.DbItemHandler;
 

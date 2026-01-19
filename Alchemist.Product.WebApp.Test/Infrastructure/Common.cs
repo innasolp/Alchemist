@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.Interfaces;
 using Alchemist.Test.Log;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.SignalRWebAppFactory;

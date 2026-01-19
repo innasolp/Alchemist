@@ -3,10 +3,10 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 using Alchemist.Product.ImportSettingsWebApp.Models;
-using Alchemist.Product.Interfaces;
 using Alchgemist.Product.ImportSettingsWebApp.UnitTests.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 

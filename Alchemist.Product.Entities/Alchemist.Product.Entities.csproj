@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
+    <ProjectReference Include="..\Shop.Entities\Shop.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

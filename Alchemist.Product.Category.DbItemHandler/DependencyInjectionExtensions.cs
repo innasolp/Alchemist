@@ -1,6 +1,6 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.DbItemHandler;
+﻿using Alchemist.Product.DbItemHandler;
 using Microsoft.Extensions.DependencyInjection;
+using Shop.Interfaces;
 
 namespace Alchemist.Product.Category.DbItemHandler;
 

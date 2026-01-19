@@ -1,8 +1,8 @@
 ﻿using Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
 using System.Collections;
 using System.Text.Json.Serialization;
 using Alchemist.Import.Settings;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Settings;
 

@@ -1,13 +1,11 @@
 using Alchemist.BrowserService.Client;
 using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.Import.Background;
 using Alchemist.Product.Import.Background.Settings;
-using Alchemist.Product.Interfaces;
 using Alchemist.Settings.RestAPIClient;
 using DependencyInjection.AssemblyExtensions;
 using Http.DelegatingRequestSender;
@@ -26,6 +24,8 @@ using Alchemist.BackgroundTaskQueue;
 using Alchemist.Product.BeautyAndHealth.ImportItemHandler;
 using Alchemist.Product.Category.ImportItemHandler;
 using Shop.API.Client;
+using Shop.Interfaces;
+using ShopSettings.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

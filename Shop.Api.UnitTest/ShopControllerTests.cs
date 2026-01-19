@@ -100,9 +100,9 @@ namespace Shop.Api.UnitTest
         [Fact]
         public async Task GetShopById_ReturnsBadRequest_WhenIdInvalid()
         {
-            var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.GetShop(0));
+            var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.GetShop(-1));
             var bad = Assert.IsType<BadRequest<int>>(result.Result);
-            Assert.Equal(0, bad.Value);
+            Assert.Equal(-1, bad.Value);
         }
 
         [Fact]

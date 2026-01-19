@@ -1,6 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
-
-namespace Alchemist.DataService.Interfaces;
+﻿namespace Shop.Interfaces;
 
 public interface IShopDataService
 {

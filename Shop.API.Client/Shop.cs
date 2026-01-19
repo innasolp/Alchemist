@@ -1,8 +1,8 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Shop.Interfaces;
 
-namespace Alchemist.Product.Entities;
+namespace Shop.API.Client;
 
-public class Shop:IShop
+internal class Shop:IShop
 {
     public int Id { get; set; }
 

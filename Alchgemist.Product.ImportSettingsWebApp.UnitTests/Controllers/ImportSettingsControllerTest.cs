@@ -2,12 +2,12 @@
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
 using Alchemist.Product.ImportSettingsWebApp.Models;
-using Alchemist.Product.Interfaces;
 using Alchgemist.Product.ImportSettingsWebApp.UnitTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Alchemist.Import.Settings;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 

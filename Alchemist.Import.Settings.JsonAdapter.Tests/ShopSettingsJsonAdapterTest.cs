@@ -1,7 +1,6 @@
 ﻿using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Test.Model;
-using Alchemist.Product.Interfaces;
-using Import.Settings.Interfaces;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Import.Settings.JsonAdapter.Tests;
 

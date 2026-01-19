@@ -1,5 +1,4 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Interfaces;
+﻿using Shop.Interfaces;
 
 namespace Alchemist.Product.ShopWebApp.Models;
 

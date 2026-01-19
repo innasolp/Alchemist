@@ -1,6 +1,5 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

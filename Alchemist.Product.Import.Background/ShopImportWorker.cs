@@ -1,4 +1,3 @@
-using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.DataAdapter;
@@ -6,20 +5,19 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Messages.Common;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Background.Models;
-using Alchemist.Product.Interfaces;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
-using Mapster;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Shop.Interfaces;
+using ShopSettings.Interfaces;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization.Metadata;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -135,7 +133,7 @@ public class ShopImportWorker : BackgroundService
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase                        
         };
 
-        var newShopSettings = JsonSerializer.Deserialize<ShopSettings>(json, options);
+        var newShopSettings = JsonSerializer.Deserialize<Settings.ShopSettings>(json, options);
         
         if (ShopModels.OfType<ShopModel>().Any(s => s.Id == newShopSettings.ShopId))
             return;

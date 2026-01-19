@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Product.Interfaces;
+﻿namespace Shop.Interfaces;
 
 public interface IShopCategory
 {

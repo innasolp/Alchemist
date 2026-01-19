@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
-using Alchemist.Product.Interfaces;
 using Import.Settings.Interfaces;
+using Shop.Interfaces;
 using System.ComponentModel;
 
 namespace Alchemist.Product.Import.Background.Models;
@@ -10,7 +10,7 @@ interface IShopModel : IImportSource, IShop
     IList<IProductShopCategory> RootCategories { get; }
 }
 
-internal abstract class ShopModel : IShopModel
+internal class ShopModel : IShopModel
 {
     private int _Id;
     public int Id

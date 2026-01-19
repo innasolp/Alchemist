@@ -1,8 +1,8 @@
 ﻿using Alchemist.Common;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
-using Alchemist.Product.Interfaces;
 using Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using ShopSettings.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;

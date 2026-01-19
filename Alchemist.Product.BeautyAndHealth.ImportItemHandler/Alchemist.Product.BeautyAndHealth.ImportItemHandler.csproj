@@ -12,6 +12,7 @@
     <ProjectReference Include="..\Alchemist.Product.BeautyAndHealth\Alchemist.Product.BeautyAndHealth.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
     <ProjectReference Include="..\Alchemist.Product.ImportItemHandler\Alchemist.Product.ImportItemHandler.csproj" />
+    <ProjectReference Include="..\Shop.Entities\Shop.Interfaces.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

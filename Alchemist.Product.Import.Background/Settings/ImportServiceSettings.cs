@@ -1,9 +1,9 @@
 ﻿using Alchemist.Import.Settings.Extensions;
 using Import.Settings.Interfaces;
-using Alchemist.Product.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Settings;
 

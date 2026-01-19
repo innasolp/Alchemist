@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Settings.Extensions;
-using Alchemist.Product.Interfaces;
 using Import.Settings.Interfaces;
+using ShopSettings.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;

@@ -1,6 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
-
-namespace Alchemist.DataService.Interfaces;
+﻿namespace Alchemist.Product.Interfaces;
 
 public interface IProductDataService
 {

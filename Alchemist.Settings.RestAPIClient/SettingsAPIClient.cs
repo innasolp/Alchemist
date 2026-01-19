@@ -1,7 +1,5 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ShopSettings.Interfaces;
 using System.Collections;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;

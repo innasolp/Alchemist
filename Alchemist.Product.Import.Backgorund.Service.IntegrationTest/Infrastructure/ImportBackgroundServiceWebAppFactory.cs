@@ -10,7 +10,6 @@ using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Alchemist.DataService.Interfaces;
 using Alchemist.Settings.RestAPIClient;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.ShopApiFactory;
@@ -18,6 +17,8 @@ using Alchemist.Test.SettingsAPIFactory;
 using Import.Factory.Interfaces;
 using Alchemist.Import.Settings;
 using Shop.API.Client;
+using Shop.Interfaces;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 

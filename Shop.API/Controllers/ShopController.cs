@@ -65,7 +65,7 @@ public class ShopController(ILogger<ShopController> logger, IMediator mediator, 
     [HttpGet("{id:int}", Name = nameof(GetShop))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<Alchemist.Product.Data.Shop>>> GetShop(int id, CancellationToken cancellationToken = default)
     {
-        if (id <= 0)
+        if (id < 0)
             return TypedResults.BadRequest(id);
 
         var shop = await _mediator.Send(new GetByIdRequest<Alchemist.Product.Data.Shop>(id), cancellationToken);

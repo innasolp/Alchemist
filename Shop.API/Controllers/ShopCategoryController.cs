@@ -1,7 +1,6 @@
 ﻿using Message.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Alchemist.Product.Interfaces;
 using MediatR;
 using Alchemist.Product.Data;
 using Mediator.Infrastructure.Command;

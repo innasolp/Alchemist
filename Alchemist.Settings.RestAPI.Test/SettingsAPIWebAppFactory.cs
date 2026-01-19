@@ -40,8 +40,8 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        Shops[0] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;        
-        Shops[1] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
+        Shops[0] = dbContext.Shops.Add(new Product.Data.Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;        
+        Shops[1] = dbContext.Shops.Add(new Product.Data.Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
 
         dbContext.SaveChanges();        
 

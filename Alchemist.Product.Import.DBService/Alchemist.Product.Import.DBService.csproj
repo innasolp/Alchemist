@@ -23,7 +23,6 @@
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.BeautyAndHealth.DbItemHandler\Alchemist.Product.BeautyAndHealth.DbItemHandler.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Category.DbItemHandler\Alchemist.Product.Category.DbItemHandler.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />
     <ProjectReference Include="..\Shop.API.Client\Shop.API.Client.csproj" />
   </ItemGroup>

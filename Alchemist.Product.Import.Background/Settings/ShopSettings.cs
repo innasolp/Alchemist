@@ -1,7 +1,8 @@
-﻿using Alchemist.Product.Interfaces;
-namespace Alchemist.Product.Entities;
+﻿using ShopSettings.Interfaces;
 
-public class ShopSettings : IShopSettings
+namespace Alchemist.Product.Import.Background.Settings;
+
+internal class ShopSettings : IShopSettings
 {
     public int Id { get; set; }
 

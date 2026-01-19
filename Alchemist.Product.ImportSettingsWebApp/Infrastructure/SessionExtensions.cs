@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Models;
-using Alchemist.Product.Interfaces;
+using ShopSettings.Interfaces;
 using System.Text.Json;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Infrastructure;

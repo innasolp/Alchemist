@@ -24,7 +24,7 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
         var response = await httpClient.GetAsync($"api/Settings/byName?name={settingsName}");
         response.EnsureSuccessStatusCode();
 
-        var shopSettings = await response.Content.ReadFromJsonAsync<Product.Data.ShopSettings>();
+        var shopSettings = await response.Content.ReadFromJsonAsync<Alchemist.Product.Data.ShopSettings>();
         Assert.Equal(settingsName, shopSettings.Name);
     }
 

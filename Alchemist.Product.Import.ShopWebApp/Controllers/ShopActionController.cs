@@ -1,6 +1,6 @@
-using Alchemist.DataService.Interfaces;
 using Alchemist.Product.ShopWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Interfaces;
 
 namespace Alchemist.Product.ShopWebApp.Controllers;
 

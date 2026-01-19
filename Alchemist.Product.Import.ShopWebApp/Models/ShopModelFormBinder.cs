@@ -1,5 +1,5 @@
-﻿using Alchemist.Product.Interfaces;
-using Alchemist.Web.ModelBinder;
+﻿using Alchemist.Web.ModelBinder;
+using Shop.Interfaces;
 
 namespace Alchemist.Product.ShopWebApp.Models;
 

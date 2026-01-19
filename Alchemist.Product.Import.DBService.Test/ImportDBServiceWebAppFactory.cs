@@ -1,5 +1,4 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Test.Server.Fixtures;
+﻿using Alchemist.Test.Server.Fixtures;
 using Alchemist.Product.SignalR;
 using Alchemist.Test.Host.Interfaces;
 using Alchemist.Test.RabbitMQ;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shop.API.Client;
+using Shop.Interfaces;
 
 namespace Alchemist.Product.Import.DBService.Test;
 

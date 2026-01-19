@@ -1,9 +1,9 @@
 ﻿using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
 using Alchemist.Exceptions;
 using Alchemist.Product.DbItemHandler;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
+using Shop.Interfaces;
 
 namespace Alchemist.Product.BeautyAndHealth.DbItemHandler;
 

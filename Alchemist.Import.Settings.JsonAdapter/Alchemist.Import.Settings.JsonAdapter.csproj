@@ -14,6 +14,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
 	  <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
+	  <ProjectReference Include="..\ShopSettings.Interfaces\ShopSettings.Interfaces.csproj" />
 	</ItemGroup>
 
 

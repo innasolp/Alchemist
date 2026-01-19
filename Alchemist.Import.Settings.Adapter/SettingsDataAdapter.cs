@@ -1,16 +1,14 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Settings.Extensions;
-using Alchemist.Product.Interfaces;
-using Alchemist.Product.Entities;
+﻿using Alchemist.Import.Settings.Extensions;
 using System.Text.Json;
 using Import.Settings.Interfaces;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Import.Settings.DataAdapter;
 
 public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IShopSettingsDataService shopSettingsDataService, ShopSettingType shopSettingType)
     : ISettingsDataAdapter
-    where TShopImportSettings : class, IShopImportSettings, IShopSettings
-    where TImportServiceSettings : class, IServiceSettings, IShopSettings
+    where TShopImportSettings : class, IShopImportSettings, IShopSettings, new()
+    where TImportServiceSettings : class, IServiceSettings, IShopSettings, new()
 {
     private readonly IShopSettingsDataService _shopSettingsDataService = shopSettingsDataService;
 
@@ -64,13 +62,13 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
 
     public async Task<TShopImportSettings> Save(TShopImportSettings shopSettingsModel, CancellationToken cancellationToken = default)
     {
-        var shopSettings = shopSettingsModel.To<ShopSettings>() as IShopSettings;
+        var shopSettings = shopSettingsModel.To<TShopImportSettings>() as IShopSettings;
         shopSettings.JsonValue = JsonSerializer.Serialize(shopSettingsModel,
             EntityExtensions.GetDefaultImportSettingsSerializationOptions<TShopImportSettings>());
 
         var services = new List<IShopSettings>();
         foreach (var (serviceModel, service) in from serviceModel in shopSettingsModel.Services.OfType<KeyValuePair<string, TImportServiceSettings>>()
-                                                let service = serviceModel.Value.ToEntity()
+                                                let service = serviceModel.Value.ToShopSettings()
                                                 select (serviceModel, service))
         {
             service.JsonValue = JsonSerializer.Serialize(serviceModel.Value);

@@ -1,5 +1,4 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Interfaces;
+﻿using Shop.Interfaces;
 using System.Collections.Concurrent;
 
 namespace Alchemist.Product.DbItemHandler;

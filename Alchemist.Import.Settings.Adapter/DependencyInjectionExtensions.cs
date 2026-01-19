@@ -1,16 +1,15 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Interfaces;
-using Import.Settings.Interfaces;
+﻿using Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using ShopSettings.Interfaces;
 
-using SettingsDataAdapterFactory = System.Collections.Generic.IDictionary<Alchemist.Product.Interfaces.ShopSettingType, 
-    System.Func<Alchemist.Product.Interfaces.ShopSettingType,
-        Alchemist.DataService.Interfaces.IShopSettingsDataService, 
+using SettingsDataAdapterFactory = System.Collections.Generic.IDictionary<ShopSettings.Interfaces.ShopSettingType, 
+    System.Func<ShopSettings.Interfaces.ShopSettingType,
+        ShopSettings.Interfaces.IShopSettingsDataService, 
         Alchemist.Import.Settings.DataAdapter.ISettingsDataAdapter>>;
 
-using SettingsDataAdapterFactoryImpl = System.Collections.Generic.Dictionary<Alchemist.Product.Interfaces.ShopSettingType, 
-    System.Func<Alchemist.Product.Interfaces.ShopSettingType,
-        Alchemist.DataService.Interfaces.IShopSettingsDataService,
+using SettingsDataAdapterFactoryImpl = System.Collections.Generic.Dictionary<ShopSettings.Interfaces.ShopSettingType, 
+    System.Func<ShopSettings.Interfaces.ShopSettingType,
+        ShopSettings.Interfaces.IShopSettingsDataService,
         Alchemist.Import.Settings.DataAdapter.ISettingsDataAdapter>>;
 
 namespace Alchemist.Import.Settings.DataAdapter;
@@ -19,8 +18,8 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddSettingsDataAdapter<TShopImportSettings, TImportServiceSettings>
         (this IServiceCollection services, ShopSettingType shopSettingType)
-        where TShopImportSettings : class, IShopImportSettings, IShopSettings
-    where TImportServiceSettings : class, IServiceSettings, IShopSettings
+        where TShopImportSettings : class, IShopImportSettings, IShopSettings, new()
+    where TImportServiceSettings : class, IServiceSettings, IShopSettings, new()
     {
         return services.AddSingleton<ISettingsAdapter, SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>>(
             serviceProvider =>
@@ -32,8 +31,8 @@ public static class DependencyInjectionExtensions
 
     public static IServiceCollection AddKeyedSettingsDataAdapter<TShopImportSettings, TImportServiceSettings>
         (this IServiceCollection services, ShopSettingType shopSettingType, object key)
-        where TShopImportSettings : class, IShopImportSettings, IShopSettings
-    where TImportServiceSettings : class, IServiceSettings, IShopSettings
+        where TShopImportSettings : class, IShopImportSettings, IShopSettings, new()
+    where TImportServiceSettings : class, IServiceSettings, IShopSettings, new()
     {
         return services.AddKeyedSingleton<ISettingsAdapter, SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>>(
             key,
@@ -46,8 +45,8 @@ public static class DependencyInjectionExtensions
 
     public static IServiceCollection AddTypedSettingsDataAdapter<TShopImportSettings, TImportServiceSettings>
         (this IServiceCollection services, ShopSettingType shopSettingType)
-        where TShopImportSettings : class, IShopImportSettings, IShopSettings
-    where TImportServiceSettings : class, IServiceSettings, IShopSettings
+        where TShopImportSettings : class, IShopImportSettings, IShopSettings, new()
+    where TImportServiceSettings : class, IServiceSettings, IShopSettings, new()
     {
         return services.AddSingleton<ISettingsDataAdapter, SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>>(
             serviceProvider =>
@@ -59,8 +58,8 @@ public static class DependencyInjectionExtensions
 
     public static IServiceCollection AddKeyedTypedSettingsDataAdapter<TShopImportSettings, TImportServiceSettings>
         (this IServiceCollection services, ShopSettingType shopSettingType, object key)
-        where TShopImportSettings : class, IShopImportSettings, IShopSettings
-    where TImportServiceSettings : class, IServiceSettings, IShopSettings
+        where TShopImportSettings : class, IShopImportSettings, IShopSettings, new()
+    where TImportServiceSettings : class, IServiceSettings, IShopSettings, new()
     {
         return services.AddKeyedSingleton<ISettingsDataAdapter, SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>>(
             key,
@@ -73,8 +72,8 @@ public static class DependencyInjectionExtensions
 
     public static IServiceCollection AddSettingsDataAdapterToCollection<TShopImportSettings, TImportServiceSettings>(this IServiceCollection services,
         ShopSettingType shopSettingType, object key)
-        where TShopImportSettings : class, IShopImportSettings, IShopSettings
-        where TImportServiceSettings : class, IServiceSettings, IShopSettings
+        where TShopImportSettings : class, IShopImportSettings, IShopSettings, new()
+        where TImportServiceSettings : class, IServiceSettings, IShopSettings, new()
     {
         var factoryDictionaryDescriptor = services.FirstOrDefault(sd => sd.IsKeyedService && sd.ServiceKey == key
             && sd.ServiceType == typeof(SettingsDataAdapterFactory));

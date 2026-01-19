@@ -1,5 +1,5 @@
 ﻿using Alchemist.Import.Settings.Category;
-using Alchemist.Product.Interfaces;
+using ShopSettings.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 

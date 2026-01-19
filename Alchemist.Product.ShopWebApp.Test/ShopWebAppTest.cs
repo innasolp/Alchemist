@@ -1,10 +1,9 @@
-using Alchemist.Product.Interfaces;
 using Alchemist.Product.ShopWebApp.Test.Infrastructure;
 using Alchemist.Test.Functional.Playwright;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using Shop.Interfaces;
 using Xunit.Abstractions;
-using Shop = Alchemist.Product.Entities.Shop;
 
 namespace Alchemist.Product.ShopWebApp.Test;
 
@@ -138,7 +137,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var selectedShopLocator = Page.Locator("a[class='shop_item selected']");
         await Expect(selectedShopLocator).ToHaveCountAsync(0);
 
-        var newShop = new Entities.Shop();
+        var newShop = new Infrastructure.Shop();
         await ExpectShopEditFormFilledByShopFieldValuesAsync(newShop);
     }
 
@@ -159,7 +158,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var shop = shops[new Random().Next(0, shops.Count)];
         await GoToShopAsync(shop.Id);
 
-        var editedShop = new Entities.Shop();
+        var editedShop = new Infrastructure.Shop();
         SetRandomValues(editedShop);
 
         var nextShop = GetRandomShop(shops, shop.Id);
@@ -177,7 +176,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
         var nextShop = GetRandomShop(shops, shop.Id);
 
-        var editedShop = new Entities.Shop();
+        var editedShop = new Infrastructure.Shop();
         SetRandomValues(editedShop);
 
         var confirmation = await ExpectConfirmationOnNextShopSelectingWhenPreviousEditedWithoutSavingAsync(editedShop, nextShop.Id);
@@ -203,7 +202,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
         var nextShop = GetRandomShop(shops, shop.Id);
 
-        var editedShop = new Entities.Shop();
+        var editedShop = new Infrastructure.Shop();
         SetRandomValues(editedShop);
 
         var confirmation = await ExpectConfirmationOnNextShopSelectingWhenPreviousEditedWithoutSavingAsync(editedShop, nextShop.Id);
@@ -224,7 +223,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var shop = shops[new Random().Next(0, shops.Count)];
         await GoToShopAsync(shop.Id);
 
-        var editedShop = new Entities.Shop();
+        var editedShop = new Infrastructure.Shop();
         SetRandomValues(editedShop);
 
         await FillShopEditFormFieldsAsync(editedShop);
@@ -247,7 +246,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
 
         await GoToNewShopAsync();
 
-        var newShop = new Entities.Shop();
+        var newShop = new Infrastructure.Shop();
         SetRandomValues(newShop);
         await FillShopEditFormFieldsAsync(newShop);
 
@@ -264,7 +263,7 @@ public class ShopWebAppTest(ShopWebAppFactory shopWebAppFactory, ITestOutputHelp
         var shop = shops[new Random().Next(0, shops.Count)];
         await GoToShopAsync(shop.Id);
 
-        var editedShop = new Entities.Shop();
+        var editedShop = new Infrastructure.Shop();
         await FillShopEditFormFieldsAsync(editedShop);
 
         await ExpectSaveClickAsync();
