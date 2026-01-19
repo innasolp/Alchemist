@@ -11,8 +11,10 @@ public abstract class CreateCommandHandler<T, TCreateRequest, TRepository, TTran
 {
     protected TRepository Repository { get; } = repository;
 
-    protected override Task<T> HandlerRequest(TCreateRequest request, CancellationToken cancellationToken)
+    protected override async Task<T> HandlerRequest(TCreateRequest request, CancellationToken cancellationToken)
     {
-        return Repository.Create(request.Entity, cancellationToken);
+        var result = await Repository.Create(request.Entity, cancellationToken);
+        await UnitOfWork.SaveChangesAsync(cancellationToken);
+        return result;
     }
 }

@@ -10,3 +10,9 @@ public class EFCreateCommandHandler<TRequest, T>(IRepository<T> repository, IUni
     where TRequest: CreateCommand<T>
 {
 }
+
+public class EFCreateCommandHandler<T>(IRepository<T> repository, IUnitOfWork<IDbContextTransaction> unitOfWork)
+    : CreateCommandHandler<T, CreateCommand<T>, IRepository<T>, IDbContextTransaction, IUnitOfWork<IDbContextTransaction>>(repository, unitOfWork)
+    where T : class
+{
+}
