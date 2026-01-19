@@ -1,9 +1,13 @@
 ﻿using Autofac;
+using Mediator.Infrastructure.Command;
+using Mediator.Messages;
+using Mediator.Module.EF;
+using MediatR;
 using Microsoft.EntityFrameworkCore.Storage;
+using Shop.Infrastructure;
 using Shop.UnitOfWork;
 using UnitOfWork;
-using Mediator.Module.EF;
-using Shop.Infrastructure;
+using Alchemist.Product.Data;
 
 namespace Shop.Module;
 
@@ -20,5 +24,13 @@ public class ShopModule : MediatorModule
         builder.RegisterGeneric(typeof(ShopRepository<>)).As(typeof(IRepository<>));
         builder.RegisterType(typeof(ShopRepository)).As(typeof(IShopRepository));
         builder.RegisterType(typeof(ShopCategoryRepository)).As(typeof(IShopCategoryRepository));
+
+        builder.RegisterType(typeof(CreateShopCommandHandler))
+            .As(typeof(IRequestHandler<CreateCommand<Alchemist.Product.Data.Shop>, Alchemist.Product.Data.Shop>));
+        builder.RegisterType(typeof(CreateShopCategoryCommandHandler))
+            .As(typeof(IRequestHandler<CreateCommand<ShopCategory>, ShopCategory>));
+
+        builder.RegisterType(typeof(MessageEventHandler<CreateShopEvent, Alchemist.Product.Data.Shop>)).As(typeof(INotificationHandler<CreateShopEvent>));
+        builder.RegisterType(typeof(MessageEventHandler<CreateShopCategoryEvent, ShopCategory>)).As(typeof(INotificationHandler<CreateShopCategoryEvent>));
     }
 }
