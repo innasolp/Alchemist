@@ -1,46 +1,23 @@
-using Alchemist.Common;
 using Alchemist.Product.Data;
 using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Request;
 using MediatR;
-using Message.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ShopSettings.Infrastructure;
-using System.Collections;
 using System.Net;
 
 namespace Alchemist.Settings.RestAPI.Controllers;
 
 [ApiController]
 [Route("api/Settings")]
-public class SettingsController(ILogger<SettingsController> logger, IMediator mediator, IMessageSender messageSender) : ControllerBase
+public class SettingsController(ILogger<SettingsController> logger, IMediator mediator) : ControllerBase
 {
     public record ShopSettingsWithServices(Product.Data.ShopSettings ShopSettings, Product.Data.ShopSettings[] Services);
 
     private readonly IMediator _mediator = mediator;
 
     private readonly ILogger<SettingsController> _logger = logger;
-
-    private readonly IMessageSender _messageSender = messageSender;
-
-    private async Task SendMessage<T>(T entity, string methodName, CancellationToken cancellationToken = default)
-    {
-        if (cancellationToken.IsCancellationRequested)
-            return;
-
-        try
-        {
-            if(!_messageSender.IsConnected)
-                await _messageSender.Start(cancellationToken);
-            await _messageSender.Send(entity, methodName, cancellationToken);
-            _logger.LogInformation($"Call {methodName} {entity} ");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, ex.Message);
-        }
-    }
 
     [HttpGet("byShopId/{shopId:int}/{shopSettingType:int}", Name = nameof(GetShopSettingsByShopId))]
     public async Task<Results<BadRequest<int>, NotFound<int>, Ok<Product.Data.ShopSettings>>> GetShopSettingsByShopId(int shopId, int shopSettingType, CancellationToken cancellationToken = default)
@@ -96,10 +73,7 @@ public class SettingsController(ILogger<SettingsController> logger, IMediator me
             return TypedResults.BadRequest(shopSettings);
 
         var shopSettingsId = shopSettings.Id;
-        var savedShopSettings = await _mediator.Send(new SaveShopSettingsCommand(shopSettings), cancellationToken);
-
-        if (shopSettingsId == 0)
-            await SendMessage(savedShopSettings, Messages.Common.Messages.ShopSettingsCreated, cancellationToken);
+        var savedShopSettings = await _mediator.Send(new SaveShopSettingsCommand(shopSettings), cancellationToken);        
 
         var location = Url.Action(nameof(SaveShopSettings), new { id = savedShopSettings.Id }) ?? $"/{savedShopSettings.Id}";
         return shopSettingsId == 0 
@@ -109,7 +83,7 @@ public class SettingsController(ILogger<SettingsController> logger, IMediator me
 
 
     [HttpPost("save", Name = nameof(SaveShopSettingsWithServices))]
-    public async Task<Results<BadRequest, BadRequest<string>,  BadRequest<ShopSettingsWithServices>, StatusCodeHttpResult, Created<ArrayList>, Accepted<ArrayList>>>
+    public async Task<Results<BadRequest, BadRequest<string>,  BadRequest<ShopSettingsWithServices>, StatusCodeHttpResult, Created<ShopSettingsWithServices>, Accepted<ShopSettingsWithServices>>>
         SaveShopSettingsWithServices(ShopSettingsWithServices shopSettingsWithServices, CancellationToken cancellationToken = default)
     {
         if (shopSettingsWithServices == null || shopSettingsWithServices.ShopSettings == null)
@@ -121,17 +95,14 @@ public class SettingsController(ILogger<SettingsController> logger, IMediator me
 
         var initId = shopSettingsWithServices.ShopSettings.Id;
 
-        var allData = await _mediator.Send(
+        var saved = await _mediator.Send(
             new SaveShopSettingsWithChildrenCommand(shopSettingsWithServices.ShopSettings, shopSettingsWithServices.Services), cancellationToken);
-        var shopSettingResult = allData.FirstOrDefault(s => s.Type != ShopSettingType.Service);
-        if (shopSettingResult == null)
-            return TypedResults.StatusCode((int)HttpStatusCode.InternalServerError);
+        if (saved.shopSettings == null)
+            return TypedResults.StatusCode((int)HttpStatusCode.InternalServerError);        
 
-        if (initId == 0)
-            await SendMessage(shopSettingResult, Messages.Common.Messages.ShopSettingsCreated, cancellationToken);
-
-        var location = Url.Action(nameof(SaveShopSettingsWithServices), new { id = shopSettingResult.Id }) ?? $"/{shopSettingResult.Id}";
-        var result = new ArrayList { shopSettingResult, allData.Where(d => d.Type == ShopSettingType.Service).ToArray() };
+        var location = Url.Action(nameof(SaveShopSettingsWithServices), new { id = saved.shopSettings.Id }) ?? $"/{saved.shopSettings.Id}";
+        
+        var result = new ShopSettingsWithServices(saved.shopSettings, [.. saved.services]);
         return initId == 0 ? TypedResults.Created(location, result) : TypedResults.Accepted(location, result);
     }
     

@@ -6,4 +6,4 @@ public record SaveShopSettingsCommand(Alchemist.Product.Data.ShopSettings ShopSe
 
 public record SaveShopSettingsWithChildrenCommand(Alchemist.Product.Data.ShopSettings ParentShopSettings, 
     IEnumerable<Alchemist.Product.Data.ShopSettings> ChildrenSettings)
-    : IRequest<List<Alchemist.Product.Data.ShopSettings>>;
+    : IRequest<(Alchemist.Product.Data.ShopSettings shopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings> services)>;

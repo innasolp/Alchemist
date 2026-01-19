@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Autofac.Module\Mediator.Module.EF.csproj" />
+    <ProjectReference Include="..\Mediator.Messages\Mediator.Messages.csproj" />
     <ProjectReference Include="..\ShopSettings.Infrastructure\ShopSettings.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -64,7 +64,7 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
         return added;
     }
 
-    public async Task<List<Alchemist.Product.Data.ShopSettings>> SaveShopSettingsWithChildren(Alchemist.Product.Data.ShopSettings parentShopSettings,
+    public async Task<(Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>)> SaveShopSettingsWithChildren(Alchemist.Product.Data.ShopSettings parentShopSettings,
         IEnumerable<Alchemist.Product.Data.ShopSettings> childrenSettings, CancellationToken cancellationToken = default)
     {
         await SetShopSettingsActuality(parentShopSettings.ShopId, parentShopSettings.Type, parentShopSettings.Id, cancellationToken);
@@ -73,7 +73,7 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
 
         await Context.SaveChangesAsync(cancellationToken);
 
-        var handledServices = new List<Alchemist.Product.Data.ShopSettings> { shopSettings };
+        var handledServices = new List<Alchemist.Product.Data.ShopSettings> ();
         foreach (var service in childrenSettings)
         {
             service.ParentSettingsId = shopSettings.Id;
@@ -81,7 +81,7 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
             handledServices.Add(await AddOrUpdateShopSettings(service, cancellationToken));
         }
 
-        return handledServices;
+        return (shopSettings, handledServices);
     }
 }
 

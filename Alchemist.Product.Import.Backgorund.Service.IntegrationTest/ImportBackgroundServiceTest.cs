@@ -1,16 +1,13 @@
 using Alchemist.Product.BeautyAndHealth;
 using Alchemist.Product.CategoryData;
-using Alchemist.Product.Data;
 using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.VisualStudio.Threading;
 using Moq;
-using System.Collections;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Xunit.Abstractions;
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
@@ -22,7 +19,9 @@ public class ImportBackgroundServiceTestFixtureWebAppFactory : ImportBackgroundS
 }
 
 public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgroundServiceTestFixtureWebAppFactory, ImportBackgroundServiceProgram>
-{    
+{   
+    private record ShopSettingsWithServices(Infrastructure.ShopSettings ShopSettings, Infrastructure.ShopSettings[] Services);
+    
     public ImportBackgroundServiceTest(ImportBackgroundServiceTestFixtureWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
         : base(webAppFactory, outputHelper)
     {
@@ -132,17 +131,16 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         return await response.Content.ReadFromJsonAsync<Data.Shop>();
     }
 
-    private async Task<Data.ShopSettings> CreateNewShopSettingsAsync(int shopId, string name)
-    {
+    private async Task<Infrastructure.ShopSettings> CreateNewShopSettingsAsync(int shopId, string name)
+    {      
+
         var shopSettings = SettingsTestRepository.CreateProductShopSettings(shopId, name);
         var services = SettingsTestRepository.CreateShopSettingsServicesTestData(shopSettings);
         var settingsData = new  { ShopSettings = shopSettings, Services = services.ToArray() };
         var settingsPutResponse = await WebAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData);
         settingsPutResponse.EnsureSuccessStatusCode();
 
-        var result = await settingsPutResponse.Content.ReadFromJsonAsync<ArrayList>();
-        var settings = JsonSerializer.Deserialize<Data.ShopSettings>(result[0].ToString(),
-            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        return settings;
+        var result = await settingsPutResponse.Content.ReadFromJsonAsync<ShopSettingsWithServices>();
+        return result.ShopSettings;
     }    
 }

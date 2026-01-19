@@ -77,10 +77,8 @@ public class SettingsDataAdapter<TShopImportSettings, TImportServiceSettings>(IS
         }
 
         var result = await _shopSettingsDataService.SaveShopSettings(shopSettings, services,cancellationToken);
-
-        var savedShopSettings = result.First();
-        var savedServices = result.TakeLast(result.Count - 1);
-        var savedShopImportSettings = GetShopImportSettings(savedShopSettings, savedServices);
+        
+        var savedShopImportSettings = GetShopImportSettings(result.ShopSettings, result.Services);
         
         return savedShopImportSettings;
     }

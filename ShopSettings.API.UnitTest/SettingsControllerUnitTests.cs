@@ -1,18 +1,19 @@
-using System.Collections;
 using Alchemist.Product.Data;
+using Alchemist.Settings.RestAPI.Controllers;
 using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Request;
+using MediatR;
+using Message.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ShopSettings.Infrastructure;
 using ShopSettings.UnitOfWork;
-using MediatR;
-using Message.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Alchemist.Settings.RestAPI.Controllers;
 using UnitOfWork;
+using static Alchemist.Settings.RestAPI.Controllers.SettingsController;
 
 namespace ShopSettings.API.UnitTest;
 
@@ -28,6 +29,9 @@ public class SettingsControllerUnitTests
 
     private readonly SettingsController _controller;
 
+    private readonly Mock<IPublisher> _publisherMock = new();
+    private readonly Mock<IUnitOfWork<IDbContextTransaction>> _unitOfWorkMock = new();
+
     public SettingsControllerUnitTests()
     {
         // default message sender behavior
@@ -36,16 +40,19 @@ public class SettingsControllerUnitTests
 
         // IMediator setups moved to ctor per request types used by SettingsController,
         // mapping Send(...) to repository mocks.
+        var saveShopSettingsCommandHandler = new SaveShopSettingsCommandHandler(_shopSettingsRepository.Object, _unitOfWorkMock.Object, _publisherMock.Object);
 
         // SaveShopSettingsCommand -> IShopSettingsRepository.SaveShopSettings
         _mediator.Setup(m => m.Send(It.IsAny<SaveShopSettingsCommand>(), It.IsAny<CancellationToken>()))
                  .Returns((SaveShopSettingsCommand req, CancellationToken ct) =>
-                     _shopSettingsRepository.Object.SaveShopSettings(req.ShopSettings, ct)!);
+                     saveShopSettingsCommandHandler.Handle(req, ct));         
+
+        var saveShopSettingsWithChildrenCommandHandler = new SaveShopSettingsWithChildrenCommandHandler(_shopSettingsRepository.Object, _unitOfWorkMock.Object, _publisherMock.Object);
 
         // SaveShopSettingsWithChildrenCommand -> IShopSettingsRepository.SaveShopSettingsWithChildren
         _mediator.Setup(m => m.Send(It.IsAny<SaveShopSettingsWithChildrenCommand>(), It.IsAny<CancellationToken>()))
                  .Returns((SaveShopSettingsWithChildrenCommand req, CancellationToken ct) =>
-                     _shopSettingsRepository.Object.SaveShopSettingsWithChildren(req.ParentShopSettings, req.ChildrenSettings, ct)!);
+                     saveShopSettingsWithChildrenCommandHandler.Handle(req, ct)!);
 
         // UpdateCommand<ShopSettings> -> IShopSettingsRepository.SaveShopSettings (used as update)
         _mediator.Setup(m => m.Send(It.IsAny<UpdateCommand<Alchemist.Product.Data.ShopSettings>>(), It.IsAny<CancellationToken>()))
@@ -81,7 +88,7 @@ public class SettingsControllerUnitTests
                  .Returns((GetShopSettingsByShopIdRequest req, CancellationToken ct) =>
                      _shopSettingsRepository.Object.GetShopSettingsByShopId(req.ShopId, req.SettingType, ct)!);
 
-        _controller = new SettingsController(_logger, _mediator.Object, _messageSender.Object)
+        _controller = new SettingsController(_logger, _mediator.Object)
         {
             Url = new Mock<IUrlHelper>().Object
         };
@@ -170,18 +177,25 @@ public class SettingsControllerUnitTests
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.SaveShopSettings(incoming));
         var created = Assert.IsType<Created<Alchemist.Product.Data.ShopSettings>>(result.Result);
         Assert.Equal(saved.Id, created.Value.Id);
+
+        _publisherMock.Verify(p => p.Publish(It.Is<CreateShopSettingsEvent>(c => c.Entity == created.Value), It.IsAny<CancellationToken>()));
     }
 
     [Fact]
     public async Task UpdateShopSettings_ReturnsAccepted_WhenUpdated()
     {
         var incoming = new Alchemist.Product.Data.ShopSettings { Id = 7, ShopId = 1, JsonValue = "{}", Name = "u" };
+        
         _shopSettingsRepository.Setup(r => r.SaveShopSettings(It.IsAny<Alchemist.Product.Data.ShopSettings>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync(incoming);
+
+        
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.UpdateShopSettings(incoming));
         var accepted = Assert.IsType<Accepted<Alchemist.Product.Data.ShopSettings>>(result.Result);
         Assert.Equal(incoming.Id, accepted.Value.Id);
+
+        _publisherMock.Verify(p => p.Publish(It.Is<CreateShopSettingsEvent>(c => c.Entity == accepted.Value), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -217,25 +231,26 @@ public class SettingsControllerUnitTests
         var savedService1 = new Alchemist.Product.Data.ShopSettings { Id = 101, ShopId = parent.ShopId, JsonValue = service1.JsonValue, Name = service1.Name, Type = service1.Type, ParentSettingsId = savedParent.Id };
         var savedService2 = new Alchemist.Product.Data.ShopSettings { Id = 102, ShopId = parent.ShopId, JsonValue = service2.JsonValue, Name = service2.Name, Type = service2.Type, ParentSettingsId = savedParent.Id };
 
-        var savedList = new List<Alchemist.Product.Data.ShopSettings> { savedParent, savedService1, savedService2 };
+        var saved = (savedParent, new Alchemist.Product.Data.ShopSettings[] { savedService1, savedService2 });
 
         _shopSettingsRepository.Setup(r => r.SaveShopSettingsWithChildren(It.IsAny<Alchemist.Product.Data.ShopSettings>(), It.IsAny<IEnumerable<Alchemist.Product.Data.ShopSettings>>(), It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(savedList);
+                               .ReturnsAsync(saved);
 
         var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.SaveShopSettingsWithServices(payload));
-        var created = Assert.IsType<Created<ArrayList>>(result.Result);
-        var resultArray = Assert.IsType<ArrayList>(created.Value);
-        Assert.Equal(2, resultArray.Count);
+        var created = Assert.IsType<Created<ShopSettingsWithServices>>(result.Result);
+        var shopSettingsWithServices = Assert.IsType<ShopSettingsWithServices>(created.Value);        
         
 
-        var resultParent = Assert.IsType<Alchemist.Product.Data.ShopSettings>(resultArray[0]);
+        var resultParent = Assert.IsType<Alchemist.Product.Data.ShopSettings>(shopSettingsWithServices.ShopSettings);
         Assert.Equal(savedParent.Id, resultParent.Id);
 
         // second element should be JSON array of services
-        var services = Assert.IsType<Alchemist.Product.Data.ShopSettings[]>(resultArray[1]);
+        var services = Assert.IsType<Alchemist.Product.Data.ShopSettings[]>(shopSettingsWithServices.Services);
         Assert.NotNull(services);
         Assert.Equal(2, services.Length);
         Assert.All(services, s => Assert.NotEqual(0, s.Id));
+
+        _publisherMock.Verify(p => p.Publish(It.Is<CreateShopSettingsEvent>(c => c.Entity == created.Value.ShopSettings), It.IsAny<CancellationToken>()));
     }
 
     [Fact]
