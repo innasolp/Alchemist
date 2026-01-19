@@ -1,10 +1,9 @@
-using Alchemist.DataService.Interfaces;
 using Alchemist.Product.BeautyAndHealth;
 using Alchemist.Product.CategoryData;
-using Alchemist.Product.Data.Repository;
 using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
 using Alchemist.Test.Server.Fixtures;
+using Mediator.Infrastructure.Request;
+using MediatR;
 using Message.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +11,8 @@ using Microsoft.VisualStudio.Threading;
 using Moq;
 using System.Net;
 using Xunit.Abstractions;
+using Mapster;
+using Shop.Infrastructure;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
@@ -19,7 +20,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
     : TestFixture<ImportDBServiceWebAppFactory, ImportDbServiceProgram>(webAppFactory, outputHelper)
 {
 
-    private readonly Mock<IAlchemyRepository> _alchemyRepositoryMock = new();
+    private readonly Mock<IMediator> _mediator = new();
 
     [Fact]
     public async Task HelloResponseWhenStartingSuccess()
@@ -37,21 +38,21 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
     [Fact]
     public async Task WaitForImportItemReceiveByGrpcService()
     {
-        void setTestRepository(IServiceCollection services) => services.InterceptImplementation<IAlchemyRepository, AlchemyRepository>(_alchemyRepositoryMock.Object);
+        void setTestRepository(IServiceCollection services) => services.InterceptImplementation(_mediator.Object);
         WebAppFactory.GrpcWebAppFactory.ConfigureServices += setTestRepository;
         WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;        
 
         var categoryMessageMock = new Mock<ICategoryData>();
         FillTestCategoryData(categoryMessageMock);
 
-        var shop = new Shop { Id = 1, Name = categoryMessageMock.Object.ShopName, Url = categoryMessageMock.Object.ShopUrl };
+        var shop = new Data.Shop { Id = 1, Name = categoryMessageMock.Object.ShopName, Url = categoryMessageMock.Object.ShopUrl };
 
         var shopCreateResetEvent = new AsyncAutoResetEvent();
-        _alchemyRepositoryMock.Setup(r => r.GetShopByName(categoryMessageMock.Object.ShopName, It.IsAny<CancellationToken>()))
-            .Returns(async (string name, CancellationToken cancellationToken = default) =>
+        _mediator.Setup(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r=>r.Name == categoryMessageMock.Object.ShopName), It.IsAny<CancellationToken>()))
+            .Returns((FindByNameRequest<Data.Shop> req, CancellationToken cancellationToken) =>
             {
                 shopCreateResetEvent.Set();
-                return await Task.FromResult(shop as IShop);
+                return Task.FromResult(shop.Adapt<Data.Shop>());
             });
 
         WebAppFactory.StartGrpc();
@@ -70,11 +71,12 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
 
         await shopCreateResetEvent.WaitAsync();
 
-        _alchemyRepositoryMock.Verify(r => r.GetShopByName(categoryMessageMock.Object.ShopName, It.IsAny<CancellationToken>()));
+        _mediator.Verify(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r => r.Name == categoryMessageMock.Object.ShopName), It.IsAny<CancellationToken>()));
 
         await Task.Delay(500);
 
-        _alchemyRepositoryMock.Verify(r => r.GetShopCategory(shop.Id, categoryMessageMock.Object.ShopCategory.ItemId, It.IsAny<CancellationToken>()));
+        _mediator.Verify(r => r.Send(It.Is <GetShopCategoryByShopIdAndItemIdRequest>(r=>r.ShopId == shop.Id && r.ItemId == categoryMessageMock.Object.ShopCategory.ItemId)
+            ,It.IsAny<CancellationToken>()));
 
         WebAppFactory.GrpcWebAppFactory.ConfigureServices -= setTestRepository;
     }

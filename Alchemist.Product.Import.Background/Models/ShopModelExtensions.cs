@@ -1,11 +1,10 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Category;
 using Alchemist.Import.Settings.Product;
-using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
 using Import.Settings.Interfaces;
+using Shop.Interfaces;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Models;
 
@@ -102,13 +101,13 @@ internal static class ShopModelExtensions
         CancellationToken cancellationToken = default)
         where T : ShopModel, new()
     {
-        var shop = (shopImportSettings is ShopSettings shopSettings
+        var shop = (shopImportSettings is IShopSettings shopSettings
                 ? await shopDataService.GetShop(shopSettings.ShopId, cancellationToken)
                 : await shopDataService.GetShopByName(shopImportSettings.ShopName, cancellationToken)
                 ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl, cancellationToken))
-                ?? await shopDataService.CreateShop(new Shop { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
+                ?? await shopDataService.CreateShop(new ShopModel { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
 
-        var shopModel = CreateShopModelCore<T>(shop, shopImportSettings);
+        var shopModel = GetShopModelCore<T>(shop, shopImportSettings);
 
         return await Task.FromResult(shopModel);
     }
@@ -124,7 +123,7 @@ internal static class ShopModelExtensions
         return categoryShopModel;
     }    
 
-    private static T CreateShopModelCore<T>(IShop shop, IShopImportSettings shopImportSettings)
+    private static T GetShopModelCore<T>(IShop shop, IShopImportSettings shopImportSettings)
         where T : ShopModel, new()
     {
         return new T

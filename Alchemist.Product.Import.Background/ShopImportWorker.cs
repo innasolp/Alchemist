@@ -1,4 +1,3 @@
-using Alchemist.DataService.Interfaces;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.DataAdapter;
@@ -6,7 +5,6 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Messages.Common;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Import.Background.Models;
-using Alchemist.Product.Interfaces;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
@@ -14,7 +12,12 @@ using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Shop.Interfaces;
+using ShopSettings.Interfaces;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Alchemist.Product.Import.Background;
 
@@ -54,7 +57,7 @@ public class ShopImportWorker : BackgroundService
 
         _shopServiceFactories = shopImportFactories;
 
-        _eventMessageReceiver.On<ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);
+        _eventMessageReceiver.On(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync, typeof(object));
 
         _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);
 
@@ -119,8 +122,19 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task OnShopSettingsCreatedAsync(ShopSettings newShopSettings)
+    private async Task OnShopSettingsCreatedAsync(object newShopSettingsDto)
     {
+        var json = newShopSettingsDto is IEnumerable arr ? arr.OfType<object>().First().ToString() : newShopSettingsDto.ToString();
+        var jsonElement = JsonSerializer.Deserialize<JsonObject>(json);
+
+        var options = new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase                        
+        };
+
+        var newShopSettings = JsonSerializer.Deserialize<Settings.ShopSettings>(json, options);
+        
         if (ShopModels.OfType<ShopModel>().Any(s => s.Id == newShopSettings.ShopId))
             return;
 

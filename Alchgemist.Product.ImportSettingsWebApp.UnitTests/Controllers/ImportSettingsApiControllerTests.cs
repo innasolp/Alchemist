@@ -4,7 +4,7 @@ using Moq;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.ImportSettingsWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Alchemist.Product.Interfaces;
+using ShopSettings.Interfaces;
 
 
 namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;

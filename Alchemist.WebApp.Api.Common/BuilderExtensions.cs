@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Alchemist.WebApp.Api.Common;
 
@@ -12,6 +14,11 @@ public static class BuilderExtensions
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+
+        services.Configure<SwaggerOptions>(options =>
+        {
+            options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+        });
     }
 
     public static bool IsApi(this IHostApplicationBuilder builder, string[] args)

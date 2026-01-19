@@ -1,6 +1,4 @@
-﻿using Shop = Alchemist.Product.Entities.Shop;
-
-namespace Alchemist.Product.ShopWebApp.Test.Infrastructure;
+﻿namespace Alchemist.Product.ShopWebApp.Test.Infrastructure;
 
 internal static class TestRepository
 {

@@ -74,4 +74,10 @@ public static class JsonExtensions
         var json = JsonSerializer.Serialize(obj, options);
         return JsonSerializer.Deserialize<T>(json, options);
     }
+
+    public static T? DeserializeToAnonymousType<T>(this T anonymousTypeObject, object? obj, JsonSerializerOptions? options = null)
+    {
+        var json = JsonSerializer.Serialize(obj, options);
+        return JsonSerializer.Deserialize<T>(json, options);
+    }
 }

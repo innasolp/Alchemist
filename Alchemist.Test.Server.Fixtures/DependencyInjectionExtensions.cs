@@ -32,6 +32,15 @@ public static class DependencyInjectionExtensions
         implementation(services);
     }
 
+    public static void InterceptImplementation<TService>(this IServiceCollection services, TService implementation)
+        where TService : class
+    {
+        var descriptors = services.Where(s => s.ServiceType == typeof(TService));
+        descriptors.ToList().ForEach(sd => services.Remove(sd));
+
+        services.AddSingleton<TService>(implementation);
+    }
+
     public static void RemoveImplementations<TService, TServiceImplementation>(this IServiceCollection services)
     {
         var descriptors = services.Where(s => s.ServiceType == typeof(TService) &&

@@ -8,12 +8,7 @@ public static class WebApplicationExtenions
     public static void UseApiSwagger(this IApplicationBuilder app)
     {
         app.UseSwagger();
-        app.UseSwaggerUI();
-
-        app.UseSwagger(options =>
-        {
-            options.SerializeAsV2 = true;
-        });
+        app.UseSwaggerUI();       
     }
 
     public static void SetApiRoute<TAppBuilder>(this TAppBuilder app, string helloText)

@@ -1,5 +1,5 @@
 ﻿using Alchemist.Import.Settings.Category;
-using Alchemist.Product.Interfaces;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Settings;
 

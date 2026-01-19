@@ -20,13 +20,12 @@ public class SaveCategoryShopSettingsTestImportSettingsWebAppFactory()
 public class SaveCategoryShopSettingsTest : 
     SaveShopImportSettingsTest<SaveCategoryShopSettingsTestImportSettingsWebAppFactory, (string, string)>
 {
-    private readonly SaveCategoryShopSettingsTestImportSettingsWebAppFactory _webAppFactory;
-    private readonly ITestOutputHelper _outputHelper;
+    private readonly SaveCategoryShopSettingsTestImportSettingsWebAppFactory _webAppFactory;    
 
     public SaveCategoryShopSettingsTest(SaveCategoryShopSettingsTestImportSettingsWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
+        : base(outputHelper)
     {
-        _webAppFactory = webAppFactory;
-        _outputHelper = outputHelper;
+        _webAppFactory = webAppFactory;        
 
         _webAppFactory.CreateClient();
     }

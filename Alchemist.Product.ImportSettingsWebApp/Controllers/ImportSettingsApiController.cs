@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Models;
-using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Controllers;
 

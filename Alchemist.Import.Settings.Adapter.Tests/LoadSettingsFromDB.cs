@@ -1,11 +1,8 @@
-using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
 using Moq;
 using System.Text.Json;
 using Alchemist.Import.Settings.Extensions;
-using ShopSettingType = Alchemist.Product.Interfaces.ShopSettingType;
 using Alchemist.Import.Settings.Test.Model;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Import.Settings.DataAdapter.Tests;
 

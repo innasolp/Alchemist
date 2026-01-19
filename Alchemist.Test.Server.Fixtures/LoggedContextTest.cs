@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using Xunit.Abstractions;
 
 namespace Alchemist.Test.Server.Fixtures;
@@ -9,7 +10,7 @@ public abstract class LoggedContextTest(ITestOutputHelper outputHelper)
 {
     protected ITestOutputHelper OutputHelper { get; private set; } = outputHelper;
 
-    private readonly List<TestLogMessage> _logMessages = [];
+    private readonly BlockingCollection<TestLogMessage> _logMessages = [];
 
     protected IEnumerable<TestLogMessage> LogMessages => _logMessages;
 

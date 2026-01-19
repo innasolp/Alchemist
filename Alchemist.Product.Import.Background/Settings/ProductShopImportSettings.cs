@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Product;
-using Alchemist.Product.Interfaces;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Settings;
 

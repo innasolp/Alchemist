@@ -1,7 +1,7 @@
-using Alchemist.Product.Interfaces;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.ShopWebAppFactory;
+using ShopSettings.Interfaces;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;

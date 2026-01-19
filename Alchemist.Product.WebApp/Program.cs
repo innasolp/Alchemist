@@ -1,8 +1,8 @@
 using Alchemist.Common;
-using Alchemist.Product.Interfaces;
 using Alchemist.WebApp.Api.Common;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
+using ShopSettings.Interfaces;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);

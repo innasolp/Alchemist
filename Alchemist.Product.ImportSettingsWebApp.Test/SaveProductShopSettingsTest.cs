@@ -19,15 +19,14 @@ public class SaveProductShopSettingsTestImportSettingsWebAppFactory()
 }
 
 public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProductShopSettingsTestImportSettingsWebAppFactory, 
-    (string, string, string, UrlFormatType, UrlFormatType)>
+    (string, string, string, PathFormatType, PathFormatType)>
 {
     private readonly SaveProductShopSettingsTestImportSettingsWebAppFactory _webAppFactory;
-    private readonly ITestOutputHelper _outputHelper;
 
     public SaveProductShopSettingsTest(SaveProductShopSettingsTestImportSettingsWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
+        :base(outputHelper)
     {
         _webAppFactory = webAppFactory;
-        _outputHelper = outputHelper;
 
         _webAppFactory.CreateClient();
     }
@@ -41,8 +40,8 @@ public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProduc
         (string,
         string,
         string,
-        UrlFormatType,
-        UrlFormatType) inputs)
+        PathFormatType,
+        PathFormatType) inputs)
     {
         await Expect(Page.Locator($"#ShopSettingsName")).ToHaveValueAsync(inputs.Item1);
         await Expect(Page.Locator($"#ProductUrlFormat")).ToHaveValueAsync(inputs.Item2);
@@ -59,7 +58,7 @@ public class SaveProductShopSettingsTest : SaveShopImportSettingsTest<SaveProduc
         await this.ExpectProductShopSettingsLoadedAsync();
     }
 
-    protected override async Task<(string, string, string, UrlFormatType, UrlFormatType)> FillInputFieldsAsync()
+    protected override async Task<(string, string, string, PathFormatType, PathFormatType)> FillInputFieldsAsync()
     {
         return await this.FillProductInputFieldsAsync();
     }

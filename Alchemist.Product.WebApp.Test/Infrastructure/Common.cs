@@ -1,5 +1,4 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.Interfaces;
 using Alchemist.Test.Log;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.SignalRWebAppFactory;
@@ -28,18 +27,18 @@ internal static class Common
         {
             var shopId = shopIds[i];
             var productSettings = SettingsTestRepository.CreateProductShopSettings(shopId);
-            var productSettingsEntry = dbContext.ShopSettings.Add(productSettings.To<ShopSettings>());
+            var productSettingsEntry = dbContext.ShopSettings.Add(productSettings);
 
             var categorySettings = SettingsTestRepository.CreateCategoryShopSettings(shopId);
-            var categorySettingsEntry = dbContext.ShopSettings.Add(categorySettings.To<ShopSettings>());
+            var categorySettingsEntry = dbContext.ShopSettings.Add(categorySettings);
 
             dbContext.SaveChanges();
 
             var productServices = SettingsTestRepository.CreateShopSettingsServicesTestData(productSettingsEntry.Entity);
-            productServices.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
+            productServices.ForEach(s => dbContext.ShopSettings.Add(s));
 
             var categoryServices = SettingsTestRepository.CreateShopSettingsServicesTestData(categorySettingsEntry.Entity);
-            categoryServices.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
+            categoryServices.ForEach(s => dbContext.ShopSettings.Add(s));
 
             dbContext.SaveChanges();
         }

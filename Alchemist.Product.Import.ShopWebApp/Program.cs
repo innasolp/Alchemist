@@ -1,8 +1,6 @@
 using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Log.Extensions;
-using Alchemist.Product.RestAPIClient;
 using Alchemist.Product.ShopWebApp.Controllers;
 using Alchemist.WebApp.Api.Common;
 using CustomConfigurationProvider;
@@ -10,7 +8,8 @@ using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
 using Serilog;
-using Serilog.Configuration.Extensions;
+using Shop.API.Client;
+using Shop.Interfaces;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);

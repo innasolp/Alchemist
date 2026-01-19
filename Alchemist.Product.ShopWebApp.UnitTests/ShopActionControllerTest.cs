@@ -1,13 +1,11 @@
 ﻿using Alchemist.Common;
-using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
 using Alchemist.Product.ShopWebApp.Controllers;
 using Alchemist.Product.ShopWebApp.Models;
 using Alchemist.Product.ShopWebApp.UnitTests.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Shop.Interfaces;
 
 
 namespace Alchemist.Product.ShopWebApp.UnitTests;
@@ -233,7 +231,7 @@ public class ShopActionControllerTest
         SetupShops();
 
         var shop = await GetRandomShop();
-        var shopCopy = shop.To<Shop>();
+        var shopCopy = shop.To<Infrastructure.Shop>();
 
         var result = Assert.IsAssignableFrom<OkObjectResult>(await _shopController.IsChanged(shopCopy.To<ShopModel>()));
         var isChanged = Assert.IsType<bool>(result.Value);

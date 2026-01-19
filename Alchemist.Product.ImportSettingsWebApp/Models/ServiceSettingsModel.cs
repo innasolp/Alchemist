@@ -1,7 +1,8 @@
-﻿using Import.Settings.Interfaces;
+﻿using Alchemist.Common;
 using Alchemist.Product.ImportSettingsWebApp.Controllers;
-using Alchemist.Product.Interfaces;
+using Import.Settings.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using ShopSettings.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -40,6 +41,7 @@ public class ServiceSettingsModel : IServiceSettings, IShopSettings
     public string? Value { get; set; }
 
     [JsonPropertyName("Value")]
+    [JsonConverter(typeof(JsonValueConverter))]
     public JsonObject? JsonValue { get; set; }
 
     public int Id { get; set; }

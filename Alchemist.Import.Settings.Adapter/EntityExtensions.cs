@@ -1,8 +1,6 @@
-﻿using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
-using Import.Settings.Interfaces;
+﻿using Import.Settings.Interfaces;
+using ShopSettings.Interfaces;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
@@ -62,17 +60,17 @@ public static class EntityExtensions
         return model;
     }
 
-    internal static IShopSettings ToEntity<T>(this T shopSettings, JsonSerializerOptions? options = null)
-        where T : class, IShopSettings
+    internal static IShopSettings ToShopSettings<T>(this T shopSettings, JsonSerializerOptions? options = null)
+        where T : class, IShopSettings, new()
     {
         options ??= GetDefaultServiceSerializationOptions<T>();
 
         var json = JsonSerializer.Serialize(shopSettings, options);
 
-        return new ShopSettings
+        return new T
         {
             Id = shopSettings.Id,
-            JsonValue = JsonSerializer.Deserialize<JsonObject>(json),
+            JsonValue = json,
             ShopId = shopSettings.ShopId,
             Type = shopSettings.Type,
             Name = shopSettings.Name,

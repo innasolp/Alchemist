@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 

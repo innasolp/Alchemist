@@ -1,9 +1,9 @@
-﻿using Alchemist.DataService.Interfaces;
-using Alchemist.Settings.RestAPIClient;
+﻿using Alchemist.Settings.RestAPIClient;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ShopSettings.Interfaces;
 
 
 namespace Alchemist.Test.ImportSettingsWebApp.Factory;

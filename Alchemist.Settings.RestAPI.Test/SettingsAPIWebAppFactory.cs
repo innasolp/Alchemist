@@ -1,6 +1,5 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Product.Interfaces;
 using Alchemist.Test.DBApiWebAppFactory;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
@@ -21,7 +20,7 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
 
     public event Action<WebHostBuilderContext, IServiceCollection> ConfigureContextServices;
 
-    public IShop[] Shops { get; } = new IShop[2];
+    public Product.Data.Shop[] Shops { get; } = new Product.Data.Shop[2];
 
     public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
 
@@ -41,19 +40,19 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        Shops[0] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;        
-        Shops[1] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
+        Shops[0] = dbContext.Shops.Add(new Product.Data.Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;        
+        Shops[1] = dbContext.Shops.Add(new Product.Data.Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
 
         dbContext.SaveChanges();        
 
        var shopSettings = TestRepository.CreateCategoryShopSettings(Shops[0].Id, Shops[0].Name); 
 
-        dbContext.ShopSettings.Add(shopSettings.To<ShopSettings>());
+        dbContext.ShopSettings.Add(shopSettings);
         dbContext.SaveChanges();
         var savedShopSettings = dbContext.ShopSettings.FirstOrDefault();
 
         var serviceSettings = TestRepository.CreateShopSettingsServicesTestData(Shops[0].Id, savedShopSettings.Id);
-        serviceSettings.ForEach(s => dbContext.ShopSettings.Add(s.To<ShopSettings>()));
+        serviceSettings.ForEach(s => dbContext.ShopSettings.Add(s));
         dbContext.SaveChanges();
     }
 

@@ -1,4 +1,4 @@
-﻿using Alchemist.Product.Interfaces;
+﻿using Shop.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace Alchemist.Product.ShopWebApp.Models;

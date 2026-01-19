@@ -27,7 +27,7 @@
 </div>
 <div class="form-group">
     @Html.LabelFor(model => model.ProductUrlFormatType)
-    @Html.DropDownListFor(m => m.ProductUrlFormatType, Html.GetEnumSelectList<UrlFormatType>(),
+    @Html.DropDownListFor(m => m.ProductUrlFormatType, Html.GetEnumSelectList<PathFormatType>(),
     new { @class = "form-control form-dropdown" })
 </div>
 <div class="form-group">
@@ -37,7 +37,7 @@
 </div>
 <div class="form-group">
     @Html.LabelFor(model => model.CategoryUrlFormatType)
-    @Html.DropDownListFor(m => m.CategoryUrlFormatType, Html.GetEnumSelectList<UrlFormatType>(),
+    @Html.DropDownListFor(m => m.CategoryUrlFormatType, Html.GetEnumSelectList<PathFormatType>(),
         new { @class = "form-control form-dropdown" })
 </div>
 

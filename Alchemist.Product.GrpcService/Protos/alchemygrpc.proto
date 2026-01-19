@@ -33,7 +33,7 @@ service AlchemyGrpcService {
 	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply);
 	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply);
 	rpc GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest) returns (ShopProductReply);
-	rpc UpdateShopProduct(UpdateShopProductRequest) returns(google.protobuf.BoolValue);
+	rpc UpdateShopProduct(UpdateShopProductRequest) returns(ShopProductReply);
 	rpc CreateShopProduct(CreateShopProductRequest) returns(ShopProductReply);
 
 	rpc SetProductComponent(SetProductComponentRequest) returns(ProductComponentReply);
@@ -47,7 +47,7 @@ service AlchemyGrpcService {
 
 	rpc GetShopProductPrice(GetByIdInt64Request) returns(ShopProductPriceReply);
 	rpc CreateShopProductPrice(CreateShopProductPriceRequest) returns(ShopProductPriceReply);
-	rpc UpdateShopProductPrice(UpdateShopProductPriceRequest) returns(google.protobuf.BoolValue);
+	rpc UpdateShopProductPrice(UpdateShopProductPriceRequest) returns(ShopProductPriceReply);
 	rpc GetShopProductCategories(GetByIdInt64Request) returns(ShopProductCategoryListReply);
 	rpc AddShopProductCategory(ShopProductCategoryRequest) returns(ShopProductCategoryReply);
 	rpc CheckShopProductCategory(ShopProductCategoryRequest) returns(google.protobuf.BoolValue);

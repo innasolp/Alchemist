@@ -3,11 +3,16 @@
     "Name": "Shop WebApp",
     "Projects": [
       {
-        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
+        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
         "Action": "Start"
       },
       {
-        "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
+        "Path": "Shop.API\\Shop.API.csproj",
         "Action": "Start"
       }
     ]
@@ -16,12 +21,9 @@
     "Name": "ImportSettings WebApp",
     "Projects": [
       {
-        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
-        "Action": "Start"
-      },
-      {
         "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "https_api"
       },
       {
         "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
@@ -33,6 +35,11 @@
       },
       {
         "Path": "Alchemist.Product.ImportSettingsWebApp\\Alchemist.Product.ImportSettingsWebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "Shop.API\\Shop.API.csproj",
         "Action": "Start"
       }
     ]
@@ -40,10 +47,6 @@
   {
     "Name": "WebApp",
     "Projects": [
-      {
-        "Path": "Alchemist.Product.RestAPI\\Alchemist.Product.RestAPI.csproj",
-        "Action": "Start"
-      },
       {
         "Path": "Alchemist.Product.Import.ShopWebApp\\Alchemist.Product.ShopWebApp.csproj",
         "Action": "Start"

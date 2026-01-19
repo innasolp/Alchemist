@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Infrastructure;
-using Alchemist.Product.Interfaces;
+using ShopSettings.Interfaces;
 namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
 internal static class ModelHelper

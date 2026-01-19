@@ -1,8 +1,8 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Controllers;
 using Alchemist.Product.ImportSettingsWebApp.Models;
-using Alchemist.Product.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
+using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.ImportSettingsWebApp.UnitTests.Controllers;
 

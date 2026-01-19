@@ -1,14 +1,27 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Models;
+using Alchemist.Test.Functional.Playwright;
 using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
-using Alchemist.Test.Functional.Playwright;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 
 public abstract class ShopImportSettingsTest<TWebAppFactory, TInput> : PageTest, IClassFixture<TWebAppFactory>
     where TWebAppFactory :  ImportSettingsWebAppFactory
-{   
+{    
+
+    protected List<IConsoleMessage> _consoleMessages = [];
+
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+
+        Page.Console += (sender, args) =>
+        {
+            _consoleMessages.Add(args);
+        };
+    }
+
     protected abstract Task ExpectPageLoadedAsync();
 
     protected abstract Task<TInput> FillInputFieldsAsync();
