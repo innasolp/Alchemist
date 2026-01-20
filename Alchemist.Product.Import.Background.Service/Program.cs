@@ -26,6 +26,7 @@ using Alchemist.Product.Category.ImportItemHandler;
 using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
+using Import.Service.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,8 @@ AddShopAPIService(builder, out var restApiHost);
 AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
+
+builder.Host.AddImportServicesInfrastructure();
 
 AddMessages(builder);
 

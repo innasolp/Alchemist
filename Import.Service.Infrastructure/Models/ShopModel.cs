@@ -3,7 +3,7 @@ using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using System.ComponentModel;
 
-namespace Alchemist.Product.Import.Background.Models;
+namespace Import.Service.Commands.Models;
 
 interface IShopModel : IImportSource, IShop 
 {
@@ -11,20 +11,8 @@ interface IShopModel : IImportSource, IShop
 }
 
 internal class ShopModel : IShopModel
-{
-    private int _Id;
-    public int Id
-    {
-        get => _Id;
-        set
-        {
-            if (_Id != value)
-            {
-                _Id = value;
-                OnPropertyChanged("Id");
-            }
-        }
-    }
+{    
+    public int Id { get; set; }
 
     public string Name { get; set; }
     public string Url { get; set; }

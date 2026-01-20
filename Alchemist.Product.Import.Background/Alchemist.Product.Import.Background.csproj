@@ -32,6 +32,7 @@
     <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
+    <ProjectReference Include="..\Import.Service.Infrastructure\Import.Service.Commands.csproj" />
     <ProjectReference Include="..\Shop.Entities\Shop.Interfaces.csproj" />
   </ItemGroup>
 
