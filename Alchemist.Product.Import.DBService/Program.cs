@@ -1,8 +1,9 @@
 using Alchemist.Common;
 using Alchemist.DependencyInjection.Common;
 using Alchemist.Log.Extensions;
-using Alchemist.Product.BeautyAndHealth.DbItemHandler;
-using Alchemist.Product.Category.DbItemHandler;
+using Alchemist.Product.BeautyAndHealth;
+using Alchemist.Product.BeautyAndHealth.Commands;
+using Alchemist.Product.CategoryData;
 using Alchemist.Product.Import.DBService;
 using Alchemist.Product.Interfaces;
 using CustomConfigurationProvider;
@@ -16,6 +17,7 @@ using Serilog;
 using Serilog.Configuration.Extensions;
 using Serilog.Loggers;
 using Shop.API.Client;
+using Shop.Import.Category.Commands;
 using Shop.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,8 +40,15 @@ builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new 
 var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
 builder.Services.AddRabbitMQMessageReceiver(rabbitMQOptions);
 
-builder.Services.AddBeautyAndHealthProductItemHandler(builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>());
-builder.Services.AddCategoryItemHandler(builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
+builder.Services.AddKeyedSingleton<IDictionary<string, Type>>("ImportEvents", new Dictionary<string,Type>
+    { {builder.Configuration.GetSection("RabbitMQProductEvent").Get<string>(), typeof(ImportBeautyAndHealthProductCommand) },
+    { builder.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>(), typeof(ImportShopCategoryCommand) }
+});
+
+
+builder.Host.AddShopCategoryImportInfrastructure();
+builder.Host.AddBeautyAndHealthImportInfrastructure();
+
 
 AddLogging(builder.Configuration, builder.Logging, "log.property.json", $"{Utils.GetAppPath()}/Logs", restApiHost);
 

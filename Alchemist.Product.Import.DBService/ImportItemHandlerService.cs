@@ -1,34 +1,24 @@
-﻿using Alchemist.Common;
-using Alchemist.Product.DbItemHandler;
+﻿using MediatR;
 using Message.Interfaces;
-using System.Collections.Concurrent;
 
 namespace Alchemist.Product.Import.DBService;
 
-public class ImportItemHandlerService(ILogger<ImportItemHandlerService> logger,
-    IMessageReceiver messageReceiver, IEnumerable<IImportItemHandler> importItemHandlers) : BackgroundService
+public class ImportItemHandlerService(ILogger<ImportItemHandlerService> logger, 
+    IMediator mediator,
+    IMessageReceiver messageReceiver,
+    [FromKeyedServices("ImportEvents")] IDictionary<string, Type> events) : BackgroundService
 {
     private readonly ILogger<ImportItemHandlerService> _logger = logger;
-
+    private readonly IMediator _mediator = mediator;
     private readonly IMessageReceiver _messageReceiver = messageReceiver;
-
-    private readonly IEnumerable<IImportItemHandler> _importItemHandlers = importItemHandlers;
-
-    private readonly ConcurrentDictionary<Type, IImportItemHandler> _typedItemHandlers = new();
+    private readonly IDictionary<string, Type> _events = events; 
 
     private async Task OnHandleItem(object item, CancellationToken cancellationToken)
     {
         try
         {
-            if (!_typedItemHandlers.TryGetValue(item.GetType(), out var handler))
-            {
-                handler = _importItemHandlers.FirstOrDefault(h => h.ItemType == item.GetType() || item.GetType().IsImplementation(h.ItemType));
-                if (handler != null)
-                    _typedItemHandlers.TryAdd(item.GetType(), handler);
-            }
-
-            if (handler != null)
-                await handler.HandleItem(item, cancellationToken);
+            //todo retrieve item type
+            await _mediator.Send(item, cancellationToken);
         }
         catch(OperationCanceledException)
         {
@@ -56,8 +46,8 @@ public class ImportItemHandlerService(ILogger<ImportItemHandlerService> logger,
 
                 _logger.LogInformation("Import service connected to messaging host.");
 
-                foreach (var itemHandler in _importItemHandlers)
-                    _messageReceiver.On(itemHandler.EventName, onHandleItemTask, itemHandler.ItemType);
+                foreach (var @event in _events)
+                    _messageReceiver.On(@event.Key, onHandleItemTask, @event.Value);
             }
             catch (Exception ex)
             {

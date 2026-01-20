@@ -1,6 +1,6 @@
 ﻿using Shop.Interfaces;
 
-namespace Alchemist.Product.DbItemHandler;
+namespace Shop.Import.Common;
 
 public interface IShopCachedRepository 
 {

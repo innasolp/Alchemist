@@ -7,8 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Interfaces\Alchemist.Product.Interfaces.csproj" />
   </ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="MediatR" Version="14.0.0" />
+	</ItemGroup>
 
 </Project>
