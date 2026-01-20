@@ -5,6 +5,7 @@ using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.Concurrent;
 using Xunit.Abstractions;
+using ServiceMessage = Import.Service.Commands.ServiceMessage;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
@@ -101,7 +102,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             firstServiceCreatedAutoResetEvent.Set();
         }
 
-        async Task serviceStoppedAsync(Guid guid)
+        async Task serviceStopAsync(Guid guid)
         {
             serviceStoppedAutoResetEvent.Set();
         }
@@ -129,7 +130,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             }
 
             var guid = serviceGuids.First();
-            testMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, serviceStoppedAsync);
+            testMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, serviceStopAsync);
             await testMessageSender.Send(guid, Messages.Common.Messages.ServiceStop);
             waitingServiceStoppedTokenSource.CancelAfter(20000);
             await serviceStoppedAutoResetEvent.WaitAsync(waitingServiceStoppedTokenSource.Token);
@@ -138,7 +139,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
 
             var messages = new List<TestLogMessage>(LogMessages);
             Assert.Contains(messages, l => l.LogLevel == Microsoft.Extensions.Logging.LogLevel.Information
-            && l.Message?.Contains($"Stopping service with guid {guid} started.") == true);
+            && l.Message?.Contains($"Stopping service {guid} started.") == true);
 
         }
         catch

@@ -6,7 +6,7 @@ using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
 
-namespace Alchemist.Product.Import.Background.Models;
+namespace Import.Service.Commands.Models;
 
 internal static class ShopModelExtensions
 {

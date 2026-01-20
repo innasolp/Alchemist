@@ -9,13 +9,13 @@ using System.Text.Json;
 namespace Alchemist.Product.BeautyAndHealth.ImportItemHandler;
 
 internal class ProductQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue, IMessageSender messageSender, string methodName, IJsonSettings jsonSettings) 
-    : QueueItemHandler<IImportProduct, IBeautyAndHealthProductData>(backgroundTaskQueue, messageSender, methodName), IProductItemHandler
+    : QueueItemHandler<IImportProduct, ImportBeautyAndHealthProductCommand>(backgroundTaskQueue, messageSender, methodName), IProductItemHandler
 {
     private readonly JsonLoader _jsonLoader = new(jsonSettings);    
 
-    protected override async Task<IBeautyAndHealthProductData> ConvertToImportEntity(IImportProduct item)
+    protected override async Task<ImportBeautyAndHealthProductCommand> ConvertToImportEntity(IImportProduct item)
     {
-        return await ConvertToImportProductItem(item.ProductItem, item.SourceName, item.SourcePath, item.Stream);
+        return new ImportBeautyAndHealthProductCommand(await ConvertToImportProductItem(item.ProductItem, item.SourceName, item.SourcePath, item.Stream));
     }
 
     protected override string GetUrl(IImportProduct item)
@@ -23,7 +23,7 @@ internal class ProductQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue,
         return item.ProductItem.AbsolutePath;
     }
 
-    private async Task<IBeautyAndHealthProductData> ConvertToImportProductItem(IProductItem productItem, string shopName, string shopUrl, Stream stream)
+    private async Task<BeautyAndHealthProductData> ConvertToImportProductItem(IProductItem productItem, string shopName, string shopUrl, Stream stream)
     {
         var json = await JsonSerializer.DeserializeAsync<System.Text.Json.Nodes.JsonObject>(stream);
         var beautyAndHealthProduct = new BeautyAndHealthProduct();

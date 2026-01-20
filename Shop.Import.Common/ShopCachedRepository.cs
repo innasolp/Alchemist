@@ -1,7 +1,7 @@
 ﻿using Shop.Interfaces;
 using System.Collections.Concurrent;
 
-namespace Alchemist.Product.DbItemHandler;
+namespace Shop.Import.Common;
 
 internal class ShopCachedRepository(IShopDataService shopDataService) : IShopCachedRepository
 {

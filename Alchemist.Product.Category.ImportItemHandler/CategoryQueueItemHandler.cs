@@ -7,20 +7,20 @@ using Message.Interfaces;
 
 namespace Alchemist.Product.Category.ImportItemHandler;
 
-internal class CategoryQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue, IMessageSender messageSender, string methodName) 
-    : QueueItemHandler<IImportCategory, ICategoryData>(backgroundTaskQueue, messageSender, methodName), ICategoryItemHandler
+public class CategoryQueueItemHandler(IBackgroundTaskQueue backgroundTaskQueue, IMessageSender messageSender, string methodName) 
+    : QueueItemHandler<IImportCategory, ImportShopCategoryCommand>(backgroundTaskQueue, messageSender, methodName), ICategoryItemHandler
 {
-    protected override async Task<ICategoryData> ConvertToImportEntity(IImportCategory item)
+    protected override async Task<ImportShopCategoryCommand> ConvertToImportEntity(IImportCategory item)
     {
-        return ConvertToImportCategoryItem(item.Category, item.SourceName, item.SourceUrl);
+        return new ImportShopCategoryCommand(ConvertToImportCategoryItem(item.Category, item.SourceName, item.SourceUrl));
     }
 
     protected override string GetUrl(IImportCategory item)
     {
         return item.Category.Url;
     }
-
-    private static ICategoryData ConvertToImportCategoryItem(ICategory categoryItem, string shopName, string shopUrl)
+     
+    private static CategoryData.CategoryData ConvertToImportCategoryItem(ICategory categoryItem, string shopName, string shopUrl)
     {
         return new CategoryData.CategoryData
         {

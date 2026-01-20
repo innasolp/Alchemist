@@ -1,61 +1,44 @@
 ﻿using Alchemist.Common;
-using Alchemist.Exceptions;
-using Alchemist.Product.DbItemHandler;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
+using MediatR;
+using Shop.Import.Common;
 using Shop.Interfaces;
 
-namespace Alchemist.Product.BeautyAndHealth.DbItemHandler;
+namespace Alchemist.Product.BeautyAndHealth.Commands;
 
-internal class BeautyAndHealthProductItemHandler(IProductDataService productDataService, IShopDataService shopDataService, string eventName, IShopCachedRepository shopCache)
-    : IImportItemHandler
+public class ImportBeautyAndHealthProductCommandHandler(IProductDataService productDataService, 
+    IShopDataService shopDataService,
+    IShopCachedRepository shopCache) : IRequestHandler<ImportBeautyAndHealthProductCommand, ItemProcessStatus>
 {
-    private class ImportProductProcessEventArgs(IBeautyAndHealthProductData item, ItemProcessStatus processStatus, CancellationToken cancellationToken)
-       : ItemProcessEventArgs<object, ItemProcessStatus>(item, processStatus, cancellationToken)
-    { }
-
     private readonly IProductDataService _productDataService = productDataService;
 
     private readonly IShopDataService _shopDataService = shopDataService;
 
     private readonly IShopCachedRepository _shopCache = shopCache;
 
-    public string EventName { get; private set; } = eventName;
-
-    Type IImportItemHandler.ItemType => typeof(BeautyAndHealthProductData);
-
-    private event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>>? _itemProcessed;
-    public event AsyncEventHandler<ItemProcessEventArgs<object, ItemProcessStatus>> ItemProcessed
+    public async Task<ItemProcessStatus> Handle(ImportBeautyAndHealthProductCommand request, CancellationToken cancellationToken)
     {
-        add => _itemProcessed += value;
-        remove => _itemProcessed -= value;
-    }
-
-    public async Task<ItemProcessStatus> HandleItem(object item, CancellationToken cancellationToken = default)
-    {
-        if (item is not IBeautyAndHealthProductData productData)
-            throw new InvalidDataException($"Item type {item.GetType().Name} is invalid. Expected type must implement {nameof(IBeautyAndHealthProductData)}");
-
         try
         {
-            var shop = await _shopCache.TryGetShopAsync(productData.ShopName, productData.ShopUrl, cancellationToken)
-            ?? throw new InvalidDataException($"Shop with name {productData.ShopName} or url {productData.ShopUrl} not found.");
+            var shop = await _shopCache.TryGetShopAsync(request.Product.ShopName, request.Product.ShopUrl, cancellationToken)
+            ?? throw new InvalidDataException($"Shop with name {request.Product.ShopName} or url {request.Product.ShopUrl} not found.");
 
-            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(shop.Id, productData.ShopProduct?.ItemId ?? string.Empty, cancellationToken)
+            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(shop.Id, request.Product.ShopProduct?.ItemId ?? string.Empty, cancellationToken)
                 ??
                 new ShopProduct
                 {
                     ShopId = shop.Id,
-                    ItemId = productData.ShopProduct.ItemId,
-                    ApiUrl = productData.ShopProduct.ApiUrl,
-                    ItemUrl = productData.ShopProduct.ItemUrl
+                    ItemId = request.Product.ShopProduct.ItemId,
+                    ApiUrl = request.Product.ShopProduct.ApiUrl,
+                    ItemUrl = request.Product.ShopProduct.ItemUrl
                 };
 
             if (shopProduct.ProductId != 0)
             {
-                await SetShopProductPriceForItemAsync(productData, shopProduct.Id, cancellationToken);
-                
-                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shop.Id, shopProduct.Id, productData.ShopCategory.ItemId, cancellationToken);
+                await SetShopProductPriceForItemAsync(request.Product, shopProduct.Id, cancellationToken);
+
+                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shop.Id, shopProduct.Id, request.Product.ShopCategory.ItemId, cancellationToken);
                 //todo
                 //if(!categoryResult)
                 //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
@@ -69,49 +52,38 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
                 return result;
             }
 
-            var product = !string.IsNullOrEmpty(productData.Brand?.Name)
-                ? await _productDataService.FindProductByNameAndBrand(productData.Product.Name, productData.Brand.Name, cancellationToken)
-                    ?? await _productDataService.FindProductByName(productData.Product.Name, cancellationToken)
-                : await _productDataService.FindProductByName(productData.Product.Name, cancellationToken);
-            
+            var product = !string.IsNullOrEmpty(request.Product.Brand?.Name)
+                ? await _productDataService.FindProductByNameAndBrand(request.Product.Product.Name, request.Product.Brand.Name, cancellationToken)
+                    ?? await _productDataService.FindProductByName(request.Product.Product.Name, cancellationToken)
+                : await _productDataService.FindProductByName(request.Product.Product.Name, cancellationToken);
+
             if (product != null)
             {
-                if (await _productDataService.GetShopProductByShopAndProductId(shop.Id, product.Id, cancellationToken) != null)
-                {
-                    await InvokeItemProcessedAsync(productData, ItemProcessStatus.AlreadyExists, cancellationToken);
+                if (await _productDataService.GetShopProductByShopAndProductId(shop.Id, product.Id, cancellationToken) != null)                
                     return ItemProcessStatus.AlreadyExists;
-                }
+                
             }
             else
-                product = await CreateProductFromModelAsync(productData, shop.Id, cancellationToken);
+                product = await CreateProductFromModelAsync(request.Product, shop.Id, cancellationToken);
 
             shopProduct.ProductId = product.Id;
             shopProduct.IsActual = true;
 
             var newShopProduct = await _productDataService.CreateShopProduct(shopProduct, cancellationToken);
 
-            var shopProductPrice = await SetShopProductPriceForItemAsync(productData, newShopProduct.Id, cancellationToken);
+            var shopProductPrice = await SetShopProductPriceForItemAsync(request.Product, newShopProduct.Id, cancellationToken);
 
-            if (!await SetShopProductCategoryIfNeedAsync(shop.Id, newShopProduct.Id, productData.ShopCategory.ItemId, cancellationToken))
-            {
-                await InvokeItemProcessedAsync(productData, ItemProcessStatus.Error, cancellationToken);
-                return await Task.FromResult(ItemProcessStatus.Error);
-            }
+            if (!await SetShopProductCategoryIfNeedAsync(shop.Id, newShopProduct.Id, request.Product.ShopCategory.ItemId, cancellationToken))            
+                return await Task.FromResult(ItemProcessStatus.Error);            
 
             //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
 
-            await InvokeItemProcessedAsync(productData, ItemProcessStatus.New, cancellationToken);
             return ItemProcessStatus.New;
         }
         catch (Exception e)
         {
-            throw new WarningException($"Product {productData.ShopProduct.ItemUrl} proccessed with error.", e);
+            throw new Exception($"Product {request.Product.ShopProduct.ItemUrl} proccessed with error.", e);
         }
-    }
-
-    private Task InvokeItemProcessedAsync(IBeautyAndHealthProductData item, ItemProcessStatus itemProcessStatus, CancellationToken cancellationToken)
-    {
-        return _itemProcessed?.Invoke(this, new ImportProductProcessEventArgs(item, itemProcessStatus, cancellationToken)) ?? Task.FromResult(false);
     }
 
     private async Task<bool> SetShopProductCategoryIfNeedAsync(int shopId, long shopProductId, int categoryItemId, CancellationToken cancellationToken = default)
@@ -153,8 +125,8 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
 
     private async Task<IProduct> CreateProductFromModelAsync(IBeautyAndHealthProductData productItem, int shopId, CancellationToken cancellationToken = default)
     {
-        var brand = !string.IsNullOrWhiteSpace(productItem.Brand?.Name) 
-            ? await GetBrandAsync(productItem.Brand.Name, productItem.Country?.Name, cancellationToken) 
+        var brand = !string.IsNullOrWhiteSpace(productItem.Brand?.Name)
+            ? await GetBrandAsync(productItem.Brand.Name, productItem.Country?.Name, cancellationToken)
             : null;
 
         var productType = await _productDataService.FindProductTypeByName(productItem.ProductType.Name, cancellationToken) ??
@@ -190,7 +162,7 @@ internal class BeautyAndHealthProductItemHandler(IProductDataService productData
 
             componentNumber++;
 
-            var productComponent = _productDataService.SetProductComponent(new ProductComponent { ProductId = productId, ComponentId = component.Id, SequalNumber = (short)componentNumber }, 
+            var productComponent = _productDataService.SetProductComponent(new ProductComponent { ProductId = productId, ComponentId = component.Id, SequalNumber = (short)componentNumber },
                 cancellationToken);
         }
     }
