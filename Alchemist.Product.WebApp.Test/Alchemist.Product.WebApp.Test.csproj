@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Alchemist.Test.Functional.Playwright\Alchemist.Test.Functional.Playwright.csproj" />
     <ProjectReference Include="..\Alchemist.Test.ProductWebAppFactory\Alchemist.Test.ProductWebAppFactory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
+    <ProjectReference Include="..\Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

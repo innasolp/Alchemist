@@ -4,12 +4,21 @@ using Alchemist.Test.DBApiWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Test.PostresqlTestContainer;
+using Testcontainers.PostgreSql;
 
 namespace Alchemist.Product.GrpcService.Tests.Infrastructure;
 
-public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<GrpcServiceProgramm, AlchemyContext>
+public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<GrpcServiceProgramm, AlchemyContext>, IAsyncLifetime
 {
-    public string DataBase { get; set; } = "test_ci_db";
+    private readonly PostgreSqlContainer _postgreSqlContainer;
+
+    private readonly string _host = Guid.NewGuid().ToString();
+
+    public AlchemistGrpcWebAppFactory()
+    {
+        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(_host);
+    }
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
@@ -22,10 +31,20 @@ public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<GrpcServiceProg
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
         return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder =>
-        optionsBuilder.UseNpgsql($"Host=localhost;Database={DataBase};Username=postgres;Password=P@ssw0rd;"));
+            optionsBuilder.UseNpgsql(_postgreSqlContainer.BuildConnectionString(DataBase)));
     }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {        
+    }
+
+    public Task InitializeAsync()
+    {
+        return _postgreSqlContainer.StartAsync();
+    }
+
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await _postgreSqlContainer.DisposeAsync();
     }
 }

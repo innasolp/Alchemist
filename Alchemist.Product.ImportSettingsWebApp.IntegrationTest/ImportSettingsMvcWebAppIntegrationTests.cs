@@ -1,4 +1,4 @@
-using Alchemist.Test.ImportSettingsWebApp.Factory;
+using Alchemist.Product.ImportSettingsWebApp.IntegrationTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.ShopWebAppFactory;
 using ShopSettings.Interfaces;
@@ -8,25 +8,17 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest;
 
-public class TestImportSettingsMvcWebAppFactory : ImportsettingsWebAppFullFactory
+public class TestImportSettingsMvcWebAppFactory : ImportSettingsWebAppTestContainerLifetimeFactory
 {
-    private readonly ShopWebAppFactory _shopWebAppFactory;
-
-    public TestImportSettingsMvcWebAppFactory() : base(isApi : false,
-        "https://localhost:8411",
+    public TestImportSettingsMvcWebAppFactory() : base(isApi : false,        
     httpPort : 7082,
-    httpsPort : 7083,
-    settingsApiDbConnectionString: Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsMvcTestDb"),
+    httpsPort : 7083,    
     settingsApiHttpPort : 8210,
     settingsApiHttpsPort : 8211,
-    Common.SignalRTestServer)
+    database: Alchemist.Common.ConfigurationHelper.GetSectionValue("SettingsMvcTestDb"),
+    8070,8071,
+    8410,8411)
     {
-        _shopWebAppFactory = new ShopWebAppFullFactory(isApi: true,
-            connectionString: Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsMvcTestDb"),
-            httpPort: 8410, httpsPort: 8411, shopAPIHttpPort: 8070, shopAPIHttpsPort: 8071,
-            Common.SignalRTestServer
-            );
-        _shopWebAppFactory.CreateClient();
     }
 }
 

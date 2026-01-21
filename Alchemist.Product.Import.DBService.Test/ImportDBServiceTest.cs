@@ -14,7 +14,6 @@ using Xunit.Abstractions;
 using Mapster;
 using Shop.Infrastructure;
 using Mediator.Infrastructure.Command;
-using Shop.UnitOfWork;
 using Alchemist.Product.Infrastructure;
 
 namespace Alchemist.Product.Import.DBService.Test;

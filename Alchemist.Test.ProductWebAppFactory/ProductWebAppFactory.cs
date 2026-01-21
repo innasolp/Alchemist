@@ -16,8 +16,10 @@ public class ProductWebAppFactory(int httpPort, int httpsPort, HttpClient shopWe
     private readonly HttpClient _importSettingsWebAppApiClient = importSettingsWebAppApiClient;
 
     public ProductWebAppFactory(int httpPort, int httpsPort, string connectionString, TestServer signalRTestServer,
-        int shopApiHttpPort, int shopApiHttpsPort, int shopWebAppApiHttpPort, int shopWebAppApiHttspPort,
-        int settingsApiHttpPort, int settingsApiHttpsPort, int settingsWebAppApiHttpPort, int settingsWebAppApiHttspPort) :
+        int shopApiHttpPort, int shopApiHttpsPort,
+        int shopWebAppApiHttpPort, int shopWebAppApiHttspPort,
+        int settingsApiHttpPort, int settingsApiHttpsPort,
+        int settingsWebAppApiHttpPort, int settingsWebAppApiHttspPort) :
          this(httpPort, httpsPort, 
              ShopWebAppHelper.CreateShopWebAppApiHttpClient(connectionString,
                  shopWebAppApiHttpPort, shopWebAppApiHttspPort, shopApiHttpPort,

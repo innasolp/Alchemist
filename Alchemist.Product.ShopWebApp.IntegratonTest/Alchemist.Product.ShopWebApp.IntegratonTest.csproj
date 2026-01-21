@@ -26,6 +26,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Alchemist.Test.ShopWebAppFactory\Alchemist.Test.ShopWebAppFactory.csproj" />
+	  <ProjectReference Include="..\Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

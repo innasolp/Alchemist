@@ -1,24 +1,20 @@
-using Alchemist.Test.ImportSettingsWebApp.Factory;
-using Alchemist.Test.ProductWebAppFactory;
-using Alchemist.Test.ShopWebAppFactory;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using Alchemist.Product.WebApp.Test.Infrastructure;
+using Alchemist.Test.Functional.Playwright;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
-using System;
 using Xunit.Abstractions;
-using TestCommon = Alchemist.Product.WebApp.Test.Infrastructure.Common;
-using Alchemist.Test.Functional.Playwright;
 
 namespace Alchemist.Product.WebApp.Test;
 
-public class TestProductWebAppFactory : ProductWebAppFactory
+public class TestProductWebAppFactory : ProductWebAppTestContainerLifetimeFactory
 {
-    private static readonly string dbConnectionString = Common.ConfigurationHelper.GetConnectionString("ContainerWebAppTestDb");
+    private static readonly string dbConnectionString = Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb");
     public TestProductWebAppFactory() : base(7102, 7103,
-        ShopWebAppHelper.CreateShopWebAppApiHttpClient(dbConnectionString,7500, 7501,8060,8061,TestCommon.SignalRTestServer),
-        ImportSettingsWebAppHelper.CreateImportSettingsWebAppApiHttpClient(dbConnectionString,7088,7089,null, 8406,8407,
-            TestCommon.SignalRTestServer,
-            (dbContext) => TestCommon.FillTestData(dbContext, [1, 2, 3, 4])))
+        7500, 7501,
+        8060,8061,
+        7088,7089,
+         8406,8407,
+        dbConnectionString)
     { }
 }
 

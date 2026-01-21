@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ShopSettings.Interfaces;
 
-
 namespace Alchemist.Test.ImportSettingsWebApp.Factory;
 
 public class ImportSettingsWebAppFactory(bool isApi, string? shopApiHost, int httpPort, int httpsPort,

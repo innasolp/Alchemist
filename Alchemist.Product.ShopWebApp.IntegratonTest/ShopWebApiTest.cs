@@ -1,14 +1,14 @@
 using Alchemist.Product.ShopWebApp.Controllers;
+using Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
-using Alchemist.Test.ShopWebAppFactory;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
-public class ShopWebAppApiFactory : ShopWebAppFullFactory
+public class ShopWebAppApiFactory : ShopWebAppLifetimeTestContainerFactory
 {
-    public ShopWebAppApiFactory() : base (true, Common.ConfigurationHelper.GetConnectionString("ShopWebApiTestDb"), 8402,8403,8060,8061)
+    public ShopWebAppApiFactory() : base (true, 8402,8403,8060,8061, Common.ConfigurationHelper.GetSectionValue("ShopWebApiTestDb"))
     {
     }
 }

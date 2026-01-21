@@ -2,7 +2,7 @@
 
 namespace Alchemist.Test.Host.Interfaces;
 
-public interface ITestHost : IDisposable, IAsyncDisposable
+public interface IMessageTestHost : IDisposable, IAsyncDisposable
 {
     Task Start();
 

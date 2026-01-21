@@ -1,40 +1,50 @@
 ﻿using Alchemist.BrowserService.Client;
+using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.Import.Background;
+using Alchemist.Settings.RestAPIClient;
 using Alchemist.Test.Host.Interfaces;
 using Alchemist.Test.Log;
 using Alchemist.Test.RabbitMQ;
 using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.SettingsAPIFactory;
+using Alchemist.Test.ShopApiFactory;
 using Alchemist.Test.SignalRWebAppFactory;
+using Import.Factory.Interfaces;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Alchemist.Settings.RestAPIClient;
 using Microsoft.Extensions.DependencyInjection;
-using Alchemist.Test.ShopApiFactory;
-using Alchemist.Test.SettingsAPIFactory;
-using Import.Factory.Interfaces;
-using Alchemist.Import.Settings;
 using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
+using Test.PostresqlTestContainer;
+using Testcontainers.PostgreSql;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBackgroundServiceProgram>, ILoggedContext
+public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBackgroundServiceProgram>, ILoggedContext, IAsyncLifetime
 {
-    private readonly SettingsAPIWebAppFactory _settingsAPIWebAppFactory;
+    private readonly string _dataBase;
+    private readonly int _shopAPIHttpPort;
+    private readonly int _shopAPIHttpsPort;
+    private readonly int _settingsAPIHttpPort;
+    private readonly int _settingsAPIHttpsPort;
 
-    private readonly ShopAPIWebAppFactory _shopAPIWebAppFactory;
+    private SettingsAPIWebAppFactory? _settingsAPIWebAppFactory;
+
+    private ShopAPIWebAppFactory? _shopAPIWebAppFactory;
 
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
     private readonly TestWebAppKestrelFactory<BrowserServiceProgramm> _browserServiceFactory;
     
-    private readonly ITestHost _importItemsHost = new RabbitMQTestHost();
+    private readonly IMessageTestHost _importItemsHost = new RabbitMQTestHost();
 
     private IConfiguration? _configuration;
+
+    private readonly PostgreSqlContainer _postgreSqlContainer;
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
@@ -47,28 +57,29 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
 
-    public HttpClient ShopSettingsApiClient { get; }
+    public HttpClient? ShopSettingsApiClient { get; private set; }
 
-    public HttpClient ShopApiClient { get; }   
+    public HttpClient? ShopApiClient { get; private set; }   
 
-    public ImportBackgroundServiceWebAppFactory(string connectionSection, int shopAPIHttpPort, int shopAPIHttpsPort,
+    public ImportBackgroundServiceWebAppFactory(string dataBaseSection,
+        int shopAPIHttpPort, int shopAPIHttpsPort,
         int settingsAPIHttpPort, int settingsAPIHttpsPort, 
         int browserServiceHttpPort, int browserServiceHttpsPort)
     {
+        _shopAPIHttpPort = shopAPIHttpPort;
+        _shopAPIHttpsPort = shopAPIHttpsPort;
+        _settingsAPIHttpPort = settingsAPIHttpPort;
+        _settingsAPIHttpsPort = settingsAPIHttpsPort;
+        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+
         var settings = new ConfigurationBuilder()
               .AddJsonFile("appsettings.json")
               .Build();
 
-        var alchemyDbConnectionString = settings.GetConnectionString(connectionSection);
+        _dataBase = settings.GetSection(dataBaseSection).Get<string>() ?? "test_ci_db";
 
         _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
-        _signalRApplicationFactory.CreateClient();
-
-        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, shopAPIHttpPort, shopAPIHttpsPort);
-        ShopApiClient = _shopAPIWebAppFactory.CreateClient();
-
-        _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, settingsAPIHttpPort, settingsAPIHttpsPort);
-        ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
+        _signalRApplicationFactory.CreateClient();        
 
         _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(browserServiceHttpPort, browserServiceHttpsPort);
     }  
@@ -107,5 +118,23 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         services.SetSignalRHubTestSender(Category.ImportItemHandler.ServiceKeys.ImportCategoryMessageSenderKey, _signalRApplicationFactory.Server, "import");
         services.SetSignalRHubTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
         services.SetSignalRHubTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _postgreSqlContainer.StartAsync();
+
+        var alchemyDbConnectionString = _postgreSqlContainer.BuildConnectionString(_dataBase);
+
+        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, _shopAPIHttpPort, _shopAPIHttpsPort);
+        ShopApiClient = _shopAPIWebAppFactory.CreateClient();
+
+        _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, _settingsAPIHttpPort, _settingsAPIHttpsPort);
+        ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
+    }
+
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await _postgreSqlContainer.DisposeAsync();
     }
 }

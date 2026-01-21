@@ -8,14 +8,15 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Alchemist.Product.Import.DBService.Test;
 
 public class GrpcServiceWebAppFactory(string connectionString) : DBAPIKestrelWebAppFactory<GrpcServiceProgramm, AlchemyContext>(false, 8070, 8071)
-{
+{  
     private readonly string _connectionString = connectionString;
 
     public event Action<IServiceCollection> ConfigureServices;
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
-        return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
+        return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder =>
+                optionsBuilder.UseNpgsql(_connectionString));
     }
 
     protected override void FillTestData(AlchemyContext dbContext)

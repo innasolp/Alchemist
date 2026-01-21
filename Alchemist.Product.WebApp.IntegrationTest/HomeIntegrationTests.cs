@@ -1,19 +1,19 @@
-using System.Net;
-using Alchemist.Test.ProductWebAppFactory;
+using Alchemist.Product.WebApp.IntegrationTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net;
 using Xunit.Abstractions;
-using TestCommon = Alchemist.Product.WebApp.IntegrationTest.Infrastructure.Common;
 
 namespace Alchemist.Product.WebApp.IntegrationTest;
 
-public class TestProductWebAppFactory : ProductWebAppFactory
+public class TestProductWebAppFactory : ProductWebAppTestContainerLifetimeFactory
 {
     public TestProductWebAppFactory() : base(7102, 7103,
-        Common.ConfigurationHelper.GetConnectionString("ContainerWebAppTestDb"),
-        TestCommon.SignalRTestServer,
-      8060, 8061, 7500, 7501,
-      8406, 8407, 7088, 7089)
+        8060, 8061,
+        7500, 7501,
+      8406, 8407,
+      7088, 7089,
+        Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb"))
     { }
 }
 
