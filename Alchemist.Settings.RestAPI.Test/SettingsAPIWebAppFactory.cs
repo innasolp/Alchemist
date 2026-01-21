@@ -8,40 +8,43 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Test.PostresqlTestContainer;
+using Testcontainers.PostgreSql;
 
 namespace Alchemist.Settings.RestAPI.Test;
 
-public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgram, AlchemyContext>, ILoggedContext
+public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgram, AlchemyContext>, ILoggedContext, IAsyncLifetime
 {
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
+    private readonly PostgreSqlContainer _postgreSqlContainer;
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
     public event Action<WebHostBuilderContext, IServiceCollection> ConfigureContextServices;
 
-    public Product.Data.Shop[] Shops { get; } = new Product.Data.Shop[2];
+    public Shop[] Shops { get; } = new Shop[2];
 
     public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
 
     public SettingsAPIWebAppFactory()
     {
+        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+
         _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
         _signalRApplicationFactory.CreateClient();
     }
 
-    public string DataBase { get; set; } = "test_ci_db";
-
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
         return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder =>
-        optionsBuilder.UseNpgsql($"Host=localhost;Database={DataBase};Username=postgres;Password=P@ssw0rd;"));
+        optionsBuilder.UseNpgsql(_postgreSqlContainer.BuildConnectionString(DataBase)));
     }
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
-        Shops[0] = dbContext.Shops.Add(new Product.Data.Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;        
-        Shops[1] = dbContext.Shops.Add(new Product.Data.Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
+        Shops[0] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;        
+        Shops[1] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
 
         dbContext.SaveChanges();        
 
@@ -63,5 +66,15 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
         FixtureLoggingContext.ConfigureServices(services);
 
         ConfigureContextServices?.Invoke(context, services);
+    }
+
+    public Task InitializeAsync()
+    {
+        return _postgreSqlContainer.StartAsync();
+    }
+
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await _postgreSqlContainer.DisposeAsync();
     }
 }

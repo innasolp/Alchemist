@@ -29,6 +29,7 @@
     <ProjectReference Include="..\Alchemist.Product.GrpcService\Alchemist.Product.GrpcService.csproj" />
     <ProjectReference Include="..\Alchemist.Test.DBApiWebAppFactory\Alchemist.Test.DBApiWebAppFactory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
+    <ProjectReference Include="..\Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

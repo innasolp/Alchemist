@@ -1,5 +1,4 @@
-﻿using Alchemist.Messages.Common;
-using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
+﻿using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.VisualStudio.Threading;
@@ -12,12 +11,14 @@ namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper) 
  : LoggedContextTest(outputHelper)
 {    
-    private ImportBackgroundServiceWebAppFactory CreateWebAppFactory(int[] ports)
+    private async Task<ImportBackgroundServiceWebAppFactory> CreateWebAppFactoryAsync(int[] ports)
     {
         if (ports.Length < 6)
             throw new Exception($"No 6 ports in range");
         var webAppFactory = new ImportBackgroundServiceWebAppFactory("serviceMessageTestDb", 
             ports[0], ports[1], ports[2], ports[3], ports[4], ports[5]);
+
+        await webAppFactory.InitializeAsync();
 
         webAppFactory.FixtureLoggingContext.LoggedMessage += Log;
         webAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
@@ -36,7 +37,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
     [Fact]
     public async Task SendMessageServiceCreatedSuccess()
     {
-        var WebAppFactory = CreateWebAppFactory([8052, 8053, 8202, 8203,8304,8305]);
+        var WebAppFactory = await CreateWebAppFactoryAsync([8052, 8053, 8202, 8203,8304,8305]);
 
         var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         var serviceCreatedAutoResetEvent = new AsyncAutoResetEvent();
@@ -88,7 +89,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
     [Fact]
     public async Task ReceiveMessageServiceStopSuccess()
     {
-        var webAppFactory = CreateWebAppFactory([8054, 8055, 8204, 8205, 8306, 8307]);
+        var webAppFactory = await CreateWebAppFactoryAsync([8054, 8055, 8204, 8205, 8306, 8307]);
 
         var serviceGuids = new BlockingCollection<Guid>();
         var firstServiceCreatedAutoResetEvent = new AsyncAutoResetEvent(false);

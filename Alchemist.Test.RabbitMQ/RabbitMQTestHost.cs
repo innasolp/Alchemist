@@ -7,9 +7,9 @@ using Testcontainers.RabbitMq;
 
 namespace Alchemist.Test.RabbitMQ;
 
-public class RabbitMQTestHost() : ITestHost
+public class RabbitMQTestHost() : IMessageTestHost
 {
-    private readonly RabbitMqContainer _rabbitMqContainer = new RabbitMqBuilder().Build();    
+    private readonly RabbitMqContainer _rabbitMqContainer = new RabbitMqBuilder("rabbitmq:latest").Build();    
 
     public bool IsStarted => _rabbitMqContainer.State == DotNet.Testcontainers.Containers.TestcontainersStates.Running;
 

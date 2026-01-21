@@ -1,4 +1,4 @@
-﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
+﻿using Alchemist.Product.ImportSettingsWebApp.IntegrationTest.Infrastructure;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
@@ -9,14 +9,17 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest;
 
-public class ImportSettingsWebAppApiLoggedFactory : ImportsettingsWebAppFullFactory, ILoggedContext
+public class ImportSettingsWebAppApiLoggedFactory : ImportSettingsWebAppTestContainerLifetimeFactory, ILoggedContext
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
-    public ImportSettingsWebAppApiLoggedFactory() : base(true, null, 7086, 7087, Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsWebApiLogTestDb")
-        , 8214, 8215)
+    public ImportSettingsWebAppApiLoggedFactory() 
+        : base(true,
+            7086, 7087, 
+            8214, 8215,
+            Alchemist.Common.ConfigurationHelper.GetSectionValue("SettingsWebApiLogTestDb"))
     {
     }
 

@@ -20,8 +20,10 @@ public static class ShopApiHelper
     public static HttpClient CreateShopApiClient(string alchemyDbConnectionString, int httpPort, int httpsPort, TestServer signalRTestServer, bool ensureDeleted = true)
     {
         var shopApiWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, signalRTestServer, httpPort, httpsPort, ensureDeleted);
-        var httpClient = shopApiWebAppFactory.CreateClient();
-        httpClient.BaseAddress = new Uri(shopApiWebAppFactory.ServerAddress);
+        var httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(shopApiWebAppFactory.ServerAddress)
+        };
         return httpClient;
     }
 

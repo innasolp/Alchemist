@@ -8,7 +8,8 @@ using Shop.Interfaces;
 
 namespace Alchemist.Test.ShopWebAppFactory;
 
-public class ShopWebAppFactory(bool isApi, int httpPort, int httpsPort, HttpClient shopApiClient) : TestWebAppKestrelFactory<ShopWebAppProgram>(httpPort, httpsPort)
+public class ShopWebAppFactory(bool isApi, int httpPort, int httpsPort, HttpClient shopApiClient) 
+    : TestWebAppKestrelFactory<ShopWebAppProgram>(httpPort, httpsPort)
 {
     private readonly bool _isApi = isApi;
 

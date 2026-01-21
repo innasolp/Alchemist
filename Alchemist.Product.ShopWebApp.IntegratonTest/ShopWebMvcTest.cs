@@ -1,12 +1,12 @@
-﻿using Alchemist.Test.Server.Fixtures;
-using Alchemist.Test.ShopWebAppFactory;
+﻿using Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
+using Alchemist.Test.Server.Fixtures;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
-public class ShopWebAppMvcFactory : ShopWebAppFullFactory
+public class ShopWebAppMvcFactory : ShopWebAppLifetimeTestContainerFactory
 {
-    public ShopWebAppMvcFactory() : base(false, Common.ConfigurationHelper.GetConnectionString("ShopMvcTestDb"), 8404, 8405, 8062, 8063)
+    public ShopWebAppMvcFactory() : base(false, 8404, 8405, 8062, 8063, Common.ConfigurationHelper.GetSectionValue("ShopMvcTestDb"))
     {
     }
 }

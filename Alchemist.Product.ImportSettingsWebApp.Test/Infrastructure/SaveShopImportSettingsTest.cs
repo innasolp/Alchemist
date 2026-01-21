@@ -1,10 +1,10 @@
-﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 
 public abstract class SaveShopImportSettingsTest<TWebAppFactory, TInput>(ITestOutputHelper testOutputHelper) : ShopImportSettingsTest<TWebAppFactory, TInput>
-    where TWebAppFactory : ImportSettingsWebAppFactory
+    where TWebAppFactory : WebApplicationFactory<ImportSettingsWebAppProgramm>
 {
     protected ITestOutputHelper TestOutputHelper { get; } = testOutputHelper;
 

@@ -11,6 +11,12 @@ public abstract class DbContextWebAppFactory<TEntryPoint, TDbContext> : TestWebA
     where TEntryPoint : class
     where TDbContext : DbContext
 {
+    public virtual string DataBase { get; set; } = "test_ci_db";
+
+    protected virtual string UserName { get; } = "postgres";
+
+    protected virtual string Password { get; } = "P@ssw0rd";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);

@@ -1,7 +1,7 @@
-﻿using Alchemist.Test.Server.Fixtures;
-using Alchemist.Product.SignalR;
+﻿using Alchemist.Product.SignalR;
 using Alchemist.Test.Host.Interfaces;
 using Alchemist.Test.RabbitMQ;
+using Alchemist.Test.Server.Fixtures;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -9,22 +9,28 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shop.API.Client;
 using Shop.Interfaces;
+using Test.PostresqlTestContainer;
+using Testcontainers.PostgreSql;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServiceProgram>
+public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServiceProgram>, IAsyncLifetime
 {
-    private readonly GrpcServiceWebAppFactory _grpcWebAppFactory;
+    private readonly string _dataBase;
 
-    internal GrpcServiceWebAppFactory GrpcWebAppFactory => _grpcWebAppFactory;
+    private readonly PostgreSqlContainer _postgreSqlContainer;
 
-    private readonly ShopAPIWebAppFactory _shopAPIWebAppFactory;
+    private GrpcServiceWebAppFactory? _grpcWebAppFactory;
 
-    internal ShopAPIWebAppFactory ShopAPIWebAppFactory => _shopAPIWebAppFactory;
+    internal GrpcServiceWebAppFactory? GrpcWebAppFactory => _grpcWebAppFactory;
+
+    private ShopAPIWebAppFactory? _shopAPIWebAppFactory;
+
+    internal ShopAPIWebAppFactory? ShopAPIWebAppFactory => _shopAPIWebAppFactory;
 
     private readonly WebApplicationFactory<Startup> _signalRApplicationFactory;
 
-    private readonly ITestHost _importItemsHost = new RabbitMQTestHost();
+    private readonly IMessageTestHost _importItemsHost = new RabbitMQTestHost();
 
     public IConfiguration? Configuration { get; private set; }
 
@@ -36,19 +42,17 @@ public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServicePro
               .AddJsonFile("appsettings.json")
               .Build();
 
-        var alchemyDbConnectionString = settings.GetConnectionString("alchemydb");
+        _dataBase = settings.GetSection("alchemydb").Get<string>() ?? "test_ci_db";
 
-        _grpcWebAppFactory = new GrpcServiceWebAppFactory(alchemyDbConnectionString);       
-
+        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+        
         _signalRApplicationFactory = new WebApplicationFactory<Startup>();
-        _signalRApplicationFactory.CreateClient();
-
-        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server);       
+        _signalRApplicationFactory.CreateClient();            
     }
 
     public void StartGrpc()
     {
-        _grpcWebAppFactory.CreateClient();            
+        _grpcWebAppFactory?.CreateClient();            
     }
 
     private void SetReceiver(IServiceCollection services)
@@ -81,5 +85,21 @@ public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServicePro
         SetReceiver(services);
 
         ConfigureServices?.Invoke(services);
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _postgreSqlContainer.StartAsync();
+
+        var connectionString = _postgreSqlContainer.BuildConnectionString(_dataBase);
+
+        _grpcWebAppFactory = new GrpcServiceWebAppFactory(connectionString);
+
+        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(connectionString, _signalRApplicationFactory.Server);
+    }
+
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await _postgreSqlContainer.DisposeAsync();
     }
 }

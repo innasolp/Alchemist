@@ -1,20 +1,18 @@
-﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
+﻿using Alchemist.Product.ImportSettingsWebApp.IntegrationTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
 using System.Net;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest;
 
-public class TestImportSettingsApiWebAppFactory : ImportsettingsWebAppFullFactory
+public class TestImportSettingsApiWebAppFactory : ImportSettingsWebAppTestContainerLifetimeFactory
 {
     public TestImportSettingsApiWebAppFactory() : base(isApi: true,
-       null,
     httpPort: 7084,
     httpsPort: 7085,
-    settingsApiDbConnectionString: Alchemist.Common.ConfigurationHelper.GetConnectionString("SettingsWebApiTestDb"),
     settingsApiHttpPort: 8212,
     settingsApiHttpsPort: 8213,
-    Common.SignalRTestServer)
+    database: Alchemist.Common.ConfigurationHelper.GetSectionValue("SettingsWebApiTestDb"))
     {       
     }
 }

@@ -1,13 +1,13 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Models;
 using Alchemist.Test.Functional.Playwright;
-using Alchemist.Test.ImportSettingsWebApp.Factory;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 
 public abstract class ShopImportSettingsTest<TWebAppFactory, TInput> : PageTest, IClassFixture<TWebAppFactory>
-    where TWebAppFactory :  ImportSettingsWebAppFactory
+    where TWebAppFactory :  WebApplicationFactory<ImportSettingsWebAppProgramm>
 {    
 
     protected List<IConsoleMessage> _consoleMessages = [];

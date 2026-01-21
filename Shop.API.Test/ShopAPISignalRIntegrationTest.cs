@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Shop.API.Test;
 
-public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>, Startup>
+public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>, Startup>, IAsyncLifetime
 {
     record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
@@ -17,7 +17,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
 
     private readonly ShopAPISignalRWebAppFactory _shopAPIFactory;
 
-    private readonly HttpClient _shopAPIHttpClient;
+    private HttpClient _shopAPIHttpClient;
 
     public ShopAPISignalRIntegrationTest(SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> webAppFactory, ITestOutputHelper outputHelper)
         : base(webAppFactory, outputHelper)
@@ -27,8 +27,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
         _shopAPIFactory = new ShopAPISignalRWebAppFactory(WebAppFactory.Server)
         {
             DataBase = "test_ci_db_signalr"
-        };
-        _shopAPIHttpClient = _shopAPIFactory.CreateClient();        
+        };        
     }
 
     private void Log(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception)
@@ -39,6 +38,8 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
     [Fact]
     public async Task LogInfoSendMessageOnCreateShopAsync()
     {
+        _shopAPIHttpClient = _shopAPIFactory.CreateClient();
+
         _messages.Clear();
 
         var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
@@ -52,6 +53,8 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
     [Fact]
     public async Task LogErrorSendMessageOnCreateInvalidShopAsync()
     {
+        _shopAPIHttpClient = _shopAPIFactory.CreateClient();
+
         _messages.Clear();
 
         var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
@@ -59,5 +62,15 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
         Assert.False(response.IsSuccessStatusCode);
 
         Assert.Empty(_messages.Where(m => m.categoryName.Contains(typeof(LogHubFilter).Name) && m.logLevel == LogLevel.Information));        
+    }
+
+    public Task InitializeAsync()
+    {
+        return _shopAPIFactory.InitializeAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _shopAPIFactory.DisposeAsync();
     }
 }

@@ -23,6 +23,7 @@
     <ProjectReference Include="..\Alchemist.Test.SettingsAPIFactory\Alchemist.Test.SettingsAPIFactory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.ShopApiFactory\Alchemist.Test.ShopApiFactory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.ShopWebAppFactory\Alchemist.Test.ShopWebAppFactory.csproj" />
+    <ProjectReference Include="..\Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

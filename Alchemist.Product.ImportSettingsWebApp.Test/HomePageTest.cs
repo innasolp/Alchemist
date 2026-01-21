@@ -1,21 +1,17 @@
 using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
-using Alchemist.Test.ImportSettingsWebApp.Factory;
-using Alchemist.Test.SettingsAPIFactory;
-using Alchemist.Test.ShopWebAppFactory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using System.Collections.ObjectModel;
 using Xunit.Abstractions;
-using TestCommon = Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure.Common;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class HomePageTestImportSettingsWebAppFactory()
-    : ImportSettingsWebAppFactory(false,
-        ShopWebAppHelper.CreateShopWebAppApiFactory(Common.ConfigurationHelper.GetConnectionString("HomePageTestDb"), 8420,8421, 8072,8073, TestCommon.SignalRTestServer).ServerAddress,
+    : ImportSettingsWebAppTestContainerLifetimeFactory(false,
         8090, 8091, 
-        SettingsApiHelper.CreateSettingsApiHttpClient(Common.ConfigurationHelper.GetConnectionString("HomePageTestDb"), 8220, 8221, TestCommon.SignalRTestServer,
-            (dbContext) => TestCommon.FillTestData(dbContext, [1, 2, 3, 4])))
+        8220, 8221,
+        Common.ConfigurationHelper.GetSectionValue("HomePageTestDb"),
+        8420,8421, 8072,8073)
 {
 }
 

@@ -1,34 +1,12 @@
 ﻿using Alchemist.Product.ShopWebApp.Controllers;
-using Alchemist.Test.Log;
+using Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
-using Alchemist.Test.ShopWebAppFactory;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
-
-public class ShopWebAppApiLoggedFactory : ShopWebAppFullFactory, ILoggedContext
-{
-    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
-
-    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
-
-    public ShopWebAppApiLoggedFactory() : base(true, Common.ConfigurationHelper.GetConnectionString("ShopWebApiLogTestDb"),
-        8406, 8407, 8064, 8065)
-    {
-    }
-
-    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
-    {        
-        base.ConfigureWebHostBuilderContext(context, services);
-
-        FixtureLoggingContext.ConfigureServices(services);
-    }
-}
 
 public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFactory, ITestOutputHelper outputHelper) 
     : LoggedContextTestFixture<ShopWebAppApiLoggedFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
