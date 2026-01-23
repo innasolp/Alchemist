@@ -7,8 +7,8 @@
     "Perfomance": true,
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesJsonTimerService",
-        "AssemblyPath": "Import\\Categories\\Json",
+        "ImplementationTypeName": "ShopImportCategoriesTimerService",
+        "AssemblyPath": "Import\\Categories\\Services\\Timer",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
       "WebLoader": {
@@ -20,49 +20,62 @@
           "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions"
         }
       },
-      "CategoryLoadOptions": {
-        "ServiceTypeName": "CategoryLoadOptions",
-        "AssemblyPath": "Import\\Categories\\Json",
-        "Value": {
-          "HtmlSearchOptions": {
-            "Tag": "div",
-            "SearchString": "id=state-catalogMenu",
-            "ValueString": "data-state"
+      "LoadStages": {
+        "Value": [
+          {
+            "Type": "RecursiveJsonCategoryFromHtmlLoader",
+            "CategoryLoadOptions": {
+              "HtmlSearchFactoryOptions": {                
+                  "SearchMatchType": 1,
+                  "SearchElementType": 0                
+              },
+              "HtmlSearchOptions": {
+                "Tag": "div",
+                "SearchString": "id=state-catalogMenu",
+                "ValueString": "data-state"
+              },
+              "FirstNodePath": [ "data", "columns", "categories" ],
+              "CategoryPropertyPaths": {
+                "Url": {
+                  "PropertyName": "Url",
+                  "Path": "url"
+                },
+                "Description": {
+                  "PropertyName": "Description",
+                  "Path": "title"
+                },
+                "Children": {
+                  "PropertyName": "Children",
+                  "Path": "categories"
+                }
+              }
+            }
           },
-          "FirstNodePath": [ "data", "columns", "categories" ],
-          "CategoriesApiUrlFormat": "https://www.ozon.ru/api/composer-api.bx/_action/v2/categoryChildV3?menuId=185&categoryId={0}",
-          "SecondsInterval": 1800,
-          "CategoryPropertyPaths": {
-            "Url": {
-              "PropertyName": "Url",
-              "Path": "url"
-            },
-            "Description": {
-              "PropertyName": "Description",
-              "Path": "title"
-            },
-            "Children": {
-              "PropertyName": "Children",
-              "Path": "categories"
+          {
+            "Type": "JsonCategoryLoader",
+            "CategoryLoadOptions": {
+              "CategoriesApiUrlFormat": "https://www.ozon.ru/api/composer-api.bx/_action/v2/categoryChildV3?menuId=185&categoryId={0}",
+              "FirstNodePath": [ "data", "columns", "categories" ],
+              "CategoryPropertyPaths": {
+                "Url": {
+                  "PropertyName": "Url",
+                  "Path": "url"
+                },
+                "Description": {
+                  "PropertyName": "Description",
+                  "Path": "title"
+                },
+                "Children": {
+                  "PropertyName": "Children",
+                  "Path": "categories"
+                }
+              }
             }
           }
-        }
-      },
-      "HtmlSearchFactoryOptions": {
-        "ServiceTypeName": "HtmlSearchFactoryOptions",
-        "AssemblyPath": "Import\\Html",
-        "Value": {
-          "SearchMatchType": 1,
-          "SearchElementType": 0
-        }
-      },
-      "IHtmlSearcher": {
-        "ServiceTypeName": "IHtmlSearcher",
-        "AssemblyPath": "Import\\Html",
-        "ServiceProviderPath": "Import\\Html"
+        ]
       }
     }
-    },
+  },
 
   "GoldAppleCategories": {
     "ShopName": "Goldapple",
@@ -72,8 +85,8 @@
     "Perfomance": true,
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesJsonTimerService",
-        "AssemblyPath": "Import\\Categories\\Json",
+        "ImplementationTypeName": "ShopImportCategoriesTimerService",
+        "AssemblyPath": "Import\\Categories\\Services\\Timer",
         "ServiceProviderPath": "Import\\Categories"
 
       },
@@ -91,31 +104,33 @@
           "RouteUrlFormat": "https://goldapple.ru/web/api/v3/catalog/navigation"
         }
       },
-      "CategoryLoadOptions": {
-        "ServiceTypeName": "CategoryLoadOptions",
-        "AssemblyPath": "Import\\Categories\\Json",
-        "Value": {
-          "FirstNodePath": [ "data", "general" ],
-          "SecondsInterval": 1800,
-          "CategoryPropertyPaths": {
-            "Url": {
-              "PropertyName": "Url",
-              "Path": "link"
-            },
-            "Description": {
-              "PropertyName": "Description",
-              "Path": "name"
-            },
-            "Children": {
-              "PropertyName": "Children",
-              "Path": "children"
-            },
-            "Id": {
-              "PropertyName": "Id",
-              "Path": "id"
+      "LoadStages": {
+        "Value": [
+          {
+            "Type": "JsonCategoryLoader",
+            "CategoryLoadOptions": {
+              "FirstNodePath": [ "data", "general" ],
+              "CategoryPropertyPaths": {
+                "Url": {
+                  "PropertyName": "Url",
+                  "Path": "link"
+                },
+                "Description": {
+                  "PropertyName": "Description",
+                  "Path": "name"
+                },
+                "Children": {
+                  "PropertyName": "Children",
+                  "Path": "children"
+                },
+                "Id": {
+                  "PropertyName": "Id",
+                  "Path": "id"
+                }
+              }
             }
           }
-        }
+        ]
       }
     }
   }

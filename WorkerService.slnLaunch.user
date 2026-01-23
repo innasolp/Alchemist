@@ -19,15 +19,15 @@
         "Action": "Start"
       },
       {
-        "Path": "Alchemist.Product.RestAPI\\Shop.API.csproj",
-        "Action": "Start"
-      },
-      {
         "Path": "Alchemist.Product.Import.DBService\\Alchemist.Product.Import.DBService.csproj",
         "Action": "Start"
       },
       {
         "Path": "Alchemist.BrowserService\\Alchemist.BrowserService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Shop.API\\Shop.API.csproj",
         "Action": "Start"
       }
     ]

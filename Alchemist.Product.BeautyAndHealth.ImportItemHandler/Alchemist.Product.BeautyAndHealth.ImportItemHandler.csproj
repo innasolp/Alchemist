@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Products.Factory\Alchemist.Import.Factory.Products.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Extensions\Alchemist.Import.Settings.Extensions.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
     <ProjectReference Include="..\Alchemist.Product.BeautyAndHealth\Alchemist.Product.BeautyAndHealth.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
     <ProjectReference Include="..\Alchemist.Product.ImportItemHandler\Alchemist.Product.ImportItemHandler.csproj" />

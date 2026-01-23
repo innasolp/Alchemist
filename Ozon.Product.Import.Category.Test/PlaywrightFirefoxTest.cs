@@ -6,9 +6,8 @@ using WebLoader.Interfaces;
 using Xunit.Abstractions;
 using Import.Html;
 using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Service;
-using Alchemist.Import.Category.Service.Json;
 using Product.Import.Test;
+using ShopImport.Category.Recursive;
 
 namespace Ozon.Product.Import.Category.Test;
 

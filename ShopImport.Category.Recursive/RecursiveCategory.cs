@@ -2,10 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Alchemist.Import.Category.Service;
+namespace ShopImport.Category.Recursive;
 
 public class RecursiveCategory : ICategory
 {
@@ -129,7 +128,7 @@ public class RecursiveCategory : ICategory
             result = getValue(element);
             return true;
         }
-        else if (propertyPath.LoadStopIfNotExists == true)
+        else if (propertyPath.StopLoadIfNotExists == true)
             return false;
         else
             throw new InvalidDataException(string.Format(_invalidDataMessageFormat,
@@ -225,34 +224,27 @@ public class RecursiveCategory : ICategory
         IElementHelper<TElement> elementHelper,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var categoriesElements = nodePath?.Length > 0 ? GetAllElementsByNodePath(element, nodePath, elementHelper) : [element];
+        var categoriesElements = nodePath?.Length > 0 ? GetAllElementsByNodePath(element, nodePath, elementHelper) : [element];
 
-            await Task.WhenAll(categoriesElements.Select(async categoryElement =>
+        await Task.WhenAll(categoriesElements.Select(async categoryElement =>
+        {
+            if (elementHelper.TryGetElementEnumerable(categoryElement, null, out var childElements))
             {
-                if (elementHelper.TryGetElementEnumerable(categoryElement, null, out var childElements))
-                {
-                    await LoadChildrenTreeAsync(parentCategory, categories, childElements, propertyPathes, elementHelper, cancellationToken);
-                }
-                else 
-                {
-                    var recursiveCategory = new RecursiveCategory();
-                    TryLoadValuesFrom(recursiveCategory, categoryElement, propertyPathes, elementHelper);
+                await LoadChildrenTreeAsync(parentCategory, categories, childElements, propertyPathes, elementHelper, cancellationToken);
+            }
+            else
+            {
+                var recursiveCategory = new RecursiveCategory();
+                TryLoadValuesFrom(recursiveCategory, categoryElement, propertyPathes, elementHelper);
 
-                    if (parentCategory?.Id > 0)
-                        SetParent(recursiveCategory, parentCategory);
+                if (parentCategory?.Id > 0)
+                    SetParent(recursiveCategory, parentCategory);
 
-                    await recursiveCategory.AddCategoryToCollectionAsync(categories, cancellationToken);
+                await recursiveCategory.AddCategoryToCollectionAsync(categories, cancellationToken);
 
-                    if (elementHelper.TryGetElementEnumerable(categoryElement, propertyPathes[nameof(Children)].Path, out childElements))
-                        await LoadChildrenTreeAsync(recursiveCategory, categories, childElements, propertyPathes, elementHelper, cancellationToken);
-                }
-            }));
-        }
-        catch
-        {
-            throw;
-        }
+                if (elementHelper.TryGetElementEnumerable(categoryElement, propertyPathes[nameof(Children)].Path, out childElements))
+                    await LoadChildrenTreeAsync(recursiveCategory, categories, childElements, propertyPathes, elementHelper, cancellationToken);
+            }
+        }));
     }
 }

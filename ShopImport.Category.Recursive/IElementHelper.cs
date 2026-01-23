@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Category.Service;
+﻿namespace ShopImport.Category.Recursive;
 
 public interface IElementHelper<TElement>
 {

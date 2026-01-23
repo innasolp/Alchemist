@@ -5,16 +5,18 @@ using Moq;
 using Xunit.Abstractions;
 using Import.Service.Test.Infrastructure;
 using Alchemist.Import.Category.Service;
-using Alchemist.Import.Category.Service.Json;
 using Alchemist.Import.CategoryService.Test.Infrastructure;
+using ShopImport.Category.Loader.Interfaces;
 
 namespace Alchemist.Import.CategoryService.Test;
 
-public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesJsonTimerService>>
+public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesTimerService>>
 {
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
 
-    private readonly CategoryLoadOptions _loadOptions = new() { SecondsInterval = 5 };
+    private readonly CategoryImportOptions _importOptions = new() { SecondsInterval = 5 };
+
+    private readonly Mock<ICategoryLoader>[] _categoryLoadersMock = [new Mock<ICategoryLoader>()];    
 
     private readonly Mock<ICategoryItemHandler> _categoryItemHandlerMock = new();
 
@@ -27,10 +29,10 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     {
         return new ShopImportCategoriesTimerServiceTest(LoggerMock.Object,
              name,
-             null,
              LoaderMock.Object,
              _categoryShopModelMock.Object,
-             _loadOptions,
+             _categoryLoadersMock.Select(m=>m.Object),
+             _importOptions,
              _categoryItemHandlerMock.Object
              );
     }
@@ -57,10 +59,6 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         var category = Helper.CreateCategoryWithChildren();
         var requestData = new object();
         LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
-        _loadOptions.CategoryPropertyPaths = new Dictionary<string, PropertyPath>() { { "Url", new PropertyPath("Url", "Url") },
-            { "Description",new PropertyPath("Description", "Description") },
-            { "Children",new PropertyPath("Children", "Children") },
-            { "Id",new PropertyPath("Id", "Id") } };
 
         await ImportStoppedWhenCancellationRequestedAsync();
     }

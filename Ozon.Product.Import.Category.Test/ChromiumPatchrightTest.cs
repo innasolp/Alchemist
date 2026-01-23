@@ -1,21 +1,13 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Service;
-using Alchemist.Import.Category.Service.Json;
-using BrowserDataLoader.Interfaces;
 using Import.Html;
 using Import.Html.Factory;
 using Product.Import.Test;
-using System;
-using System.Collections.Generic;
+using ShopImport.Category.Recursive;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using WebLoader.Interfaces;
 using WebLoader.Playwright.ChromiumPatchright;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Ozon.Product.Import.Category.Test;
 

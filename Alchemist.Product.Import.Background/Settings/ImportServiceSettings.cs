@@ -1,13 +1,14 @@
-﻿using Alchemist.Import.Settings.Extensions;
+﻿using Alchemist.Import.Settings;
+using Alchemist.Import.Settings.Extensions;
 using Import.Settings.Interfaces;
+using ShopSettings.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using ShopSettings.Interfaces;
 
 namespace Alchemist.Product.Import.Background.Settings;
 
-public class ImportServiceSettings : IServiceSettings, IShopSettings, IJsonOnDeserialized, IJsonValue
+public class ImportServiceSettings : IServiceSettings, IShopSettings, IJsonOnDeserialized, IJsonNodeValue
 {   
     public string? Name { get; set; }
     public string? ServiceTypeName { get; set; }
@@ -17,7 +18,7 @@ public class ImportServiceSettings : IServiceSettings, IShopSettings, IJsonOnDes
     public int? Id { get; set; }
 
     [JsonIgnore]
-    public JsonObject? Value { get; set; }
+    public JsonNode? Value { get; set; }
 
     [JsonPropertyName("Value")]
     public JsonElement? ValueObj { get; set; }
@@ -29,7 +30,7 @@ public class ImportServiceSettings : IServiceSettings, IShopSettings, IJsonOnDes
     string? IServiceSettings.Value { 
         get => Value?.ToString();
         set {
-            Value = value != null ? JsonSerializer.Deserialize<JsonObject>(value) : null;
+            Value = !string.IsNullOrEmpty(value) ? JsonNode.Parse(value) : null;
         } 
     }
     int IShopSettings.Id { get =>Id ?? 0; set => Id = value; }

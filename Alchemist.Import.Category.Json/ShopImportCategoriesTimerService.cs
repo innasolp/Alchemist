@@ -1,24 +1,16 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Import.Html;
 using Import.Interfaces;
 using Import.Service;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
+using ShopImport.Category.Loader.Interfaces;
 using System.Collections.ObjectModel;
 
 namespace Alchemist.Import.Category.Service;
 
-public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
+public class ShopImportCategoriesTimerService : ImportService
 {
-    protected sealed record ImportCategory(ICategory Category, string CategorySourceUrl, string SourceName, string SourceUrl) : IImportCategory
-    {
-    }
-
-    protected abstract IElementHelper<TElement> GetElementHelper();
-
-    protected IHtmlSearcher? HtmlSearcher { get; }
-
-    protected CategoryLoadOptions CategoryLoadOptions { get; }
+    protected sealed record ImportCategory(ICategory Category, string CategorySourceUrl, string SourceName, string SourceUrl) : IImportCategory;
 
     public override string Name { get; }
 
@@ -34,203 +26,147 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
 
     private bool? _isStarted;
 
-    private readonly SemaphoreSlim _htmlSearcherSemaphoreSlim = new(1, 1);
-
     private readonly object? _categoryLoadData;
+
+    private readonly IEnumerable<ICategoryLoader> _categoryLoadStages;
 
     public ShopImportCategoriesTimerService(ILogger logger,
         string name,
-        IHtmlSearcher? htmlSearcher,
         ILoaderService loader,
         string categorySourceUrl,
         string sourceName,
         string url,
-        CategoryLoadOptions categoryLoadOptions,
+       IEnumerable<ICategoryLoader> categoryLoadStages,
        ICategoryItemHandler itemHandler,
+       CategoryImportOptions? categoryImportOptions = null,
        object? categoryLoadData = null) : base(logger, loader, url)
     {
-        HtmlSearcher = htmlSearcher;
-        CategoryLoadOptions = categoryLoadOptions;
         Name = name;
         _categorySourceUrl = categorySourceUrl;
         _sourceName = sourceName;
+        _categoryLoadStages = categoryLoadStages;
         _itemHandler = itemHandler;
 
-        _timer = new(TimeSpan.FromSeconds(CategoryLoadOptions.SecondsInterval ?? _defaultInterval));
+        _timer = new(TimeSpan.FromSeconds(categoryImportOptions?.SecondsInterval ?? _defaultInterval));
         _categoryLoadData = categoryLoadData;
-    }
-
-    public ShopImportCategoriesTimerService(ILogger logger,
-        string name,
-   ILoaderService loader,
-   string categorySourceUrl,
-   string sourceName,
-   string url,
-   CategoryLoadOptions categoryLoadOptions,
-   ICategoryItemHandler itemHandler,
-        object? categoryLoadData = null)
-        : this(logger, name, null, loader, categorySourceUrl, sourceName, url, categoryLoadOptions, itemHandler, categoryLoadData)
-    {
-    }
-
-    protected async Task<(bool success, TElement? result)> TryLoadElementAsync(string url, CancellationToken cancellationToken = default)
-    {
-        var categoryLoadData = LoadData != null
-                ? new object?[] { LoadData, _categoryLoadData }
-                : LoadData;
-
-        if (HtmlSearcher != null)
-        {
-            var (success, values) = await TryLoadHtmlFromUrlAsync(url, categoryLoadData, cancellationToken);
-
-            if (!success) return (false, default(TElement?));
-
-            return (true, LoadElementFromString(values[0]));
-        }
-        else
-            return await TryLoadElementFromUrlAsync(url, categoryLoadData, cancellationToken);
-    }
+    } 
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
+        var categoryLoadData = LoadData != null && _categoryLoadData != null 
+                ? new object?[] { LoadData, _categoryLoadData } 
+                : LoadData;
+
         if (_isStarted == null)
         {
             _isStarted = true;
-            await LoadCategoriesAsync(stoppingToken);
+            await LoadCategoriesAsync(categoryLoadData, stoppingToken);
         }
         else if (!stoppingToken.IsCancellationRequested)
         {
             var nextTickResult = await _timer.WaitForNextTickAsync(stoppingToken).AsTask();
 
-            await LoadCategoriesAsync(stoppingToken);
+            await LoadCategoriesAsync(categoryLoadData, stoppingToken);
         }
     }
 
-    private async Task LoadCategoriesAsync(CancellationToken stoppingToken)
+    private async Task LoadCategoriesAsync(object? categoryLoadData, CancellationToken stoppingToken)
     {
-        var (success, elementResult) = await TryLoadElementAsync(_categorySourceUrl, stoppingToken);
+        var allCategories = new ObservableCollection<ICategory>();
+        allCategories.CollectionChanged += CategoryCollectionChanged;
 
-        if (!success)
+        var parentCategories = new List<ICategory>();
+
+        foreach (var stage in _categoryLoadStages)
         {
-            Logger.LogInformation(ImportCategoryLogMessages.CategoriesWereNotLoaded, _sourceName, Host);
-            return;
+            if (parentCategories.Count == 0)
+            {
+                var (success, loadedCategories) = await LoadCategoryChildrenAsync(_categorySourceUrl, categoryLoadData, stage, null, cancellationToken : stoppingToken);
+                if (!success)
+                {
+                    Logger.LogInformation(ImportCategoryLogMessages.CategoriesWereNotLoaded, _sourceName, Host);
+                    return;
+                }
+                
+                parentCategories.AddRange(loadedCategories.Where(c=>!c.Children.Any()));
+                loadedCategories.ToList().ForEach(allCategories.Add);                
+            }
+            else if(!string.IsNullOrEmpty(stage.CategoryLoadOptions.CategoriesApiUrlFormat))
+            {
+                var loadedCategories = await LoadCategoryChildrenAsync(stage.CategoryLoadOptions.CategoriesApiUrlFormat, 
+                    stage, parentCategories, allCategories, categoryLoadData, stoppingToken);
+                parentCategories = [.. loadedCategories.Where(c => !c.Children.Any())];
+            }
         }
 
-        var categories = new ObservableCollection<ICategory>();
-        categories.CollectionChanged += CategoryCollectionChanged;
-
-        var elementHelper = GetElementHelper();
-
-        await RecursiveCategory.LoadAllChildrenAsync(null, categories, elementResult,
-                CategoryLoadOptions.FirstNodePath,
-                CategoryLoadOptions.CategoryPropertyPaths,
-                elementHelper,
-                stoppingToken);
-
-
-        if (string.IsNullOrEmpty(CategoryLoadOptions.CategoriesApiUrlFormat))
-        {
-            categories.CollectionChanged -= CategoryCollectionChanged;
-            return;
-        }
-
-        var parentCategories = new List<ICategory>(categories);
-        var loadChildCategoriesTasks = parentCategories.Select(c => LoadCategoryChildrentTreeAsync(c as RecursiveCategory,
-            CategoryLoadOptions.CategoriesApiUrlFormat, categories, elementHelper, stoppingToken));
-        
-        await Task.WhenAll(loadChildCategoriesTasks);
-
-        categories.CollectionChanged -= CategoryCollectionChanged;
+        allCategories.CollectionChanged -= CategoryCollectionChanged;
     }
 
-    private async Task LoadCategoryChildrentTreeAsync(RecursiveCategory parentCategory, 
-        string urlFormat, 
-        ICollection<ICategory> categories, 
-        IElementHelper<TElement> elementHelper,
-        CancellationToken token)
+    private async Task<IEnumerable<ICategory>> LoadCategoryChildrenAsync(string urlFormat, ICategoryLoader stage, IEnumerable<ICategory> parentCategories,
+        IList<ICategory> allCategories, object? categoryLoadData, CancellationToken stoppingToken)        
     {
-        var url = string.Format(urlFormat, parentCategory.Id);        
+        var anyLoaded = false;
 
-        var (success, categoriesResult) = await TryLoadElementFromUrlAsync(url, LoadData, token);
+        List<ICategory> currentCategories = [];
+
+        async Task loadParentCategoryStageAsync(ICategory parentCategory)
+        {
+            var url = string.Format(urlFormat, parentCategory.Id);
+            var (success, loadedCategories) = await LoadCategoryChildrenAsync(url, categoryLoadData, stage, parentCategory, !stage.IsRecursive,
+                cancellationToken: stoppingToken);
+
+            anyLoaded = anyLoaded | success;
+            if (!success) return;
+
+            currentCategories.AddRange(loadedCategories);
+            loadedCategories.ToList().ForEach(allCategories.Add);
+        }
+
+        var loadChildCategoriesTasks = parentCategories.Select(loadParentCategoryStageAsync);
+
+        await Task.WhenAll(loadChildCategoriesTasks);        
+
+        IEnumerable<ICategory> loadedParentCategories = [.. currentCategories.Where(c => !c.Children.Any())];
+
+        if (stage.IsRecursive && anyLoaded)
+        {
+            var loadedCategories = await LoadCategoryChildrenAsync(urlFormat, stage, loadedParentCategories, allCategories, categoryLoadData, stoppingToken);
+            currentCategories.AddRange(loadedCategories);
+        }
+       
+        return currentCategories;
+    }
+
+    private async Task<(bool success, IEnumerable<ICategory> result)> LoadCategoryChildrenAsync(string url, 
+        object? categoryLoadData,
+        ICategoryLoader stage,
+        ICategory? parentCategory, 
+        bool required = true,
+        CancellationToken cancellationToken = default)
+    {
+        var (success, stream) = await TryLoadFromUrlAsync(url, categoryLoadData, cancellationToken);
 
         if (!success)
         {
-            Logger.LogInformation(ImportCategoryLogMessages.ChildrenForCategoryWereNotLoaded, url);
-            return;
+            if(required)
+                Logger.LogInformation(ImportCategoryLogMessages.CategoryWasNotLoaded, url);
+
+            return (false, []);
         }
 
         try
         {
-            await RecursiveCategory.LoadAllChildrenAsync(parentCategory,
-                categories,
-                categoriesResult,
-                CategoryLoadOptions.FirstNodePath,
-                 CategoryLoadOptions.CategoryPropertyPaths,
-                 elementHelper,
-                 token);
+            var loadedCategories = await stage.LoadAsync(parentCategory, stream, cancellationToken);          
+            return (true, loadedCategories);    
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Logger.LogError(ex, ex.Message);
+            Logger.LogError(e, e.Message);
             Logger.LogInformation(ImportCategoryLogMessages.ChildrenForCategoryWereNotLoaded, url);
+            return (false, []);
         }
-    }
-
-    private async Task<(bool success, List<string>? result)> TryLoadHtmlFromUrlAsync(string url, object? requestData = null, CancellationToken token = default)
-    {
-        var (success, stream) = await TryLoadFromUrlAsync(url, requestData, token);
-
-        using (stream)
-        {
-            if (!success)
-                return await Task.FromResult((false, default(List<string>)));
-
-            try
-            {
-                await _htmlSearcherSemaphoreSlim.WaitAsync(token);
-                var values = await HtmlSearcher.GetValues(stream, CategoryLoadOptions.HtmlSearchOptions, token);
-                return await Task.FromResult((true, values));
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, ImportCategoryLogMessages.ParseHtmlFromUrlFailed, url, ex.Message);
-                return await Task.FromResult((false, default(List<string>)));
-            }
-            finally
-            {
-                stream?.Close();
-                _htmlSearcherSemaphoreSlim.Release();
-            }
-        }
-    }
-
-    private async Task<(bool success, TElement? element)> TryLoadElementFromUrlAsync(string url, object? requestData = null, CancellationToken stoppingToken = default)
-    {
-        var (success, stream) = await TryLoadFromUrlAsync(url, requestData, stoppingToken);
-
-        if (!success)        
-            return (false, default(TElement));
-
-        try
-        {
-            using (stream)
-            {
-                var categoriesElement = await LoadElementFromStreamAsync(stream, stoppingToken);
-                stream.Close();
-                return await Task.FromResult((true, categoriesElement));
-            }
-        }
-        catch (SerializationException ex)
-        {
-            Logger.LogError(ex, ImportCategoryLogMessages.ParseFromUrlFailed, url, ex.Message);
-            return await Task.FromResult((false, default(TElement)));
-        }
-    }
-
-    protected abstract Task<TElement> LoadElementFromStreamAsync(Stream stream, CancellationToken cancellationToken);
-
-    protected abstract TElement LoadElementFromString(string str);
-
+    }    
+    
     private readonly SemaphoreSlim _categoryCollectionChangedSemaphore = new(1, 1);
 
     private async void CategoryCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -241,7 +177,7 @@ public abstract class ShopImportCategoriesTimerService<TElement> : ImportService
 
         try
         {
-            var newItems = e.NewItems?.OfType<RecursiveCategory>();
+            var newItems = e.NewItems?.OfType<ICategory>();
             if (newItems == null) return;
 
             foreach (var category in newItems)

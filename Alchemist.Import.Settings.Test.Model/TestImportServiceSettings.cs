@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Alchemist.Import.Settings.Test.Model;
 
-public class TestImportServiceSettings : IServiceSettings, IShopSettings, IJsonOnDeserialized, IJsonValue
+public class TestImportServiceSettings : IServiceSettings, IShopSettings, IJsonOnDeserialized, IJsonNodeValue
 {   
     public string Name { get; set; }
     public string? ServiceTypeName { get; set; }
@@ -17,7 +17,7 @@ public class TestImportServiceSettings : IServiceSettings, IShopSettings, IJsonO
     public int? Id { get; set; }
 
     [JsonIgnore]
-    public JsonObject? Value { get; set; }
+    public JsonNode? Value { get; set; }
 
     [JsonPropertyName("Value")]
     public JsonElement? ValueObj { get; set; }

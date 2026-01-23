@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Alchemist.Import.Category.Service.Json;
+namespace ShopImport.Category.Recursive;
 
 public class JsonElementHelper : IElementHelper<JsonElement>
 {

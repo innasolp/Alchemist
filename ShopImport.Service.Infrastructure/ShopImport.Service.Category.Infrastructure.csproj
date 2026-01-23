@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.5" />
+		<PackageReference Include="Import.Factory.Service" Version="1.0.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ShopImport.Category.Loader.Interfaces\ShopImport.Category.Loader.Interfaces.csproj" />
+	</ItemGroup>
+
+</Project>

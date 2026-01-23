@@ -27,8 +27,9 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Alchemist.Import.Category.Service.Json\Alchemist.Import.Category.Service.Json.csproj" />
 		<ProjectReference Include="..\Product.Import.Test\Product.Import.Test.csproj" />
+		<ProjectReference Include="..\ShopImport.Category.HtmlLoader\ShopImport.Category.RecursiveHtmlLoader.csproj" />
+		<ProjectReference Include="..\ShopImport.Category.Recursive\ShopImport.Category.Recursive.csproj" />
 	</ItemGroup>
 
   <ItemGroup>

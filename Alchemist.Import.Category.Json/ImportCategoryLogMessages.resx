@@ -138,4 +138,7 @@
   <data name="ParseFromUrlFailed" xml:space="preserve">
     <value>Error on parsing {0}. {1}.</value>
   </data>
+  <data name="CategoryWasNotLoaded" xml:space="preserve">
+    <value>Category from url {0} was not loaded. See error log.</value>
+  </data>
 </root>
