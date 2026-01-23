@@ -98,13 +98,14 @@ public static class ServiceExtensions
     {
         return shopImportSettings.GetService(nameof(PrimaryServiceName.WebLoader));
     }
+    
 
     public static bool TryGetServiceStringValue(this IImportSettings shopImportSettings, string serviceName, out string? value)
     {
         value = default;
-        if (!shopImportSettings.Services.Contains(serviceName) || shopImportSettings.GetService(serviceName) is not IJsonValue jsonValue
-            || jsonValue?.ValueObj?.ValueKind != System.Text.Json.JsonValueKind.String
-            || jsonValue.Value?.ContainsKey("Value") != true)
+        if (!shopImportSettings.Services.Contains(serviceName) || shopImportSettings.GetService(serviceName) is not IJsonNodeValue jsonValue
+            || jsonValue?.ValueObj?.ValueKind != JsonValueKind.String
+            || jsonValue.Value?.AsObject().ContainsKey("Value") != true)
             return false;
 
         value = jsonValue.Value["Value"].GetValue<string>();

@@ -1,7 +1,7 @@
 ﻿using Alchemist.BackgroundTaskQueue;
-using Alchemist.Import.Factory.Products;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings.Product;
 using Import.Settings.Interfaces;
 using Message.Interfaces;
 

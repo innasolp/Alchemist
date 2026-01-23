@@ -17,6 +17,8 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
 
     private readonly IShopDataService _shopDataService = shopDataService;
 
+    private readonly SemaphoreSlim _addServiceSemaphoreSlim = new(1);
+
     private List<IImportSource> ShopModels { get; } = [];
 
     public IReadOnlyDictionary<Guid, ServiceItem> Services => _services;
@@ -25,18 +27,26 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
 
     public async Task<(bool, Guid guid, IImportService? service)> TryAddShopImportService(string name, IShopImportSettings shopImportSettings,
         CancellationToken cancellationToken = default)
-    { 
-        var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings, cancellationToken);
-        if (!ShopModels.Any(s => s.Name == ((IImportSource)shopModel).Name))
-            ShopModels.Add(shopModel);
+    {
+        await _addServiceSemaphoreSlim.WaitAsync(cancellationToken);
+        try
+        {
+            var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings, cancellationToken);
+            if (!ShopModels.Any(s => s.Name == ((IImportSource)shopModel).Name))
+                ShopModels.Add(shopModel);
 
-        if (!TryCreateImportService(name, shopImportSettings, shopModel, out var service) || service is null)
-            return (false, Guid.Empty, default);
+            if (!TryCreateImportService(name, shopImportSettings, shopModel, out var service) || service is null)
+                return (false, Guid.Empty, default);
 
-        var serviceItem = new ServiceItem(Guid.NewGuid(), service, shopModel.Id, new CancellationTokenSource());
-        var added = _services.TryAdd(serviceItem.Guid, serviceItem);
+            var serviceItem = new ServiceItem(Guid.NewGuid(), service, shopModel.Id, new CancellationTokenSource());
+            var added = _services.TryAdd(serviceItem.Guid, serviceItem);
 
-        return (added, serviceItem.Guid, service);
+            return (added, serviceItem.Guid, service);
+        }
+        finally
+        {
+            _addServiceSemaphoreSlim.Release();
+        }
     }
 
     private bool TryCreateImportService(string name, IShopImportSettings shopImportSettings, IShopModel source, out IImportService? service)

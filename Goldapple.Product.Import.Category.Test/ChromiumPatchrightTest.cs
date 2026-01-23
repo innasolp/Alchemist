@@ -1,6 +1,5 @@
 ﻿using Alchemist.Import.Category.Interfaces;
-using Alchemist.Import.Category.Service;
-using Alchemist.Import.Category.Service.Json;
+using ShopImport.Category.Recursive;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using WebLoader.Playwright.ChromiumPatchright;
@@ -34,10 +33,13 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
         var result = await webLoader.Start();
 
         var (success, stream) = await webLoader.TryLoadFromRoute(_shopUrl, (url) => url.Contains(_shopCategoriesApiUrl),
-            timeoutInMilliseconds: 10000);
+            timeoutInMilliseconds: 15000);
+        
+        Assert.True(success);
+
         using (stream)
 
-            jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
+        jsonDocument = await JsonSerializer.DeserializeAsync<JsonDocument>(stream);
         stream.Close();
 
         Assert.NotNull(jsonDocument);

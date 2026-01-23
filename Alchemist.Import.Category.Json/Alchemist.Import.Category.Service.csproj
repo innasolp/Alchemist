@@ -9,13 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="Import.Service" Version="1.0.0.1" />
-	<PackageReference Include="Import.Html" Version="1.0.0" />
-	<PackageReference Include="Import.Html.Factory" Version="1.0.0" />
 	  <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
+    <ProjectReference Include="..\ShopImport.Category.Loader.Interfaces\ShopImport.Category.Loader.Interfaces.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -24,7 +24,6 @@
     </Content>
   </ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Alchemist.Import.Product.JsonPathHandlers\Alchemist.Import.Product.JsonPathHandlers.csproj" />
 		<ProjectReference Include="..\Alchemist.Import.Products.Json\Alchemist.Import.Products.Json.csproj" />
 		<ProjectReference Include="..\Product.Import.Test.Common\Product.Import.Json.Test.Common.csproj" />
 	</ItemGroup>

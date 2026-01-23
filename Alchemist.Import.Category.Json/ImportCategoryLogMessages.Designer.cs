@@ -88,6 +88,15 @@ namespace Alchemist.Import.Category.Service {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Category from url {0} was not loaded. See error log..
+        /// </summary>
+        internal static string CategoryWasNotLoaded {
+            get {
+                return ResourceManager.GetString("CategoryWasNotLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Children for category {0} were not loaded. See error log..
         /// </summary>
         internal static string ChildrenForCategoryWereNotLoaded {

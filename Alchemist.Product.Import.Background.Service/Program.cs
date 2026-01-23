@@ -27,6 +27,7 @@ using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
 using Import.Service.Commands;
+using ShopImport.Service.Category.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -119,7 +120,11 @@ static void AddShopSettingsAPIService(WebApplicationBuilder builder, out string 
 static void AddShopImporters(IServiceCollection services, IConfiguration configuration)
 {
     services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopProductImportPath").Value}");
-    services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryImportPath").Value}");
+
+    //services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryImportPath").Value}");
+    var categoryServicesPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryImportPath").Value}";
+    var categoryLoadersPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryLoadersPath").Value}";
+    services.AddImportCategoryInfrastructure(categoryServicesPath, categoryLoadersPath);
 
     services.AddImportServiceLogFactory((logger, name, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
     { "ShopImportService", name },

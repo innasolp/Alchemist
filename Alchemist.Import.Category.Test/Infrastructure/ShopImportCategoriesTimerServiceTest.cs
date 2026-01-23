@@ -1,19 +1,18 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Category.Service;
-using Alchemist.Import.Category.Service.Json;
-using Import.Html;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
+using ShopImport.Category.Loader.Interfaces;
 
 namespace Alchemist.Import.CategoryService.Test.Infrastructure;
 
-public class ShopImportCategoriesTimerServiceTest(ILogger<ShopImportCategoriesJsonTimerService> logger,
+public class ShopImportCategoriesTimerServiceTest(ILogger<ShopImportCategoriesTimerService> logger,
     string name,
-    IHtmlSearcher? htmlSearcher, 
     ILoaderService loader,
     ICategoryShopModel shop, 
-    CategoryLoadOptions categoryLoadOptions,
+    IEnumerable<ICategoryLoader> categoryLoadStages,
+    CategoryImportOptions importOptions,
     ICategoryItemHandler itemHandler)
-    : ShopImportCategoriesJsonTimerService(logger, name, htmlSearcher, loader, shop.CategorySourceUrl, shop.SourceName, shop.SourceUrl,  categoryLoadOptions, itemHandler)
+    : ShopImportCategoriesTimerService(logger, name, loader, shop.CategorySourceUrl, shop.SourceName, shop.SourceUrl, categoryLoadStages, itemHandler,  importOptions)
 {
 }

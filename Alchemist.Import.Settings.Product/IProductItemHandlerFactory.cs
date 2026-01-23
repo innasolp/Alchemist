@@ -2,7 +2,7 @@
 using Import.Settings.Interfaces;
 
 
-namespace Alchemist.Import.Factory.Products;
+namespace Alchemist.Import.Settings.Product;
 
 public interface IProductItemHandlerFactory
 {
