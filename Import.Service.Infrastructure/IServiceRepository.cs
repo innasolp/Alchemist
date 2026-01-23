@@ -9,6 +9,6 @@ public interface IServiceRepository
 
     IReadOnlyList<IImportSource> ShopModels { get; }
 
-    Task<(bool, Guid guid, IImportService? service)> TryAddImportService(string name, IImportSettings importSettings, 
+    Task<(Guid guid, IImportService service)> AddImportService(string name, IImportSettings importSettings, 
         CancellationToken cancellationToken = default);
 }

@@ -101,10 +101,12 @@ internal static class ShopModelExtensions
         CancellationToken cancellationToken = default)
         where T : ShopModel, new()
     {
-        var shop = (shopImportSettings is IShopSettings shopSettings
-                ? await shopDataService.GetShop(shopSettings.ShopId, cancellationToken)
+        var shopId = shopImportSettings is IShopSettings shopSettings ? shopSettings.Id : 0;
+
+        var shop = shopId > 0
+                ? await shopDataService.GetShop(shopId, cancellationToken)
                 : await shopDataService.GetShopByName(shopImportSettings.ShopName, cancellationToken)
-                ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl, cancellationToken))
+                ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl, cancellationToken)
                 ?? await shopDataService.CreateShop(new ShopModel { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
 
         var shopModel = GetShopModelCore<T>(shop, shopImportSettings);

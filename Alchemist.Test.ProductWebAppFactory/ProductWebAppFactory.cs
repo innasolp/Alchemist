@@ -36,10 +36,10 @@ public class ProductWebAppFactory(int httpPort, int httpsPort, HttpClient shopWe
     {
         base.ConfigureWebHostBuilderContext(context, services);
         
-        if (!string.IsNullOrEmpty(_shopWebAppApiClient.BaseAddress.AbsoluteUri)) 
+        if (!string.IsNullOrEmpty(_shopWebAppApiClient?.BaseAddress?.AbsoluteUri)) 
             SetProxyHost(context.Configuration, "shopCluster", "user", _shopWebAppApiClient.BaseAddress.AbsoluteUri);
 
-        if (!string.IsNullOrEmpty(_importSettingsWebAppApiClient.BaseAddress.AbsoluteUri)) 
+        if (!string.IsNullOrEmpty(_importSettingsWebAppApiClient?.BaseAddress?.AbsoluteUri)) 
             SetProxyHost(context.Configuration, "importSettingsCluster", "user", _importSettingsWebAppApiClient.BaseAddress.AbsoluteUri);
     }
 

@@ -2,7 +2,7 @@
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-internal class ShopSettings : IShopSettings
+internal class ShopSettings 
 {
     public int Id { get; set; }
 

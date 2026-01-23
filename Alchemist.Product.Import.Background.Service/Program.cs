@@ -44,7 +44,7 @@ AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
-builder.Host.AddImportServicesInfrastructure();
+builder.Host.AddImportServicesInfrastructure(nameof(ShopImportWorker));
 
 AddMessages(builder);
 
@@ -121,7 +121,6 @@ static void AddShopImporters(IServiceCollection services, IConfiguration configu
 {
     services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopProductImportPath").Value}");
 
-    //services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryImportPath").Value}");
     var categoryServicesPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryImportPath").Value}";
     var categoryLoadersPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryLoadersPath").Value}";
     services.AddImportCategoryInfrastructure(categoryServicesPath, categoryLoadersPath);
