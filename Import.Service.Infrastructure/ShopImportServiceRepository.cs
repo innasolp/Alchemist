@@ -25,7 +25,7 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
 
     IReadOnlyList<IImportSource> IServiceRepository.ShopModels => ShopModels;
 
-    public async Task<(bool, Guid guid, IImportService? service)> TryAddShopImportService(string name, IShopImportSettings shopImportSettings,
+    public async Task<(Guid guid, IImportService service)> AddShopImportService(string name, IShopImportSettings shopImportSettings,
         CancellationToken cancellationToken = default)
     {
         await _addServiceSemaphoreSlim.WaitAsync(cancellationToken);
@@ -35,13 +35,12 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
             if (!ShopModels.Any(s => s.Name == ((IImportSource)shopModel).Name))
                 ShopModels.Add(shopModel);
 
-            if (!TryCreateImportService(name, shopImportSettings, shopModel, out var service) || service is null)
-                return (false, Guid.Empty, default);
+            var service = CreateImportService(name, shopImportSettings, shopModel);
 
             var serviceItem = new ServiceItem(Guid.NewGuid(), service, shopModel.Id, new CancellationTokenSource());
             var added = _services.TryAdd(serviceItem.Guid, serviceItem);
 
-            return (added, serviceItem.Guid, service);
+            return (serviceItem.Guid, service);
         }
         finally
         {
@@ -49,27 +48,23 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
         }
     }
 
-    private bool TryCreateImportService(string name, IShopImportSettings shopImportSettings, IShopModel source, out IImportService? service)
+    private IImportService CreateImportService(string name, IShopImportSettings shopImportSettings, IShopModel source)
     {
-        service = default;
-
-        var importServiceSettings = shopImportSettings.GetImportService();
-        if (importServiceSettings == null)
-            return false;
-
-        var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName);
-        if (serviceFactory == null) return false;
-
-        service = serviceFactory.Create(name, source, shopImportSettings);
-        return true;
+        var importServiceSettings = shopImportSettings.GetImportService()
+            ?? throw new InvalidOperationException($"Import settings {name} does not contain the import service settings");
+        
+        var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName) 
+            ?? throw new InvalidOperationException($"Service type {importServiceSettings.ImplementationTypeName} not found.");
+        
+        return serviceFactory.Create(name, source, shopImportSettings);
     }
 
-    Task<(bool, Guid guid, IImportService? service)> IServiceRepository.TryAddImportService(string name, IImportSettings importSettings, 
-        CancellationToken cancellationToken = default)
+    Task<(Guid guid, IImportService service)> IServiceRepository.AddImportService(string name, IImportSettings importSettings, 
+        CancellationToken cancellationToken)
     {
         if(importSettings is not IShopImportSettings shopImportSettings)
             throw new InvalidOperationException($"Invalid import settings type {importSettings.GetType().Name}");        
 
-        return TryAddShopImportService(name, shopImportSettings, cancellationToken);
+        return AddShopImportService(name, shopImportSettings, cancellationToken);
     }
 }

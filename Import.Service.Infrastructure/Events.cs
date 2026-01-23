@@ -1,4 +1,6 @@
-﻿namespace Import.Service.Commands;
+﻿using Mediator.Messages;
+
+namespace Import.Service.Commands;
 
 public record ServiceMessage(Guid Guid, string? Name);
 

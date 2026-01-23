@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Mediator.Infrastructure;
+namespace Mediator.Messages;
 
 public interface IEvent : INotification
 {

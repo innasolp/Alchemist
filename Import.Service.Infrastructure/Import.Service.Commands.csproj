@@ -23,6 +23,7 @@
     <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
+    <ProjectReference Include="..\Mediator.Messages\Mediator.Messages.csproj" />
     <ProjectReference Include="..\Shop.Entities\Shop.Interfaces.csproj" />
     <ProjectReference Include="..\ShopSettings.Interfaces\ShopSettings.Interfaces.csproj" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-﻿namespace Mediator.Infrastructure;
+﻿namespace Mediator.Messages;
 
 public class Event<T>(string eventName, T entity, DateTime creationDate) : IEvent
 {

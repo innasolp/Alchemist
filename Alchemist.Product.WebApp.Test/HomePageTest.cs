@@ -8,13 +8,13 @@ namespace Alchemist.Product.WebApp.Test;
 
 public class TestProductWebAppFactory : ProductWebAppTestContainerLifetimeFactory
 {
-    private static readonly string dbConnectionString = Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb");
+    private static readonly string database = Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb");
     public TestProductWebAppFactory() : base(7102, 7103,
         7500, 7501,
         8060,8061,
         7088,7089,
          8406,8407,
-        dbConnectionString)
+        database)
     { }
 }
 

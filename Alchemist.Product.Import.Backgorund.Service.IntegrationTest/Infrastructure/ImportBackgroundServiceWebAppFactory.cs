@@ -51,9 +51,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
 
-    public FixtureLoggerFactoryContext SettingsApiFixtureLoggingContext => _settingsAPIWebAppFactory.FixtureLoggingContext;
+    public FixtureLoggerFactoryContext? SettingsApiFixtureLoggingContext => _settingsAPIWebAppFactory?.FixtureLoggingContext;
 
-    public FixtureLoggerFactoryContext ShopApiFixtureLoggingContext => _shopAPIWebAppFactory.FixtureLoggingContext;
+    public FixtureLoggerFactoryContext? ShopApiFixtureLoggingContext => _shopAPIWebAppFactory?.FixtureLoggingContext;
 
     public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
 
@@ -87,8 +87,8 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     public IMessageReceiver CreateImportItemReceiver()
     {
         return _importItemsHost.CreateSubscriber(Services,
-            _configuration.GetSection("RabbitMqExchangeOptions:ExchangeName").Get<string>(),
-            _configuration.GetSection("RabbitMqQueueOptions:Name").Get<string>());
+            _configuration?.GetSection("RabbitMqExchangeOptions:ExchangeName")?.Get<string>(),
+            _configuration?.GetSection("RabbitMqQueueOptions:Name")?.Get<string>());
     }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)

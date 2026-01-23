@@ -31,6 +31,9 @@ internal class RecursiveJsonCategoryFromHtmlLoader(IHtmlSearcher htmlSearcher, H
         Stream stream, IHtmlSearcher htmlSearcher, HtmlCategoryLoadOptions categoryLoadStageOptions, CancellationToken cancellationToken = default)
     {
         var values = await htmlSearcher.GetValues(stream, categoryLoadStageOptions.HtmlSearchOptions, cancellationToken);
+        if (values.Count == 0)
+            return [];
+
         var rootElement = JsonDocument.Parse(values[0]).RootElement;      
         
         var elementHelper = new JsonElementHelper();    

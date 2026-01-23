@@ -31,7 +31,7 @@ public class ShopImportWorker : BackgroundService
         _eventMessageSender = eventMessageSender;
         _initSettingsAdapters = initSettingsAdapters;
 
-        _eventMessageReceiver.On<Settings.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);//, typeof(ShopSettings));
+        _eventMessageReceiver.On<Settings.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);
 
         _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);
 
@@ -89,20 +89,36 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task OnShopSettingsCreatedAsync(Settings.ShopSettings newShopSettings)//  (object newShopSettingsDto)
+    private async Task OnShopSettingsCreatedAsync(Settings.ShopSettings newShopSettings)
     {
         _logger.LogInformation($"Handling of settings {newShopSettings.Name} for shop id={newShopSettings.ShopId} started.");
 
         try
         {
-            var (success, guid) = await _mediator.Send(new AddShopImportServiceFromShopSettingsCommand(newShopSettings));
+            var guid = await _mediator.Send(new AddShopImportServiceFromShopSettingsCommand(newShopSettings));
 
-            if(success)
-             _logger.LogInformation($"New service {newShopSettings.Name} with id {guid} added");
+            _logger.LogInformation($"New service {newShopSettings.Name} with id {guid} added");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Service creation for shop settings {newShopSettings.Name} failed.");
+        }
+    }
+
+    private async Task StartNewService(string name, IShopImportSettings shopImportSettings, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var guid = await _mediator.Send(new AddShopImportServiceCommand(name, shopImportSettings), cancellationToken);
+
+            _logger.LogInformation($"Service {name} is initialized.");
+
+            await _mediator.Send(new StartServiceCommand(guid), cancellationToken);
+        }
+        catch(Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            _logger.LogInformation($"Couldn't start the service {name}. See error log.");
         }
     }
 
@@ -114,23 +130,13 @@ public class ShopImportWorker : BackgroundService
         {
             var allShopImportSettings = await GetAllShopImportSettingsAsync(stoppingToken);
 
-            await Task.WhenAll(allShopImportSettings.Select(s => _mediator.Send(new AddShopImportServiceCommand(s.Key, s.Value), stoppingToken)));
+            var tasks = allShopImportSettings.Select(s => StartNewService(s.Key, s.Value, stoppingToken));
 
-            _logger.LogInformation("Import services initialized.");    
+            await Parallel.ForEachAsync(allShopImportSettings, (s, token) => new ValueTask(StartNewService(s.Key, s.Value, token)));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-        }
-
-        try
-        {
-            var startAllTask = _mediator.Send(new StartAllServicesCommand(), stoppingToken);
-            await startAllTask;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
         }
     }
 
