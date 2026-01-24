@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using Import.Service.Commands.Handlers;
 using Mediator.Messages;
 using MediatR;
+using MediatR.NotificationPublishers;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,7 +22,7 @@ public static class MediatrExtensions
             {
                 cfg.RegisterGenericHandlers = true;
 
-                cfg.NotificationPublisherType = typeof(LoggingNotificationPublisher);
+                cfg.NotificationPublisherType = typeof(LoggingNotificationPublisher<ForeachAwaitPublisher>);
                 cfg.RegisterServicesFromAssemblyContaining<AddShopImportServiceCommandHandler>();
             });
         });
@@ -30,11 +31,11 @@ public static class MediatrExtensions
         return hostBuilder
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddScoped<INotificationPublisher, LoggingNotificationPublisher>(serviceProvider =>
+                services.AddScoped<INotificationPublisher, LoggingNotificationPublisher<ForeachAwaitPublisher>>(serviceProvider =>
                 {
                     var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
                     var logger = loggerFactory.CreateLogger(loggingCategory);
-                    return new LoggingNotificationPublisher(logger);
+                    return new LoggingNotificationPublisher<ForeachAwaitPublisher>(logger);
                 });
             })
             .ConfigureContainer<ContainerBuilder>((builderContext, builder) =>

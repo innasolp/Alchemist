@@ -8,19 +8,19 @@ namespace Mediator.Module.EF;
 
 public static class AutofacExtensions
 {
-    public static IHostBuilder AddMediatorInfrastructure<T>(this IHostBuilder hostBuilder)//, params System.Reflection.Assembly[] assemblies)
+    public static IHostBuilder AddMediatorInfrastructure<T>(this IHostBuilder hostBuilder)
         where T : MediatorModule, new()
     {
         var module = new T();
 
+        return hostBuilder.AddMediatorInfrastructure(module);
+    }
+
+    public static IHostBuilder AddMediatorInfrastructure(this IHostBuilder hostBuilder, MediatorModule module)
+    {
         hostBuilder.ConfigureServices((context, services) =>
         {
-            services.AddMediatR(cfg =>
-            {
-                cfg.RegisterGenericHandlers = true;
-
-                module.ConfigureMediator(cfg);
-            });
+            module.ConfigureServices(services); 
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());

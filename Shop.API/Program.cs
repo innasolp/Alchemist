@@ -26,7 +26,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
-builder.Host.AddMediatorInfrastructure<ShopModule>();
+builder.Host.AddMediatorInfrastructure(new ShopModule(nameof(InfoLogMiddleware<ShopController>)));
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);

@@ -12,7 +12,7 @@ namespace ShopSettings.Module;
 
 public class ShopSettingsModule : MediatorModule
 {
-    public override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
+    protected override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
     {
         cfg.RegisterServicesFromAssemblyContaining<GetChildSettingsRequest>();
     }

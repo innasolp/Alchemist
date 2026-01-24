@@ -9,7 +9,7 @@ namespace Alchemist.Product.Module;
 
 public class ProductModule : MediatorModule
 {
-    public override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
+    protected override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
     {
         cfg.RegisterServicesFromAssemblyContaining<GetCurrencyByCodeRequestHandler>();
     }
