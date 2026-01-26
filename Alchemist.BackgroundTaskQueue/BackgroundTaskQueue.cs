@@ -12,7 +12,7 @@ internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
         _queue = CreateCahnnel();
     }
 
-    protected abstract Channel<Func<CancellationToken, ILogger, ValueTask>> CreateCahnnel();
+    protected abstract Channel<Func<CancellationToken, ILogger, ValueTask>> CreateChannel();
 
     public async ValueTask QueueBackgroundWorkItemAsync(
         Func<CancellationToken, ILogger, ValueTask> workItem, CancellationToken cancellationToken = default)
