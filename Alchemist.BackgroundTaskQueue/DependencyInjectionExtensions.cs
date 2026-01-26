@@ -18,4 +18,9 @@ public static class DependencyInjectionExtensions
     {
         return services.AddKeyedSingleton<IBackgroundTaskQueue>(key, new DefaultBoundedBackgroundTaskQueue(capacity));
     }
+
+    public static IServiceCollection AddKeyedUnboundedBackgroundQueue(this IServiceCollection services, object? key, bool singleReader = false, bool singleWriter = false)
+    {
+        return services.AddKeyedSingleton<IBackgroundTaskQueue>(key, new DefaultUnboundedBackgroundTaskQueue(singleReader, singleWriter));
+    }
 }
