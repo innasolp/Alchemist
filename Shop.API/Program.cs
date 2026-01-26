@@ -6,11 +6,13 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
+using Log.Interceptors;
 using Mediator.Module.EF;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Serilog;
+using Serilog.Loggers;
 using Shop.API.Controllers;
 using Shop.Module;
 using Swashbuckle.AspNetCore.Swagger;
@@ -49,6 +51,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopCategoryControll
 
 builder.Services.AddProblemDetails();
 
+InterceptLogs(builder.Services);
+
 AddLogging(builder.Configuration, builder.Logging);
 
 var app = builder.Build();
@@ -74,6 +78,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void InterceptLogs(IServiceCollection services)
+{
+    services.InterceptLoggerFactory((logger) => new SerilogForceDestructuringLogger(logger));
+}
 
 static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
 {
