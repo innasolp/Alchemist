@@ -7,12 +7,12 @@ public record ServiceMessage(Guid Guid, string? Name);
 public abstract class ServiceEvent(string eventName, ServiceMessage serviceMessage, DateTime creationDate) 
     : Event<ServiceMessage>(eventName, serviceMessage, creationDate)
 {
-    protected override (string, object?[]) GetFailedMessage()
+    protected internal override (string, object?[]) GetFailedMessage()
     {
         return ("Notification event {EventName} for service {Entity.Name} {Entity.Guid} failed.", [EventName, Entity.Name, Entity.Guid]);
     }
 
-    protected override (string, object?[]) GetSuccessEventMessage()
+    protected internal override (string, object?[]) GetSuccessEventMessage()
     {
         return ("Successfully published event {EventName} for service {Entity.Name} {Entity.Guid}.", [EventName, Entity.Name, Entity.Guid]);
     }
