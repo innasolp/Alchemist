@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alchemist.BackgroundTaskQueueService\BackgroundTaskQueueService.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />

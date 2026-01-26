@@ -3,6 +3,8 @@ using Alchemist.Log.Extensions;
 using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Settings.RestAPI.Controllers;
+using BackgroundTaskQueueService;
+using BackgroundTaskQueue;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
@@ -24,8 +26,11 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => 
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
+
+builder.Services.AddUnboundedBackgroundQueue();
+
 
 builder.Host.AddMediatorInfrastructure(new ShopSettingsModule(nameof(InfoLogMiddleware<SettingsController>)));
 
@@ -50,6 +55,8 @@ builder.Services.AddProblemDetails();
 InterceptLogs(builder.Services);
 
 AddLogging(builder.Configuration, builder.Logging);
+
+builder.Services.AddHostedService<BackgroundTaskQueuedHostedService>();
 
 var app = builder.Build();
 

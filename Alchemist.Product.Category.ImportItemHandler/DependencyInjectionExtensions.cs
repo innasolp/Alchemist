@@ -1,5 +1,5 @@
-﻿using Alchemist.BackgroundTaskQueue;
-using Alchemist.Import.Category.Interfaces;
+﻿using Alchemist.Import.Category.Interfaces;
+using BackgroundTaskQueue;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

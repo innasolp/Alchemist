@@ -19,8 +19,6 @@ using CustomConfigurationProvider;
 using Serilog;
 using Import.Factory.Interfaces;
 using Import.Factory.Logging;
-using Alchemist.BackgroundTaskQueueService;
-using Alchemist.BackgroundTaskQueue;
 using Alchemist.Product.BeautyAndHealth.ImportItemHandler;
 using Alchemist.Product.Category.ImportItemHandler;
 using Shop.API.Client;
@@ -28,11 +26,16 @@ using Shop.Interfaces;
 using ShopSettings.Interfaces;
 using Import.Service.Commands;
 using ShopImport.Service.Category.Infrastructure;
+using BackgroundTaskQueue;
+using BackgroundTaskQueueService;
+using Alchemist.Product.Import.Background.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
 builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
+
+builder.Services.AddKeyedBoundedBackgroundQueue(100, "EventBackgroundTaskQueue");
 
 AddSettingsAdapters(builder);
 
@@ -56,6 +59,7 @@ AddLogging(builder.Configuration, builder.Logging, builder.Environment, restApiH
 
 builder.Services.AddHostedService<ShopImportWorker>();
 builder.Services.AddHostedService<BackgroundTaskQueuedHostedService>();
+builder.Services.AddHostedService<EventBackgroundTaskQueueHostedService>();
 
 builder.Services.AddAuthentication("https");
 

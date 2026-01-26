@@ -7,7 +7,7 @@ using UnitOfWork;
 namespace Alchemist.Product.Infrastructure;
 
 public class SetProductPurposeCommandHandler(IProductPurposeRepository productPurposeRepository, IUnitOfWork<IDbContextTransaction> productUnitOfWork)
-    : CommandHandler<ProductPurpose, SetProductPurposeCommand, IDbContextTransaction, IUnitOfWork<IDbContextTransaction>>(productUnitOfWork)
+    : TransactionCommandHandler<ProductPurpose, SetProductPurposeCommand, IDbContextTransaction, IUnitOfWork<IDbContextTransaction>>(productUnitOfWork)
 {
     private readonly IProductPurposeRepository _productPurposeRepository = productPurposeRepository;
 

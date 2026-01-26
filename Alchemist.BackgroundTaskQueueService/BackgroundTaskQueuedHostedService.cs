@@ -1,8 +1,8 @@
-﻿using Alchemist.BackgroundTaskQueue;
+﻿using BackgroundTaskQueue;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.BackgroundTaskQueueService;
+namespace BackgroundTaskQueueService;
 
 public class BackgroundTaskQueuedHostedService(
         IBackgroundTaskQueue taskQueue,

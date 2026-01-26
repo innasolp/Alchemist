@@ -297,9 +297,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader.Playwright.Chromi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Settings", "Alchemist.Import.Settings\Alchemist.Import.Settings.csproj", "{2225A228-F0A5-4FA4-A985-02586A99042E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BackgroundTaskQueue", "Alchemist.BackgroundTaskQueue\Alchemist.BackgroundTaskQueue.csproj", "{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundTaskQueue", "Alchemist.BackgroundTaskQueue\BackgroundTaskQueue.csproj", "{8F1C5872-5646-49AD-B3BA-3F20B044DCE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.BackgroundTaskQueueService", "Alchemist.BackgroundTaskQueueService\Alchemist.BackgroundTaskQueueService.csproj", "{2590A476-819F-4D59-9739-57A581FBF2D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundTaskQueueService", "Alchemist.BackgroundTaskQueueService\BackgroundTaskQueueService.csproj", "{2590A476-819F-4D59-9739-57A581FBF2D0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alchemist.Import.Products.Json", "Alchemist.Import.Products.Json\Alchemist.Import.Products.Json.csproj", "{0CA27842-0574-44F7-B636-C11F1D5FE93D}"
 EndProject
@@ -418,6 +418,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopImport.Service.Category.Infrastructure", "ShopImport.Service.Infrastructure\ShopImport.Service.Category.Infrastructure.csproj", "{3B79E4D2-F03B-4652-BAFA-EC92EAC2CF63}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.InterceptionExtensions", "..\DependencyInjection\DependencyInjection.InterceptionExtensions\DependencyInjection.InterceptionExtensions.csproj", "{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackgroundTaskQueue", "BackgroundTaskQueue", "{30482552-E3F1-4A73-81A6-D65BC4FCDEFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1950,8 +1952,8 @@ Global
 		{F963D2E6-7663-A8AD-3555-F5E7C7FCB2CA} = {B34A2054-0477-4A0A-9064-0181CFFB6682}
 		{6E2A0A96-04A9-A34F-8779-C099CC2BA55A} = {D57540CD-C3BF-4BF4-BBAD-C7D537FB5726}
 		{2225A228-F0A5-4FA4-A985-02586A99042E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7} = {2B9E318A-ACF8-4407-8738-E4E5424F52A3}
-		{2590A476-819F-4D59-9739-57A581FBF2D0} = {2B9E318A-ACF8-4407-8738-E4E5424F52A3}
+		{8F1C5872-5646-49AD-B3BA-3F20B044DCE7} = {30482552-E3F1-4A73-81A6-D65BC4FCDEFC}
+		{2590A476-819F-4D59-9739-57A581FBF2D0} = {30482552-E3F1-4A73-81A6-D65BC4FCDEFC}
 		{0CA27842-0574-44F7-B636-C11F1D5FE93D} = {42CB0CAC-CD16-462F-925F-952CE5C22B91}
 		{85E5C6CC-1DD4-45E7-95C4-C126B33C23A2} = {B9D88BFF-90DD-4C72-9ADE-5FBCB8DD4FFC}
 		{B4AC7241-BA22-45DD-F9C0-05925CF882ED} = {85E5C6CC-1DD4-45E7-95C4-C126B33C23A2}

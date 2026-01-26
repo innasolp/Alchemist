@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Alchemist.BackgroundTaskQueue;
+namespace BackgroundTaskQueue;
 
 public interface IBackgroundTaskQueue
 {
     ValueTask QueueBackgroundWorkItemAsync(
-        Func<CancellationToken, ILogger, ValueTask> workItem);
+        Func<CancellationToken, ILogger, ValueTask> workItem, CancellationToken cancellationToken);
 
     ValueTask<Func<CancellationToken, ILogger, ValueTask>> DequeueAsync(
         CancellationToken cancellationToken);

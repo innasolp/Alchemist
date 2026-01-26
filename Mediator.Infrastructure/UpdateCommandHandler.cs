@@ -4,7 +4,7 @@ using UnitOfWork;
 namespace Mediator.Infrastructure;
 
 public class UpdateCommandHandler<T, TUpdateCommand, TRepository, TTransaction, TUnitOfWork>(TRepository repository, TUnitOfWork unitOfWork) 
-    : CommandHandler<T, TUpdateCommand, TTransaction, TUnitOfWork>(unitOfWork)
+    : TransactionCommandHandler<T, TUpdateCommand, TTransaction, TUnitOfWork>(unitOfWork)
     where TRepository : IRepository<T>
     where TUnitOfWork : IUnitOfWork<TTransaction>
     where TUpdateCommand : UpdateCommand<T>

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.BackgroundTaskQueue;
+namespace BackgroundTaskQueue;
 
 public static class DependencyInjectionExtensions
 {
@@ -12,5 +12,10 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection AddUnboundedBackgroundQueue(this IServiceCollection services, bool singleReader = false, bool singleWriter = false)
     {
         return services.AddSingleton<IBackgroundTaskQueue>(new DefaultUnboundedBackgroundTaskQueue(singleReader, singleWriter));
+    }
+
+    public static IServiceCollection AddKeyedBoundedBackgroundQueue(this IServiceCollection services, int capacity, object? key)
+    {
+        return services.AddKeyedSingleton<IBackgroundTaskQueue>(key, new DefaultBoundedBackgroundTaskQueue(capacity));
     }
 }

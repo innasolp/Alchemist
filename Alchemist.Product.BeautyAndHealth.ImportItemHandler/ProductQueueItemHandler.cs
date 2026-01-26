@@ -1,7 +1,7 @@
-﻿using Alchemist.BackgroundTaskQueue;
-using Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Product.Entities;
 using Alchemist.Product.ImportItemHandler;
+using BackgroundTaskQueue;
 using Json.CustomSerialization;
 using Message.Interfaces;
 using System.Text.Json;

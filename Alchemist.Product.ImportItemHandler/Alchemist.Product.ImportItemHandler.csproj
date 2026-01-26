@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Alchemist.BackgroundTaskQueue\Alchemist.BackgroundTaskQueue.csproj" />
+	  <ProjectReference Include="..\Alchemist.BackgroundTaskQueue\BackgroundTaskQueue.csproj" />
 	  <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
 	  <ProjectReference Include="..\Alchemist.Import\Alchemist.Import.csproj" />
 	  <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
