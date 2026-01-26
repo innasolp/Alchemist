@@ -12,12 +12,11 @@
     <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.4" />
     <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.4" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
 	<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.1" />
 	<PackageReference Include="Mapster" Version="7.4.0" />
-	<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+	<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>

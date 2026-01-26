@@ -3,15 +3,30 @@ using Autofac;
 using Mediator.Messages;
 using Mediator.Module.EF;
 using MediatR;
+using MediatR.NotificationPublishers;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ShopSettings.Infrastructure;
 using ShopSettings.UnitOfWork;
 using UnitOfWork;
 
 namespace ShopSettings.Module;
 
-public class ShopSettingsModule : MediatorModule
+public class ShopSettingsModule(string logCategory) : MediatorModule
 {
+    public override void ConfigureServices(IServiceCollection services)
+    {
+        services.AddScoped<INotificationPublisher, LoggingNotificationPublisher<ForeachAwaitPublisher>>(serviceProvider =>
+        {
+            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger(logCategory);
+            return new LoggingNotificationPublisher<ForeachAwaitPublisher>(logger);
+        });
+
+        base.ConfigureServices(services);
+    }
+
     protected override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
     {
         cfg.RegisterServicesFromAssemblyContaining<GetChildSettingsRequest>();

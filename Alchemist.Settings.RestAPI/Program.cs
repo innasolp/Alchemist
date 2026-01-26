@@ -7,11 +7,13 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Http.Info;
+using Log.Interceptors;
 using Mediator.Module.EF;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Serilog;
+using Serilog.Loggers;
 using ShopSettings.Module;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -25,7 +27,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => 
             options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
-builder.Host.AddMediatorInfrastructure<ShopSettingsModule>();
+builder.Host.AddMediatorInfrastructure(new ShopSettingsModule(nameof(InfoLogMiddleware<SettingsController>)));
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
@@ -44,6 +46,8 @@ builder.Services.AddAuthentication("https");
 builder.Services.AddExceptionHandler<GlobalExceptionHandler<SettingsController>>();
 builder.Services.AddSingleton<InfoLogMiddleware<SettingsController>>();
 builder.Services.AddProblemDetails();
+
+InterceptLogs(builder.Services);
 
 AddLogging(builder.Configuration, builder.Logging);
 
@@ -70,6 +74,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void InterceptLogs(IServiceCollection services)
+{
+    services.InterceptLoggerFactory((logger) => new SerilogForceDestructuringLogger(logger));
+}
 
 static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
 {
