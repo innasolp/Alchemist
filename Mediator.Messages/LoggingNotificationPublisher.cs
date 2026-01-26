@@ -20,8 +20,8 @@ public class LoggingNotificationPublisher<TDefaultPublisher>(ILogger logger) : I
 
             if (notification is IEventMessage eventMessage)
             {
-                var msg = eventMessage.GetSuccessEventMessage();
-                _logger.LogInformation(msg.messageFormat, msg.args);
+                var (messageFormat, args) = eventMessage.GetSuccessEventMessage();
+                _logger.LogInformation(messageFormat, args);
             }
             else
                 _logger.LogInformation("Successfully published notification: {NotificationName}", notificationName);
@@ -30,8 +30,8 @@ public class LoggingNotificationPublisher<TDefaultPublisher>(ILogger logger) : I
         {
             if (notification is IEventMessage eventMessage)
             {
-                var msg = eventMessage.GetFailedMessage();
-                _logger.LogError(ex, msg.messageFormat, msg.args);
+                var (messageFormat, args) = eventMessage.GetFailedMessage();
+                _logger.LogError(ex, messageFormat, args);
             }
             else
                 _logger.LogError(ex, "Error publishing notification: {NotificationName}", notificationName);            

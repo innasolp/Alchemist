@@ -4,13 +4,13 @@ using Mediator.Infrastructure.Command;
 using Mediator.Messages;
 using Mediator.Module.EF;
 using MediatR;
-using MediatR.NotificationPublishers;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shop.Infrastructure;
 using Shop.UnitOfWork;
 using UnitOfWork;
+using Alchemist.DependencyInjection.Common;
 
 namespace Shop.Module;
 
@@ -18,12 +18,7 @@ public class ShopModule (string logCategory) : MediatorModule
 {
     public override void ConfigureServices(IServiceCollection services)
     {
-        services.AddScoped<INotificationPublisher, LoggingNotificationPublisher<ForeachAwaitPublisher>>(serviceProvider =>
-        {
-            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger(logCategory);
-            return new LoggingNotificationPublisher<ForeachAwaitPublisher>(logger);
-        });
+        services.AddLogger(logCategory);
 
         base.ConfigureServices(services);
     }
@@ -45,7 +40,7 @@ public class ShopModule (string logCategory) : MediatorModule
         builder.RegisterType(typeof(CreateShopCategoryCommandHandler))
             .As(typeof(IRequestHandler<CreateCommand<ShopCategory>, ShopCategory>));
 
-        builder.RegisterType(typeof(MessageEventHandler<CreateShopEvent, Alchemist.Product.Data.Shop>)).As(typeof(INotificationHandler<CreateShopEvent>));
-        builder.RegisterType(typeof(MessageEventHandler<CreateShopCategoryEvent, ShopCategory>)).As(typeof(INotificationHandler<CreateShopCategoryEvent>));
+        builder.RegisterType(typeof(BackgroundMessageEventHandler<CreateShopEvent, Alchemist.Product.Data.Shop>)).As(typeof(INotificationHandler<CreateShopEvent>));
+        builder.RegisterType(typeof(BackgroundMessageEventHandler<CreateShopCategoryEvent, ShopCategory>)).As(typeof(INotificationHandler<CreateShopCategoryEvent>));
     }
 }

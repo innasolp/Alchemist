@@ -8,7 +8,7 @@ public class MessageEventHandler<TEvent, T>(IMessageSender messageSender) : INot
 {
     protected IMessageSender MessageSender { get; } = messageSender;
 
-    public async Task Handle(TEvent @event, CancellationToken cancellationToken = default)
+    public virtual async Task Handle(TEvent @event, CancellationToken cancellationToken = default)
     {
         if (!MessageSender.IsConnected)
             await MessageSender.Start(cancellationToken);

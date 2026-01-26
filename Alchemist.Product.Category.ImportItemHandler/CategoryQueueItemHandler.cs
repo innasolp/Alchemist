@@ -1,8 +1,8 @@
-﻿using Alchemist.BackgroundTaskQueue;
-using Alchemist.Import.Category.Interfaces;
+﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Product.CategoryData;
 using Alchemist.Product.Entities;
 using Alchemist.Product.ImportItemHandler;
+using BackgroundTaskQueue;
 using Message.Interfaces;
 
 namespace Alchemist.Product.Category.ImportItemHandler;

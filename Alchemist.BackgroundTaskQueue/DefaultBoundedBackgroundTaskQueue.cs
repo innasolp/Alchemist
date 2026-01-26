@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
 
-namespace Alchemist.BackgroundTaskQueue;
+namespace BackgroundTaskQueue;
 
 internal sealed class DefaultBoundedBackgroundTaskQueue(int capacity) : BackgroundTaskQueue
 {

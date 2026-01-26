@@ -46,6 +46,11 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
         var response = await _shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
         Assert.True(response.IsSuccessStatusCode);
 
+        await WaitForConditionAsync(
+            () => _messages.Count(m => m.categoryName.Contains(typeof(LogHubFilter).Name) && m.logLevel == LogLevel.Information) == 2,
+            TimeSpan.FromSeconds(5)
+        );
+
         Assert.Equal(2, _messages.Count(m => m.categoryName.Contains(typeof(LogHubFilter).Name) && m.logLevel == LogLevel.Information));
         Assert.Empty(_messages.Where(m => m.categoryName.Contains(typeof(LogHubFilter).Name) && m.logLevel == LogLevel.Error));
     }

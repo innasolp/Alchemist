@@ -19,8 +19,6 @@ using CustomConfigurationProvider;
 using Serilog;
 using Import.Factory.Interfaces;
 using Import.Factory.Logging;
-using Alchemist.BackgroundTaskQueueService;
-using Alchemist.BackgroundTaskQueue;
 using Alchemist.Product.BeautyAndHealth.ImportItemHandler;
 using Alchemist.Product.Category.ImportItemHandler;
 using Shop.API.Client;
@@ -28,11 +26,16 @@ using Shop.Interfaces;
 using ShopSettings.Interfaces;
 using Import.Service.Commands;
 using ShopImport.Service.Category.Infrastructure;
+using BackgroundTaskQueue;
+using BackgroundTaskQueueService;
+using Alchemist.Product.Import.Background.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
 builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
+
+builder.Services.AddKeyedBoundedBackgroundQueue(100, "EventBackgroundTaskQueue");
 
 AddSettingsAdapters(builder);
 
@@ -55,7 +58,8 @@ AddShopImportItemHandlers(builder.Services, builder.Configuration);
 AddLogging(builder.Configuration, builder.Logging, builder.Environment, restApiHost, settingsAPIHost);
 
 builder.Services.AddHostedService<ShopImportWorker>();
-builder.Services.AddHostedService<BackgroundTaskQueuedHostedService>();
+builder.Services.AddHostedService<ImportBackgroundTaskQueueHostedService>();
+builder.Services.AddHostedService<EventBackgroundTaskQueueHostedService>();
 
 builder.Services.AddAuthentication("https");
 
@@ -140,7 +144,7 @@ static void AddShopImportItemHandlers(IServiceCollection services, IConfiguratio
     services.AddImportProductMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
     services.AddImportCategoryMessageSender((s, key)=>s.AddSignalRMessageSender(configuration, "SignalRImportUrl", key));
 
-    services.AddUnboundedBackgroundQueue();
+    services.AddKeyedUnboundedBackgroundQueue("ImportBackgroundTaskQueue");
     services.AddProductQueueItemHandlerFactory("importqueue", configuration.GetSection("RabbitMQProductEvent").Get<string>());
     services.AddCategoryQueueItemHandler("importqueue", configuration.GetSection("RabbitMQCategoryEvent").Get<string>());
 }

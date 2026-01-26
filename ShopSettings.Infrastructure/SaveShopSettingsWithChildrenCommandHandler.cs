@@ -9,7 +9,7 @@ namespace ShopSettings.Infrastructure;
 public sealed class SaveShopSettingsWithChildrenCommandHandler(IShopSettingsRepository repository,
     IUnitOfWork<IDbContextTransaction> unitOfWork,
     IPublisher eventPublisher)
-    : CommandHandler<(Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>), SaveShopSettingsWithChildrenCommand, IDbContextTransaction, IUnitOfWork<IDbContextTransaction>>(unitOfWork)
+    : TransactionCommandHandler<(Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>), SaveShopSettingsWithChildrenCommand, IDbContextTransaction, IUnitOfWork<IDbContextTransaction>>(unitOfWork)
 {
     private readonly IShopSettingsRepository _repository = repository;
 

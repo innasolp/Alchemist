@@ -1,4 +1,4 @@
-﻿using Alchemist.BackgroundTaskQueue;
+﻿using BackgroundTaskQueue;
 using Import.Interfaces;
 using Message.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -20,7 +20,7 @@ public abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue backgr
 
     public async Task<ResultStatus> HandleItem(T item, CancellationToken cancellationToken = default)
     {
-        await _backgroundTaskQueue.QueueBackgroundWorkItemAsync((token, logger)=>ProcessItem(item, logger, token));
+        await _backgroundTaskQueue.QueueBackgroundWorkItemAsync((token, logger)=>ProcessItem(item, logger, token), cancellationToken);
             
        return ResultStatus.Success;
     }

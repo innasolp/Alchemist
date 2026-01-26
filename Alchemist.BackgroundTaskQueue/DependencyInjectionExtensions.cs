@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Alchemist.BackgroundTaskQueue;
+namespace BackgroundTaskQueue;
 
 public static class DependencyInjectionExtensions
 {
@@ -12,5 +12,18 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection AddUnboundedBackgroundQueue(this IServiceCollection services, bool singleReader = false, bool singleWriter = false)
     {
         return services.AddSingleton<IBackgroundTaskQueue>(new DefaultUnboundedBackgroundTaskQueue(singleReader, singleWriter));
+    }
+
+    public static IServiceCollection AddKeyedBoundedBackgroundQueue(this IServiceCollection services, int capacity, object? key)
+    {
+        if (capacity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(capacity), $"value can't be zero or negative");
+
+        return services.AddKeyedSingleton<IBackgroundTaskQueue>(key, new DefaultBoundedBackgroundTaskQueue(capacity));
+    }
+
+    public static IServiceCollection AddKeyedUnboundedBackgroundQueue(this IServiceCollection services, object? key, bool singleReader = false, bool singleWriter = false)
+    {
+        return services.AddKeyedSingleton<IBackgroundTaskQueue>(key, new DefaultUnboundedBackgroundTaskQueue(singleReader, singleWriter));
     }
 }

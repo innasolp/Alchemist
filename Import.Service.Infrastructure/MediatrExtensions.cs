@@ -1,5 +1,7 @@
-﻿using Autofac;
+﻿using Alchemist.DependencyInjection.Common;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using BackgroundTaskQueue;
 using Import.Service.Commands.Handlers;
 using Mediator.Messages;
 using MediatR;
@@ -7,7 +9,6 @@ using MediatR.NotificationPublishers;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Import.Service.Commands;
 
@@ -31,19 +32,15 @@ public static class MediatrExtensions
         return hostBuilder
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddScoped<INotificationPublisher, LoggingNotificationPublisher<ForeachAwaitPublisher>>(serviceProvider =>
-                {
-                    var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-                    var logger = loggerFactory.CreateLogger(loggingCategory);
-                    return new LoggingNotificationPublisher<ForeachAwaitPublisher>(logger);
-                });
+                services.AddLogger(loggingCategory);
             })
             .ConfigureContainer<ContainerBuilder>((builderContext, builder) =>
         {
+            builder.Register(c => c.ResolveKeyed<IBackgroundTaskQueue>(ServiceKeys.EventBackgroundTaskQueue)).As<IBackgroundTaskQueue>();
             builder.Register(c => c.ResolveKeyed<IMessageSender>(ServiceKeys.EventMessageSenderKey)).As<IMessageSender>();
-            builder.RegisterType(typeof(MessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));
-            builder.RegisterType(typeof(MessageEventHandler<ServiceStartedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStartedEvent>));
-            builder.RegisterType(typeof(MessageEventHandler<ServiceStoppedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStoppedEvent>));
+            builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));
+            builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStartedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStartedEvent>));
+            builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStoppedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStoppedEvent>));
         });
     }
 }

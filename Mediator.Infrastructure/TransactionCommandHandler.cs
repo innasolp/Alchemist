@@ -3,7 +3,7 @@ using UnitOfWork;
 
 namespace Mediator.Infrastructure;
 
-public abstract class CommandHandler<T, TCommand, TTransaction, TUnitOfWork>(TUnitOfWork unitOfWork)
+public abstract class TransactionCommandHandler<T, TCommand, TTransaction, TUnitOfWork>(TUnitOfWork unitOfWork)
     : IRequestHandler<TCommand, T>    
     where TUnitOfWork : IUnitOfWork<TTransaction>
     where TCommand : IRequest<T>

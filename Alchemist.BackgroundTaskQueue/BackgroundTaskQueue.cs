@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
 
-namespace Alchemist.BackgroundTaskQueue;
+namespace BackgroundTaskQueue;
 
 internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
 {
@@ -12,14 +12,14 @@ internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
         _queue = CreateCahnnel();
     }
 
-    protected abstract Channel<Func<CancellationToken, ILogger, ValueTask>> CreateCahnnel();
+    protected abstract Channel<Func<CancellationToken, ILogger, ValueTask>> CreateChannel();
 
     public async ValueTask QueueBackgroundWorkItemAsync(
-        Func<CancellationToken, ILogger, ValueTask> workItem)
+        Func<CancellationToken, ILogger, ValueTask> workItem, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(workItem);
 
-        await _queue.Writer.WriteAsync(workItem);
+        await _queue.Writer.WriteAsync(workItem, cancellationToken);
     }
 
     public async ValueTask<Func<CancellationToken, ILogger, ValueTask>> DequeueAsync(

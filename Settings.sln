@@ -342,6 +342,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediator.Messages", "Mediat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.PostresqlTestContainer", "Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj", "{79CDCCDE-DDBE-AE82-C488-ECDA2420B93D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackgroundTaskQueue", "BackgroundTaskQueue", "{C03B1CB6-15FF-4872-8F09-FD3A69136586}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundTaskQueue", "Alchemist.BackgroundTaskQueue\BackgroundTaskQueue.csproj", "{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundTaskQueueService", "Alchemist.BackgroundTaskQueueService\BackgroundTaskQueueService.csproj", "{037A67D5-C441-CA25-0B52-B8B89A96F973}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.InterceptionExtensions", "..\DependencyInjection\DependencyInjection.InterceptionExtensions\DependencyInjection.InterceptionExtensions.csproj", "{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug libs|Any CPU = debug libs|Any CPU
@@ -1472,6 +1480,41 @@ Global
 		{79CDCCDE-DDBE-AE82-C488-ECDA2420B93D}.import_shops|Any CPU.Build.0 = Release|Any CPU
 		{79CDCCDE-DDBE-AE82-C488-ECDA2420B93D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79CDCCDE-DDBE-AE82-C488-ECDA2420B93D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823}.Release|Any CPU.Build.0 = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.debug libs|Any CPU.ActiveCfg = Debug|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.debug libs|Any CPU.Build.0 = Debug|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{037A67D5-C441-CA25-0B52-B8B89A96F973}.Release|Any CPU.Build.0 = Release|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.debug libs|Any CPU.ActiveCfg = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.debug libs|Any CPU.Build.0 = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.import_core|Any CPU.ActiveCfg = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.import_core|Any CPU.Build.0 = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.import_settings|Any CPU.ActiveCfg = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.import_settings|Any CPU.Build.0 = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.import_shops|Any CPU.ActiveCfg = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.import_shops|Any CPU.Build.0 = debug libs|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1623,6 +1666,9 @@ Global
 		{608B93A4-2FFA-FAB2-25E7-2C3A613F44E7} = {45FA6381-B2ED-4C89-997C-9A963E9C5F12}
 		{5EBC2C5B-1C2E-D654-8995-5C2EE11B9698} = {5CB679FE-D808-4494-8194-CFDF6F9801CD}
 		{79CDCCDE-DDBE-AE82-C488-ECDA2420B93D} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
+		{1E7C02B8-FD30-B5D6-B803-A8C359BBA823} = {C03B1CB6-15FF-4872-8F09-FD3A69136586}
+		{037A67D5-C441-CA25-0B52-B8B89A96F973} = {C03B1CB6-15FF-4872-8F09-FD3A69136586}
+		{743FBFBE-A6A0-EB71-8E64-2FFA62F90AD2} = {4A75A9ED-5D0D-4230-A04C-957AFE79D9FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}
