@@ -1,19 +1,34 @@
-﻿using Autofac;
+﻿using Alchemist.Product.Data;
+using Autofac;
 using Mediator.Infrastructure.Command;
 using Mediator.Messages;
 using Mediator.Module.EF;
 using MediatR;
+using MediatR.NotificationPublishers;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shop.Infrastructure;
 using Shop.UnitOfWork;
 using UnitOfWork;
-using Alchemist.Product.Data;
 
 namespace Shop.Module;
 
-public class ShopModule : MediatorModule
+public class ShopModule (string logCategory) : MediatorModule
 {
-    public override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
+    public override void ConfigureServices(IServiceCollection services)
+    {
+        services.AddScoped<INotificationPublisher, LoggingNotificationPublisher<ForeachAwaitPublisher>>(serviceProvider =>
+        {
+            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger(logCategory);
+            return new LoggingNotificationPublisher<ForeachAwaitPublisher>(logger);
+        });
+
+        base.ConfigureServices(services);
+    }
+
+    protected override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
     {
         cfg.RegisterServicesFromAssemblyContaining<GetAllCategoryChildrenRequest>();
     }

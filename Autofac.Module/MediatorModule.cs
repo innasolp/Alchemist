@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Mediator.Infrastructure;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Mediator.Module.EF;
 
@@ -19,5 +20,15 @@ public abstract class MediatorModule : Autofac.Module
 
     protected abstract void RegisterTypes(ContainerBuilder builder);
 
-    public abstract void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration configuration);
+    public virtual void ConfigureServices(IServiceCollection services)
+    {
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterGenericHandlers = true;
+
+            ConfigureMediator(cfg);
+        });
+    }
+
+    protected abstract void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration configuration);
 }

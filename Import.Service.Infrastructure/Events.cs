@@ -4,6 +4,20 @@ namespace Import.Service.Commands;
 
 public record ServiceMessage(Guid Guid, string? Name);
 
-public class ServiceCreatedEvent(ServiceMessage message) : Event<ServiceMessage>(Messages.ServiceCreated, message, DateTime.Now);
-public class ServiceStartedEvent(ServiceMessage message) : Event<ServiceMessage>(Messages.ServiceStarted, message, DateTime.Now);
-public class ServiceStoppedEvent(ServiceMessage message) : Event<ServiceMessage>(Messages.ServiceStopped, message, DateTime.Now);
+public abstract class ServiceEvent(string eventName, ServiceMessage serviceMessage, DateTime creationDate) 
+    : Event<ServiceMessage>(eventName, serviceMessage, creationDate)
+{
+    protected internal override (string, object?[]) GetFailedMessage()
+    {
+        return ("Notification event {EventName} for service {Entity.Name} {Entity.Guid} failed.", [EventName, Entity.Name, Entity.Guid]);
+    }
+
+    protected internal override (string, object?[]) GetSuccessEventMessage()
+    {
+        return ("Successfully published event {EventName} for service {Entity.Name} {Entity.Guid}.", [EventName, Entity.Name, Entity.Guid]);
+    }
+}
+
+public class ServiceCreatedEvent(ServiceMessage message) : ServiceEvent(Messages.ServiceCreated, message, DateTime.Now);
+public class ServiceStartedEvent(ServiceMessage message) : ServiceEvent(Messages.ServiceStarted, message, DateTime.Now);
+public class ServiceStoppedEvent(ServiceMessage message) : ServiceEvent(Messages.ServiceStopped, message, DateTime.Now);

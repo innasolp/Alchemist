@@ -1,15 +1,14 @@
-﻿using Mediator.Messages;
-using MediatR;
-using MediatR.NotificationPublishers;
+﻿using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Import.Service.Commands;
+namespace Mediator.Messages;
 
-internal class LoggingNotificationPublisher(ILogger logger) : INotificationPublisher
+public class LoggingNotificationPublisher<TDefaultPublisher>(ILogger logger) : INotificationPublisher
+    where TDefaultPublisher : class, INotificationPublisher, new()
 {
     private readonly ILogger _logger = logger;
     
-    private readonly INotificationPublisher _defaultPublisher = new ForeachAwaitPublisher();
+    private readonly INotificationPublisher _defaultPublisher = new TDefaultPublisher();
 
     public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken = default)
     {
@@ -19,15 +18,21 @@ internal class LoggingNotificationPublisher(ILogger logger) : INotificationPubli
         {
             await _defaultPublisher.Publish(handlerExecutors, notification, cancellationToken).ConfigureAwait(false);
 
-            if (notification is Event<ServiceMessage> @event)
-                _logger.LogInformation($"Successfully published event {@event.EventName} for service {@event.Entity.Name} {@event.Entity.Guid}.");
-            else 
+            if (notification is IEventMessage eventMessage)
+            {
+                var msg = eventMessage.GetSuccessEventMessage();
+                _logger.LogInformation(msg.messageFormat, msg.args);
+            }
+            else
                 _logger.LogInformation("Successfully published notification: {NotificationName}", notificationName);
         }
         catch (Exception ex)
         {
-            if (notification is Event<ServiceMessage> @event)
-                _logger.LogError(ex, $"Notification event {@event.EventName} for service {@event.Entity.Name} {@event.Entity.Guid} failed.");
+            if (notification is IEventMessage eventMessage)
+            {
+                var msg = eventMessage.GetFailedMessage();
+                _logger.LogError(ex, msg.messageFormat, msg.args);
+            }
             else
                 _logger.LogError(ex, "Error publishing notification: {NotificationName}", notificationName);            
         }
