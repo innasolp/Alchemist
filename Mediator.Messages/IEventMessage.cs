@@ -2,7 +2,7 @@
 
 public interface IEventMessage
 {
-    protected internal (string messageFormat, object?[] args) GetSuccessEventMessage();
+    (string messageFormat, object?[] args) GetSuccessEventMessage();
 
-    protected internal (string messageFormat, object?[] args) GetFailedMessage();
+    (string messageFormat, object?[] args) GetFailedMessage();
 }
