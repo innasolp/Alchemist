@@ -96,47 +96,47 @@ service AlchemyGrpcService {
 
 	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply) {
 		option (google.api.http) = {
-			get: "/v1/shops/{shopid}/products/byApiUrl/{apiurl}"
+			get: "/v1/shops/{shopId}/products/byApiUrl/{apiUrl}"
 		};
 	}
 	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply) {
 		option (google.api.http) = {
-			get: "/v1/shops/{shopid}/products/byItemId/{itemid}"
+			get: "/v1/shops/{shopId}/products/byItemId/{itemId}"
 		};
 	}
 	rpc GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest) returns (ShopProductReply) {
 		option (google.api.http) = {
-			get: "/v1/shops/{shopid}/products/{productid}"
+			get: "/v1/shops/{shopId}/products/{productId}"
 		};
 	}
 	rpc UpdateShopProduct(UpdateShopProductRequest) returns(ShopProductReply) {
 		option (google.api.http) = {
-			put: "/v1/shops/{shopid}/products/{id}"
+			put: "/v1/shops/{shopId}/products/{id}"
 			body: "*"
 		};
 	}
 	rpc CreateShopProduct(CreateShopProductRequest) returns(ShopProductReply) {
 		option (google.api.http) = {
-			post: "/v1/shops/{shopid}/products"
+			post: "/v1/shops/{shopId}/products"
 			body: "*"
 		};
 	}
 
 	rpc SetProductComponent(SetProductComponentRequest) returns(ProductComponentReply) {
 		option (google.api.http) = {
-			post: "/v1/products/{productid}/components"
+			post: "/v1/products/{productId}/components"
 			body: "*"
 		};
 	}
 
 	rpc GetProductPurposes(GetProductPurposesRequest) returns(PurposeTypeListReply) {
 		option (google.api.http) = {
-			get: "/v1/products/{productid}/purposes"
+			get: "/v1/products/{productId}/purposes"
 		};
 	}
 	rpc SetProductPurpose(SetProductPurposeRequest) returns(ProductPurposeReply) {
 		option (google.api.http) = {
-			post: "/v1/products/{productid}/purposes"
+			post: "/v1/products/{productId}/purposes"
 			body: "*"
 		};
 	}
@@ -182,13 +182,13 @@ service AlchemyGrpcService {
 	}
 	rpc AddShopProductCategory(ShopProductCategoryRequest) returns(ShopProductCategoryReply) {
 		option (google.api.http) = {
-			post: "/v1/shopProducts/{shopproductid}/categories"
+			post: "/v1/shopProducts/{shopProductId}/categories"
 			body: "*"
 		};
 	}
 	rpc CheckShopProductCategory(ShopProductCategoryRequest) returns(google.protobuf.BoolValue) {
 		option (google.api.http) = {
-			get: "/v1/shopProducts/{shopproductid}/categories/check/{shopcategoryid}"
+			get: "/v1/shopProducts/{shopProductId}/categories/check/{shopCategoryid}"
 		};
 	}
 }
