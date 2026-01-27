@@ -34,20 +34,6 @@ internal class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.WebHost.ConfigureKestrel(options =>
-        {
-            // Configure HTTP/2 flow control window sizes
-            var http2 = options.Limits.Http2;
-            http2.InitialConnectionWindowSize = 1024 * 1024 * 2; // 2 MB
-            http2.InitialStreamWindowSize = 1024 * 1024; // 1 MB
-
-            options.Listen(IPAddress.Any, 7051, listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http2;
-                listenOptions.UseHttps();
-            });
-        });
-
         builder.WebHost.UseKestrel();
 
         builder.Services.AddMapster();
@@ -102,10 +88,10 @@ internal class Program
 
         // Configure the HTTP request pipeline.
 
-        app.UseSwagger();
-
         if (builder.Environment.IsDevelopment())
         {
+            app.UseSwagger();
+
             app.UseDeveloperExceptionPage();
 
             app.UseSwaggerUI(c =>
