@@ -8,14 +8,15 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Grpc.Server.Interceptors;
 using Grpc.Server.RequestInterceptor;
-using Http.RequestHandling.PerfomanceCounter;
 using Mapster;
-using MapsterMapper;
 using Mediator.Module.EF;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using Serilog;
-using Serilog.Loggers;
-using System.Security.AccessControl;
+using System.Net;
+using System.Reflection;
 
 internal class Program
 {
@@ -33,6 +34,8 @@ internal class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.WebHost.UseKestrel();
+
         builder.Services.AddMapster();
         TypeAdapterConfig.GlobalSettings.Default.NameMatchingStrategy(NameMatchingStrategy.IgnoreCase);
 
@@ -40,18 +43,39 @@ internal class Program
         builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
         builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
-        builder.Services.AddPerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>((logger) => new SerilogUrlLogger<PerfomanceCounter<ServerRequestSenderInterceptor<AlchemyService>>>(logger));
-
         builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
-        builder.Host.AddMediatorInfrastructure<ProductModule>();      
+        builder.Host.AddMediatorInfrastructure<ProductModule>();
 
         builder.Services.AddSingleton<ServerLoggingInterceptor<AlchemyService>>();
         builder.Services.AddSingleton<ServerRequestSenderInterceptor<AlchemyService>>();
+        
         builder.Services.AddGrpc(options =>
         {
             options.Interceptors.Add<ServerRequestSenderInterceptor<AlchemyService>>();
             options.Interceptors.Add<ServerLoggingInterceptor<AlchemyService>>();
+        }).AddJsonTranscoding();
+        
+        // Register OpenAPI/Swagger support for transcoded gRPC endpoints
+        //builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddGrpcSwagger();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "gRPC Product service", Version = "v1" });
+
+            // Include XML comments for .proto and generated types if available
+            var xmlFile = $"{Assembly.GetEntryAssembly()?.GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory ?? ".", xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                c.IncludeXmlComments(xmlPath);
+                // Include gRPC-specific xml comments (extension provided by Microsoft.AspNetCore.Grpc.Swagger)
+                c.IncludeGrpcXmlComments(xmlPath, includeControllerXmlComments: true);
+            }
+        });
+        builder.Services.ConfigureSwagger((options) =>
+        {
+            options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
         });
 
         AddLogging(builder.Configuration, builder.Logging);
@@ -65,20 +89,27 @@ internal class Program
         // Configure the HTTP request pipeline.
 
         if (builder.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+
             app.UseDeveloperExceptionPage();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "gRPC Product service v1");
+            });
+        }
 
         app.UseHsts();
 
         app.UseHttpsRedirection();
 
         app.UseRouting();
-
-        (app as IHost).UsePerfomanceCounters();
-
+        
         // Configure the HTTP request pipeline.
         app.MapGrpcService<AlchemyService>();
         app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
-
+        
         app.Run();
 
         static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
@@ -90,8 +121,6 @@ internal class Program
             loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(AlchemyService).Name);
             loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerRequestSenderInterceptor<>).GetNameWithoutGenericArity());
             loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{typeof(AlchemyService).Name}", typeof(ServerLoggingInterceptor<>).GetNameWithoutGenericArity());
-
-            loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: "https://localhost:8071", EventIds.Perfomance.Id, typeof(AlchemyService).Name);
 
             loggerConfiguration.SetSerilog(loggingBuilder);
         }

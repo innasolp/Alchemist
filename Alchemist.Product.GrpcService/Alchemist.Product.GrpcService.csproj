@@ -4,14 +4,17 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>efcb67c2-b5fc-41b5-a48a-387cdcdf230e</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+	  <InvariantGlobalization>true</InvariantGlobalization>
+	  <IncludeHttpRuleProtos>true</IncludeHttpRuleProtos>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>  
 
   <ItemGroup>
     <Protobuf Include="Protos\alchemygrpc.proto" GrpcServices="Server" />
+    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client" 
+			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client" 
+			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,17 +25,19 @@
     <PackageReference Include="Grpc.Server.Interceptors" Version="1.0.0.1" />
     <PackageReference Include="Grpc.Server.RequestInterceptor" Version="1.0.0" />
     <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.72.0">
+    <PackageReference Include="Grpc.Tools" Version="2.76.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="MediatR" Version="14.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Grpc.Swagger" Version="0.9.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="9.0.12" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0.3" />
 	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
