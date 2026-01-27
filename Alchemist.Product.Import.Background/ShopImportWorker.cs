@@ -73,7 +73,7 @@ public class ShopImportWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Service {Guid} stopping error: {Message}", guid, ex.Message);
+            _logger.LogWarning(ex, "Service {Guid} stopping error.", guid);
         }
     }
 
