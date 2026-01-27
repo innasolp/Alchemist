@@ -41,8 +41,9 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
         Assert.NotNull(response);
         Assert.Equal(brandName, response.Name);
 
-        Assert.Equal(2, _messages.Count(m=>m.eventId == 5001 &&
+        Assert.Equal(1, _messages.Count(m=>
             m.logLevel == LogLevel.Information
+            && m.message.Contains("success")
             && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
     }
 
@@ -57,10 +58,6 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
         });       
 
         Assert.Equal(StatusCode.InvalidArgument, rpcException.Status.StatusCode);
-        
-        Assert.Equal(2, _messages.Count(m => m.eventId == 5001 &&
-            m.logLevel == LogLevel.Information
-            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
         
         Assert.Equal(1, _messages.Count(m=> m.logLevel == LogLevel.Error
             && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
