@@ -19,14 +19,13 @@ internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
     {
         ArgumentNullException.ThrowIfNull(workItem);
 
-        while (await _queue.Writer.WaitToWriteAsync(cancellationToken).ConfigureAwait(false))
+        while (true)
         {
-            if (_queue.Writer.TryWrite(workItem))
-            {
-                return; // Successfully wrote the item
-            }
-            // Another producer might have written to the channel between the await
-            // and the TryWrite call. The loop handles this by waiting again.
+            if (!await _queue.Writer.WaitToWriteAsync(cancellationToken).ConfigureAwait(false))
+               throw new InvalidOperationException("The background task queue is closed and cannot accept new work items.");            
+
+            if (_queue.Writer.TryWrite(workItem))            
+                return;             
         }
     }
 
@@ -40,6 +39,7 @@ internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
 
             return workItem;
         }
-        throw new InvalidOperationException($"can't read from queue");
+
+        throw new InvalidOperationException("The background task queue is completed and no more items can be read.");
     }
 }
