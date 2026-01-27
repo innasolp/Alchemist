@@ -4,53 +4,193 @@ option csharp_namespace = "Alchemist.Product.GrpcService";
 
 package alchemygrpc;
 
+import "google/api/annotations.proto";
+import "google/api/http.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
 // The alchemy service definition.
 service AlchemyGrpcService {
-	rpc CreateProductType(CreateProductTypeRequest) returns (ProductTypeReply);
-	rpc FindProductTypeByName(FindByNameRequest) returns (ProductTypeReply);
+	rpc CreateProductType(CreateProductTypeRequest) returns (ProductTypeReply) {
+		option (google.api.http) = {
+			post: "/v1/productTypes"
+			body: "*"
+		};
+	}
+	rpc FindProductTypeByName(FindByNameRequest) returns (ProductTypeReply) {
+		option (google.api.http) = {
+			get: "/v1/productTypes/findByName/{name}"
+		};
+	}
 	
-	rpc CreatePurposeType(CreatePurposeTypeRequest) returns (PurposeTypeReply);
-	rpc FindPurposeTypeByName(FindByNameRequest) returns (PurposeTypeReply);
+	rpc CreatePurposeType(CreatePurposeTypeRequest) returns (PurposeTypeReply) {
+		option (google.api.http) = {
+			post: "/v1/purposeTypes"
+			body: "*"
+		};
+	}
+	rpc FindPurposeTypeByName(FindByNameRequest) returns (PurposeTypeReply) {
+		option (google.api.http) = {
+			get: "/v1/purposeTypes/findByName/{name}"
+		};
+	}
 
-	rpc CreateCountry(CreateCountryRequest) returns (CountryReply);
-	rpc FindCountryByName(FindByNameRequest) returns (CountryReply);
+	rpc CreateCountry(CreateCountryRequest) returns (CountryReply) {
+		option (google.api.http) = {
+			post: "/v1/countries"
+			body: "*"
+		};
+	}
+	rpc FindCountryByName(FindByNameRequest) returns (CountryReply) {
+		option (google.api.http) = {
+			get: "/v1/countries/findByName/{name}"
+		};
+	}
 
-	rpc CreateBrand(CreateBrandRequest) returns (BrandReply);
-	rpc FindBrandByName(FindByNameRequest) returns (BrandReply);		
+	rpc CreateBrand(CreateBrandRequest) returns (BrandReply) {
+		option (google.api.http) = {
+			post: "/v1/brands"
+			body: "*"
+		};
+	}
+	rpc FindBrandByName(FindByNameRequest) returns (BrandReply) {
+		option (google.api.http) = {
+			get: "/v1/brands/findByName/{name}"
+		};
+	}		
 	
-	rpc CreateComponent(CreateComponentRequest) returns (ComponentReply);
-	rpc GetComponent(GetByIdInt32Request) returns (ComponentReply);	
-	rpc FindComponentByName(FindByNameRequest) returns (ComponentReply);
+	rpc CreateComponent(CreateComponentRequest) returns (ComponentReply) {
+		option (google.api.http) = {
+			post: "/v1/components"
+			body: "*"
+		};
+	}
+	rpc GetComponent(GetByIdInt32Request) returns (ComponentReply) {
+		option (google.api.http) = {
+			get: "/v1/components/{id}"
+		};
+	}	
+	rpc FindComponentByName(FindByNameRequest) returns (ComponentReply) {
+		option (google.api.http) = {
+			get: "/v1/components/findByName/{name}"
+		};
+	}
 
-	rpc CreateProduct(CreateProductRequest) returns (ProductReply);
-	rpc FindProductByName(FindByNameRequest) returns (ProductReply);
-	rpc FindProductByNameAndBrand(FindProductByNameAndBrandRequest) returns (ProductReply);
+	rpc CreateProduct(CreateProductRequest) returns (ProductReply) {
+		option (google.api.http) = {
+			post: "/v1/products"
+			body: "*"
+		};
+	}
+	rpc FindProductByName(FindByNameRequest) returns (ProductReply) {
+		option (google.api.http) = {
+			get: "/v1/products/findByName/{name}"
+		};
+	}
+	rpc FindProductByNameAndBrand(FindProductByNameAndBrandRequest) returns (ProductReply) {
+		option (google.api.http) = {
+			get: "/v1/products/findByNameAndBrand/{name}/{brand}"
+		};
+	}
 
-	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply);
-	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply);
-	rpc GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest) returns (ShopProductReply);
-	rpc UpdateShopProduct(UpdateShopProductRequest) returns(ShopProductReply);
-	rpc CreateShopProduct(CreateShopProductRequest) returns(ShopProductReply);
+	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply) {
+		option (google.api.http) = {
+			get: "/v1/shops/{shopid}/products/byApiUrl/{apiurl}"
+		};
+	}
+	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply) {
+		option (google.api.http) = {
+			get: "/v1/shops/{shopid}/products/byItemId/{itemid}"
+		};
+	}
+	rpc GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest) returns (ShopProductReply) {
+		option (google.api.http) = {
+			get: "/v1/shops/{shopid}/products/{productid}"
+		};
+	}
+	rpc UpdateShopProduct(UpdateShopProductRequest) returns(ShopProductReply) {
+		option (google.api.http) = {
+			put: "/v1/shops/{shopid}/products/{id}"
+			body: "*"
+		};
+	}
+	rpc CreateShopProduct(CreateShopProductRequest) returns(ShopProductReply) {
+		option (google.api.http) = {
+			post: "/v1/shops/{shopid}/products"
+			body: "*"
+		};
+	}
 
-	rpc SetProductComponent(SetProductComponentRequest) returns(ProductComponentReply);
+	rpc SetProductComponent(SetProductComponentRequest) returns(ProductComponentReply) {
+		option (google.api.http) = {
+			post: "/v1/products/{productid}/components"
+			body: "*"
+		};
+	}
 
-	rpc GetProductPurposes(GetProductPurposesRequest) returns(PurposeTypeListReply) ;
-	rpc SetProductPurpose(SetProductPurposeRequest) returns(ProductPurposeReply);
+	rpc GetProductPurposes(GetProductPurposesRequest) returns(PurposeTypeListReply) {
+		option (google.api.http) = {
+			get: "/v1/products/{productid}/purposes"
+		};
+	}
+	rpc SetProductPurpose(SetProductPurposeRequest) returns(ProductPurposeReply) {
+		option (google.api.http) = {
+			post: "/v1/products/{productid}/purposes"
+			body: "*"
+		};
+	}
 
-	rpc GetCurrencyByName(FindByNameRequest) returns (CurrencyReply);
-	rpc GetCurrencyByCode(GetCurrencyByCodeRequest) returns (CurrencyReply);
-	rpc CreateCurrency(CreateCurrencyRequest) returns(CurrencyReply);
+	rpc GetCurrencyByName(FindByNameRequest) returns (CurrencyReply) {
+		option (google.api.http) = {
+			get: "/v1/currencies/findByName/{name}"
+		};
+	}
+	rpc GetCurrencyByCode(GetCurrencyByCodeRequest) returns (CurrencyReply) {
+		option (google.api.http) = {
+			get: "/v1/currencies/{code}"
+		};
+	}
+	rpc CreateCurrency(CreateCurrencyRequest) returns(CurrencyReply) {
+		option (google.api.http) = {
+			post: "/v1/currencies"
+			body: "*"
+		};
+	}
 
-	rpc GetShopProductPrice(GetByIdInt64Request) returns(ShopProductPriceReply);
-	rpc CreateShopProductPrice(CreateShopProductPriceRequest) returns(ShopProductPriceReply);
-	rpc UpdateShopProductPrice(UpdateShopProductPriceRequest) returns(ShopProductPriceReply);
-	rpc GetShopProductCategories(GetByIdInt64Request) returns(ShopProductCategoryListReply);
-	rpc AddShopProductCategory(ShopProductCategoryRequest) returns(ShopProductCategoryReply);
-	rpc CheckShopProductCategory(ShopProductCategoryRequest) returns(google.protobuf.BoolValue);
+	rpc GetShopProductPrice(GetByIdInt64Request) returns(ShopProductPriceReply) {
+		option (google.api.http) = {
+			get: "/v1/shopProductPrices/{id}"
+		};
+	}
+	rpc CreateShopProductPrice(CreateShopProductPriceRequest) returns(ShopProductPriceReply) {
+		option (google.api.http) = {
+			post: "/v1/shopProductPrices"
+			body: "*"
+		};
+	}
+	rpc UpdateShopProductPrice(UpdateShopProductPriceRequest) returns(ShopProductPriceReply) {
+		option (google.api.http) = {
+			put: "/v1/shopProductPrices/{id}"
+			body: "*"
+		};
+	}
+	rpc GetShopProductCategories(GetByIdInt64Request) returns(ShopProductCategoryListReply) {
+		option (google.api.http) = {
+			get: "/v1/shopProducts/{id}/categories"
+		};
+	}
+	rpc AddShopProductCategory(ShopProductCategoryRequest) returns(ShopProductCategoryReply) {
+		option (google.api.http) = {
+			post: "/v1/shopProducts/{shopproductid}/categories"
+			body: "*"
+		};
+	}
+	rpc CheckShopProductCategory(ShopProductCategoryRequest) returns(google.protobuf.BoolValue) {
+		option (google.api.http) = {
+			get: "/v1/shopProducts/{shopproductid}/categories/check/{shopcategoryid}"
+		};
+	}
 }
 
 message GetByIdInt32Request
@@ -308,6 +448,3 @@ message ShopProductCategoryListReply
 {
 	repeated ShopProductCategoryReply ShopProductCategories = 1;
 }
-
-
-
