@@ -18,15 +18,19 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
 
         serviceItem.Service.ConnectedAsync += ServiceConnectedAsync;
 
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, serviceItem.InnerTokenSource.Token);
+
         try
         {
             await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, serviceItem.Service.Name)), cancellationToken);
 
-            await serviceItem.Service.Start(request.Guid, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, serviceItem.InnerTokenSource.Token).Token);
+            await serviceItem.Service.Start(request.Guid, linkedCts.Token);
         }
-        finally
+        catch
         {
             serviceItem.Service.ConnectedAsync -= ServiceConnectedAsync;
+
+            throw;
         }
     }
 
@@ -34,8 +38,13 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
     {
         if (sender is not IImportService service || eventArgs.Parameter is not Guid guid) return;
 
-        await _publisher.Publish(new ServiceStartedEvent(eventArgs.Success, new ServiceMessage(guid, service.Name)), eventArgs.CancellationToken);        
-
-        service.ConnectedAsync -= ServiceConnectedAsync;
+        try
+        {
+            await _publisher.Publish(new ServiceStartedEvent(eventArgs.Success, new ServiceMessage(guid, service.Name)), eventArgs.CancellationToken);
+        }
+        finally
+        {
+            service.ConnectedAsync -= ServiceConnectedAsync;
+        }
     }
 }
