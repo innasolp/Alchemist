@@ -2,9 +2,10 @@ using Alchemist.Common;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
+using Alchemist.Settings.RestAPI;
 using Alchemist.Settings.RestAPI.Controllers;
-using BackgroundTaskQueueService;
 using BackgroundTaskQueue;
+using BackgroundTaskQueueService;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
@@ -32,7 +33,7 @@ builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFacto
 builder.Services.AddUnboundedBackgroundQueue();
 
 
-builder.Host.AddMediatorInfrastructure(new ShopSettingsModule(nameof(InfoLogMiddleware<SettingsController>)));
+builder.Host.AddMediatorInfrastructure(new ShopSettingsModule());
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
@@ -56,7 +57,7 @@ InterceptLogs(builder.Services);
 
 AddLogging(builder.Configuration, builder.Logging);
 
-builder.Services.AddHostedService<BackgroundTaskQueuedHostedService>();
+builder.Services.AddHostedService<ShopSettingsBackgroundTaskQueuedHostedService>();
 
 var app = builder.Build();
 
@@ -98,6 +99,7 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
     loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
     loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", nameof(ShopSettingsBackgroundTaskQueuedHostedService));
 
     loggerConfiguration.SetSerilog(loggingBuilder);
 }

@@ -9,7 +9,7 @@ internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
 
     public BackgroundTaskQueue()
     {
-        _queue = CreateCahnnel();
+        _queue = CreateChannel();
     }
 
     protected abstract Channel<Func<CancellationToken, ILogger, ValueTask>> CreateChannel();
@@ -19,15 +19,27 @@ internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
     {
         ArgumentNullException.ThrowIfNull(workItem);
 
-        await _queue.Writer.WriteAsync(workItem, cancellationToken);
+        while (await _queue.Writer.WaitToWriteAsync(cancellationToken).ConfigureAwait(false))
+        {
+            if (_queue.Writer.TryWrite(workItem))
+            {
+                return; // Successfully wrote the item
+            }
+            // Another producer might have written to the channel between the await
+            // and the TryWrite call. The loop handles this by waiting again.
+        }
     }
 
     public async ValueTask<Func<CancellationToken, ILogger, ValueTask>> DequeueAsync(
         CancellationToken cancellationToken)
     {
-        Func<CancellationToken, ILogger, ValueTask>? workItem =
-            await _queue.Reader.ReadAsync(cancellationToken);
+        if (await _queue.Reader.WaitToReadAsync(cancellationToken))
+        {
+            Func<CancellationToken, ILogger, ValueTask>? workItem =
+                await _queue.Reader.ReadAsync(cancellationToken);
 
-        return workItem;
+            return workItem;
+        }
+        throw new InvalidOperationException($"can't read from queue");
     }
 }

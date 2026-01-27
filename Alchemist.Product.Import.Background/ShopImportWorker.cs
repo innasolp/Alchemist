@@ -35,8 +35,23 @@ public class ShopImportWorker : BackgroundService
 
         _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);
 
+        _eventMessageReceiver.On<ServiceMessage>(Messages.Common.Messages.ServiceStarting, OnServiceStarting);
+        _eventMessageReceiver.On<ServiceStartedMessage>(Messages.Common.Messages.ServiceStarted, OnServiceStarted);
         _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, OnStopServiceAsync);
         _eventMessageReceiver.On<ServiceMessage>(Messages.Common.Messages.ServiceStopped, OnServiceStoppedAsync);
+    }
+
+    private async Task OnServiceStarted(ServiceStartedMessage serviceStartedMessage)
+    {
+        if (serviceStartedMessage.Success)
+            _logger.LogInformation($"Service {serviceStartedMessage.Name} {serviceStartedMessage.Guid} started successfully.");
+        else
+            _logger.LogInformation($"Service {serviceStartedMessage.Name} {serviceStartedMessage.Guid} failed on start.");
+    }
+
+    private async Task OnServiceStarting(ServiceMessage serviceMessage)
+    {
+        _logger.LogInformation($"Service {serviceMessage.Name} {serviceMessage.Guid} starting.");
     }
 
     private async Task OnServiceStoppedAsync(ServiceMessage serviceMessage)
@@ -58,7 +73,7 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task OnStartServiceAsync(Guid guid, CancellationToken stoppingToken)
+    private async Task StartServiceAsync(Guid guid, CancellationToken stoppingToken)
     {
         _logger.LogInformation($"Starting service with guid {guid}.");
 
@@ -144,7 +159,7 @@ public class ShopImportWorker : BackgroundService
     {        
         try
         {
-            async Task startServiceAsync(Guid guid) => await OnStartServiceAsync(guid, stoppingToken);
+            async Task startServiceAsync(Guid guid) => await StartServiceAsync(guid, stoppingToken);
 
             await _eventMessageReceiver.Start(stoppingToken);
 

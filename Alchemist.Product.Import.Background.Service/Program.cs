@@ -47,7 +47,7 @@ AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
 builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
-builder.Host.AddImportServicesInfrastructure(nameof(ShopImportWorker));
+builder.Host.AddImportServicesInfrastructure();
 
 AddMessages(builder);
 
@@ -188,7 +188,8 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     AddShopImportLogging(logPath, environment, loggerConfiguration);
 
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ShopImportWorker).Name);
-    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(BackgroundTaskQueuedHostedService).Name);
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(EventBackgroundTaskQueueHostedService).Name);
+    loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ImportBackgroundTaskQueueHostedService).Name);
 
     AddPerfomanceLogging(loggerConfiguration, logPath, restApiHost, settingsAPIHost, logContextFile);
 

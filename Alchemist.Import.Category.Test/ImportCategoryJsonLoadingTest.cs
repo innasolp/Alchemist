@@ -60,7 +60,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         var tokenSource = new CancellationTokenSource();
         tokenSource.CancelAfter(executionDuration);
 
-        await service.Start(tokenSource.Token); 
+        await service.Start(new object(), tokenSource.Token); 
     }
 
     [Fact]

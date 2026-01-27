@@ -7,7 +7,7 @@ internal sealed class DefaultBoundedBackgroundTaskQueue(int capacity) : Backgrou
 {
     private readonly int _capacity = capacity;
 
-    protected override Channel<Func<CancellationToken, ILogger, ValueTask>> CreateCahnnel()
+    protected override Channel<Func<CancellationToken, ILogger, ValueTask>> CreateChannel()
     {
         BoundedChannelOptions options = new(_capacity)
         {

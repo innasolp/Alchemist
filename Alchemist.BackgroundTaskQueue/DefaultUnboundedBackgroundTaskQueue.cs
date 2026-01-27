@@ -8,7 +8,7 @@ internal class DefaultUnboundedBackgroundTaskQueue(bool singleReader = false, bo
     private readonly bool _singleReader = singleReader;
     private readonly bool _singleWriter = singleWriter;
 
-    protected override Channel<Func<CancellationToken, ILogger, ValueTask>> CreateCahnnel()
+    protected override Channel<Func<CancellationToken, ILogger, ValueTask>> CreateChannel()
     {
         UnboundedChannelOptions options = new() { SingleReader = _singleReader, SingleWriter = _singleWriter };
         
