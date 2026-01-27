@@ -12,6 +12,7 @@ using Mapster;
 using Mediator.Module.EF;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Net;
@@ -45,9 +46,6 @@ internal class Program
                 listenOptions.Protocols = HttpProtocols.Http2;
                 listenOptions.UseHttps();
             });
-
-            // You can also configure specific endpoints if needed
-            // options.ListenLocalhost(5000, o => o.Protocols = HttpProtocols.Http2); 
         });
 
         builder.WebHost.UseKestrel();
@@ -65,7 +63,7 @@ internal class Program
 
         builder.Services.AddSingleton<ServerLoggingInterceptor<AlchemyService>>();
         builder.Services.AddSingleton<ServerRequestSenderInterceptor<AlchemyService>>();
-        // Enable JSON transcoding and keep existing gRPC interceptors
+        
         builder.Services.AddGrpc(options =>
         {
             options.Interceptors.Add<ServerRequestSenderInterceptor<AlchemyService>>();
@@ -77,7 +75,7 @@ internal class Program
         builder.Services.AddGrpcSwagger();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "gRPC transcoding", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "gRPC Product service", Version = "v1" });
 
             // Include XML comments for .proto and generated types if available
             var xmlFile = $"{Assembly.GetEntryAssembly()?.GetName().Name}.xml";
@@ -88,6 +86,10 @@ internal class Program
                 // Include gRPC-specific xml comments (extension provided by Microsoft.AspNetCore.Grpc.Swagger)
                 c.IncludeGrpcXmlComments(xmlPath, includeControllerXmlComments: true);
             }
+        });
+        builder.Services.ConfigureSwagger((options) =>
+        {
+            options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
         });
 
         AddLogging(builder.Configuration, builder.Logging);
@@ -108,7 +110,7 @@ internal class Program
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "gRPC transcoding v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "gRPC Product service v1");
             });
         }
 

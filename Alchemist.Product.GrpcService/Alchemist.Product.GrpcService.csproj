@@ -18,7 +18,6 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.30.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
-    <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.71.0" />
     <PackageReference Include="Grpc.Interception.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Message.Extensions" Version="1.0.0" />
     <PackageReference Include="Grpc.Server.Interceptors" Version="1.0.0.1" />
@@ -28,7 +27,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="MediatR" Version="14.0.0" />
