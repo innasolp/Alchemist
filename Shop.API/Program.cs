@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Serilog;
 using Serilog.Loggers;
+using Shop.API;
 using Shop.API.Controllers;
 using Shop.Module;
 using Swashbuckle.AspNetCore.Swagger;
@@ -32,7 +33,7 @@ builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFacto
 
 builder.Services.AddUnboundedBackgroundQueue();
 
-builder.Host.AddMediatorInfrastructure(new ShopModule(nameof(InfoLogMiddleware<ShopController>)));
+builder.Host.AddMediatorInfrastructure(new ShopModule());
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
@@ -59,7 +60,7 @@ InterceptLogs(builder.Services);
 
 AddLogging(builder.Configuration, builder.Logging);
 
-builder.Services.AddHostedService<BackgroundTaskQueuedHostedService>();
+builder.Services.AddHostedService<ShopBackgroundTaskQueuedHostedService>();
 
 var app = builder.Build();
 
@@ -101,6 +102,7 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
     loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
     loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", nameof(ShopBackgroundTaskQueuedHostedService));
 
     loggerConfiguration.SetSerilog(loggingBuilder);
 }

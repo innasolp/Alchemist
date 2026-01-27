@@ -114,7 +114,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var tokenSource = new CancellationTokenSource();
         tokenSource.CancelAfter(500);
 
-        await service.Start(tokenSource.Token);
+        await service.Start(new object(), tokenSource.Token);
 
         LoaderMock.Verify(l => l.Load(It.Is<string>(v => v == categoryUrl), It.IsAny<object>(), It.IsAny<CancellationToken>()));
 
@@ -135,7 +135,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         var tokenSource = new CancellationTokenSource();
         tokenSource.CancelAfter(1000);
 
-        await service.Start(tokenSource.Token);
+        await service.Start(new object(), tokenSource.Token);
 
         foreach (var categoryUrl in categoryUrls)
             LoaderMock.Verify(l => l.Load(It.Is<string>(v => v.Contains(categoryUrl)), It.IsAny<object>(), It.IsAny<CancellationToken>()));

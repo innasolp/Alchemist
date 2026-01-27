@@ -5,24 +5,14 @@ using Mediator.Messages;
 using Mediator.Module.EF;
 using MediatR;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Shop.Infrastructure;
 using Shop.UnitOfWork;
 using UnitOfWork;
-using Alchemist.DependencyInjection.Common;
 
 namespace Shop.Module;
 
-public class ShopModule (string logCategory) : MediatorModule
+public class ShopModule  : MediatorModule
 {
-    public override void ConfigureServices(IServiceCollection services)
-    {
-        services.AddLogger(logCategory);
-
-        base.ConfigureServices(services);
-    }
-
     protected override void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration cfg)
     {
         cfg.RegisterServicesFromAssemblyContaining<GetAllCategoryChildrenRequest>();

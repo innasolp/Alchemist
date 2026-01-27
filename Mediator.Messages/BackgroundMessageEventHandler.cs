@@ -5,12 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Mediator.Messages;
 
-public class BackgroundMessageEventHandler<TEvent, T>(ILogger logger, IBackgroundTaskQueue backgroundTaskQueue, IMessageSender messageSender) 
+public class BackgroundMessageEventHandler<TEvent, T>(IBackgroundTaskQueue backgroundTaskQueue, IMessageSender messageSender) 
     : MessageEventHandler<TEvent, T>(messageSender)
     where TEvent : Event<T>
 {
-    private readonly ILogger _logger = logger;
-
     private readonly IBackgroundTaskQueue _backgroundTaskQueue = backgroundTaskQueue;
 
     public override async Task Handle(TEvent @event, CancellationToken cancellationToken = default)
@@ -18,42 +16,42 @@ public class BackgroundMessageEventHandler<TEvent, T>(ILogger logger, IBackgroun
         var notificationName = @event.GetType().Name;
 
         await _backgroundTaskQueue.QueueBackgroundWorkItemAsync((token, logger) => 
-            new ValueTask(HandleNotification(@event, token, notificationName)), cancellationToken);        
+            new ValueTask(HandleNotification(@event, logger, token, notificationName)), cancellationToken);        
     }
 
-    private async Task HandleNotification(TEvent @event, CancellationToken token, string notificationName)
+    private async Task HandleNotification(TEvent @event, ILogger logger, CancellationToken token, string notificationName)
     {
         try
         {
             await base.Handle(@event, token);
 
-            LogNotificationInfo(@event, notificationName);
+            LogNotificationInfo(logger, @event, notificationName);
         }
         catch (Exception ex)
         {
-            LogNotificationError(@event, notificationName, ex);
+            LogNotificationError(logger, @event, notificationName, ex);
         }
     }
 
-    private void LogNotificationError(INotification notification, string notificationName, Exception ex)
+    private void LogNotificationError(ILogger logger, INotification notification, string notificationName, Exception ex)
     {
         if (notification is IEventMessage eventMessage)
         {
             var (messageFormat, args) = eventMessage.GetFailedMessage();
-            _logger.LogError(ex, messageFormat, args);
+            logger.LogError(ex, messageFormat, args);
         }
         else
-            _logger.LogError(ex, "Error publishing notification: {NotificationName}", notificationName);
+            logger.LogError(ex, "Error publishing notification: {NotificationName}", notificationName);
     }
 
-    private void LogNotificationInfo(INotification notification, string notificationName)
+    private void LogNotificationInfo(ILogger logger, INotification notification, string notificationName)
     {
         if (notification is IEventMessage eventMessage)
         {
             var (messageFormat, args) = eventMessage.GetSuccessEventMessage();
-            _logger.LogInformation(messageFormat, args);
+            logger.LogInformation(messageFormat, args);
         }
         else
-            _logger.LogInformation("Successfully published notification: {NotificationName}", notificationName);
+            logger.LogInformation("Successfully published notification: {NotificationName}", notificationName);
     }
 }

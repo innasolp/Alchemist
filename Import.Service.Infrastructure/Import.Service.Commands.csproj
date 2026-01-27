@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.1" />
-    <PackageReference Include="Import.Interfaces" Version="1.0.0" />
+    <PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.2" />
+    <PackageReference Include="Import.Interfaces" Version="1.0.0.1" />
 	<PackageReference Include="MediatR" Version="14.0.0" />
 	<PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
 	<PackageReference Include="Autofac" Version="9.0.0" />

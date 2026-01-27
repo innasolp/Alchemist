@@ -9,6 +9,7 @@ public static class Messages
     public static string CategoryItem => "CategoryItem";
     public static string ShopSettingsCreated => "ShopSettingsCreated";
     public static string ServiceStart => "ServiceStart";
+    public static string ServiceStarting => "ServiceStarting";
     public static string ServiceStarted => "ServiceStarted";
     public static string ServiceStop => "ServiceStop";
     public static string ServiceCreated => "ServiceCreated";
