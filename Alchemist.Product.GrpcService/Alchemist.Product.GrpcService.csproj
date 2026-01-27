@@ -11,8 +11,10 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\alchemygrpc.proto" GrpcServices="Server" />
-    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client" ProtoRoot="(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
-    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client" ProtoRoot="(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client" 
+			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client" 
+			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
   </ItemGroup>
 
   <ItemGroup>
