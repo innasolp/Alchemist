@@ -72,8 +72,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (!Categories.TryDequeue(out var category))            
-                continue;            
+            if (!Categories.TryDequeue(out var category))
+            {
+                await Task.Delay(50, stoppingToken);
+                continue;
+            }
 
             int successProductCount = 0;
             int unsuccessProductCount = 0;
@@ -172,10 +175,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, int page, CancellationToken stoppingToken)
     {
+        var loaderData = GetLoaderData();
         var (success, category) = await TryGetCategoryFromPathAsync<TCategory>(categoryPagePath,
             ImportProductServiceOptions.CategoryLoadData != null 
-                ? new object?[] { LoadData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } 
-                : LoadData,
+                ? new object?[] { loaderData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } 
+                : loaderData,
             stoppingToken);
 
         if (!success)
@@ -210,10 +214,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         var path = GetProductAbsolutePath(_productPathFormat, categoryProductItem);
 
+        var loaderData = GetLoaderData();
         var (success, stream) = await TryLoadFromUrlAsync(path,
             ImportProductServiceOptions.ProductLoadData is not null
-                ? new object?[] { LoadData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } }
-                : LoadData,
+                ? new object?[] { loaderData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } }
+                : loaderData,
             cancellationToken);
         
         if(!success)

@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace BackgroundTaskQueue;
 
-internal class DefaultUnboundedBackgroundTaskQueue(bool singleReader = false, bool singleWriter = false) : BackgroundTaskQueue
+public class UnboundedBackgroundTaskQueue(bool singleReader = false, bool singleWriter = false) : BackgroundTaskQueue
 {
     private readonly bool _singleReader = singleReader;
     private readonly bool _singleWriter = singleWriter;

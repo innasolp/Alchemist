@@ -38,21 +38,21 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     }
 
     [Fact]
-    public async Task StoppedWhenWebLoaderNotExecutedAsync()
+    public async Task ShouldLogImportWasStoppedWhenLoaderNotExecuted()
     {
         LoaderMock.Reset();
-        await ImportWasStoppedWhenLoaderNotExecutedAsync();
+        await ShouldLogImportWasStoppedWhenLoaderNotExecutedAsync();
     }
 
     [Fact]
-    public async Task StartedWhenWebLoaderExecutedSuccessfullAsync()
+    public async Task ShouldLogServiceStartedWhenLoaderExecutesSuccessfully()
     {
         LoaderMock.Reset();
-        await ImportStartedWhenLoaderExecutedSuccessfullAsync();
+        await ShouldLogServiceStartedWhenLoaderExecutesSuccessfullyAsync();
     }
 
     [Fact]
-    public async Task StoppedWhenCancellationRequestedAsync()
+    public async Task ShouldLogImportStoppedWhenCancellationRequested()
     {
         LoaderMock.Reset();
 
@@ -60,30 +60,30 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         var requestData = new object();
         LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
 
-        await ImportStoppedWhenCancellationRequestedAsync();
+        await ShouldLogImportStoppedWhenCancellationRequestedAsync();
     }
 
     [Fact]
-    public async Task LogResetingWarningIfLoaderServiceNeedReseting()
+    public async Task ShouldLogResettingErrorIfLoaderServiceNeedsReseting()
     {
         LoaderMock.Reset();
 
-        await LogResetingWarningIfLoaderServiceNeedResetingAsync();
+        await ShouldLogResettingErrorIfLoaderServiceNeedsResettingAsync();
     }
 
     [Fact]
-    public async Task LogServiceFailedErrorWhenUnhandledExceptionThrown()
+    public async Task ShouldLogServiceFailedErrorWhenUnhandledExceptionThrown()
     {
         LoaderMock.Reset();
 
-        await LogServiceFailedErrorWhenUnhandledExceptionThrownAsync();
+        await ShouldLogServiceFailedErrorWhenUnhandledExceptionThrownAsync();
     }
 
     [Fact]
-    public async Task LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequest()
+    public async Task ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWait()
     {
         LoaderMock.Reset();
 
-        await LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequestAsync();
+        await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync();
     }
 }

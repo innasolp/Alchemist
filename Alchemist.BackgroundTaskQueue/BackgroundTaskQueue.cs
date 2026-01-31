@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace BackgroundTaskQueue;
 
-internal abstract class BackgroundTaskQueue : IBackgroundTaskQueue
+public abstract class BackgroundTaskQueue : IBackgroundTaskQueue
 {
     private readonly Channel<Func<CancellationToken, ILogger, ValueTask>> _queue;
 

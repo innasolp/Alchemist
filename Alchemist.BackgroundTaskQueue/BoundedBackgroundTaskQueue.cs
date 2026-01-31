@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace BackgroundTaskQueue;
 
-internal sealed class DefaultBoundedBackgroundTaskQueue(int capacity) : BackgroundTaskQueue
+public sealed class BoundedBackgroundTaskQueue(int capacity) : BackgroundTaskQueue
 {
     private readonly int _capacity = capacity;
 
