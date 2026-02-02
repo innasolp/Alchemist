@@ -1,12 +1,13 @@
 using Alchemist.Import.Category.Interfaces;
-using Import.Service.Test;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Xunit.Abstractions;
-using Import.Service.Test.Infrastructure;
 using Alchemist.Import.Category.Service;
 using Alchemist.Import.CategoryService.Test.Infrastructure;
+using Import.Service.Test;
+using Import.Service.Test.Infrastructure;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Threading;
+using Moq;
 using ShopImport.Category.Loader.Interfaces;
+using Xunit.Abstractions;
 
 namespace Alchemist.Import.CategoryService.Test;
 
@@ -14,11 +15,14 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
 {
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
 
-    private readonly CategoryImportOptions _importOptions = new() { SecondsInterval = 5 };
+    private readonly CategoryImportOptions _importOptions = new() { SecondsInterval = 1 };
 
-    private readonly Mock<ICategoryLoader>[] _categoryLoadersMock = [new Mock<ICategoryLoader>()];    
+    private readonly Mock<ICategoryLoader>[] _categoryLoadersMock = [new Mock<ICategoryLoader>()];
+
+    private readonly Mock<ICategoryLoader> _categoryLoaderMock = new();
 
     private readonly Mock<ICategoryItemHandler> _categoryItemHandlerMock = new();
+
 
     public ImportCategoryServiceTest(ITestOutputHelper outputHelper) : base(outputHelper)
     {
@@ -41,26 +45,50 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     public async Task ShouldLogImportWasStoppedWhenLoaderNotExecuted()
     {
         LoaderMock.Reset();
-        await ShouldLogImportWasStoppedWhenLoaderNotExecutedAsync();
+        await ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecutedAsync(2000);
     }
 
     [Fact]
     public async Task ShouldLogServiceStartedWhenLoaderExecutesSuccessfully()
     {
         LoaderMock.Reset();
-        await ShouldLogServiceStartedWhenLoaderExecutesSuccessfullyAsync();
+        
+        var requestData = new { id = 2 };
+        var category = Helper.CreateCategoryWithChildren();
+        LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
+
+        var categoryStream = await TestExtensions.LoadItemAsync(category);
+
+        LoaderMock.SetupGetRequestData(requestData);
+        LoaderMock.Setup(w =>
+           w.Load(_categoryShopModelMock.Object.CategorySourceUrl,
+           It.Is<object?>(data => data == requestData),
+           It.IsAny<CancellationToken>()))
+           .ReturnsAsync(categoryStream);
+
+        _categoryLoaderMock.Setup(s => s.LoadAsync(null, It.Is<Stream>(s => s == categoryStream), It.IsAny<CancellationToken>())).
+            ReturnsAsync([category]);
+
+        await ShouldLogServiceStartedWhenLoaderExecutesSuccessfullyAsync(1000);
     }
 
     [Fact]
     public async Task ShouldLogImportStoppedWhenCancellationRequested()
     {
         LoaderMock.Reset();
-
+        
+        var requestData = new { id = 2 };
         var category = Helper.CreateCategoryWithChildren();
-        var requestData = new object();
         LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
 
-        await ShouldLogImportStoppedWhenCancellationRequestedAsync();
+        var categoryStream = await TestExtensions.LoadItemAsync(category);
+
+        LoaderMock.SetupGetRequestData(requestData);       
+
+        _categoryLoaderMock.Setup(s => s.LoadAsync(null, It.Is<Stream>(s => s == categoryStream), It.IsAny<CancellationToken>())).
+            ReturnsAsync([category]);
+
+        await ShouldLogImportStoppedWhenCancellationRequestedAsync(500);
     }
 
     [Fact]
@@ -68,7 +96,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     {
         LoaderMock.Reset();
 
-        await ShouldLogResettingErrorIfLoaderServiceNeedsResettingAsync();
+        await ShouldLogResettingErrorIfLoaderServiceNeedsResettingAsync(15000);
     }
 
     [Fact]
@@ -76,7 +104,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     {
         LoaderMock.Reset();
 
-        await ShouldLogServiceFailedErrorWhenUnhandledExceptionThrownAsync();
+        await ShouldLogServiceFailedErrorWhenUnhandledExceptionThrownAsync(1000);
     }
 
     [Fact]
@@ -84,6 +112,6 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     {
         LoaderMock.Reset();
 
-        await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync();
+        await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync(1000);
     }
 }

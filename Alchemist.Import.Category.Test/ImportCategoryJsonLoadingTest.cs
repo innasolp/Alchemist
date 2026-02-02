@@ -68,6 +68,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
     {
         LoaderMock.Reset();
         LoaderMock.SetupStartSuccess();
+        LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
         var category = Helper.CreateCategoryWithChildren();        
 
@@ -102,7 +103,8 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
     public async Task LogErrorWhenJsonLoadFromCategorySourceUrlFailed()
     {
         LoaderMock.Reset();
-        LoaderMock.SetupStartSuccess();       
+        LoaderMock.SetupStartSuccess();
+        LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
         var exception = new LoaderServiceException("Json loading failed");
         var requestData = new {id = 10};

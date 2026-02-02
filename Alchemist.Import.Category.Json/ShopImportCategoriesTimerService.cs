@@ -62,16 +62,13 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
         if (_initialLoadDone == null)
         {
             _initialLoadDone = true;
-            await LoadCategoriesAsync(categoryLoadData, stoppingToken);
-            return;
+            await LoadCategoriesAsync(categoryLoadData, stoppingToken);            
         }
 
-        // Wait for next tick and handle timer disposal
-        var ticked = await _timer.WaitForNextTickAsync(stoppingToken).AsTask();
-        if (!ticked || stoppingToken.IsCancellationRequested)
-            return;
-
-        await LoadCategoriesAsync(categoryLoadData, stoppingToken);
+        while ((await _timer.WaitForNextTickAsync(stoppingToken).AsTask()) && !stoppingToken.IsCancellationRequested)
+        {
+            await LoadCategoriesAsync(categoryLoadData, stoppingToken);
+        }
     }
 
     private async Task LoadCategoriesAsync(object? categoryLoadData, CancellationToken stoppingToken)
@@ -147,20 +144,26 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
     {
         var (success, stream) = await TryLoadFromUrlAsync(url, categoryLoadData, cancellationToken);
 
-        using (stream)
+        if (!success)
+        {
+            if (required)
+                Logger.LogInformation(ImportCategoryLogMessages.CategoryWasNotLoaded, url);
 
-            if (!success)
-            {
-                if (required)
-                    Logger.LogInformation(ImportCategoryLogMessages.CategoryWasNotLoaded, url);
-
-                return (false, Enumerable.Empty<ICategory>());
-            }
+            return (false, Enumerable.Empty<ICategory>());
+        }
 
         try
         {
-            var loadedCategories = await stage.LoadAsync(parentCategory, stream, cancellationToken);
-            return (true, loadedCategories);
+            using (stream)
+            {
+                var loadedCategories = await stage.LoadAsync(parentCategory, stream, cancellationToken);
+                stream.Close();
+                return (true, loadedCategories);
+            }
+        }
+        catch(OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception e)
         {
