@@ -29,28 +29,28 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     protected Mock<IProductItemHandler> ProductItemHandlerMock { get; } = new Mock<IProductItemHandler>();
 
     [Fact]
-    public async Task StoppedWhenWebLoaderNotExecutedAsync()
+    public async Task ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecuted()
     {
         LoaderMock.Reset();        
-        await ImportWasStoppedWhenLoaderNotExecutedAsync();
+        await ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecutedAsync(3000);
     }
 
     [Fact]
-    public async Task StartedWhenWebLoaderExecutedSuccessfullAsync()
+    public async Task ShouldLogServiceStartedWhenLoaderExecutesSuccessfully()
     {
         LoaderMock.Reset();
-        await ImportStartedWhenLoaderExecutedSuccessfullAsync();
+        await ShouldLogServiceStartedWhenLoaderExecutesSuccessfullyAsync(1000);
     }
 
     [Fact]
-    public async Task StoppedWhenCancellationRequestedAsync()
+    public async Task ShouldLogImportStoppedWhenCancellationRequested()
     {
         LoaderMock.Reset();
-        await ImportStoppedWhenCancellationRequestedAsync();
+        await ShouldLogImportStoppedWhenCancellationRequestedAsync(500);
     }
 
     [Fact]
-    public async Task LogResetingWarningIfLoaderServiceNeedReseting()
+    public async Task ShouldLogResettingErrorIfLoaderServiceNeedsReseting()
     {
         LoaderMock.Reset();
 
@@ -58,11 +58,11 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         var categoryMock = TestHelper.CreateCategoryMock();        
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
         
-        await LogResetingWarningIfLoaderServiceNeedResetingAsync();
+        await ShouldLogResettingErrorIfLoaderServiceNeedsResettingAsync(15000);
     }
 
     [Fact]
-    public async Task LogServiceFailedErrorWhenUnhandledExceptionThrown()
+    public async Task ShouldLogServiceFailedErrorWhenUnhandledExceptionThrown()
     {
         LoaderMock.Reset();
 
@@ -70,11 +70,11 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         var categoryMock = TestHelper.CreateCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
-        await LogServiceFailedErrorWhenUnhandledExceptionThrownAsync();
+        await ShouldLogServiceFailedErrorWhenUnhandledExceptionThrownAsync(1000);
     }
 
     [Fact]
-    public async Task LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequest()
+    public async Task ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWait()
     {
         LoaderMock.Reset();
 
@@ -82,6 +82,6 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         var categoryMock = TestHelper.CreateCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
-        await LogRequestFailedAndLoaderWillBePausedWarningWhenForbiddenRequestAsync();
+        await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync(1000);
     }
 }

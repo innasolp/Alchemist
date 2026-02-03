@@ -2,9 +2,8 @@
 using Import.Interfaces;
 using Import.Service;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Threading;
 using ShopImport.Category.Loader.Interfaces;
-using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 
 namespace Alchemist.Import.Category.Service;
 
@@ -24,11 +23,13 @@ public class ShopImportCategoriesTimerService : ImportService
 
     private readonly PeriodicTimer _timer;
 
-    private bool? _isStarted;
+    private bool? _initialLoadDone;
 
     private readonly object? _categoryLoadData;
 
     private readonly IEnumerable<ICategoryLoader> _categoryLoadStages;
+
+    private readonly SemaphoreSlim _handleSemaphore = new(8);
 
     public ShopImportCategoriesTimerService(ILogger logger,
         string name,
@@ -49,147 +50,147 @@ public class ShopImportCategoriesTimerService : ImportService
 
         _timer = new(TimeSpan.FromSeconds(categoryImportOptions?.SecondsInterval ?? _defaultInterval));
         _categoryLoadData = categoryLoadData;
-    } 
+    }
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        var categoryLoadData = LoadData != null && _categoryLoadData != null 
-                ? new object?[] { LoadData, _categoryLoadData } 
-                : LoadData;
+        var loaderData = GetLoaderData();
+        var categoryLoadData = loaderData != null && _categoryLoadData != null
+                ? new object?[] { loaderData, _categoryLoadData }
+                : loaderData;
 
-        if (_isStarted == null)
+        // renamed flag to avoid shadowing base class
+        if (_initialLoadDone == null)
         {
-            _isStarted = true;
-            await LoadCategoriesAsync(categoryLoadData, stoppingToken);
+            _initialLoadDone = true;
+            await LoadCategoriesAsync(categoryLoadData, stoppingToken);            
         }
-        else if (!stoppingToken.IsCancellationRequested)
-        {
-            var nextTickResult = await _timer.WaitForNextTickAsync(stoppingToken).AsTask();
 
+        while ((await _timer.WaitForNextTickAsync(stoppingToken).AsTask()) && !stoppingToken.IsCancellationRequested)
+        {
             await LoadCategoriesAsync(categoryLoadData, stoppingToken);
         }
     }
 
     private async Task LoadCategoriesAsync(object? categoryLoadData, CancellationToken stoppingToken)
     {
-        var allCategories = new ObservableCollection<ICategory>();
-        allCategories.CollectionChanged += CategoryCollectionChanged;
-
+        var nextStageParentCategories = new List<ICategory>();
         var parentCategories = new List<ICategory>();
 
         foreach (var stage in _categoryLoadStages)
         {
-            if (parentCategories.Count == 0)
+            if (nextStageParentCategories.Count == 0)
             {
-                var (success, loadedCategories) = await LoadCategoryChildrenAsync(_categorySourceUrl, categoryLoadData, stage, null, cancellationToken : stoppingToken);
+                var (success, loadedCategories) = await LoadCategoryChildrenAsync(_categorySourceUrl, categoryLoadData, stage, null, cancellationToken: stoppingToken);
                 if (!success)
                 {
                     Logger.LogInformation(ImportCategoryLogMessages.CategoriesWereNotLoaded, _sourceName, Host);
                     return;
                 }
-                
-                parentCategories.AddRange(loadedCategories.Where(c=>!c.Children.Any()));
-                loadedCategories.ToList().ForEach(allCategories.Add);                
+
+                nextStageParentCategories.AddRange(loadedCategories.Where(c => !c.Children.Any()));
+                parentCategories.AddRange(loadedCategories.Where(c => c.ParentId is null));
+
+                foreach (var category in loadedCategories)
+                {
+                    Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasLoaded,
+                    category.Name, category.Id, _sourceName);
+                }
+
+                await Task.WhenAll(loadedCategories.Select(c => HandleCategoryAsync(c, stoppingToken)));
             }
-            else if(!string.IsNullOrEmpty(stage.CategoryLoadOptions.CategoriesApiUrlFormat))
+            else if (!string.IsNullOrEmpty(stage.CategoryLoadOptions.CategoriesApiUrlFormat))
             {
-                var loadedCategories = await LoadCategoryChildrenAsync(stage.CategoryLoadOptions.CategoriesApiUrlFormat, 
-                    stage, parentCategories, allCategories, categoryLoadData, stoppingToken);
-                parentCategories = [.. loadedCategories.Where(c => !c.Children.Any())];
+                var loadedCategories = await LoadCategoryChildrenAsync(stage.CategoryLoadOptions.CategoriesApiUrlFormat,
+                    stage, nextStageParentCategories, categoryLoadData, stoppingToken);
+
+                await Task.WhenAll(loadedCategories.Select(c => HandleCategoryAsync(c, stoppingToken)));
+
+                nextStageParentCategories = [.. loadedCategories.Where(c => !c.Children.Any())];
             }
         }
 
-        allCategories.CollectionChanged -= CategoryCollectionChanged;
+        foreach(var parentCategory in parentCategories.OfType<IDisposable>())        
+            parentCategory.Dispose();        
     }
 
     private async Task<IEnumerable<ICategory>> LoadCategoryChildrenAsync(string urlFormat, ICategoryLoader stage, IEnumerable<ICategory> parentCategories,
-        IList<ICategory> allCategories, object? categoryLoadData, CancellationToken stoppingToken)        
+        object? categoryLoadData, CancellationToken stoppingToken)
     {
-        var anyLoaded = false;
+        BlockingCollection<ICategory> currentCategories = [];
 
-        List<ICategory> currentCategories = [];
+        var loaderDegree = 8;
+        await Parallel.ForEachAsync(parentCategories, new ParallelOptions { CancellationToken = stoppingToken, MaxDegreeOfParallelism = loaderDegree },
+            async (parentCategory, ct) =>
+            {
+                var url = string.Format(urlFormat, parentCategory.Id);
+                var (success, loadedCategories) = await LoadCategoryChildrenAsync(url, categoryLoadData, stage, parentCategory, !stage.IsRecursive,
+                    cancellationToken: ct);
 
-        async Task loadParentCategoryStageAsync(ICategory parentCategory)
+                if(success)
+                    loadedCategories.ToList().ForEach(currentCategories.Add);
+            });
+
+        
+        if (stage.IsRecursive)
         {
-            var url = string.Format(urlFormat, parentCategory.Id);
-            var (success, loadedCategories) = await LoadCategoryChildrenAsync(url, categoryLoadData, stage, parentCategory, !stage.IsRecursive,
-                cancellationToken: stoppingToken);
-
-            anyLoaded = anyLoaded | success;
-            if (!success) return;
-
-            currentCategories.AddRange(loadedCategories);
-            loadedCategories.ToList().ForEach(allCategories.Add);
+            IEnumerable<ICategory> loadedNextParentCategories = [.. currentCategories.Where(c => !c.Children.Any())];
+            var loadedCategories = await LoadCategoryChildrenAsync(urlFormat, stage, loadedNextParentCategories, categoryLoadData, stoppingToken);
+            
+            loadedCategories.ToList().ForEach(currentCategories.Add);
         }
 
-        var loadChildCategoriesTasks = parentCategories.Select(loadParentCategoryStageAsync);
+        currentCategories.CompleteAdding();
 
-        await Task.WhenAll(loadChildCategoriesTasks);        
-
-        IEnumerable<ICategory> loadedParentCategories = [.. currentCategories.Where(c => !c.Children.Any())];
-
-        if (stage.IsRecursive && anyLoaded)
-        {
-            var loadedCategories = await LoadCategoryChildrenAsync(urlFormat, stage, loadedParentCategories, allCategories, categoryLoadData, stoppingToken);
-            currentCategories.AddRange(loadedCategories);
-        }
-       
         return currentCategories;
     }
 
-    private async Task<(bool success, IEnumerable<ICategory> result)> LoadCategoryChildrenAsync(string url, 
+    private async Task<(bool success, IEnumerable<ICategory> result)> LoadCategoryChildrenAsync(string url,
         object? categoryLoadData,
         ICategoryLoader stage,
-        ICategory? parentCategory, 
+        ICategory? parentCategory,
         bool required = true,
         CancellationToken cancellationToken = default)
     {
         var (success, stream) = await TryLoadFromUrlAsync(url, categoryLoadData, cancellationToken);
 
-        if (!success)
+        if (!success || stream is null)
         {
-            if(required)
+            if (required)
                 Logger.LogInformation(ImportCategoryLogMessages.CategoryWasNotLoaded, url);
 
-            return (false, []);
+            return (false, Enumerable.Empty<ICategory>());
         }
 
         try
         {
-            var loadedCategories = await stage.LoadAsync(parentCategory, stream, cancellationToken);          
-            return (true, loadedCategories);    
+            await using (stream)
+            {
+                var loadedCategories = await stage.LoadAsync(parentCategory, stream, cancellationToken);
+                return (true, loadedCategories);
+            }
+        }
+        catch(OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception e)
         {
             Logger.LogError(e, e.Message);
             Logger.LogInformation(ImportCategoryLogMessages.ChildrenForCategoryWereNotLoaded, url);
-            return (false, []);
+            return (false, Enumerable.Empty<ICategory>());
         }
-    }    
-    
-    private readonly SemaphoreSlim _categoryCollectionChangedSemaphore = new(1, 1);
+    }
 
-    private async void CategoryCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private async Task HandleCategoryAsync(ICategory category, CancellationToken cancellationToken)
     {
-        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add) return;
-
-        await _categoryCollectionChangedSemaphore.WaitAsync();
-
+        await _handleSemaphore.WaitAsync(cancellationToken);
         try
         {
-            var newItems = e.NewItems?.OfType<ICategory>();
-            if (newItems == null) return;
+            await _itemHandler.HandleItem(new ImportCategory(category, _categorySourceUrl, _sourceName, Host), cancellationToken);
 
-            foreach (var category in newItems)
-            {
-                Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasLoaded,
-                    category.Name, category.Id, _sourceName);
-
-                await _itemHandler.HandleItem(new ImportCategory(category, _categorySourceUrl, _sourceName, Host));
-
-                Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
-                    category.Name, category.Id, _sourceName);
-            }
+            Logger.LogInformation(ImportCategoryLogMessages.CategoryNameIdForShopWasHandled,
+                category.Name, category.Id, _sourceName);
         }
         catch (Exception ex)
         {
@@ -197,7 +198,14 @@ public class ShopImportCategoriesTimerService : ImportService
         }
         finally
         {
-            _categoryCollectionChangedSemaphore.Release();
+            _handleSemaphore.Release();
         }
+    }
+
+    protected override void Dispose()
+    {
+        _timer.Dispose();
+        _handleSemaphore.Dispose();
+        base.Dispose();
     }
 }

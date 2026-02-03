@@ -21,6 +21,7 @@ internal sealed class StopAllServicesCommandHandler(IServiceRepository serviceRe
             throw new InvalidOperationException($"Service with id {guid} not found.");
 
         await serviceItem.InnerTokenSource.CancelAsync();
+        await serviceItem.Service.Stop(cancellationToken);
 
         await _publisher.Publish(new ServiceStoppedEvent(new ServiceMessage(guid, serviceItem.Service.Name)), cancellationToken);
     }

@@ -118,36 +118,36 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CategoryCompletedInfo" xml:space="preserve">
-    <value>Category {0} completed. {1} products handled. {2} unhandled.</value>
+    <value>Category {CategoryPath} completed. {HandledProductCount} products handled. {UnhandledProductCount} unhandled.</value>
   </data>
   <data name="CategoryNotLoadedFromUrl" xml:space="preserve">
-    <value>Category not loaded from url {0}. See error log.</value>
+    <value>Category not loaded from path {Path}. See error log.</value>
   </data>
   <data name="NotAllCategoryProductsForUrlWereProcessedWarning" xml:space="preserve">
-    <value>Category from url {0} was processed: {1} products from {2} were loaded. </value>
+    <value>Category from path {Category} was processed: {HandledProductsCount} products from {CategoryPath} were loaded. </value>
   </data>
   <data name="NewCategoryIsEnqueued" xml:space="preserve">
-    <value>New category {0} is enqueued.</value>
+    <value>New category {Category} is enqueued.</value>
   </data>
   <data name="ProductFromUrlHandledWithStatusInfo" xml:space="preserve">
-    <value>Product {0} from url {1} handled with status {2}.</value>
+    <value>Product {ProductName} from path {ProductPath} handled with status {Status}.</value>
   </data>
   <data name="ProductHasBeenSuccessfullyLoadedFromUrl" xml:space="preserve">
-    <value>Product {0} has been successfully loaded from url {1}.</value>
+    <value>Product {ProductName} has been successfully loaded from path {ProductPath}.</value>
   </data>
   <data name="ProductWasNotLoadedFromUrlWithError" xml:space="preserve">
-    <value>Product was not loaded from url {0} . See error log.</value>
+    <value>Product was not loaded from path {ProductPath} .</value>
   </data>
   <data name="CategoryProductsWereNotLoadedError" xml:space="preserve">
-    <value>All products in category url {0} were not loaded.</value>
+    <value>All products in category path {CategoryPath} were not loaded.</value>
   </data>
   <data name="CategoryProductsForUrlWereProcessedSuccesfullInfo" xml:space="preserve">
-    <value>Category Url {0} were processed successfull : {1} products were loaded</value>
+    <value>Category Path {CategoryPath} were processed successfull : {ProductCount} products were loaded</value>
   </data>
-  <data name="SerializationError" xml:space="preserve">
-    <value>Item {0} from url {1} was not deserialized. {2}.</value>
+  <data name="SerializationFailed" xml:space="preserve">
+    <value>Item {Item} from path {ItemPath} was not deserialized.</value>
   </data>
   <data name="ProductFromUrlHandlingFailed" xml:space="preserve">
-    <value>Product from url {1} handling failed with error: {1}.</value>
+    <value>Product from path {ProductPath} handling failed.</value>
   </data>
 </root>

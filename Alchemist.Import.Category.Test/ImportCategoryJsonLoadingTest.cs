@@ -60,7 +60,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         var tokenSource = new CancellationTokenSource();
         tokenSource.CancelAfter(executionDuration);
 
-        await service.Start(new object(), tokenSource.Token); 
+        await service.Start(tokenSource.Token); 
     }
 
     [Fact]
@@ -68,6 +68,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
     {
         LoaderMock.Reset();
         LoaderMock.SetupStartSuccess();
+        LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
         var category = Helper.CreateCategoryWithChildren();        
 
@@ -92,7 +93,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         _categoryLoaderMock.Setup(s => s.LoadAsync(null, It.Is<Stream>(s => s == categoryStream), It.IsAny<CancellationToken>())).
             ReturnsAsync([category]);
 
-        await ExecuteServiceAsync(name, 500);
+        await ExecuteServiceAsync(name, 1000);
 
         LoggerMock.VerifyInfo(ImportCategoriesResourceManager.GetString("CategoryNameIdForShopWasLoaded"),
             category.Name, category.Id, _categoryShopModelMock.Object.SourceName); 
@@ -102,7 +103,8 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
     public async Task LogErrorWhenJsonLoadFromCategorySourceUrlFailed()
     {
         LoaderMock.Reset();
-        LoaderMock.SetupStartSuccess();       
+        LoaderMock.SetupStartSuccess();
+        LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
         var exception = new LoaderServiceException("Json loading failed");
         var requestData = new {id = 10};
@@ -115,7 +117,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
         var name = Guid.NewGuid().ToString();
 
-        await ExecuteServiceAsync(name, 500);
+        await ExecuteServiceAsync(name, 1000);
 
         LoggerMock.VerifyInfo(ImportCategoriesResourceManager.GetString("CategoriesWereNotLoaded"),
             _categoryShopModelMock.Object.SourceName, _categoryShopModelMock.Object.SourceUrl);

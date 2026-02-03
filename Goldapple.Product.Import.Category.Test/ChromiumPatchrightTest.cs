@@ -16,10 +16,11 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
 
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
-    private readonly Dictionary<string, PropertyPath> _categoryPropertyPathes = new Dictionary<string, PropertyPath>()
+    private readonly Dictionary<string, PropertyPath> _categoryPropertyPaths = new Dictionary<string, PropertyPath>()
         {
             { "Url",new PropertyPath("Url","link",true) },
             {"Description",new PropertyPath("Description","name") },
+            {"Name",new PropertyPath("Name","name") },
             {"Id",new PropertyPath("Id","id") },
             {"Children",new PropertyPath("Children","children") }
         };
@@ -50,9 +51,9 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
 
         await RecursiveCategory.LoadAllChildrenAsync(null, categories, jsonDocument.RootElement,
                _nodePath,
-               _categoryPropertyPathes,
+               _categoryPropertyPaths,
                elementHelper,
-               tokenSource.Token);
+               tokenSource.Token);        
 
         Assert.True(categories.Count > 0);
 

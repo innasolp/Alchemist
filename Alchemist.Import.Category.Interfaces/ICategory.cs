@@ -1,8 +1,6 @@
-﻿using System.Collections.Specialized;
+﻿namespace Alchemist.Import.Category.Interfaces;
 
-namespace Alchemist.Import.Category.Interfaces;
-
-public interface ICategory : INotifyCollectionChanged
+public interface ICategory
 {
     string Name { get; }
 
@@ -10,13 +8,11 @@ public interface ICategory : INotifyCollectionChanged
 
     int Id { get; }    
 
-    string Description { get; }
+    string? Description { get; }
 
     int? ParentId { get; }
 
     IEnumerable<ICategory> Children { get; }
-
-    IEnumerable<int> ChildrenIds { get; }
 
     public bool? IsParented { get; }
 

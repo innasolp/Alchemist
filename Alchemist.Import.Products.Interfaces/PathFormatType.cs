@@ -8,5 +8,5 @@ public enum PathFormatType
     None = 0,
     Path = 1,
     ItemId = 2,
-    PathWithItemId = 3
+    CategoryWithItemId = 3
 }
