@@ -6,6 +6,9 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddBoundedBackgroundQueue(this IServiceCollection services, int capacity)
     {
+        if (capacity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(capacity), $"value can't be zero or negative");
+
         return services.AddSingleton<IBackgroundTaskQueue>(new BoundedBackgroundTaskQueue(capacity));
     }
 

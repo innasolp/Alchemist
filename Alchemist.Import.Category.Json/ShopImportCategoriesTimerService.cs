@@ -154,7 +154,7 @@ public class ShopImportCategoriesTimerService : ImportService
     {
         var (success, stream) = await TryLoadFromUrlAsync(url, categoryLoadData, cancellationToken);
 
-        if (!success)
+        if (!success || stream is null)
         {
             if (required)
                 Logger.LogInformation(ImportCategoryLogMessages.CategoryWasNotLoaded, url);
@@ -164,10 +164,9 @@ public class ShopImportCategoriesTimerService : ImportService
 
         try
         {
-            using (stream)
+            await using (stream)
             {
                 var loadedCategories = await stage.LoadAsync(parentCategory, stream, cancellationToken);
-                stream.Close();
                 return (true, loadedCategories);
             }
         }
