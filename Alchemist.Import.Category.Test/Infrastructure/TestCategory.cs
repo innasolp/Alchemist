@@ -23,8 +23,6 @@ public class TestCategory : ICategory
 
     public List<int> ChildrenIds { get; set; } = [];
 
-    IEnumerable<int> ICategory.ChildrenIds => ChildrenIds;
-
     public TestCategory? ItemParent { get; set; }
 
     ICategory? ICategory.ItemParent => ItemParent;

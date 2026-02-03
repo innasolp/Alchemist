@@ -6,7 +6,7 @@ using ShopImport.Category.Loader.Interfaces;
 
 namespace Alchemist.Import.Category.Service;
 
-public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsyncDisposable
+public class ShopImportCategoriesTimerService : ImportService
 {
     protected sealed record ImportCategory(ICategory Category, string CategorySourceUrl, string SourceName, string SourceUrl) : IImportCategory;
 
@@ -23,7 +23,7 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
     private readonly PeriodicTimer _timer;
 
     private bool? _initialLoadDone;
-    private bool disposedValue;
+
     private readonly object? _categoryLoadData;
 
     private readonly IEnumerable<ICategoryLoader> _categoryLoadStages;
@@ -73,11 +73,12 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
 
     private async Task LoadCategoriesAsync(object? categoryLoadData, CancellationToken stoppingToken)
     {
+        var nextStageParentCategories = new List<ICategory>();
         var parentCategories = new List<ICategory>();
 
         foreach (var stage in _categoryLoadStages)
         {
-            if (parentCategories.Count == 0)
+            if (nextStageParentCategories.Count == 0)
             {
                 var (success, loadedCategories) = await LoadCategoryChildrenAsync(_categorySourceUrl, categoryLoadData, stage, null, cancellationToken: stoppingToken);
                 if (!success)
@@ -86,7 +87,8 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
                     return;
                 }
 
-                parentCategories.AddRange(loadedCategories.Where(c => !c.Children.Any()));
+                nextStageParentCategories.AddRange(loadedCategories.Where(c => !c.Children.Any()));
+                parentCategories.AddRange(loadedCategories.Where(c => c.ParentId is null));
 
                 foreach (var category in loadedCategories)
                 {
@@ -99,20 +101,21 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
             else if (!string.IsNullOrEmpty(stage.CategoryLoadOptions.CategoriesApiUrlFormat))
             {
                 var loadedCategories = await LoadCategoryChildrenAsync(stage.CategoryLoadOptions.CategoriesApiUrlFormat,
-                    stage, parentCategories, categoryLoadData, stoppingToken);
+                    stage, nextStageParentCategories, categoryLoadData, stoppingToken);
 
                 await Task.WhenAll(loadedCategories.Select(c => HandleCategoryAsync(c, stoppingToken)));
 
-                parentCategories = loadedCategories.Where(c => !c.Children.Any()).ToList();
+                nextStageParentCategories = [.. loadedCategories.Where(c => !c.Children.Any())];
             }
         }
+
+        foreach(var parentCategory in parentCategories.OfType<IDisposable>())        
+            parentCategory.Dispose();        
     }
 
     private async Task<IEnumerable<ICategory>> LoadCategoryChildrenAsync(string urlFormat, ICategoryLoader stage, IEnumerable<ICategory> parentCategories,
         object? categoryLoadData, CancellationToken stoppingToken)
     {
-        var anyLoaded = false;
-
         List<ICategory> currentCategories = [];
 
         var loaderDegree = 8;
@@ -122,13 +125,14 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
                 var url = string.Format(urlFormat, parentCategory.Id);
                 var (success, loadedCategories) = await LoadCategoryChildrenAsync(url, categoryLoadData, stage, parentCategory, !stage.IsRecursive,
                     cancellationToken: ct);
+                currentCategories.AddRange(loadedCategories);
             });
 
-        IEnumerable<ICategory> loadedParentCategories = [.. currentCategories.Where(c => !c.Children.Any())];
-
-        if (stage.IsRecursive && anyLoaded)
+        
+        if (stage.IsRecursive)
         {
-            var loadedCategories = await LoadCategoryChildrenAsync(urlFormat, stage, loadedParentCategories, categoryLoadData, stoppingToken);
+            IEnumerable<ICategory> loadedNextParentCategories = [.. currentCategories.Where(c => !c.Children.Any())];
+            var loadedCategories = await LoadCategoryChildrenAsync(urlFormat, stage, loadedNextParentCategories, categoryLoadData, stoppingToken);
             currentCategories.AddRange(loadedCategories);
         }
 
@@ -193,34 +197,10 @@ public class ShopImportCategoriesTimerService : ImportService, IDisposable, IAsy
         }
     }
 
-    protected virtual void Dispose(bool disposing)
+    protected override void Dispose()
     {
-        if (!disposedValue)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-                _timer.Dispose();
-                _handleSemaphore.Dispose();
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            disposedValue = true;
-        }
-    }
-
-    void IDisposable.Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-        return ValueTask.CompletedTask;
+        _timer.Dispose();
+        _handleSemaphore.Dispose();
+        base.Dispose();
     }
 }

@@ -1,50 +1,37 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Text.Json.Serialization;
 
 namespace ShopImport.Category.Recursive;
 
-public class RecursiveCategory : ICategory
+public class RecursiveCategory : ICategory, IDisposable
 {
-    private static readonly string _invalidDataMessageFormat = "Element '{0}' not contains {1} property '{2}'";
+    public string Name { get;  }
 
-    private static readonly string _invalidUrlMessageFormat = "Url '{0}' not contains {1}";
-    public string Name { get; private set; }
+    public string Url { get; }
 
-    public string Url { get; private set; }
+    public int Id { get; }
 
-    public int Id { get; private set; }
-
-    public string Description { get; private set; }
+    public string? Description { get; private set; }
 
     public int? ParentId { get; private set; }
 
-    private readonly ObservableCollection<ICategory> _children = [];
+    private readonly List<ICategory> _children = [];
 
     [JsonIgnore]
     public IEnumerable<ICategory> Children => _children;
 
-    private readonly List<int> _childrenIds = [];
-    public IEnumerable<int> ChildrenIds => _childrenIds;
-
-    private readonly SemaphoreSlim _categoriesSemaphoreSlim = new(1, 1);
+    private readonly SemaphoreSlim _categoriesSemaphoreSlim = new(1, 1);   
 
     public bool? IsParented { get; private set; }
 
     public ICategory? ItemParent { get; private set; }
 
-    public event NotifyCollectionChangedEventHandler? CollectionChanged;
-
-    protected RecursiveCategory()
-    {
-        _children.CollectionChanged += OnChildrenCollectionChanged;
-    }
-
-    private void OnChildrenCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        CollectionChanged?.Invoke(this, e);
+    protected RecursiveCategory(int id, string name, string url)
+    {       
+        Id = id;
+        Name = name;
+        Url = url;
     }
 
     protected async Task AddCategoryToCollectionAsync(ICollection<ICategory> jsonCategories, CancellationToken cancellationToken = default)
@@ -55,56 +42,42 @@ public class RecursiveCategory : ICategory
         {
             jsonCategories.Add(this);
         }
-#if DEBUG
-        catch (Exception e)
-        {
-            throw;
-        }
-#endif
         finally
         {
             _categoriesSemaphoreSlim.Release();
         }
     }
 
-    private static bool TryLoadValuesFrom<TElement>(RecursiveCategory recursiveCategory, TElement categoryElement, Dictionary<string, PropertyPath> propertyPathes, IElementHelper<TElement> elementHelper)
+    private static bool TryGetRecursiveCategoryFrom<TElement>(TElement categoryElement,
+        Dictionary<string, PropertyPath> propertyPathes,
+        IElementHelper<TElement> elementHelper,
+        out RecursiveCategory? recursiveCategory)
     {
-        if (TryGetProperty(categoryElement, propertyPathes[nameof(Url)], elementHelper.GetString, elementHelper, out string? url))
-        {
-            if (url == null) return false;
-            recursiveCategory.Url = url;
-        }
-        else
+        recursiveCategory = default;
+
+        if (!propertyPathes.TryGetValue(nameof(Url), out var urlPath))
             return false;
 
-        if (propertyPathes.TryGetValue(nameof(Id), out var idPath))
-        {
-            if (TryGetProperty(categoryElement, idPath, elementHelper.GetInt32, elementHelper, out int id))
-                recursiveCategory.Id = id;
-            else
-                return false;
-        }
-        else if (TryGetPropertyFromUrl(nameof(Id), recursiveCategory.Url, Utils.TryGetCategoryIdFromUrl, out int categoryId))
-            recursiveCategory.Id = categoryId;
+        if(!TryGetProperty(categoryElement, urlPath, elementHelper.GetString, elementHelper, out var url)
+            || string.IsNullOrEmpty(url))
+            url = "";
 
-        if (propertyPathes.TryGetValue(nameof(Name), out var namePath))
-        {
-            if (TryGetProperty(categoryElement, namePath, elementHelper.GetString, elementHelper, out string? name))
-                recursiveCategory.Name = name;
-            else
-                return false;
-        }
-        else
-            recursiveCategory.Name = Utils.TryGetCategoryNameFromUrl(recursiveCategory.Url, out string categoryName) ? categoryName : "";
+        if ((!propertyPathes.TryGetValue(nameof(Id), out var idPath) 
+            || !TryGetProperty(categoryElement, idPath, elementHelper.GetInt32, elementHelper, out int id))
+            && !Utils.TryGetCategoryIdFromUrl(url, out id))
+            return false;
 
 
-        if (propertyPathes.TryGetValue(nameof(Description), out var descriptionPath))
-        {
-            if (TryGetProperty(categoryElement, descriptionPath, elementHelper.GetString, elementHelper, out string? description))
+        if (!propertyPathes.TryGetValue(nameof(Name), out var namePath)
+            || !TryGetProperty(categoryElement, namePath, elementHelper.GetString, elementHelper, out var name)
+            || string.IsNullOrEmpty(name))
+            return false;
+
+        recursiveCategory = new RecursiveCategory(id, name, url);
+
+        if (propertyPathes.TryGetValue(nameof(Description), out var descriptionPath)
+            && TryGetProperty(categoryElement, descriptionPath, elementHelper.GetString, elementHelper, out string? description))
                 recursiveCategory.Description = description;
-            else
-                return false;
-        }
 
         if (propertyPathes.TryGetValue(nameof(IsParented), out var isParentedPath))
         {
@@ -116,6 +89,7 @@ public class RecursiveCategory : ICategory
 
         return true;
     }
+
     private static bool TryGetProperty<TElement, T>(TElement categoryElement,
         PropertyPath propertyPath,
         Func<TElement, T> getValue,
@@ -128,26 +102,8 @@ public class RecursiveCategory : ICategory
             result = getValue(element);
             return true;
         }
-        else if (propertyPath.StopLoadIfNotExists == true)
+        else
             return false;
-        else
-            throw new InvalidDataException(string.Format(_invalidDataMessageFormat,
-                elementHelper.GetRawText(categoryElement), 
-                propertyPath.PropertyName,
-                propertyPath.Path));
-    }
-
-    private delegate bool TryGetValueFromUrl<TResult>(string url, out TResult result);
-
-    private static bool TryGetPropertyFromUrl<T>(string propertyName,
-        string? url,
-        TryGetValueFromUrl<T> tryGetValueFromUrl,
-        out T? result)
-    {
-        if (tryGetValueFromUrl(url, out result))
-            return true;
-        else
-            throw new InvalidDataException(string.Format(_invalidUrlMessageFormat, url, propertyName));
     }
 
     private static async Task LoadChildrenTreeAsync<TElement>(RecursiveCategory? parentCategory, 
@@ -164,14 +120,15 @@ public class RecursiveCategory : ICategory
             if (!categoryElementQueue.TryDequeue(out var categoryElement))
                 return;
 
-            var category = new RecursiveCategory();
-            var isLoaded = TryLoadValuesFrom(category, categoryElement, propertyPathes, elementHelper);
+            if(!TryGetRecursiveCategoryFrom(categoryElement, propertyPathes, elementHelper, out var category) 
+                || category is null)
+                continue;
 
             if (category.Id == parentCategory?.Id)
                 continue;
 
-            if (isLoaded && parentCategory?.Id > 0)
-                SetParent(category, parentCategory);
+            if (parentCategory?.Id > 0)
+                await SetParentAsync(category, parentCategory, cancellationToken);
 
             await category.AddCategoryToCollectionAsync(recursiveCategories, cancellationToken);
 
@@ -180,12 +137,12 @@ public class RecursiveCategory : ICategory
         }
     }
 
-    protected static void SetParent(RecursiveCategory category, RecursiveCategory parentCategory)
+    protected static async Task SetParentAsync(RecursiveCategory category, RecursiveCategory parentCategory, CancellationToken cancellationToken)
     {
         category.ParentId = parentCategory.Id;
         category.ItemParent = parentCategory;
-        parentCategory._children.Add(category);
-        parentCategory._childrenIds.Add(category.Id);
+
+        await category.AddCategoryToCollectionAsync(parentCategory._children, cancellationToken);
     }
 
     protected static IEnumerable<TElement> GetAllElementsByNodePath<TElement>(TElement element, string[] nodePath, IElementHelper<TElement> elementHelper)
@@ -234,11 +191,12 @@ public class RecursiveCategory : ICategory
             }
             else
             {
-                var recursiveCategory = new RecursiveCategory();
-                TryLoadValuesFrom(recursiveCategory, categoryElement, propertyPathes, elementHelper);
+                if (!TryGetRecursiveCategoryFrom(categoryElement, propertyPathes, elementHelper, out var recursiveCategory)
+                    || recursiveCategory is null)
+                    return;
 
                 if (parentCategory?.Id > 0)
-                    SetParent(recursiveCategory, parentCategory);
+                    await SetParentAsync(recursiveCategory, parentCategory, cancellationToken);
 
                 await recursiveCategory.AddCategoryToCollectionAsync(categories, cancellationToken);
 
@@ -246,5 +204,14 @@ public class RecursiveCategory : ICategory
                     await LoadChildrenTreeAsync(recursiveCategory, categories, childElements, propertyPathes, elementHelper, cancellationToken);
             }
         }));
+    }
+
+    void IDisposable.Dispose()
+    {
+        _categoriesSemaphoreSlim.Dispose();
+        foreach(var category in _children.OfType<IDisposable>())
+        {
+            category.Dispose();
+        }
     }
 }

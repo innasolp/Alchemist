@@ -20,6 +20,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
         {
             { "Url",new PropertyPath("Url","link",true) },
             {"Description",new PropertyPath("Description","name") },
+            {"Name",new PropertyPath("Name","name") },
             {"Id",new PropertyPath("Id","id") },
             {"Children",new PropertyPath("Children","children") }
         };
@@ -52,7 +53,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
                _nodePath,
                _categoryPropertyPathes,
                elementHelper,
-               tokenSource.Token);
+               tokenSource.Token);        
 
         Assert.True(categories.Count > 0);
 
