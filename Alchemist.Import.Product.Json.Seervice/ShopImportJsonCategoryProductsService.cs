@@ -37,8 +37,7 @@ public abstract class ShopImportJsonCategoryProductsService<TCategory, TProduct>
 
     public override string Name { get; }
 
-    protected override async Task<TCategory?> DeserializeCategoryFromStream<T>(Stream stream, CancellationToken cancellationToken = default)
-        where T : class
+    protected override async Task<TCategory?> DeserializeCategoryFromStream(Stream stream, CancellationToken cancellationToken = default)
     {
         return await LoadFromJson<TCategory>(stream, _categoryJsonLoader, cancellationToken);
     }

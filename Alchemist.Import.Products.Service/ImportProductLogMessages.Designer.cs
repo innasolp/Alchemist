@@ -61,7 +61,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Category {0} completed. {1} products handled. {2} unhandled..
+        ///   Looks up a localized string similar to Category {CategoryPath} completed. {HandledProductCount} products handled. {UnhandledProductCount} unhandled..
         /// </summary>
         internal static string CategoryCompletedInfo {
             get {
@@ -70,7 +70,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Category not loaded from url {0}. See error log..
+        ///   Looks up a localized string similar to Category not loaded from path {Path}. See error log..
         /// </summary>
         internal static string CategoryNotLoadedFromUrl {
             get {
@@ -79,7 +79,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Category Url {0} were processed successfull : {1} products were loaded.
+        ///   Looks up a localized string similar to Category Path {CategoryPath} were processed successfull : {ProductCount} products were loaded.
         /// </summary>
         internal static string CategoryProductsForUrlWereProcessedSuccesfullInfo {
             get {
@@ -88,7 +88,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All products in category url {0} were not loaded..
+        ///   Looks up a localized string similar to All products in category path {CategoryPath} were not loaded..
         /// </summary>
         internal static string CategoryProductsWereNotLoadedError {
             get {
@@ -97,7 +97,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New category {0} is enqueued..
+        ///   Looks up a localized string similar to New category {Category} is enqueued..
         /// </summary>
         internal static string NewCategoryIsEnqueued {
             get {
@@ -106,7 +106,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Category from url {0} was processed: {1} products from {2} were loaded. .
+        ///   Looks up a localized string similar to Category from path {Category} was processed: {HandledProductsCount} products from {CategoryPath} were loaded. .
         /// </summary>
         internal static string NotAllCategoryProductsForUrlWereProcessedWarning {
             get {
@@ -115,7 +115,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product {0} from url {1} handled with status {2}..
+        ///   Looks up a localized string similar to Product {ProductName} from path {ProductPath} handled with status {Status}..
         /// </summary>
         internal static string ProductFromUrlHandledWithStatusInfo {
             get {
@@ -124,7 +124,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product from url {1} handling failed with error: {1}..
+        ///   Looks up a localized string similar to Product from path {ProductPath} handling failed..
         /// </summary>
         internal static string ProductFromUrlHandlingFailed {
             get {
@@ -133,7 +133,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product {0} has been successfully loaded from url {1}..
+        ///   Looks up a localized string similar to Product {ProductName} has been successfully loaded from path {ProductPath}..
         /// </summary>
         internal static string ProductHasBeenSuccessfullyLoadedFromUrl {
             get {
@@ -142,7 +142,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product was not loaded from url {0} . See error log..
+        ///   Looks up a localized string similar to Product was not loaded from path {ProductPath} ..
         /// </summary>
         internal static string ProductWasNotLoadedFromUrlWithError {
             get {
@@ -151,11 +151,11 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Item {0} from url {1} was not deserialized. {2}..
+        ///   Looks up a localized string similar to Item {Item} from path {ItemPath} was not deserialized..
         /// </summary>
-        internal static string SerializationError {
+        internal static string SerializationFailed {
             get {
-                return ResourceManager.GetString("SerializationError", resourceCulture);
+                return ResourceManager.GetString("SerializationFailed", resourceCulture);
             }
         }
     }
