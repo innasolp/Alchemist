@@ -127,7 +127,8 @@ public class ShopImportCategoriesTimerService : ImportService
                 var (success, loadedCategories) = await LoadCategoryChildrenAsync(url, categoryLoadData, stage, parentCategory, !stage.IsRecursive,
                     cancellationToken: ct);
 
-                loadedCategories.ToList().ForEach(currentCategories.Add);
+                if(success)
+                    loadedCategories.ToList().ForEach(currentCategories.Add);
             });
 
         

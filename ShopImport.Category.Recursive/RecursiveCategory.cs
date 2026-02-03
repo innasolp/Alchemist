@@ -1,6 +1,7 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace ShopImport.Category.Recursive;
 
@@ -22,6 +23,7 @@ public class RecursiveCategory : ICategory, IDisposable
     public IEnumerable<ICategory> Children => _children;
 
     private readonly SemaphoreSlim _categoriesSemaphoreSlim = new(1, 1);   
+    private readonly SemaphoreSlim _childrenSemaphoreSlim = new(1, 1);   
 
     public bool? IsParented { get; private set; }
 
@@ -45,6 +47,20 @@ public class RecursiveCategory : ICategory, IDisposable
         finally
         {
             _categoriesSemaphoreSlim.Release();
+        }
+    }
+
+    private async Task AddChildAsync(ICategory child, CancellationToken cancellationToken)
+    {
+        await _childrenSemaphoreSlim.WaitAsync(cancellationToken);
+
+        try
+        {
+            _children.Add(child);
+        }
+        finally
+        {
+            _childrenSemaphoreSlim.Release();
         }
     }
 
@@ -142,7 +158,7 @@ public class RecursiveCategory : ICategory, IDisposable
         category.ParentId = parentCategory.Id;
         category.ItemParent = parentCategory;
 
-        await category.AddCategoryToCollectionAsync(parentCategory._children, cancellationToken);
+        await parentCategory.AddChildAsync(category, cancellationToken);
     }
 
     protected static IEnumerable<TElement> GetAllElementsByNodePath<TElement>(TElement element, string[] nodePath, IElementHelper<TElement> elementHelper)
@@ -209,6 +225,7 @@ public class RecursiveCategory : ICategory, IDisposable
     void IDisposable.Dispose()
     {
         _categoriesSemaphoreSlim.Dispose();
+        _childrenSemaphoreSlim.Dispose();
         foreach(var category in _children.OfType<IDisposable>())
         {
             category.Dispose();

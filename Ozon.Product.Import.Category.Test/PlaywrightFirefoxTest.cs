@@ -24,6 +24,7 @@ public class PlaywrightFirefoxTest(ITestOutputHelper testOutputHelper)
     {
         { "Url", new PropertyPath("Url","url") },
         {"Description",new PropertyPath("Description","title") },
+        {"Name",new PropertyPath("Name","title") },
         {"Children",new PropertyPath("Children","categories") }
     };
 

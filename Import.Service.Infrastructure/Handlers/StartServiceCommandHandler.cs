@@ -11,16 +11,26 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
 
     private readonly IPublisher _publisher = publisher;
 
-    private AsyncEventHandler<ConnectedAsyncEventArgs>? _serviceConnectedAsync;
-
     public async Task Handle(StartServiceCommand request, CancellationToken cancellationToken)
     {
         if (!_serviceRepository.Services.TryGetValue(request.Guid, out var serviceItem))
             throw new InvalidOperationException($"Service with id {request.Guid} not found.");
 
-        _serviceConnectedAsync = (sender, args) => ServiceConnectedAsync(sender, request.Guid, args);
+        async Task serviceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs)
+        {
+            if (sender is not IImportService service) return;
 
-        serviceItem.Service.ConnectedAsync += _serviceConnectedAsync;
+            try
+            {
+                await _publisher.Publish(new ServiceStartedEvent(eventArgs.Success, new ServiceMessage(request.Guid, service.Name)), eventArgs.CancellationToken);
+            }
+            finally
+            {
+                service.ConnectedAsync -= serviceConnectedAsync;
+            }
+        }
+
+        serviceItem.Service.ConnectedAsync += serviceConnectedAsync;
 
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, serviceItem.InnerTokenSource.Token);
 
@@ -32,23 +42,9 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
         }
         catch
         {
-            serviceItem.Service.ConnectedAsync -= _serviceConnectedAsync;
+            serviceItem.Service.ConnectedAsync -= serviceConnectedAsync;
 
             throw;
-        }
-    }
-
-    private async Task ServiceConnectedAsync(object sender, Guid guid, ConnectedAsyncEventArgs eventArgs)
-    {
-        if (sender is not IImportService service) return;
-
-        try
-        {
-            await _publisher.Publish(new ServiceStartedEvent(eventArgs.Success, new ServiceMessage(guid, service.Name)), eventArgs.CancellationToken);
-        }
-        finally
-        {
-            service.ConnectedAsync -= _serviceConnectedAsync;
         }
     }
 }
