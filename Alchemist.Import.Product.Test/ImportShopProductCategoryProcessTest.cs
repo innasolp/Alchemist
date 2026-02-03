@@ -36,6 +36,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     {
         LoaderMock.Reset();
         LoaderMock.SetupStartSuccess();
+        LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
         var categoryMock = TestHelper.CreateCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
@@ -68,6 +69,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     {
         LoaderMock.Reset();
         LoaderMock.SetupStartSuccess();
+        LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
         var categoryMock = TestHelper.CreateCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);

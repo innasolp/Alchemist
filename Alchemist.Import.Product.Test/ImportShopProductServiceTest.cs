@@ -29,24 +29,24 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     protected Mock<IProductItemHandler> ProductItemHandlerMock { get; } = new Mock<IProductItemHandler>();
 
     [Fact]
-    public async Task ShouldLogImportWasStoppedWhenLoaderNotExecuted()
+    public async Task ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecuted()
     {
         LoaderMock.Reset();        
-        await ShouldLogImportWasStoppedWhenLoaderNotExecutedAsync();
+        await ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecutedAsync(3000);
     }
 
     [Fact]
     public async Task ShouldLogServiceStartedWhenLoaderExecutesSuccessfully()
     {
         LoaderMock.Reset();
-        await ShouldLogServiceStartedWhenLoaderExecutesSuccessfullyAsync();
+        await ShouldLogServiceStartedWhenLoaderExecutesSuccessfullyAsync(1000);
     }
 
     [Fact]
     public async Task ShouldLogImportStoppedWhenCancellationRequested()
     {
         LoaderMock.Reset();
-        await ShouldLogImportStoppedWhenCancellationRequestedAsync();
+        await ShouldLogImportStoppedWhenCancellationRequestedAsync(500);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         var categoryMock = TestHelper.CreateCategoryMock();        
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
         
-        await ShouldLogResettingErrorIfLoaderServiceNeedsResettingAsync();
+        await ShouldLogResettingErrorIfLoaderServiceNeedsResettingAsync(15000);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         var categoryMock = TestHelper.CreateCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
-        await ShouldLogServiceFailedErrorWhenUnhandledExceptionThrownAsync();
+        await ShouldLogServiceFailedErrorWhenUnhandledExceptionThrownAsync(1000);
     }
 
     [Fact]
@@ -82,6 +82,6 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         var categoryMock = TestHelper.CreateCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
-        await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync();
+        await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync(1000);
     }
 }

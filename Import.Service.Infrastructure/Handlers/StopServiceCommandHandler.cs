@@ -13,7 +13,7 @@ internal sealed class StopServiceCommandHandler(IServiceRepository serviceReposi
         if (!_serviceRepository.Services.TryGetValue(request.Guid, out var serviceItem))
             throw new InvalidOperationException($"Service with id {request.Guid} not found.");
 
-        await serviceItem.InnerTokenSource.CancelAsync();
+        await serviceItem.Service.Stop(cancellationToken);
 
         await _publisher.Publish(new ServiceStoppedEvent(new ServiceMessage(request.Guid, serviceItem.Service.Name)), cancellationToken);
     }

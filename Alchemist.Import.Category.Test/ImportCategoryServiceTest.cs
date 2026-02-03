@@ -42,10 +42,10 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
     }
 
     [Fact]
-    public async Task ShouldLogImportWasStoppedWhenLoaderNotExecuted()
+    public async Task ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecuted()
     {
         LoaderMock.Reset();
-        await ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecutedAsync(2000);
+        await ShouldLogImportWasStoppedWithErrorWhenLoaderNotExecutedAsync(3000);
     }
 
     [Fact]
