@@ -18,7 +18,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
 
     private const string TimeWatchMessageFormat = "{0} load time {1} seconds";
 
-    private readonly Dictionary<string, PropertyPath> _categoryPropertyPathes = new()
+    private readonly Dictionary<string, PropertyPath> _categoryPropertyPaths = new()
     {
         { "Url", new PropertyPath("Url","url") },
         {"Description",new PropertyPath("Description","title") },
@@ -80,7 +80,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
         timespan = await TimeWatchHelper.ExecuteTaskWithTimeWatchAsync(async () =>
         {
             await RecursiveCategory.LoadAllChildrenAsync(null, categories, document.RootElement, _nodePath,
-                _categoryPropertyPathes, jsonElementHelper, tokenSource.Token);
+                _categoryPropertyPaths, jsonElementHelper, tokenSource.Token);
         });
 
         testOutputHelper.WriteLine(TimeWatchMessageFormat, "Parent categories", timespan.TotalSeconds);
@@ -102,7 +102,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
                 categoryStream.Close();
 
                 await RecursiveCategory.LoadAllChildrenAsync(parentCategory as RecursiveCategory, categories, categoriesJson.RootElement,
-                    _nodePath, _categoryPropertyPathes, jsonElementHelper, tokenSource.Token);
+                    _nodePath, _categoryPropertyPaths, jsonElementHelper, tokenSource.Token);
             }
         });
 

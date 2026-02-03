@@ -49,37 +49,37 @@ public class RecursiveCategory : ICategory, IDisposable
     }
 
     private static bool TryGetRecursiveCategoryFrom<TElement>(TElement categoryElement,
-        Dictionary<string, PropertyPath> propertyPathes,
+        Dictionary<string, PropertyPath> propertyPaths,
         IElementHelper<TElement> elementHelper,
         out RecursiveCategory? recursiveCategory)
     {
         recursiveCategory = default;
 
-        if (!propertyPathes.TryGetValue(nameof(Url), out var urlPath))
+        if (!propertyPaths.TryGetValue(nameof(Url), out var urlPath))
             return false;
 
         if(!TryGetProperty(categoryElement, urlPath, elementHelper.GetString, elementHelper, out var url)
             || string.IsNullOrEmpty(url))
             url = "";
 
-        if ((!propertyPathes.TryGetValue(nameof(Id), out var idPath) 
+        if ((!propertyPaths.TryGetValue(nameof(Id), out var idPath) 
             || !TryGetProperty(categoryElement, idPath, elementHelper.GetInt32, elementHelper, out int id))
             && !Utils.TryGetCategoryIdFromUrl(url, out id))
             return false;
 
 
-        if (!propertyPathes.TryGetValue(nameof(Name), out var namePath)
+        if (!propertyPaths.TryGetValue(nameof(Name), out var namePath)
             || !TryGetProperty(categoryElement, namePath, elementHelper.GetString, elementHelper, out var name)
             || string.IsNullOrEmpty(name))
             return false;
 
         recursiveCategory = new RecursiveCategory(id, name, url);
 
-        if (propertyPathes.TryGetValue(nameof(Description), out var descriptionPath)
+        if (propertyPaths.TryGetValue(nameof(Description), out var descriptionPath)
             && TryGetProperty(categoryElement, descriptionPath, elementHelper.GetString, elementHelper, out string? description))
                 recursiveCategory.Description = description;
 
-        if (propertyPathes.TryGetValue(nameof(IsParented), out var isParentedPath))
+        if (propertyPaths.TryGetValue(nameof(IsParented), out var isParentedPath))
         {
             if (TryGetProperty(categoryElement, isParentedPath, elementHelper.GetBoolean, elementHelper, out bool isParented))
                 recursiveCategory.IsParented = isParented;
@@ -109,7 +109,7 @@ public class RecursiveCategory : ICategory, IDisposable
     private static async Task LoadChildrenTreeAsync<TElement>(RecursiveCategory? parentCategory, 
         ICollection<ICategory> recursiveCategories,
         IEnumerable<TElement> childrenCategoryElements,
-        Dictionary<string, PropertyPath> propertyPathes,
+        Dictionary<string, PropertyPath> propertyPaths,
         IElementHelper<TElement> elementHelper,
         CancellationToken cancellationToken)
     {
@@ -120,7 +120,7 @@ public class RecursiveCategory : ICategory, IDisposable
             if (!categoryElementQueue.TryDequeue(out var categoryElement))
                 return;
 
-            if(!TryGetRecursiveCategoryFrom(categoryElement, propertyPathes, elementHelper, out var category) 
+            if(!TryGetRecursiveCategoryFrom(categoryElement, propertyPaths, elementHelper, out var category) 
                 || category is null)
                 continue;
 
@@ -132,8 +132,8 @@ public class RecursiveCategory : ICategory, IDisposable
 
             await category.AddCategoryToCollectionAsync(recursiveCategories, cancellationToken);
 
-            if (elementHelper.TryGetElementEnumerable(categoryElement, propertyPathes[nameof(Children)].Path, out var childrenElements))
-                await LoadChildrenTreeAsync(category, recursiveCategories, childrenElements, propertyPathes, elementHelper, cancellationToken);
+            if (elementHelper.TryGetElementEnumerable(categoryElement, propertyPaths[nameof(Children)].Path, out var childrenElements))
+                await LoadChildrenTreeAsync(category, recursiveCategories, childrenElements, propertyPaths, elementHelper, cancellationToken);
         }
     }
 
@@ -177,7 +177,7 @@ public class RecursiveCategory : ICategory, IDisposable
         ICollection<ICategory> categories,
         TElement element,
         string[] nodePath,
-        Dictionary<string, PropertyPath> propertyPathes,
+        Dictionary<string, PropertyPath> propertyPaths,
         IElementHelper<TElement> elementHelper,
         CancellationToken cancellationToken)
     {
@@ -187,11 +187,11 @@ public class RecursiveCategory : ICategory, IDisposable
         {
             if (elementHelper.TryGetElementEnumerable(categoryElement, null, out var childElements))
             {
-                await LoadChildrenTreeAsync(parentCategory, categories, childElements, propertyPathes, elementHelper, cancellationToken);
+                await LoadChildrenTreeAsync(parentCategory, categories, childElements, propertyPaths, elementHelper, cancellationToken);
             }
             else
             {
-                if (!TryGetRecursiveCategoryFrom(categoryElement, propertyPathes, elementHelper, out var recursiveCategory)
+                if (!TryGetRecursiveCategoryFrom(categoryElement, propertyPaths, elementHelper, out var recursiveCategory)
                     || recursiveCategory is null)
                     return;
 
@@ -200,8 +200,8 @@ public class RecursiveCategory : ICategory, IDisposable
 
                 await recursiveCategory.AddCategoryToCollectionAsync(categories, cancellationToken);
 
-                if (elementHelper.TryGetElementEnumerable(categoryElement, propertyPathes[nameof(Children)].Path, out childElements))
-                    await LoadChildrenTreeAsync(recursiveCategory, categories, childElements, propertyPathes, elementHelper, cancellationToken);
+                if (elementHelper.TryGetElementEnumerable(categoryElement, propertyPaths[nameof(Children)].Path, out childElements))
+                    await LoadChildrenTreeAsync(recursiveCategory, categories, childElements, propertyPaths, elementHelper, cancellationToken);
             }
         }));
     }

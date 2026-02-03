@@ -3,6 +3,7 @@ using Import.Interfaces;
 using Import.Service;
 using Microsoft.Extensions.Logging;
 using ShopImport.Category.Loader.Interfaces;
+using System.Collections.Concurrent;
 
 namespace Alchemist.Import.Category.Service;
 
@@ -116,7 +117,7 @@ public class ShopImportCategoriesTimerService : ImportService
     private async Task<IEnumerable<ICategory>> LoadCategoryChildrenAsync(string urlFormat, ICategoryLoader stage, IEnumerable<ICategory> parentCategories,
         object? categoryLoadData, CancellationToken stoppingToken)
     {
-        List<ICategory> currentCategories = [];
+        BlockingCollection<ICategory> currentCategories = [];
 
         var loaderDegree = 8;
         await Parallel.ForEachAsync(parentCategories, new ParallelOptions { CancellationToken = stoppingToken, MaxDegreeOfParallelism = loaderDegree },
@@ -125,7 +126,8 @@ public class ShopImportCategoriesTimerService : ImportService
                 var url = string.Format(urlFormat, parentCategory.Id);
                 var (success, loadedCategories) = await LoadCategoryChildrenAsync(url, categoryLoadData, stage, parentCategory, !stage.IsRecursive,
                     cancellationToken: ct);
-                currentCategories.AddRange(loadedCategories);
+
+                loadedCategories.ToList().ForEach(currentCategories.Add);
             });
 
         
@@ -133,8 +135,11 @@ public class ShopImportCategoriesTimerService : ImportService
         {
             IEnumerable<ICategory> loadedNextParentCategories = [.. currentCategories.Where(c => !c.Children.Any())];
             var loadedCategories = await LoadCategoryChildrenAsync(urlFormat, stage, loadedNextParentCategories, categoryLoadData, stoppingToken);
-            currentCategories.AddRange(loadedCategories);
+            
+            loadedCategories.ToList().ForEach(currentCategories.Add);
         }
+
+        currentCategories.CompleteAdding();
 
         return currentCategories;
     }
