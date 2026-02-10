@@ -3,29 +3,25 @@ using Alchemist.Log.Extensions;
 using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using BackgroundTaskQueue;
-using BackgroundTaskQueueService;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
-using Http.ErrorHandling;
-using Http.Info;
 using Log.Interceptors;
 using Mediator.Module.EF;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
 using Serilog;
 using Serilog.Loggers;
 using Shop.API;
-using Shop.API.Controllers;
 using Shop.Module;
-using Swashbuckle.AspNetCore.Swagger;
+using Alchemist.WebApp.Api.Common;
+using Http.ErrorHandling;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
 builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
-
 
 // Add services to the container.
 
@@ -40,49 +36,38 @@ builder.Services.AddSignalRHubMessageSender(signalRUrl);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.Configure<SwaggerOptions>(options =>
-{
-    options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
-});
+builder.Services.AddSwaggerApi();
 
 builder.Services.AddAuthentication("https");
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopController>>();
-builder.Services.AddSingleton<InfoLogMiddleware<ShopController>>();
+builder.Services.AddBaseControllerInterceptors();
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler<ShopCategoryController>>();
+var logger = AddLogging(builder.Configuration, builder.Logging);
 
-builder.Services.AddProblemDetails();
+builder.Host.UseSerilog(logger);
 
 InterceptLogs(builder.Services);
-
-AddLogging(builder.Configuration, builder.Logging);
 
 builder.Services.AddHostedService<ShopBackgroundTaskQueuedHostedService>();
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
-app.UseMiddleware<InfoLogMiddleware<ShopController>>();
-
 app.UseAuthentication();
+
+app.UseBaseInterceptors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHsts();
+    app.UseApiSwagger();
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseHsts();
 app.MapControllers();
+
+app.UseSerilogRequestLogging();
 
 app.Run();
 
@@ -91,7 +76,7 @@ static void InterceptLogs(IServiceCollection services)
     services.InterceptLoggerFactory((logger) => new SerilogForceDestructuringLogger(logger));
 }
 
-static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
+static Serilog.ILogger AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
 {
     var logPath = $"{Utils.GetAppPath()}/Logs";
     var logContextFile = "log.property.json";
@@ -100,11 +85,11 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
-    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
-    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", nameof(ShopBackgroundTaskQueuedHostedService));
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}/Http", "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware");
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}/Http", nameof(GlobalExceptionHandler));
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}/{nameof(ShopBackgroundTaskQueuedHostedService)}", nameof(ShopBackgroundTaskQueuedHostedService));
 
-    loggerConfiguration.SetSerilog(loggingBuilder);
+    return loggerConfiguration.SetSerilog(loggingBuilder);
 }
 
 public class ShopAPIProgram { }

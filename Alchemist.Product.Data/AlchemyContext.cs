@@ -180,7 +180,7 @@ public partial class AlchemyContext : DbContext
                 // .HasDefaultValueSql("nextval('product_type_id_seq'::regclass)")
                 .HasColumnName("id");
             entity.Property(e => e.Name)
-                .HasMaxLength(63)
+                .HasMaxLength(255)
                 .HasColumnName("name");
 
             entity.SetAddedTsColumn();

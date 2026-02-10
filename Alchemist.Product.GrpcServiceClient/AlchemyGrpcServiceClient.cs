@@ -212,27 +212,27 @@ public class AlchemyGrpcServiceClient : IProductDataService
         return reply?.Adapt<Currency>();
     }
 
-    public async Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl, CancellationToken cancellationToken = default)
+    public async Task<IShopProduct?> GetShopProductByShopIdAndApiUrl(int shopId, string apiUrl, CancellationToken cancellationToken = default)
     {
-        var request = new GetShopProductByShopAndApiUrlRequest { Apiurl = apiUrl, Shopid = shopId };
+        var request = new GetShopProductByShopIdAndApiUrlRequest { Apiurl = apiUrl, Shopid = shopId };
 
-        var reply = await _serviceClient.GetShopProductByShopAndApiUrlAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var reply = await _serviceClient.GetShopProductByShopIdAndApiUrlAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
         return reply?.Adapt<ShopProduct>();
     }
 
-    public async Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId, CancellationToken cancellationToken = default)
+    public async Task<IShopProduct?> GetShopProductByShopIdAndItemId(int shopId, string itemId, CancellationToken cancellationToken = default)
     {
-        var request = new GetShopProductByShopAndItemIdRequest { Itemid = itemId, Shopid = shopId };
+        var request = new GetShopProductByShopIdAndItemIdRequest { Itemid = itemId, Shopid = shopId };
 
-        var reply = await _serviceClient.GetShopProductByShopAndItemIdAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var reply = await _serviceClient.GetShopProductByShopIdAndItemIdAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
         return reply?.Adapt<ShopProduct>();
     }
 
-    public async Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId, CancellationToken cancellationToken = default)
+    public async Task<IShopProduct?> GetShopProductByShopIdAndProductId(int shopId, long productId, CancellationToken cancellationToken = default)
     {
-        var request = new GetShopProductByShopAndProductIdRequest { Productid = productId, Shopid = shopId };
+        var request = new GetShopProductByShopIdAndProductIdRequest { Productid = productId, Shopid = shopId };
 
-        var reply = await _serviceClient.GetShopProductByShopAndProductIdAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var reply = await _serviceClient.GetShopProductByShopIdAndProductIdAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
         return reply?.Adapt<ShopProduct>();
     }
 

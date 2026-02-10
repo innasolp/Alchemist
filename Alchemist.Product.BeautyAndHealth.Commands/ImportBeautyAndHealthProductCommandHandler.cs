@@ -24,7 +24,7 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
             var shop = await _shopCache.TryGetShopAsync(request.Product.ShopName, request.Product.ShopUrl, cancellationToken)
             ?? throw new InvalidDataException($"Shop with name {request.Product.ShopName} or url {request.Product.ShopUrl} not found.");
 
-            var shopProduct = await _productDataService.GetShopProductByShopAndItemId(shop.Id, request.Product.ShopProduct?.ItemId ?? string.Empty, cancellationToken)
+            var shopProduct = await _productDataService.GetShopProductByShopIdAndItemId(shop.Id, request.Product.ShopProduct?.ItemId ?? string.Empty, cancellationToken)
                 ??
                 new ShopProduct
                 {
@@ -59,7 +59,7 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
 
             if (product != null)
             {
-                if (await _productDataService.GetShopProductByShopAndProductId(shop.Id, product.Id, cancellationToken) != null)                
+                if (await _productDataService.GetShopProductByShopIdAndProductId(shop.Id, product.Id, cancellationToken) != null)                
                     return ItemProcessStatus.AlreadyExists;
                 
             }

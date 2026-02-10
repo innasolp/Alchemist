@@ -18,12 +18,11 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />		
-		<PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
-		<PackageReference Include="Http.Info" Version="1.0.0.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
 		<PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.5" />
 		<PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
 		<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.1" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 	</ItemGroup>
 
   <ItemGroup>

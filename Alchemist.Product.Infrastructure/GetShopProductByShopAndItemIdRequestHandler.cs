@@ -4,7 +4,8 @@ using MediatR;
 
 namespace Alchemist.Product.Infrastructure;
 
-public class GetShopProductByShopAndItemIdRequestHandler(IShopProductRepository repository) : IRequestHandler<GetShopProductByShopAndItemIdRequest, ShopProduct>
+public class GetShopProductByShopAndItemIdRequestHandler(IShopProductRepository repository) 
+    : IRequestHandler<GetShopProductByShopAndItemIdRequest, ShopProduct>
 {
     private readonly IShopProductRepository _repository = repository;
 

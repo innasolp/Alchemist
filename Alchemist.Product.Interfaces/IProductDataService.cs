@@ -24,9 +24,9 @@ public interface IProductDataService
     Task<List<IPurposeType>> GetProductPurposes(long productId, CancellationToken cancellationToken = default);
     Task<IProductPurpose> SetProductPurpose(IProductPurpose productPurpose, CancellationToken cancellationToken = default);
 
-    Task<IShopProduct?> GetShopProductByShopAndApiUrl(int shopId, string apiUrl, CancellationToken cancellationToken = default);
-    Task<IShopProduct?> GetShopProductByShopAndItemId(int shopId, string itemId, CancellationToken cancellationToken = default);
-    Task<IShopProduct?> GetShopProductByShopAndProductId(int shopId, long productId, CancellationToken cancellationToken = default);
+    Task<IShopProduct?> GetShopProductByShopIdAndApiUrl(int shopId, string apiUrl, CancellationToken cancellationToken = default);
+    Task<IShopProduct?> GetShopProductByShopIdAndItemId(int shopId, string itemId, CancellationToken cancellationToken = default);
+    Task<IShopProduct?> GetShopProductByShopIdAndProductId(int shopId, long productId, CancellationToken cancellationToken = default);
 
     Task<IShopProduct> UpdateShopProduct(IShopProduct shopProduct, CancellationToken cancellationToken = default);
 

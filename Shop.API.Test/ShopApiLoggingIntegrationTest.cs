@@ -13,6 +13,12 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
 
     private readonly HttpClient _httpClient;
 
+    private const string HttpLogCategory = "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware";
+
+    private const string HttpExceptionHandler = "GlobalExceptionHandler";
+
+    private const string ResponseBodyEvent = "ResponseBody";
+
     public ShopApiLoggingIntegrationTest(ShopAPILoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
         : base(webAppFactory, outputHelper)
     {
@@ -35,7 +41,7 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
         var response = await _httpClient.GetAsync($"api/Shop/byName?name={name}");
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
 
-        Assert.Equal(1, _messages.Count(m => m.eventId != 5001 && m.categoryName.Contains("InfoLogMiddleware") && m.logLevel == LogLevel.Information));
+        Assert.Equal(1, _messages.Count(m => m.eventId.Name == ResponseBodyEvent && m.categoryName.Contains(HttpLogCategory) && m.logLevel == LogLevel.Information));
     }
 
     [Fact]
@@ -46,6 +52,6 @@ public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWeb
         var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
         var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop);
 
-        Assert.Equal(1, _messages.Count(m =>m.categoryName.Contains("GlobalExceptionHandler") && m.logLevel == LogLevel.Error));
+        Assert.Equal(1, _messages.Count(m =>m.categoryName.Contains(HttpExceptionHandler) && m.logLevel == LogLevel.Error));
     }
 }

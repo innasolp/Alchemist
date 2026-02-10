@@ -14,7 +14,7 @@ import "google/protobuf/wrappers.proto";
 service AlchemyGrpcService {
 	rpc CreateProductType(CreateProductTypeRequest) returns (ProductTypeReply) {
 		option (google.api.http) = {
-			post: "/v1/productTypes"
+			post: "/v1/productType"
 			body: "*"
 		};
 	}
@@ -26,7 +26,7 @@ service AlchemyGrpcService {
 	
 	rpc CreatePurposeType(CreatePurposeTypeRequest) returns (PurposeTypeReply) {
 		option (google.api.http) = {
-			post: "/v1/purposeTypes"
+			post: "/v1/purposeType"
 			body: "*"
 		};
 	}
@@ -38,7 +38,7 @@ service AlchemyGrpcService {
 
 	rpc CreateCountry(CreateCountryRequest) returns (CountryReply) {
 		option (google.api.http) = {
-			post: "/v1/countries"
+			post: "/v1/country"
 			body: "*"
 		};
 	}
@@ -50,7 +50,7 @@ service AlchemyGrpcService {
 
 	rpc CreateBrand(CreateBrandRequest) returns (BrandReply) {
 		option (google.api.http) = {
-			post: "/v1/brands"
+			post: "/v1/brand"
 			body: "*"
 		};
 	}
@@ -62,7 +62,7 @@ service AlchemyGrpcService {
 	
 	rpc CreateComponent(CreateComponentRequest) returns (ComponentReply) {
 		option (google.api.http) = {
-			post: "/v1/components"
+			post: "/v1/component"
 			body: "*"
 		};
 	}
@@ -79,7 +79,7 @@ service AlchemyGrpcService {
 
 	rpc CreateProduct(CreateProductRequest) returns (ProductReply) {
 		option (google.api.http) = {
-			post: "/v1/products"
+			post: "/v1/product"
 			body: "*"
 		};
 	}
@@ -94,49 +94,49 @@ service AlchemyGrpcService {
 		};
 	}
 
-	rpc GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest) returns (ShopProductReply) {
+	rpc GetShopProductByShopIdAndApiUrl(GetShopProductByShopIdAndApiUrlRequest) returns (ShopProductReply) {
 		option (google.api.http) = {
-			get: "/v1/shops/{shopId}/products/byApiUrl/{apiUrl}"
+			get: "/v1/shops/{shopid}/products/byApiUrl/{apiurl}"
 		};
 	}
-	rpc GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest) returns (ShopProductReply) {
+	rpc GetShopProductByShopIdAndItemId(GetShopProductByShopIdAndItemIdRequest) returns (ShopProductReply) {
 		option (google.api.http) = {
-			get: "/v1/shops/{shopId}/products/byItemId/{itemId}"
+			get: "/v1/shops/{shopid}/products/byItemId/{itemid}"
 		};
 	}
-	rpc GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest) returns (ShopProductReply) {
+	rpc GetShopProductByShopIdAndProductId(GetShopProductByShopIdAndProductIdRequest) returns (ShopProductReply) {
 		option (google.api.http) = {
-			get: "/v1/shops/{shopId}/products/{productId}"
+			get: "/v1/shops/{shopid}/products/{productid}"
 		};
 	}
 	rpc UpdateShopProduct(UpdateShopProductRequest) returns(ShopProductReply) {
 		option (google.api.http) = {
-			put: "/v1/shops/{shopId}/products/{id}"
+			put: "/v1/shops/{shopid}/products/{id}"
 			body: "*"
 		};
 	}
 	rpc CreateShopProduct(CreateShopProductRequest) returns(ShopProductReply) {
 		option (google.api.http) = {
-			post: "/v1/shops/{shopId}/products"
+			post: "/v1/shops/{shopid}/product"
 			body: "*"
 		};
 	}
 
 	rpc SetProductComponent(SetProductComponentRequest) returns(ProductComponentReply) {
 		option (google.api.http) = {
-			post: "/v1/products/{productId}/components"
+			post: "/v1/products/{productid}/components"
 			body: "*"
 		};
 	}
 
 	rpc GetProductPurposes(GetProductPurposesRequest) returns(PurposeTypeListReply) {
 		option (google.api.http) = {
-			get: "/v1/products/{productId}/purposes"
+			get: "/v1/products/{productid}/purposes"
 		};
 	}
 	rpc SetProductPurpose(SetProductPurposeRequest) returns(ProductPurposeReply) {
 		option (google.api.http) = {
-			post: "/v1/products/{productId}/purposes"
+			post: "/v1/products/{productid}/purposes"
 			body: "*"
 		};
 	}
@@ -153,7 +153,7 @@ service AlchemyGrpcService {
 	}
 	rpc CreateCurrency(CreateCurrencyRequest) returns(CurrencyReply) {
 		option (google.api.http) = {
-			post: "/v1/currencies"
+			post: "/v1/currency"
 			body: "*"
 		};
 	}
@@ -165,7 +165,7 @@ service AlchemyGrpcService {
 	}
 	rpc CreateShopProductPrice(CreateShopProductPriceRequest) returns(ShopProductPriceReply) {
 		option (google.api.http) = {
-			post: "/v1/shopProductPrices"
+			post: "/v1/shopProductPrice"
 			body: "*"
 		};
 	}
@@ -182,13 +182,13 @@ service AlchemyGrpcService {
 	}
 	rpc AddShopProductCategory(ShopProductCategoryRequest) returns(ShopProductCategoryReply) {
 		option (google.api.http) = {
-			post: "/v1/shopProducts/{shopProductId}/categories"
+			post: "/v1/shopProducts/{shopproductid}/categories"
 			body: "*"
 		};
 	}
 	rpc CheckShopProductCategory(ShopProductCategoryRequest) returns(google.protobuf.BoolValue) {
 		option (google.api.http) = {
-			get: "/v1/shopProducts/{shopProductId}/categories/check/{shopCategoryid}"
+			get: "/v1/shopProducts/{shopproductid}/categories/check/{shopcategoryid}"
 		};
 	}
 }
@@ -307,19 +307,19 @@ message CreateShopProductRequest
 	 google.protobuf.DoubleValue price=7;
 }
 
-message GetShopProductByShopAndApiUrlRequest
+message GetShopProductByShopIdAndApiUrlRequest
 {
 	int32 shopid=1;
 	string apiurl=2;
 }
 
-message GetShopProductByShopAndItemIdRequest
+message GetShopProductByShopIdAndItemIdRequest
 {
 	int32 shopid=1;
 	string itemid=2;
 }
 
-message GetShopProductByShopAndProductIdRequest
+message GetShopProductByShopIdAndProductIdRequest
 {
 	int32 shopid=1;
 	int64 productid=2;

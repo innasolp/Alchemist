@@ -27,7 +27,7 @@ public static class SerilogConfigurationExtensions
     public static LoggerConfiguration AddSourceContextConfig(this LoggerConfiguration loggerConfiguration, string logContextFile, string logPath, string serviceName)
     {
         var configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.AddBaseSourceContextRules(logContextFile, $"{logPath}/{serviceName}", serviceName);
+        configurationBuilder.AddBaseSourceContextRules(logContextFile, logPath, serviceName);
 
         var configuration = configurationBuilder.Build();
         return loggerConfiguration.ReadFrom.Configuration(configuration);
@@ -86,10 +86,11 @@ public static class SerilogConfigurationExtensions
         return loggerConfiguration.ReadFrom.Configuration(configuration);
     }
 
-    public static ILoggingBuilder SetSerilog(this LoggerConfiguration loggerConfiguration, ILoggingBuilder loggingBuilder)
+    public static Serilog.ILogger SetSerilog(this LoggerConfiguration loggerConfiguration, ILoggingBuilder loggingBuilder)
     {
         loggingBuilder.ClearProviders();
         Logger logger = loggerConfiguration.CreateLogger();
-        return loggingBuilder.AddSerilog(logger);
+        loggingBuilder.AddSerilog(logger);
+        return logger;
     }
 }

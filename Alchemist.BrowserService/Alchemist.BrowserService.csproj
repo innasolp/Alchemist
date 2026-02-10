@@ -7,18 +7,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
 		<PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0.5" />
 		<PackageReference Include="BrowserLauncher.Interfaces" Version="1.0.0.2" />
-		<PackageReference Include="Http.ErrorHandling" Version="1.0.0" />
-		<PackageReference Include="Http.Info" Version="1.0.0.1" />
 		<PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.5" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.8" />
-		<PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
+		<ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
 	</ItemGroup>
 
 
