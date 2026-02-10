@@ -1,10 +1,14 @@
 ﻿using Alchemist.Product.Data;
 using Autofac;
+using Mediator.Infrastructure.EF;
+using Mediator.Infrastructure.Events;
 using Mediator.Messages;
 using Mediator.Module.EF;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using ShopSettings.Infrastructure;
+using ShopSettings.Infrastructure.EF;
 using ShopSettings.UnitOfWork;
 using UnitOfWork;
 
@@ -19,8 +23,9 @@ public class ShopSettingsModule : MediatorModule
 
     protected override void RegisterTypes(ContainerBuilder builder)
     {
+        builder.RegisterType(typeof(AlchemyContext)).As(typeof(DbContext));
+
         builder.RegisterType(typeof(EFUnitOfWork<AlchemyContext>)).As(typeof(IUnitOfWork<IDbContextTransaction>));
-        builder.RegisterGeneric(typeof(ShopSettingsRepository<>)).As(typeof(IRepository<>));
         builder.RegisterType(typeof(ShopSettingsRepository)).As(typeof(IShopSettingsRepository));
 
         builder.RegisterType(typeof(SaveShopSettingsCommandHandler))
@@ -29,7 +34,7 @@ public class ShopSettingsModule : MediatorModule
             .As(typeof(IRequestHandler<SaveShopSettingsWithChildrenCommand, 
             (Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>)>));
 
-        builder.RegisterType(typeof(MessageEventHandler<CreateShopSettingsEvent, Alchemist.Product.Data.ShopSettings>))
-            .As(typeof(INotificationHandler<CreateShopSettingsEvent>));
+        builder.RegisterType(typeof(MessageEventHandler<CreationEvent<Alchemist.Product.Data.ShopSettings>, Alchemist.Product.Data.ShopSettings>))
+            .As(typeof(INotificationHandler<CreationEvent<Alchemist.Product.Data.ShopSettings>>));
     }
 }

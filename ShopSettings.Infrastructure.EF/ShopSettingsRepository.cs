@@ -1,25 +1,28 @@
 ﻿using Alchemist.Product.Data;
+using Mediator.Infrastructure.EF;
 using Microsoft.EntityFrameworkCore;
-using UnitOfWork;
+using ShopSettings.UnitOfWork;
 using ShopSettingType = Alchemist.Product.Data.ShopSettingType;
 
-namespace ShopSettings.UnitOfWork;
+namespace ShopSettings.Infrastructure.EF;
 
-public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alchemist.Product.Data.ShopSettings, AlchemyContext>(context), IShopSettingsRepository
+public sealed class ShopSettingsRepository(AlchemyContext context) : IShopSettingsRepository
 {
+    private readonly AlchemyContext _context = context;
+
     public Task<List<Alchemist.Product.Data.ShopSettings>> GetAllParentShopSettings(CancellationToken cancellationToken = default)
     {
-        return Context.ShopSettings.Where(s => s.ParentSettingsId == null).ToListAsync(cancellationToken);
+        return _context.ShopSettings.Where(s => s.ParentSettingsId == null).ToListAsync(cancellationToken);
     }
 
     public Task<List<Alchemist.Product.Data.ShopSettings>> GetChildSettings(int parentSettingsId, CancellationToken cancellationToken = default)
     {
-        return Context.ShopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToListAsync(cancellationToken);
+        return _context.ShopSettings.Where(s => s.ParentSettingsId == parentSettingsId).ToListAsync(cancellationToken);
     }
 
     public Task<Alchemist.Product.Data.ShopSettings?> GetShopSettingsByShopId(int shopId, ShopSettingType settingType, CancellationToken cancellationToken = default)
     {
-        return Context.ShopSettings.FirstOrDefaultAsync(s => s.ShopId == shopId && s.Type == settingType && s.IsActual != false, cancellationToken);
+        return _context.ShopSettings.FirstOrDefaultAsync(s => s.ShopId == shopId && s.Type == settingType && s.IsActual != false, cancellationToken);
     }
 
     public async Task<Alchemist.Product.Data.ShopSettings?> SaveShopSettings(Alchemist.Product.Data.ShopSettings shopSettings, CancellationToken cancellationToken = default)
@@ -33,7 +36,7 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
 
     private  Task<int> SetShopSettingsActuality(int shopId, ShopSettingType shopSettingType, int actualId, CancellationToken cancellationToken = default)
     {
-        return  Context.ShopSettings.Where(s => s.ShopId == shopId
+        return  _context.ShopSettings.Where(s => s.ShopId == shopId
             && s.Id != actualId
             && s.Type == shopSettingType && s.Type != ShopSettingType.Service
             && s.IsActual != false)
@@ -46,7 +49,7 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
     {
         shopSettings.IsActual = true;
 
-        var result = await Context.ShopSettings.Where(s => s.Id == shopSettings.Id)
+        var result = await _context.ShopSettings.Where(s => s.Id == shopSettings.Id)
            .ExecuteUpdateAsync(settings =>
                 settings.SetProperty(s => s.IsActual, s => shopSettings.IsActual)
                         .SetProperty(s => s.JsonValue, s => shopSettings.JsonValue)
@@ -59,7 +62,7 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
         if (result > 0)
             return shopSettings;
 
-        var added = await Context.Create(shopSettings, cancellationToken);       
+        var added = await _context.Create(shopSettings, cancellationToken);       
 
         return added;
     }
@@ -71,7 +74,7 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
 
         var shopSettings = await AddOrUpdateShopSettings(parentShopSettings, cancellationToken);
 
-        await Context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         var handledServices = new List<Alchemist.Product.Data.ShopSettings> ();
         foreach (var service in childrenSettings)
@@ -83,9 +86,4 @@ public class ShopSettingsRepository(AlchemyContext context) : EFRepository<Alche
 
         return (shopSettings, handledServices);
     }
-}
-
-public class ShopSettingsRepository<T>(AlchemyContext context) : EFRepository<T, AlchemyContext>(context)
-    where T : class
-{
 }

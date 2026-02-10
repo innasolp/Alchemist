@@ -1,4 +1,5 @@
 using Mediator.Infrastructure;
+using Mediator.Infrastructure.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore.Storage;
 using ShopSettings.UnitOfWork;
@@ -24,7 +25,8 @@ public sealed class SaveShopSettingsCommandHandler(IShopSettingsRepository repos
         await UnitOfWork.SaveChangesAsync(cancellationToken);
 
         if(shopSettingsId == 0)
-            await _eventPublisher.Publish(new CreateShopSettingsEvent(saved, DateTime.Now), cancellationToken);
+            await _eventPublisher.Publish(new CreationEvent<Alchemist.Product.Data.ShopSettings>(Messages.ShopSettingsCreated, saved, DateTime.Now),
+                cancellationToken);
 
         return saved;
     }

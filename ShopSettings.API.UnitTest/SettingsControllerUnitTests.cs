@@ -1,6 +1,7 @@
 using Alchemist.Product.Data;
 using Alchemist.Settings.RestAPI.Controllers;
 using Mediator.Infrastructure.Command;
+using Mediator.Infrastructure.Events;
 using Mediator.Infrastructure.Request;
 using MediatR;
 using Message.Interfaces;
@@ -178,7 +179,7 @@ public class SettingsControllerUnitTests
         var created = Assert.IsType<Created<Alchemist.Product.Data.ShopSettings>>(result.Result);
         Assert.Equal(saved.Id, created.Value.Id);
 
-        _publisherMock.Verify(p => p.Publish(It.Is<CreateShopSettingsEvent>(c => c.Entity == created.Value), It.IsAny<CancellationToken>()));
+        _publisherMock.Verify(p => p.Publish(It.Is<CreationEvent<Alchemist.Product.Data.ShopSettings>>(c => c.Entity == created.Value), It.IsAny<CancellationToken>()));
     }
 
     [Fact]
@@ -195,7 +196,7 @@ public class SettingsControllerUnitTests
         var accepted = Assert.IsType<Accepted<Alchemist.Product.Data.ShopSettings>>(result.Result);
         Assert.Equal(incoming.Id, accepted.Value.Id);
 
-        _publisherMock.Verify(p => p.Publish(It.Is<CreateShopSettingsEvent>(c => c.Entity == accepted.Value), It.IsAny<CancellationToken>()), Times.Never);
+        _publisherMock.Verify(p => p.Publish(It.Is<CreationEvent<Alchemist.Product.Data.ShopSettings>>(c => c.Entity == accepted.Value), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -250,7 +251,7 @@ public class SettingsControllerUnitTests
         Assert.Equal(2, services.Length);
         Assert.All(services, s => Assert.NotEqual(0, s.Id));
 
-        _publisherMock.Verify(p => p.Publish(It.Is<CreateShopSettingsEvent>(c => c.Entity == created.Value.ShopSettings), It.IsAny<CancellationToken>()));
+        _publisherMock.Verify(p => p.Publish(It.Is<CreationEvent<Alchemist.Product.Data.ShopSettings>>(c => c.Entity == created.Value.ShopSettings), It.IsAny<CancellationToken>()));
     }
 
     [Fact]
