@@ -11,20 +11,17 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\alchemygrpc.proto" GrpcServices="Server" />
-    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client" 
-			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
-    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client" 
-			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client" ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+    <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client" ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.30.2" />
-    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
-    <PackageReference Include="Grpc.Interception.Extensions" Version="1.0.0" />
-    <PackageReference Include="Grpc.Message.Extensions" Version="1.0.0" />
-    <PackageReference Include="Grpc.Server.Interceptors" Version="1.0.0.1" />
-    <PackageReference Include="Grpc.Server.RequestInterceptor" Version="1.0.0" />
-    <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.31.1" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
+    <PackageReference Include="GrpcExtensions.Aspnet.Interceptors" Version="1.0.0" />
+    <PackageReference Include="GrpcExtensions.Interception" Version="1.0.0" />
+    <PackageReference Include="GrpcExtensions.Message" Version="1.0.0" />
+    <PackageReference Include="Grpc.StatusProto" Version="2.76.0" />
     <PackageReference Include="Grpc.Tools" Version="2.76.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -38,6 +35,7 @@
     <PackageReference Include="Serilog.Loggers" Version="1.0.0.3" />
 	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+	  <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>

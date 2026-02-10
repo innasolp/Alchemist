@@ -1,12 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Shop.API.Controllers;
+﻿using Alchemist.Test.Log;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Shop.API.Test.Infrastructure;
 
 public class ShopAPILoggingWebAppFactory: ShopAPISignlRMockWebAppFactory
 {
-    public MiddlewareFixtureLogContext<ShopController> FixtureLoggingContext { get; }
-        = new MiddlewareFixtureLogContext<ShopController>();
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
     protected override void ConfigureServices(IServiceCollection services)
     {

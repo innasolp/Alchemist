@@ -117,6 +117,8 @@ public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutput
         var response = await httpClient.GetAsync($"api/Settings/byId/1");
         response.EnsureSuccessStatusCode();
 
-        Assert.Contains(LogMessages, m => m.LogLevel == LogLevel.Information && m.Message.Contains("api/Settings/byId/1"));
+        Assert.Contains(LogMessages, m => m.LogLevel == LogLevel.Information
+        && m.CategoryName == "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware"
+        && m.Message.Contains("api/Settings/byId/1"));
     }    
 }

@@ -9,7 +9,6 @@ using Alchemist.WebApp.Api.Common;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
-using Http.Info;
 using Serilog;
 using ShopSettings.Interfaces;
 using System.Text.Json.Serialization;
@@ -43,7 +42,7 @@ if (isApi)
 }
 
 if (isApi)
-    builder.Services.AddBaseControllerInterceptors<ImportSettingsApiController>();
+    builder.Services.AddBaseControllerInterceptors();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddJsonOptions(options =>
@@ -60,8 +59,8 @@ builder.Services.Configure<RouteOptions>(options =>
     options.ConstraintMap.Add("shopSettingType", typeof(EnumRouteConstraint<ShopSettingType>)); 
 });
 
-
-AddLogging(builder.Configuration, builder.Logging, isApi);
+var logger = AddLogging(builder.Configuration, builder.Logging, isApi);
+builder.Host.UseSerilog(logger);
 
 var app = builder.Build();
 
@@ -76,7 +75,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 else if (isApi)
-    app.UseBaseInterceptors<ImportSettingsApiController>();
+    app.UseBaseInterceptors();
 
 if (isApi)
     app.UseApiSwagger();
@@ -97,9 +96,11 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.UseSerilogRequestLogging();
+
 app.Run();
 
-static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, bool isApi)
+static Serilog.ILogger AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, bool isApi)
 {
     var logPath = $"{Utils.GetAppPath()}/Logs";
     var logContextFile = "log.property.json";
@@ -109,10 +110,10 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
     if (isApi)
     {
-        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}/Http", "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware");
+        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}/Http", nameof(GlobalExceptionHandler));
     }
-    loggerConfiguration.SetSerilog(loggingBuilder);
+    return loggerConfiguration.SetSerilog(loggingBuilder);
 }
 
 public class ImportSettingsWebAppProgramm

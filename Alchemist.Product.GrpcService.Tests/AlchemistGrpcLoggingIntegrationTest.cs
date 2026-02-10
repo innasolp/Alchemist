@@ -43,7 +43,7 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
 
         Assert.Equal(1, _messages.Count(m=>
             m.logLevel == LogLevel.Information
-            && m.message.Contains("success")
+            && m.message.Contains("HttpStatusCode: 200")
             && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
     }
 

@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release</Configurations>
+	  <InvariantGlobalization>true</InvariantGlobalization>
+	  <IncludeHttpRuleProtos>true</IncludeHttpRuleProtos>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +21,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
 	<PackageReference Include="Grpc.Message.Extensions" Version="1.0.0" />
 	<PackageReference Include="Mapster" Version="7.4.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="9.0.12" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +32,10 @@
     <Protobuf Include="..\Alchemist.Product.GrpcService\Protos\alchemygrpc.proto" GrpcServices="Client">
       <Link>Protos\Alchemist.proto</Link>
     </Protobuf>
+	  <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client"
+			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+	  <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client"
+				ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
   </ItemGroup>
 
 </Project>

@@ -1,14 +1,11 @@
-using Alchemist.BrowserService.Controllers;
 using Alchemist.Common;
 using Alchemist.Log.Extensions;
 using BrowserDataLoader.Interfaces;
 using BrowserLauncher.Interfaces;
 using DependencyInjection.AssemblyExtensions;
-using Http.ErrorHandling;
-using Http.Info;
-using Microsoft.OpenApi;
 using Serilog;
-using Swashbuckle.AspNetCore.Swagger;
+using Alchemist.WebApp.Api.Common;
+using Http.ErrorHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,46 +18,34 @@ builder.Services.AddControllers();
 builder.Services.AddAuthentication("https");
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.Configure<SwaggerOptions>(options =>
-{
-    options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
-});
+builder.Services.AddSwaggerApi();
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler<BrowserServiceController>>();
-builder.Services.AddSingleton<InfoLogMiddleware<BrowserServiceController>>();
-builder.Services.AddProblemDetails();
+builder.Services.AddBaseControllerInterceptors();
 
-AddLogging(builder.Configuration, builder.Logging);
+var logger = AddLogging(builder.Configuration, builder.Logging);
+builder.Host.UseSerilog(logger);
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
-app.UseMiddleware<InfoLogMiddleware<BrowserServiceController>>();
+app.UseBaseInterceptors();
 
 app.UseAuthentication();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHsts();
+    app.UseApiSwagger();
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseSerilogRequestLogging();
 
-app.MapGet("/", () => "Hello BrowserService!");
+app.SetApiRoute("Hello BrowserService!");
 
 app.Run();
 
-static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
+static Serilog.ILogger AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder)
 {
     var logPath = $"{Utils.GetAppPath()}/Logs";
     var logContextFile = "log.property.json";
@@ -69,10 +54,10 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
-    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}/Http", "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware");
+    loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}/Http", nameof(GlobalExceptionHandler));
 
-    loggerConfiguration.SetSerilog(loggingBuilder);
+    return loggerConfiguration.SetSerilog(loggingBuilder);
 }
 
 public class BrowserServiceProgramm { }

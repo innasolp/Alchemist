@@ -11,13 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Http.ErrorHandling" Version="1.0.0.2" />
-    <PackageReference Include="Http.Info" Version="1.0.0.2" />
     <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.4" />
     <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 	<PackageReference Include="MediatR" Version="14.0.0" />
 	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
   </ItemGroup>
@@ -27,6 +25,7 @@
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
     <ProjectReference Include="..\Shop.Module\Shop.Module.csproj" />
   </ItemGroup>
 

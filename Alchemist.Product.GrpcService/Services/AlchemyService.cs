@@ -2,12 +2,12 @@
 using Alchemist.Product.Infrastructure;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Grpc.Interception.Extensions;
-using Grpc.Message.Extensions;
 using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Request;
 using MediatR;
 using Mapster;
+using GrpcExtensions.Interception;
+using GrpcExtensions.Message;
 
 namespace Alchemist.Product.GrpcService.Services;
 
@@ -193,7 +193,6 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"Country with name '{request.Name}' not found"));  
         
         return  await Task.FromResult(new CountryReply { Id = country.Id, Name = country.Name });
-
     }
 
     public override async Task<ProductReply> FindProductByName(FindByNameRequest request, ServerCallContext context)
@@ -244,13 +243,13 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         return  await Task.FromResult(new PurposeTypeReply { Id = purposeType.Id, Name = purposeType.Name });
     }
 
-    public override async Task<ShopProductReply> GetShopProductByShopAndApiUrl(GetShopProductByShopAndApiUrlRequest request, ServerCallContext context)
+    public override async Task<ShopProductReply> GetShopProductByShopIdAndApiUrl(GetShopProductByShopIdAndApiUrlRequest request, ServerCallContext context)
     {
         if (string.IsNullOrEmpty(request.Apiurl))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndApiUrlRequest.Apiurl));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndApiUrlRequest.Apiurl));
 
         if (request.Shopid <= 0)
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndApiUrlRequest.Shopid), "Invalid value");
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndApiUrlRequest.Shopid), "Invalid value");
 
         var shopProduct = await _mediator.Send(new GetShopProductByShopAndItemUrlRequest(request.Shopid, request.Apiurl), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
@@ -259,30 +258,30 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
         return await Task.FromResult(reply);
     }
     
-    public override async Task<ShopProductReply> GetShopProductByShopAndItemId(GetShopProductByShopAndItemIdRequest request, ServerCallContext context)
+    public override async Task<ShopProductReply> GetShopProductByShopIdAndItemId(GetShopProductByShopIdAndItemIdRequest request, ServerCallContext context)
     {
         if (request.Shopid <= 0)
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndItemIdRequest.Shopid), "Invalid value");
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndItemIdRequest.Shopid), "Invalid value");
 
         if (string.IsNullOrEmpty(request.Itemid))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndItemIdRequest.Itemid));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndItemIdRequest.Itemid));
 
-        var shopProduct = await _mediator.Send(new Infrastructure.GetShopProductByShopAndItemIdRequest(request.Shopid, request.Itemid), context.CancellationToken)
+        var shopProduct = await _mediator.Send(new GetShopProductByShopAndItemIdRequest(request.Shopid, request.Itemid), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
         var reply = shopProduct.Adapt<ShopProductReply>();
         reply.Id = shopProduct.Id;
         return await Task.FromResult(reply);
     }
 
-    public override async Task<ShopProductReply> GetShopProductByShopAndProductId(GetShopProductByShopAndProductIdRequest request, ServerCallContext context)
+    public override async Task<ShopProductReply> GetShopProductByShopIdAndProductId(GetShopProductByShopIdAndProductIdRequest request, ServerCallContext context)
     {
         if (request.Shopid <= 0)
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndProductIdRequest.Shopid), "InvalidValue");
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndProductIdRequest.Shopid), "InvalidValue");
 
         if (request.Productid <= 0)
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopAndProductIdRequest.Productid), "InvalidValue");
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndProductIdRequest.Productid), "InvalidValue");
 
-        var shopProduct = await _mediator.Send(new Infrastructure.GetShopProductByShopAndProductIdRequest(request.Shopid, request.Productid), context.CancellationToken)
+        var shopProduct = await _mediator.Send(new GetShopProductByShopAndProductIdRequest(request.Shopid, request.Productid), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
         var reply = shopProduct.Adapt<ShopProductReply>();
         reply.Id = shopProduct.Id;

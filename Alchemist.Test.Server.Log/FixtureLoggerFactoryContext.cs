@@ -15,9 +15,9 @@ public class FixtureLoggerFactoryContext : FixtureLogContext, IDisposable
 
     public override void ConfigureServices(IServiceCollection services)
     {
-        var loggerFactoryService = services.SingleOrDefault(s => s.ServiceType == typeof(ILoggerFactory));
-        if (loggerFactoryService != null)
-            services.Remove(loggerFactoryService);
+        var loggerFactoryServices = services.Where(s => s.ServiceType == typeof(ILoggerFactory)).ToList();
+        if (loggerFactoryServices.Count > 0)
+            loggerFactoryServices.ForEach(s=>services.Remove(s));            
 
         services.AddSingleton<ILoggerFactory>(LoggerFactory);
     }    
