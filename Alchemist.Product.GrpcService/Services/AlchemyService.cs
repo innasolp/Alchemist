@@ -18,7 +18,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
     public override async Task<ProductTypeReply> CreateProductType(CreateProductTypeRequest request, ServerCallContext context)
     {
         if (string.IsNullOrEmpty(request.Name))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductTypeRequest.Name));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductTypeRequest.Name), "Value is null or empty");
 
         var productType = new ProductType { Name = request.Name };
         var newProductType = await _mediator.Send(new CreateCommand<ProductType>(productType), context.CancellationToken);
@@ -29,7 +29,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
     public override async Task<PurposeTypeReply> CreatePurposeType(CreatePurposeTypeRequest request, ServerCallContext context)
     {
         if (string.IsNullOrEmpty(request.Name))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreatePurposeTypeRequest.Name));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreatePurposeTypeRequest.Name), "Value is null or empty");
 
         var purposeType = new PurposeType { Name = request.Name };
         var newPurposeType = await _mediator.Send(new CreateCommand<PurposeType>(purposeType), context.CancellationToken);
@@ -51,7 +51,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
     public override async Task<BrandReply> CreateBrand(CreateBrandRequest request, ServerCallContext context)
     {
         if (string.IsNullOrEmpty(request.Name))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateBrandRequest.Name));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateBrandRequest.Name), "Value is null or empty");
 
         if (request.Countryid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateBrandRequest.Countryid), "Invalid value");
@@ -65,7 +65,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
     public override async Task<ComponentReply> CreateComponent(CreateComponentRequest request, ServerCallContext context)
     {
         if (string.IsNullOrEmpty(request.Name))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateComponentRequest.Name));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateComponentRequest.Name), "Value is null or empty");
 
         var component = request.Adapt<Component>();
         var entity = await _mediator.Send(new CreateCommand<Component>(component), context.CancellationToken);
@@ -89,7 +89,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
     public override async Task<ProductReply> CreateProduct(CreateProductRequest request, ServerCallContext context)
     {
         if (string.IsNullOrEmpty(request.Name))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductRequest.Name));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductRequest.Name), "Value is null or empty");
         
         if (request.Producttypeid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(CreateProductRequest.Producttypeid), "InvalidValue");
@@ -246,7 +246,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
     public override async Task<ShopProductReply> GetShopProductByShopIdAndApiUrl(GetShopProductByShopIdAndApiUrlRequest request, ServerCallContext context)
     {
         if (string.IsNullOrEmpty(request.Apiurl))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndApiUrlRequest.Apiurl));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndApiUrlRequest.Apiurl), "Value is null or empty");
 
         if (request.Shopid <= 0)
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndApiUrlRequest.Shopid), "Invalid value");
@@ -264,7 +264,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
             throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndItemIdRequest.Shopid), "Invalid value");
 
         if (string.IsNullOrEmpty(request.Itemid))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndItemIdRequest.Itemid));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(GetShopProductByShopIdAndItemIdRequest.Itemid), "Value is null or empty");
 
         var shopProduct = await _mediator.Send(new GetShopProductByShopAndItemIdRequest(request.Shopid, request.Itemid), context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "ShopProduct not found"));
@@ -314,10 +314,10 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
             throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductRequest.Shopid), "Invalid value");
 
         if (string.IsNullOrEmpty(request.Itemid))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductRequest.Itemid));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductRequest.Itemid), "Value is null or empty");
         
         if (string.IsNullOrEmpty(request.Apiurl))
-            throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductRequest.Apiurl));
+            throw GrpcStatuses.GetBadRequestRpcException(nameof(UpdateShopProductRequest.Apiurl), "Value is null or empty");
 
         var shopProduct = request.Adapt<ShopProduct>();
         shopProduct.Id = request.Id;
