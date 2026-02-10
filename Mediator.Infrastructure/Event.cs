@@ -1,12 +1,19 @@
-﻿namespace Mediator.Messages;
+﻿namespace Mediator.Infrastructure;
 
-public class Event<T>(string eventName, T entity, DateTime creationDate) : IEvent, IEventMessage
+public class Event<T>() : IEvent, IEventMessage
 {
-    public T Entity { get; } = entity;
+    public T Entity { get; init; }
 
-    public DateTime CreationDate { get; } = creationDate;
+    public DateTime CreationDate { get; init; }
 
-    public string EventName { get; } = eventName;
+    public string EventName { get; init; }
+
+    public Event(string eventName, T entity, DateTime creationDate) : this()
+    {
+        Entity = entity;
+        CreationDate = creationDate;
+        EventName = eventName;
+    }
 
     protected internal virtual (string, object?[]) GetSuccessEventMessage()
     {

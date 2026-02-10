@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using UnitOfWork;
 
-
-namespace UnitOfWork;
+namespace Mediator.Infrastructure.EF;
 
 public static class DbContextExtensions
 {

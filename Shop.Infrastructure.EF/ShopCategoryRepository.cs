@@ -1,12 +1,13 @@
 ﻿using Alchemist.Product.Data;
 using Microsoft.EntityFrameworkCore;
-using UnitOfWork;
 
-namespace Shop.UnitOfWork;
+namespace Shop.Infrastructure.EF;
 
-public class ShopCategoryRepository(AlchemyContext context) : EFRepository<ShopCategory, AlchemyContext>(context), IShopCategoryRepository
+public class ShopCategoryRepository(AlchemyContext context) : IShopCategoryRepository
 {
     private readonly SemaphoreSlim _addCategoryChildrenSemaphore = new(1, 1);
+
+    private AlchemyContext Context { get; } = context;
 
     public async Task<List<ShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default)
     {

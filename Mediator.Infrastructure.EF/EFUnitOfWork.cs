@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using UnitOfWork;
 
-namespace UnitOfWork;
+namespace Mediator.Infrastructure.EF;
 
 public class EFUnitOfWork<TDbContext>(TDbContext dbContext) : IUnitOfWork<IDbContextTransaction>
     where TDbContext : DbContext

@@ -1,5 +1,7 @@
 using Alchemist.Product.Data;
+using Mediator.Infrastructure;
 using Mediator.Infrastructure.Command;
+using Mediator.Infrastructure.Events;
 using Mediator.Infrastructure.Request;
 using MediatR;
 using Message.Interfaces;
@@ -11,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Shop.API.Controllers;
 using Shop.Infrastructure;
-using Shop.UnitOfWork;
 using UnitOfWork;
 
 namespace Shop.Api.UnitTest;
@@ -22,6 +23,7 @@ public class ShopCategoryControllerTests
     private readonly Mock<IMediator> _mediator = new();
     private readonly Mock<IMessageSender> _messageSender = new();
     private readonly Mock<IShopCategoryRepository> _categoryRepository = new();
+    private readonly Mock<IRepository<ShopCategory>> _repository = new();
 
     private readonly ShopCategoryController _controller;
 
@@ -32,16 +34,16 @@ public class ShopCategoryControllerTests
 
         // Common mediator setups moved to ctor for ShopCategory:
         _mediator.Setup(m => m.Send(It.IsAny<UpdateCommand<ShopCategory>>(), It.IsAny<CancellationToken>()))
-                 .Returns((UpdateCommand<ShopCategory> req, CancellationToken ct) => _categoryRepository.Object.Update(req.Entity, ct));
+                 .Returns((UpdateCommand<ShopCategory> req, CancellationToken ct) => _repository.Object.Update(req.Entity, ct));
 
         _mediator.Setup(m => m.Send(It.IsAny<FindByNameRequest<ShopCategory>>(), It.IsAny<CancellationToken>()))
-                 .Returns((FindByNameRequest<ShopCategory> req, CancellationToken ct) => _categoryRepository.Object.FindByName(req.GetName, req.Name, ct));
+                 .Returns((FindByNameRequest<ShopCategory> req, CancellationToken ct) => _repository.Object.FindByName(req.GetName, req.Name, ct));
 
         _mediator.Setup(m => m.Send(It.IsAny<GetAllRequest<ShopCategory>>(), It.IsAny<CancellationToken>()))
-                 .Returns((GetAllRequest<ShopCategory> req, CancellationToken ct) => _categoryRepository.Object.GetAll(ct));
+                 .Returns((GetAllRequest<ShopCategory> req, CancellationToken ct) => _repository.Object.GetAll(ct));
 
         _mediator.Setup(m => m.Send(It.IsAny<GetByIdRequest<int, ShopCategory>>(), It.IsAny<CancellationToken>()))
-                 .Returns((GetByIdRequest<int, ShopCategory> req, CancellationToken ct) => _categoryRepository.Object.GetById<int>(req.Id, ct));
+                 .Returns((GetByIdRequest<int, ShopCategory> req, CancellationToken ct) => _repository.Object.GetById<int>(req.Id, ct));
 
         _controller = new ShopCategoryController(_logger, _mediator.Object)
         {
@@ -73,9 +75,18 @@ public class ShopCategoryControllerTests
         var publisherMock = new Mock<IPublisher>();
         var unitOfWorkMock = new Mock<IUnitOfWork<IDbContextTransaction>>();
 
-        var createShopCategoryCommandHandler = new CreateShopCategoryCommandHandler(_categoryRepository.Object, unitOfWorkMock.Object, publisherMock.Object);
+        var createCommandHandlerMock = new Mock<ICreateCommandHandler<ShopCategory>>();
+        createCommandHandlerMock.Setup(s => s.Handle(It.IsAny<CreateCommand<ShopCategory>>(), It.IsAny<CancellationToken>()))
+            .Returns(async (CreateCommand<ShopCategory> cmd, CancellationToken token) =>
+            {
+                return await _repository.Object.Create(cmd.Entity, token);
+            });
 
-        _categoryRepository.Setup(r => r.Create(It.IsAny<ShopCategory>(), It.IsAny<CancellationToken>())).ReturnsAsync(created);
+        var createShopCategoryCommandHandler = new CreateEventedCommandHandler<ShopCategory>(createCommandHandlerMock.Object, 
+            publisherMock.Object,
+            Messages.CategoryAdded);
+
+        _repository.Setup(r => r.Create(It.IsAny<ShopCategory>(), It.IsAny<CancellationToken>())).ReturnsAsync(created);
 
         _mediator.Setup(m => m.Send(It.IsAny<CreateCommand<ShopCategory>>(), It.IsAny<CancellationToken>()))
                  .Returns((CreateCommand<ShopCategory> req, CancellationToken ct) => createShopCategoryCommandHandler.Handle(req, ct));
@@ -84,7 +95,7 @@ public class ShopCategoryControllerTests
         var cr = Assert.IsType<Created<ShopCategory>>(result.Result);
         Assert.Equal(created.Id, cr.Value.Id);
 
-        publisherMock.Verify(p => p.Publish(It.Is<CreateShopCategoryEvent>(c => c.Entity == cr.Value), It.IsAny<CancellationToken>()));
+        publisherMock.Verify(p => p.Publish(It.Is<CreationEvent<ShopCategory>>(c => c.Entity == cr.Value), It.IsAny<CancellationToken>()));
     }
 
     [Fact]

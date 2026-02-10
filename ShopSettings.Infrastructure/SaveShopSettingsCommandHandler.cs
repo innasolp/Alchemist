@@ -16,7 +16,7 @@ public sealed class SaveShopSettingsCommandHandler(IShopSettingsRepository repos
 
     private readonly IPublisher _eventPublisher = eventPublisher;
 
-    protected override async Task<Alchemist.Product.Data.ShopSettings> HandlerRequest(SaveShopSettingsCommand request, CancellationToken cancellationToken = default)
+    protected override async Task<Alchemist.Product.Data.ShopSettings> HandleCommand(SaveShopSettingsCommand request, CancellationToken cancellationToken = default)
     {
         var shopSettingsId = request.ShopSettings.Id;
 

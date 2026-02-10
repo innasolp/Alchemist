@@ -1,9 +1,8 @@
 ﻿using Alchemist.Product.Data;
-using UnitOfWork;
 
-namespace Shop.UnitOfWork;
+namespace Shop.Infrastructure;
 
-public interface IShopCategoryRepository : IRepository<ShopCategory>
+public interface IShopCategoryRepository
 {
     Task<List<ShopCategory>> GetShopCategories(int shopId, CancellationToken cancellationToken = default);
 

@@ -16,7 +16,7 @@ public sealed class SaveShopSettingsWithChildrenCommandHandler(IShopSettingsRepo
     private readonly IPublisher _eventPublisher = eventPublisher;
 
     protected override async Task<(Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>)>
-        HandlerRequest(SaveShopSettingsWithChildrenCommand request, CancellationToken cancellationToken)
+        HandleCommand(SaveShopSettingsWithChildrenCommand request, CancellationToken cancellationToken)
     {
         var shopSettingsId = request.ParentShopSettings.Id;
 

@@ -1,4 +1,4 @@
-﻿using Mediator.Messages.Events;
+﻿using Mediator.Infrastructure.Events;
 
 namespace ShopSettings.Infrastructure;
 

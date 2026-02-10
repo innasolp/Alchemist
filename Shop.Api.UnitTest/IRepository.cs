@@ -1,4 +1,4 @@
-﻿namespace UnitOfWork;
+﻿namespace Shop.Api.UnitTest;
 
 public interface IRepository<T>
 {

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Mediator.Infrastructure;
+using MediatR;
 using Message.Interfaces;
 
 namespace Mediator.Messages;

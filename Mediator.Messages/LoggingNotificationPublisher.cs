@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Mediator.Infrastructure;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Mediator.Messages;
