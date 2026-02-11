@@ -1,9 +1,8 @@
 ﻿using Alchemist.Product.Data;
-using UnitOfWork;
 
-namespace Alchemist.Product.UnitOfWork.Interfaces;
+namespace Alchemist.Product.Infrastructure.Interfaces;
 
-public interface IProductComponentRepository : IRepository<ProductComponent>
+public interface IProductComponentRepository
 {
     Task<ProductComponent> SetProductComponent(ProductComponent productComponent, CancellationToken cancellationToken = default);
 }

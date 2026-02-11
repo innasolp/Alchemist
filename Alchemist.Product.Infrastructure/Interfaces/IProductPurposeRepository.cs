@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Data;
 
-namespace Alchemist.Product.UnitOfWork.Interfaces;
+namespace Alchemist.Product.Infrastructure.Interfaces;
 
 public interface IProductPurposeRepository
 {

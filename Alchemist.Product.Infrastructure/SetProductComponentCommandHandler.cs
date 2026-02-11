@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.UnitOfWork.Interfaces;
+using Alchemist.Product.Infrastructure.Interfaces;
 using Mediator.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using UnitOfWork;

@@ -1,9 +1,8 @@
 ﻿using Alchemist.Product.Data;
-using UnitOfWork;
 
-namespace Alchemist.Product.UnitOfWork.Interfaces;
+namespace Alchemist.Product.Infrastructure.Interfaces;
 
-public interface IShopProductCategoryRepository : IRepository<ShopProductCategory>
+public interface IShopProductCategoryRepository 
 {
     Task<ShopProductCategory> AddShopProductCategory(long shopProductId, int shopCategoryId, CancellationToken cancellationToken = default);
 

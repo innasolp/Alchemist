@@ -28,9 +28,9 @@ public class ShopSettingsModule : MediatorModule
         builder.RegisterType(typeof(EFUnitOfWork<AlchemyContext>)).As(typeof(IUnitOfWork<IDbContextTransaction>));
         builder.RegisterType(typeof(ShopSettingsRepository)).As(typeof(IShopSettingsRepository));
 
-        builder.RegisterType(typeof(SaveShopSettingsCommandHandler))
+        builder.RegisterType(typeof(SaveShopSettingsCommandHandler<IDbContextTransaction>))
             .As(typeof(IRequestHandler<SaveShopSettingsCommand, Alchemist.Product.Data.ShopSettings>));
-        builder.RegisterType(typeof(SaveShopSettingsWithChildrenCommandHandler))
+        builder.RegisterType(typeof(SaveShopSettingsWithChildrenCommandHandler<IDbContextTransaction>))
             .As(typeof(IRequestHandler<SaveShopSettingsWithChildrenCommand, 
             (Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>)>));
 

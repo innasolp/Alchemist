@@ -1,4 +1,4 @@
-﻿namespace UnitOfWork;
+﻿namespace Mediator.Infrastructure;
 
 public class EntityWarningException : Exception
 {

@@ -26,8 +26,6 @@ public abstract class MediatorModule : Autofac.Module
     {
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterGenericHandlers = true;
-
             ConfigureMediator(cfg);
         });
     }

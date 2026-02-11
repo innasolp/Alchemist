@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Infrastructure\Alchemist.Product.Infrastructure.csproj" />
+    <ProjectReference Include="..\Mediator.Infrastructure.EF\Mediator.Infrastructure.EF.csproj" />
   </ItemGroup>
 
 </Project>

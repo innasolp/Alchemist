@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.UnitOfWork.Interfaces;
+using Alchemist.Product.Infrastructure.Interfaces;
 using MediatR;
 
 namespace Alchemist.Product.Infrastructure;

@@ -1,9 +1,8 @@
 ﻿using Alchemist.Product.Data;
-using UnitOfWork;
 
-namespace Alchemist.Product.UnitOfWork.Interfaces;
+namespace Alchemist.Product.Infrastructure.Interfaces;
 
-public interface IShopProductPriceRepository : IRepository<ShopProductPrice>
+public interface IShopProductPriceRepository
 {
     Task<ShopProductPrice?> GetShopProductPrice(long shopProductId, CancellationToken cancellationToken = default);
 }

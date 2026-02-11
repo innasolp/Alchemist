@@ -1,16 +1,15 @@
 using Mediator.Infrastructure;
 using Mediator.Infrastructure.Events;
 using MediatR;
-using Microsoft.EntityFrameworkCore.Storage;
 using ShopSettings.UnitOfWork;
 using UnitOfWork;
 
 namespace ShopSettings.Infrastructure;
 
-public sealed class SaveShopSettingsWithChildrenCommandHandler(IShopSettingsRepository repository,
-    IUnitOfWork<IDbContextTransaction> unitOfWork,
+public sealed class SaveShopSettingsWithChildrenCommandHandler<TTransaction>(IShopSettingsRepository repository,
+    IUnitOfWork<TTransaction> unitOfWork,
     IPublisher eventPublisher)
-    : TransactionCommandHandler<(Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>), SaveShopSettingsWithChildrenCommand, IDbContextTransaction, IUnitOfWork<IDbContextTransaction>>(unitOfWork)
+    : TransactionCommandHandler<(Alchemist.Product.Data.ShopSettings, IEnumerable<Alchemist.Product.Data.ShopSettings>), SaveShopSettingsWithChildrenCommand, TTransaction, IUnitOfWork<TTransaction>>(unitOfWork)
 {
     private readonly IShopSettingsRepository _repository = repository;
 

@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Data;
+using Mediator.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using UnitOfWork;
 
 namespace Shop.Infrastructure.EF;
 

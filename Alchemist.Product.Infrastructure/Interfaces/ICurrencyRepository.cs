@@ -1,9 +1,8 @@
 ﻿using Alchemist.Product.Data;
-using UnitOfWork;
 
-namespace Alchemist.Product.UnitOfWork.Interfaces;
+namespace Alchemist.Product.Infrastructure.Interfaces;
 
-public interface ICurrencyRepository : IRepository<Currency>
+public interface ICurrencyRepository
 {
     Task<Currency?> GetCurrencyByCode(short code, CancellationToken cancellationToken = default);
 }
