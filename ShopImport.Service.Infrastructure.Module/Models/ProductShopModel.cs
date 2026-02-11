@@ -2,7 +2,7 @@
 using Alchemist.Import.Settings.Product;
 using System.Collections.ObjectModel;
 
-namespace Import.Service.Commands.Models;
+namespace ShopImport.Service.Infrastructure.Module.Models;
 
 interface IProductShopModel : IShopModel, IProductShopSource { }
 

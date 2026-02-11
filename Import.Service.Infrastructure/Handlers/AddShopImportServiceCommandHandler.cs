@@ -2,14 +2,14 @@
 
 namespace Import.Service.Commands.Handlers;
 
-internal sealed class AddShopImportServiceCommandHandler(IServiceRepository serviceRepository, 
+public sealed class AddShopImportServiceCommandHandler(IServiceRepository serviceRepository, 
     IPublisher publisher) 
-    : IRequestHandler<AddShopImportServiceCommand, Guid>
+    : IRequestHandler<AddImportServiceCommand, Guid>
 {
     private readonly IServiceRepository _serviceRepository = serviceRepository;
     private readonly IPublisher _publisher = publisher;
 
-    public async Task<Guid> Handle(AddShopImportServiceCommand request, CancellationToken cancellationToken = default)
+    public async Task<Guid> Handle(AddImportServiceCommand request, CancellationToken cancellationToken = default)
     {
         var (guid, service) = await _serviceRepository.AddImportService(request.Name, request.ImportSettings, cancellationToken);
 

@@ -1,7 +1,7 @@
-﻿using Alchemist.DependencyInjection.Common;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using BackgroundTaskQueue;
+using Import.Service.Commands;
 using Import.Service.Commands.Handlers;
 using Mediator.Messages;
 using MediatR;
@@ -9,7 +9,7 @@ using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Import.Service.Commands;
+namespace ShopImport.Service.Infrastructure.Module;
 
 public static class MediatrExtensions
 {
@@ -17,7 +17,7 @@ public static class MediatrExtensions
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
-            services.AddSingleton<IServiceRepository, ShopImportServiceRepository>();
+            services.AddSingleton<IShopImportServiceRepository, ShopImportServiceRepository>();
             services.AddMediatR(cfg =>
             {
                 cfg.RegisterGenericHandlers = true;
@@ -29,6 +29,7 @@ public static class MediatrExtensions
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
         return hostBuilder.ConfigureContainer<ContainerBuilder>((builderContext, builder) =>
         {
+            builder.Register(c=>c.Resolve(typeof(IShopImportServiceRepository))).As(typeof(IServiceRepository));
             builder.Register(c => c.ResolveKeyed<IBackgroundTaskQueue>(ServiceKeys.EventBackgroundTaskQueue)).As<IBackgroundTaskQueue>();
             builder.Register(c => c.ResolveKeyed<IMessageSender>(ServiceKeys.EventMessageSenderKey)).As<IMessageSender>();
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));

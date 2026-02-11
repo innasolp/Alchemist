@@ -13,9 +13,6 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
 
     public async Task Handle(StartServiceCommand request, CancellationToken cancellationToken)
     {
-        if (!_serviceRepository.Services.TryGetValue(request.Guid, out var serviceItem))
-            throw new InvalidOperationException($"Service with id {request.Guid} not found.");
-
         async Task serviceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs)
         {
             if (sender is not IImportService service) return;
@@ -30,19 +27,21 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
             }
         }
 
-        serviceItem.Service.ConnectedAsync += serviceConnectedAsync;
-
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, serviceItem.InnerTokenSource.Token);
+        IImportService? service = null;
 
         try
         {
-            await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, serviceItem.Service.Name)), cancellationToken);
+            (service, var startTask) = _serviceRepository.StartServiceTask(request.Guid, cancellationToken);
+            using(startTask)
+            service.ConnectedAsync += serviceConnectedAsync;
 
-            await serviceItem.Service.Start(linkedCts.Token);
+            await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);            
+            
+            await startTask;
         }
         catch
         {
-            serviceItem.Service.ConnectedAsync -= serviceConnectedAsync;
+            if(service != null) service.ConnectedAsync -= serviceConnectedAsync;
 
             throw;
         }

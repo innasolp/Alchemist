@@ -18,9 +18,9 @@ public sealed class SaveShopSettingsCommandHandler<TTransaction>(IShopSettingsRe
 
     protected override async Task<Alchemist.Product.Data.ShopSettings> HandleCommand(SaveShopSettingsCommand request, CancellationToken cancellationToken = default)
     {
-        var shopSettingsId = request.ShopSettings.Id;
+        var shopSettingsId = request.Entity.Id;
 
-        var saved = await _repository.SaveShopSettings(request.ShopSettings, cancellationToken)!;
+        var saved = await _repository.SaveShopSettings(request.Entity, cancellationToken)!;
         await UnitOfWork.SaveChangesAsync(cancellationToken);
 
         if(shopSettingsId == 0)

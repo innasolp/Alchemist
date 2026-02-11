@@ -5,7 +5,7 @@ namespace Mediator.Infrastructure;
 
 public class EventedCommandHandler<T, TCommand, TEvent, TCommandHandler>(TCommandHandler handler, IPublisher eventPublisher, string eventName)
     : IRequestHandler<TCommand, T>
-     where TCommand : IRequest<T>
+     where TCommand : Command<T>
     where TEvent : Event<T>, new()
     where TCommandHandler : ICommandHandler<TCommand, T>
 {

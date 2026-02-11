@@ -5,10 +5,12 @@ namespace Import.Service.Commands;
 
 public interface IServiceRepository
 {
-    IReadOnlyDictionary<Guid, ServiceItem> Services { get; }
-
-    IReadOnlyList<IImportSource> ShopModels { get; }
-
     Task<(Guid guid, IImportService service)> AddImportService(string name, IImportSettings importSettings, 
         CancellationToken cancellationToken = default);
+
+    (IImportService service,Task startTask) StartServiceTask(Guid guid, CancellationToken cancellationToken);
+
+    IEnumerable<(Guid guid, IImportService service, Task stopTask)> StopAllServicesTask(CancellationToken cancellationToken = default);
+
+    (IImportService service, Task startTask) StopServiceTask(Guid guid, CancellationToken cancellationToken);
 }

@@ -44,8 +44,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
 
         WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;        
 
-        var categoryMessage = new CategoryData.CategoryData();
-        FillTestCategoryData(categoryMessage);
+        var categoryMessage = CreateTestCategoryData();
 
         var shop = new Data.Shop { Id = 1, Name = categoryMessage.ShopName, Url = categoryMessage.ShopUrl };
 
@@ -102,8 +101,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
         WebAppFactory.GrpcWebAppFactory.ConfigureServices += setTestRepository;
         WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;
 
-        var productData = new BeautyAndHealthProductData();
-        FillTestProductData(productData);
+        var productData = CreateTestProductData();
 
         var shop = new Data.Shop { Id = 1, Name = productData.ShopName, Url = productData.ShopUrl };
 
@@ -159,35 +157,43 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
         return autoResetEvent;
     }
 
-    private static void FillTestProductData(BeautyAndHealthProductData productData)
+    private static BeautyAndHealthProductData CreateTestProductData()
     {
-        productData.Product = new Entities.Product {
-            Name = $"Product_{Guid.NewGuid()}",
-            Articul = Guid.NewGuid().ToString()
-        };
-
-        productData.ShopProduct = new ShopProduct
+        return new BeautyAndHealthProductData()
         {
-            ShopId = 1,
-            ApiUrl = Guid.NewGuid().ToString(),
-            ItemId = Guid.NewGuid().ToString(),
-            ItemUrl = Guid.NewGuid().ToString(),
-        };
 
-        productData.ShopName = Guid.NewGuid().ToString();
-        productData.ShopUrl = Guid.NewGuid().ToString();
+            Product = new Entities.Product
+            {
+                Name = $"Product_{Guid.NewGuid()}",
+                Articul = Guid.NewGuid().ToString()
+            },
+
+            ShopProduct = new ShopProduct
+            {
+                ShopId = 1,
+                ApiUrl = Guid.NewGuid().ToString(),
+                ItemId = Guid.NewGuid().ToString(),
+                ItemUrl = Guid.NewGuid().ToString(),
+            },
+
+            ShopName = Guid.NewGuid().ToString(),
+            ShopUrl = Guid.NewGuid().ToString()
+        };
     }
 
-    private static void FillTestCategoryData(CategoryData.CategoryData categoryData)
+    private static CategoryData.CategoryData CreateTestCategoryData()
     {
-        categoryData.ShopCategory = new ShopCategory {
-            Category = $"Product_{Guid.NewGuid()}",
-            ShopId =1,
-            ItemId = 10,
-            Url = $"{Guid.NewGuid()}"
+        return new CategoryData.CategoryData()
+        {
+            ShopCategory = new ShopCategory
+            {
+                Category = $"Product_{Guid.NewGuid()}",
+                ShopId = 1,
+                ItemId = 10,
+                Url = $"{Guid.NewGuid()}"
+            },
+            ShopName = Guid.NewGuid().ToString(),
+            ShopUrl = Guid.NewGuid().ToString()
         };
-        
-        categoryData.ShopName = Guid.NewGuid().ToString();
-        categoryData.ShopUrl = Guid.NewGuid().ToString();
     }
 }

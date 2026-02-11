@@ -3,8 +3,8 @@ using MediatR;
 
 namespace Mediator.Infrastructure;
 
-public interface ICommandHandler<TRequest, TResponse> : IRequestHandler<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>;
+public interface ICommandHandler<TCommand, TResponse> : IRequestHandler<TCommand, TResponse>
+    where TCommand : Command<TResponse>;
 
 public interface ICreateCommandHandler<TRequest, TResponse> : ICommandHandler<TRequest, TResponse>
     where TRequest : CreateCommand<TResponse>;

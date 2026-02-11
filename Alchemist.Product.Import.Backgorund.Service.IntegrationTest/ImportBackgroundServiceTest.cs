@@ -49,8 +49,8 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         void onHandleCategoryMessage(object obj) => asyncAutoResetEvent.Set();
 
         await importReceiver.Start();
-        importReceiver.On("product", onHandleProductMessage, typeof(Mock<IBeautyAndHealthProductData>));
-        importReceiver.On("category", onHandleCategoryMessage, typeof(Mock<ICategoryData>));        
+        importReceiver.On("product", onHandleProductMessage, typeof(BeautyAndHealthProductData));
+        importReceiver.On("category", onHandleCategoryMessage, typeof(Alchemist.Product.CategoryData.CategoryData));        
         
         var httpClient = WebAppFactory.CreateClient();
 

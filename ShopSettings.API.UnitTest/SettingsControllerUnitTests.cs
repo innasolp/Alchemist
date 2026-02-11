@@ -41,14 +41,14 @@ public class SettingsControllerUnitTests
 
         // IMediator setups moved to ctor per request types used by SettingsController,
         // mapping Send(...) to repository mocks.
-        var saveShopSettingsCommandHandler = new SaveShopSettingsCommandHandler(_shopSettingsRepository.Object, _unitOfWorkMock.Object, _publisherMock.Object);
+        var saveShopSettingsCommandHandler = new SaveShopSettingsCommandHandler<IDbContextTransaction>(_shopSettingsRepository.Object, _unitOfWorkMock.Object, _publisherMock.Object);
 
         // SaveShopSettingsCommand -> IShopSettingsRepository.SaveShopSettings
         _mediator.Setup(m => m.Send(It.IsAny<SaveShopSettingsCommand>(), It.IsAny<CancellationToken>()))
                  .Returns((SaveShopSettingsCommand req, CancellationToken ct) =>
                      saveShopSettingsCommandHandler.Handle(req, ct));         
 
-        var saveShopSettingsWithChildrenCommandHandler = new SaveShopSettingsWithChildrenCommandHandler(_shopSettingsRepository.Object, _unitOfWorkMock.Object, _publisherMock.Object);
+        var saveShopSettingsWithChildrenCommandHandler = new SaveShopSettingsWithChildrenCommandHandler<IDbContextTransaction>(_shopSettingsRepository.Object, _unitOfWorkMock.Object, _publisherMock.Object);
 
         // SaveShopSettingsWithChildrenCommand -> IShopSettingsRepository.SaveShopSettingsWithChildren
         _mediator.Setup(m => m.Send(It.IsAny<SaveShopSettingsWithChildrenCommand>(), It.IsAny<CancellationToken>()))

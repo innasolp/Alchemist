@@ -2,47 +2,28 @@
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Category;
 using Alchemist.Import.Settings.Product;
-using Import.Settings.Interfaces;
 using Shop.Interfaces;
+using ShopImport.Service.Infrastructure.Module.Models;
 using ShopSettings.Interfaces;
 
 namespace Import.Service.Commands.Models;
 
-internal static class ShopModelExtensions
+public static class ShopModelExtensions
 {
     internal static IProductShopCategory ToProductShopCategoryModel(this IShopCategory c)
     {
         return new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId, Path = c.Url };
     }
 
-    internal static IProductShopCategory ToProductShopCategoryModel(this IProductShopCategory c)
-    {
-        return new ProductShopCategoryModel { Category = c.Category, ItemId = c.ItemId, Path = c.Path };
-    }
-
-    internal static async Task<IImportSource> GetShopModelAsync(this IShopDataService shopDataService,
-        IShopImportSettings shopImportSettings, 
-        ShopSettingType shopSettingType,
-        CancellationToken cancellationToken = default)
-    {
-        return shopSettingType == ShopSettingType.Product
-            ? await shopDataService.GetProductShopModelAsync(shopImportSettings as IProductShopImportSettings, cancellationToken)
-            : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings, cancellationToken: cancellationToken);
-    }
-
     internal static async Task<IShopModel> GetShopModelAsync(this IShopDataService shopDataService,
         IShopImportSettings shopImportSettings,
         CancellationToken cancellationToken = default)
     {
-        var shopSettingsType = shopImportSettings is IShopSettings shopSettings ? shopSettings.Type
-             : shopImportSettings is IProductShopImportSettings ? ShopSettingType.Product :
-              shopImportSettings is ICategoryShopImportSettings ? ShopSettingType.Category
-              : throw new InvalidOperationException($"{shopImportSettings.GetType().Name} unavailable shop settings type");
-
-        return shopSettingsType == ShopSettingType.Product
-            ? await shopDataService.GetProductShopModelAsync(shopImportSettings as IProductShopImportSettings, cancellationToken: cancellationToken)
-            : await shopDataService.GetCategoryShopModelAsync(shopImportSettings as ICategoryShopImportSettings, cancellationToken: cancellationToken);        
-
+        return shopImportSettings is IProductShopImportSettings productShopImportSettings
+            ? await shopDataService.GetProductShopModelAsync(productShopImportSettings, cancellationToken: cancellationToken)
+            : shopImportSettings is ICategoryShopImportSettings categoryShopImportSettings
+             ? await shopDataService.GetCategoryShopModelAsync(categoryShopImportSettings, cancellationToken: cancellationToken)
+             :  throw new InvalidOperationException($"Invalid shop settings type {shopImportSettings.GetType().Name}");
     }
 
     private static async Task<IProductShopModel> GetProductShopModelAsync(this IShopDataService shopDataService,
@@ -109,7 +90,12 @@ internal static class ShopModelExtensions
                 ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl, cancellationToken)
                 ?? await shopDataService.CreateShop(new ShopModel { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
 
-        var shopModel = GetShopModelCore<T>(shop, shopImportSettings);
+        var shopModel = new T
+        {
+            Name = shop?.Name ?? shopImportSettings.ShopName,
+            Url = shop?.Url ?? shopImportSettings.ShopUrl,
+            Id = shop?.Id ?? 0
+        };
 
         return await Task.FromResult(shopModel);
     }
@@ -124,15 +110,4 @@ internal static class ShopModelExtensions
 
         return categoryShopModel;
     }    
-
-    private static T GetShopModelCore<T>(IShop shop, IShopImportSettings shopImportSettings)
-        where T : ShopModel, new()
-    {
-        return new T
-        {
-            Name = shop?.Name ?? shopImportSettings.ShopName,
-            Url = shop?.Url ?? shopImportSettings.ShopUrl,
-            Id = shop.Id
-        };
-    }
 }

@@ -35,6 +35,7 @@
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
     <ProjectReference Include="..\Shop.API.Client\Shop.API.Client.csproj" />
     <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
+    <ProjectReference Include="..\ShopImport.Service.Infrastructure.Module\ShopImport.Service.Infrastructure.Module.csproj" />
     <ProjectReference Include="..\ShopImport.Service.Infrastructure\ShopImport.Service.Category.Infrastructure.csproj" />
   </ItemGroup>
 

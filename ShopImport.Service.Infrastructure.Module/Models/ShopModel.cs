@@ -3,7 +3,7 @@ using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using System.ComponentModel;
 
-namespace Import.Service.Commands.Models;
+namespace ShopImport.Service.Infrastructure.Module.Models;
 
 interface IShopModel : IImportSource, IShop 
 {

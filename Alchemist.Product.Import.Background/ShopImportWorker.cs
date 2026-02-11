@@ -139,7 +139,7 @@ public class ShopImportWorker : BackgroundService
     {
         try
         {
-            var guid = await _mediator.Send(new AddShopImportServiceCommand(name, shopImportSettings), cancellationToken);
+            var guid = await _mediator.Send(new AddImportServiceCommand(name, shopImportSettings), cancellationToken);
 
             _logger.LogInformation("Service {Name} is initialized.", name);
 

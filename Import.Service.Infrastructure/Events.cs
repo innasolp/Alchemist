@@ -1,4 +1,5 @@
-﻿using Mediator.Messages;
+﻿using Mediator.Infrastructure;
+
 
 namespace Import.Service.Commands;
 

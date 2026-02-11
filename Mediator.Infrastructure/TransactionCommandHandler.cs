@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Mediator.Infrastructure.Command;
+using MediatR;
 using UnitOfWork;
 
 namespace Mediator.Infrastructure;
@@ -6,7 +7,7 @@ namespace Mediator.Infrastructure;
 public abstract class TransactionCommandHandler<T, TCommand, TTransaction, TUnitOfWork>(TUnitOfWork unitOfWork)
     : IRequestHandler<TCommand, T>, ICommandHandler<TCommand, T>
     where TUnitOfWork : IUnitOfWork<TTransaction>
-    where TCommand : IRequest<T>
+    where TCommand : Command<T>
 {
     protected TUnitOfWork UnitOfWork { get; } = unitOfWork;
 
@@ -31,6 +32,5 @@ public abstract class TransactionCommandHandler<T, TCommand, TTransaction, TUnit
             throw;
         }
     }
-
     internal protected abstract Task<T> HandleCommand(TCommand command, CancellationToken cancellationToken);    
 }
