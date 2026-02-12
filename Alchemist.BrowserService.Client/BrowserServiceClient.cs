@@ -212,7 +212,7 @@ public class BrowserServiceClient(HttpClient httpClient,
                 throw new LoaderServiceException($"Route {routeUrl} on page {url} not found");
             else
             {
-                var streamReader = new StreamReader(result);
+                using var streamReader = new StreamReader(result);
                 var message = await streamReader.ReadToEndAsync(cancellationToken);
                 streamReader.Close();
                 throw new LoaderServiceException($"Route {routeUrl} on page {url} failed. {message}");

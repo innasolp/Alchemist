@@ -150,7 +150,7 @@ public class BrowserServiceClientWebLoaderCallsTest
         var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl };
 
         await Assert.ThrowsAsync<LoaderServiceException>
-            (()=>Helper.LoadHostAsync(webLoaderMock, url, hostRequestOptions: loaderOptions, cancellationToken: CancellationToken.None));
+            (async ()=>Helper.LoadHostAsync(webLoaderMock, url, hostRequestOptions: loaderOptions, cancellationToken: CancellationToken.None));
 
         webLoaderMock.Verify(w => w.Start(), Times.Once);
         webLoaderMock.Verify(w => w.TryLoadFromRoute(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>(), It.IsAny<CancellationToken>()), Times.Once);
