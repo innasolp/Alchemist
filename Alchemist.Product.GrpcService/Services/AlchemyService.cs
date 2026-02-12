@@ -2,12 +2,12 @@
 using Alchemist.Product.Infrastructure;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Request;
 using MediatR;
 using Mapster;
 using GrpcExtensions.Interception;
 using GrpcExtensions.Message;
+using Mediator.Infrastructure;
 
 namespace Alchemist.Product.GrpcService.Services;
 
@@ -165,8 +165,7 @@ public class AlchemyService(IMediator mediator) : AlchemyGrpcService.AlchemyGrpc
             throw GrpcStatuses.GetBadRequestRpcException(nameof(FindByNameRequest.Name));
 
         var brand = await _mediator.Send(new FindByNameRequest<Brand>(request.Name, e => e.Name), context.CancellationToken)
-                 ?? throw new RpcException(new Status(StatusCode.NotFound, $"Brand with name '{request.Name}' not found")); ;
-
+                 ?? throw new RpcException(new Status(StatusCode.NotFound, $"Brand with name '{request.Name}' not found")); 
 
         return brand.Adapt<BrandReply>();
     }

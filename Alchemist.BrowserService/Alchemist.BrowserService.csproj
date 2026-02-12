@@ -12,6 +12,7 @@
 		<PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.5" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.8" />
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Category.Interfaces\Alchemist.Import.Category.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.CategoryData.Interfaces\Alchemist.Product.CategoryData.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.ImportItemHandler\Alchemist.Product.ImportItemHandler.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.ImportItemHandler\Alchemist.BackgroundQueueItemHandler.csproj" />
     <ProjectReference Include="..\Shop.Entities\Shop.Interfaces.csproj" />
   </ItemGroup>
 

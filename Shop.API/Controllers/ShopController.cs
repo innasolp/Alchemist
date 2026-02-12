@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using MediatR;
 using Mediator.Infrastructure.Request;
 using Shop.Infrastructure;
-using Mediator.Infrastructure.Command;
+using Mediator.Infrastructure;
 
 
 namespace Shop.API.Controllers;

@@ -1,4 +1,5 @@
-using Mediator.Infrastructure.Command;
+using Mediator.Infrastructure;
+using Mediator.Infrastructure.Events;
 using Mediator.Infrastructure.Request;
 using MediatR;
 using Message.Interfaces;
@@ -10,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Shop.API.Controllers;
 using Shop.Infrastructure;
-using Shop.UnitOfWork;
 using UnitOfWork;
 
 namespace Shop.Api.UnitTest
@@ -21,6 +21,7 @@ namespace Shop.Api.UnitTest
         private readonly Mock<IMediator> _mediator = new();
         private readonly Mock<IMessageSender> _messageSender = new();
         private readonly Mock<IShopRepository> _shopRepository = new();
+        private readonly Mock<IRepository<Alchemist.Product.Data.Shop>> _repository = new();
 
         private readonly ShopController _controller;
 
@@ -33,25 +34,25 @@ namespace Shop.Api.UnitTest
             
             // UpdateCommand<Alchemist.Product.Data.Shop> -> repository.Update
             _mediator.Setup(m => m.Send(It.IsAny<UpdateCommand<Alchemist.Product.Data.Shop>>(), It.IsAny<CancellationToken>()))
-                     .Returns((UpdateCommand<Alchemist.Product.Data.Shop> req, CancellationToken ct) => _shopRepository.Object.Update(req.Entity, ct));
+                     .Returns((UpdateCommand<Alchemist.Product.Data.Shop> req, CancellationToken ct) => _repository.Object.Update(req.Entity, ct));
 
             // FindByNameRequest<Alchemist.Product.Data.Shop> -> repository.FindByName
             _mediator.Setup(m => m.Send(It.IsAny<FindByNameRequest<Alchemist.Product.Data.Shop>>(), It.IsAny<CancellationToken>()))
-                     .Returns((FindByNameRequest<Alchemist.Product.Data.Shop> req, CancellationToken ct) => _shopRepository.Object.FindByName(req.GetName, req.Name, ct));
+                     .Returns((FindByNameRequest<Alchemist.Product.Data.Shop> req, CancellationToken ct) => _repository.Object.FindByName(req.GetName, req.Name, ct));
 
             // GetAllRequest<Alchemist.Product.Data.Shop> -> repository.GetAll
             _mediator.Setup(m => m.Send(It.IsAny<GetAllRequest<Alchemist.Product.Data.Shop>>(), It.IsAny<CancellationToken>()))
-                     .Returns((GetAllRequest<Alchemist.Product.Data.Shop> req, CancellationToken ct) => _shopRepository.Object.GetAll(ct));
+                     .Returns((GetAllRequest<Alchemist.Product.Data.Shop> req, CancellationToken ct) => _repository.Object.GetAll(ct));
 
             // GetByIdRequest<int, Alchemist.Product.Data.Shop> -> repository.GetById<int>
             _mediator.Setup(m => m.Send(It.IsAny<GetByIdRequest<int, Alchemist.Product.Data.Shop>>(), It.IsAny<CancellationToken>()))
-                     .Returns((GetByIdRequest<int, Alchemist.Product.Data.Shop> req, CancellationToken ct) => _shopRepository.Object.GetById<int>(req.Id, ct));
+                     .Returns((GetByIdRequest<int, Alchemist.Product.Data.Shop> req, CancellationToken ct) => _repository.Object.GetById<int>(req.Id, ct));
 
             // Also support object-based overload GetByIdRequest<Alchemist.Product.Data.Shop>(object)
             _mediator.Setup(m => m.Send(It.IsAny<GetByIdRequest<Alchemist.Product.Data.Shop>>(), It.IsAny<CancellationToken>()))
                      .Returns((GetByIdRequest<Alchemist.Product.Data.Shop> req, CancellationToken ct) =>
                      {
-                         if (req.Id is int i) return _shopRepository.Object.GetById<int>(i, ct);
+                         if (req.Id is int i) return _repository.Object.GetById<int>(i, ct);
                          return Task.FromResult<Alchemist.Product.Data.Shop?>(default);
                      });
 
@@ -80,7 +81,7 @@ namespace Shop.Api.UnitTest
             var name = "MyShop";
             var shop = new Alchemist.Product.Data.Shop { Id = 10, Name = name, Url = "u" };
 
-            _shopRepository.Setup(r => r.FindByName(It.IsAny<Func<Alchemist.Product.Data.Shop, string>>(), name, It.IsAny<CancellationToken>()))
+            _repository.Setup(r => r.FindByName(It.IsAny<Func<Alchemist.Product.Data.Shop, string>>(), name, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(shop);
 
             var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.GetShopByName(name));
@@ -127,7 +128,7 @@ namespace Shop.Api.UnitTest
         public async Task GetShopById_ReturnsNotFound_WhenRepositoryReturnsNull()
         {
             var id = 55;
-            _shopRepository.Setup(r => r.GetById<int>(id, It.IsAny<CancellationToken>())).ReturnsAsync((Alchemist.Product.Data.Shop?)null);
+            _repository.Setup(r => r.GetById<int>(id, It.IsAny<CancellationToken>())).ReturnsAsync((Alchemist.Product.Data.Shop?)null);
 
             var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.GetShop(id));
             var nf = Assert.IsType<NotFound<int>>(result.Result);
@@ -137,7 +138,7 @@ namespace Shop.Api.UnitTest
         [Fact]
         public async Task GetShops_ReturnsNotFound_WhenNoItems()
         {
-            _shopRepository.Setup(r => r.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync((List<Alchemist.Product.Data.Shop>?)null);
+            _repository.Setup(r => r.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync((List<Alchemist.Product.Data.Shop>?)null);
 
             var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.GetShops());
             Assert.IsType<NotFound>(result.Result);
@@ -147,7 +148,7 @@ namespace Shop.Api.UnitTest
         public async Task GetShops_ReturnsOk_WhenItemsExist()
         {
             var items = new List<Alchemist.Product.Data.Shop> { new() { Id = 1, Name = "A" }, new() { Id = 2, Name = "B" } };
-            _shopRepository.Setup(r => r.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync(items);
+            _repository.Setup(r => r.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync(items);
 
             var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.GetShops());
             var ok = Assert.IsType<Ok<List<Alchemist.Product.Data.Shop>>>(result.Result);
@@ -163,9 +164,18 @@ namespace Shop.Api.UnitTest
             var publisherMock = new Mock<IPublisher>();
             var unitOfWorkMock = new Mock<IUnitOfWork<IDbContextTransaction>>();
 
-            var createShopCommandHandler = new CreateShopCommandHandler(_shopRepository.Object, unitOfWorkMock.Object, publisherMock.Object);
+            var createCommandHandlerMock = new Mock<ICreateCommandHandler<Alchemist.Product.Data.Shop>>();
+            createCommandHandlerMock.Setup(s => s.Handle(It.IsAny<CreateCommand<Alchemist.Product.Data.Shop>>(), It.IsAny<CancellationToken>()))
+                .Returns(async (CreateCommand<Alchemist.Product.Data.Shop> cmd, CancellationToken token) =>
+                {
+                    return await _repository.Object.Create(cmd.Entity, token);
+                });
 
-            _shopRepository.Setup(r => r.Create(It.IsAny<Alchemist.Product.Data.Shop>(), It.IsAny<CancellationToken>())).ReturnsAsync(created);
+            var createShopCommandHandler = new CreateEventedCommandHandler<Alchemist.Product.Data.Shop>(createCommandHandlerMock.Object,
+            publisherMock.Object,
+            Messages.ShopCreated);
+
+            _repository.Setup(r => r.Create(It.IsAny<Alchemist.Product.Data.Shop>(), It.IsAny<CancellationToken>())).ReturnsAsync(created);
 
             // IMediator setups moved to ctor per request:
             // CreateCommand<Alchemist.Product.Data.Shop> -> repository.Create
@@ -177,14 +187,14 @@ namespace Shop.Api.UnitTest
             var cr = Assert.IsType<Created<Alchemist.Product.Data.Shop>>(result.Result);
             Assert.Equal(created.Id, cr.Value.Id);
 
-            publisherMock.Verify(p => p.Publish(It.Is<CreateShopEvent>(c => c.Entity == cr.Value), It.IsAny<CancellationToken>()));
+            publisherMock.Verify(p => p.Publish(It.Is<CreationEvent<Alchemist.Product.Data.Shop>>(c => c.Entity == cr.Value), It.IsAny<CancellationToken>()));
         }
 
         [Fact]
         public async Task UpdateShop_ReturnsAccepted_WhenRepositoryUpdates()
         {
             var incoming = new Alchemist.Product.Data.Shop { Id = 7, Name = "Upd", Url = "u" };
-            _shopRepository.Setup(r => r.Update(It.IsAny<Alchemist.Product.Data.Shop>(), It.IsAny<CancellationToken>())).ReturnsAsync(incoming);
+            _repository.Setup(r => r.Update(It.IsAny<Alchemist.Product.Data.Shop>(), It.IsAny<CancellationToken>())).ReturnsAsync(incoming);
 
             var result = Assert.IsAssignableFrom<INestedHttpResult>(await _controller.UpdateShop(incoming));
             var ok = Assert.IsType<Accepted<Alchemist.Product.Data.Shop>>(result.Result);

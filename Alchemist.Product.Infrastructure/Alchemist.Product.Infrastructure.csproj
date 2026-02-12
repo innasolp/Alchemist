@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.UnitOfWork\Alchemist.Product.UnitOfWork.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
     <ProjectReference Include="..\Mediator.Infrastructure\Mediator.Infrastructure.csproj" />
   </ItemGroup>
 

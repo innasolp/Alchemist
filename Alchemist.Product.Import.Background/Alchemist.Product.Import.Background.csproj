@@ -16,7 +16,6 @@
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
 	<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.2" />
 	<PackageReference Include="Mapster" Version="7.4.0" />
-	<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,7 +28,7 @@
     <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
     <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
-    <ProjectReference Include="..\Import.Service.Infrastructure\Import.Service.Commands.csproj" />
+    <ProjectReference Include="..\Import.Service.Infrastructure\Import.Service.Infrastructure.csproj" />
     <ProjectReference Include="..\Shop.Entities\Shop.Interfaces.csproj" />
   </ItemGroup>
 

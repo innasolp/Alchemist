@@ -1,4 +1,5 @@
 ﻿using BackgroundTaskQueue;
+using Mediator.Infrastructure;
 using MediatR;
 using Message.Interfaces;
 using Microsoft.Extensions.Logging;

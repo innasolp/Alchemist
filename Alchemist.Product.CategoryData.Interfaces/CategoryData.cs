@@ -1,19 +1,14 @@
 ﻿using Alchemist.Product.Entities;
-using Shop.Interfaces;
 
 namespace Alchemist.Product.CategoryData;
 
-public class CategoryData : ICategoryData
+public class CategoryData
 {
-    public ShopCategory ShopCategory { get; set; }
+    public ShopCategory ShopCategory { get; init; }
 
-    public ShopCategory? ParentCategory { get; set; }
+    public ShopCategory? ParentCategory { get; init; }
 
-    public string ShopName { get; set; }
+    public string ShopName { get; init; }
 
-    public string ShopUrl { get; set; }
-
-    IShopCategory ICategoryData.ShopCategory => ShopCategory;
-
-    IShopCategory? ICategoryData.ParentCategory => ParentCategory;
+    public string ShopUrl { get; init; }
 }

@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.UnitOfWork.Interfaces;
+using Alchemist.Product.Infrastructure.Interfaces;
 using Mediator.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using UnitOfWork;
@@ -11,7 +11,7 @@ public class SetProductComponentCommandHandler(IProductComponentRepository repos
 {
     private readonly IProductComponentRepository _repository = repository;
 
-    protected override Task<ProductComponent> HandlerRequest(SetProductComponentCommand request, CancellationToken cancellationToken = default)
+    protected override Task<ProductComponent> HandleCommand(SetProductComponentCommand request, CancellationToken cancellationToken = default)
     {
         return _repository.SetProductComponent(request.Entity, cancellationToken);
     }

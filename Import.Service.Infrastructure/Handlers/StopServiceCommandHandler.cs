@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Import.Service.Infrastructure;
+using MediatR;
 namespace Import.Service.Commands.Handlers;
 
 internal sealed class StopServiceCommandHandler(IServiceRepository serviceRepository,
@@ -6,16 +7,15 @@ internal sealed class StopServiceCommandHandler(IServiceRepository serviceReposi
     : IRequestHandler<StopServiceCommand>
 {
     private readonly IServiceRepository _serviceRepository = serviceRepository;
+
     private readonly IPublisher _publisher = publisher;
 
     public async Task Handle(StopServiceCommand request, CancellationToken cancellationToken)
     {
-        if (!_serviceRepository.Services.TryGetValue(request.Guid, out var serviceItem))
-            throw new InvalidOperationException($"Service with id {request.Guid} not found.");
+        var (service, stopTask) = _serviceRepository.StopServiceTask(request.Guid, cancellationToken);
 
-        await serviceItem.InnerTokenSource.CancelAsync();
-        await serviceItem.Service.Stop(cancellationToken);
+        await stopTask;
 
-        await _publisher.Publish(new ServiceStoppedEvent(new ServiceMessage(request.Guid, serviceItem.Service.Name)), cancellationToken);
+        await _publisher.Publish(new ServiceStoppedEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
     }
 }

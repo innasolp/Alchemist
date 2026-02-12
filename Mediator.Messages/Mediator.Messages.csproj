@@ -13,6 +13,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Alchemist.BackgroundTaskQueue\BackgroundTaskQueue.csproj" />
+	  <ProjectReference Include="..\Mediator.Infrastructure\Mediator.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>

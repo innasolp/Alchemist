@@ -4,7 +4,7 @@ using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.Concurrent;
 using Xunit.Abstractions;
-using ServiceMessage = Import.Service.Commands.ServiceMessage;
+using ServiceMessage = Import.Service.Infrastructure.ServiceMessage;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 

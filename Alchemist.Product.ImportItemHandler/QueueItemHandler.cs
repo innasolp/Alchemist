@@ -3,7 +3,7 @@ using Import.Interfaces;
 using Message.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Alchemist.Product.ImportItemHandler;
+namespace Alchemist.BackgroundQueueItemHandler;
 
 public abstract class QueueItemHandler<T, TDataItem>(IBackgroundTaskQueue backgroundTaskQueue, 
     IMessageSender messageSender, 

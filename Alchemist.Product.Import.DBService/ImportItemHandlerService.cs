@@ -17,7 +17,6 @@ public class ImportItemHandlerService(ILogger<ImportItemHandlerService> logger,
     {
         try
         {
-            //todo retrieve item type
             await _mediator.Send(item, cancellationToken);
         }
         catch(OperationCanceledException)

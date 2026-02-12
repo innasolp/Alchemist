@@ -1,5 +1,4 @@
 using Alchemist.Product.Data;
-using Shop.UnitOfWork;
 using MediatR;
 
 namespace Shop.Infrastructure;

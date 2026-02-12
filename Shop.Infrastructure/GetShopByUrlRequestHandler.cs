@@ -1,5 +1,4 @@
 using MediatR;
-using Shop.UnitOfWork;
 
 namespace Shop.Infrastructure;
 

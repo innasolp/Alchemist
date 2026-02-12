@@ -13,6 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Alchemist.Product.Infrastructure.EF\Alchemist.Product.Infrastructure.EF.csproj" />
 	  <ProjectReference Include="..\Alchemist.Product.Infrastructure\Alchemist.Product.Infrastructure.csproj" />
 	  <ProjectReference Include="..\Autofac.Module\Mediator.Module.EF.csproj" />
 	</ItemGroup>

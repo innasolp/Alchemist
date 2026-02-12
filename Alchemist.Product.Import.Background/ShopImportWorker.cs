@@ -1,6 +1,6 @@
 using Alchemist.Import.Settings;
 using Alchemist.Product.Entities;
-using Import.Service.Commands;
+using Import.Service.Infrastructure;
 using MediatR;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -139,7 +139,7 @@ public class ShopImportWorker : BackgroundService
     {
         try
         {
-            var guid = await _mediator.Send(new AddShopImportServiceCommand(name, shopImportSettings), cancellationToken);
+            var guid = await _mediator.Send(new AddImportServiceCommand(name, shopImportSettings), cancellationToken);
 
             _logger.LogInformation("Service {Name} is initialized.", name);
 

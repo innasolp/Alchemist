@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.UnitOfWork.Interfaces;
+using Alchemist.Product.Infrastructure.Interfaces;
 using Mediator.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using UnitOfWork;
@@ -11,7 +11,7 @@ public class SetProductPurposeCommandHandler(IProductPurposeRepository productPu
 {
     private readonly IProductPurposeRepository _productPurposeRepository = productPurposeRepository;
 
-    protected override Task<ProductPurpose> HandlerRequest(SetProductPurposeCommand request, CancellationToken cancellationToken = default)
+    protected override Task<ProductPurpose> HandleCommand(SetProductPurposeCommand request, CancellationToken cancellationToken = default)
     {
         return _productPurposeRepository.SetProductPurpose(request.Entity, cancellationToken);
     }

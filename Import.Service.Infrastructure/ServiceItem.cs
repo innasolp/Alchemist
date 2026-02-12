@@ -1,6 +1,6 @@
 ﻿using Import.Interfaces;
 
-namespace Import.Service.Commands;
+namespace Import.Service.Infrastructure;
 
 public class ServiceItem(Guid guid, IImportService service, int sourceId, CancellationTokenSource innerTokenSource)
 {

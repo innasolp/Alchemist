@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Alchemist.Product.Data;
-using Mediator.Infrastructure.Command;
 using Shop.Infrastructure;
+using Mediator.Infrastructure;
 
 namespace Shop.API.Controllers;
 

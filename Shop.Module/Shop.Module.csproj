@@ -10,7 +10,7 @@
     <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
     <ProjectReference Include="..\Autofac.Module\Mediator.Module.EF.csproj" />
     <ProjectReference Include="..\Mediator.Messages\Mediator.Messages.csproj" />
-    <ProjectReference Include="..\Shop.Infrastructure\Shop.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shop.Infrastructure.EF\Shop.Infrastructure.EF.csproj" />
   </ItemGroup>
 	
 	<ItemGroup>

@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using Mediator.Infrastructure;
+using Mediator.Infrastructure.EF;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,8 +11,10 @@ public abstract class MediatorModule : Autofac.Module
     {
         RegisterTypes(builder);
 
-        builder.RegisterGeneric(typeof(EFCreateCommandHandler<,>)).As(typeof(IRequestHandler<,>));
-        builder.RegisterGeneric(typeof(EFUpdateCommandHandler<,>)).As(typeof(IRequestHandler<,>));
+        builder.RegisterGeneric(typeof(EFUnitOfWork<>)).As(typeof(EFUnitOfWork<>));
+
+        builder.RegisterGeneric(typeof(CreateCommandHandler<,>)).As(typeof(IRequestHandler<,>));
+        builder.RegisterGeneric(typeof(UpdateCommandHandler<,>)).As(typeof(IRequestHandler<,>));
         builder.RegisterGeneric(typeof(GetByIdRequestHandler<,>)).As(typeof(IRequestHandler<,>));
         builder.RegisterGeneric(typeof(FindByNameRequestHandler<,>)).As(typeof(IRequestHandler<,>));
         builder.RegisterGeneric(typeof(GetAllRequestHandler<,>)).As(typeof(IRequestHandler<,>));
@@ -22,12 +24,7 @@ public abstract class MediatorModule : Autofac.Module
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddMediatR(cfg =>
-        {
-            cfg.RegisterGenericHandlers = true;
-
-            ConfigureMediator(cfg);
-        });
+        services.AddMediatR(ConfigureMediator);
     }
 
     protected abstract void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration configuration);

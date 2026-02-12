@@ -24,11 +24,10 @@ using Alchemist.Product.Category.ImportItemHandler;
 using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
-using Import.Service.Commands;
 using ShopImport.Service.Category.Infrastructure;
 using BackgroundTaskQueue;
-using BackgroundTaskQueueService;
 using Alchemist.Product.Import.Background.Service;
+using ShopImport.Service.Infrastructure.Module;
 
 var builder = WebApplication.CreateBuilder(args);
 

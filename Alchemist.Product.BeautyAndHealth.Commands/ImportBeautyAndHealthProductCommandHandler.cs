@@ -99,7 +99,7 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
         return await Task.FromResult(true);
     }
 
-    private async Task<IShopProductPrice> SetShopProductPriceForItemAsync(IBeautyAndHealthProductData item, long shopProductId,
+    private async Task<IShopProductPrice> SetShopProductPriceForItemAsync(BeautyAndHealthProductData item, long shopProductId,
         CancellationToken cancellationToken = default)
     {
         var shopProductPrice = await _productDataService.GetShopProductPrice(shopProductId, cancellationToken);
@@ -123,7 +123,7 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
         }
     }
 
-    private async Task<IProduct> CreateProductFromModelAsync(IBeautyAndHealthProductData productItem, int shopId, CancellationToken cancellationToken = default)
+    private async Task<IProduct> CreateProductFromModelAsync(BeautyAndHealthProductData productItem, int shopId, CancellationToken cancellationToken = default)
     {
         var brand = !string.IsNullOrWhiteSpace(productItem.Brand?.Name)
             ? await GetBrandAsync(productItem.Brand.Name, productItem.Country?.Name, cancellationToken)

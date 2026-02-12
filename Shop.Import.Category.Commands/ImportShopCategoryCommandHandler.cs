@@ -38,7 +38,7 @@ public class ImportShopCategoryCommandHandler(IShopDataService shopDataService, 
         
     }
 
-    private async Task<IShopCategory?> AddShopCategoryAsync(ICategoryData categoryItem, int shopId, CancellationToken cancellationToken = default)
+    private async Task<IShopCategory?> AddShopCategoryAsync(CategoryData categoryItem, int shopId, CancellationToken cancellationToken = default)
     {
         var parentCategory = categoryItem.ParentCategory?.ItemId > 0
             ? await _shopDataService.GetShopCategoryByShopIdAndItemId(shopId, categoryItem.ParentCategory.ItemId, cancellationToken)
