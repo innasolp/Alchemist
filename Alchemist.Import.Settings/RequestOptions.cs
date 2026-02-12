@@ -6,7 +6,7 @@ public enum LoadingType
 {
     Simple,
     Route,
-    Request,
+    RequestFinished,
     Response,
     Api,
     WaitForUrl

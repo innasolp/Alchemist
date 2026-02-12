@@ -270,8 +270,8 @@ public class BrowserServiceClient(HttpClient httpClient,
                 (webLoader, cancellationToken) =>
                 webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { TimeoutInMilliseconds = _hostRequestOptions?.TimeouteMillseconds }), cancellationToken);
 
-        var routeType = _hostRequestOptions.Parameters?.TryGetValue("RouteType", out var webLoaderrouteType) == true 
-            ? webLoaderrouteType
+        var routeType = _hostRequestOptions.Parameters?.TryGetValue("RouteType", out var webLoaderRouteType) == true 
+            ? webLoaderRouteType
             : null;
 
         var webLoaderRequestOptions = new WebLoaderRequestOptions
@@ -284,20 +284,26 @@ public class BrowserServiceClient(HttpClient httpClient,
 
         if(_hostRequestOptions.LoadingType == LoadingType.WaitForUrl)
             return await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
-                (webLoader, cancellationToken) => webLoader.WaitForUrl(url, _hostRequestOptions.RouteUrlFormat, webLoaderRequestOptions), cancellationToken);
+                (webLoader, cancellationToken) => webLoader.WaitForUrl(url, _hostRequestOptions.RouteUrlFormat, webLoaderRequestOptions), 
+                cancellationToken);
 
         var (success, stream) = await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
-                (webLoader, cancellationToken) => webLoader.TryLoadFromRoute(url, _hostRequestOptions.RouteUrlFormat,
-                    new WebLoaderRequestOptions
-                    {
-                        TimeoutInMilliseconds = _hostRequestOptions.TimeouteMillseconds,
-                        Parameters = routeType != null
-                           ? new Dictionary<string, object>() { { "RouteType", routeType } }
-                           : default
-                    }, cancellationToken), cancellationToken);
+                (webLoader, cancellationToken) => 
+                webLoader.TryLoadFromRoute(url, _hostRequestOptions.RouteUrlFormat, webLoaderRequestOptions, cancellationToken), 
+                cancellationToken);
 
-        if(success)
-            return stream;
+        if (success && stream is not null)
+                return stream;
+
+        if(stream is not null)        
+            using (stream)
+            {
+                using var streamReader = new StreamReader(stream);
+                var message = streamReader.ReadToEnd();
+                streamReader.Close();
+                throw new LoaderServiceException($"Route {_hostRequestOptions.RouteUrlFormat} on page {url} failed. {message}");
+            }
+        
 
         throw new LoaderServiceException($"No request {_hostRequestOptions.RouteUrlFormat} in page {url}", LoaderServiceAction.Stop);
     }
