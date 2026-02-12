@@ -1,6 +1,5 @@
 using Alchemist.Product.Data;
 using Mediator.Infrastructure;
-using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Events;
 using Mediator.Infrastructure.Request;
 using MediatR;

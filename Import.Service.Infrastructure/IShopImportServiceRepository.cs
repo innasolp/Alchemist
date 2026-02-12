@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Entities;
 
-namespace Import.Service.Commands;
+namespace Import.Service.Infrastructure;
 
 public interface IShopImportServiceRepository : IServiceRepository
 {

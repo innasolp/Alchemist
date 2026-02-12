@@ -1,5 +1,4 @@
-﻿using Mediator.Infrastructure.Command;
-using Mediator.Infrastructure.Events;
+﻿using Mediator.Infrastructure.Events;
 using MediatR;
 namespace Mediator.Infrastructure;
 

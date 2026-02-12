@@ -1,4 +1,4 @@
-﻿namespace Import.Service.Commands;
+﻿namespace Import.Service.Infrastructure;
 
 public static class ServiceKeys
 {

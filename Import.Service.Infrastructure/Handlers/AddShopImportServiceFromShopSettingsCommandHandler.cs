@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
+using Import.Service.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using ShopSettings.Interfaces;

@@ -1,7 +1,7 @@
 ﻿using Mediator.Infrastructure;
 
 
-namespace Import.Service.Commands;
+namespace Import.Service.Infrastructure;
 
 public record ServiceMessage(Guid Guid, string? Name);
 

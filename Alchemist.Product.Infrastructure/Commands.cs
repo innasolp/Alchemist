@@ -1,5 +1,5 @@
 ﻿using Alchemist.Product.Data;
-using Mediator.Infrastructure.Command;
+using Mediator.Infrastructure;
 
 namespace Alchemist.Product.Infrastructure;
 

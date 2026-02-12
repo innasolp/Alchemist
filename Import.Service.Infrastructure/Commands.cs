@@ -3,7 +3,7 @@ using Import.Settings.Interfaces;
 using MediatR;
 using ShopSettings.Interfaces;
 
-namespace Import.Service.Commands;
+namespace Import.Service.Infrastructure;
 
 public record AddImportServiceCommand(string Name, IImportSettings ImportSettings) : IRequest<Guid>;
 

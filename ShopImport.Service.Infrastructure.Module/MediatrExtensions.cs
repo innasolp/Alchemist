@@ -1,8 +1,8 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using BackgroundTaskQueue;
-using Import.Service.Commands;
 using Import.Service.Commands.Handlers;
+using Import.Service.Infrastructure;
 using Mediator.Messages;
 using MediatR;
 using Message.Interfaces;

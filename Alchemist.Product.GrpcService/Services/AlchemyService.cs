@@ -2,12 +2,12 @@
 using Alchemist.Product.Infrastructure;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.Request;
 using MediatR;
 using Mapster;
 using GrpcExtensions.Interception;
 using GrpcExtensions.Message;
+using Mediator.Infrastructure;
 
 namespace Alchemist.Product.GrpcService.Services;
 

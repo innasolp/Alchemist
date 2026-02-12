@@ -1,5 +1,5 @@
 using Alchemist.Product.Data;
-using Mediator.Infrastructure.Command;
+using Mediator.Infrastructure;
 using Mediator.Infrastructure.Request;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;

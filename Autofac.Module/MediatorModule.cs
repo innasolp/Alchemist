@@ -24,10 +24,7 @@ public abstract class MediatorModule : Autofac.Module
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddMediatR(cfg =>
-        {
-            ConfigureMediator(cfg);
-        });
+        services.AddMediatR(ConfigureMediator);
     }
 
     protected abstract void ConfigureMediator(Microsoft.Extensions.DependencyInjection.MediatRServiceConfiguration configuration);

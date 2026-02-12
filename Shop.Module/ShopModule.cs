@@ -1,7 +1,6 @@
 ﻿using Alchemist.Product.Data;
 using Autofac;
 using Mediator.Infrastructure;
-using Mediator.Infrastructure.Command;
 using Mediator.Infrastructure.EF;
 using Mediator.Infrastructure.Events;
 using Mediator.Messages;

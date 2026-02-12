@@ -1,7 +1,7 @@
 ﻿using Import.Interfaces;
 using Import.Settings.Interfaces;
 
-namespace Import.Service.Commands;
+namespace Import.Service.Infrastructure;
 
 public interface IServiceRepository
 {

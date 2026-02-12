@@ -1,4 +1,4 @@
-﻿using Mediator.Infrastructure.Command;
+﻿using Mediator.Infrastructure;
 
 namespace ShopSettings.Infrastructure;
 

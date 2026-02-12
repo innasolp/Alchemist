@@ -1,5 +1,4 @@
-﻿using Mediator.Infrastructure.Command;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Mediator.Infrastructure.EF;

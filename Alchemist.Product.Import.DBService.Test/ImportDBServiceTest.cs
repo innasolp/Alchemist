@@ -13,8 +13,8 @@ using System.Net;
 using Xunit.Abstractions;
 using Mapster;
 using Shop.Infrastructure;
-using Mediator.Infrastructure.Command;
 using Alchemist.Product.Infrastructure;
+using Mediator.Infrastructure;
 
 namespace Alchemist.Product.Import.DBService.Test;
 

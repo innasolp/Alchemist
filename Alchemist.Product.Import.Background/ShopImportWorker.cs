@@ -1,6 +1,6 @@
 using Alchemist.Import.Settings;
 using Alchemist.Product.Entities;
-using Import.Service.Commands;
+using Import.Service.Infrastructure;
 using MediatR;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
