@@ -92,7 +92,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 attemptsCount++;
 
                 if (attemptsCount == MaxUnsuccessRequestCount)
+                {
+                    Logger.LogError(ImportProductLogMessages.FailedToLoadCategoryPageAfterAttempts, category.Path, page, MaxUnsuccessRequestCount);
                     break;
+                }
 
                 continue;
             }
@@ -238,7 +241,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         if (!success || stream is null) return (false, default(TCategory?));
 
-        Logger.LogInformation(ImportProductLogMessages.CaterogyPageLoadedSuccessfully, categoryPath, page);
+        Logger.LogInformation(ImportProductLogMessages.CategoryPageLoadedSuccessfully, categoryPath, page);
 
         try
         {
