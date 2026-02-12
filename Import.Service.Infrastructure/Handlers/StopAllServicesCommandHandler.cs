@@ -13,7 +13,7 @@ internal sealed class StopAllServicesCommandHandler(IServiceRepository serviceRe
 
     public async Task Handle(StopAllServicesCommand request, CancellationToken cancellationToken = default)
     {
-        var stopServiceTasks = _serviceRepository.StopAllServicesTask(cancellationToken);
+        var stopServiceTasks = _serviceRepository.StopAllServicesTask(cancellationToken).ToList();
 
         await Task.WhenAll(stopServiceTasks.Select(async st=>
         {
