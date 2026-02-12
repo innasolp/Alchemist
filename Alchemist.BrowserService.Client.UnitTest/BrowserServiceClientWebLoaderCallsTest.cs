@@ -149,7 +149,7 @@ public class BrowserServiceClientWebLoaderCallsTest
 
         var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl };
 
-        var exception = Assert.ThrowsAsync<LoaderServiceException>
+        await Assert.ThrowsAsync<LoaderServiceException>
             (()=>Helper.LoadHostAsync(webLoaderMock, url, hostRequestOptions: loaderOptions, cancellationToken: CancellationToken.None));
 
         webLoaderMock.Verify(w => w.Start(), Times.Once);
