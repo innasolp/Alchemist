@@ -97,6 +97,15 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Category {Category} page {Page} loaded successfully..
+        /// </summary>
+        internal static string CaterogyPageLoadedSuccessfully {
+            get {
+                return ResourceManager.GetString("CaterogyPageLoadedSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New category {Category} is enqueued..
         /// </summary>
         internal static string NewCategoryIsEnqueued {

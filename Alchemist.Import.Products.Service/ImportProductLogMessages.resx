@@ -150,4 +150,7 @@
   <data name="ProductFromUrlHandlingFailed" xml:space="preserve">
     <value>Product from path {ProductPath} handling failed.</value>
   </data>
+  <data name="CaterogyPageLoadedSuccessfully" xml:space="preserve">
+    <value>Category {Category} page {Page} loaded successfully.</value>
+  </data>
 </root>

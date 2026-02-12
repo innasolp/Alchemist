@@ -31,8 +31,8 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
 	  <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.5" />
 	  <PackageReference Include="BrowserDataLoader.Firefox.DevEdition.Windows" Version="1.0.0.5" />
-	  <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.5" />
-	  <PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.3" />
+	  <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.6" />
+	  <PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.4" />
   </ItemGroup>
 
 	<ItemGroup>

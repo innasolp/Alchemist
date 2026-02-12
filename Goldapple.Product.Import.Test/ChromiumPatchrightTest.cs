@@ -19,7 +19,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
         await using var webLoader = new ChromiumPatchrightWebLoader();
 
         await webLoader.Start();
-        var (success, stream) = await webLoader.TryLoadFromRoute(categoryPageUrl, (routeUrl)=> routeUrl.Contains(_categoryApiUrl));
+        var (success, stream) = await webLoader.TryLoadFromRouteAsync(categoryPageUrl, (routeUrl)=> routeUrl.Contains(_categoryApiUrl));
          
         Assert.True(success);
 
@@ -37,7 +37,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
 
         await webLoader.Start();
 
-        var (success, stream) = await webLoader.TryLoadFromRoute(productPageUrl, (routeUrl)=>routeUrl.Contains(_productApiUrl));
+        var (success, stream) = await webLoader.TryLoadFromRouteAsync(productPageUrl, (routeUrl)=>routeUrl.Contains(_productApiUrl));
 
         Assert.True(success);
 
