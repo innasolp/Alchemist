@@ -40,11 +40,9 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
             
             await startTask;
         }
-        catch
+        finally
         {
-            if(service != null) service.ConnectedAsync -= serviceConnectedAsync;
-
-            throw;
+            if (service != null) service.ConnectedAsync -= serviceConnectedAsync;
         }
     }
 }

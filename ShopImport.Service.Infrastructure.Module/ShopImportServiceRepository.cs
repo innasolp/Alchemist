@@ -2,6 +2,7 @@
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
+using Autofac.Core;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service.Commands.Models;
@@ -85,7 +86,21 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
             throw new InvalidOperationException($"Service with id {guid} not found.");
 
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, serviceItem.InnerTokenSource.Token);
-        return (serviceItem.Service, serviceItem.Service.Start(linkedCts.Token));
+
+        var startTask = StartAndDisposeAsync(serviceItem.Service, linkedCts);
+        return (serviceItem.Service, startTask);
+    }
+
+    static async Task StartAndDisposeAsync(IImportService service, CancellationTokenSource linkedCts)
+    {
+        try
+        {
+            await service.Start(linkedCts.Token);
+        }
+        finally
+        {
+            linkedCts.Dispose();
+        }
     }
 
     public (IImportService service, Task startTask) StopServiceTask(Guid guid, CancellationToken cancellationToken)
@@ -98,8 +113,15 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
 
     private static async Task StopServiceAsync(ServiceItem serviceItem, CancellationToken cancellationToken)
     {
-        await serviceItem.InnerTokenSource.CancelAsync();
-        await serviceItem.Service.Stop(cancellationToken);
+        try
+        {
+            await serviceItem.InnerTokenSource.CancelAsync();
+            await serviceItem.Service.Stop(cancellationToken);
+        }
+        finally
+        {
+            serviceItem.InnerTokenSource.Dispose();
+        }
     }
 
     public IEnumerable<(Guid guid, IImportService service, Task stopTask)> StopAllServicesTask(CancellationToken cancellationToken)
