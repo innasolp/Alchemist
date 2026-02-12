@@ -33,7 +33,7 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
         try
         {
             (service, var startTask) = _serviceRepository.StartServiceTask(request.Guid, cancellationToken);
-            using(startTask)
+            
             service.ConnectedAsync += serviceConnectedAsync;
 
             await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);            

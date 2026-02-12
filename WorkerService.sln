@@ -237,7 +237,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shop.Import.Category.Comman
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shop.Import.Common", "Shop.Import.Common\Shop.Import.Common.csproj", "{4C0DCAE1-AB4B-4771-AD10-D955289A1D09}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{E99D4DC2-F128-4567-B4FD-23E62E79FC7B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Import.Service.Infrastructure", "Import.Service.Infrastructure", "{E99D4DC2-F128-4567-B4FD-23E62E79FC7B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.PostresqlTestContainer", "Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj", "{BB9FBA2E-0EA0-40ED-ABB1-B62B31FE2EBB}"
 EndProject

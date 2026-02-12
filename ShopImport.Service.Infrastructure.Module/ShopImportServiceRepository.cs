@@ -73,7 +73,10 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
         var shops = ShopModels.OfType<IShopModel>().Where(s =>isConsumerSource(item, s));
 
         var consumeServicesItems = _services.Where(s => s.Value.Service is IListener<T> && shops.Any(shop => s.Value.SourceId == shop.Id));
-        consumeServicesItems.Select(s=>s.Value.Service).OfType<IListener<T>>().ToList().ForEach(s => s.On(item, cancellationToken));
+        
+        var tasks = consumeServicesItems.Select(s => s.Value.Service).OfType<IListener<T>>().Select(s => s.On(item, cancellationToken));
+
+        await Task.WhenAll(tasks);
     }
 
     public (IImportService service, Task startTask) StartServiceTask(Guid guid, CancellationToken cancellationToken)
@@ -104,14 +107,22 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
         return _services.Select(si => (si.Key, si.Value.Service, StopServiceAsync(si.Value, cancellationToken)));
     }
 
+    private readonly Lock _shopModelsLock = new();
+
     public async Task AddShopCategory(ShopCategory shopCategory)
     {
-        var shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
-        if (shop?.RootCategories.Any(c => c.ItemId == shopCategory.ItemId) != true)
-            return;
+        ProductShopModel? shop;
+        IProductShopCategory? productShopCategory;
+        lock (_shopModelsLock)
+        {
+            shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
 
-        var productShopCategory = shopCategory.ToProductShopCategoryModel();
-        shop?.Categories.Add(productShopCategory);
+            if (shop?.RootCategories.Any(c => c.ItemId == shopCategory.ItemId) != true)
+                return;
+
+            productShopCategory = shopCategory.ToProductShopCategoryModel();
+            shop?.Categories.Add(productShopCategory);
+        }
 
         if (_services.FirstOrDefault(s => s.Value.SourceId == shop?.Id
                     && s.Value.Service is IListener<IProductShopCategory> shopCategoryListener).Value.Service
