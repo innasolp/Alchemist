@@ -36,7 +36,8 @@
       },
       "HostRequestOptions": {
         "Value": {
-          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions"
+          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions",
+          "LoadingType": "WaitForUrl"
         }
       },
       "CategoryRequestOptions": {
@@ -96,7 +97,8 @@
       },
       "HostRequestOptions": {
         "Value": {
-          "RouteUrlFormat": "https://goldapple.ru/front/api/apm/events"
+          "RouteUrlFormat": "https://goldapple.ru/front/api/apm/events",
+          "LoadingType" : "Route"
         }
       }
     }
