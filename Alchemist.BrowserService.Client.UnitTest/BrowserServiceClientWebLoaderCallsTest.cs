@@ -108,7 +108,56 @@ public class BrowserServiceClientWebLoaderCallsTest
     }
 
     [Fact]
-    public async Task LoadHostPageWithRouteUrl_CallsWebLoaderWaitForUrl_ReturnsStreamAsync()
+    public async Task LoadHostPageWithRouteUrl_CallsWebLoaderTryLoadFromUrl_ReturnsStreamAsync()
+    {
+        var webLoaderMock = new Mock<IWebLoader>();
+
+        var expectedBytes = Encoding.UTF8.GetBytes("hello world");
+        var expectedStream = new MemoryStream(expectedBytes);
+
+        var url = "http://example";
+        var routeUrl = "http://example/api";
+
+        webLoaderMock
+            .Setup(w => w.TryLoadFromRoute(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, expectedStream));
+
+        var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl };
+
+        var resultStream = await Helper.LoadHostAsync(webLoaderMock, url, hostRequestOptions: loaderOptions, cancellationToken: CancellationToken.None);
+
+        Assert.Same(expectedStream, resultStream);
+
+        webLoaderMock.Verify(w => w.Start(), Times.Once);
+        webLoaderMock.Verify(w => w.TryLoadFromRoute(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task LoadHostPageWithRouteUrl_WhenWebLoaderLoadFromRouteReturnFalse_ThrownLoaderServiceExceptionAsync()
+    {
+        var webLoaderMock = new Mock<IWebLoader>();
+
+        var expectedBytes = Encoding.UTF8.GetBytes("hello world");
+        var expectedStream = new MemoryStream(expectedBytes);
+
+        var url = "http://example";
+        var routeUrl = "http://example/api";
+
+        webLoaderMock
+            .Setup(w => w.TryLoadFromRoute(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, expectedStream));
+
+        var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl };
+
+        await Assert.ThrowsAsync<LoaderServiceException>
+            (async ()=>Helper.LoadHostAsync(webLoaderMock, url, hostRequestOptions: loaderOptions, cancellationToken: CancellationToken.None));
+
+        webLoaderMock.Verify(w => w.Start(), Times.Once);
+        webLoaderMock.Verify(w => w.TryLoadFromRoute(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task LoadHostPageWithRouteUrl_CallsWebLoaderWaitForUrl_WhenLoadingTypeIsWaitForUrl_ReturnsStreamAsync()
     {
         var webLoaderMock = new Mock<IWebLoader>();
 
@@ -122,7 +171,7 @@ public class BrowserServiceClientWebLoaderCallsTest
             .Setup(w => w.WaitForUrl(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>()))
             .ReturnsAsync(expectedStream);
 
-        var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl };
+        var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl, LoadingType = LoadingType.WaitForUrl };
 
         var resultStream = await Helper.LoadHostAsync(webLoaderMock, url, hostRequestOptions: loaderOptions, cancellationToken: CancellationToken.None);
 
@@ -131,4 +180,5 @@ public class BrowserServiceClientWebLoaderCallsTest
         webLoaderMock.Verify(w => w.Start(), Times.Once);
         webLoaderMock.Verify(w => w.WaitForUrl(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>()), Times.Once);
     }
+
 }

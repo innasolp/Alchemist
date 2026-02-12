@@ -6,8 +6,10 @@ public enum LoadingType
 {
     Simple,
     Route,
-    Request,
-    Api
+    RequestFinished,
+    Response,
+    Api,
+    WaitForUrl
 }
 
 public class RequestOptions
