@@ -85,14 +85,17 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         while (isEndOfCategory != true)
         {
-            var (success, categoryResult, categoryPageResult) = await TryProcessCategoryPageAsync(categoryPagePath, category.ItemId, page, stoppingToken);
+            var (success, categoryResult, categoryPageResult) = await TryProcessCategoryPageAsync(categoryPagePath, category.ItemId, category.Path, page, stoppingToken);
 
             if (!success)
             {
                 attemptsCount++;
 
                 if (attemptsCount == MaxUnsuccessRequestCount)
+                {
+                    Logger.LogError(ImportProductLogMessages.FailedToLoadCategoryPageAfterAttempts, category.Path, page, MaxUnsuccessRequestCount);
                     break;
+                }
 
                 continue;
             }
@@ -159,13 +162,15 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return null;
     }
 
-    protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, int page, CancellationToken stoppingToken)
+    protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, string categoryPath, int page, CancellationToken stoppingToken)
     {
         var loaderData = GetLoaderData();
         var (success, category) = await TryGetCategoryFromPathAsync(categoryPagePath,
             ImportProductServiceOptions.CategoryLoadData != null 
                 ? new object?[] { loaderData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } 
                 : loaderData,
+            categoryPath, 
+            page,
             stoppingToken);
 
         if (!success)
@@ -230,11 +235,13 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return true;
     }
 
-    protected virtual async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string path, object? requestData, CancellationToken token)
+    protected virtual async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
     {        
-        var (success, stream) = await TryLoadFromUrlAsync(path, requestData, cancellationToken : token);
+        var (success, stream) = await TryLoadFromUrlAsync(dataPath, requestData, cancellationToken : token);
 
         if (!success || stream is null) return (false, default(TCategory?));
+
+        Logger.LogInformation(ImportProductLogMessages.CategoryPageLoadedSuccessfully, categoryPath, page);
 
         try
         {
@@ -246,7 +253,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
         catch (JsonException ex)
         {
-            Logger.LogError(ex, ImportProductLogMessages.SerializationFailed, typeof(TCategory).Name, path);
+            Logger.LogError(ex, ImportProductLogMessages.SerializationFailed, typeof(TCategory).Name, dataPath);
             return (false, default(TCategory?));
         }   
     }

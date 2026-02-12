@@ -63,7 +63,7 @@ public class ChromiumPatchrightTest(ITestOutputHelper testOutputHelper)
 
         var (document, timespan) = await TimeWatchHelper.ExecuteTaskWithTimeWatchAsync(async () =>
         {
-            await webLoader.WaitForUrl(_shopUrl, url=>url.Contains(routeUrl), timeoutInMilliseconds : 5000);
+            await webLoader.WaitForUrlAsync(_shopUrl, url=>url.Contains(routeUrl), timeoutInMilliseconds : 5000);
 
             return await GetJsonDocumentAsync(webLoader);
         });

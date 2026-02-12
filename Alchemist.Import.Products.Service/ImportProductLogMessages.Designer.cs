@@ -79,6 +79,15 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Category {Category} page {Page} loaded successfully..
+        /// </summary>
+        internal static string CategoryPageLoadedSuccessfully {
+            get {
+                return ResourceManager.GetString("CategoryPageLoadedSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Category Path {CategoryPath} were processed successfull : {ProductCount} products were loaded.
         /// </summary>
         internal static string CategoryProductsForUrlWereProcessedSuccesfullInfo {
@@ -93,6 +102,15 @@ namespace Alchemist.Import.Products.Service {
         internal static string CategoryProductsWereNotLoadedError {
             get {
                 return ResourceManager.GetString("CategoryProductsWereNotLoadedError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to load category {CategoryPath} page {Page} after {MaxAttempts} attempts..
+        /// </summary>
+        internal static string FailedToLoadCategoryPageAfterAttempts {
+            get {
+                return ResourceManager.GetString("FailedToLoadCategoryPageAfterAttempts", resourceCulture);
             }
         }
         

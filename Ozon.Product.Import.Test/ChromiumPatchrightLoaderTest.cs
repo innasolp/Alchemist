@@ -37,7 +37,7 @@ public class ChromiumPatchrightLoaderTest(ITestOutputHelper testOutputHelper)
 
         await webLoader.Start();
 
-        var (success, stream) = await webLoader.TryLoadFromRoute(string.Format(_shopUrlFormat, string.Format(_productPathFormat, _productItem)), 
+        var (success, stream) = await webLoader.TryLoadFromRouteAsync(string.Format(_shopUrlFormat, string.Format(_productPathFormat, _productItem)), 
             url=>url.Contains(string.Format(_productApiUrlFormat, _productItem)),
             loadingType: WebLoader.Playwright.RouteType.Request,
             timeoutInMilliseconds:5000);
@@ -58,7 +58,7 @@ public class ChromiumPatchrightLoaderTest(ITestOutputHelper testOutputHelper)
 
         await webLoader.Start();
 
-        var (success, stream) = await webLoader.TryLoadFromRoute(string.Format(_shopUrlFormat, string.Format(_categoryPathFormat, _categoryItem)),
+        var (success, stream) = await webLoader.TryLoadFromRouteAsync(string.Format(_shopUrlFormat, string.Format(_categoryPathFormat, _categoryItem)),
             url => url.Contains(string.Format(_categoryApiUrlFormat, _categoryItem)),
             loadingType: WebLoader.Playwright.RouteType.Request,
             timeoutInMilliseconds: 5000);
@@ -81,7 +81,7 @@ public class ChromiumPatchrightLoaderTest(ITestOutputHelper testOutputHelper)
 
         await webLoader.Start();
 
-        await webLoader.WaitForUrl("https://www.ozon.ru", (url) => url.Contains(routeUrl), timeoutInMilliseconds: 10000);
+        await webLoader.WaitForUrlAsync("https://www.ozon.ru", (url) => url.Contains(routeUrl), timeoutInMilliseconds: 10000);
 
         using var stream = await webLoader.LoadFromApiRequestAsync($"{string.Format(_productApiUrlFormat, _productItem)}%2F%3Flayout_container%3DpdpPage2column%26layout_page_index%3D2", 
             timeoutInMilliseconds: 5000);
@@ -106,7 +106,7 @@ public class ChromiumPatchrightLoaderTest(ITestOutputHelper testOutputHelper)
 
         await webLoader.Start();
 
-        await webLoader.WaitForUrl("https://www.ozon.ru", (url) => url.Contains(routeUrl), timeoutInMilliseconds: 10000);
+        await webLoader.WaitForUrlAsync("https://www.ozon.ru", (url) => url.Contains(routeUrl), timeoutInMilliseconds: 10000);
 
         using var stream = await webLoader.LoadFromApiRequestAsync($"{string.Format(_categoryApiUrlFormat, _categoryItem)}%2F%3Flayout_page_index%3D2", 
             timeoutInMilliseconds: 5000);
