@@ -213,7 +213,7 @@ public class BrowserServiceClient(HttpClient httpClient,
             else
             {
                 var streamReader = new StreamReader(result);
-                var message = streamReader.ReadToEnd();
+                var message = await streamReader.ReadToEndAsync(cancellationToken);
                 streamReader.Close();
                 throw new LoaderServiceException($"Route {routeUrl} on page {url} failed. {message}");
             }
@@ -299,11 +299,10 @@ public class BrowserServiceClient(HttpClient httpClient,
             using (stream)
             {
                 using var streamReader = new StreamReader(stream);
-                var message = streamReader.ReadToEnd();
+                var message = await streamReader.ReadToEndAsync(cancellationToken);
                 streamReader.Close();
                 throw new LoaderServiceException($"Route {_hostRequestOptions.RouteUrlFormat} on page {url} failed. {message}");
-            }
-        
+            }        
 
         throw new LoaderServiceException($"No request {_hostRequestOptions.RouteUrlFormat} in page {url}", LoaderServiceAction.Stop);
     }
