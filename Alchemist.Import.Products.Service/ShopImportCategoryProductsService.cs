@@ -67,12 +67,12 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 continue;
             }
 
-            var concurrentCategories = new BlockingCollection<IProductShopCategory>();
+            var concurrentCategories = new List<IProductShopCategory>(ConcurrentCategoryTaskCount);
 
             while (!Categories.IsEmpty && concurrentCategories.Count < ConcurrentCategoryTaskCount)
             {
-                if(Categories.TryDequeue(out var productShopCategory))
-                    concurrentCategories.Add(productShopCategory, stoppingToken);
+                if (Categories.TryDequeue(out var productShopCategory))
+                    concurrentCategories.Add(productShopCategory);
             }
 
             try
