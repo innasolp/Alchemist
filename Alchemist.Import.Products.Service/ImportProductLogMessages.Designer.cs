@@ -106,7 +106,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to load category {CategoryPath} page {Page}..
+        ///   Looks up a localized string similar to Failed to load category {CategoryPath} page {Page}. See error log..
         /// </summary>
         internal static string FailedToLoadCategoryPage {
             get {
@@ -124,7 +124,7 @@ namespace Alchemist.Import.Products.Service {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to load product {ProductPath} of category {Category}.
+        ///   Looks up a localized string similar to Failed to load product {ProductPath} of category {Category}. See error log..
         /// </summary>
         internal static string FailedToLoadProductOfCategory {
             get {

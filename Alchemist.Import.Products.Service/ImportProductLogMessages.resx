@@ -157,9 +157,9 @@
     <value>Failed to load category {CategoryPath} page {Page} after {MaxAttempts} attempts.</value>
   </data>
   <data name="FailedToLoadCategoryPage" xml:space="preserve">
-    <value>Failed to load category {CategoryPath} page {Page}.</value>
+    <value>Failed to load category {CategoryPath} page {Page}. See error log.</value>
   </data>
   <data name="FailedToLoadProductOfCategory" xml:space="preserve">
-    <value>Failed to load product {ProductPath} of category {Category}</value>
+    <value>Failed to load product {ProductPath} of category {Category}. See error log.</value>
   </data>
 </root>

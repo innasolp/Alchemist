@@ -83,10 +83,6 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             {
                 throw;
             }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error processing category batch");
-            }
         }
     }
 
@@ -235,13 +231,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                     : loaderData,
                 cancellationToken);
         }
-        catch (LoadFromUrlException e)
+        catch
         {
-            Logger.LogError(e, ImportProductLogMessages.FailedToLoadProductOfCategory, path, categoryProductItem.CategoryItemId);
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e, "Unexpected error while loading product from url: {ProductPath}", path);
+            Logger.LogInformation(ImportProductLogMessages.FailedToLoadProductOfCategory, path, categoryProductItem.CategoryItemId);
+            throw;
         }
 
         if (!success || stream is null)
@@ -276,9 +269,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             (success, stream) = await TryLoadFromUrlAsync(dataPath, requestData, cancellationToken: token);
         }
-        catch(LoadFromUrlException e)
+        catch
         {
-            Logger.LogError(e, ImportProductLogMessages.FailedToLoadCategoryPage, categoryPath, page);
+            Logger.LogInformation(ImportProductLogMessages.FailedToLoadCategoryPage, categoryPath, page);
+            throw;
         }
 
         if (!success || stream is null) return (false, default(TCategory?));
