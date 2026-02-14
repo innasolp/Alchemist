@@ -239,6 +239,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             Logger.LogError(e, ImportProductLogMessages.FailedToLoadProductOfCategory, path, categoryProductItem.CategoryItemId);
         }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Unexpected error while loading product from url: {ProductPath}", path);
+        }
 
         if (!success || stream is null)
         {
