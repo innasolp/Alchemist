@@ -29,47 +29,64 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly SemaphoreSlim _categoryListenerSemaphoreSlim = new(1, 1);
 
-    protected ConcurrentQueue<IProductShopCategory> Categories { get; } = new();
+    protected ConcurrentQueue<IProductShopCategory> Categories { get; } = new ConcurrentQueue<IProductShopCategory>(shopCategories);
 
-    private readonly IEnumerable<IProductShopCategory> _initialCategories = shopCategories;
+    private readonly string _productPathFormat = productPathFormat;
 
-    private readonly string _productPathFormat = productPathFormat;    
+    private readonly string _categoryPathFormat = categoryPathFormat;
 
-    private readonly string _categoryPathFormat = categoryPathFormat; 
-
-    private readonly string _sourceName = sourceName;    
+    private readonly string _sourceName = sourceName;
 
     protected virtual int MaxUnsuccessRequestCount => 10;
+
+    protected virtual int ConcurrentCategoryTaskCount => 10;
 
     protected ImportProductServiceOptions ImportProductServiceOptions { get; } = importProductServiceOptions;
 
     async Task IListener<IProductShopCategory>.On(IProductShopCategory message, CancellationToken cancellationToken)
     {
+        var acquired = false;
         try
         {
             await _categoryListenerSemaphoreSlim.WaitAsync(cancellationToken);
+            acquired = true;
+
             Categories.Enqueue(message);
             Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, message.Path);
         }
         finally
         {
-            _categoryListenerSemaphoreSlim.Release();
+            if (acquired)
+                _categoryListenerSemaphoreSlim.Release();
         }
     }
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        await Task.WhenAll(_initialCategories.Select(c => ProcessCategoryAsync(c, stoppingToken)));
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (!Categories.TryDequeue(out var category))
+            if (Categories.IsEmpty)
             {
                 await Task.Delay(50, stoppingToken);
                 continue;
-            } 
+            }
 
-            await ProcessCategoryAsync(category, stoppingToken);
+            var concurrentCategories = new List<IProductShopCategory>(ConcurrentCategoryTaskCount);
+
+            while (!Categories.IsEmpty && concurrentCategories.Count < ConcurrentCategoryTaskCount)
+            {
+                if (Categories.TryDequeue(out var productShopCategory))
+                    concurrentCategories.Add(productShopCategory);
+            }
+
+            try
+            {
+                await Task.WhenAll(concurrentCategories.Select(c => ProcessCategoryAsync(c, stoppingToken)));
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                throw;
+            }
         }
     }
 
@@ -206,14 +223,28 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         var path = GetProductAbsolutePath(_productPathFormat, categoryProductItem);
 
         var loaderData = GetLoaderData();
-        var (success, stream) = await TryLoadFromUrlAsync(path,
-            ImportProductServiceOptions.ProductLoadData is not null
-                ? new object?[] { loaderData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } }
-                : loaderData,
-            cancellationToken);
-        
-        if(!success)
+
+        bool success;
+        Stream? stream;
+        try
         {
+            (success, stream) = await TryLoadFromUrlAsync(path,
+                ImportProductServiceOptions.ProductLoadData is not null
+                    ? new object?[] { loaderData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } }
+                    : loaderData,
+                cancellationToken);
+        }
+        catch
+        {
+            Logger.LogInformation(ImportProductLogMessages.FailedToLoadProductOfCategory, path, categoryProductItem.CategoryItemId);
+            throw;
+        }
+
+        if (!success || stream is null)
+        {
+            if (stream is not null)
+                await stream.DisposeAsync();
+
             Logger.LogInformation(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, path);
             return false;
         }  
@@ -231,31 +262,55 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             Logger.LogError(e, ImportProductLogMessages.ProductFromUrlHandlingFailed, productItem.AbsolutePath);
         }
+        finally
+        {
+            await stream.DisposeAsync();
+        }
 
         return true;
     }
 
     protected virtual async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
-    {        
-        var (success, stream) = await TryLoadFromUrlAsync(dataPath, requestData, cancellationToken : token);
+    {
+        bool success;
+        Stream? stream;
+        try
+        {
+            (success, stream) = await TryLoadFromUrlAsync(dataPath, requestData, cancellationToken: token);
+        }
+        catch
+        {
+            Logger.LogInformation(ImportProductLogMessages.FailedToLoadCategoryPage, categoryPath, page);
+            throw;
+        }
 
-        if (!success || stream is null) return (false, default(TCategory?));
+        if (!success || stream is null)
+        {
+            if (stream is not null)
+                await stream.DisposeAsync();
+
+            return (false, default(TCategory?));
+        }
+
+        await using var categoryStream = stream;
 
         Logger.LogInformation(ImportProductLogMessages.CategoryPageLoadedSuccessfully, categoryPath, page);
 
         try
         {
-            await using (stream)
-            {
-                var item = await DeserializeCategoryFromStream(stream, cancellationToken: token); 
-                return (true, item);
-            }
+            var item = await DeserializeCategoryFromStream(stream, cancellationToken: token); 
+            return (true, item);
+            
         }
         catch (JsonException ex)
         {
             Logger.LogError(ex, ImportProductLogMessages.SerializationFailed, typeof(TCategory).Name, dataPath);
             return (false, default(TCategory?));
-        }   
+        }  
+        finally
+        {
+            await stream.DisposeAsync();
+        }
     }
 
     protected virtual async Task<TCategory?> DeserializeCategoryFromStream(Stream stream, CancellationToken cancellationToken = default)
