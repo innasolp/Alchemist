@@ -103,13 +103,8 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
         if(_connectionsPool.Count == 0)
             await _webLoader.DisposeAsync();
 
-        _addToPoolSemaphore.Release();
         _addToPoolSemaphore.Dispose();
-
-        _startSemaphoreSlim.Release();
         _startSemaphoreSlim.Dispose();
-
-        _removeFromPoolSemaphore.Release();
         _removeFromPoolSemaphore.Dispose();
     }    
 
