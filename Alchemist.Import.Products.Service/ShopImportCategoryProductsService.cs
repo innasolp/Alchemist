@@ -45,15 +45,19 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     async Task IListener<IProductShopCategory>.On(IProductShopCategory message, CancellationToken cancellationToken)
     {
+        var acquired = false;
         try
         {
             await _categoryListenerSemaphoreSlim.WaitAsync(cancellationToken);
+            acquired = true;
+
             Categories.Enqueue(message);
             Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, message.Path);
         }
         finally
         {
-            _categoryListenerSemaphoreSlim.Release();
+            if (acquired)
+                _categoryListenerSemaphoreSlim.Release();
         }
     }
 
