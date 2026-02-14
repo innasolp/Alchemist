@@ -79,6 +79,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             {
                 await Task.WhenAll(concurrentCategories.Select(c => ProcessCategoryAsync(c, stoppingToken)));
             }
+            catch (Exception ex) when (ex is OperationCanceledException && stoppingToken.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Error processing category batch");
