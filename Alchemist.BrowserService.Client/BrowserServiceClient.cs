@@ -103,6 +103,9 @@ public class BrowserServiceClient(HttpClient httpClient,
 
         try
         {
+            if (requestOptions?.LoadingType == LoadingType.WaitForUrl)
+                return await WaitForUrlAsync(url, requestOptions.RouteUrlFormat ?? url, parameters, requestOptions?.TimeouteMillseconds, headers, cancellationToken);
+
             if (!string.IsNullOrEmpty(requestOptions?.RouteUrlFormat) &&
                 requestOptions?.LoadingType != LoadingType.Simple && requestOptions?.LoadingType != LoadingType.Api)
                 return await LoadFromRouteUrl(url, requestOptions.RouteUrlFormat, requestOptions?.LoadingType, parameters, requestOptions?.TimeouteMillseconds, headers, cancellationToken);
@@ -110,10 +113,7 @@ public class BrowserServiceClient(HttpClient httpClient,
             if (requestOptions?.LoadingType == LoadingType.Api)
                 return await LoadFromApi(url, requestOptions, parameters, headers, cancellationToken);
 
-            return await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
-                (webLoader, cancellationToken) =>
-                webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { Headers = headers, TimeoutInMilliseconds = requestOptions?.TimeouteMillseconds }),
-                cancellationToken);
+            return await LoadFromUrl(url, timeoutInMilliseconds: requestOptions?.TimeouteMillseconds, cancellationToken: cancellationToken);
         }
         catch (WebLoader.Common.WebLoaderException e)
         {
@@ -193,7 +193,7 @@ public class BrowserServiceClient(HttpClient httpClient,
 
         var (success, result) = await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
                 (webLoader, cancellationToken) =>
-                webLoader.TryLoadFromRoute(url, routeUrl,
+                webLoader.TryLoadFromRoute(url, (url)=>url.Contains(routeUrl, StringComparison.InvariantCultureIgnoreCase),
                     new WebLoaderRequestOptions
                     {
                         Headers = headers,
@@ -220,6 +220,47 @@ public class BrowserServiceClient(HttpClient httpClient,
         }
 
         return result;
+    }
+
+    private async Task<Stream> LoadFromUrl(string url,
+        int? timeoutInMilliseconds = null,
+        Dictionary<string, string>? headers = null,
+        CancellationToken cancellationToken = default)
+    {
+        return  await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
+                (webLoader, cancellationToken) =>
+                webLoader.LoadFromUrl(url,
+                    new WebLoaderRequestOptions
+                    {
+                        Headers = headers,
+                        TimeoutInMilliseconds = timeoutInMilliseconds,
+                        Parameters = new Dictionary<string, object>() { { "RouteUrl", url } }
+                    }),
+                cancellationToken);
+    }
+
+    private async Task<Stream> WaitForUrlAsync(string url,
+        string routeUrlFormat,
+        IEnumerable<string>? parameters = null,
+        int? timeoutInMilliseconds = null,
+        Dictionary<string, string>? headers = null,
+        CancellationToken cancellationToken = default)
+    {
+        var routeUrl = parameters?.Any() == true
+            ? string.Format(routeUrlFormat, [.. parameters])
+            : routeUrlFormat;
+
+        var result = await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
+                (webLoader, cancellationToken) =>
+                webLoader.WaitForUrl(url, (url)=> url.Contains(routeUrl, StringComparison.InvariantCultureIgnoreCase),
+                    new WebLoaderRequestOptions
+                    {
+                        Headers = headers,
+                        TimeoutInMilliseconds = timeoutInMilliseconds
+                    }),
+                cancellationToken);
+
+        return result is not null ? result : throw new LoaderServiceException($"Route {routeUrl} on page {url} not found");
     }
 
     private async Task<int> ClearCookiesForHost(string host, CancellationToken token = default)
@@ -265,45 +306,17 @@ public class BrowserServiceClient(HttpClient httpClient,
 
     public async Task<Stream> LoadHostPage(string url, CancellationToken cancellationToken = default)
     {
-        if (_hostRequestOptions is null || string.IsNullOrEmpty(_hostRequestOptions?.RouteUrlFormat))
-            return await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
-                (webLoader, cancellationToken) =>
-                webLoader.LoadFromUrl(url, new WebLoaderRequestOptions { TimeoutInMilliseconds = _hostRequestOptions?.TimeouteMillseconds }), cancellationToken);
+        if (_hostRequestOptions is null || string.IsNullOrEmpty(_hostRequestOptions?.RouteUrlFormat)
+            || _hostRequestOptions.LoadingType == LoadingType.Simple)
+            return await LoadFromUrl(url, timeoutInMilliseconds: _hostRequestOptions?.TimeouteMillseconds, cancellationToken: cancellationToken);            
 
-        var routeType = _hostRequestOptions.Parameters?.TryGetValue("RouteType", out var webLoaderRouteType) == true 
-            ? webLoaderRouteType
-            : null;
+        if (_hostRequestOptions.LoadingType == LoadingType.WaitForUrl)
+            return await WaitForUrlAsync(url, _hostRequestOptions.RouteUrlFormat, null, _hostRequestOptions.TimeouteMillseconds,
+                cancellationToken: cancellationToken);
 
-        var webLoaderRequestOptions = new WebLoaderRequestOptions
-        {
-            TimeoutInMilliseconds = _hostRequestOptions.TimeouteMillseconds,
-            Parameters = routeType != null
-                           ? new Dictionary<string, object>() { { "RouteType", routeType } }
-                           : default
-        };
-
-        if(_hostRequestOptions.LoadingType == LoadingType.WaitForUrl)
-            return await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
-                (webLoader, cancellationToken) => webLoader.WaitForUrl(url, _hostRequestOptions.RouteUrlFormat, webLoaderRequestOptions), 
-                cancellationToken);
-
-        var (success, stream) = await _rateLimiterWebLoader.ExecuteAsync(_connectionId,
-                (webLoader, cancellationToken) => 
-                webLoader.TryLoadFromRoute(url, _hostRequestOptions.RouteUrlFormat, webLoaderRequestOptions, cancellationToken), 
-                cancellationToken);
-
-        if (success && stream is not null)
-                return stream;
-
-        if(stream is not null)        
-            using (stream)
-            {
-                using var streamReader = new StreamReader(stream);
-                var message = await streamReader.ReadToEndAsync(cancellationToken);
-                streamReader.Close();
-                throw new LoaderServiceException($"Route {_hostRequestOptions.RouteUrlFormat} on page {url} failed. {message}");
-            }        
-
-        throw new LoaderServiceException($"No request {_hostRequestOptions.RouteUrlFormat} in page {url}", LoaderServiceAction.Stop);
+        return await LoadFromRouteUrl(url, _hostRequestOptions.RouteUrlFormat,
+            _hostRequestOptions.LoadingType,
+            timeoutInMilliseconds: _hostRequestOptions.TimeouteMillseconds,
+            cancellationToken: cancellationToken);
     }
 }

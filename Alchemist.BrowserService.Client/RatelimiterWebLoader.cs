@@ -17,7 +17,8 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
 
     private readonly SemaphoreSlim _addToPoolSemaphore = new(1,1);
     private readonly SemaphoreSlim _removeFromPoolSemaphore = new(1,1);
-
+    private readonly SemaphoreSlim _startSemaphoreSlim = new(1,1);
+    
     private ResiliencePipeline? _pipeline;
 
     private void ThrowExceptionIfNotStarted(Guid connectionId)
@@ -101,6 +102,15 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
     {
         if(_connectionsPool.Count == 0)
             await _webLoader.DisposeAsync();
+
+        _addToPoolSemaphore.Release();
+        _addToPoolSemaphore.Dispose();
+
+        _startSemaphoreSlim.Release();
+        _startSemaphoreSlim.Dispose();
+
+        _removeFromPoolSemaphore.Release();
+        _removeFromPoolSemaphore.Dispose();
     }    
 
     public async Task Reset(string host)
@@ -111,10 +121,21 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
             await Reseted.Invoke(this, new EventArgs());
     }
 
-    public async Task<bool> Start(Guid connectionId)
+    public async Task<bool> Start(Guid connectionId, CancellationToken cancellationToken = default)
     {
-        return _connectionsPool.Contains(connectionId) 
-            && (_webLoader.IsStarted || await _webLoader.Start());
+        if (!_connectionsPool.Contains(connectionId)) return false;
+
+        await _startSemaphoreSlim.WaitAsync(cancellationToken);
+        try
+        {
+            if (!_webLoader.IsStarted) return await _webLoader.Start();
+        }
+        finally
+        {
+            _startSemaphoreSlim.Release();
+        }
+
+        return true;
     }
 
     public async Task<T> ExecuteAsync<T>(Guid connectionId, Func<IWebLoader,CancellationToken, Task<T>> task, CancellationToken cancellationToken = default)

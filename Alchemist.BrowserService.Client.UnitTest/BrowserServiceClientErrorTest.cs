@@ -112,9 +112,11 @@ public class BrowserServiceClientErrorTest
 
         var url = "http://example";
         var routeUrl = "http://example/api";
-
+        
         webLoaderMock
-            .Setup(w => w.TryLoadFromRoute(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>(), It.IsAny<CancellationToken>()))
+            .Setup(w => w.TryLoadFromRoute(url, It.Is<Func<string, bool>>(f => f.Invoke(routeUrl)),
+                    It.IsAny<WebLoader.Interfaces.RequestOptions?>(), 
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, expectedStream));        
 
         var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl };
@@ -124,7 +126,9 @@ public class BrowserServiceClientErrorTest
 
         Assert.Contains($"Route {routeUrl} on page {url} failed. {errorMessage}", ex.Message);
 
-        webLoaderMock.Verify(w => w.TryLoadFromRoute(url, routeUrl, It.IsAny<WebLoader.Interfaces.RequestOptions?>(), 
+        webLoaderMock.Verify(w => w.TryLoadFromRoute(url, 
+            It.Is<Func<string, bool>>(f=>f.Invoke(routeUrl)),
+            It.IsAny<WebLoader.Interfaces.RequestOptions?>(), 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 }

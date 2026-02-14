@@ -17,7 +17,7 @@ public interface IRateLimiterWebLoader : IAsyncDisposable
 
     Task Reset(string host);
 
-    Task<bool> Start(Guid connectionId);
+    Task<bool> Start(Guid connectionId, CancellationToken cancellationToken = default);
 
     Task<T> ExecuteAsync<T>(Guid connectionId, Func<IWebLoader, CancellationToken, Task<T>> task, CancellationToken cancellationToken = default);
 }

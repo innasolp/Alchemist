@@ -16,7 +16,7 @@ public class BrowserServiceClientRatelimiterTest(ITestOutputHelper testOutputHel
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
     [Theory]
-    [InlineData(500,300)]
+    [InlineData(5000,300)]
     [InlineData(100,500)]
     public async Task TaskWhenAllLoadFromUrl_SuccessAsync(int windowMilliseconds, int delay)
     {

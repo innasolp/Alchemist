@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -21,10 +21,10 @@
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
 	  <PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.5" />
-	  <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.6" />
-	  <PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.4" />
+	  <PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.7" />
+	  <PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.5" />
 	  <PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.2" />
-	  <PackageReference Include="WebLoader.HttpClient" Version="1.0.1.6" />
+	  <PackageReference Include="WebLoader.HttpClient" Version="1.0.1.7" />
   </ItemGroup>
 
   <ItemGroup>
