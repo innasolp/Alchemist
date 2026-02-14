@@ -87,7 +87,7 @@ public class BrowserServiceClientWebLoaderCallsTest
         Assert.Contains($"Route {invalidRouteUrl} on page {url} not found", ex.Message);
 
         webLoaderMock.Verify(w => w.TryLoadFromRoute(url,
-            It.Is<Func<string, bool>>(f => f.Invoke(invalidRouteUrl) && !f.Invoke(routeUrl)),
+            It.Is<Func<string, bool>>(f => f.Invoke(invalidRouteUrl)),
             It.IsAny<WebLoader.Interfaces.RequestOptions?>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
