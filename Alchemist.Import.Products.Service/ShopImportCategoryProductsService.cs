@@ -75,7 +75,14 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                     concurrentCategories.Add(productShopCategory, stoppingToken);
             }
 
-            await Task.WhenAll(concurrentCategories.Select(c => ProcessCategoryAsync(c, stoppingToken)));
+            try
+            {
+                await Task.WhenAll(concurrentCategories.Select(c => ProcessCategoryAsync(c, stoppingToken)));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error processing category batch");
+            }
         }
     }
 
