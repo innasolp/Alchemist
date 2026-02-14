@@ -29,17 +29,17 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly SemaphoreSlim _categoryListenerSemaphoreSlim = new(1, 1);
 
-    protected ConcurrentQueue<IProductShopCategory> Categories { get; } = new();
+    protected ConcurrentQueue<IProductShopCategory> Categories { get; } = new ConcurrentQueue<IProductShopCategory>(shopCategories);
 
-    private readonly IEnumerable<IProductShopCategory> _initialCategories = shopCategories;
+    private readonly string _productPathFormat = productPathFormat;
 
-    private readonly string _productPathFormat = productPathFormat;    
+    private readonly string _categoryPathFormat = categoryPathFormat;
 
-    private readonly string _categoryPathFormat = categoryPathFormat; 
-
-    private readonly string _sourceName = sourceName;    
+    private readonly string _sourceName = sourceName;
 
     protected virtual int MaxUnsuccessRequestCount => 10;
+
+    private const int ConcurrentCategoryTaskCount = 10;
 
     protected ImportProductServiceOptions ImportProductServiceOptions { get; } = importProductServiceOptions;
 
@@ -59,17 +59,23 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        await Task.WhenAll(_initialCategories.Select(c => ProcessCategoryAsync(c, stoppingToken)));
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (!Categories.TryDequeue(out var category))
+            if (Categories.IsEmpty)
             {
                 await Task.Delay(50, stoppingToken);
                 continue;
-            } 
+            }
 
-            await ProcessCategoryAsync(category, stoppingToken);
+            var concurrentCategories = new BlockingCollection<IProductShopCategory>();
+
+            while (!Categories.IsEmpty && concurrentCategories.Count < ConcurrentCategoryTaskCount)
+            {
+                if(Categories.TryDequeue(out var productShopCategory))
+                    concurrentCategories.Add(productShopCategory, stoppingToken);
+            }
+
+            await Task.WhenAll(concurrentCategories.Select(c => ProcessCategoryAsync(c, stoppingToken)));
         }
     }
 
@@ -206,13 +212,24 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         var path = GetProductAbsolutePath(_productPathFormat, categoryProductItem);
 
         var loaderData = GetLoaderData();
-        var (success, stream) = await TryLoadFromUrlAsync(path,
-            ImportProductServiceOptions.ProductLoadData is not null
-                ? new object?[] { loaderData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } }
-                : loaderData,
-            cancellationToken);
-        
-        if(!success)
+
+        bool success = false;
+        Stream? stream = null;
+
+        try
+        {
+            (success, stream) = await TryLoadFromUrlAsync(path,
+                ImportProductServiceOptions.ProductLoadData is not null
+                    ? new object?[] { loaderData, ImportProductServiceOptions.ProductLoadData, new string[] { $"{categoryProductItem.Id}" } }
+                    : loaderData,
+                cancellationToken);
+        }
+        catch (LoadFromUrlException e)
+        {
+            Logger.LogError(e, ImportProductLogMessages.FailedToLoadProductOfCategory, path, categoryProductItem.CategoryItemId);
+        }
+
+        if (!success || stream is null)
         {
             Logger.LogInformation(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, path);
             return false;
@@ -236,8 +253,18 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     }
 
     protected virtual async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
-    {        
-        var (success, stream) = await TryLoadFromUrlAsync(dataPath, requestData, cancellationToken : token);
+    {
+        bool success = false;
+        Stream? stream = null;
+
+        try
+        {
+            (success, stream) = await TryLoadFromUrlAsync(dataPath, requestData, cancellationToken: token);
+        }
+        catch(LoadFromUrlException e)
+        {
+            Logger.LogError(e, ImportProductLogMessages.FailedToLoadCategoryPage, categoryPath, page);
+        }
 
         if (!success || stream is null) return (false, default(TCategory?));
 
