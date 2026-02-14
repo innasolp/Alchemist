@@ -39,7 +39,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual int MaxUnsuccessRequestCount => 10;
 
-    private const int ConcurrentCategoryTaskCount = 10;
+    protected virtual int ConcurrentCategoryTaskCount => 10;
 
     protected ImportProductServiceOptions ImportProductServiceOptions { get; } = importProductServiceOptions;
 
