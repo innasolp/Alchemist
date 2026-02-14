@@ -113,7 +113,7 @@ public class BrowserServiceClient(HttpClient httpClient,
             if (requestOptions?.LoadingType == LoadingType.Api)
                 return await LoadFromApi(url, requestOptions, parameters, headers, cancellationToken);
 
-            return await LoadFromUrl(url, timeoutInMilliseconds: requestOptions?.TimeouteMillseconds, cancellationToken: cancellationToken);
+            return await LoadFromUrl(url, timeoutInMilliseconds: requestOptions?.TimeouteMillseconds, headers: headers, cancellationToken: cancellationToken);
         }
         catch (WebLoader.Common.WebLoaderException e)
         {
