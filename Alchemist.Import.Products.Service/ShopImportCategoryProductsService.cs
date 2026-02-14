@@ -224,9 +224,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         var loaderData = GetLoaderData();
 
-        bool success = false;
-        Stream? stream = null;
-
+        bool success;
+        Stream? stream;
         try
         {
             (success, stream) = await TryLoadFromUrlAsync(path,
@@ -243,6 +242,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         if (!success || stream is null)
         {
+            if (stream is not null)
+                await stream.DisposeAsync();
+
             Logger.LogInformation(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, path);
             return false;
         }  
@@ -260,15 +262,18 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         {
             Logger.LogError(e, ImportProductLogMessages.ProductFromUrlHandlingFailed, productItem.AbsolutePath);
         }
+        finally
+        {
+            await stream.DisposeAsync();
+        }
 
         return true;
     }
 
     protected virtual async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
     {
-        bool success = false;
-        Stream? stream = null;
-
+        bool success;
+        Stream? stream;
         try
         {
             (success, stream) = await TryLoadFromUrlAsync(dataPath, requestData, cancellationToken: token);
@@ -279,23 +284,33 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             throw;
         }
 
-        if (!success || stream is null) return (false, default(TCategory?));
+        if (!success || stream is null)
+        {
+            if (stream is not null)
+                await stream.DisposeAsync();
+
+            return (false, default(TCategory?));
+        }
+
+        await using var categoryStream = stream;
 
         Logger.LogInformation(ImportProductLogMessages.CategoryPageLoadedSuccessfully, categoryPath, page);
 
         try
         {
-            await using (stream)
-            {
-                var item = await DeserializeCategoryFromStream(stream, cancellationToken: token); 
-                return (true, item);
-            }
+            var item = await DeserializeCategoryFromStream(stream, cancellationToken: token); 
+            return (true, item);
+            
         }
         catch (JsonException ex)
         {
             Logger.LogError(ex, ImportProductLogMessages.SerializationFailed, typeof(TCategory).Name, dataPath);
             return (false, default(TCategory?));
-        }   
+        }  
+        finally
+        {
+            await stream.DisposeAsync();
+        }
     }
 
     protected virtual async Task<TCategory?> DeserializeCategoryFromStream(Stream stream, CancellationToken cancellationToken = default)
