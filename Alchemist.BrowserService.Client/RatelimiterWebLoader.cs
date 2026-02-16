@@ -102,12 +102,20 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
     {
         _connectionsPool.Clear();
 
-        _addToPoolSemaphore.Dispose();
-        _startSemaphoreSlim.Dispose();
-        _removeFromPoolSemaphore.Dispose();
-        
-        await _webLoader.DisposeAsync();        
-    }    
+        try
+        {
+            if (_webLoader.IsStarted)
+                await _webLoader.Close();
+        }
+        finally
+        {
+            _addToPoolSemaphore.Dispose();
+            _startSemaphoreSlim.Dispose();
+            _removeFromPoolSemaphore.Dispose();
+        }
+
+        await _webLoader.DisposeAsync();
+    }
 
     public async Task Reset(string host)
     {
