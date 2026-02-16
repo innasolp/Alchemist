@@ -16,14 +16,14 @@ public static class ModelExtensions
         serviceSettings.Value = source.Value;
     }    
 
-    public static void UpdateServices<TService>(this IImportSettings shopImportSettings, string serviceName, TService serviceSource)
+    public static void UpdateServices<TService>(this IImportSettings importSettings, string serviceName, TService serviceSource)
         where TService : class, IServiceSettings 
     {
-        var targetService = shopImportSettings.GetService<TService>(serviceName);
+        var targetService = importSettings.GetService<TService>(serviceName);
 
         if (targetService != null)
             targetService.Update(serviceSource);
         else
-            shopImportSettings.Services.Add(serviceName, serviceSource);
+            importSettings.Services.Add(serviceName, serviceSource);
     }
 }
