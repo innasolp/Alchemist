@@ -17,7 +17,8 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
 
     private readonly SemaphoreSlim _addToPoolSemaphore = new(1,1);
     private readonly SemaphoreSlim _removeFromPoolSemaphore = new(1,1);
-
+    private readonly SemaphoreSlim _startSemaphoreSlim = new(1,1);
+    
     private ResiliencePipeline? _pipeline;
 
     private void ThrowExceptionIfNotStarted(Guid connectionId)
@@ -99,9 +100,22 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
 
     public async ValueTask DisposeAsync()
     {
-        if(_connectionsPool.Count == 0)
-            await _webLoader.DisposeAsync();
-    }    
+        _connectionsPool.Clear();
+
+        try
+        {
+            if (_webLoader.IsStarted)
+                await _webLoader.Close();
+        }
+        finally
+        {
+            _addToPoolSemaphore.Dispose();
+            _startSemaphoreSlim.Dispose();
+            _removeFromPoolSemaphore.Dispose();
+        }
+
+        await _webLoader.DisposeAsync();
+    }
 
     public async Task Reset(string host)
     {
@@ -111,17 +125,28 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
             await Reseted.Invoke(this, new EventArgs());
     }
 
-    public async Task<bool> Start(Guid connectionId)
+    public async Task<bool> Start(Guid connectionId, CancellationToken cancellationToken = default)
     {
-        return _connectionsPool.Contains(connectionId) 
-            && (_webLoader.IsStarted || await _webLoader.Start());
+        if (!_connectionsPool.Contains(connectionId)) return false;
+
+        await _startSemaphoreSlim.WaitAsync(cancellationToken);
+        try
+        {
+            if (!_webLoader.IsStarted) return await _webLoader.Start();
+        }
+        finally
+        {
+            _startSemaphoreSlim.Release();
+        }
+
+        return true;
     }
 
     public async Task<T> ExecuteAsync<T>(Guid connectionId, Func<IWebLoader,CancellationToken, Task<T>> task, CancellationToken cancellationToken = default)
     {
         ThrowExceptionIfNotStarted(connectionId);
 
-        ValueTask<T> valueTask(CancellationToken ct) => new(task(_webLoader, cancellationToken));
+        ValueTask<T> valueTask(CancellationToken ct) => new(task(_webLoader, ct));
         return await _pipeline.ExecuteAsync(valueTask, cancellationToken);
     }
 

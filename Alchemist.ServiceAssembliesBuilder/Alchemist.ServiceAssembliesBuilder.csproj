@@ -9,9 +9,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="BrowserDataLoader.Firefox.Standart.Windows" Version="1.0.0.5" GeneratePathProperty="true" />
-		<PackageReference Include="WebLoader.HttpClient" Version="1.0.1.6" />
-		<PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.6" GeneratePathProperty="true" />
-		<PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.4" GeneratePathProperty="true" />
+		<PackageReference Include="WebLoader.HttpClient" Version="1.0.1.7" />
+		<PackageReference Include="WebLoader.Playwright.Firefox" Version="1.0.1.7" GeneratePathProperty="true" />
+		<PackageReference Include="WebLoader.Playwright.ChromiumPatchright" Version="1.0.0.5" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserLauncher.Firefox.Windows.Standart" Version="1.0.0.2" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserLauncher.Firefox.Windows.DevEdition" Version="1.0.0.2" GeneratePathProperty="true" />
 		<PackageReference Include="BrowserDataLoader.Firefox.DevEdition.Windows" Version="1.0.0.5" GeneratePathProperty="true" />

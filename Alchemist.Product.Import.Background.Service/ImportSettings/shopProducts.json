@@ -42,12 +42,18 @@
       },
       "CategoryRequestOptions": {
         "Value": {
-          "LoadingType": "Api"
+          "LoadingType": "Simple",
+          "TimeouteMillseconds" : 3000
         }
       },
       "ProductRequestOptions": {
         "Value": {
           "LoadingType": "Api"
+        }
+      },
+      "RateLimiterOptions": {
+        "Value": {
+          "WindowMilliseconds": 5000
         }
       }
     }
