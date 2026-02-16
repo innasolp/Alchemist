@@ -1,11 +1,11 @@
 ﻿using Alchemist.Import.Category.Interfaces;
 using Alchemist.Import.Category.Service;
-using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Category;
 using Alchemist.Import.Settings.Extensions;
 using Import.Factory.Interfaces;
 using Import.Factory.Service;
 using Import.Interfaces;
+using Import.LoaderSettings;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 using ShopImport.Category.Loader.Interfaces;

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Alchemist.Import.Settings;
+namespace Import.LoaderSettings;
 
 public enum LoadingType
 {

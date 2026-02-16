@@ -1,11 +1,7 @@
-﻿using Moq;
-using System;
-using System.Collections.Generic;
+﻿using Import.LoaderSettings;
+using Moq;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using WebLoader.Interfaces;
 using Xunit.Abstractions;
 
@@ -34,8 +30,8 @@ public class BrowserServiceClientRatelimiterTest(ITestOutputHelper testOutputHel
         }
 
         webLoaderMock
-            .Setup(w => w.LoadFromUrl(It.IsAny<string>(), It.IsAny<RequestOptions>()))
-            .Returns(async (string url, RequestOptions? loadOptions = null)=>
+            .Setup(w => w.LoadFromUrl(It.IsAny<string>(), It.IsAny<WebLoader.Interfaces.RequestOptions?>()))
+            .Returns(async (string url, WebLoader.Interfaces.RequestOptions? loadOptions = null)=>
             {
                 _testOutputHelper.WriteLine($"Load from  {url} started at {DateTime.Now}");
                 await Task.Delay(delay);
@@ -46,7 +42,7 @@ public class BrowserServiceClientRatelimiterTest(ITestOutputHelper testOutputHel
             });
 
         var client = await Helper.CreateAsync(webLoaderMock, 
-            rateLimiterOptions:new Import.Settings.RateLimiterOptions { WindowMilliseconds = windowMilliseconds });
+            rateLimiterOptions:new RateLimiterOptions { WindowMilliseconds = windowMilliseconds });
 
         async Task<Stream> loadCall(int id)
         {
@@ -66,7 +62,7 @@ public class BrowserServiceClientRatelimiterTest(ITestOutputHelper testOutputHel
 
         Assert.Equal(ids.Length, streams.Length);
         webLoaderMock.Verify(w => w.Start(), Times.Once);
-        webLoaderMock.Verify(w => w.LoadFromUrl(It.IsIn(urls), It.IsAny<RequestOptions>()), Times.Exactly(ids.Length));
+        webLoaderMock.Verify(w => w.LoadFromUrl(It.IsIn(urls), It.IsAny<WebLoader.Interfaces.RequestOptions>()), Times.Exactly(ids.Length));
         Assert.True(stopWatch.Elapsed.TotalMilliseconds >= windowMilliseconds * (ids.Length - 1));
     }
 }

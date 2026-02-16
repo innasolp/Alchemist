@@ -1,4 +1,4 @@
-﻿namespace Alchemist.Import.Settings;
+﻿namespace Import.LoaderSettings;
 
 public class RateLimiterOptions
 {

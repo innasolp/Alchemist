@@ -7,7 +7,11 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.2" />
+		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Import.LoaderSettings\Import.LoaderSettings.csproj" />
 	</ItemGroup>
 
 </Project>

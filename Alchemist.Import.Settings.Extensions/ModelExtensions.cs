@@ -16,7 +16,7 @@ public static class ModelExtensions
         serviceSettings.Value = source.Value;
     }    
 
-    public static void UpdateServices<TService>(this IShopImportSettings shopImportSettings, string serviceName, TService serviceSource)
+    public static void UpdateServices<TService>(this IImportSettings shopImportSettings, string serviceName, TService serviceSource)
         where TService : class, IServiceSettings 
     {
         var targetService = shopImportSettings.GetService<TService>(serviceName);
@@ -26,5 +26,4 @@ public static class ModelExtensions
         else
             shopImportSettings.Services.Add(serviceName, serviceSource);
     }
-
 }
