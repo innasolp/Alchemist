@@ -146,7 +146,7 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
     {
         ThrowExceptionIfNotStarted(connectionId);
 
-        ValueTask<T> valueTask(CancellationToken ct) => new(task(_webLoader, cancellationToken));
+        ValueTask<T> valueTask(CancellationToken ct) => new(task(_webLoader, ct));
         return await _pipeline.ExecuteAsync(valueTask, cancellationToken);
     }
 
