@@ -31,6 +31,9 @@ public class BrowserServiceClientFactory : ILoaderServiceFactory
         if (importSettings is not IHostSettings hostSettings)
             throw new InvalidDataException($"invalid settings type {importSettings.GetType().Name}.");
 
+        if (string.IsNullOrWhiteSpace(hostSettings.Host) || !Uri.TryCreate(hostSettings.Host, UriKind.Absolute, out _))
+            throw new InvalidDataException($"Invalid host value for settings {name}.");
+
         var webLoaderSettings = importSettings.GetWebLoader<IServiceSettings>() ??
             throw new InvalidDataException($"Webloader in settings {name} not exists.");
        
