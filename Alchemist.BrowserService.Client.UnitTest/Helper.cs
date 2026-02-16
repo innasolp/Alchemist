@@ -24,8 +24,10 @@ internal static class Helper
         var rateLimiter = new RatelimiterWebLoader(webLoaderMock.Object,
             new RateLimiterOptions { WindowMilliseconds = rateLimiterOptions?.WindowMilliseconds ?? 100 });
 
-        var httpClientMock = new Mock<HttpClient>();
-        return new BrowserServiceClient(httpClientMock.Object, "test", host, rateLimiter, hostRequestOptions: hostRequestOptions, browserDataLoader: null, browserDataLauncher: null, requestHeaders: null);
+        var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
+
+        var httpClient = new HttpClient(httpMessageHandlerMock.Object);
+        return new BrowserServiceClient(httpClient, "test", host, rateLimiter, hostRequestOptions: hostRequestOptions, browserDataLoader: null, browserDataLauncher: null, requestHeaders: null);
     }
 
     public static async Task<Stream> LoadAsync(Mock<IWebLoader> webLoaderMock, string url, object? data = null,
