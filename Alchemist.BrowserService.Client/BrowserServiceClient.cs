@@ -288,7 +288,8 @@ public class BrowserServiceClient(HttpClient httpClient,
         if (!_rateLimiterWebLoader.IsConnected(_connectionId))
             await _rateLimiterWebLoader.AddToPool(_connectionId, token);
 
-        await _rateLimiterWebLoader.Start(_connectionId);
+        if (!await _rateLimiterWebLoader.Start(_connectionId, token))
+            throw new InvalidOperationException($"Failed to start web loader for connection {_connectionId}");
     }
 
     public async Task Close(CancellationToken token = default)

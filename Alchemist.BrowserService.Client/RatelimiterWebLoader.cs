@@ -100,12 +100,13 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
 
     public async ValueTask DisposeAsync()
     {
-        if(_connectionsPool.Count == 0)
-            await _webLoader.DisposeAsync();
+        _connectionsPool.Clear();
 
         _addToPoolSemaphore.Dispose();
         _startSemaphoreSlim.Dispose();
         _removeFromPoolSemaphore.Dispose();
+        
+        await _webLoader.DisposeAsync();        
     }    
 
     public async Task Reset(string host)
