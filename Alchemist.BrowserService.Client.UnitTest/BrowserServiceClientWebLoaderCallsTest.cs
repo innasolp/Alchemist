@@ -19,13 +19,13 @@ public class BrowserServiceClientWebLoaderCallsTest
         var expectedStream = new MemoryStream(expectedBytes);
 
         webLoaderMock
-            .Setup(w => w.LoadFromUrl(It.IsAny<string>(), It.IsAny<WebLoader.Interfaces.RequestOptions>()))
+            .Setup(w => w.LoadFromUrl(It.IsAny<string>(), It.IsAny<WebLoader.Interfaces.RequestOptions?>()))
             .ReturnsAsync(expectedStream);
 
         var resultStream = await Helper.LoadAsync(webLoaderMock, "http://example", new object[] { Array.Empty<ICookieData>() }, cancellationToken: CancellationToken.None);
 
         Assert.Same(expectedStream, resultStream);
-        webLoaderMock.Verify(w => w.LoadFromUrl("http://example", It.IsAny<WebLoader.Interfaces.RequestOptions>()), Times.Once);
+        webLoaderMock.Verify(w => w.LoadFromUrl("http://example", It.IsAny<WebLoader.Interfaces.RequestOptions?>()), Times.Once);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class BrowserServiceClientWebLoaderCallsTest
         var data = new { id = 1, name = "Name" };
 
         webLoaderMock
-            .Setup(w => w.LoadFromApiUrl(apiUrl, HttpMethod.Post, data, It.IsAny<WebLoader.Interfaces.RequestOptions>()))
+            .Setup(w => w.LoadFromApiUrl(apiUrl, HttpMethod.Post, data, It.IsAny<WebLoader.Interfaces.RequestOptions?>()))
             .ReturnsAsync(expectedStream);
 
         var loaderOptions = new RequestOptions { LoadingType = LoadingType.Api, HttpMethod = "POST", Data = data };
@@ -117,7 +117,7 @@ public class BrowserServiceClientWebLoaderCallsTest
         Assert.Same(expectedStream, resultStream);
 
         webLoaderMock.Verify(w => w.Start(), Times.Once);
-        webLoaderMock.Verify(w => w.LoadFromApiUrl(apiUrl, HttpMethod.Post, data, It.IsAny<WebLoader.Interfaces.RequestOptions>()), Times.Once);
+        webLoaderMock.Verify(w => w.LoadFromApiUrl(apiUrl, HttpMethod.Post, data, It.IsAny<WebLoader.Interfaces.RequestOptions?>()), Times.Once);
     }
 
     [Fact]

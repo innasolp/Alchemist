@@ -44,9 +44,10 @@ public class BrowserServiceClientRatelimiterTest(ITestOutputHelper testOutputHel
         var client = await Helper.CreateAsync(webLoaderMock, 
             rateLimiterOptions:new RateLimiterOptions { WindowMilliseconds = windowMilliseconds });
 
+        await client.Start();
+        
         async Task<Stream> loadCall(int id)
         {
-            await client.Start();
             return await client.Load(urls[id], Array.Empty<object>(),
                     cancellationToken: CancellationToken.None);
         }
@@ -62,7 +63,7 @@ public class BrowserServiceClientRatelimiterTest(ITestOutputHelper testOutputHel
 
         Assert.Equal(ids.Length, streams.Length);
         webLoaderMock.Verify(w => w.Start(), Times.Once);
-        webLoaderMock.Verify(w => w.LoadFromUrl(It.IsIn(urls), It.IsAny<WebLoader.Interfaces.RequestOptions>()), Times.Exactly(ids.Length));
+        webLoaderMock.Verify(w => w.LoadFromUrl(It.IsIn(urls), It.IsAny<WebLoader.Interfaces.RequestOptions?>()), Times.Exactly(ids.Length));
         Assert.True(stopWatch.Elapsed.TotalMilliseconds >= windowMilliseconds * (ids.Length - 1));
     }
 }
