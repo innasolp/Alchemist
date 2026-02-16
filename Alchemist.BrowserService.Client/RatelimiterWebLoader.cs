@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings;
+﻿using Import.LoaderSettings;
 using Polly;
 using Polly.RateLimiting;
 using Polly.Retry;

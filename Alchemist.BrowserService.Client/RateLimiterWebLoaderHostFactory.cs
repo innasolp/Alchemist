@@ -1,4 +1,4 @@
-﻿using Alchemist.Import.Settings;
+﻿using Import.LoaderSettings;
 using Import.Settings.Interfaces;
 using System.Collections.Concurrent;
 using WebLoader.Interfaces;

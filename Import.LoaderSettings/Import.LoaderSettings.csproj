@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Import.Settings.Interfaces" Version="1.0.0.3" />
-	</ItemGroup>
-
 </Project>
