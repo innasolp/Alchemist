@@ -4,6 +4,7 @@ using System.Net;
 using System.Text;
 using WebLoader.Common;
 using WebLoader.Interfaces;
+using RequestOptions = Import.LoaderSettings.RequestOptions;
 
 namespace Alchemist.BrowserService.Client.UnitTest;
 
@@ -119,7 +120,7 @@ public class BrowserServiceClientErrorTest
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, expectedStream));        
 
-        var loaderOptions = new Import.Settings.RequestOptions { RouteUrlFormat = routeUrl };
+        var loaderOptions = new RequestOptions { RouteUrlFormat = routeUrl };
 
         var ex = await Assert.ThrowsAsync<LoaderServiceException>(async () => 
                 await Helper.LoadAsync(webLoaderMock, url, new object[] { loaderOptions }, cancellationToken: CancellationToken.None));

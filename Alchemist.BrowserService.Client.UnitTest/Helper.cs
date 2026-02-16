@@ -1,13 +1,14 @@
-﻿using Alchemist.Import.Settings;
+﻿using Import.LoaderSettings;
 using Moq;
 using WebLoader.Interfaces;
+using RequestOptions = Import.LoaderSettings.RequestOptions;
 
 namespace Alchemist.BrowserService.Client.UnitTest;
 
 internal static class Helper
 {
     public static async Task<BrowserServiceClient> CreateAsync(Mock<IWebLoader> webLoaderMock,
-        Import.Settings.RequestOptions? hostRequestOptions = null,
+        RequestOptions? hostRequestOptions = null,
         RateLimiterOptions? rateLimiterOptions = null)
     {
         webLoaderMock.SetupGet(w => w.IsStarted).Returns(false);
@@ -18,15 +19,17 @@ internal static class Helper
             return true;
         });
 
+        var host = "http://host";
+
         var rateLimiter = new RatelimiterWebLoader(webLoaderMock.Object,
             new RateLimiterOptions { WindowMilliseconds = rateLimiterOptions?.WindowMilliseconds ?? 100 });
 
-        using var httpClient = new HttpClient(); // not used in this scenario but required by ctor
-        return new BrowserServiceClient(httpClient, "test", "http://host", rateLimiter, hostRequestOptions: hostRequestOptions, browserDataLoader: null, browserDataLauncher: null, requestHeaders: null);
+        var httpClientMock = new Mock<HttpClient>();
+        return new BrowserServiceClient(httpClientMock.Object, "test", host, rateLimiter, hostRequestOptions: hostRequestOptions, browserDataLoader: null, browserDataLauncher: null, requestHeaders: null);
     }
 
     public static async Task<Stream> LoadAsync(Mock<IWebLoader> webLoaderMock, string url, object? data = null,
-        Import.Settings.RequestOptions? hostRequestOptions = null,
+        RequestOptions? hostRequestOptions = null,
         RateLimiterOptions? rateLimiterOptions = null,
         CancellationToken cancellationToken = default)
     {
@@ -38,7 +41,7 @@ internal static class Helper
     }    
 
     public static async Task<Stream> LoadHostAsync(Mock<IWebLoader> webLoaderMock, string hostUrl, 
-        Import.Settings.RequestOptions? hostRequestOptions = null,
+        RequestOptions? hostRequestOptions = null,
         RateLimiterOptions? rateLimiterOptions = null,
         CancellationToken cancellationToken = default)
     {

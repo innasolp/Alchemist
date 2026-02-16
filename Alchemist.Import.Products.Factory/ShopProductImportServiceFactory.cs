@@ -5,6 +5,7 @@ using Alchemist.Import.Settings.Product;
 using Import.Factory.Interfaces;
 using Import.Factory.Service;
 using Import.Interfaces;
+using Import.LoaderSettings;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 

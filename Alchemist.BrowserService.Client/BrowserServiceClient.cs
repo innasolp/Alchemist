@@ -1,11 +1,11 @@
-﻿using Alchemist.Import.Settings;
-using BrowserDataLoader.Interfaces;
+﻿using BrowserDataLoader.Interfaces;
 using Import.Interfaces;
+using Import.LoaderSettings;
 using System.Collections;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Web;
-using ImportRequestOptions = Alchemist.Import.Settings.RequestOptions;
+using ImportRequestOptions = Import.LoaderSettings.RequestOptions;
 using WebLoaderRequestOptions = WebLoader.Interfaces.RequestOptions;
 
 namespace Alchemist.BrowserService.Client;
