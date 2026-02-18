@@ -150,7 +150,7 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
     private static AsyncAutoResetEvent SetAutoResetEventOnConnectionChanged(IMessageProcessor messageProcessor)
     {
         var autoResetEvent = new AsyncAutoResetEvent();
-        messageProcessor.ConnectionChanged += async (sender, args) =>
+        messageProcessor.ConnectionStateChanged += async (sender, args) =>
         {
             autoResetEvent.Set();
         };

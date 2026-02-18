@@ -10,9 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.8" />
-	  <PackageReference Include="Grpc.Client.RequestInterceptor" Version="1.0.0" />
-	  <PackageReference Include="Http.DelegatingRequestSender" Version="1.0.0" />
-	  <PackageReference Include="Http.RequestHandling.PerfomanceCounter" Version="1.0.0.1" />
+	  <PackageReference Include="GrpcExtensions.Client.Interceptors" Version="1.0.0" />
 	  <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
 	  <PackageReference Include="Serilog.Loggers" Version="1.0.0.3" />
 	  <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
