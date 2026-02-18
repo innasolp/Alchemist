@@ -1,5 +1,4 @@
-﻿using Alchemist.Common;
-using Grpc.Client.Extensions;
+﻿using GrpcExtensions.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

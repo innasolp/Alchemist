@@ -2,9 +2,9 @@
 using Grpc.Net.Client;
 using Alchemist.Product.GrpcService;
 using Grpc.Core.Interceptors;
-using Grpc.Client.Interceptors;
+using GrpcExtensions.Client.Interceptors;
 using Alchemist.Product.Interfaces;
-using Grpc.Message.Extensions;
+using GrpcExtensions.Message;
 using Mapster;
 
 namespace Alchemist.Product.GrpcServiceClient;

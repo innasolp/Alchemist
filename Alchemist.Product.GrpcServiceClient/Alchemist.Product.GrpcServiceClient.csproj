@@ -11,15 +11,15 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.28.3" />
-    <PackageReference Include="Grpc.Client.Interceptors" Version="1.0.0" />
-    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
-    <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.72.0">
+    <PackageReference Include="GrpcExtensions.Client.Interceptors" Version="1.0.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.76.0" />
+    <PackageReference Include="Grpc.StatusProto" Version="2.76.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.76.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
-	<PackageReference Include="Grpc.Message.Extensions" Version="1.0.0" />
+	<PackageReference Include="GrpcExtensions.Message" Version="1.0.0" />
 	<PackageReference Include="Mapster" Version="7.4.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="9.0.12" GeneratePathProperty="true" />
   </ItemGroup>
