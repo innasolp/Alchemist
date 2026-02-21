@@ -26,6 +26,8 @@ using ShopImport.Service.Category.Infrastructure;
 using BackgroundTaskQueue;
 using Alchemist.Product.Import.Background.Service;
 using ShopImport.Service.Infrastructure.Module;
+using ShopImport.Service.Hangfire;
+using LongRunningTask;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +44,8 @@ AddShopAPIService(builder, out var restApiHost);
 
 AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
-builder.Host.AddImportServicesInfrastructure();
+//builder.Host.AddImportServicesInfrastructure();
+builder.Host.AddImportServicesInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"));
 
 AddMessages(builder);
 
@@ -69,6 +72,8 @@ app.UseHttpsRedirection();
 //app.UseAuthorization();
 
 app.UseRouting();
+
+app.UseHangfireSuspendPage();
 
 app.MapGet("/", () => "Hello ImportBackgroundService!");
 

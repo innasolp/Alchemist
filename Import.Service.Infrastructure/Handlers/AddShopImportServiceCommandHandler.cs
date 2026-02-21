@@ -1,13 +1,13 @@
-﻿using Import.Service.Infrastructure;
-using MediatR;
+﻿using MediatR;
 
-namespace Import.Service.Commands.Handlers;
+namespace Import.Service.Infrastructure.Handlers;
 
-public sealed class AddShopImportServiceCommandHandler(IServiceRepository serviceRepository, 
+public sealed class AddShopImportServiceCommandHandler(IServiceManager serviceRepository, 
     IPublisher publisher) 
     : IRequestHandler<AddImportServiceCommand, Guid>
 {
-    private readonly IServiceRepository _serviceRepository = serviceRepository;
+    private readonly IServiceManager _serviceRepository = serviceRepository;
+    
     private readonly IPublisher _publisher = publisher;
 
     public async Task<Guid> Handle(AddImportServiceCommand request, CancellationToken cancellationToken = default)

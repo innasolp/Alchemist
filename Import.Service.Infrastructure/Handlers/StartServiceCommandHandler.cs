@@ -1,14 +1,13 @@
 ﻿using Import.Interfaces;
-using Import.Service.Infrastructure;
 using MediatR;
 
-namespace Import.Service.Commands.Handlers;
+namespace Import.Service.Infrastructure.Handlers;
 
-internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepository,
+internal sealed class StartServiceCommandHandler(IServiceManager serviceRepository,
     IPublisher publisher)
     : IRequestHandler<StartServiceCommand>
 {
-    private readonly IServiceRepository _serviceRepository = serviceRepository;
+    private readonly IServiceManager _serviceRepository = serviceRepository;
 
     private readonly IPublisher _publisher = publisher;
 
@@ -28,21 +27,20 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
             }
         }
 
-        IImportService? service = null;
+        var (service, startTask) = _serviceRepository.StartServiceTask(request.Guid, cancellationToken);
+
+        service.ConnectedAsync += serviceConnectedAsync;
+
+        await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
 
         try
         {
-            (service, var startTask) = _serviceRepository.StartServiceTask(request.Guid, cancellationToken);
-            
-            service.ConnectedAsync += serviceConnectedAsync;
-
-            await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);            
-            
             await startTask;
         }
-        finally
+        catch
         {
-            if (service != null) service.ConnectedAsync -= serviceConnectedAsync;
+            service.ConnectedAsync -= serviceConnectedAsync;
+            throw;
         }
     }
 }

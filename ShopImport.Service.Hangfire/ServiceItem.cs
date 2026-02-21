@@ -1,6 +1,6 @@
 ﻿using Import.Interfaces;
 
-namespace Import.Service.Infrastructure;
+namespace ShopImport.Service.Hangfire;
 
 public class ServiceItem(Guid guid, IImportService service, int sourceId, CancellationTokenSource innerTokenSource)
 {
@@ -10,5 +10,5 @@ public class ServiceItem(Guid guid, IImportService service, int sourceId, Cancel
 
     public int SourceId { get; } = sourceId;
 
-    public CancellationTokenSource InnerTokenSource { get; } = innerTokenSource;
+    public string? JobId { get; set; }
 }
