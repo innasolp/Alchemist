@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.5" />
     <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
+    <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.12.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
@@ -32,6 +33,7 @@
     <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
     <ProjectReference Include="..\Shop.API.Client\Shop.API.Client.csproj" />
     <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
+    <ProjectReference Include="..\ShopImport.Service.Hangfire\ShopImport.Service.Hangfire.csproj" />
     <ProjectReference Include="..\ShopImport.Service.Infrastructure.Module\ShopImport.Service.Infrastructure.Module.csproj" />
     <ProjectReference Include="..\ShopImport.Service.Infrastructure\ShopImport.Service.Category.Infrastructure.csproj" />
   </ItemGroup>

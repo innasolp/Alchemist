@@ -1,12 +1,11 @@
-﻿using Import.Service.Infrastructure;
-using MediatR;
+﻿using MediatR;
 
-namespace Import.Service.Commands.Handlers;
+namespace Import.Service.Infrastructure.Handlers;
 
-internal sealed class QueueShopCategoryToServicesCommandHandler(IShopImportServiceRepository serviceRepository) :
+internal sealed class QueueShopCategoryToServicesCommandHandler(IShopImportServiceManager serviceRepository) :
     IRequestHandler<QueueShopCategoryToServicesCommand>
 {
-    private readonly IShopImportServiceRepository _serviceRepository = serviceRepository;
+    private readonly IShopImportServiceManager _serviceRepository = serviceRepository;
 
     public async Task Handle(QueueShopCategoryToServicesCommand request, CancellationToken cancellationToken)
     {
