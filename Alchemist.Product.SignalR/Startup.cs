@@ -17,7 +17,7 @@ public class Startup
         
         app.UseEndpoints(erb =>
             {
-                erb.MapGet("/", () => "Hello World!");
+                erb.MapGet("/", () => "Hello signalR!");
                 erb.MapHub<EventHub>("/events");
                 erb.MapHub<ImportHub>("/import");
             }

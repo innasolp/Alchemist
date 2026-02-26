@@ -44,7 +44,7 @@ public static class SerilogConfigurationExtensions
         var configurationBuilder = new ConfigurationBuilder();
         var source = configurationBuilder.AddCustomJsonConfigurationProvider(logContextFile);
 
-        source.AddLogPathRule(logPath, [ "path", "pathFormat" ]);
+        source.AddLogPathRule(logPath);
         source.AddContextPropertyNameRule(contextPropertyName);
         if(!string.IsNullOrEmpty(sourceContext)) source.AddSourceContextFilterRule(sourceContext);
         propertyExpressions?.ToList().ForEach(source.AddExpressionFilterRule);

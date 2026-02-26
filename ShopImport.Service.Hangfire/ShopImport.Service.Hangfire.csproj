@@ -11,6 +11,9 @@
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="Hangfire.Redis.StackExchange" Version="1.12.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
+		<PackageReference Include="Hangfire" Version="1.8.23" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+
 	</ItemGroup>
 
   <ItemGroup>
@@ -18,7 +21,6 @@
     <ProjectReference Include="..\Alchemist.Import.Settings.Category\Alchemist.Import.Settings.Category.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
     <ProjectReference Include="..\Import.Service.Infrastructure\Import.Service.Infrastructure.csproj" />
-    <ProjectReference Include="..\LongRunningTask\LongRunningTask.csproj" />
     <ProjectReference Include="..\Mediator.Messages\Mediator.Messages.csproj" />
   </ItemGroup>
 

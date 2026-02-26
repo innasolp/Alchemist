@@ -16,9 +16,8 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
-    <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
-	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.8" />
-	<PackageReference Include="Import.Factory.Logging" Version="1.0.0.2" />
+    <PackageReference Include="Message.Interfaces" Version="1.0.0.4" />
+	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.9" />
   </ItemGroup>
 
   <ItemGroup>

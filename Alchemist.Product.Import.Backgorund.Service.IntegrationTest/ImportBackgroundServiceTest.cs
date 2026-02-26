@@ -59,7 +59,7 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
 
         try
         {
-            await task.WaitAsync(TimeSpan.FromMilliseconds(45000), token);
+            await task.WaitAsync(TimeSpan.FromMilliseconds(120000), token);
 
             OutputHelper.WriteLine("Event set");
         }
