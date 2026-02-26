@@ -1117,7 +1117,6 @@ Global
 		{8EE163EC-1DBA-43ED-BFE2-5B8D985F4A72}.import_core|Any CPU.ActiveCfg = Release|Any CPU
 		{8EE163EC-1DBA-43ED-BFE2-5B8D985F4A72}.import_core|Any CPU.Build.0 = Release|Any CPU
 		{8EE163EC-1DBA-43ED-BFE2-5B8D985F4A72}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
-		{8EE163EC-1DBA-43ED-BFE2-5B8D985F4A72}.import_settings|Any CPU.Build.0 = Release|Any CPU
 		{8EE163EC-1DBA-43ED-BFE2-5B8D985F4A72}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
 		{8EE163EC-1DBA-43ED-BFE2-5B8D985F4A72}.import_shops|Any CPU.Build.0 = Release|Any CPU
 		{8EE163EC-1DBA-43ED-BFE2-5B8D985F4A72}.Release|Any CPU.ActiveCfg = Release|Any CPU

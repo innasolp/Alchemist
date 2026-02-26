@@ -4,30 +4,30 @@ using Alchemist.DependencyInjection.Common;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Import.Settings.JsonAdapter;
 using Alchemist.Log.Extensions;
-using Alchemist.Product.Import.Background;
-using Alchemist.Product.Import.Background.Settings;
-using Alchemist.Settings.RestAPIClient;
-using DependencyInjection.AssemblyExtensions;
-using Message.RabbitMQ.DependencyInjection;
-using Serilog.Configuration.Extensions;
-using Serilog.Loggers;
-using WebLoader.Interfaces;
-using CustomJsonConfigurationProvider;
-using CustomConfigurationProvider;
-using Serilog;
-using Import.Factory.Interfaces;
-using Import.Factory.Logging;
 using Alchemist.Product.BeautyAndHealth.ImportItemHandler;
 using Alchemist.Product.Category.ImportItemHandler;
+using Alchemist.Product.Import.Background;
+using Alchemist.Product.Import.Background.Service;
+using Alchemist.Product.Import.Background.Settings;
+using Alchemist.Settings.RestAPIClient;
+using BackgroundTaskQueue;
+using CustomConfigurationProvider;
+using CustomJsonConfigurationProvider;
+using DependencyInjection.AssemblyExtensions;
+using Hangfire;
+using Import.Factory.Interfaces;
+using Import.Factory.Logging;
+using Message.RabbitMQ.DependencyInjection;
+using Serilog;
+using Serilog.Configuration.Extensions;
+using Serilog.Loggers;
 using Shop.API.Client;
 using Shop.Interfaces;
-using ShopSettings.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
-using BackgroundTaskQueue;
-using Alchemist.Product.Import.Background.Service;
-using ShopImport.Service.Infrastructure.Module;
 using ShopImport.Service.Hangfire;
-using LongRunningTask;
+using ShopImport.Service.Infrastructure.Module;
+using ShopSettings.Interfaces;
+using WebLoader.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,9 +73,11 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseHangfireSuspendPage();
+app.UseHangfireDashboard("/hangfire");
 
 app.MapGet("/", () => "Hello ImportBackgroundService!");
+
+app.UseDefaultFiles();
 
 await app.RunAsync();
 

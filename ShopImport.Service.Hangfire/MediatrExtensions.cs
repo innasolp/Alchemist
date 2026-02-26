@@ -8,7 +8,6 @@ using Import.Service.Infrastructure.Handlers;
 using Mediator.Messages;
 using MediatR;
 using Message.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
@@ -21,7 +20,7 @@ public static class MediatrExtensions
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
-            services.AddSingleton<IShopImportServiceManager, ShopImportServiceManager>();
+            services.AddSingleton<IShopImportServiceJobManager, ShopImportServiceManager>();
             services.AddMediatR(cfg =>
             {
                 cfg.RegisterGenericHandlers = true;
@@ -29,24 +28,15 @@ public static class MediatrExtensions
                 cfg.RegisterServicesFromAssemblyContaining<AddShopImportServiceCommandHandler>();
             });
 
-            var redis = ConnectionMultiplexer.Connect(hangfireConnectionString);
-            services.AddHangfire(config =>
-               config.UseRedisStorage(redis, new RedisStorageOptions
-               {
-                   Prefix = "hangfire-test:" // Optional: add a prefix to avoid key collisions
-               }));
-
-            // Добавляет и запускает Background Job Server
-            services.AddHangfireServer(options => {
-                options.WorkerCount = Environment.ProcessorCount * 5; // Настройка кол-ва воркеров
-                options.Queues = ["default", "critical"];     // Очереди, которые слушает этот сервер
-            });
+            services.AddHangfire(hangfireConnectionString);
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
         return hostBuilder.ConfigureContainer<ContainerBuilder>((builderContext, builder) =>
         {
-            builder.Register(c=>c.Resolve(typeof(IShopImportServiceManager))).As(typeof(IServiceManager));
+            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IShopImportServiceManager));
+            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IServiceManager));
+            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IImportServiceJob));
             builder.Register(c => c.ResolveKeyed<IBackgroundTaskQueue>(ServiceKeys.EventBackgroundTaskQueue)).As<IBackgroundTaskQueue>();
             builder.Register(c => c.ResolveKeyed<IMessageSender>(ServiceKeys.EventMessageSenderKey)).As<IMessageSender>();
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));
@@ -54,5 +44,36 @@ public static class MediatrExtensions
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStartedEvent, ServiceStartedMessage>)).As(typeof(INotificationHandler<ServiceStartedEvent>));
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStoppedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStoppedEvent>));
         });
+    }
+
+    private static void AddHangfire(this IServiceCollection services, string hangfireConnectionString)
+    {
+        ClearRedisDataBase(hangfireConnectionString);
+
+        services.AddHangfire(config =>
+        {
+            config.UseRedisStorage(hangfireConnectionString, new RedisStorageOptions
+            {
+                // Увеличьте этот таймаут, если задача длится дольше 30 минут
+                InvisibilityTimeout = TimeSpan.FromHours(3)
+            });
+        });
+        
+
+        services.AddHangfireServer();
+
+        ThreadPool.SetMinThreads(100, 100);
+    }
+
+    private static void ClearRedisDataBase(string hangfireConnectionString)
+    {
+        var redis = ConnectionMultiplexer.Connect($"{hangfireConnectionString},allowAdmin=true");
+
+        var endpoints = redis.GetEndPoints();
+        foreach (var endpoint in endpoints)
+        {
+            var server = redis.GetServer(endpoint);
+            server.FlushDatabase(); // Очистит текущую БД
+        }
     }
 }

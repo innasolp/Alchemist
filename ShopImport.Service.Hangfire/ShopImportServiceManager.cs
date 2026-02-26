@@ -8,7 +8,6 @@ using Import.Interfaces;
 using Import.Service.Commands.Models;
 using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
-using LongRunningTask;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Models;
 using ShopImport.Service.Infrastructure.Module.Models;
@@ -16,15 +15,14 @@ using System.Collections.Concurrent;
 
 namespace ShopImport.Service.Hangfire;
 
-internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopServiceFactories, IShopDataService shopDataService) : IShopImportServiceManager
+internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopServiceFactories, IShopDataService shopDataService) 
+    : IShopImportServiceJobManager
 {
     private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories = shopServiceFactories;
 
     private readonly IShopDataService _shopDataService = shopDataService;
 
     private readonly ConcurrentDictionary<Guid, ServiceItem> _services = new();
-
-    private readonly ConcurrentDictionary<string, ImportServiceJob> _backgroundJobs = new();
 
     private readonly SemaphoreSlim _addServiceSemaphoreSlim = new(1);
 
@@ -74,26 +72,44 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
 
     public (IImportService service, Task startTask) StartServiceTask(Guid guid, CancellationToken cancellationToken)
     {
-        if (!_services.TryGetValue(guid, out var serviceItem))
-            throw new InvalidOperationException($"Service with id {guid} not found.");
+        var serviceItem = GetServiceItem(guid);
 
-        var startTask = StartServiceTask(serviceItem);
+        var startTask = StartService(serviceItem, cancellationToken);
 
         return (serviceItem.Service, startTask);
     }
 
-    private Task StartServiceTask(ServiceItem importServiceItem)
+    private static Task StartService(ServiceItem serviceItem, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(importServiceItem.JobId) && _backgroundJobs.TryGetValue(importServiceItem.JobId, out var job) && job != null)
-            throw new InvalidOperationException($"Job for service {importServiceItem.Service.Name} already run.");
+        if (!string.IsNullOrEmpty(serviceItem.JobId))
+            throw new InvalidOperationException($"Job for service {serviceItem.Service.Name} already run.");
 
-        var importServiceJob = new ImportServiceJob(importServiceItem);
-        var jobId = BackgroundJob.Enqueue<IBackgroundJobService>((job) => job.Execute(importServiceJob, null));
-        _backgroundJobs.TryAdd(jobId, importServiceJob);
-
-        importServiceItem.JobId = jobId;
+        var jobId = BackgroundJob.Enqueue<IImportServiceJob>(serviceJob => serviceJob.Execute(serviceItem.Guid, cancellationToken));
+        
+        serviceItem.JobId = jobId;
 
         return Task.CompletedTask;
+    }
+
+    public async Task StartAndDisposeAsync(Guid guid, CancellationToken cancellationToken)
+    {
+        var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        try
+        {
+            var serviceItem = GetServiceItem(guid);        
+            await serviceItem.Service.Start(linkedCts.Token);
+        }
+        finally
+        {
+            linkedCts.Dispose();
+        }
+    }
+
+    private ServiceItem GetServiceItem(Guid guid)
+    {
+        return !_services.TryGetValue(guid, out var serviceItem)
+            ? throw new InvalidOperationException($"Service with id {guid} not found.")
+            : serviceItem;
     }
 
     public (IImportService service, Task startTask) StopServiceTask(Guid guid, CancellationToken cancellationToken)
@@ -104,14 +120,14 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
         return (serviceItem.Service, StopServiceAsync(serviceItem, cancellationToken));
     }
 
-    private void DequeueServiceTask(ServiceItem importServiceItem)
+    private static void DequeueServiceTask(ServiceItem importServiceItem)
     {
-        if (string.IsNullOrEmpty(importServiceItem.JobId) || !_backgroundJobs.TryGetValue(importServiceItem.JobId, out var job) || job == null)
+        if (string.IsNullOrEmpty(importServiceItem.JobId))
             throw new InvalidOperationException($"Job for service {importServiceItem.Service.Name} not found.");
 
         BackgroundJob.Delete(importServiceItem.JobId);
 
-        _backgroundJobs.TryRemove(importServiceItem.JobId, out job);
+        importServiceItem.JobId = null;
     }
 
 
@@ -120,7 +136,7 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
         return _services.Select(si => (si.Key, si.Value.Service, StopServiceAsync(si.Value, cancellationToken)));
     }
 
-    private async Task StopServiceAsync(ServiceItem serviceItem, CancellationToken cancellationToken)
+    private static async Task StopServiceAsync(ServiceItem serviceItem, CancellationToken cancellationToken)
     {
         await serviceItem.Service.Stop(cancellationToken);
         DequeueServiceTask(serviceItem);
@@ -147,5 +163,10 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
                     && s.Value.Service is IListener<IProductShopCategory> shopCategoryListener).Value.Service
             is IListener<IProductShopCategory> shopCategoryListener)
             await shopCategoryListener.On(productShopCategory);
+    }
+
+    Task IImportServiceJob.Execute(Guid guid, CancellationToken cancellationToken)
+    {
+        return StartAndDisposeAsync(guid, cancellationToken);
     }
 }

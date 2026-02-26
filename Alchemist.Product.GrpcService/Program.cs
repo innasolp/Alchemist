@@ -37,7 +37,7 @@ TypeAdapterConfig.GlobalSettings.Default.NameMatchingStrategy(NameMatchingStrate
 builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
 builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
-builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
+builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2")));
 
 builder.Host.AddMediatorInfrastructure<ProductModule>();
 
