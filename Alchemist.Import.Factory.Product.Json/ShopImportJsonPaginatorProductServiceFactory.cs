@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Factory.Products;
-using Alchemist.Import.Product.Json.Service;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;

@@ -1,4 +1,6 @@
-﻿namespace Alchemist.Import.Products.Interfaces;
+﻿using Alchemist.Import.Products.Interfaces;
+
+namespace Alchemist.Import.Products.Service;
 
 public interface ICategoryPaging<TCategory>
     where TCategory : class, ICategoryProducts
