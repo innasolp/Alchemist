@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Alchemist.Import.Products.Json;
 
-public class PagingCategoryProducts : CategoryProducts, IPaginatorItem
+public class PagingCategoryProducts : CategoryProducts, IPagingItem
 {
     private static readonly ReadOnlyDictionary<string, Type> _propertyTypes = new(new Dictionary<string, Type>()
     {
@@ -13,12 +13,12 @@ public class PagingCategoryProducts : CategoryProducts, IPaginatorItem
 
     public override IReadOnlyDictionary<string, Type> PropertyTypes => _propertyTypes.Union(base.PropertyTypes).ToDictionary();
 
-    string? IPaginatorItem.GetNextPageUrl(string urlFormat, string item, int page)
+    string? IPagingItem.GetNextPageUrl(string urlFormat, string item, int page)
     {
         return string.Format(urlFormat, System.Web.HttpUtility.UrlEncode(NextPage));
     }
 
-    string? IPaginatorItem.GetPageUrl(string urlFormat, string item, int page)
+    string? IPagingItem.GetPageUrl(string urlFormat, string item, int page)
     {
         return string.Format(urlFormat, System.Web.HttpUtility.UrlEncode(PrevPage));
     }

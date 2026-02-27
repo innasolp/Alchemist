@@ -17,7 +17,9 @@ internal class ShopImportHttpJsonCategoryProductsService(ILogger<ShopImportHttpJ
     string categoryUrlFormat,
     string sourceName,
     ImportProductJsonServiceOptions importProductJsonServiceOptions)
-    : ShopImportJsonCategoryProductsService<CategoryProducts, Product>(logger, loader, url, serviceName, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, importProductJsonServiceOptions)
+    : ShopImportJsonCategoryProductsService<CategoryProducts, Product>(logger, loader, url, serviceName, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, 
+        new CategoryUrlPaging<CategoryProducts>(),
+        importProductJsonServiceOptions)
 {
     protected override string PreparePath(string path) => HttpUtility.UrlEncode(path);
 }

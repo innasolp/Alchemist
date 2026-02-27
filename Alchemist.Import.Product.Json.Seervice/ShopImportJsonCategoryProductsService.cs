@@ -25,8 +25,9 @@ public abstract class ShopImportJsonCategoryProductsService<TCategory, TProduct>
         string productUrlFormat,
         string categoryUrlFormat,
         string sourceName,
+        ICategoryPaging<TCategory> categoryPaging,
         ImportProductJsonServiceOptions importProductJsonServiceOptions)
-        : base(logger, loader, url, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, importProductJsonServiceOptions)
+        : base(logger, loader, url, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, categoryPaging, importProductJsonServiceOptions)
     {
         Name = serviceName;
         
