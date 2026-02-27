@@ -12,6 +12,7 @@
     <ProjectReference Include="..\Alchemist.Import.Products.Factory\Alchemist.Import.Factory.Products.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Json\Alchemist.Import.Products.Json.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
+    <ProjectReference Include="..\ShopImport.Product.Service.Stateful\ShopImport.Product.Service.Stateful.csproj" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
