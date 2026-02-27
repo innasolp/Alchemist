@@ -17,7 +17,7 @@
     ],
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportHttpJsonPaginatorCategoryProductsService",
+        "ImplementationTypeName": "ShopImportHttpJsonPagingCategoryProductsService",
         "AssemblyPath": "Import\\Products\\Json"
       },
       "WebLoader": {

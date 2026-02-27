@@ -15,6 +15,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     string productPathFormat,
     string categoryPathFormat,
     string sourceName,
+    ICategoryPaging<TCategory> categoryPaging,
     ImportProductServiceOptions importProductServiceOptions) : ImportService(logger, loader, url), IListener<IProductShopCategory>
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
@@ -36,6 +37,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     private readonly string _categoryPathFormat = categoryPathFormat;
 
     private readonly string _sourceName = sourceName;
+
+    private readonly ICategoryPaging<TCategory> _categoryPaging = categoryPaging;
 
     protected virtual int MaxUnsuccessRequestCount => 10;
 
@@ -62,6 +65,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     }
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
+    {
+        await ProcessCategories(stoppingToken);
+    }
+
+    private async Task ProcessCategories(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -90,7 +98,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    private async Task ProcessCategoryAsync(IProductShopCategory category, CancellationToken stoppingToken)
+    protected virtual async Task ProcessCategoryAsync(IProductShopCategory category, CancellationToken stoppingToken)
     {
         int successProductCount = 0;
         int unsuccessProductCount = 0;
@@ -98,7 +106,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         bool? isEndOfCategory = null;
         var attemptsCount = 0;
 
-        var categoryPagePath = GetCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page);
+        var categoryPagePath = _categoryPaging.GetCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page);
 
         while (isEndOfCategory != true)
         {
@@ -121,7 +129,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             if (categoryPageResult == null)
             {
-                categoryPagePath = GetCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page, categoryResult);
+                categoryPagePath = _categoryPaging.GetCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page, categoryResult);
                 continue;
             }
 
@@ -131,38 +139,13 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             isEndOfCategory = categoryResult != null && (IsLastPage(categoryResult, page) == true
                 || IsEndOfCategory(categoryResult, successProductCount + unsuccessProductCount) == true);
 
-            var nextCategoryPagePath = GetNextCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page, categoryResult);
+            var nextCategoryPagePath = _categoryPaging.GetNextCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page, categoryResult);
             categoryPagePath = nextCategoryPagePath;
             page++;
         }
 
         Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, category.Category, successProductCount, unsuccessProductCount);
-    }
-
-    protected virtual object[] GetCategoryPathArguments(IProductShopCategory productShopCategory, PathFormatType pathFormatType)
-    {
-        return pathFormatType switch
-        {
-            PathFormatType.ItemId => [productShopCategory.ItemId],
-            PathFormatType.Path => [PreparePath(productShopCategory.Path)],
-            PathFormatType.CategoryWithItemId => [PreparePath(productShopCategory.Category), productShopCategory.ItemId],
-            _ => [productShopCategory.Path],
-        };
-    }
-
-    protected virtual string GetCategoryPagePath(IProductShopCategory productShopCategory, string pathFormat, PathFormatType pathFormatType, int page, TCategory? category = null)
-    {
-        List<object> args = [.. GetCategoryPathArguments(productShopCategory, pathFormatType), page];
-
-        return string.Format(pathFormat, args: [.. args]);
-    }
-
-    protected abstract string PreparePath(string path);
-
-    protected virtual string GetNextCategoryPagePath(IProductShopCategory productShopCategory, string pathFormat, PathFormatType pathFormatType, int page, TCategory? category = null)
-    {
-        return GetCategoryPagePath(productShopCategory,pathFormat, pathFormatType, page + 1, category);
-    }
+    }    
 
     protected bool? IsLastPage(TCategory category, int page)
     {
@@ -183,10 +166,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         var loaderData = GetLoaderData();
         var (success, category) = await TryGetCategoryFromPathAsync(categoryPagePath,
-            ImportProductServiceOptions.CategoryLoadData != null 
-                ? new object?[] { loaderData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } 
+            ImportProductServiceOptions.CategoryLoadData != null
+                ? new object?[] { loaderData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } }
                 : loaderData,
-            categoryPath, 
+            categoryPath,
             page,
             stoppingToken);
 
@@ -196,17 +179,9 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             return (false, default(TCategory), default(CountResult));
         }
 
-        if(!(category?.CategoryProductItems?.Length > 0))
+        if (!(category?.CategoryProductItems?.Length > 0))
             return (true, category, default);
-
-        var successCount = 0;
-        foreach (var categoryProductItem in category.CategoryProductItems)
-        {
-            categoryProductItem.CategoryItemId = categoryItemId;
-
-            if (await TryProcessCategoryProductAsync(categoryProductItem, stoppingToken))
-                successCount++;
-        }
+        int successCount = await ProcessCategoryProductItems(categoryItemId, category, stoppingToken);
 
         if (successCount == category.CategoryProductItems.Length)
             Logger.LogInformation(ImportProductLogMessages.CategoryProductsForUrlWereProcessedSuccesfullInfo, categoryPagePath, successCount);
@@ -216,6 +191,20 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             Logger.LogInformation(ImportProductLogMessages.NotAllCategoryProductsForUrlWereProcessedWarning, categoryPagePath);
 
         return (true, category, new CountResult(successCount, category.CategoryProductItems.Length - successCount));
+    }
+
+    protected virtual async Task<int> ProcessCategoryProductItems(int categoryItemId, TCategory category, CancellationToken stoppingToken)
+    {
+        var successCount = 0;
+        foreach (var categoryProductItem in category.CategoryProductItems)
+        {
+            categoryProductItem.CategoryItemId = categoryItemId;
+
+            if (await TryProcessCategoryProductAsync(categoryProductItem, stoppingToken))
+                successCount++;
+        }
+
+        return successCount;
     }
 
     protected async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
@@ -299,8 +288,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         try
         {
             var item = await DeserializeCategoryFromStream(stream, cancellationToken: token); 
-            return (true, item);
-            
+            return (true, item);            
         }
         catch (JsonException ex)
         {
@@ -350,6 +338,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             _ => string.Format(productPathFormat, productItem.ItemPath),
         };
     }
+
+    protected abstract string PreparePath(string path);
 
     protected override void Dispose()
     {

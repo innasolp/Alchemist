@@ -7,7 +7,7 @@ using System.Web;
 
 namespace Alchemist.Import.Factory.Product.Json;
 
-internal class ShopImportHttpJsonPaginatorCategoryProductsService(ILogger<ShopImportHttpJsonPaginatorCategoryProductsService> logger, 
+internal class ShopImportHttpJsonPagingCategoryProductsService(ILogger<ShopImportHttpJsonPagingCategoryProductsService> logger, 
     ILoaderService loader,
     string url,
     string serviceName,
@@ -17,7 +17,10 @@ internal class ShopImportHttpJsonPaginatorCategoryProductsService(ILogger<ShopIm
     string categoryUrlFormat,
     string sourceName,
     ImportProductJsonServiceOptions importProductJsonServiceOptions) 
-    : ShopImportJsonPaginatorCategoryProductsService<PagingCategoryProducts, Product>(logger, loader, url, serviceName, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, importProductJsonServiceOptions)
+    : ShopImportJsonCategoryProductsService<PagingCategoryProducts, Product>(logger, loader, url, serviceName, shopCategories, itemHandler, 
+        productUrlFormat, categoryUrlFormat, sourceName, 
+        new CategoryItemUrlPaging<PagingCategoryProducts>(),
+        importProductJsonServiceOptions)
 {
     protected override string PreparePath(string path) => HttpUtility.UrlEncode(path);
 }
