@@ -16,6 +16,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     string categoryPathFormat,
     string sourceName,
     ICategoryPaging<TCategory> categoryPaging,
+    IItemSerializer<TCategory> categorySerializer,
     ImportProductServiceOptions importProductServiceOptions) : ImportService(logger, loader, url), IListener<IProductShopCategory>
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
@@ -39,6 +40,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     private readonly string _sourceName = sourceName;
 
     private readonly ICategoryPaging<TCategory> _categoryPaging = categoryPaging;
+
+    private readonly IItemSerializer<TCategory> _categorySerializer = categorySerializer;
 
     protected virtual int MaxUnsuccessRequestCount => 10;
 
@@ -238,7 +241,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             return false;
         }  
 
-        var productItem = CreateProductItemFromCategoryItem(categoryProductItem, path);        
+        var productItem = CreateProductItemFromCategoryProductItem(categoryProductItem, path);        
 
         Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, productItem.Name, path);
 
@@ -287,7 +290,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         try
         {
-            var item = await DeserializeCategoryFromStream(stream, cancellationToken: token); 
+            var item = await _categorySerializer.DeserializeFromStream(stream, cancellationToken: token); 
             return (true, item);            
         }
         catch (JsonException ex)
@@ -301,12 +304,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected virtual async Task<TCategory?> DeserializeCategoryFromStream(Stream stream, CancellationToken cancellationToken = default)
-    {
-        return await JsonSerializer.DeserializeAsync<TCategory>(stream, cancellationToken: cancellationToken);
-    }
-
-    protected TProductItem CreateProductItemFromCategoryItem(ICategoryProductItem categoryProductItem, string productPath)
+    protected TProductItem CreateProductItemFromCategoryProductItem(ICategoryProductItem categoryProductItem, string productPath)
     {  
         var productItem = new TProductItem
         {

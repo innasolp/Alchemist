@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;
 using Import.Factory.Interfaces;

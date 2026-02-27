@@ -1,9 +1,9 @@
 ﻿using Alchemist.Import.Products.Service;
 using Json.CustomSerialization;
 
-namespace Alchemist.Import.Product.Json.Service;
+namespace Alchemist.Import.Factory.Product.Json;
 
-public class ImportProductJsonServiceOptions : ImportProductServiceOptions
+internal class ImportProductJsonServiceOptions : ImportProductServiceOptions
 {
     public IJsonSettings CategoryJsonSettings { get; set; }
 }

@@ -17,6 +17,7 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
             shopModel.CategoryUrlFormat,
             shopModel.Name,
             new TestCategoryPaging<TCategory>(),
+            new SimpleCategoryJsonSerializer<TCategory>(),
             new ImportProductServiceOptions { PageProductCount = pageProductCount })
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()

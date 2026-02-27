@@ -8,9 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Product.Json.Seervice\Alchemist.Import.Product.Json.Service.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Product.JsonPathHandlers\Alchemist.Import.Product.JsonPathHandlers.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Factory\Alchemist.Import.Factory.Products.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Json\Alchemist.Import.Products.Json.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
