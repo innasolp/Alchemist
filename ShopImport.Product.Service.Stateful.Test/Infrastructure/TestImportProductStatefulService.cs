@@ -4,16 +4,19 @@ using Import.Interfaces;
 using Microsoft.Extensions.Logging;
 using ShopImport.Product.Service.Test.Infrastructure;
 
-namespace Alchemist.Import.ProductService.Test.Infrastructure;
+namespace ShopImport.Product.Service.Stateful.Test.Infrastructure;
 
-public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
+public class TestImportProductStatefulService<TCategory, TProductItem>(ILogger logger,
     string name,
     IProductShopModel shopModel, 
     ILoaderService loader,
     IProductItemHandler itemHandler
     , int pageProductCount = 1000) 
-    : ShopImportCategoryProductsService<TCategory, TProductItem>(logger,loader, shopModel.Url,
-        shopModel.Categories,  itemHandler,
+    : ShopImportCategoryProductsStatefulService<TCategory, TProductItem>(logger,
+        loader,
+        shopModel.Url,
+        shopModel.Categories, 
+        itemHandler,
         shopModel.ProductUrl,
             shopModel.CategoryUrlFormat,
             shopModel.Name,
