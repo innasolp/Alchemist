@@ -36,7 +36,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly SemaphoreSlim _categoryListenerSemaphoreSlim = new(1, 1);
 
-    protected ConcurrentQueue<IProductShopCategory> Categories { get; } = new ConcurrentQueue<IProductShopCategory>(shopCategories);
+    protected LinkedList<IProductShopCategory> Categories { get; } = new LinkedList<IProductShopCategory>(shopCategories);
 
     private readonly string _productPathFormat = productPathFormat;
 
@@ -62,7 +62,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             await _categoryListenerSemaphoreSlim.WaitAsync(cancellationToken);
             acquired = true;
 
-            Categories.Enqueue(message);
+            Categories.AddLast(message);
             Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, message.Path);
         }
         finally
@@ -81,7 +81,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (Categories.IsEmpty)
+            if (Categories.Count == 0)
             {
                 await Task.Delay(50, stoppingToken);
                 continue;
@@ -89,10 +89,15 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             var concurrentCategories = new List<IProductShopCategory>(ConcurrentCategoryTaskCount);
 
-            while (!Categories.IsEmpty && concurrentCategories.Count < ConcurrentCategoryTaskCount)
+            while (Categories.Count > 0 && concurrentCategories.Count < ConcurrentCategoryTaskCount)
             {
-                if (Categories.TryDequeue(out var productShopCategory))
+                if (Categories.First != null)
+                {
+                    var productShopCategory = Categories.First?.Value;
                     concurrentCategories.Add(productShopCategory);
+                }
+
+                Categories.RemoveFirst();
             }
 
             try

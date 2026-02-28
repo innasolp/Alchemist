@@ -1,23 +1,24 @@
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.ProductService.Test.Infrastructure;
 using Import.Service.Test;
+using Import.Service.Test.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ShopImport.Product.Service.Stateful.Test.Infrastructure;
 using ShopImport.Product.Service.Test.Infrastructure;
 using Xunit.Abstractions;
 
-namespace Alchemist.Import.ProductService.Test;
+namespace ShopImport.Product.Service.Stateful.Test;
 
-public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImportProductService<TestCategory, TestProductItem>, ILogger>
+public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImportProductStatefulService<TestCategory, TestProductItem>, ILogger>
 {
     public ImportShopProductServiceTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
         ProductShopModelMock.Setup(s => s.Categories).Returns([]);
     }
 
-    protected override TestImportProductService<TestCategory, TestProductItem> CreateService(string name)
+    protected override TestImportProductStatefulService<TestCategory, TestProductItem> CreateService(string name)
     {
-        return new TestImportProductService<TestCategory, TestProductItem>(
+        return new TestImportProductStatefulService<TestCategory, TestProductItem>(
              LoggerMock.Object,
              name,
              ProductShopModelMock.Object,
@@ -47,6 +48,24 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     public async Task ShouldLogImportStoppedWhenCancellationRequested()
     {
         LoaderMock.Reset();
+        LoaderMock.SetupStartSuccess();
+        LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
+
+        var categoryMock = TestHelper.CreateProductShopCategoryMock();
+        ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
+
+        ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns($"{Guid.NewGuid()}_{{0}}_{{1}}");
+
+        var requestData = new object();
+        LoaderMock.SetupGetRequestData(requestData);
+
+        LoaderMock.Setup(s => s.Load(It.IsAny<string>(), It.IsAny<object?>(), It.IsAny<CancellationToken>())).
+            Returns(async (string path, object? data, CancellationToken cancellationToken) =>
+            {
+                await Task.Delay(100, cancellationToken);
+                return default;
+            });
+
         await ShouldLogImportStoppedWhenCancellationRequestedAsync(500);
     }
 

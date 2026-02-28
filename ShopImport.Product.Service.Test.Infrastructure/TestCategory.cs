@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 
-namespace Alchemist.Import.ProductService.Test.Infrastructure;
+namespace ShopImport.Product.Service.Test.Infrastructure;
 
 public class TestCategory : ICategoryProducts
 {
@@ -9,6 +9,8 @@ public class TestCategory : ICategoryProducts
     public int? TotalCount { get; set; }
 
     ICategoryProductItem[] ICategoryProducts.CategoryProductItems => CategoryProductItems;
+
+    public int Page { get; set; }
 }
 
 public class TestCategoryProduct : ICategoryProductItem

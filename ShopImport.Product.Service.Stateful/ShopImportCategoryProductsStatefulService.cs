@@ -34,11 +34,26 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 
     protected override async Task ProcessCategories(CancellationToken stoppingToken)
     {
-        while(!Categories.IsEmpty)
+        while(Categories.Count > 0)
         {
-            if (!Categories.TryDequeue(out var productShopCategory)) continue;
+            if(Categories.First == null)
+            {
+                Categories.RemoveFirst();
+                continue;
+            }
+            
+            var productShopCategory = Categories.First.Value;
+            Categories.RemoveFirst();
 
-            await ProcessCategoryAsync(productShopCategory, stoppingToken);
+            try
+            {
+                await ProcessCategoryAsync(productShopCategory, stoppingToken);
+            }
+            catch(OperationCanceledException)
+            {
+                Categories.AddFirst(productShopCategory);
+                throw;
+            }
         }
     }
 
@@ -48,7 +63,7 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
         {
             _serviceState.Reset();
             _serviceState.Start(category);
-        }        
+        }
         
         await ProcessCategoryAsync(category, _serviceState.CategoryState, stoppingToken);
     }
@@ -63,10 +78,17 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 
     protected override async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
-        if (_serviceState.CategoryProductItem == categoryProductItem) return true;
+        if (_serviceState.CurrentCategoryProductItem == categoryProductItem 
+            || _serviceState.HandledCategoryProductItems.Any(p=>p.Id == categoryProductItem.Id)) return true;
 
         var result = await base.TryProcessCategoryProductAsync(categoryProductItem, cancellationToken);
-        if(result) _serviceState.CategoryProductItem = categoryProductItem;
+        if (result)
+        {
+            if (_serviceState.CurrentCategoryProductItem != null)
+                _serviceState.HandledCategoryProductItems.Add(_serviceState.CurrentCategoryProductItem);
+
+            _serviceState.CurrentCategoryProductItem = categoryProductItem;
+        }
 
         return result;
     }

@@ -12,13 +12,17 @@ internal class ServiceState<TCategory>
 
     public IProductShopCategory? ProductShopCategory { get; private set; }
 
-    public ICategoryProductItem? CategoryProductItem { get; set; }
+    public ICategoryProductItem? CurrentCategoryProductItem { get; set; }
+
+    public List<ICategoryProductItem> HandledCategoryProductItems { get; } = [];
 
     public void Reset()
     {
         CategoryState.Reset();
         Category = null;
         ProductShopCategory = null;
+        CurrentCategoryProductItem = null;
+        HandledCategoryProductItems.Clear();
     }
 
     public void Start(IProductShopCategory productShopCategory)
