@@ -1,29 +1,27 @@
-﻿using Alchemist.Import.Factory.Products;
+﻿using Alchemist.Import.Factory.Product.Json.Infrastructure;
+using Alchemist.Import.Factory.Products;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
-using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Factory.Product.Json;
 
-internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportHttpJsonCategoryProductsService> logger,
+public abstract class ShopImportJsonProductServiceFactory(ILogger logger,
     ILoaderServiceFactory browserServiceFactory,
     IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,
-    IImportServiceLogFactory? logFactory = null) 
+    IImportServiceLogFactory? logFactory = null)
     : ShopProductImportServiceFactory(logger, browserServiceFactory, itemHandlerFactories, logFactory)
 {
-    public override Type ServiceImplementationType => typeof(ShopImportHttpJsonCategoryProductsService);
-
     protected override IImportService Create(ILogger logger, string name, IProductShopSource shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, object? productLoadData = null, object? categoryLoadData = null)
     {
         var categoryJsonSettingsService = productShopImportSettings.GetService("CategoryJsonSettings");
         var categoryJsonSettings = categoryJsonSettingsService.GetServiceValue<JsonSettings>();
 
         var importProductJsonServiceOptions = new ImportProductJsonServiceOptions
-        { 
+        {
             CategoryJsonSettings = categoryJsonSettings,
             PageProductCount = productShopImportSettings.PageProductCount,
             ProductLoadData = productLoadData,
@@ -32,25 +30,14 @@ internal class ShopImportJsonProductServiceFactory(ILogger<ShopImportHttpJsonCat
             CategoryPathFormatType = productShopImportSettings.CategoryUrlFormatType
         };
 
-        return new ShopImportHttpJsonCategoryProductsService(logger as ILogger<ShopImportHttpJsonCategoryProductsService>,
-            browserService,
-            shopModel.Url,
-            //todo
-            $"{shopModel.Name}_product",
-            shopModel.Categories,
-            productItemHandler,
-            productShopImportSettings.ProductUrlFormat,
-            productShopImportSettings.CategoryUrlFormat,
-            shopModel.Name, 
-            importProductJsonServiceOptions
-            );
+        return CreateWithJsonServiceOptions(logger, name, shopModel, productShopImportSettings, productItemHandler, browserService, importProductJsonServiceOptions);
     }
 
-    protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource importSource, IImportSettings importSettings)
-    {
-        if (logger is ILogger<ShopImportHttpJsonCategoryProductsService> serviceLogger)
-            return importServiceLogFactory?.GetLogger(serviceLogger, name, importSource, importSettings) ?? serviceLogger;
-        else
-            throw new InvalidDataException(logger.GetType().FullName);
-    }
+    protected abstract IImportService CreateWithJsonServiceOptions(ILogger logger,
+        string name,
+        IProductShopSource shopModel,
+        IProductShopImportSettings productShopImportSettings,
+        IProductItemHandler productItemHandler,
+        ILoaderService browserService,
+        ImportProductJsonServiceOptions importProductJsonServiceOptions);
 }

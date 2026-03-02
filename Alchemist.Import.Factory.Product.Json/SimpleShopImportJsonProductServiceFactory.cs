@@ -8,17 +8,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Factory.Product.Json;
 
-internal class ShopImportJsonPaginatorProductServiceFactory(ILogger<ShopImportHttpJsonPagingCategoryProductsService> logger, 
+internal class SimpleShopImportJsonProductServiceFactory(ILogger<ShopImportHttpJsonCategoryProductsService> logger,
     ILoaderServiceFactory browserServiceFactory,
     IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,
     IImportServiceLogFactory? logFactory = null) 
     : ShopImportJsonProductServiceFactory(logger, browserServiceFactory, itemHandlerFactories, logFactory)
 {
-    public override Type ServiceImplementationType => typeof(ShopImportHttpJsonPagingCategoryProductsService);
+    public override Type ServiceImplementationType => typeof(ShopImportHttpJsonCategoryProductsService);
 
     protected override IImportService CreateWithJsonServiceOptions(ILogger logger, string name, IProductShopSource shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, ImportProductJsonServiceOptions importProductJsonServiceOptions)
     {
-        return new ShopImportHttpJsonPagingCategoryProductsService(logger as ILogger<ShopImportHttpJsonPagingCategoryProductsService>,
+        return new ShopImportHttpJsonCategoryProductsService(logger as ILogger<ShopImportHttpJsonCategoryProductsService>,
             browserService,
             shopModel.Url,
             //todo
@@ -28,12 +28,13 @@ internal class ShopImportJsonPaginatorProductServiceFactory(ILogger<ShopImportHt
             productShopImportSettings.ProductUrlFormat,
             productShopImportSettings.CategoryUrlFormat,
             shopModel.Name,
-            importProductJsonServiceOptions);
-    }    
+            importProductJsonServiceOptions
+            );
+    }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource importSource, IImportSettings importSettings)
     {
-        if (logger is ILogger<ShopImportHttpJsonPagingCategoryProductsService> serviceLogger)
+        if (logger is ILogger<ShopImportHttpJsonCategoryProductsService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, importSource, importSettings) ?? serviceLogger;
         else
             throw new InvalidDataException(logger.GetType().FullName);

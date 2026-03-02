@@ -2,7 +2,10 @@
 using Alchemist.Import.Products.Service;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
+using Moq;
+using ShopImport.KeyHash;
 using ShopImport.Product.Service.Test.Infrastructure;
+using ShopImport.ServiceState;
 
 namespace ShopImport.Product.Service.Stateful.Test.Infrastructure;
 
@@ -22,7 +25,9 @@ public class TestImportProductStatefulService<TCategory, TProductItem>(ILogger l
             shopModel.Name,
             new TestCategoryPaging<TCategory>(),
             new SimpleCategoryJsonSerializer<TCategory>(),
-            new ImportProductServiceOptions { PageProductCount = pageProductCount })
+            new ImportProductServiceOptions { PageProductCount = pageProductCount },
+            new Mock<IKeyHasher>().Object,
+            new Mock<IServiceStateRepository>().Object)
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {

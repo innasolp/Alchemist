@@ -2,10 +2,10 @@
 using Alchemist.Import.Products.Service;
 using System.Web;
 
-namespace Alchemist.Import.Factory.Product.Json;
+namespace Alchemist.Import.Factory.Product.Json.Infrastructure;
 
-internal class CategoryItemUrlPaging<TCategory> : CategoryItemPaging<TCategory>
-    where TCategory : class, ICategoryProducts, IPagingItem
+public class CategoryUrlPaging <TCategory> : CategoryPaging<TCategory> 
+    where TCategory : class, ICategoryProducts
 {
     protected override string PreparePath(string path) => HttpUtility.UrlEncode(path);
 }

@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Products.Service\Alchemist.Import.Products.Service.csproj" />
+    <ProjectReference Include="..\ShopImport.ServiceHash\ShopImport.KeyHash.csproj" />
+    <ProjectReference Include="..\ShopImport.ServiceState\ShopImport.ServiceState.csproj" />
   </ItemGroup>
 
 </Project>

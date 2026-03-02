@@ -1,8 +1,8 @@
 ﻿using Json.CustomSerialization;
 
-namespace Alchemist.Import.Factory.Product.Json;
+namespace Alchemist.Import.Factory.Product.Json.Infrastructure;
 
-internal class JsonSettings() : IJsonSettings
+public class JsonSettings() : IJsonSettings
 {
     public Dictionary<string, string[]> PropertyNodePathes { get; set; }
 
