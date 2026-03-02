@@ -1,8 +1,8 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 
-namespace Alchemist.Import.Factory.Product.Json;
+namespace Alchemist.Import.Factory.Product.Json.Infrastructure;
 
-internal class Product : IProductItem
+public class Product : IProductItem
 {
     public string Name { get; set; }
     public string ItemId { get; set; }

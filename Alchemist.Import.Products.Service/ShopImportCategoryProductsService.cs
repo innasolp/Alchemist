@@ -2,7 +2,6 @@
 using Import.Interfaces;
 using Import.Service;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace Alchemist.Import.Products.Service;
@@ -38,11 +37,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected LinkedList<IProductShopCategory> Categories { get; } = new LinkedList<IProductShopCategory>(shopCategories);
 
-    private readonly string _productPathFormat = productPathFormat;
+    protected readonly string ProductPathFormat = productPathFormat;
 
-    private readonly string _categoryPathFormat = categoryPathFormat;
+    protected readonly string СategoryPathFormat = categoryPathFormat;
 
-    private readonly string _sourceName = sourceName;
+    protected readonly string SourceName = sourceName;
 
     private readonly ICategoryPaging<TCategory> _categoryPaging = categoryPaging;
 
@@ -124,7 +123,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         if(string.IsNullOrEmpty(categoryState.CategoryPagePath))
             categoryState.CategoryPagePath = _categoryPaging.GetCategoryPagePath(category, 
-                _categoryPathFormat,
+                СategoryPathFormat,
                 ImportProductServiceOptions.CategoryPathFormatType, 
                 categoryState.Page);
 
@@ -146,14 +145,14 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             if (successCount == null)
             {
-                categoryState.CategoryPagePath = _categoryPaging.GetCategoryPagePath(category, _categoryPathFormat, 
+                categoryState.CategoryPagePath = _categoryPaging.GetCategoryPagePath(category, СategoryPathFormat, 
                     ImportProductServiceOptions.CategoryPathFormatType, 
                     categoryState.Page, 
                     categoryResult);
                 continue;
             }
 
-            var nextCategoryPagePath = _categoryPaging.GetNextCategoryPagePath(category, _categoryPathFormat, 
+            var nextCategoryPagePath = _categoryPaging.GetNextCategoryPagePath(category, СategoryPathFormat, 
                 ImportProductServiceOptions.CategoryPathFormatType,
                 categoryState.Page,
                 categoryResult);
@@ -252,7 +251,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
-        var path = GetProductAbsolutePath(_productPathFormat, categoryProductItem);
+        var path = GetProductAbsolutePath(ProductPathFormat, categoryProductItem);
 
         var loaderData = GetLoaderData();
         (bool success, Stream? stream) = await TryLoadProductItemAsync(categoryProductItem, path, loaderData, cancellationToken);
@@ -301,7 +300,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         try
         {
-            var result = await _itemHandler.HandleItem(new ImportProduct(productItem, _sourceName, Host, stream), cancellationToken);
+            var result = await _itemHandler.HandleItem(new ImportProduct(productItem, SourceName, Host, stream), cancellationToken);
             Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, productItem.Name, productItem.AbsolutePath, result);
             return true;
         }

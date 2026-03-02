@@ -10,24 +10,24 @@ internal class ServiceState<TCategory>
 
     public TCategory? Category { get; set;  }
 
-    public IProductShopCategory? ProductShopCategory { get; private set; }
+    public string? ProductShopCategoryPath { get; private set; }
 
-    public ICategoryProductItem? CurrentCategoryProductItem { get; set; }
+    public string? CurrentCategoryProductItemId { get; set; }
 
-    public List<ICategoryProductItem> HandledCategoryProductItems { get; } = [];
+    public List<string> HandledCategoryProductItemIds { get; } = [];
 
     public void Reset()
     {
         CategoryState.Reset();
         Category = null;
-        ProductShopCategory = null;
-        CurrentCategoryProductItem = null;
-        HandledCategoryProductItems.Clear();
+        ProductShopCategoryPath = null;
+        CurrentCategoryProductItemId = null;
+        HandledCategoryProductItemIds.Clear();
     }
 
     public void Start(IProductShopCategory productShopCategory)
     {
-        ProductShopCategory = productShopCategory;
-        CategoryState = CategoryState.Start(ProductShopCategory.Path);
+        ProductShopCategoryPath = productShopCategory.Path;
+        CategoryState = CategoryState.Start(ProductShopCategoryPath);
     }
 }

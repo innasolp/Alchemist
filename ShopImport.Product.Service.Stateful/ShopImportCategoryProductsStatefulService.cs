@@ -2,6 +2,8 @@
 using Alchemist.Import.Products.Service;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
+using ShopImport.KeyHash;
+using ShopImport.ServiceState;
 
 namespace ShopImport.Product.Service.Stateful;
 
@@ -15,7 +17,9 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
     string sourceName,
     ICategoryPaging<TCategory> categoryPaging,
     IItemSerializer<TCategory> categorySerializer,
-    ImportProductServiceOptions importProductServiceOptions) : 
+    ImportProductServiceOptions importProductServiceOptions,
+    IKeyHasher keyHasher,
+    IServiceStateRepository serviceStateRepository) : 
     ShopImportCategoryProductsService<TCategory, TProductItem>(logger,
         loader,
         url, 
@@ -30,7 +34,27 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
-    private readonly ServiceState<TCategory> _serviceState = new();
+    private readonly ServiceStateWorker<TCategory> _serviceStateWorker = new(serviceStateRepository);
+
+    protected override async Task ProcessAsync(CancellationToken stoppingToken)
+    {
+        var serviceStateKeyObject = new
+        {
+            Name,
+            SourceName,
+            Url = Host,
+            ProductPathFormat,
+            СategoryPathFormat,
+            StartCategory = Categories.Count > 0
+                ? new { Categories.First.Value.Category, Categories.First.Value.ItemId, Categories.First.Value.Path }
+                : new { Category = "", ItemId = 0, Path = "" }
+        };
+
+        var serviceStateKey = keyHasher.Hash(serviceStateKeyObject);
+        _serviceStateWorker.Initialize(serviceStateKey);
+
+        await base.ProcessAsync(stoppingToken);
+    }
 
     protected override async Task ProcessCategories(CancellationToken stoppingToken)
     {
@@ -59,36 +83,33 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 
     protected override async Task ProcessCategoryAsync(IProductShopCategory category, CancellationToken stoppingToken)
     {
-        if(_serviceState.ProductShopCategory != category)
-        {
-            _serviceState.Reset();
-            _serviceState.Start(category);
-        }
+        await _serviceStateWorker.SetProductShopCategoryIfNeedAsync(category, stoppingToken);
         
-        await ProcessCategoryAsync(category, _serviceState.CategoryState, stoppingToken);
+        await ProcessCategoryAsync(category, _serviceStateWorker.CategoryState, stoppingToken);
     }
 
-    protected override Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
+    protected override async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
     {
-        if (_serviceState.Category != null && _serviceState.CategoryState.CategoryPath == categoryPath && _serviceState.CategoryState.Page == page)
-            return Task.FromResult((true, _serviceState.Category));
+        if(_serviceStateWorker.IsCategoryCurrent(categoryPath, page))
+            return (true, _serviceStateWorker.Category);
 
-       return base.TryGetCategoryFromPathAsync(dataPath, requestData, categoryPath, page, token);
+       var (success, result) = await base.TryGetCategoryFromPathAsync(dataPath, requestData, categoryPath, page, token);
+
+        if (success && result != null)        
+            await _serviceStateWorker.SaveCategoryAsync(result, token);        
+
+        return (success, result);
     }
 
     protected override async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
-        if (_serviceState.CurrentCategoryProductItem == categoryProductItem 
-            || _serviceState.HandledCategoryProductItems.Any(p=>p.Id == categoryProductItem.Id)) return true;
+        if(_serviceStateWorker.IsCategoryProductItemCurrent(categoryProductItem))  
+            return true;
 
         var result = await base.TryProcessCategoryProductAsync(categoryProductItem, cancellationToken);
-        if (result)
-        {
-            if (_serviceState.CurrentCategoryProductItem != null)
-                _serviceState.HandledCategoryProductItems.Add(_serviceState.CurrentCategoryProductItem);
-
-            _serviceState.CurrentCategoryProductItem = categoryProductItem;
-        }
+        
+        if (result)        
+            await _serviceStateWorker.SaveCurrentCategoryProductItemAsync(categoryProductItem, cancellationToken);       
 
         return result;
     }

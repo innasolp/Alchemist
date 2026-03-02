@@ -1,36 +1,31 @@
-﻿using Alchemist.Import.Factory.Products;
+﻿using Alchemist.Import.Factory.Product.Json;
+using Alchemist.Import.Factory.Product.Json.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Settings.Extensions;
 using Alchemist.Import.Settings.Product;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
+using ShopImport.KeyHash;
+using ShopImport.ServiceState;
 
-namespace Alchemist.Import.Factory.Product.Json;
+namespace ShopImport.Factory.Product.Json.Stateful;
 
 internal class ShopImportJsonPaginatorProductStatefulServiceFactory(ILogger<ShopImportHttpJsonPagingCategoryProductsStatefulService> logger, 
-    ILoaderServiceFactory browserServiceFactory,
+    ILoaderServiceFactory loaderServiceFactory,
     IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,
+    IEnumerable<IKeyHasher> keyHashers,
+    IEnumerable<IServiceStateRepositoryFactory> serviceStateRepositoryFactories,
     IImportServiceLogFactory? logFactory = null) 
-    : ShopProductImportServiceFactory(logger, browserServiceFactory, itemHandlerFactories, logFactory)
+    : ShopImportJsonProductServiceFactory(logger, loaderServiceFactory, itemHandlerFactories, logFactory)
 {
     public override Type ServiceImplementationType => typeof(ShopImportHttpJsonPagingCategoryProductsStatefulService);
 
-    protected override IImportService Create(ILogger logger, string name, IProductShopSource shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, object? productLoadData = null, object? categoryLoadData = null)
+    protected override IImportService CreateWithJsonServiceOptions(ILogger logger, string name, IProductShopSource shopModel, IProductShopImportSettings productShopImportSettings, IProductItemHandler productItemHandler, ILoaderService browserService, ImportProductJsonServiceOptions importProductJsonServiceOptions)
     {
-        var categoryJsonSettingsService = productShopImportSettings.GetService("CategoryJsonSettings");
-        var categoryJsonSettings = categoryJsonSettingsService.GetServiceValue<JsonSettings>();
+        var keyHasher = keyHashers.GetKeyHasher(productShopImportSettings);
 
-        var importProductJsonServiceOptions = new ImportProductJsonServiceOptions
-        {
-            CategoryJsonSettings = categoryJsonSettings,
-            PageProductCount = productShopImportSettings.PageProductCount,
-            ProductLoadData = productLoadData,
-            CategoryLoadData = categoryLoadData,
-            ProductPathFormatType = productShopImportSettings.ProductUrlFormatType,
-            CategoryPathFormatType = productShopImportSettings.CategoryUrlFormatType
-        };
+        var serviceStateRepository = serviceStateRepositoryFactories.GetServiceStateRepository(productShopImportSettings);
 
         return new ShopImportHttpJsonPagingCategoryProductsStatefulService(logger as ILogger<ShopImportHttpJsonPagingCategoryProductsStatefulService>,
             browserService,
@@ -42,7 +37,9 @@ internal class ShopImportJsonPaginatorProductStatefulServiceFactory(ILogger<Shop
             productShopImportSettings.ProductUrlFormat,
             productShopImportSettings.CategoryUrlFormat,
             shopModel.Name,
-            importProductJsonServiceOptions);
+            importProductJsonServiceOptions,
+            keyHasher,
+            serviceStateRepository);
     }
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource importSource, IImportSettings importSettings)

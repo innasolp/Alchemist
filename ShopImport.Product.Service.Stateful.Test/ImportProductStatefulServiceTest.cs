@@ -94,8 +94,12 @@ public class ImportProductStatefulServiceTest(ITestOutputHelper outputHelper)
 
         VerifyWarningServiceWasCancelled(serviceName);
 
+        LoggerMock.Invocations.Clear();
+
         using var newCancellationTokenSource = new CancellationTokenSource();
         await service.Start(newCancellationTokenSource.Token);
+
+        VerifyNotContainsCategoryPageMessage(ProductShopModelMock.Object.Categories[pauseIteration - 1]);
 
         LoggerMock.VerifyInfo(categoryPageMessageFormat,
                 ProductShopModelMock.Object.Categories[pauseIteration].Path,
