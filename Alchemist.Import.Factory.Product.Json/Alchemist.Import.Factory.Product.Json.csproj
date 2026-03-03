@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DependencyInjection.Attributes" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Product.JsonPathHandlers\Alchemist.Import.Product.JsonPathHandlers.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Factory\Alchemist.Import.Factory.Products.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Products.Json\Alchemist.Import.Products.Json.csproj" />

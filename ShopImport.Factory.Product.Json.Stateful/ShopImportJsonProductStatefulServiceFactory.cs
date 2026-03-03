@@ -2,6 +2,7 @@
 using Alchemist.Import.Factory.Product.Json.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Product;
+using DependencyInjection.Attributes;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
@@ -11,6 +12,7 @@ using ShopImport.ServiceState;
 
 namespace ShopImport.Factory.Product.Json.Stateful;
 
+[DILoad]
 internal class ShopImportJsonProductStatefulServiceFactory(ILogger<ShopImportHttpJsonCategoryProductsStatefulService> logger,
     ILoaderServiceFactory browserServiceFactory,
     IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,

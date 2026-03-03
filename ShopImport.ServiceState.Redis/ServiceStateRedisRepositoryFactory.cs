@@ -1,5 +1,8 @@
-﻿namespace ShopImport.ServiceState.Redis;
+﻿using DependencyInjection.Attributes;
 
+namespace ShopImport.ServiceState.Redis;
+
+[DILoad]
 public class ServiceStateRedisRepositoryFactory : IServiceStateRepositoryFactory
 {
     public static ServiceStateRedisRepository Create(string connectionString)

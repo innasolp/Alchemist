@@ -1,6 +1,7 @@
 ﻿using Alchemist.Import.Factory.Product.Json.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Product;
+using DependencyInjection.Attributes;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Settings.Interfaces;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alchemist.Import.Factory.Product.Json;
 
+[DILoad]
 internal class ShopImportJsonPaginatorProductServiceFactory(ILogger<ShopImportHttpJsonPagingCategoryProductsService> logger, 
     ILoaderServiceFactory browserServiceFactory,
     IEnumerable<IProductItemHandlerFactory> itemHandlerFactories,

@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using DependencyInjection.Attributes;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ShopImport.ServiceState.InMemory;
 
+[DILoad]
 public class ServiceStateInMemoryRepositoryFactory(IMemoryCache cache) : IServiceStateRepositoryFactory
 {
     public ServiceStateInMemoryRepository Create()

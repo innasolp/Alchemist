@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using DependencyInjection.Attributes;
+using System.Text;
 
 namespace ShopImport.KeyHash.XxHash64;
 
-public class XXKeyHasher : IKeyHasher
+[DILoad]
+public class XxHash64KeyHasher : IKeyHasher
 {
     public byte[] Hash<T>(T key)
     {
