@@ -2,6 +2,7 @@
 using Alchemist.Import.Products.Service;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
+using ShopImport.Product.Service.Test.Infrastructure;
 
 namespace Alchemist.Import.ProductService.Test.Infrastructure;
 

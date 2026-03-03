@@ -2,9 +2,9 @@
 using Alchemist.Import.Products.Service;
 using System.Text.Json;
 
-namespace Alchemist.Import.ProductService.Test.Infrastructure;
+namespace Alchemist.Import.Factory.Product.Json.Infrastructure;
 
-internal class SimpleCategoryJsonSerializer<TCategory> : IItemSerializer<TCategory>
+public class SimpleCategoryJsonSerializer<TCategory> : IItemSerializer<TCategory>
     where TCategory : class, ICategoryProducts, new()
 {
     public async Task<TCategory?> DeserializeFromStream(Stream stream, CancellationToken cancellationToken = default)

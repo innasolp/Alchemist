@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 
-namespace Alchemist.Import.ProductService.Test.Infrastructure;
+namespace ShopImport.Product.Service.Test.Infrastructure;
 
 public interface IProductShopModel
 {

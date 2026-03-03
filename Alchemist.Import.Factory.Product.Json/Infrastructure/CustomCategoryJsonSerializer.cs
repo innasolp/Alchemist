@@ -5,9 +5,9 @@ using Json.CustomSerialization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Alchemist.Import.Factory.Product.Json;
+namespace Alchemist.Import.Factory.Product.Json.Infrastructure;
 
-internal class CustomCategoryJsonSerializer<TCategory> : IItemSerializer<TCategory>
+public class CustomCategoryJsonSerializer<TCategory> : IItemSerializer<TCategory>
     where TCategory : class, ICategoryProducts, IJsonItem, new()
 {
     private readonly JsonLoader _categoryJsonLoader;

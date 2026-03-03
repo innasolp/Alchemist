@@ -3,6 +3,7 @@ using Alchemist.Import.ProductService.Test.Infrastructure;
 using Import.Service.Test;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ShopImport.Product.Service.Test.Infrastructure;
 using Xunit.Abstractions;
 
 namespace Alchemist.Import.ProductService.Test;
@@ -55,7 +56,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         LoaderMock.Reset();
 
         ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns("Category_{0}_page{1}");        
-        var categoryMock = TestHelper.CreateCategoryMock();        
+        var categoryMock = TestHelper.CreateProductShopCategoryMock();        
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
         
         await ShouldLogResettingErrorIfLoaderServiceNeedsResettingAsync(15000);
@@ -67,7 +68,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         LoaderMock.Reset();
 
         ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns("Category_{0}_page{1}");
-        var categoryMock = TestHelper.CreateCategoryMock();
+        var categoryMock = TestHelper.CreateProductShopCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
         await ShouldLogServiceFailedErrorWhenUnhandledExceptionThrownAsync(1000);
@@ -79,7 +80,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         LoaderMock.Reset();
 
         ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns("Category_{0}_page{1}");
-        var categoryMock = TestHelper.CreateCategoryMock();
+        var categoryMock = TestHelper.CreateProductShopCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
         await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync(1000);

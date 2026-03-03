@@ -1,11 +1,11 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Moq;
 
-namespace Alchemist.Import.ProductService.Test.Infrastructure;
+namespace ShopImport.Product.Service.Test.Infrastructure;
 
-internal static class TestHelper
+public static class TestHelper
 {
-    public static Mock<IProductShopCategory> CreateCategoryMock()
+    public static Mock<IProductShopCategory> CreateProductShopCategoryMock()
     {
         var categoryMock = new Mock<IProductShopCategory>();
         categoryMock.Setup(c => c.ItemId).Returns(new Random().Next(10000));
@@ -14,12 +14,13 @@ internal static class TestHelper
         return categoryMock;
     }
 
-    public static TestCategory CreateCategoryWithProducts(int productCount)
+    public static TestCategory CreateCategoryWithProducts(int productCount, int totalCount, int page)
     {        
         var productsCategory = new TestCategory
         {
             CategoryProductItems = new TestCategoryProduct[productCount],
-            TotalCount = productCount
+            TotalCount = totalCount,
+            Page = page
         };        
 
         for (var i = 0; i < productsCategory.CategoryProductItems.Length; i++)

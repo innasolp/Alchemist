@@ -15,7 +15,6 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using DependencyInjection.AssemblyExtensions;
 using Hangfire;
-using Import.Factory.Interfaces;
 using Import.Factory.Logging;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog;
@@ -121,7 +120,9 @@ static void AddShopSettingsAPIService(WebApplicationBuilder builder, out string 
 
 static void AddShopImporters(IServiceCollection services, IConfiguration configuration)
 {
-    services.AddServiceImplementationsFromPath(typeof(IImportServiceFactory), $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopProductImportPath").Value}");
+    services.RegisterServiceImplementationsFromPathDILoad($"{Utils.GetAppPath()}\\{configuration.GetSection("ShopImportServiceStatePath").Value}");
+    services.AddMemoryCache();
+    services.RegisterServiceImplementationsFromPathDILoad($"{Utils.GetAppPath()}\\{configuration.GetSection("ShopProductImportPath").Value}");
 
     var categoryServicesPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryImportPath").Value}";
     var categoryLoadersPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryLoadersPath").Value}";
