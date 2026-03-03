@@ -105,7 +105,7 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
     {
         await _serviceStateWorker.SetProductShopCategoryIfNeedAsync(category, stoppingToken);
 
-        await ProcessCategoryAsync(category, _serviceStateWorker.CategoryState, stoppingToken);
+        await ProcessCategoryAsync(category, _serviceStateWorker.CategoryProcessState, stoppingToken);
 
         await _serviceStateWorker.ResetAsync(stoppingToken);
     }
@@ -133,7 +133,9 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
         var result = await base.TryProcessCategoryProductAsync(categoryProductItem, cancellationToken);
         
         if (result)        
-            await _serviceStateWorker.SaveHandledCategoryProductItemAsync(categoryProductItem, cancellationToken);       
+            await _serviceStateWorker.SaveHandledCategoryProductItemAsync(categoryProductItem, cancellationToken);
+
+        await _serviceStateWorker.ResetCategoryAsync(cancellationToken);
 
         return result;
     }

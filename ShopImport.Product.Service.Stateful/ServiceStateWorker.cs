@@ -13,7 +13,7 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
 
     private ServiceState<TCategory> _serviceState = new();
 
-    public CategoryState CategoryState => _serviceState.CategoryState;
+    public CategoryProcessState CategoryProcessState => _serviceState.CategoryProcessState;
 
     public TCategory? Category => _serviceState.Category;
 
@@ -35,6 +35,12 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
         return _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);
     }
 
+    public Task ResetCategoryAsync(CancellationToken cancellationToken)
+    {
+        _serviceState.Category = null;
+        return _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);
+    }
+
     public Task SetProductShopCategoryIfNeedAsync(IProductShopCategory category, CancellationToken cancellationToken)
     {
         if (_serviceState.ProductShopCategory?.Path == category.Path)
@@ -48,8 +54,8 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
     public bool IsCategoryCurrent(string categoryPath, int page)
     {
         return _serviceState.Category != null && 
-            _serviceState.CategoryState.CategoryPath == categoryPath && 
-            _serviceState.CategoryState.Page == page;
+            _serviceState.CategoryProcessState.CategoryPath == categoryPath && 
+            _serviceState.CategoryProcessState.Page == page;
     }
 
     public async Task SaveCategoryAsync(TCategory category, CancellationToken cancellationToken)

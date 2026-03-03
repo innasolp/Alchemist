@@ -6,7 +6,7 @@ namespace ShopImport.Product.Service.Stateful;
 internal class ServiceState<TCategory>
     where TCategory : class, ICategoryProducts
 {
-    public CategoryState CategoryState { get; private set; } = CategoryState.Start();
+    public CategoryProcessState CategoryProcessState { get; private set; } = CategoryProcessState.Start();
 
     public TCategory? Category { get; set;  }
 
@@ -18,7 +18,7 @@ internal class ServiceState<TCategory>
 
     public void Reset()
     {
-        CategoryState.Reset();
+        CategoryProcessState.Reset();
         Category = null;
         ProductShopCategory = null;
         CurrentCategoryProductItemId = null;
@@ -34,6 +34,6 @@ internal class ServiceState<TCategory>
             ItemId = productShopCategory.ItemId
         };
 
-        CategoryState = CategoryState.Start(ProductShopCategory.Path);
+        CategoryProcessState = CategoryProcessState.Start(ProductShopCategory.Path);
     }
 }
