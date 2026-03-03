@@ -125,13 +125,15 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 
     protected override async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
-        if(_serviceStateWorker.IsCategoryProductItemCurrent(categoryProductItem))  
+        if(_serviceStateWorker.IsCategoryProductItemHandled(categoryProductItem))  
             return true;
+
+        await _serviceStateWorker.SetCurrentCategoryProductItemAsync(categoryProductItem, cancellationToken);
 
         var result = await base.TryProcessCategoryProductAsync(categoryProductItem, cancellationToken);
         
         if (result)        
-            await _serviceStateWorker.SaveCurrentCategoryProductItemAsync(categoryProductItem, cancellationToken);       
+            await _serviceStateWorker.SaveHandledCategoryProductItemAsync(categoryProductItem, cancellationToken);       
 
         return result;
     }
