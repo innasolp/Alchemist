@@ -31,7 +31,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
     }
 
-    private readonly IProductItemHandler _itemHandler = itemHandler;
+    protected readonly IProductItemHandler ItemHandler = itemHandler;
 
     private readonly SemaphoreSlim _categoryListenerSemaphoreSlim = new(1, 1);
 
@@ -300,7 +300,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         try
         {
-            var result = await _itemHandler.HandleItem(new ImportProduct(productItem, SourceName, Host, stream), cancellationToken);
+            var result = await ItemHandler.HandleItem(new ImportProduct(productItem, SourceName, Host, stream), cancellationToken);
             Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, productItem.Name, productItem.AbsolutePath, result);
             return true;
         }

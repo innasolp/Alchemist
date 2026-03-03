@@ -97,4 +97,12 @@ public class ServiceStateRedisRepository(string connectionString) : IServiceStat
         var json = JsonSerializer.Serialize(value);
         return _database!.StringSetAsync(key, json);
     }
+
+    public Task Remove(byte[] key, CancellationToken cancellationToken = default)
+    {
+        if (!IsConnected)
+            throw new InvalidOperationException($"Database {connectionString} not connected.");
+
+        return _database!.KeyDeleteAsync(key);
+    }
 }

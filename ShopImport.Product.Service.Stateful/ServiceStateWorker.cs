@@ -4,7 +4,7 @@ using ShopImport.ServiceState;
 
 namespace ShopImport.Product.Service.Stateful;
 
-internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStateRepository)
+internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStateRepository) : IAsyncDisposable
     where TCategory : class, ICategoryProducts, new()
 {
     private readonly IServiceStateRepository _serviceStateRepository = serviceStateRepository;
@@ -17,21 +17,32 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
 
     public TCategory? Category => _serviceState.Category;
 
-    public void Initialize(byte[] serviceStateKey)
+    public IProductShopCategory? ProductShopCategory => _serviceState.ProductShopCategory;
+
+    public async Task Start(byte[] serviceStateKey, CancellationToken cancellationToken)
     {
         _serviceStateKey = serviceStateKey;
-    }
 
-    public async Task Load(CancellationToken cancellationToken)
-    {
+        if (!_serviceStateRepository.IsConnected)
+            await _serviceStateRepository.Connect(cancellationToken);
+
         _serviceState = await _serviceStateRepository.Load<ServiceState<TCategory>>(_serviceStateKey, cancellationToken) ?? new();
     }
 
-    public async Task SetProductShopCategoryIfNeedAsync(IProductShopCategory category, CancellationToken cancellationToken)
+    public Task ResetAsync(CancellationToken cancellationToken)
     {
         _serviceState.Reset();
+        return _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);
+    }
+
+    public Task SetProductShopCategoryIfNeedAsync(IProductShopCategory category, CancellationToken cancellationToken)
+    {
+        if (_serviceState.ProductShopCategory?.Path == category.Path)
+            return Task.CompletedTask;
+
+        _serviceState.Reset();
         _serviceState.Start(category);
-        await _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
+        return _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
     }
 
     public bool IsCategoryCurrent(string categoryPath, int page)
@@ -61,5 +72,17 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
         _serviceState.CurrentCategoryProductItemId = categoryProductItem.Id;
 
         await _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
+    }
+
+    public Task CloseAsync(CancellationToken cancellationToken = default)
+    {
+        _serviceState.Reset();
+        return _serviceStateRepository.Close(cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await CloseAsync();
+        await _serviceStateRepository.DisposeAsync();
     }
 }

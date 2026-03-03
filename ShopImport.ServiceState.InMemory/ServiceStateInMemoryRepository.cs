@@ -28,13 +28,15 @@ public class ServiceStateInMemoryRepository(IMemoryCache cache) : IServiceStateR
 
     public Task<T?> Load<T>(byte[] key, CancellationToken cancellationToken = default)
     {
-        var result = _cache.Get<T>(key);
+        var hexHash = Convert.ToHexString(key);
+        var result = _cache.Get<T>(hexHash);
         return Task.FromResult(result);
     }
 
     public Task Save<T>(byte[] key, T value, CancellationToken cancellationToken = default)
     {
-        _cache.Set(key, value);
+        var hexHash = Convert.ToHexString(key);
+        _cache.Set(hexHash, value);
         return Task.CompletedTask;
     }
 
@@ -62,8 +64,7 @@ public class ServiceStateInMemoryRepository(IMemoryCache cache) : IServiceStateR
         async Task HandlerTask(AsyncEventHandler<ConnectedAsyncEventArgs> handler)
         {
             await handler(this, args).ConfigureAwait(false);
-        }
-        ;
+        };
 
         var tasks = handlers.GetInvocationList()
             .OfType<AsyncEventHandler<ConnectedAsyncEventArgs>>()
@@ -75,5 +76,12 @@ public class ServiceStateInMemoryRepository(IMemoryCache cache) : IServiceStateR
     ValueTask IAsyncDisposable.DisposeAsync()
     {
         return ValueTask.CompletedTask;
+    }
+
+    public Task Remove(byte[] key, CancellationToken cancellationToken = default)
+    {
+        var hexHash = Convert.ToHexString(key);
+        _cache.Remove(hexHash);
+        return Task.CompletedTask;
     }
 }

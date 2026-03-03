@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 
-namespace ShopImport.Service.Infrastructure.Module.Models;
+namespace ShopImport.Service.Hangfire.Models;
 
 internal class ProductShopCategoryModel : IProductShopCategory
 {

@@ -3,14 +3,20 @@ using Import.Service.Test;
 using Import.Service.Test.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ShopImport.KeyHash;
 using ShopImport.Product.Service.Stateful.Test.Infrastructure;
 using ShopImport.Product.Service.Test.Infrastructure;
+using ShopImport.ServiceState;
 using Xunit.Abstractions;
 
 namespace ShopImport.Product.Service.Stateful.Test;
 
 public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImportProductStatefulService<TestCategory, TestProductItem>, ILogger>
 {
+    private readonly Mock<IKeyHasher> _keyHasherMock = new();
+
+    private readonly Mock<IServiceStateRepository> _serviceStarepositoryMock = new();
+
     public ImportShopProductServiceTest(ITestOutputHelper outputHelper):base(outputHelper)
     {
         ProductShopModelMock.Setup(s => s.Categories).Returns([]);
@@ -23,7 +29,9 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
              name,
              ProductShopModelMock.Object,
              LoaderMock.Object,
-             ProductItemHandlerMock.Object);
+             ProductItemHandlerMock.Object,
+             _keyHasherMock.Object,
+             _serviceStarepositoryMock.Object);
     }
 
     protected Mock<IProductShopModel> ProductShopModelMock { get; } = new Mock<IProductShopModel>();
