@@ -12,4 +12,19 @@
     <ProjectReference Include="..\ShopImport.ServiceState\ShopImport.ServiceState.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="ImportProductStatefulLogMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ImportProductStatefulLogMessages.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="ImportProductStatefulLogMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ImportProductStatefulLogMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

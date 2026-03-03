@@ -2,7 +2,6 @@
 using Alchemist.Import.Products.Service;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
-using Moq;
 using ShopImport.KeyHash;
 using ShopImport.Product.Service.Test.Infrastructure;
 using ShopImport.ServiceState;
@@ -13,8 +12,10 @@ public class TestImportProductStatefulService<TCategory, TProductItem>(ILogger l
     string name,
     IProductShopModel shopModel, 
     ILoaderService loader,
-    IProductItemHandler itemHandler
-    , int pageProductCount = 1000) 
+    IProductItemHandler itemHandler,
+    IKeyHasher keyHasher,
+    IServiceStateRepository serviceStateRepository,
+    int pageProductCount = 1000) 
     : ShopImportCategoryProductsStatefulService<TCategory, TProductItem>(logger,
         loader,
         shopModel.Url,
@@ -26,8 +27,8 @@ public class TestImportProductStatefulService<TCategory, TProductItem>(ILogger l
             new TestCategoryPaging<TCategory>(),
             new SimpleCategoryJsonSerializer<TCategory>(),
             new ImportProductServiceOptions { PageProductCount = pageProductCount },
-            new Mock<IKeyHasher>().Object,
-            new Mock<IServiceStateRepository>().Object)
+            keyHasher,
+            serviceStateRepository)
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {

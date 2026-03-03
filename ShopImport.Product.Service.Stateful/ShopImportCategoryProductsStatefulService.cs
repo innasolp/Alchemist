@@ -36,22 +36,25 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 {
     private readonly ServiceStateWorker<TCategory> _serviceStateWorker = new(serviceStateRepository);
 
+    protected virtual object GetServiceStateKeyObject()
+    {
+        return new
+                {
+                    Name,
+                    SourceName,
+                    Url = Host,
+                    ProductPathFormat,
+                    СategoryPathFormat,
+                    ItemHandlerType = ItemHandler.GetType().Name
+                };
+    }
+
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
-        var serviceStateKeyObject = new
-        {
-            Name,
-            SourceName,
-            Url = Host,
-            ProductPathFormat,
-            СategoryPathFormat,
-            StartCategory = Categories.Count > 0
-                ? new { Categories.First.Value.Category, Categories.First.Value.ItemId, Categories.First.Value.Path }
-                : new { Category = "", ItemId = 0, Path = "" }
-        };
+        var serviceStateKeyObject = GetServiceStateKeyObject();
 
         var serviceStateKey = keyHasher.Hash(serviceStateKeyObject);
-        _serviceStateWorker.Initialize(serviceStateKey);
+        await _serviceStateWorker.Start(serviceStateKey, stoppingToken);
 
         await base.ProcessAsync(stoppingToken);
     }
@@ -65,27 +68,46 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
                 Categories.RemoveFirst();
                 continue;
             }
-            
-            var productShopCategory = Categories.First.Value;
-            Categories.RemoveFirst();
 
-            try
+            IProductShopCategory productShopCategory;
+            if (_serviceStateWorker.ProductShopCategory == null)
             {
-                await ProcessCategoryAsync(productShopCategory, stoppingToken);
+                productShopCategory = Categories.First.Value;
+                Categories.RemoveFirst();
             }
-            catch(OperationCanceledException)
+            else
             {
-                Categories.AddFirst(productShopCategory);
-                throw;
+                productShopCategory = _serviceStateWorker.ProductShopCategory;
+                RemovePreviousCategoriesIfNeed(productShopCategory);
+                Logger.LogInformation(ImportProductStatefulLogMessages.CategoryWasLoadedFromState, productShopCategory.Path);
             }
+
+            await ProcessCategoryAsync(productShopCategory, stoppingToken);            
+        }
+    }
+
+    private void RemovePreviousCategoriesIfNeed(IProductShopCategory productShopCategory)
+    {
+        var element = Categories.FirstOrDefault(c => c.ItemId == productShopCategory.ItemId
+            && c.Path == productShopCategory.Path
+            && c.Category == productShopCategory.Category);
+
+        if (element == null) return;
+
+        var node = Categories.Find(element);
+        while (node?.Previous != null)
+        {
+            Categories.RemoveFirst();
         }
     }
 
     protected override async Task ProcessCategoryAsync(IProductShopCategory category, CancellationToken stoppingToken)
     {
         await _serviceStateWorker.SetProductShopCategoryIfNeedAsync(category, stoppingToken);
-        
+
         await ProcessCategoryAsync(category, _serviceStateWorker.CategoryState, stoppingToken);
+
+        await _serviceStateWorker.ResetAsync(stoppingToken);
     }
 
     protected override async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
@@ -112,5 +134,12 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
             await _serviceStateWorker.SaveCurrentCategoryProductItemAsync(categoryProductItem, cancellationToken);       
 
         return result;
+    }
+
+    protected override async Task CloseAsync()
+    {
+        await _serviceStateWorker.CloseAsync();
+        await _serviceStateWorker.DisposeAsync();
+        await base.CloseAsync();
     }
 }

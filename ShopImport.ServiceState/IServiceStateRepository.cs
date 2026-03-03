@@ -12,6 +12,8 @@ public interface IServiceStateRepository : IAsyncDisposable
 
     Task Save<T>(byte[] key, T value, CancellationToken cancellationToken = default);
 
+    Task Remove(byte[] key, CancellationToken cancellationToken = default);
+
     Task Close(CancellationToken cancellationToken = default);
 
     event AsyncEventHandler<ConnectedAsyncEventArgs> ConnectedAsync;
