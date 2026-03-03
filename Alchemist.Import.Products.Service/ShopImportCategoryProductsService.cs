@@ -112,12 +112,12 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected virtual Task ProcessCategoryAsync(IProductShopCategory category, CancellationToken stoppingToken)
     {
-        var categoryState = CategoryState.Start(category.Path);
+        var categoryState = CategoryProcessState.Start(category.Path);
 
         return ProcessCategoryAsync(category, categoryState, stoppingToken);
     }
 
-    protected async Task ProcessCategoryAsync(IProductShopCategory category, CategoryState categoryState, CancellationToken stoppingToken)
+    protected async Task ProcessCategoryAsync(IProductShopCategory category, CategoryProcessState categoryState, CancellationToken stoppingToken)
     {
         bool? isEndOfCategory = null;
 
@@ -169,7 +169,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, category.Category, categoryState.SuccessProductCount, categoryState.UnsuccessProductCount);
     }
 
-    protected AttemptResult ApplyCategoryStateAttempts(IProductShopCategory category, CategoryState categoryState, bool success)
+    protected AttemptResult ApplyCategoryStateAttempts(IProductShopCategory category, CategoryProcessState categoryState, bool success)
     {
         if (!success)
         {

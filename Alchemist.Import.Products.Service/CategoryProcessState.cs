@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Import.Products.Service;
 
-public class CategoryState
+public class CategoryProcessState
 {
     public int SuccessProductCount { get; private set; }
 
@@ -16,7 +16,7 @@ public class CategoryState
 
     public string? CategoryPath { get; private set; } 
 
-    private CategoryState(int successProductCount, int unsuccessProductCount, int attemptsCount, int page)
+    private CategoryProcessState(int successProductCount, int unsuccessProductCount, int attemptsCount, int page)
     {
         SuccessProductCount = successProductCount;
         UnsuccessProductCount = unsuccessProductCount;
@@ -24,14 +24,14 @@ public class CategoryState
         Page = page;
     }    
 
-    public static CategoryState Start()
+    public static CategoryProcessState Start()
     {
-        return new CategoryState(0, 0, 0, 1);
+        return new CategoryProcessState(0, 0, 0, 1);
     }
 
-    public static CategoryState Start(string categoryPath)
+    public static CategoryProcessState Start(string categoryPath)
     {
-        return new CategoryState(0, 0, 0, 1) { CategoryPath = categoryPath };
+        return new CategoryProcessState(0, 0, 0, 1) { CategoryPath = categoryPath };
     }
 
     public void Reset()
