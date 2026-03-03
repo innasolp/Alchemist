@@ -58,17 +58,23 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
         await _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
     }
 
-    public bool IsCategoryProductItemCurrent(ICategoryProductItem categoryProductItem)
+    public bool IsCategoryProductItemHandled(ICategoryProductItem categoryProductItem)
     {
-        return _serviceState.CurrentCategoryProductItemId == categoryProductItem.Id
-            || _serviceState.HandledCategoryProductItemIds.Any(p => p == categoryProductItem.Id);
+        return _serviceState.HandledCategoryProductItemIds.Any(p => p == categoryProductItem.Id);
     }
 
-    public async Task SaveCurrentCategoryProductItemAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
+    public async Task SaveHandledCategoryProductItemAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
         if (_serviceState.CurrentCategoryProductItemId != null)
             _serviceState.HandledCategoryProductItemIds.Add(_serviceState.CurrentCategoryProductItemId);
 
+        _serviceState.CurrentCategoryProductItemId = null;
+
+        await _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
+    }
+
+    public async Task SetCurrentCategoryProductItemAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
+    {
         _serviceState.CurrentCategoryProductItemId = categoryProductItem.Id;
 
         await _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);

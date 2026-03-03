@@ -331,6 +331,8 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
 
         await service.Start(cancellationTokenSource.Token);
 
+        VerifyWarningServiceWasCancelled(serviceName);
+
         VerifyCategoryCompletedSuccessfully(ProductShopModelMock.Object.Categories[categoryNumber - 1], [testCategories[categoryNumber - 1]]);
 
         VerifyNotContainsCategoryCompleted(ProductShopModelMock.Object.Categories[categoryNumber]);
@@ -338,8 +340,6 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         VerifyProductLoadedSuccessfully(testCategories[categoryNumber].CategoryProductItems[productNumber - 1]);
 
         VerifyNotContainsProductLoadedSuccessfully(testCategories[categoryNumber].CategoryProductItems[productNumber]);
-
-        VerifyWarningServiceWasCancelled(serviceName);
 
         LoggerMock.Invocations.Clear();
 
