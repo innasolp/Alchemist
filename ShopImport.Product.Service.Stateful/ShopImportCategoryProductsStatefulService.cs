@@ -61,19 +61,15 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 
     protected override async Task ProcessCategories(CancellationToken stoppingToken)
     {
-        while(Categories.Count > 0)
+        while(!Categories.IsEmpty && !stoppingToken.IsCancellationRequested)
         {
-            if(Categories.First == null)
-            {
-                Categories.RemoveFirst();
-                continue;
-            }
-
             IProductShopCategory productShopCategory;
             if (_serviceStateWorker.ProductShopCategory == null)
             {
-                productShopCategory = Categories.First.Value;
-                Categories.RemoveFirst();
+                if (!Categories.TryDequeue(out var category))
+                    continue;
+
+                productShopCategory = category;
             }
             else
             {
@@ -94,10 +90,9 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 
         if (element == null) return;
 
-        var node = Categories.Find(element);
-        while (node?.Previous != null)
+        while (!Categories.IsEmpty && Categories.TryPeek(out var current) && current != element)
         {
-            Categories.RemoveFirst();
+            Categories.TryDequeue(out var dequeued);
         }
     }
 
@@ -108,6 +103,15 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
         await ProcessCategoryAsync(category, _serviceStateWorker.CategoryProcessState, stoppingToken);
 
         await _serviceStateWorker.ResetAsync(stoppingToken);
+    }
+
+    protected override async Task<(bool success, TCategory?, int? successCount)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, string categoryPath, int page, CancellationToken stoppingToken)
+    {
+        var result = await base.TryProcessCategoryPageAsync(categoryPagePath, categoryItemId, categoryPath, page, stoppingToken);
+
+        await _serviceStateWorker.ResetLoadedCategoryPageAsync(stoppingToken);
+
+        return result;
     }
 
     protected override async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
@@ -133,9 +137,7 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
         var result = await base.TryProcessCategoryProductAsync(categoryProductItem, cancellationToken);
         
         if (result)        
-            await _serviceStateWorker.SaveHandledCategoryProductItemAsync(categoryProductItem, cancellationToken);
-
-        await _serviceStateWorker.ResetCategoryAsync(cancellationToken);
+            await _serviceStateWorker.SaveHandledCategoryProductItemAsync(categoryProductItem, cancellationToken);        
 
         return result;
     }

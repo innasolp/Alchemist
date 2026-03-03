@@ -1,21 +1,30 @@
-﻿namespace Alchemist.Import.Products.Service;
+﻿using System.Text.Json.Serialization;
+
+namespace Alchemist.Import.Products.Service;
 
 public class CategoryProcessState
 {
+    [JsonInclude]
     public int SuccessProductCount { get; private set; }
 
+    [JsonInclude]
     public int UnsuccessProductCount { get; private set; }
 
+    [JsonInclude]
     public int AttemptsCount { get; private set; }
 
+    [JsonInclude]
     public int Page { get; private set; } = 1;
 
     public int AllProductCount => SuccessProductCount + UnsuccessProductCount;
 
+    [JsonInclude]
     public string? CategoryPagePath { get; set; }
 
-    public string? CategoryPath { get; private set; } 
+    [JsonInclude]
+    public string? CategoryPath { get; private set; }
 
+    [JsonConstructor]
     private CategoryProcessState(int successProductCount, int unsuccessProductCount, int attemptsCount, int page)
     {
         SuccessProductCount = successProductCount;

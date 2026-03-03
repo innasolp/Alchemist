@@ -35,7 +35,7 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
         return _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);
     }
 
-    public Task ResetCategoryAsync(CancellationToken cancellationToken)
+    public Task ResetLoadedCategoryPageAsync(CancellationToken cancellationToken)
     {
         _serviceState.Category = null;
         return _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);
