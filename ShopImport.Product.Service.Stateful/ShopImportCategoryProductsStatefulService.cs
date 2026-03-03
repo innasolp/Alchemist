@@ -136,10 +136,11 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
         return result;
     }
 
-    protected override async Task CloseAsync()
-    {
-        await _serviceStateWorker.CloseAsync();
-        await _serviceStateWorker.DisposeAsync();
-        await base.CloseAsync();
-    }
+    //todo
+    //protected override async Task CloseAsync()
+    //{
+    //    await _serviceStateWorker.CloseAsync();
+    //    await _serviceStateWorker.DisposeAsync();
+    //    await base.CloseAsync();
+    //}
 }
