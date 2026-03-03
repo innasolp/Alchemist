@@ -2,6 +2,7 @@
 using Import.Interfaces;
 using Import.Service;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace Alchemist.Import.Products.Service;
@@ -35,7 +36,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     private readonly SemaphoreSlim _categoryListenerSemaphoreSlim = new(1, 1);
 
-    protected LinkedList<IProductShopCategory> Categories { get; } = new LinkedList<IProductShopCategory>(shopCategories);
+    protected ConcurrentQueue<IProductShopCategory> Categories { get; } = new ConcurrentQueue<IProductShopCategory>(shopCategories);
 
     protected readonly string ProductPathFormat = productPathFormat;
 
@@ -61,7 +62,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             await _categoryListenerSemaphoreSlim.WaitAsync(cancellationToken);
             acquired = true;
 
-            Categories.AddLast(message);
+            Categories.Enqueue(message);
             Logger.LogInformation(ImportProductLogMessages.NewCategoryIsEnqueued, message.Path);
         }
         finally
@@ -80,7 +81,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (Categories.Count == 0)
+            if (Categories.IsEmpty)
             {
                 await Task.Delay(50, stoppingToken);
                 continue;
@@ -88,15 +89,10 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             var concurrentCategories = new List<IProductShopCategory>(ConcurrentCategoryTaskCount);
 
-            while (Categories.Count > 0 && concurrentCategories.Count < ConcurrentCategoryTaskCount)
+            while (!Categories.IsEmpty && concurrentCategories.Count < ConcurrentCategoryTaskCount)
             {
-                if (Categories.First != null)
-                {
-                    var productShopCategory = Categories.First?.Value;
-                    concurrentCategories.Add(productShopCategory);
-                }
-
-                Categories.RemoveFirst();
+                if (Categories.TryDequeue(out var productShopCategory) && productShopCategory != null)
+                    concurrentCategories.Add(productShopCategory);                                
             }
 
             try
@@ -204,7 +200,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return null;
     }
 
-    protected async Task<(bool success, TCategory?, int? successCount)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, string categoryPath, int page, CancellationToken stoppingToken)
+    protected virtual async Task<(bool success, TCategory?, int? successCount)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, string categoryPath, int page, CancellationToken stoppingToken)
     {
         var loaderData = GetLoaderData();
         var (success, category) = await TryGetCategoryFromPathAsync(categoryPagePath,

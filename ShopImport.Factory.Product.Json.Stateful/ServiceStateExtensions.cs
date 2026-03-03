@@ -28,7 +28,7 @@ internal static class ServiceStateExtensions
         var serviceStateRepositoryProvider = serviceStateSettings?.Provider ?? DefaultServiceStateRepositoryProvider;
 
         var serviceStateRepositoryFactory = factories.FirstOrDefault(f => f.GetType().Name.ToString().Contains(serviceStateRepositoryProvider, StringComparison.CurrentCultureIgnoreCase))
-         ?? throw new InvalidDataException($"ServiceState repository provider {DefaultServiceStateRepositoryProvider} not found.");
+         ?? throw new InvalidDataException($"ServiceState repository provider {serviceStateRepositoryProvider} not found.");
 
         return !string.IsNullOrEmpty(serviceStateSettings?.ConnectionString)
             ? serviceStateRepositoryFactory.Create(serviceStateSettings.ConnectionString)
