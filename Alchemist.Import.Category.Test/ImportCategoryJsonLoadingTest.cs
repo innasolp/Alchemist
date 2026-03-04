@@ -72,7 +72,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
         var category = Helper.CreateCategoryWithChildren();        
 
-        var categoryStream = await TestExtensions.LoadItemAsync(category);
+        var categoryStream = await TestExtensions.LoadItemAsync(category, CancellationToken.None);
 
         var requestData = new { id = 2 };
         var loadAutoResetEvent = new AsyncAutoResetEvent();
