@@ -24,6 +24,7 @@ using Shop.API.Client;
 using Shop.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
 using ShopImport.Service.Hangfire;
+using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Infrastructure.Module;
 using ShopSettings.Interfaces;
 using WebLoader.Interfaces;
@@ -44,7 +45,8 @@ AddShopAPIService(builder, out var restApiHost);
 AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
 //builder.Host.AddImportServicesInfrastructure();
-builder.Host.AddImportServicesInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"));
+var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOptions").Get<JobExecuteOptions>();
+builder.Host.AddImportServicesInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"), hangfireOptions);
 
 AddMessages(builder);
 
