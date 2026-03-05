@@ -1,6 +1,6 @@
 ﻿namespace ShopImport.Service.Hangfire;
 
-public interface IImportServiceJob
+public interface IImportServiceJobManager
 {
     Task Execute(Guid guid, CancellationToken cancellationToken);
 }

@@ -10,13 +10,16 @@ using MediatR;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ShopImport.Service.Hangfire.Infrastructure;
 using StackExchange.Redis;
 
 namespace ShopImport.Service.Hangfire;
 
 public static class MediatrExtensions
 {
-    public static IHostBuilder AddImportServicesInfrastructure(this IHostBuilder hostBuilder, string hangfireConnectionString)
+    private readonly static JobExecuteOptions defaultJobExecuteOptions = new JobExecuteOptions { ProcessingQueue = "processing", WaitingQueue = "waiting" };
+
+    public static IHostBuilder AddImportServicesInfrastructure(this IHostBuilder hostBuilder, string hangfireConnectionString, JobExecuteOptions? jobExecuteOptions = null)
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
@@ -28,7 +31,7 @@ public static class MediatrExtensions
                 cfg.RegisterServicesFromAssemblyContaining<AddShopImportServiceCommandHandler>();
             });
 
-            services.AddHangfire(hangfireConnectionString);
+            services.AddHangfire(hangfireConnectionString, jobExecuteOptions ?? defaultJobExecuteOptions);
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -36,7 +39,7 @@ public static class MediatrExtensions
         {
             builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IShopImportServiceManager));
             builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IServiceManager));
-            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IImportServiceJob));
+            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IImportServiceJobManager));
             builder.Register(c => c.ResolveKeyed<IBackgroundTaskQueue>(ServiceKeys.EventBackgroundTaskQueue)).As<IBackgroundTaskQueue>();
             builder.Register(c => c.ResolveKeyed<IMessageSender>(ServiceKeys.EventMessageSenderKey)).As<IMessageSender>();
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));
@@ -46,7 +49,7 @@ public static class MediatrExtensions
         });
     }
 
-    private static void AddHangfire(this IServiceCollection services, string hangfireConnectionString)
+    private static void AddHangfire(this IServiceCollection services, string hangfireConnectionString, JobExecuteOptions jobExecuteOptions)
     {
         ClearRedisDataBase(hangfireConnectionString);
 
@@ -58,9 +61,14 @@ public static class MediatrExtensions
                 InvisibilityTimeout = TimeSpan.FromHours(3)
             });
         });
-        
 
-        services.AddHangfireServer();
+        services.AddSingleton(jobExecuteOptions);        
+
+        services.AddHangfireServer(options =>
+        {
+            options.Queues = [jobExecuteOptions.ProcessingQueue];
+            options.WorkerCount = 100;
+        });
 
         ThreadPool.SetMinThreads(100, 100);
     }

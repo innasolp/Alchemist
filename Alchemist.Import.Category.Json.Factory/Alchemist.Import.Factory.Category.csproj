@@ -14,7 +14,8 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Import.Factory.Service" Version="1.0.0.3" />
+		<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.4" />
+		<PackageReference Include="Import.Factory.Service" Version="1.0.0.4" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

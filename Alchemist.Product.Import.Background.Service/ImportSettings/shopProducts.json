@@ -7,7 +7,7 @@
     "ProductUrlFormatType": "Path",
     "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}",
     "CategoryUrlFormatType": "Path",
-    "Perfomance": true,
+    "IsAggregate": true,
     "PageProductCount": 12,
     "RootCategories": [
       {
@@ -43,7 +43,7 @@
       "CategoryRequestOptions": {
         "Value": {
           "LoadingType": "Simple",
-          "TimeouteMillseconds" : 3000
+          "TimeouteMillseconds": 3000
         }
       },
       "ProductRequestOptions": {
@@ -66,7 +66,7 @@
     "ProductUrlFormat": "https://goldapple.ru{0}",
     "CategoryUrlFormat": "https://goldapple.ru{0}?p={1}",
     "PageProductCount": 20,
-    "Perfomance": true,
+    "IsAggregate": true,
     "RootCategories": [
       {
         "Item": 1000000004,
@@ -104,7 +104,7 @@
       "HostRequestOptions": {
         "Value": {
           "RouteUrlFormat": "https://goldapple.ru/front/api/apm/events",
-          "LoadingType" : "Route"
+          "LoadingType": "Route"
         }
       }
     }

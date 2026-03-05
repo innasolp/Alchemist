@@ -1,0 +1,16 @@
+﻿using Import.Interfaces;
+
+namespace ShopImport.Service.Hangfire.Infrastructure;
+
+internal interface IImportServiceJob
+{
+    IImportService ImportService { get; }
+
+    public int SourceId { get; }
+
+    Guid Guid { get; }
+
+    string? JobId { get; set; }
+
+    Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs();
+}

@@ -57,7 +57,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         var category = Helper.CreateCategoryWithChildren();
         LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
 
-        var categoryStream = await TestExtensions.LoadItemAsync(category);
+        var categoryStream = await TestExtensions.LoadItemAsync(category, CancellationToken.None);
 
         LoaderMock.SetupGetRequestData(requestData);
         LoaderMock.Setup(w =>
@@ -81,7 +81,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
         var category = Helper.CreateCategoryWithChildren();
         LoaderMock.SetupLoadItem(_categoryShopModelMock.Object.CategorySourceUrl, requestData, category);
 
-        var categoryStream = await TestExtensions.LoadItemAsync(category);
+        var categoryStream = await TestExtensions.LoadItemAsync(category, CancellationToken.None);
 
         LoaderMock.SetupGetRequestData(requestData);       
 
