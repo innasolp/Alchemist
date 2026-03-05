@@ -9,7 +9,7 @@ namespace Alchemist.Product.Import.Background.Settings;
 
 public abstract class ShopImportSettings : IShopImportSettings, IShopSettings, IHostSettings
 {
-    public bool? Perfomance { get; set; }
+    public bool IsAggregate { get; set; } = false;
 
     [JsonIgnore]
     public int Id { get; set; }
