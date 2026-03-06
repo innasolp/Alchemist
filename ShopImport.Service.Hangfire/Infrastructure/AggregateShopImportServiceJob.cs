@@ -1,13 +1,10 @@
-﻿using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Settings;
+﻿using Alchemist.Import.Settings;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 using ShopImport.Service.Hangfire.Models;
-using ShopImport.Service.Infrastructure.Module.Models;
-using System.Collections.Concurrent;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
@@ -20,8 +17,6 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
     private readonly IShopModel _shopModel;
 
     private readonly string _name;
-
-    private readonly ConcurrentQueue<(IProductShopCategory, IImportService)> _categoryImportServices = [];
 
     private readonly Dictionary<Guid, IImportServiceJob> _importServiceJobs = [];
 
@@ -42,19 +37,13 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
 
     private void InitializeImportServiceJobs()
     {
-        foreach (var productShopCategory in _shopModel.RootCategories)
+        var executionSources = _shopModel.Split();
+
+        foreach (var source in executionSources)
         {
-            var serviceName = $"{_name}/{productShopCategory.Category}";
-            var currentShopModel = new ProductShopModel {
-                Name = (_shopModel as IImportSource).Name,
-                Caption = _shopModel.Caption,
-                Id = _shopModel.Id,
-                Url = (_shopModel as IImportSource).Url
-            };
-            currentShopModel.RootCategories.Add(productShopCategory);
-            var importServiceJob = new ShopImportServiceJob(serviceName, currentShopModel, _shopImportSettings, _importServiceFactory);
+            var serviceName = $"{_name}/{(source as IImportSource).Name}";
+            var importServiceJob = new ShopImportServiceJob(serviceName, source, _shopImportSettings, _importServiceFactory, Guid);
             _importServiceJobs.Add(importServiceJob.Guid, importServiceJob);
-            _categoryImportServices.Enqueue((productShopCategory, importServiceJob.ImportService));
         }
     }
 
@@ -67,6 +56,8 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
     public string? JobId { get; set; }
 
     IImportService IImportServiceJob.ImportService => ImportService;
+
+    Guid? IImportServiceJob.ParentId => null;
 
     private async Task OnExecuteService(IImportService importService, CancellationToken cancellationToken)
     {

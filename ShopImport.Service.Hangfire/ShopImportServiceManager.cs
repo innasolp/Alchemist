@@ -3,6 +3,7 @@ using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
 using Hangfire;
+using Hangfire.States;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service;
@@ -13,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Hangfire.Models;
-using ShopImport.Service.Infrastructure.Module.Models;
 using System.Collections.Concurrent;
 
 namespace ShopImport.Service.Hangfire;
@@ -22,7 +22,8 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
     IShopDataService shopDataService,
     IImportServiceLogFactory importServiceLogFactory,
     ILoggerFactory loggerFactory,
-    JobExecuteOptions jobExecuteOptions) 
+    JobExecuteOptions jobExecuteOptions,
+    IBackgroundJobClient backgroundJobClient) 
     : IShopImportServiceJobManager
 {
     private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories = shopServiceFactories;
@@ -34,6 +35,8 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
     private readonly ILoggerFactory _loggerFactory = loggerFactory;
 
     private readonly JobExecuteOptions _jobExecuteOptions = jobExecuteOptions;
+
+    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
     private readonly ConcurrentDictionary<Guid, IImportServiceJob> _allServiceJobs = [];
 
@@ -54,6 +57,16 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
 
             var serviceJob = CreateImportServiceJob(name, shopImportSettings, shopModel);
             _coreServiceJobs.TryAdd(serviceJob.Guid, serviceJob);
+
+            var executionJobs = await serviceJob.GetExecutionServiceJobs();
+            executionJobs.ToList().ForEach(j => _allServiceJobs.TryAdd(j.Key, j.Value));
+
+            foreach (var executionJob in executionJobs)
+            {
+                var jobId = BackgroundJob.Enqueue<IImportServiceJobManager>(_jobExecuteOptions.WaitingQueue,
+                     serviceJobManager => serviceJobManager.Execute(executionJob.Value.Guid, cancellationToken));
+                executionJob.Value.JobId = jobId;
+            }
 
             return (serviceJob.Guid, serviceJob.ImportService);
         }
@@ -91,26 +104,24 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
 
     public (IImportService service, Task startTask) StartServiceTask(Guid guid, CancellationToken cancellationToken)
     {
-        var serviceJob = GetServiceJob(guid);
+        var serviceJob = GetCoreServiceJob(guid);
 
-        var startTask = StartService(serviceJob, cancellationToken);
+        var startTask = StartService(guid, cancellationToken);
 
         return (serviceJob.ImportService, startTask);
     }
 
-    private async Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
+    private Task StartService(Guid serviceJobId, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(serviceJob.JobId))
-            throw new InvalidOperationException($"Job for service {serviceJob.ImportService.Name} already run.");
+        //todo
+        var serviceJob = GetCoreServiceJob(serviceJobId);
+        _backgroundJobClient.ChangeState(serviceJob.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue));
 
-        var executionJobs = await serviceJob.GetExecutionServiceJobs();
-        executionJobs.ToList().ForEach(j => _allServiceJobs.TryAdd(j.Key, j.Value));        
+        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == serviceJobId).ToList();
+        childJobs.ForEach(job =>
+        _backgroundJobClient.ChangeState(job.Value.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue)));
 
-        foreach (var executionJob in executionJobs)
-        {
-            var jobId = BackgroundJob.Enqueue<IImportServiceJobManager>(serviceJobManager => serviceJobManager.Execute(executionJob.Value.Guid, cancellationToken));
-            executionJob.Value.JobId = jobId;
-        }        
+        return Task.CompletedTask;
     }
 
     public async Task StartAndDisposeAsync(Guid guid, CancellationToken cancellationToken)
@@ -118,7 +129,7 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         try
         {
-            var serviceJob = GetServiceJob(guid);        
+            var serviceJob = GetExecutingServiceJob(guid);        
             await serviceJob.ImportService.Start(linkedCts.Token);
         }
         finally
@@ -127,18 +138,29 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
         }
     }
     
-    private IImportServiceJob GetServiceJob(Guid guid)
+    private IImportServiceJob GetCoreServiceJob(Guid guid)
     {
         return !_coreServiceJobs.TryGetValue(guid, out var serviceJob)
             ? throw new InvalidOperationException($"Service with id {guid} not found.")
             : serviceJob;
     }
 
+    private IImportServiceJob GetExecutingServiceJob(Guid guid)
+    {
+        return !_allServiceJobs.TryGetValue(guid, out var serviceJob)
+            ? throw new InvalidOperationException($"Service with id {guid} not found.")
+            : serviceJob;
+    }
+
+    private List<IImportServiceJob> GetExecutingServiceJobs(Guid coreJobGuid)
+    {
+        return [.. _allServiceJobs.Where(j=>j.Key == coreJobGuid || j.Value.ParentId == coreJobGuid).Select(j=>j.Value)];
+    }
+
     public (IImportService service, Task startTask) StopServiceTask(Guid guid, CancellationToken cancellationToken)
     {
-        if (!_coreServiceJobs.TryGetValue(guid, out var serviceJob))
-            throw new InvalidOperationException($"Service with id {guid} not found.");
-        
+        var serviceJob = GetCoreServiceJob(guid);
+
         return (serviceJob.ImportService, StopServiceAsync(serviceJob, cancellationToken));
     }
 
@@ -147,9 +169,10 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
         return _allServiceJobs.Select(si => (si.Key, si.Value.ImportService, StopServiceAsync(si.Value, cancellationToken)));
     }
 
-    private static async Task StopServiceAsync(IImportServiceJob serviceJob, CancellationToken cancellationToken)
+    private Task StopServiceAsync(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        await serviceJob.ImportService.Stop(cancellationToken);
+        var executingTasks = GetExecutingServiceJobs(serviceJob.Guid).Select(e=>e.ImportService.Stop(cancellationToken));
+        return Task.WhenAll(executingTasks);
     }
 
     private readonly Lock _shopModelsLock = new();

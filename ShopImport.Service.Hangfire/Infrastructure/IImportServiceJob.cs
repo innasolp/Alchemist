@@ -12,5 +12,7 @@ internal interface IImportServiceJob
 
     string? JobId { get; set; }
 
+    Guid? ParentId { get; }
+
     Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs();
 }
