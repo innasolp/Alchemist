@@ -17,7 +17,7 @@ namespace ShopImport.Service.Hangfire;
 
 public static class MediatrExtensions
 {
-    private readonly static JobExecuteOptions defaultJobExecuteOptions = new JobExecuteOptions { ProcessingQueue = "processing", WaitingQueue = "waiting" };
+    private readonly static JobExecuteOptions defaultJobExecuteOptions = new() { ServerName = "DefaultServer", ProcessingQueue = "processing", WaitingQueue = "waiting" };
 
     public static IHostBuilder AddImportServicesInfrastructure(this IHostBuilder hostBuilder, string hangfireConnectionString, JobExecuteOptions? jobExecuteOptions = null)
     {
@@ -67,7 +67,8 @@ public static class MediatrExtensions
         services.AddHangfireServer(options =>
         {
             options.Queues = [jobExecuteOptions.ProcessingQueue];
-            options.WorkerCount = 100;
+            options.WorkerCount = 20; //todo
+            options.ServerName = jobExecuteOptions.ServerName;
         });
 
         ThreadPool.SetMinThreads(100, 100);

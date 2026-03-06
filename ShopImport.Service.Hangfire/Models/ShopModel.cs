@@ -3,14 +3,16 @@ using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using System.ComponentModel;
 
-namespace ShopImport.Service.Infrastructure.Module.Models;
+namespace ShopImport.Service.Hangfire.Models;
 
 interface IShopModel : IImportSource, IShop 
 {
     IList<IProductShopCategory> RootCategories { get; }
+
+    IEnumerable<IShopModel> Split();
 }
 
-internal class ShopModel : IShopModel
+internal abstract class ShopModel : IShopModel
 {    
     public int Id { get; set; }
 
@@ -29,5 +31,12 @@ internal class ShopModel : IShopModel
     protected void OnPropertyChanged(string prop = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+    }
+
+    protected abstract IEnumerable<IShopModel> Split();
+
+    IEnumerable<IShopModel> IShopModel.Split()
+    {
+        return Split();
     }
 }

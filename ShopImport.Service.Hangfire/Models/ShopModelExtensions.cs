@@ -4,7 +4,6 @@ using Alchemist.Import.Settings.Category;
 using Alchemist.Import.Settings.Product;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Models;
-using ShopImport.Service.Infrastructure.Module.Models;
 using ShopSettings.Interfaces;
 
 namespace Import.Service.Commands.Models;
@@ -89,7 +88,7 @@ public static class ShopModelExtensions
                 ? await shopDataService.GetShop(shopId, cancellationToken)
                 : await shopDataService.GetShopByName(shopImportSettings.ShopName, cancellationToken)
                 ?? await shopDataService.GetShopByUrl(shopImportSettings.ShopUrl, cancellationToken)
-                ?? await shopDataService.CreateShop(new ShopModel { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
+                ?? await shopDataService.CreateShop(new T { Name = shopImportSettings.ShopName, Url = shopImportSettings.ShopUrl }, cancellationToken);
 
         var shopModel = new T
         {
