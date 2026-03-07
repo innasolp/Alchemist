@@ -14,7 +14,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Import.Factory.Service" Version="1.0.0.4" />
+		<PackageReference Include="Import.Factory.Service" Version="1.0.0.5" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -1,5 +1,6 @@
 ﻿using BrowserDataLoader.Interfaces;
 using Import.Interfaces;
+using Import.Interfaces.Exceptions;
 using Import.LoaderSettings;
 using Moq;
 using System.Text;
@@ -82,7 +83,7 @@ public class BrowserServiceClientWebLoaderCallsTest
 
         var loaderOptions = new RequestOptions { RouteUrlFormat = invalidRouteUrl };
 
-        var ex = await Assert.ThrowsAsync<LoaderServiceException>(async () =>
+        var ex = await Assert.ThrowsAnyAsync<LoaderServiceException>(async () =>
                 await Helper.LoadAsync(webLoaderMock, url, new object[] { loaderOptions }, cancellationToken: CancellationToken.None));
 
         Assert.Contains($"Route {invalidRouteUrl} on page {url} not found", ex.Message);
@@ -169,7 +170,7 @@ public class BrowserServiceClientWebLoaderCallsTest
 
         var loaderOptions = new RequestOptions { RouteUrlFormat = routeUrl };
 
-        await Assert.ThrowsAsync<LoaderServiceException>
+        await Assert.ThrowsAnyAsync<LoaderServiceException>
             (()=>Helper.LoadHostAsync(webLoaderMock, url, hostRequestOptions: loaderOptions, cancellationToken: CancellationToken.None));
 
         webLoaderMock.Verify(w => w.Start(), Times.Once);

@@ -40,9 +40,9 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
         var limiter = new FixedWindowRateLimiter(
             new FixedWindowRateLimiterOptions
             {
-                Window = TimeSpan.FromMilliseconds(_rateLimiterOptions.WindowMilliseconds!.Value),
+                Window = TimeSpan.FromMilliseconds(_rateLimiterOptions.WindowMilliseconds ?? DefaultLimiterWindowInMilliseconds),
                 PermitLimit = 1,
-                QueueLimit = _rateLimiterOptions.QueueLimit!.Value,
+                QueueLimit = _rateLimiterOptions.QueueLimit ?? DefaultQueueLimit,
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 AutoReplenishment = true
             });

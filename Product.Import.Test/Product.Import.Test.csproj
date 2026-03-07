@@ -11,7 +11,8 @@
 		<PackageReference Include="WebLoader.Interfaces" Version="1.0.1.7" />
 		<PackageReference Include="BrowserDataLoader.Interfaces" Version="1.0.0.5" />
 		<PackageReference Include="BrowserLauncher.Interfaces" Version="1.0.0.2" />
-		<PackageReference Include="Import.Interfaces" Version="1.0.0.2" />
+		<PackageReference Include="Import.Interfaces" Version="1.0.0.3" />
+		
 	</ItemGroup>
 
 </Project>
