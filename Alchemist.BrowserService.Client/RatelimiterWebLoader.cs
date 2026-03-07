@@ -71,11 +71,22 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
 
     public void UpdateLimiterOptionsIfNeed(RateLimiterOptions rateLimiterOptions)
     {
-        if(rateLimiterOptions.WindowMilliseconds.HasValue)
-            _rateLimiterOptions.WindowMilliseconds = Math.Max(_rateLimiterOptions.WindowMilliseconds!.Value, rateLimiterOptions.WindowMilliseconds.Value);
-        
-        if(rateLimiterOptions.QueueLimit.HasValue)
-            _rateLimiterOptions.QueueLimit = Math.Max(_rateLimiterOptions.QueueLimit!.Value, rateLimiterOptions.QueueLimit.Value);
+        if (rateLimiterOptions.WindowMilliseconds.HasValue)
+        {
+            if (!_rateLimiterOptions.WindowMilliseconds.HasValue)
+                _rateLimiterOptions.WindowMilliseconds = rateLimiterOptions.WindowMilliseconds;
+            else 
+                _rateLimiterOptions.WindowMilliseconds = 
+                    Math.Max(_rateLimiterOptions.WindowMilliseconds.Value, rateLimiterOptions.WindowMilliseconds.Value);
+        }
+
+        if (rateLimiterOptions.QueueLimit.HasValue)
+        {
+            if (!_rateLimiterOptions.QueueLimit.HasValue)
+                _rateLimiterOptions.QueueLimit = rateLimiterOptions.QueueLimit;
+            else
+                _rateLimiterOptions.QueueLimit = Math.Max(_rateLimiterOptions.QueueLimit.Value, rateLimiterOptions.QueueLimit.Value);
+        }
     }
 
     public bool IsStarted(Guid connectionId)

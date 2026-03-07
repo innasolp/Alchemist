@@ -288,7 +288,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         SetupCategoriesLoadingWithDelayOnIteration(requestData, [.. productCategoryMocks.Select(c=>c.Object)], pauseIteration);
 
         var serviceName = Guid.NewGuid().ToString();
-        var service = CreateService(serviceName);
+        await using var service = CreateService(serviceName);
 
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(500);
@@ -324,7 +324,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         SetupProductItemsWithDelayOnIteration(testCategories, requestData, categoryNumber, productNumber);
 
         var serviceName = Guid.NewGuid().ToString();
-        var service = CreateService(serviceName);
+        await using var service = CreateService(serviceName);
 
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(500);
@@ -414,7 +414,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         LoggerMock.Invocations.Clear();
 
         using var newCancellationTokenSource = new CancellationTokenSource();
-        var newService = CreateService(serviceName);
+        await using var newService = CreateService(serviceName);
         await newService.Start(newCancellationTokenSource.Token);
 
         VerifyNotContainsCategoryPageMessage(ProductShopModelMock.Object.Categories[pauseIteration - 1 ]);
