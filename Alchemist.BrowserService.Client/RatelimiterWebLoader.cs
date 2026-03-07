@@ -9,7 +9,11 @@ namespace Alchemist.BrowserService.Client;
 
 public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rateLimiterOptions = null) : IRateLimiterWebLoader
 {
-    private readonly RateLimiterOptions? _rateLimiterOptions = rateLimiterOptions;
+    private readonly RateLimiterOptions _rateLimiterOptions = rateLimiterOptions ?? new RateLimiterOptions
+    {
+        WindowMilliseconds = DefaultLimiterWindowInMilliseconds,
+        QueueLimit = DefaultQueueLimit
+    };
 
     private readonly HashSet<Guid> _connectionsPool = [];
 
@@ -20,6 +24,10 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
     private readonly SemaphoreSlim _startSemaphoreSlim = new(1,1);
     
     private ResiliencePipeline? _pipeline;
+
+    private const int DefaultLimiterWindowInMilliseconds = 2000;
+
+    private const int DefaultQueueLimit = 5;
 
     private void ThrowExceptionIfNotStarted(Guid connectionId)
     {
@@ -32,9 +40,11 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
         var limiter = new FixedWindowRateLimiter(
             new FixedWindowRateLimiterOptions
             {
-                Window = TimeSpan.FromMilliseconds(_rateLimiterOptions?.WindowMilliseconds ?? 2000),
+                Window = TimeSpan.FromMilliseconds(_rateLimiterOptions.WindowMilliseconds!.Value),
                 PermitLimit = 1,
-                QueueLimit = 5
+                QueueLimit = _rateLimiterOptions.QueueLimit!.Value,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                AutoReplenishment = true
             });
 
         var pipelineBuilder = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
@@ -50,12 +60,22 @@ public class RatelimiterWebLoader(IWebLoader webLoader, RateLimiterOptions? rate
                 }
                 return ValueTask.FromResult<TimeSpan?>(TimeSpan.Zero);
             },
+            BackoffType = DelayBackoffType.Constant,
             Delay = TimeSpan.FromSeconds(1),
             MaxRetryAttempts = 5
         })
             .AddRateLimiter(limiter);
 
         _pipeline = pipelineBuilder.Build();
+    }
+
+    public void UpdateLimiterOptionsIfNeed(RateLimiterOptions rateLimiterOptions)
+    {
+        if(rateLimiterOptions.WindowMilliseconds.HasValue)
+            _rateLimiterOptions.WindowMilliseconds = Math.Max(_rateLimiterOptions.WindowMilliseconds!.Value, rateLimiterOptions.WindowMilliseconds.Value);
+        
+        if(rateLimiterOptions.QueueLimit.HasValue)
+            _rateLimiterOptions.QueueLimit = Math.Max(_rateLimiterOptions.QueueLimit!.Value, rateLimiterOptions.QueueLimit.Value);
     }
 
     public bool IsStarted(Guid connectionId)
