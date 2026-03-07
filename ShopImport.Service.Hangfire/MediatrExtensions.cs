@@ -82,7 +82,7 @@ public static class MediatrExtensions
         foreach (var endpoint in endpoints)
         {
             var server = redis.GetServer(endpoint);
-            server.FlushDatabase(); // Очистит текущую БД
+            server.FlushDatabase();
         }
     }
 }

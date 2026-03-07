@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.4" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Factory.Product.Json\Alchemist.Import.Factory.Product.Json.csproj" />
     <ProjectReference Include="..\ShopImport.Product.Service.Stateful\ShopImport.Product.Service.Stateful.csproj" />
   </ItemGroup>

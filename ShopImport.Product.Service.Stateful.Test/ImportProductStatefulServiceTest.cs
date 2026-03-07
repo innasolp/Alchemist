@@ -35,7 +35,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         });
     }   
 
-    private void SetupCategoriesLoadingWithDelayOnIteration(object requestData, List<IProductShopCategory> productCategories, int categoryPauseIteration)
+    private void SetupCategoriesLoadingWithDelayOnIteration(object requestData, List<IProductShopCategory> productCategories, int categoryPauseIteration, int delayMilliseconds = 1000)
     {
         bool delayed = false;
 
@@ -49,7 +49,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
 
             try
             {
-                await Task.Delay(1000, token);
+                await Task.Delay(delayMilliseconds, token);
                 _outputHelper.WriteLine("Category loading not canceled on first attempt");
             }
             catch (OperationCanceledException)
@@ -414,7 +414,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         LoggerMock.Invocations.Clear();
 
         using var newCancellationTokenSource = new CancellationTokenSource();
-        await using var newService = CreateService(serviceName);
+        var newService = CreateService(serviceName);
         await newService.Start(newCancellationTokenSource.Token);
 
         VerifyNotContainsCategoryPageMessage(ProductShopModelMock.Object.Categories[pauseIteration - 1 ]);

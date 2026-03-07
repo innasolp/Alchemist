@@ -75,7 +75,7 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
     }
 
     [Fact]
-    public async Task ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWait()
+    public async Task ShouldLogWarningAboutRetryAndLogSuccessAfterRetry()
     {
         LoaderMock.Reset();
 
@@ -83,6 +83,6 @@ public class ImportShopProductServiceTest : ImportServiceExecutionTest<TestImpor
         var categoryMock = TestHelper.CreateProductShopCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
-        await ShouldLogRequestFailedAndLoaderWillBePausedWarningWhenLoaderNeedsWaitAsync(1000);
+        await ShouldLogWarningAboutRetryAndLogSuccessAfterRetryAsync(1000, TimeSpan.FromMilliseconds(500));
     }
 }
