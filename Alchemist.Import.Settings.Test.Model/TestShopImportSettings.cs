@@ -33,5 +33,5 @@ public abstract class TestShopImportSettings : IShopImportSettings, IShopSetting
     string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     ShopSettingType IShopSettings.Type { get => Type; set {; } }
 
-    public bool IsAggregate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public bool IsAggregate { get ; set; }
 }

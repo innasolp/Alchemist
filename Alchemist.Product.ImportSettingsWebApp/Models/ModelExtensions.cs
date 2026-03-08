@@ -35,8 +35,7 @@ internal static class ModelExtensions
 
     private static bool ShopSettingsIsEquals(this ShopImportSettingsModel target, ShopImportSettingsModel source)
     {
-        return target.Name.EqualsWithEmpty(source.Name)
-            && target.Perfomance == source.Perfomance;
+        return target.Name.EqualsWithEmpty(source.Name) && target.IsAggregate == source.IsAggregate;
     }
 
     internal static bool ServicesAreEquals(this IDictionary<string, ServiceSettingsModel> target, IDictionary<string, ServiceSettingsModel> source)
@@ -136,7 +135,7 @@ internal static class ModelExtensions
     internal static void UpdateShopImportSettingsCore(this ShopImportSettingsModel target, ShopImportSettingsModel source)
     {
         target.Name = source.Name;
-        target.Perfomance = source.Perfomance;
+        target.IsAggregate = source.IsAggregate;
     }
 
     internal static void UpdateProductShopImportSettingsCore(this ProductShopImportSettingsModel target, ProductShopImportSettingsModel source)
