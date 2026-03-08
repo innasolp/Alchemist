@@ -17,12 +17,14 @@ internal class RateLimiterWebLoaderHostFactory(IEnumerable<IWebLoaderFactory> we
             || f.GetType().Name.Contains(webLoaderSettings.ImplementationTypeName, StringComparison.InvariantCultureIgnoreCase))
             ?? throw new InvalidDataException($"Web loader factory for type {webLoaderSettings.ImplementationTypeName} not found");
 
-        if (!_hostWebLoaders.TryGetValue((host, webLoaderFactory), out var ratelimiterWebLoader) || ratelimiterWebLoader == null)
+        if (!_hostWebLoaders.TryGetValue((host, webLoaderFactory), out var ratelimiterWebLoader))
         {
             var webloader = webLoaderFactory.CreateWebLoader();
             ratelimiterWebLoader = new RatelimiterWebLoader(webloader, rateLimiterOptions);
             _hostWebLoaders.TryAdd((host, webLoaderFactory), ratelimiterWebLoader);
         }
+        else if(rateLimiterOptions != null)
+            ratelimiterWebLoader.UpdateLimiterOptionsIfNeed(rateLimiterOptions);
 
         return ratelimiterWebLoader;
     }

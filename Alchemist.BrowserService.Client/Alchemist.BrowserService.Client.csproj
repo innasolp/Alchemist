@@ -11,7 +11,7 @@
 	<PackageReference Include="WebLoader.Interfaces" Version="1.0.1.7" />
 	<PackageReference Include="WebLoader.common" Version="1.0.0.4" />
 	<PackageReference Include="BrowserDataloader.Interfaces" Version="1.0.0.5" />
-	<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.1" />
+	<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.5" />
 	  <PackageReference Include="Polly.RateLimiting" Version="8.6.5" />
 	  <PackageReference Include="System.Threading.RateLimiting" Version="10.0.1" />
   </ItemGroup>

@@ -4,7 +4,7 @@ namespace Alchemist.Import.Settings;
 
 public interface IShopImportSettings : IImportSettings
 {
-    public bool? Perfomance { get; set; }
+    public bool IsAggregate { get; set; }
 
     string ShopName { get; set; }
 

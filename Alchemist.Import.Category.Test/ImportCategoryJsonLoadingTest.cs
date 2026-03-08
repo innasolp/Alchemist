@@ -2,6 +2,7 @@
 using Alchemist.Import.Category.Service;
 using Alchemist.Import.CategoryService.Test.Infrastructure;
 using Import.Interfaces;
+using Import.Interfaces.Exceptions;
 using Import.Service.Test;
 using Import.Service.Test.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -72,7 +73,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
 
         var category = Helper.CreateCategoryWithChildren();        
 
-        var categoryStream = await TestExtensions.LoadItemAsync(category);
+        var categoryStream = await TestExtensions.LoadItemAsync(category, CancellationToken.None);
 
         var requestData = new { id = 2 };
         var loadAutoResetEvent = new AsyncAutoResetEvent();
@@ -106,7 +107,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         LoaderMock.SetupStartSuccess();
         LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
-        var exception = new LoaderServiceException("Json loading failed");
+        var exception = new NoActionLoaderServiceException("Json loading failed");
         var requestData = new {id = 10};
         LoaderMock.SetupGetRequestData(requestData);
         LoaderMock.Setup(w=>

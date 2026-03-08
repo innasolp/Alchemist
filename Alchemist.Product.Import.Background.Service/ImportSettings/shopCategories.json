@@ -4,7 +4,6 @@
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
     "CategorySourceUrl": "https://www.ozon.ru",
-    "Perfomance": true,
     "Services": {
       "ImportService": {
         "ImplementationTypeName": "ShopImportCategoriesTimerService",
@@ -90,7 +89,6 @@
     "ShopUrl": "https://goldapple.ru",
     "CategorySourceUrl": "https://goldapple.ru",
     "Caption": "Золотое яблоко",
-    "Perfomance": true,
     "Services": {
       "ImportService": {
         "ImplementationTypeName": "ShopImportCategoriesTimerService",

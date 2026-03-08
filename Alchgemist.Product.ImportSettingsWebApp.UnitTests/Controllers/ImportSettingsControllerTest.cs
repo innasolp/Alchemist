@@ -28,7 +28,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
     {
         ShopId = shopId,
         Name = name,
-        Perfomance = true,
+        IsAggregate = true,
         ProductUrlFormat = "p/{id}",
         CategoryUrlFormat = "c/{id}",
         PageProductCount = 20,
@@ -38,7 +38,7 @@ public class ImportSettingsControllerTest : ControllerTest<ImportSettingsActionC
     {
         ShopId = shopId,
         Name = name,
-        Perfomance = true,
+        IsAggregate = true,
         CategorySourceUrl = "https://example.com/categories"
     };
 
