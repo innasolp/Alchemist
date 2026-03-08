@@ -1,4 +1,5 @@
-﻿using WebLoader.Interfaces;
+﻿using Import.LoaderSettings;
+using WebLoader.Interfaces;
 
 namespace Alchemist.BrowserService.Client;
 
@@ -7,6 +8,8 @@ public interface IRateLimiterWebLoader : IAsyncDisposable
     bool IsStarted(Guid connectionId);
 
     bool IsConnected(Guid connectionId);
+
+    void UpdateLimiterOptionsIfNeed(RateLimiterOptions rateLimiterOptions);
 
 
     event AsyncEventHandler<EventArgs>? Reseted;

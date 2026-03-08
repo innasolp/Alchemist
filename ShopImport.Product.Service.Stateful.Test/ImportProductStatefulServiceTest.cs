@@ -35,7 +35,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         });
     }   
 
-    private void SetupCategoriesLoadingWithDelayOnIteration(object requestData, List<IProductShopCategory> productCategories, int categoryPauseIteration)
+    private void SetupCategoriesLoadingWithDelayOnIteration(object requestData, List<IProductShopCategory> productCategories, int categoryPauseIteration, int delayMilliseconds = 1000)
     {
         bool delayed = false;
 
@@ -49,7 +49,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
 
             try
             {
-                await Task.Delay(1000, token);
+                await Task.Delay(delayMilliseconds, token);
                 _outputHelper.WriteLine("Category loading not canceled on first attempt");
             }
             catch (OperationCanceledException)
@@ -288,7 +288,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         SetupCategoriesLoadingWithDelayOnIteration(requestData, [.. productCategoryMocks.Select(c=>c.Object)], pauseIteration);
 
         var serviceName = Guid.NewGuid().ToString();
-        var service = CreateService(serviceName);
+        await using var service = CreateService(serviceName);
 
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(500);
@@ -324,7 +324,7 @@ public class ImportProductStatefulServiceTest : ImportProductsTest<TestImportPro
         SetupProductItemsWithDelayOnIteration(testCategories, requestData, categoryNumber, productNumber);
 
         var serviceName = Guid.NewGuid().ToString();
-        var service = CreateService(serviceName);
+        await using var service = CreateService(serviceName);
 
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(500);

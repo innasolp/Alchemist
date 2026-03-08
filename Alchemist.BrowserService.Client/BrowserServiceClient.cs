@@ -1,6 +1,8 @@
 ﻿using BrowserDataLoader.Interfaces;
 using Import.Interfaces;
+using Import.Interfaces.Exceptions;
 using Import.LoaderSettings;
+using Polly.RateLimiting;
 using System.Collections;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -24,6 +26,8 @@ public class BrowserServiceClient(HttpClient httpClient,
     private readonly string? _browserDataLoader = browserDataLoader;
 
     private readonly string? _browserDataLauncher = browserDataLauncher;
+
+    private const int DefaultRequestTimeoutMilliseconds = 5000;
 
     private readonly ImportRequestOptions? _hostRequestOptions = hostRequestOptions;
 
@@ -117,27 +121,57 @@ public class BrowserServiceClient(HttpClient httpClient,
         }
         catch (WebLoader.Common.WebLoaderException e)
         {
-            if (e.NsError == WebLoader.Common.NsError.NS_ERROR_REDIRECT_LOOP)
-                throw new LoaderServiceException(e.Message, e, LoaderServiceAction.Reset);
-            else
-                throw new LoaderServiceException(e.Message, e);
+            throw GetLoaderServiceException(e);
         }
         catch (HttpRequestException e)
         {
-            var message = $"Request error {e.HttpRequestError}, status code {e.StatusCode}. {e.Message}";
-            if (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                throw new LoaderServiceException(message, e, LoaderServiceAction.Wait);
-            else if (e.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                throw new LoaderServiceException(message, e, LoaderServiceAction.Wait);
-            else
-                throw new LoaderServiceException(message, e);
+            throw GetLoaderServiceException(e);
+        }
+        catch (RateLimiterRejectedException rateLimiterEx)
+        {
+            throw GetLoaderServiceException(url, rateLimiterEx);
         }
 #if DEBUG
-        catch(Exception e)
+        catch (Exception e)
         {
             throw;
         }
-#endif 
+#endif        
+    }
+
+    static LoaderServiceException GetLoaderServiceException(string url, RateLimiterRejectedException rateLimiterEx)
+    {        
+        if (rateLimiterEx.RetryAfter.HasValue)
+        {
+            var message = $"Load from url {url} must be retried after {rateLimiterEx.RetryAfter}.";
+            return new RetryAfterLoaderServiceException(message, rateLimiterEx, rateLimiterEx.RetryAfter.Value);
+        }
+        else
+        {
+            var message = $"Load from url {url} failed with error.";
+            return new NoActionLoaderServiceException(message, rateLimiterEx);
+        }
+    }
+
+    private LoaderServiceException GetLoaderServiceException(HttpRequestException e)
+    {
+        var message = $"Request error {e.HttpRequestError}, status code {e.StatusCode}. {e.Message}";
+        if (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            return new RetryAfterLoaderServiceException(message, e,
+                TimeSpan.FromMilliseconds(_hostRequestOptions?.TimeouteMillseconds ?? DefaultRequestTimeoutMilliseconds));
+        else if (e.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            return new RetryAfterLoaderServiceException(message, e,
+                TimeSpan.FromMilliseconds(_hostRequestOptions?.TimeouteMillseconds ?? DefaultRequestTimeoutMilliseconds));
+        else
+            return new NoActionLoaderServiceException(message, e);
+    }
+
+    private static LoaderServiceException GetLoaderServiceException(WebLoader.Common.WebLoaderException e)
+    {
+        if (e.NsError == WebLoader.Common.NsError.NS_ERROR_REDIRECT_LOOP)
+            return new ResetLoaderServiceException(e.Message, e);
+        else
+            return new NoActionLoaderServiceException(e.Message, e);
     }
 
     private async Task<Stream> LoadFromApi(string url,
@@ -209,13 +243,13 @@ public class BrowserServiceClient(HttpClient httpClient,
         if (!success)
         {
             if (result is null)
-                throw new LoaderServiceException($"Route {routeUrl} on page {url} not found");
+                throw new NoActionLoaderServiceException($"Route {routeUrl} on page {url} not found");
             else
             {
                 using var streamReader = new StreamReader(result);
                 var message = await streamReader.ReadToEndAsync(cancellationToken);
                 streamReader.Close();
-                throw new LoaderServiceException($"Route {routeUrl} on page {url} failed. {message}");
+                throw new NoActionLoaderServiceException($"Route {routeUrl} on page {url} failed. {message}");
             }
         }
 
@@ -260,7 +294,7 @@ public class BrowserServiceClient(HttpClient httpClient,
                     }),
                 cancellationToken);
 
-        return result is not null ? result : throw new LoaderServiceException($"Route {routeUrl} on page {url} not found");
+        return result is not null ? result : throw new NoActionLoaderServiceException($"Route {routeUrl} on page {url} not found");
     }
 
     private async Task<int> ClearCookiesForHost(string host, CancellationToken token = default)

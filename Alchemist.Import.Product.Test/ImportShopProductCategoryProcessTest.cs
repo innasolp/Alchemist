@@ -1,6 +1,7 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.ProductService.Test.Infrastructure;
 using Import.Interfaces;
+using Import.Interfaces.Exceptions;
 using Import.Service.Test.Infrastructure;
 using Moq;
 using ShopImport.Product.Service.Test.Infrastructure;
@@ -131,7 +132,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest<TestImpor
     {
         var exceptionFormat = "test exception {0}";
         var service = SetupServiceWithCategoryProcessException(Guid.NewGuid().ToString(),
-            item => new LoaderServiceException(string.Format(exceptionFormat, item)),
+            item => new NoActionLoaderServiceException(string.Format(exceptionFormat, item)),
             10,
             out var categoryProducts,
             out var categoryUrl);

@@ -1,4 +1,5 @@
 using Import.Interfaces;
+using Import.Interfaces.Exceptions;
 using Moq;
 using System.Net;
 using System.Text;
@@ -45,12 +46,12 @@ public class BrowserServiceClientErrorTest
             .Throws(httpRequestException);       
 
         var errorMessage = $"Request error {httpRequestException.HttpRequestError}, status code {httpRequestException.StatusCode}. {httpRequestException.Message}";
-        var resultException = await Assert.ThrowsAsync<LoaderServiceException>(async ()=>
+        var resultException = await Assert.ThrowsAnyAsync<LoaderServiceException>(async ()=>
                 await Helper.LoadAsync(webLoaderMock, url, Array.Empty<object>(), cancellationToken: CancellationToken.None));
 
         webLoaderMock.Verify(w => w.LoadFromUrl(It.IsAny<string>(), It.IsAny<WebLoader.Interfaces.RequestOptions?>()), Times.Once);
         Assert.Contains(errorMessage, resultException.Message);
-        Assert.Null(resultException.NeedAction);
+        Assert.Null(resultException.NeedsAction);
     }
 
     [Theory]
@@ -71,12 +72,12 @@ public class BrowserServiceClientErrorTest
             .Throws(httpRequestException);
 
         var errorMessage = $"Request error {httpRequestException.HttpRequestError}, status code {httpRequestException.StatusCode}. {httpRequestException.Message}";
-        var resultException = await Assert.ThrowsAsync<LoaderServiceException>(async () =>
+        var resultException = await Assert.ThrowsAnyAsync<LoaderServiceException>(async () =>
                 await Helper.LoadAsync(webLoaderMock, url, Array.Empty<object>(), cancellationToken: CancellationToken.None));
 
         webLoaderMock.Verify(w => w.LoadFromUrl(It.IsAny<string>(), It.IsAny<WebLoader.Interfaces.RequestOptions?>()), Times.Once);
         Assert.Contains(errorMessage, resultException.Message);
-        Assert.Equal(LoaderServiceAction.Wait, resultException.NeedAction);
+        Assert.Equal(LoaderServiceAction.RetryAfter, resultException.NeedsAction);
     }
 
     [Fact]
@@ -94,12 +95,12 @@ public class BrowserServiceClientErrorTest
             .Setup(w => w.LoadFromUrl(url, It.IsAny<WebLoader.Interfaces.RequestOptions?>()))
             .Throws(webloaderException);
 
-        var resultException = await Assert.ThrowsAsync<LoaderServiceException>(async () =>
+        var resultException = await Assert.ThrowsAnyAsync<LoaderServiceException>(async () =>
                 await Helper.LoadAsync(webLoaderMock, url, Array.Empty<object>(), cancellationToken: CancellationToken.None));
 
         webLoaderMock.Verify(w => w.LoadFromUrl(It.IsAny<string>(), It.IsAny<WebLoader.Interfaces.RequestOptions?>()), Times.Once);
         Assert.Contains(webloaderException.Message, resultException.Message);
-        Assert.Equal(LoaderServiceAction.Reset,  resultException.NeedAction);
+        Assert.Equal(LoaderServiceAction.Reset,  resultException.NeedsAction);
     }
 
     [Fact]
@@ -122,7 +123,7 @@ public class BrowserServiceClientErrorTest
 
         var loaderOptions = new RequestOptions { RouteUrlFormat = routeUrl };
 
-        var ex = await Assert.ThrowsAsync<LoaderServiceException>(async () => 
+        var ex = await Assert.ThrowsAnyAsync<LoaderServiceException>(async () => 
                 await Helper.LoadAsync(webLoaderMock, url, new object[] { loaderOptions }, cancellationToken: CancellationToken.None));
 
         Assert.Contains($"Route {routeUrl} on page {url} failed. {errorMessage}", ex.Message);
