@@ -42,8 +42,8 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
         foreach (var source in executionSources)
         {
             var serviceName = $"{_name}/{(source as IImportSource).Name}";
-            var importServiceJob = new ShopImportServiceJob(serviceName, source, _shopImportSettings, _importServiceFactory, Guid);
-            _importServiceJobs.Add(importServiceJob.Guid, importServiceJob);
+            var importServiceJob = new ShopImportServiceJob(serviceName, source, _shopImportSettings, _importServiceFactory, Id);
+            _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
         }
     }
 
@@ -51,7 +51,7 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
 
     public int SourceId { get; }
 
-    public Guid Guid { get; } = Guid.NewGuid();
+    public Guid Id { get; } = Guid.NewGuid();
 
     public string? JobId { get; set; }
 
@@ -66,10 +66,9 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
 
     public Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {
-        //todo 
         IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>
         {
-            { Guid, this }
+            { Id, this }
         };
 
         foreach(var serviceJob in  _importServiceJobs) 

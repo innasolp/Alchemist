@@ -3,7 +3,9 @@ using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
 using Hangfire;
+using Hangfire.Server;
 using Hangfire.States;
+using Hangfire.Tags;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service;
@@ -18,7 +20,7 @@ using System.Collections.Concurrent;
 
 namespace ShopImport.Service.Hangfire;
 
-internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopServiceFactories,
+internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactory> shopServiceFactories,
     IShopDataService shopDataService,
     IImportServiceLogFactory importServiceLogFactory,
     ILoggerFactory loggerFactory,
@@ -42,6 +44,8 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
 
     private readonly ConcurrentDictionary<Guid, IImportServiceJob> _coreServiceJobs = [];
 
+    private readonly ConcurrentDictionary<Guid, AsyncEventHandler<ConnectedAsyncEventArgs>> _serviceConnectedHandlers = [];
+
     private readonly SemaphoreSlim _addServiceSemaphoreSlim = new(1);
 
     private List<IImportSource> ShopModels { get; } = [];
@@ -56,19 +60,26 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
                 ShopModels.Add(shopModel);
 
             var serviceJob = CreateImportServiceJob(name, shopImportSettings, shopModel);
-            _coreServiceJobs.TryAdd(serviceJob.Guid, serviceJob);
+            _coreServiceJobs.TryAdd(serviceJob.Id, serviceJob);
 
             var executionJobs = await serviceJob.GetExecutionServiceJobs();
             executionJobs.ToList().ForEach(j => _allServiceJobs.TryAdd(j.Key, j.Value));
 
+            SubscribeServiceToFailedHandler(serviceJob);
+
             foreach (var executionJob in executionJobs)
             {
-                var jobId = BackgroundJob.Enqueue<IImportServiceJobManager>(_jobExecuteOptions.WaitingQueue,
-                     serviceJobManager => serviceJobManager.Execute(executionJob.Value.Guid, cancellationToken));
+                var jobId = _backgroundJobClient.Create<IHagfireServiceJobManager>(
+                     serviceJobManager => serviceJobManager.Execute(executionJob.Value.Id, 
+                                                                    executionJob.Value.ImportService.Name, 
+                                                                    cancellationToken, 
+                                                                    null),
+                     new EnqueuedState(_jobExecuteOptions.WaitingQueue));
+
                 executionJob.Value.JobId = jobId;
             }
 
-            return (serviceJob.Guid, serviceJob.ImportService);
+            return (serviceJob.Id, serviceJob.ImportService);
         }
         finally
         {
@@ -93,6 +104,40 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
         return new AggregateShopImportServiceJob(serviceLogger, name, source, shopImportSettings, serviceFactory);
     }
 
+    private void SubscribeServiceToFailedHandler(IImportServiceJob importServiceJob)
+    {
+        async Task serviceConnectedEventHandler (object sender, ConnectedAsyncEventArgs args) 
+            => await ImportServiceConnectedAsync(sender, args, importServiceJob.Id);
+
+        if (_serviceConnectedHandlers.TryAdd(importServiceJob.Id, serviceConnectedEventHandler))
+            importServiceJob.ImportService.ConnectedAsync += serviceConnectedEventHandler;
+
+        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == importServiceJob.Id).ToList();
+        foreach(var childJob in childJobs)
+        {
+            async Task childConnectedEventHandler (object sender, ConnectedAsyncEventArgs args) 
+                => await ImportServiceConnectedAsync(sender, args, childJob.Value.Id);
+
+            if (_serviceConnectedHandlers.TryAdd(childJob.Value.Id, childConnectedEventHandler))
+                childJob.Value.ImportService.ConnectedAsync += childConnectedEventHandler;
+        }            
+    }
+
+    private Task ImportServiceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs, Guid serviceJobId)
+    {
+        if (sender is not IImportService importService)
+            throw new InvalidOperationException($"Invalid sender type {sender.GetType().Name}. Sender must be assignable to {nameof(IImportService)}");
+
+        if(!eventArgs.Success && eventArgs.Exception != null
+            && _allServiceJobs.TryGetValue(serviceJobId, out var importServiceJob) && !string.IsNullOrEmpty(importServiceJob.JobId))
+        {
+            _backgroundJobClient.ChangeState(importServiceJob.JobId, new FailedState(eventArgs.Exception) 
+            { Reason = eventArgs.Exception.Message});
+        }
+
+        return Task.CompletedTask;
+    }
+
     Task<(Guid guid, IImportService service)> IServiceManager.AddImportService(string name, IImportSettings importSettings,
         CancellationToken cancellationToken)
     {
@@ -113,24 +158,22 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
 
     private Task StartService(Guid serviceJobId, CancellationToken cancellationToken)
     {
-        //todo
         var serviceJob = GetCoreServiceJob(serviceJobId);
         _backgroundJobClient.ChangeState(serviceJob.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue));
 
         var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == serviceJobId).ToList();
         childJobs.ForEach(job =>
         _backgroundJobClient.ChangeState(job.Value.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue)));
-
+        
         return Task.CompletedTask;
     }
 
-    public async Task StartAndDisposeAsync(Guid guid, CancellationToken cancellationToken)
+    public async Task StartAndDisposeAsync(IImportService importService, CancellationToken cancellationToken)
     {
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         try
-        {
-            var serviceJob = GetExecutingServiceJob(guid);        
-            await serviceJob.ImportService.Start(linkedCts.Token);
+        {                
+            await importService.Start(linkedCts.Token);
         }
         finally
         {
@@ -171,7 +214,7 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
 
     private Task StopServiceAsync(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        var executingTasks = GetExecutingServiceJobs(serviceJob.Guid).Select(e=>e.ImportService.Stop(cancellationToken));
+        var executingTasks = GetExecutingServiceJobs(serviceJob.Id).Select(e=>e.ImportService.Stop(cancellationToken));
         return Task.WhenAll(executingTasks);
     }
 
@@ -199,8 +242,22 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
             await shopCategoryListener.On(productShopCategory);
     }
 
-    Task IImportServiceJobManager.Execute(Guid guid, CancellationToken cancellationToken)
+    Task IHagfireServiceJobManager.Execute(Guid guid, string serviceName, CancellationToken cancellationToken, PerformContext? performContext)
     {
-        return StartAndDisposeAsync(guid, cancellationToken);
+        var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+            performContext?.CancellationToken.ShutdownToken ?? default);
+        var serviceJob = GetExecutingServiceJob(guid);
+
+        if (performContext != null)
+        {
+            var parentServiceJob = serviceJob.ParentId.HasValue
+                && _coreServiceJobs.TryGetValue(serviceJob.ParentId.Value, out var parentJob)
+                && parentJob != null
+                 ? parentJob
+                 : serviceJob;
+            performContext.AddTags(parentServiceJob.ImportService.Name);
+        }
+
+        return StartAndDisposeAsync(serviceJob.ImportService, linkedTokenSource.Token);
     }
 }
