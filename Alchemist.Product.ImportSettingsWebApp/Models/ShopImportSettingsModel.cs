@@ -10,7 +10,7 @@ namespace Alchemist.Product.ImportSettingsWebApp.Models;
 
 public abstract class ShopImportSettingsModel : IShopImportSettings, IShopSettings, IJsonOnDeserialized
 {
-    public bool? Perfomance { get ; set; }
+    public bool IsAggregate { get ; set; }
 
     public int Id { get; set; }
 

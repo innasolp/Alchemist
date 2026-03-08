@@ -147,28 +147,27 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         return AddShopImportService(name, shopImportSettings, cancellationToken);
     }
 
-    public (IImportService service, Task startTask) StartServiceTask(Guid guid, CancellationToken cancellationToken)
+    public (IImportService service, Task startTask) StartServiceTask(Guid guid, CancellationToken cancellationToken = default)
     {
         var serviceJob = GetCoreServiceJob(guid);
 
-        var startTask = StartService(guid, cancellationToken);
+        var startTask = StartService(serviceJob);
 
-        return (serviceJob.ImportService, startTask);
+        return (serviceJob.ImportService, Task.Run(() => startTask, cancellationToken));
     }
 
-    private Task StartService(Guid serviceJobId, CancellationToken cancellationToken)
+    private Task StartService(IImportServiceJob serviceJob)
     {
-        var serviceJob = GetCoreServiceJob(serviceJobId);
         _backgroundJobClient.ChangeState(serviceJob.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue));
 
-        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == serviceJobId).ToList();
+        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == serviceJob.Id).ToList();
         childJobs.ForEach(job =>
         _backgroundJobClient.ChangeState(job.Value.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue)));
         
         return Task.CompletedTask;
     }
 
-    public async Task StartAndDisposeAsync(IImportService importService, CancellationToken cancellationToken)
+    private static async Task StartServiceAsync(IImportService importService, CancellationToken cancellationToken)
     {
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         try
@@ -258,6 +257,13 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             performContext.AddTags(parentServiceJob.ImportService.Name);
         }
 
-        return StartAndDisposeAsync(serviceJob.ImportService, linkedTokenSource.Token);
+        try
+        {
+            return StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
+        }
+        finally
+        {
+            linkedTokenSource.Dispose();
+        }
     }
 }
