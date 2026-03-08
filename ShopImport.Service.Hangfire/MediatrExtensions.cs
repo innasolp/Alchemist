@@ -3,6 +3,8 @@ using Autofac.Extensions.DependencyInjection;
 using BackgroundTaskQueue;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using Hangfire.Tags;
+using Hangfire.Tags.Redis.StackExchange;
 using Import.Service.Infrastructure;
 using Import.Service.Infrastructure.Handlers;
 using Mediator.Messages;
@@ -23,7 +25,7 @@ public static class MediatrExtensions
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
-            services.AddSingleton<IShopImportServiceJobManager, ShopImportServiceManager>();
+            services.AddSingleton<IShopImportServiceJobManager, HangfireShopImportServiceManager>();
             services.AddMediatR(cfg =>
             {
                 cfg.RegisterGenericHandlers = true;
@@ -39,7 +41,7 @@ public static class MediatrExtensions
         {
             builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IShopImportServiceManager));
             builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IServiceManager));
-            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IImportServiceJobManager));
+            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IHagfireServiceJobManager));
             builder.Register(c => c.ResolveKeyed<IBackgroundTaskQueue>(ServiceKeys.EventBackgroundTaskQueue)).As<IBackgroundTaskQueue>();
             builder.Register(c => c.ResolveKeyed<IMessageSender>(ServiceKeys.EventMessageSenderKey)).As<IMessageSender>();
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));
@@ -60,13 +62,15 @@ public static class MediatrExtensions
                 // Увеличьте этот таймаут, если задача длится дольше 30 минут
                 InvisibilityTimeout = TimeSpan.FromHours(3)
             });
+
+            config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700"});
         });
 
         services.AddSingleton(jobExecuteOptions);        
 
         services.AddHangfireServer(options =>
         {
-            options.Queues = [jobExecuteOptions.ProcessingQueue];
+            options.Queues = [jobExecuteOptions.ProcessingQueue, "default"];
             options.WorkerCount = 20; //todo
             options.ServerName = jobExecuteOptions.ServerName;
         });

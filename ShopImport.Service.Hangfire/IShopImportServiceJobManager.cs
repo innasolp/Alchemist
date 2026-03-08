@@ -2,6 +2,6 @@
 
 namespace ShopImport.Service.Hangfire;
 
-public interface IShopImportServiceJobManager : IShopImportServiceManager, IImportServiceJobManager
+public interface IShopImportServiceJobManager : IShopImportServiceManager, IHagfireServiceJobManager
 {
 }

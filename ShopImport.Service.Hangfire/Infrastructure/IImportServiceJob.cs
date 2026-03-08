@@ -8,7 +8,7 @@ internal interface IImportServiceJob
 
     public int SourceId { get; }
 
-    Guid Guid { get; }
+    Guid Id { get; }
 
     string? JobId { get; set; }
 

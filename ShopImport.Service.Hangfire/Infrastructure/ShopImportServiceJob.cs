@@ -15,7 +15,7 @@ internal class ShopImportServiceJob(string name,
 
     public int SourceId { get; } = shopModel.Id;
 
-    public Guid Guid { get; } = Guid.NewGuid();
+    public Guid Id { get; } = Guid.NewGuid();
 
     public string? JobId { get; set; }
 
@@ -23,7 +23,7 @@ internal class ShopImportServiceJob(string name,
 
     Task<IDictionary<Guid, IImportServiceJob>> IImportServiceJob.GetExecutionServiceJobs()
     {
-        IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>() { { Guid, this } };
+        IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>() { { Id, this } };
         return Task.FromResult(result);
     }
 }
