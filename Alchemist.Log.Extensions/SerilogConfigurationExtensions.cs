@@ -1,4 +1,5 @@
 ﻿using Alchemist.Common;
+using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,32 @@ public static class SerilogConfigurationExtensions
     {
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddBaseSourceContextRules(logContextFile, logPath, serviceName);
+
+        var configuration = configurationBuilder.Build();
+        return loggerConfiguration.ReadFrom.Configuration(configuration);
+    }
+
+    public static LoggerConfiguration AddContextConfig(this LoggerConfiguration loggerConfiguration, string logContextFile)
+    {
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddJsonFile(logContextFile);
+        var configuration = configurationBuilder.Build();
+        return loggerConfiguration.ReadFrom.Configuration(configuration);
+    }
+
+    public static LoggerConfiguration AddContextPropertiesConfig(this LoggerConfiguration loggerConfiguration, string logContextFile,
+        IDictionary<string, string[]> configurationProperties)
+    {
+        var configurationBuilder = new ConfigurationBuilder();
+
+        var source = configurationBuilder.AddCustomJsonConfigurationProvider(logContextFile);
+
+        foreach(var configurationProperty in configurationProperties)
+        {
+            var configPropertiesString = $" {string.Join(" , ", configurationProperty.Value)} ";
+            var rule = new SerilogContextPropertyConfigurationRule(configurationProperty.Key, configPropertiesString);
+            source.AddCustomConfigurationRule(rule);
+        }    
 
         var configuration = configurationBuilder.Build();
         return loggerConfiguration.ReadFrom.Configuration(configuration);
@@ -65,6 +92,7 @@ public static class SerilogConfigurationExtensions
         return configurationBuilder.Build();
     }
 
+    [Obsolete]
     public static LoggerConfiguration AddPerfomanceCounter(this LoggerConfiguration loggerConfiguration,
         string logContextFile,
         string logPath,
