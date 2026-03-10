@@ -135,6 +135,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcExtensions.Client", "..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjection.Attributes", "..\DependencyInjection\DependencyInjection.Attributes\DependencyInjection.Attributes.csproj", "{3DC22793-59D0-25A0-A462-A729C7EFFC80}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.HangfireConsoleContextSink", "..\Logging\Serilog.Hangfire.ConsoleContextSink\Serilog.HangfireConsoleContextSink.csproj", "{04D8B23D-80FC-CACA-07DA-26AAF7AC7B8E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -250,6 +252,8 @@ Global
 		{9F9A6844-0135-5576-1CFA-5DEBE44DDED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DC22793-59D0-25A0-A462-A729C7EFFC80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3DC22793-59D0-25A0-A462-A729C7EFFC80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04D8B23D-80FC-CACA-07DA-26AAF7AC7B8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04D8B23D-80FC-CACA-07DA-26AAF7AC7B8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -310,6 +314,7 @@ Global
 		{0FFA4A0A-F0BD-FE4D-E348-3332715D0D8C} = {5331F40A-8EF9-4EF5-9200-7D420FC4696E}
 		{9F9A6844-0135-5576-1CFA-5DEBE44DDED7} = {5331F40A-8EF9-4EF5-9200-7D420FC4696E}
 		{3DC22793-59D0-25A0-A462-A729C7EFFC80} = {4A75A9ED-5D0D-4230-A04C-957AFE79D9FC}
+		{04D8B23D-80FC-CACA-07DA-26AAF7AC7B8E} = {94A9C5AB-5BF8-40A1-A469-89285A8D3C9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

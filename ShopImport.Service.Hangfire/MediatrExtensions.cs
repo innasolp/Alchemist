@@ -21,7 +21,9 @@ public static class MediatrExtensions
 {
     private readonly static JobExecuteOptions defaultJobExecuteOptions = new() { ServerName = "DefaultServer", ProcessingQueue = "processing", WaitingQueue = "waiting" };
 
-    public static IHostBuilder AddImportServicesInfrastructure(this IHostBuilder hostBuilder, string hangfireConnectionString, JobExecuteOptions? jobExecuteOptions = null)
+    public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder, 
+        string hangfireConnectionString,
+        JobExecuteOptions? jobExecuteOptions = null, Action<IGlobalConfiguration>? configure = null)
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
@@ -33,7 +35,7 @@ public static class MediatrExtensions
                 cfg.RegisterServicesFromAssemblyContaining<AddShopImportServiceCommandHandler>();
             });
 
-            services.AddHangfire(hangfireConnectionString, jobExecuteOptions ?? defaultJobExecuteOptions);
+            services.AddHangfire(hangfireConnectionString, jobExecuteOptions ?? defaultJobExecuteOptions, configure);
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -51,7 +53,7 @@ public static class MediatrExtensions
         });
     }
 
-    private static void AddHangfire(this IServiceCollection services, string hangfireConnectionString, JobExecuteOptions jobExecuteOptions)
+    private static void AddHangfire(this IServiceCollection services, string hangfireConnectionString, JobExecuteOptions jobExecuteOptions, Action<IGlobalConfiguration>? configure = null)
     {
         ClearRedisDataBase(hangfireConnectionString);
 
@@ -64,6 +66,8 @@ public static class MediatrExtensions
             });
 
             config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700"});
+
+            configure?.Invoke(config);
         });
 
         services.AddSingleton(jobExecuteOptions);        
