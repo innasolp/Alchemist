@@ -241,7 +241,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             await shopCategoryListener.On(productShopCategory);
     }
 
-    Task IHagfireServiceJobManager.Execute(Guid guid, string serviceName, CancellationToken cancellationToken, PerformContext? performContext)
+    Task IHagfireServiceJobManager.Execute(Guid guid, string displayName, CancellationToken cancellationToken, PerformContext? performContext)
     {
         var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             performContext?.CancellationToken.ShutdownToken ?? default);

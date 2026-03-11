@@ -176,8 +176,9 @@ static void AddHangfireLogging(LoggerConfiguration loggerConfiguration)
     loggerConfiguration.AddContextPropertiesConfig("log.hangfire.json", new Dictionary<string, string[]>()
     {
         { "$[ContextProperties]", ["ShopImportService"] },
-        { "$[JobParameters]", ["serviceName"] }
-    });
+        { "$[JobParameters]", ["displayName"] }
+    },
+    "ShopImportService");
 }
 
 static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, IWebHostEnvironment environment,  string? restApiHost, string? settingsAPIHost)
@@ -187,11 +188,12 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     AddShopImportLogging(logPath, environment, loggerConfiguration);
-    AddHangfireLogging(loggerConfiguration);
-
+    
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ShopImportWorker).Name);
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(EventBackgroundTaskQueueHostedService).Name);
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ImportBackgroundTaskQueueHostedService).Name);
+
+    AddHangfireLogging(loggerConfiguration);
 
     loggerConfiguration.SetSerilog(loggingBuilder);
 }

@@ -42,19 +42,22 @@ public static class SerilogConfigurationExtensions
         return loggerConfiguration.ReadFrom.Configuration(configuration);
     }
 
-    public static LoggerConfiguration AddContextPropertiesConfig(this LoggerConfiguration loggerConfiguration, string logContextFile,
-        IDictionary<string, string[]> configurationProperties)
+    public static LoggerConfiguration AddContextPropertiesConfig(this LoggerConfiguration loggerConfiguration, 
+        string logContextFile,
+        IDictionary<string, string[]> configurationProperties,
+        string? contextPropertyName = null)
     {
         var configurationBuilder = new ConfigurationBuilder();
 
         var source = configurationBuilder.AddCustomJsonConfigurationProvider(logContextFile);
 
-        foreach(var configurationProperty in configurationProperties)
+        foreach (var configurationProperty in configurationProperties)
         {
-            var configPropertiesString = $" {string.Join(" , ", configurationProperty.Value)} ";
-            var rule = new SerilogContextPropertyConfigurationRule(configurationProperty.Key, configPropertiesString);
+            var rule = new SerilogContextArrayPropertyConfigurationRule(configurationProperty.Key, configurationProperty.Value);
             source.AddCustomConfigurationRule(rule);
-        }    
+        }
+
+        if (!string.IsNullOrEmpty(contextPropertyName)) source.AddContextPropertyNameRule(contextPropertyName);
 
         var configuration = configurationBuilder.Build();
         return loggerConfiguration.ReadFrom.Configuration(configuration);

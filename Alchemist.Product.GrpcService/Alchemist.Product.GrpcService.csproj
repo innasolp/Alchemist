@@ -33,7 +33,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="9.0.12" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Serilog.Loggers" Version="1.0.0.3" />
-	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
+	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
 	  <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
