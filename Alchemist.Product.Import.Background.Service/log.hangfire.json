@@ -19,6 +19,14 @@
         "Name": "Logger",
         "Args": {
           "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "$[PropertyName] is not null"
+                }
+              }
+            ],
             "WriteTo": [
               {
                 "Name": "HangfireConsoleContext",
@@ -26,57 +34,6 @@
                   "contextProperties": [ "$[ContextProperties]" ],
                   "jobParameters": [ "$[JobParameters]" ],
                   "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}"
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "Name": "Logger",
-        "Args": {
-          "configureLogger": {            
-            "WriteTo": [
-              {
-                "Name": "HangfireConsoleContext",
-                "Args": {
-                  "contextProperties": [ "$[ContextProperties]" ],
-                  "jobParameters": [ "$[JobParameters]" ],
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}"
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "Name": "Logger",
-        "Args": {
-          "configureLogger": {
-            "WriteTo": [
-              {
-                "Name": "HangfireConsoleContext",
-                "Args": {
-                  "contextProperties": [ "$[ContextProperties]" ],
-                  "jobParameters": [ "$[JobParameters]" ],
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}"
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "Name": "Logger",
-        "Args": {
-          "configureLogger": {
-            "WriteTo": [
-              {
-                "Name": "HangfireConsoleContext",
-                "Args": {
-                  "contextProperties": [ "$[ContextProperties]" ],
-                  "jobParameters": [ "$[JobParameters]" ],
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {EventId} {Message}{NewLine}{Exception}"
                 }
               }
             ]
