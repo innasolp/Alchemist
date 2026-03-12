@@ -6,8 +6,8 @@
     "CategorySourceUrl": "https://www.ozon.ru",
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesTimerService",
-        "AssemblyPath": "Import\\Categories\\Services\\Timer",
+        "ImplementationTypeName": "ShopImportCategoriesSimpleService",
+        "AssemblyPath": "Import\\Categories\\Services",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
       "WebLoader": {
@@ -17,6 +17,11 @@
       "HostRequestOptions": {
         "Value": {
           "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions"
+        }
+      },
+      "TimerOptions": {
+        "Value": {
+          "SecondsInterval" : 10800
         }
       },
       "LoadStages": {
@@ -91,8 +96,8 @@
     "Caption": "Золотое яблоко",
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesTimerService",
-        "AssemblyPath": "Import\\Categories\\Services\\Timer",
+        "ImplementationTypeName": "ShopImportCategoriesSimpleService",
+        "AssemblyPath": "Import\\Categories\\Services",
         "ServiceProviderPath": "Import\\Categories"
 
       },
@@ -108,6 +113,11 @@
       "RequestOptions": {
         "Value": {
           "RouteUrlFormat": "https://goldapple.ru/web/api/v3/catalog/navigation"
+        }
+      },
+      "TimerOptions": {
+        "Value": {
+          "SecondsInterval": 10800
         }
       },
       "LoadStages": {
