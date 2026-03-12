@@ -6,13 +6,13 @@ using ShopImport.Category.Loader.Interfaces;
 
 namespace Alchemist.Import.CategoryService.Test.Infrastructure;
 
-public class ShopImportCategoriesTimerServiceTest(ILogger<ShopImportCategoriesTimerService> logger,
+public class ShopImportCategoriesTimerServiceTest(ILogger<ShopImportCategoriesService> logger,
     string name,
     ILoaderService loader,
     ICategoryShopModel shop, 
     IEnumerable<ICategoryLoader> categoryLoadStages,
-    CategoryImportOptions importOptions,
+    int timerSecondsInterval,
     ICategoryItemHandler itemHandler)
-    : ShopImportCategoriesTimerService(logger, name, loader, shop.CategorySourceUrl, shop.SourceName, shop.SourceUrl, categoryLoadStages, itemHandler,  importOptions)
+    : ShopImportCategoriesTimerService(logger, name, loader, shop.CategorySourceUrl, shop.SourceName, shop.SourceUrl, categoryLoadStages, itemHandler,  timerSecondsInterval)
 {
 }

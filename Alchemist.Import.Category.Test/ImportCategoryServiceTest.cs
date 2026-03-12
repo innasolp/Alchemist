@@ -11,11 +11,11 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Import.CategoryService.Test;
 
-public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesTimerService>>
+public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesService>>
 {
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
 
-    private readonly CategoryImportOptions _importOptions = new() { SecondsInterval = 1 };
+    private readonly int _secondsInterval = 1 ;
 
     private readonly Mock<ICategoryLoader>[] _categoryLoadersMock = [new Mock<ICategoryLoader>()];
 
@@ -36,7 +36,7 @@ public class ImportCategoryServiceTest : ImportServiceExecutionTest<ShopImportCa
              LoaderMock.Object,
              _categoryShopModelMock.Object,
              _categoryLoadersMock.Select(m=>m.Object),
-             _importOptions,
+             _secondsInterval,
              _categoryItemHandlerMock.Object
              );
     }
