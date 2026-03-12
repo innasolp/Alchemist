@@ -14,22 +14,23 @@ using System.Text.Json.Nodes;
 
 namespace Alchemist.Import.Factory.Category;
 
-public class ShopImportCategoryFactory(ILogger<ShopImportCategoriesTimerService> logger,
+public abstract class ShopImportCategoriesServiceFactory<TService>(ILogger<TService> logger,
     ILoaderServiceFactory browserServiceFactory,
-    ICategoryItemHandler itemHandler, 
+    ICategoryItemHandler itemHandler,
     IEnumerable<ICategoryLoaderFactory> categoryLoadStageFactories,
-    IImportServiceLogFactory? logFactory = null) 
+    IImportServiceLogFactory? logFactory = null)
     : ImportServiceFactory(logger, browserServiceFactory, logFactory)
+    where TService : ShopImportCategoriesService
 {
     private readonly ICategoryItemHandler _itemHandler = itemHandler;
 
-    public override Type ServiceImplementationType => typeof(ShopImportCategoriesTimerService);
+    public override Type ServiceImplementationType => typeof(TService);
 
-    protected override IImportService Create(ILogger logger, 
+    protected override IImportService Create(ILogger logger,
         string name,
         IImportSource shopModel,
         IImportSettings shopImportSettings,
-        ILoaderService browserService) 
+        ILoaderService browserService)
     {
         if (shopImportSettings is not ICategoryShopImportSettings categoryShopImportSettings)
             throw new InvalidDataException($"Invalid settings type {shopImportSettings.GetType().Name}");
@@ -40,26 +41,28 @@ public class ShopImportCategoryFactory(ILogger<ShopImportCategoriesTimerService>
         var categoryDataService = shopImportSettings.GetService("RequestOptions");
         var categoryLoadData = categoryDataService?.GetServiceValue<RequestOptions>();
 
-        var categoryImportOptionsService = shopImportSettings.GetService(nameof(CategoryImportOptions));
-        var categoryImportOptions = categoryImportOptionsService?.GetServiceValue<CategoryImportOptions>();
-        
         var stagesService = shopImportSettings.GetService("LoadStages")
             ?? throw new InvalidDataException($"LoadStages not exists for {shopModel.Name}");
         var jsonStages = stagesService.GetServiceValue<JsonObject[]>();
-        
+
         var stages = jsonStages.Select(CreateCategoryLoadStages);
 
-        return new ShopImportCategoriesTimerService(logger,
+        return CreateCategoriesService(logger,
             name,
             browserService,
-            categoryShopImportSettings.CategorySourceUrl,
-            categoryShopImportSettings.ShopName,
-            categoryShopImportSettings.ShopUrl,
+            categoryShopImportSettings,
             stages,
             _itemHandler,
-            categoryImportOptions,
             categoryLoadData);
     }
+
+    protected abstract TService CreateCategoriesService(ILogger logger,
+    string name,
+    ILoaderService loader,
+     ICategoryShopImportSettings categoryShopImportSettings,
+    IEnumerable<ICategoryLoader> categoryLoadStages,
+    ICategoryItemHandler itemHandler,
+    object? categoryLoadData = null);
 
     protected ICategoryLoader CreateCategoryLoadStages(JsonObject stageSettingsJson)
     {
@@ -74,7 +77,7 @@ public class ShopImportCategoryFactory(ILogger<ShopImportCategoriesTimerService>
 
     protected override ILogger GetLogger(ILogger logger, string name, IImportServiceLogFactory importServiceLogFactory, IImportSource shopModel, IImportSettings shopImportSettings)
     {
-        if (logger is ILogger<ShopImportCategoriesTimerService> serviceLogger)
+        if (logger is ILogger<TService> serviceLogger)
             return importServiceLogFactory?.GetLogger(serviceLogger, name, shopModel, shopImportSettings) ?? serviceLogger;
         else
             throw new InvalidDataException(logger.GetType().FullName);

@@ -14,11 +14,11 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Import.CategoryService.Test;
 
-public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesTimerService>>
+public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategoriesTimerServiceTest, ILogger<ShopImportCategoriesService>>
 {
     private readonly Mock<ICategoryShopModel> _categoryShopModelMock = new();
 
-    private readonly CategoryImportOptions _loadOptions = new() { SecondsInterval = 30 };
+    private readonly int _secondsInterval = 30;
 
     private readonly Mock<ICategoryItemHandler> _categoryItemHandlerMock = new();
 
@@ -33,7 +33,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
         _categoryLoadersMock =  [_categoryLoaderMock];
 
         ImportCategoriesResourceManager = new ResourceManager("Alchemist.Import.Category.Service.ImportCategoryLogMessages",
-                               typeof(ShopImportCategoriesTimerService).Assembly);
+                               typeof(ShopImportCategoriesService).Assembly);
 
         LoaderMock.SetupLoadCookies();
         _categoryShopModelMock.Setup(s => s.CategorySourceUrl).Returns(Guid.NewGuid().ToString());
@@ -49,7 +49,7 @@ public class ImportCategoryJsonLoadingTest : ImportServiceTest<ShopImportCategor
             LoaderMock.Object,
             _categoryShopModelMock.Object,
             _categoryLoadersMock.Select(m=>m.Object),
-            _loadOptions,
+            _secondsInterval,
             _categoryItemHandlerMock.Object
             );
     }
