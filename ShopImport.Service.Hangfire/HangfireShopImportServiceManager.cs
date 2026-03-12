@@ -8,11 +8,9 @@ using Hangfire.States;
 using Hangfire.Tags;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
-using Import.Service;
 using Import.Service.Commands.Models;
 using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
-using Microsoft.Extensions.Logging;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Hangfire.Models;
@@ -22,23 +20,20 @@ namespace ShopImport.Service.Hangfire;
 
 internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactory> shopServiceFactories,
     IShopDataService shopDataService,
-    IImportServiceLogFactory importServiceLogFactory,
-    ILoggerFactory loggerFactory,
-    JobExecuteOptions jobExecuteOptions,
-    IBackgroundJobClient backgroundJobClient) 
+    IImportServiceJobFactory importServiceJobFactory,
+     IBackgroundJobClient backgroundJobClient,
+    JobExecuteOptions jobExecuteOptions) 
     : IShopImportServiceJobManager
 {
+    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
+
     private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories = shopServiceFactories;
 
     private readonly IShopDataService _shopDataService = shopDataService;
 
-    private readonly IImportServiceLogFactory _importServiceLogFactory = importServiceLogFactory;
-
-    private readonly ILoggerFactory _loggerFactory = loggerFactory;
+    private readonly IImportServiceJobFactory _importServiceJobFactory = importServiceJobFactory;
 
     private readonly JobExecuteOptions _jobExecuteOptions = jobExecuteOptions;
-
-    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
     private readonly ConcurrentDictionary<Guid, IImportServiceJob> _allServiceJobs = [];
 
@@ -67,17 +62,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
             SubscribeServiceToFailedHandler(serviceJob);
 
-            foreach (var executionJob in executionJobs)
-            {
-                var jobId = _backgroundJobClient.Create<IHagfireServiceJobManager>(
-                     serviceJobManager => serviceJobManager.Execute(executionJob.Value.Id, 
-                                                                    executionJob.Value.ImportService.Name, 
-                                                                    cancellationToken, 
-                                                                    null),
-                     new EnqueuedState(_jobExecuteOptions.WaitingQueue));
-
-                executionJob.Value.JobId = jobId;
-            }
+            await serviceJob.Execute(_jobExecuteOptions.WaitingQueue, cancellationToken);
 
             return (serviceJob.Id, serviceJob.ImportService);
         }
@@ -95,13 +80,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName)
             ?? throw new InvalidOperationException($"Service type {importServiceSettings.ImplementationTypeName} not found.");
 
-        if(!shopImportSettings.IsAggregate)
-            return new ShopImportServiceJob(name, source, shopImportSettings, serviceFactory);
-
-        var logger = _loggerFactory.CreateLogger<AggregateImportService>();
-        var serviceLogger = _importServiceLogFactory.GetLogger(logger, name, source, shopImportSettings);
-
-        return new AggregateShopImportServiceJob(serviceLogger, name, source, shopImportSettings, serviceFactory);
+        return _importServiceJobFactory.CreateServiceJob(serviceFactory, shopImportSettings, name, source);
     }
 
     private void SubscribeServiceToFailedHandler(IImportServiceJob importServiceJob)
@@ -158,13 +137,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private Task StartService(IImportServiceJob serviceJob)
     {
-        _backgroundJobClient.ChangeState(serviceJob.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue));
-
-        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == serviceJob.Id).ToList();
-        childJobs.ForEach(job =>
-        _backgroundJobClient.ChangeState(job.Value.JobId, new EnqueuedState(_jobExecuteOptions.ProcessingQueue)));
-        
-        return Task.CompletedTask;
+        return serviceJob.Execute(_jobExecuteOptions.ProcessingQueue);
     }
 
     private static async Task StartServiceAsync(IImportService importService, CancellationToken cancellationToken)
