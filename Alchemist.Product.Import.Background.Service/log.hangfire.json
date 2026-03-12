@@ -1,0 +1,45 @@
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning",
+        "System.Net.Http.HttpClient": "Information",
+        "Microsoft.AspNetCore": "Information",
+        "Hangfire": "Warning"
+      },
+      "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId", "WithThreadName" ],
+      "Properties": {
+        "Application": "Alchemist.Product.Import.Background.Service"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "$[PropertyName] is not null"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "HangfireConsoleContext",
+                "Args": {
+                  "contextProperties": [ "$[ContextProperties]" ],
+                  "jobParameters": [ "$[JobParameters]" ],
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+  }

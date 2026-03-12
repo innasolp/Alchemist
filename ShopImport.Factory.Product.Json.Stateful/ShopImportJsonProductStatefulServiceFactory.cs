@@ -32,8 +32,7 @@ internal class ShopImportJsonProductStatefulServiceFactory(ILogger<ShopImportHtt
         return new ShopImportHttpJsonCategoryProductsStatefulService(logger as ILogger<ShopImportHttpJsonCategoryProductsStatefulService>,
             browserService,
             shopModel.Url,
-            //todo
-            $"{shopModel.Name}_product",
+            name,
             shopModel.Categories,
             productItemHandler,
             productShopImportSettings.ProductUrlFormat,

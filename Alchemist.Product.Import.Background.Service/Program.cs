@@ -15,17 +15,18 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using DependencyInjection.AssemblyExtensions;
 using Hangfire;
+using Hangfire.Console;
 using Import.Factory.Logging;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog;
 using Serilog.Configuration.Extensions;
+using Serilog.HangfireConsoleContextSink;
 using Serilog.Loggers;
 using Shop.API.Client;
 using Shop.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
 using ShopImport.Service.Hangfire;
 using ShopImport.Service.Hangfire.Infrastructure;
-using ShopImport.Service.Infrastructure.Module;
 using ShopSettings.Interfaces;
 using WebLoader.Interfaces;
 
@@ -45,7 +46,14 @@ AddShopAPIService(builder, out var restApiHost);
 AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
 var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOptions").Get<JobExecuteOptions>();
-builder.Host.AddImportServicesInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"), hangfireOptions);
+builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"),
+    hangfireOptions,
+    (config) =>
+    { 
+        config.UseConsole();
+        config.AddConsoleContextFilter();
+    });
+
 
 AddMessages(builder);
 
@@ -162,6 +170,16 @@ static void AddShopImportLogging(string logPath, IWebHostEnvironment environment
         propertyExpressions: [new PropertyExpression(SerilogFunc.Contains, [new ContextProperty("ShopSettingsType"), ShopSettingType.Category.ToString()])]);
 }
 
+static void AddHangfireLogging(LoggerConfiguration loggerConfiguration)
+{
+    loggerConfiguration.AddContextPropertiesConfig("log.hangfire.json", new Dictionary<string, string[]>()
+    {
+        { "$[ContextProperties]", ["ShopImportService"] },
+        { "$[JobParameters]", ["displayName"] }
+    },
+    "ShopImportService");
+}
+
 static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuilder, IWebHostEnvironment environment,  string? restApiHost, string? settingsAPIHost)
 {
     var logPath = $"{Utils.GetAppPath()}/Logs";
@@ -169,10 +187,12 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     AddShopImportLogging(logPath, environment, loggerConfiguration);
-
+    
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ShopImportWorker).Name);
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(EventBackgroundTaskQueueHostedService).Name);
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ImportBackgroundTaskQueueHostedService).Name);
+
+    AddHangfireLogging(loggerConfiguration);
 
     loggerConfiguration.SetSerilog(loggingBuilder);
 }

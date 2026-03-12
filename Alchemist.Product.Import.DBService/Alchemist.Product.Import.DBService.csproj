@@ -13,7 +13,7 @@
 	  <PackageReference Include="GrpcExtensions.Client.Interceptors" Version="1.0.0" />
 	  <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
 	  <PackageReference Include="Serilog.Loggers" Version="1.0.0.3" />
-	  <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
+	  <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
 	  <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
   </ItemGroup>
 
