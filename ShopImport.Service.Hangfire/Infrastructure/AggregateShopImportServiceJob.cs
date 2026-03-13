@@ -1,5 +1,4 @@
 ﻿using Alchemist.Import.Settings;
-using Hangfire;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service;
@@ -29,15 +28,13 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
 
     public override int SourceId => _shopModel.Id;
 
-    public AggregateShopImportServiceJob(IJobExecutor jobExecutor, 
-        IBackgroundJobClient backgroundJobClient,
-        IImportServiceJobFactory shopImportServiceJobFactory,
+    public AggregateShopImportServiceJob(IImportServiceJobFactory shopImportServiceJobFactory,
         ILogger logger,
         string name, 
         IShopModel shopModel,
         IShopImportSettings shopImportSettings,
         IImportServiceFactory importServiceFactory)
-        : base(jobExecutor, backgroundJobClient, null)
+        : base(null)
     {
         _shopImportServiceJobFactory = shopImportServiceJobFactory;
         _name = name;
@@ -55,7 +52,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         foreach (var source in executionSources)
         {
             var serviceName = $"{_name}/{(source as IImportSource).Name}";
-            var importServiceJob = _shopImportServiceJobFactory.CreateServiceJob(_importServiceFactory, _shopImportSettings, serviceName, _shopModel, Id);
+            var importServiceJob = _shopImportServiceJobFactory.CreateServiceJob(_importServiceFactory, _shopImportSettings, serviceName, _shopModel, false, Id);
             _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
         }
     }
