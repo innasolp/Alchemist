@@ -5,5 +5,10 @@ namespace ShopImport.Service.Hangfire.Infrastructure;
 
 internal interface IImportServiceJobFactory
 {
-    IImportServiceJob CreateServiceJob(IImportServiceFactory importServiceFactory, IImportSettings shopImportSettings, string name, IImportSource source, Guid? parentId = null);
+    IImportServiceJob CreateServiceJob(IImportServiceFactory importServiceFactory,
+        IImportSettings shopImportSettings, 
+        string name, 
+        IImportSource source, 
+        bool isAggregate = false,
+        Guid? parentId = null);
 }

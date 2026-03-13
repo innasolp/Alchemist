@@ -2,9 +2,7 @@
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
-using Hangfire;
 using Hangfire.Server;
-using Hangfire.States;
 using Hangfire.Tags;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
@@ -13,6 +11,7 @@ using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Infrastructure;
+using ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
 using ShopImport.Service.Hangfire.Models;
 using System.Collections.Concurrent;
 
@@ -21,17 +20,17 @@ namespace ShopImport.Service.Hangfire;
 internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactory> shopServiceFactories,
     IShopDataService shopDataService,
     IImportServiceJobFactory importServiceJobFactory,
-     IBackgroundJobClient backgroundJobClient,
+    IJobExecuteManager jobExecuteManager,
     JobExecuteOptions jobExecuteOptions) 
     : IShopImportServiceJobManager
 {
-    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
-
     private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories = shopServiceFactories;
 
     private readonly IShopDataService _shopDataService = shopDataService;
 
     private readonly IImportServiceJobFactory _importServiceJobFactory = importServiceJobFactory;
+
+    private readonly IJobExecuteManager _jobExecuteManager = jobExecuteManager;
 
     private readonly JobExecuteOptions _jobExecuteOptions = jobExecuteOptions;
 
@@ -62,7 +61,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
             SubscribeServiceToFailedHandler(serviceJob);
 
-            await serviceJob.Execute(_jobExecuteOptions.WaitingQueue, cancellationToken);
+            await _jobExecuteManager.Enqueue(serviceJob, _jobExecuteOptions, cancellationToken);
 
             return (serviceJob.Id, serviceJob.ImportService);
         }
@@ -80,7 +79,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName)
             ?? throw new InvalidOperationException($"Service type {importServiceSettings.ImplementationTypeName} not found.");
 
-        return _importServiceJobFactory.CreateServiceJob(serviceFactory, shopImportSettings, name, source);
+        return _importServiceJobFactory.CreateServiceJob(serviceFactory, shopImportSettings, name, source, shopImportSettings.IsAggregate);
     }
 
     private void SubscribeServiceToFailedHandler(IImportServiceJob importServiceJob)
@@ -102,7 +101,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         }            
     }
 
-    private Task ImportServiceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs, Guid serviceJobId)
+    private async Task ImportServiceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs, Guid serviceJobId)
     {
         if (sender is not IImportService importService)
             throw new InvalidOperationException($"Invalid sender type {sender.GetType().Name}. Sender must be assignable to {nameof(IImportService)}");
@@ -110,11 +109,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         if(!eventArgs.Success && eventArgs.Exception != null
             && _allServiceJobs.TryGetValue(serviceJobId, out var importServiceJob) && !string.IsNullOrEmpty(importServiceJob.JobId))
         {
-            _backgroundJobClient.ChangeState(importServiceJob.JobId, new FailedState(eventArgs.Exception) 
-            { Reason = eventArgs.Exception.Message});
+            await _jobExecuteManager.StopWithFailedState(importServiceJob, eventArgs.Exception, _jobExecuteOptions, CancellationToken.None);
         }
-
-        return Task.CompletedTask;
     }
 
     Task<(Guid guid, IImportService service)> IServiceManager.AddImportService(string name, IImportSettings importSettings,
@@ -130,14 +126,14 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     {
         var serviceJob = GetCoreServiceJob(guid);
 
-        var startTask = StartService(serviceJob);
+        var startTask = StartService(serviceJob, cancellationToken);
 
         return (serviceJob.ImportService, Task.Run(() => startTask, cancellationToken));
     }
 
-    private Task StartService(IImportServiceJob serviceJob)
+    private Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        return serviceJob.Execute(_jobExecuteOptions.ProcessingQueue);
+        return _jobExecuteManager.Execute(serviceJob, _jobExecuteOptions, cancellationToken);
     }
 
     private static async Task StartServiceAsync(IImportService importService, CancellationToken cancellationToken)
@@ -232,7 +228,11 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
         try
         {
-            return StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
+            var startTask = StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
+
+            if(performContext != null) serviceJob.JobId = performContext.BackgroundJob.Id;
+
+            return startTask;
         }
         finally
         {

@@ -15,10 +15,4 @@ internal interface IImportServiceJob
     Guid? ParentId { get; }
 
     Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs();
-
-    Task Enqueue<T>(string queue, Func<T, Task> jobTask, CancellationToken cancellationToken = default);
-
-    Task Execute(string queue, CancellationToken cancellationToken = default);
-
-    Task Stop(CancellationToken cancellationToken = default);
 }
