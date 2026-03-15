@@ -32,7 +32,7 @@ internal class JobExecuteManager : IJobExecuteManager
         if (jobExecuteOptions?.IntervalInSeconds != null)
             return _recurringJobExecutor;
 
-        if (jobExecuteOptions!.EnqueuedInSeconds != null)
+        if (jobExecuteOptions?.EnqueuedInSeconds != null)
             return _scheduledJobExecutor;
 
         return _backgroundJobExecutor;

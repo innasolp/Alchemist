@@ -15,7 +15,7 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
     {
         var waitingQueue = jobExecuteOptions?.WaitingQueue ?? "waiting";
 
-        _backgroundJobClient.Create<IHagfireServiceJobManager>(
+        importServiceJob.JobId = _backgroundJobClient.Create<IHagfireServiceJobManager>(
                       serviceJobManager => serviceJobManager.Execute(importServiceJob.Id,
                                                                      importServiceJob.ImportService.Name,
                                                                      cancellationToken,
