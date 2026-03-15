@@ -26,7 +26,6 @@ using Shop.API.Client;
 using Shop.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
 using ShopImport.Service.Hangfire;
-using ShopImport.Service.Hangfire.Infrastructure;
 using ShopSettings.Interfaces;
 using WebLoader.Interfaces;
 

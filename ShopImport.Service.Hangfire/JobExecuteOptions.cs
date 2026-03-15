@@ -1,4 +1,4 @@
-﻿namespace ShopImport.Service.Hangfire.Infrastructure;
+﻿namespace ShopImport.Service.Hangfire;
 
 public class JobExecuteOptions
 {
