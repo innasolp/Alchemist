@@ -1,4 +1,4 @@
-﻿namespace ShopImport.Service.Hangfire.Infrastructure;
+﻿namespace ShopImport.Service.Hangfire;
 
 public class JobExecuteOptions
 {
@@ -7,4 +7,8 @@ public class JobExecuteOptions
     public required string WaitingQueue { get; set;  }
 
     public required string ProcessingQueue { get; set; }
+
+    public int? EnqueuedInSeconds { get; set; } = null;
+
+    public int? IntervalInSeconds { get; set; } = null;
 }

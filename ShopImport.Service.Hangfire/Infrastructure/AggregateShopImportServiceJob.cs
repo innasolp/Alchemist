@@ -8,7 +8,7 @@ using ShopImport.Service.Hangfire.Models;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
-internal class AggregateShopImportServiceJob : IImportServiceJob
+internal class AggregateShopImportServiceJob : ImportServiceJob
 {
     private readonly IImportServiceFactory _importServiceFactory;
 
@@ -16,22 +16,32 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
 
     private readonly IShopModel _shopModel;
 
+    private readonly IImportServiceJobFactory _shopImportServiceJobFactory;
+
     private readonly string _name;
 
     private readonly Dictionary<Guid, IImportServiceJob> _importServiceJobs = [];
 
-    public AggregateShopImportServiceJob(ILogger logger,
+    private readonly IAggregateImportService _aggregateImportService;
+
+    public override IImportService ImportService => _aggregateImportService;
+
+    public override int SourceId => _shopModel.Id;
+
+    public AggregateShopImportServiceJob(IImportServiceJobFactory shopImportServiceJobFactory,
+        ILogger logger,
         string name, 
         IShopModel shopModel,
         IShopImportSettings shopImportSettings,
         IImportServiceFactory importServiceFactory)
+        : base(null)
     {
+        _shopImportServiceJobFactory = shopImportServiceJobFactory;
         _name = name;
         _shopModel = shopModel;
         _importServiceFactory = importServiceFactory;
         _shopImportSettings = shopImportSettings;
-        SourceId = _shopModel.Id;
-        ImportService = new AggregateImportService(logger, name, OnExecuteService);
+        _aggregateImportService = new AggregateImportService(logger, name, OnExecuteService);
         InitializeImportServiceJobs();
     }
 
@@ -42,29 +52,17 @@ internal class AggregateShopImportServiceJob : IImportServiceJob
         foreach (var source in executionSources)
         {
             var serviceName = $"{_name}/{(source as IImportSource).Name}";
-            var importServiceJob = new ShopImportServiceJob(serviceName, source, _shopImportSettings, _importServiceFactory, Id);
+            var importServiceJob = _shopImportServiceJobFactory.CreateServiceJob(_importServiceFactory, _shopImportSettings, serviceName, _shopModel, false, Id);
             _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
         }
     }
-
-    public IAggregateImportService ImportService { get; }
-
-    public int SourceId { get; }
-
-    public Guid Id { get; } = Guid.NewGuid();
-
-    public string? JobId { get; set; }
-
-    IImportService IImportServiceJob.ImportService => ImportService;
-
-    Guid? IImportServiceJob.ParentId => null;
 
     private async Task OnExecuteService(IImportService importService, CancellationToken cancellationToken)
     {
         //todo
     }
 
-    public Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
+    protected override Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {
         IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>
         {

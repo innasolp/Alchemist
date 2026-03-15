@@ -12,7 +12,9 @@ using MediatR;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ShopImport.Service.Hangfire;
 using ShopImport.Service.Hangfire.Infrastructure;
+using ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
 using StackExchange.Redis;
 
 namespace ShopImport.Service.Hangfire;
@@ -36,6 +38,9 @@ public static class MediatrExtensions
             });
 
             services.AddHangfire(hangfireConnectionString, jobExecuteOptions ?? defaultJobExecuteOptions, configure);
+
+            services.AddSingleton<IJobExecuteManager, JobExecuteManager>();
+            services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -43,9 +48,11 @@ public static class MediatrExtensions
         {
             builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IShopImportServiceManager));
             builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IServiceManager));
-            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IHagfireServiceJobManager));
+            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IHagfireServiceJobManager));            
+
             builder.Register(c => c.ResolveKeyed<IBackgroundTaskQueue>(ServiceKeys.EventBackgroundTaskQueue)).As<IBackgroundTaskQueue>();
             builder.Register(c => c.ResolveKeyed<IMessageSender>(ServiceKeys.EventMessageSenderKey)).As<IMessageSender>();
+
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStartingEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStartingEvent>));
             builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStartedEvent, ServiceStartedMessage>)).As(typeof(INotificationHandler<ServiceStartedEvent>));
