@@ -30,11 +30,7 @@ internal class RecurringJobExecutor(IBackgroundJobClient backgroundJobClient, IR
         if (string.IsNullOrEmpty(importServiceJob.JobId))
             throw new InvalidOperationException($"Job {importServiceJob.ImportService.Name} not enqueued.");
 
-        var dateTime = jobExecuteOptions?.IntervalInSeconds != null
-            ? DateTimeOffset.FromUnixTimeSeconds(jobExecuteOptions.IntervalInSeconds.Value)
-            : DateTimeOffset.FromUnixTimeSeconds(DefaultIntervalInSeconds);
-
-        var cron = $"{dateTime.Minute} {dateTime.Hour} {dateTime.Day} {dateTime.Month} *";        
+        var cron = ToCron(jobExecuteOptions?.IntervalInSeconds ?? DefaultIntervalInSeconds);        
 
         _recurringJobManager.AddOrUpdate<IHagfireServiceJobManager>(importServiceJob.ImportService.Name,
             jobExecuteOptions?.ProcessingQueue ?? "processing",
@@ -44,9 +40,28 @@ internal class RecurringJobExecutor(IBackgroundJobClient backgroundJobClient, IR
                                                                      null),
              cron);
 
+        _recurringJobManager.Trigger(importServiceJob.ImportService.Name);
+
         _backgroundJobClient.Delete(importServiceJob.JobId);
 
         return Task.CompletedTask;
+    }
+
+
+    private static string ToCron(int seconds)
+    {
+        TimeSpan interval = TimeSpan.FromSeconds(seconds);
+
+        if (interval.TotalSeconds < 60)
+            return $"*/{(int)interval.TotalSeconds} * * * * *";
+
+        if (interval.TotalMinutes < 60)
+            return $"*/{(int)interval.TotalMinutes} * * * *";
+
+        if (interval.TotalHours < 24)
+            return $"0 */{(int)interval.TotalHours} * * *";
+
+        return $"0 0 */{(int)interval.TotalDays} * *";
     }
 
     public Task StopWithFailedState(IImportServiceJob importServiceJob, Exception exception, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)

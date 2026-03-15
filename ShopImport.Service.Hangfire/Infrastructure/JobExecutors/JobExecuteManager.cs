@@ -68,7 +68,7 @@ internal class JobExecuteManager : IJobExecuteManager
             var executor = GetJobExecutor(executedJob.Value.ParentId != null, jobExecuteOptions);
             await executor.StopWithFailedState(executedJob.Value, exception, jobExecuteOptions, cancellationToken);
 
-            if (executedJob.Value.ParentId != null)
+            if (executedJob.Value.ParentId == importServiceJob.Id)
                 _backgroundJobClient.Delete(executedJob.Value.JobId);
         }        
     }

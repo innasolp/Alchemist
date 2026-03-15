@@ -9,7 +9,7 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
 
     public Task Enqueue(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
-       _backgroundJobClient.Create<IHagfireServiceJobManager>(
+        importServiceJob.JobId = _backgroundJobClient.Create<IHagfireServiceJobManager>(
                      serviceJobManager => serviceJobManager.Execute(importServiceJob.Id,
                                                                     importServiceJob.ImportService.Name,
                                                                     cancellationToken,
