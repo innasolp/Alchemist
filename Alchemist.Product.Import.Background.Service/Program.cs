@@ -17,6 +17,7 @@ using DependencyInjection.AssemblyExtensions;
 using Hangfire;
 using Hangfire.Console;
 using Import.Factory.Logging;
+using Import.Service;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog;
 using Serilog.Configuration.Extensions;
@@ -136,9 +137,24 @@ static void AddShopImporters(IServiceCollection services, IConfiguration configu
     var categoryLoadersPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryLoadersPath").Value}";
     services.AddImportCategoryInfrastructure(categoryServicesPath, categoryLoadersPath);
 
-    services.AddImportServiceLogFactory((logger, name, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
-    { "ShopImportService", name },
-    { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } }));
+    services.AddImportServiceLogFactory((logger, name, shopModel, settings) =>
+    new SerilogAssemblyResourcePropertyLogger(
+            new SerilogPropertyLogger(logger, new Dictionary<string, object>{
+            { "ShopImportService", name },
+            { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } }),
+
+            new Dictionary<string, System.Reflection.Assembly>()
+            {
+                { "Import.Service.LogMessages", typeof(ImportService).Assembly }, 
+                { "Import.Service.AggregateLogMessages", typeof(ImportService).Assembly }, 
+            },
+
+            new Dictionary<string, Dictionary<string, object>>
+            {
+                { "Import.Service.LogMessages", new Dictionary<string, object>{ { "Hangfire", true } } },
+                { "Import.Service.AggregateLogMessages", new Dictionary<string, object>{ { "Hangfire", true } } }
+            })    
+    );
 }
 
 static void AddShopImportItemHandlers(IServiceCollection services, IConfiguration configuration)

@@ -33,7 +33,10 @@
                 "Args": {
                   "contextProperties": [ "$[ContextProperties]" ],
                   "jobParameters": [ "$[JobParameters]" ],
-                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}"
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}",
+                  "allowedСontextProperties": {
+                     "Hangfire": true 
+                  }
                 }
               }
             ]
