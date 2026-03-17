@@ -41,7 +41,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         _shopModel = shopModel;
         _importServiceFactory = importServiceFactory;
         _shopImportSettings = shopImportSettings;
-        _aggregateImportService = new AggregateImportService(logger, name, OnExecuteService);
+        _aggregateImportService = new AggregateService(logger, name, OnExecuteService);
         InitializeImportServiceJobs();
     }
 
@@ -54,6 +54,8 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
             var serviceName = $"{_name}/{(source as IImportSource).Name}";
             var importServiceJob = _shopImportServiceJobFactory.CreateServiceJob(_importServiceFactory, _shopImportSettings, serviceName, _shopModel, false, Id);
             _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
+
+            _aggregateImportService.Enqueue(importServiceJob.ImportService);
         }
     }
 

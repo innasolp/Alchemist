@@ -34,7 +34,7 @@
                   "contextProperties": [ "$[ContextProperties]" ],
                   "jobParameters": [ "$[JobParameters]" ],
                   "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}",
-                  "allowedСontextProperties": {
+                  "allowedContextProperties": {
                      "Hangfire": true 
                   }
                 }
