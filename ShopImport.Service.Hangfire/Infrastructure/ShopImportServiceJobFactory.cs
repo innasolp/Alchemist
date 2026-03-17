@@ -35,7 +35,7 @@ internal class ShopImportServiceJobFactory(ILoggerFactory loggerFactory,
         }
         else
         {
-            var logger = _loggerFactory.CreateLogger<AggregateImportService>();
+            var logger = _loggerFactory.CreateLogger<AggregateService>();
             var serviceLogger = _importServiceLogFactory.GetLogger(logger, name, source, shopImportSettings);
             return new AggregateShopImportServiceJob(this,
                 serviceLogger, 
