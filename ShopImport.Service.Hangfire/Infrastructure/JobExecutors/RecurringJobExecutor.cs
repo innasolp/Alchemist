@@ -11,13 +11,15 @@ internal class RecurringJobExecutor(IBackgroundJobClient backgroundJobClient, IR
 
     private const int DefaultIntervalInSeconds = 10800;
 
-    public Task Enqueue(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task Enqueue(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
         var waitingQueue = jobExecuteOptions?.WaitingQueue ?? "waiting";
 
         importServiceJob.JobId = _backgroundJobClient.Create<IHagfireServiceJobManager>(
                       serviceJobManager => serviceJobManager.Execute(importServiceJob.Id,
                                                                      importServiceJob.ImportService.Name,
+                                                                     isAggregate, 
+                                                                     importServiceJob.ParentId,
                                                                      cancellationToken,
                                                                      null),
                       new EnqueuedState(waitingQueue));
@@ -25,9 +27,11 @@ internal class RecurringJobExecutor(IBackgroundJobClient backgroundJobClient, IR
         return Task.CompletedTask;
     }
 
-    public Task Execute(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task Execute(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(importServiceJob.JobId))
+        var initialJobId = importServiceJob.JobId;
+
+        if (string.IsNullOrEmpty(initialJobId))
             throw new InvalidOperationException($"Job {importServiceJob.ImportService.Name} not enqueued.");
 
         var cron = ToCron(jobExecuteOptions?.IntervalInSeconds ?? DefaultIntervalInSeconds);        
@@ -36,17 +40,18 @@ internal class RecurringJobExecutor(IBackgroundJobClient backgroundJobClient, IR
             jobExecuteOptions?.ProcessingQueue ?? "processing",
             serviceJobManager => serviceJobManager.Execute(importServiceJob.Id,
                                                                      importServiceJob.ImportService.Name,
+                                                                     isAggregate,
+                                                                     importServiceJob.ParentId,
                                                                      cancellationToken,
                                                                      null),
              cron);
 
         _recurringJobManager.Trigger(importServiceJob.ImportService.Name);
 
-        _backgroundJobClient.Delete(importServiceJob.JobId);
+        _backgroundJobClient.Delete(initialJobId);
 
         return Task.CompletedTask;
     }
-
 
     private static string ToCron(int seconds)
     {

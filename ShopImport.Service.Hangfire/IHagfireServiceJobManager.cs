@@ -10,5 +10,5 @@ public interface IHagfireServiceJobManager
     [DisplayName("{1}")]
     [AutomaticRetry(Attempts =0)]
     [ChangeQueueFilter]
-    Task Execute(Guid id, string displayName, CancellationToken cancellationToken = default, PerformContext? performContext = null);
+    Task Execute(Guid id, string displayName, bool isAggregate = false, Guid? parentId = null, CancellationToken cancellationToken = default, PerformContext? performContext = null);
 }

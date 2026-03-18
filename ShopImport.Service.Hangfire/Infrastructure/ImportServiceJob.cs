@@ -12,15 +12,15 @@ internal abstract class ImportServiceJob(Guid? parentId = null) : IImportService
 
     public Guid? ParentId { get; } = parentId;
 
-    public abstract int SourceId { get; }    
+    public abstract int SourceId { get; }
 
-    protected virtual Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
+    protected virtual Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {
         IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>() { { Id, this } };
-        return Task.FromResult(result);
+        return Task.FromResult((IReadOnlyDictionary<Guid, IImportServiceJob>)result);
     }
 
-    Task<IDictionary<Guid, IImportServiceJob>> IImportServiceJob.GetExecutionServiceJobs()
+    Task<IReadOnlyDictionary<Guid, IImportServiceJob>> IImportServiceJob.GetExecutionServiceJobs()
     {
         return GetExecutionServiceJobs();
     }

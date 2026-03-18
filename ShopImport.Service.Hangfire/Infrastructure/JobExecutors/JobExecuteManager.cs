@@ -42,20 +42,25 @@ internal class JobExecuteManager : IJobExecuteManager
     {
         var executingJobs = await importServiceJob.GetExecutionServiceJobs();
 
+        var mainJobIsAggregate = importServiceJob is AggregateShopImportServiceJob;
+
         foreach (var executedJob in executingJobs)
         {
             var executor = GetJobExecutor(executedJob.Value.ParentId != null, jobExecuteOptions);
-            await executor.Enqueue(executedJob.Value, jobExecuteOptions, cancellationToken);
+            await executor.Enqueue(executedJob.Value, mainJobIsAggregate && executedJob.Key == importServiceJob.Id,  jobExecuteOptions, cancellationToken);
         }
     }
 
     public async Task Execute(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
         var executingJobs = await importServiceJob.GetExecutionServiceJobs();
+
+        var mainJobIsAggregate = importServiceJob is AggregateShopImportServiceJob;
+
         foreach (var executedJob in executingJobs)
         {
             var executor = GetJobExecutor(executedJob.Value.ParentId != null, jobExecuteOptions);
-            await executor.Execute(executedJob.Value, jobExecuteOptions, cancellationToken);
+            await executor.Execute(executedJob.Value, mainJobIsAggregate && executedJob.Key == importServiceJob.Id, jobExecuteOptions, cancellationToken);
         }
     }
 
