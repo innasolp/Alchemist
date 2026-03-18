@@ -30,7 +30,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
 
     public AggregateShopImportServiceJob(IImportServiceJobFactory shopImportServiceJobFactory,
         ILogger logger,
-        string name, 
+        string name,
         IShopModel shopModel,
         IShopImportSettings shopImportSettings,
         IImportServiceFactory importServiceFactory)
@@ -64,16 +64,16 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         //todo
     }
 
-    protected override Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
+    protected override Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {
         IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>
         {
             { Id, this }
         };
 
-        foreach(var serviceJob in  _importServiceJobs) 
+        foreach (var serviceJob in _importServiceJobs)
             result.Add(serviceJob.Key, serviceJob.Value);
 
-        return Task.FromResult(result);
+        return Task.FromResult((IReadOnlyDictionary<Guid, IImportServiceJob>)result);
     }
 }

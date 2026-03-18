@@ -19,7 +19,7 @@ internal sealed class StartServiceCommandHandler(IServiceManager serviceReposito
 
             try
             {
-                await _publisher.Publish(new ServiceStartedEvent(eventArgs.Success, new ServiceMessage(request.Guid, service.Name)), eventArgs.CancellationToken);
+                await _publisher.Publish(new ServiceStartedEvent(eventArgs.Connected, new ServiceMessage(request.Guid, service.Name)), eventArgs.CancellationToken);
             }
             finally
             {

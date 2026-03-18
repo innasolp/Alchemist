@@ -7,11 +7,13 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
 {
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    public Task Enqueue(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task Enqueue(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
         importServiceJob.JobId = _backgroundJobClient.Create<IHagfireServiceJobManager>(
                      serviceJobManager => serviceJobManager.Execute(importServiceJob.Id,
                                                                     importServiceJob.ImportService.Name,
+                                                                    isAggregate,
+                                                                    importServiceJob.ParentId,
                                                                     cancellationToken,
                                                                     null),
                      new EnqueuedState(jobExecuteOptions?.WaitingQueue ?? "waiting"));
@@ -19,7 +21,7 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
         return Task.CompletedTask;        
     }
 
-    public Task Execute(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task Execute(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(importServiceJob.JobId))
             throw new InvalidOperationException($"Job {importServiceJob.ImportService.Name} not enqueued.");

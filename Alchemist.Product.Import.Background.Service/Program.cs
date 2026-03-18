@@ -18,6 +18,7 @@ using Hangfire;
 using Hangfire.Console;
 using Import.Factory.Logging;
 using Import.Service;
+using Import.Settings.Interfaces;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog;
 using Serilog.Configuration.Extensions;
@@ -28,6 +29,7 @@ using Shop.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
 using ShopImport.Service.Hangfire;
 using ShopSettings.Interfaces;
+using System.Xml.Linq;
 using WebLoader.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,7 +54,7 @@ builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.Ge
     (config) =>
     { 
         config.UseConsole();
-        config.AddConsoleContextFilter();
+        config.AddAggregateConsoleContextFilter();
     });
 
 
@@ -139,23 +141,29 @@ static void AddShopImporters(IServiceCollection services, IConfiguration configu
     services.AddImportCategoryInfrastructure(categoryServicesPath, categoryLoadersPath);
 
     services.AddImportServiceLogFactory((logger, name, shopModel, settings) =>
-    new SerilogAssemblyResourcePropertyLogger(
-            new SerilogPropertyLogger(logger, new Dictionary<string, object>{
-            { "ShopImportService", name },
-            { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } }),
+            GetHangfireConsoleLogger(GetShopImportServiceCoreLogger(logger, name, settings)));
+}
 
+static Microsoft.Extensions.Logging.ILogger GetShopImportServiceCoreLogger(Microsoft.Extensions.Logging.ILogger logger,  string name, IImportSettings settings)
+{
+    return new SerilogPropertyLogger(logger, new Dictionary<string, object>{
+            { "ShopImportService", name },
+            { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } });
+}
+
+static Microsoft.Extensions.Logging.ILogger GetHangfireConsoleLogger(Microsoft.Extensions.Logging.ILogger logger)
+{
+    return new SerilogAssemblyResourcePropertyLogger(logger,
             new Dictionary<string, System.Reflection.Assembly>()
             {
                 { "Import.Service.LogMessages", typeof(ImportService).Assembly }, 
                 { "Import.Service.AggregateLogMessages", typeof(ImportService).Assembly }, 
             },
-
             new Dictionary<string, Dictionary<string, object>>
             {
                 { "Import.Service.LogMessages", new Dictionary<string, object>{ { "Hangfire", true } } },
-                { "Import.Service.AggregateLogMessages", new Dictionary<string, object>{ { "Hangfire", true } } }
-            })    
-    );
+                { "Import.Service.AggregateLogMessages", new Dictionary<string, object>{ { "Hangfire", true }, { "HangfireAggregate", true } } }
+            });
 }
 
 static void AddShopImportItemHandlers(IServiceCollection services, IConfiguration configuration)
