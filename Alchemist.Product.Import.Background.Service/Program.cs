@@ -162,7 +162,7 @@ static Microsoft.Extensions.Logging.ILogger GetHangfireConsoleLogger(Microsoft.E
             new Dictionary<string, Dictionary<string, object>>
             {
                 { "Import.Service.LogMessages", new Dictionary<string, object>{ { "Hangfire", true } } },
-                { "Import.Service.AggregateLogMessages", new Dictionary<string, object>{ { "Hangfire", true }, { "HangfireAggregate", true } } }
+                { "Import.Service.AggregateLogMessages", new Dictionary<string, object>{ { "HangfireAggregate", true } } }
             });
 }
 
