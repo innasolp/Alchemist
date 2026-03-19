@@ -43,7 +43,7 @@ public static class MediatrExtensions
 
             services.AddSingleton<IJobExecuteManager, JobExecuteManager>();
             services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();
-            services.AddScoped<IPerformContextEnricher, ParentTagEnricher>();
+            services.AddSingleton<IPerformContextEnricher, ParentTagEnricher>();
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());

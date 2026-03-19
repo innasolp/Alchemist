@@ -145,9 +145,11 @@ static void AddShopImporters(IServiceCollection services, IConfiguration configu
 
 static Microsoft.Extensions.Logging.ILogger GetShopImportServiceCoreLogger(Microsoft.Extensions.Logging.ILogger logger,  string name, IImportSettings settings)
 {
+    var shopSettingsType = settings is IShopSettings shopSettings && shopSettings != null ? shopSettings.Type : ShopSettingType.Service;
+
     return new SerilogPropertyLogger(logger, new Dictionary<string, object>{
             { "ShopImportService", name },
-            { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } });
+            { "ShopSettingsType", shopSettingsType.ToString() } });
 }
 
 static Microsoft.Extensions.Logging.ILogger GetHangfireConsoleLogger(Microsoft.Extensions.Logging.ILogger logger)
