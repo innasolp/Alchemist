@@ -46,7 +46,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "$[PropertyName] is not null and IsDefined(Hangfire) = true and Hangfire = true and IsDefined(HangfireAggregate) = true and HangfireAggregate = true"
+                  "expression": "$[PropertyName] is not null and IsDefined(HangfireAggregate) = true and HangfireAggregate = true"
                 }
               }
             ],
