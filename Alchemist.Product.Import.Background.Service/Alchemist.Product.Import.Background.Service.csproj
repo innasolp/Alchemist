@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
-    <PackageReference Include="Serilog.HangfireConsoleContextSink" Version="1.0.0" />
+    <PackageReference Include="Serilog.HangfireConsoleContextSink" Version="1.0.0.1" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Message.Interfaces" Version="1.0.0.4" />
 	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.9" />
