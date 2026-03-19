@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using ShopImport.Service.Hangfire;
 using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
 using StackExchange.Redis;
 
 namespace ShopImport.Service.Hangfire;
@@ -25,7 +26,8 @@ public static class MediatrExtensions
 
     public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder, 
         string hangfireConnectionString,
-        JobExecuteOptions? jobExecuteOptions = null, Action<IGlobalConfiguration>? configure = null)
+        JobExecuteOptions? jobExecuteOptions = null, 
+        Action<IGlobalConfiguration>? configure = null)
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
@@ -41,6 +43,7 @@ public static class MediatrExtensions
 
             services.AddSingleton<IJobExecuteManager, JobExecuteManager>();
             services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();
+            services.AddSingleton<IPerformContextEnricher, ParentTagEnricher>();
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());

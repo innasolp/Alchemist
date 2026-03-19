@@ -23,7 +23,7 @@
               {
                 "Name": "ByIncludingOnly",
                 "Args": {
-                  "expression": "$[PropertyName] is not null"
+                  "expression": "$[PropertyName] is not null and IsDefined(Hangfire) = true and Hangfire = true"
                 }
               }
             ],
@@ -31,8 +31,29 @@
               {
                 "Name": "HangfireConsoleContext",
                 "Args": {
-                  "contextProperties": [ "$[ContextProperties]" ],
-                  "jobParameters": [ "$[JobParameters]" ],
+                  "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "configureLogger": {
+            "Filter": [
+              {
+                "Name": "ByIncludingOnly",
+                "Args": {
+                  "expression": "$[PropertyName] is not null and IsDefined(HangfireAggregate) = true and HangfireAggregate = true"
+                }
+              }
+            ],
+            "WriteTo": [
+              {
+                "Name": "HangfireAggregateConsoleContext",
+                "Args": {
                   "outputTemplate": "{Timestamp:o} [Thread:{ThreadId}] [{Level:u3}] {Message}{NewLine}{Exception}"
                 }
               }

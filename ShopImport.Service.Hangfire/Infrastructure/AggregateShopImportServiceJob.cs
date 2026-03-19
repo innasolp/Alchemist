@@ -30,7 +30,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
 
     public AggregateShopImportServiceJob(IImportServiceJobFactory shopImportServiceJobFactory,
         ILogger logger,
-        string name, 
+        string name,
         IShopModel shopModel,
         IShopImportSettings shopImportSettings,
         IImportServiceFactory importServiceFactory)
@@ -41,7 +41,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         _shopModel = shopModel;
         _importServiceFactory = importServiceFactory;
         _shopImportSettings = shopImportSettings;
-        _aggregateImportService = new AggregateImportService(logger, name, OnExecuteService);
+        _aggregateImportService = new AggregateService(logger, name, OnExecuteService);
         InitializeImportServiceJobs();
     }
 
@@ -54,6 +54,8 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
             var serviceName = $"{_name}/{(source as IImportSource).Name}";
             var importServiceJob = _shopImportServiceJobFactory.CreateServiceJob(_importServiceFactory, _shopImportSettings, serviceName, _shopModel, false, Id);
             _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
+
+            _aggregateImportService.Enqueue(importServiceJob.ImportService);
         }
     }
 
@@ -62,16 +64,16 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         //todo
     }
 
-    protected override Task<IDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
+    protected override Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {
         IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>
         {
             { Id, this }
         };
 
-        foreach(var serviceJob in  _importServiceJobs) 
+        foreach (var serviceJob in _importServiceJobs)
             result.Add(serviceJob.Key, serviceJob.Value);
 
-        return Task.FromResult(result);
+        return Task.FromResult((IReadOnlyDictionary<Guid, IImportServiceJob>)result);
     }
 }

@@ -12,7 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.4" />
     <PackageReference Include="Serilog" Version="4.2.0" />
-    <PackageReference Include="Serilog.Loggers" Version="1.0.0.3" />
+    <PackageReference Include="Serilog.Loggers" Version="1.0.0.4" />
     <PackageReference Include="Serilog.Configuration.Extensions" Version="1.0.0.4" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />

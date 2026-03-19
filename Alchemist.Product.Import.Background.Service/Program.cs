@@ -17,6 +17,8 @@ using DependencyInjection.AssemblyExtensions;
 using Hangfire;
 using Hangfire.Console;
 using Import.Factory.Logging;
+using Import.Service;
+using Import.Settings.Interfaces;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog;
 using Serilog.Configuration.Extensions;
@@ -27,6 +29,7 @@ using Shop.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
 using ShopImport.Service.Hangfire;
 using ShopSettings.Interfaces;
+using System.Xml.Linq;
 using WebLoader.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,7 +53,7 @@ builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.Ge
     (config) =>
     { 
         config.UseConsole();
-        config.AddConsoleContextFilter();
+        config.AddAggregateConsoleContextFilter();
     });
 
 
@@ -136,9 +139,32 @@ static void AddShopImporters(IServiceCollection services, IConfiguration configu
     var categoryLoadersPath = $"{Utils.GetAppPath()}\\{configuration.GetSection("ShopCategoryLoadersPath").Value}";
     services.AddImportCategoryInfrastructure(categoryServicesPath, categoryLoadersPath);
 
-    services.AddImportServiceLogFactory((logger, name, shopModel, settings) => new SerilogPropertyLogger(logger, new Dictionary<string, object>{
-    { "ShopImportService", name },
-    { "ShopSettingsType", (settings as IShopSettings).Type.ToString() } }));
+    services.AddImportServiceLogFactory((logger, name, shopModel, settings) =>
+            GetHangfireConsoleLogger(GetShopImportServiceCoreLogger(logger, name, settings)));
+}
+
+static Microsoft.Extensions.Logging.ILogger GetShopImportServiceCoreLogger(Microsoft.Extensions.Logging.ILogger logger,  string name, IImportSettings settings)
+{
+    var shopSettingsType = settings is IShopSettings shopSettings && shopSettings != null ? shopSettings.Type : ShopSettingType.Service;
+
+    return new SerilogPropertyLogger(logger, new Dictionary<string, object>{
+            { "ShopImportService", name },
+            { "ShopSettingsType", shopSettingsType.ToString() } });
+}
+
+static Microsoft.Extensions.Logging.ILogger GetHangfireConsoleLogger(Microsoft.Extensions.Logging.ILogger logger)
+{
+    return new SerilogAssemblyResourcePropertyLogger(logger,
+            new Dictionary<string, System.Reflection.Assembly>()
+            {
+                { "Import.Service.LogMessages", typeof(ImportService).Assembly }, 
+                { "Import.Service.AggregateLogMessages", typeof(ImportService).Assembly }, 
+            },
+            new Dictionary<string, Dictionary<string, object>>
+            {
+                { "Import.Service.LogMessages", new Dictionary<string, object>{ { "Hangfire", true } } },
+                { "Import.Service.AggregateLogMessages", new Dictionary<string, object>{ { "HangfireAggregate", true } } }
+            });
 }
 
 static void AddShopImportItemHandlers(IServiceCollection services, IConfiguration configuration)
