@@ -2,7 +2,7 @@
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
-internal abstract class ImportServiceJob(Guid? parentId = null) : IImportServiceJob
+internal abstract class ImportServiceJob(Guid? parentId = null, ServiceExecuteOptions? serviceExecuteOptions = null) : IImportServiceJob
 {
     public abstract IImportService ImportService { get; }
 
@@ -13,6 +13,8 @@ internal abstract class ImportServiceJob(Guid? parentId = null) : IImportService
     public Guid? ParentId { get; } = parentId;
 
     public abstract int SourceId { get; }
+
+    public ServiceExecuteOptions? ServiceExecuteOptions { get; } = serviceExecuteOptions;
 
     protected virtual Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {

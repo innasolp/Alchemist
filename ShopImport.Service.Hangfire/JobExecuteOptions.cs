@@ -4,11 +4,13 @@ public class JobExecuteOptions
 {
     public required string ServerName { get; set; }
 
+    public string? ChildServerName { get; set; }
+
     public required string WaitingQueue { get; set;  }
+
+    public string? ChildWaitingQueue { get; set; }
 
     public required string ProcessingQueue { get; set; }
 
-    public int? EnqueuedInSeconds { get; set; } = null;
-
-    public int? IntervalInSeconds { get; set; } = null;
+    public string? ChildProcessingQueue { get; set; }
 }

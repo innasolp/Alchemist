@@ -11,48 +11,26 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
 
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    public Task Enqueue(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
-    {
-        var waitingQueue = jobExecuteOptions?.WaitingQueue ?? "waiting";
-
-        importServiceJob.JobId = _backgroundJobClient.Create<IHagfireServiceJobManager>(
-                      serviceJobManager => serviceJobManager.Execute(importServiceJob.Id,
-                                                                     importServiceJob.ImportService.Name,
-                                                                     isAggregate,
-                                                                     importServiceJob.ParentId,
-                                                                     cancellationToken,
-                                                                     null),
-                      new EnqueuedState(waitingQueue));
-
-        return Task.CompletedTask;
-    }
-
-    public Task Execute(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrEmpty(importServiceJob.JobId))
-            throw new InvalidOperationException($"Job {importServiceJob.ImportService.Name} not enqueued.");
-
-        var enqueuedIn = jobExecuteOptions?.EnqueuedInSeconds != null ? TimeSpan.FromSeconds(jobExecuteOptions.EnqueuedInSeconds.Value) : DefaultEnqueuedIn;
-        _backgroundJobClient.ChangeState(importServiceJob.JobId, new ScheduledState(enqueuedIn));
-
-        var processingQueue = jobExecuteOptions?.ProcessingQueue ?? "processing";
-        SetJobParameter(importServiceJob.JobId, ProcessingQueueParameterName, processingQueue);
-
-        return Task.CompletedTask;
-    }
-
     private static void SetJobParameter(string jobId, string parameterName, string parameterValue)
     {
         using var connection = JobStorage.Current.GetConnection();
         connection.SetJobParameter(jobId, parameterName, parameterValue);
     }
 
-    public Task StopWithFailedState(IImportServiceJob importServiceJob, Exception exception, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task<string> Enqueue<T>(Func<T, Task> jobTask, string waitingQueue, CancellationToken cancellationToken = default)
     {
-        var failedState = jobExecuteOptions != null ? new FailedState(exception, jobExecuteOptions.ServerName) : new FailedState(exception);
-        failedState.Reason = exception.Message;
+        var jobId = _backgroundJobClient.Create<T>(
+                     obj => jobTask(obj),
+                     new EnqueuedState(waitingQueue));
+        return Task.FromResult(jobId);
+    }
 
-        _backgroundJobClient.ChangeState(importServiceJob.JobId, failedState);
+    public Task Execute(string jobId, string processingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default)
+    {
+        var enqueuedIn = serviceExecuteOptions?.EnqueuedInSeconds != null ? TimeSpan.FromSeconds(serviceExecuteOptions.EnqueuedInSeconds.Value) : DefaultEnqueuedIn;
+        _backgroundJobClient.ChangeState(jobId, new ScheduledState(enqueuedIn));
+
+        SetJobParameter(jobId, ProcessingQueueParameterName, processingQueue);
 
         return Task.CompletedTask;
     }

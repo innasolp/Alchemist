@@ -1,7 +1,6 @@
 ﻿using Hangfire.Server;
-using ShopImport.Service.Hangfire.Infrastructure;
 
-namespace ShopImport.Service.Hangfire;
+namespace ShopImport.Service.Hangfire.Infrastructure;
 
 internal interface IPerformContextEnricher
 {

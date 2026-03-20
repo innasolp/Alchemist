@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Hangfire.States;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
 
@@ -18,63 +19,93 @@ internal class JobExecuteManager : IJobExecuteManager
     {
         _backgroundJobClient = backgroundJobClient;
         _recurringJobManager = recurringJobManager;
-
         _backgroundJobExecutor = new BackgroundJobExecutor(_backgroundJobClient);
         _recurringJobExecutor = new RecurringJobExecutor(_backgroundJobClient, _recurringJobManager);
         _scheduledJobExecutor = new ScheduledJobExecutor(_backgroundJobClient);
     }
 
-    private IJobExecutor GetJobExecutor(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null)
+    private IJobExecutor GetJobExecutor(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
     {
         if (isChild)
             return _backgroundJobExecutor;
 
-        if (jobExecuteOptions?.IntervalInSeconds != null)
+        if (serviceExecuteOptions?.IntervalInSeconds != null)
             return _recurringJobExecutor;
 
-        if (jobExecuteOptions?.EnqueuedInSeconds != null)
+        if (serviceExecuteOptions?.EnqueuedInSeconds != null)
             return _scheduledJobExecutor;
 
         return _backgroundJobExecutor;
     }
 
-    public async Task Enqueue(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    private static string GetChildProcessingQueue(JobExecuteOptions jobExecuteOptions)
     {
-        var executingJobs = await importServiceJob.GetExecutionServiceJobs();
+        return !string.IsNullOrEmpty(jobExecuteOptions.ChildProcessingQueue) 
+            ? jobExecuteOptions.ChildProcessingQueue 
+            : jobExecuteOptions.ProcessingQueue;
+    }
 
-        var mainJobIsAggregate = importServiceJob is AggregateShopImportServiceJob;
+    public async Task Enqueue<T>(IImportServiceJob importServiceJob,
+        Func<T, IImportServiceJob, Task> execute,
+        JobExecuteOptions jobExecuteOptions,
+        CancellationToken cancellationToken = default)
+    {
+        var coreExecutor = GetJobExecutor(importServiceJob.ParentId != null, importServiceJob.ServiceExecuteOptions);
+        await coreExecutor.Enqueue<T>((obj) => execute(obj, importServiceJob), jobExecuteOptions.WaitingQueue, cancellationToken);
 
-        foreach (var executedJob in executingJobs)
+        var childJobs = await importServiceJob.GetСhildJobs();
+
+        foreach (var executedJob in childJobs)
         {
-            var executor = GetJobExecutor(executedJob.Value.ParentId != null, jobExecuteOptions);
-            await executor.Enqueue(executedJob.Value, mainJobIsAggregate && executedJob.Key == importServiceJob.Id,  jobExecuteOptions, cancellationToken);
+            var executor = GetJobExecutor(true);
+            var jobId = await executor.Enqueue<T>((obj)=>execute(obj, executedJob.Value), jobExecuteOptions.WaitingQueue, cancellationToken);
         }
     }
 
-    public async Task Execute(IImportServiceJob importServiceJob, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public async Task Execute(IImportServiceJob importServiceJob, 
+        JobExecuteOptions jobExecuteOptions,
+        CancellationToken cancellationToken = default)
     {
-        var executingJobs = await importServiceJob.GetExecutionServiceJobs();
+        var coreExecutor = GetJobExecutor(importServiceJob.ParentId != null, importServiceJob.ServiceExecuteOptions);
+        await coreExecutor.Execute(importServiceJob.JobId, jobExecuteOptions.WaitingQueue, importServiceJob.ServiceExecuteOptions, cancellationToken);
 
-        var mainJobIsAggregate = importServiceJob is AggregateShopImportServiceJob;
+        var childJobs = await importServiceJob.GetСhildJobs();
 
-        foreach (var executedJob in executingJobs)
+        var childJobProcessingQueue = GetChildProcessingQueue(jobExecuteOptions);
+
+        foreach (var executedJob in childJobs)
         {
-            var executor = GetJobExecutor(executedJob.Value.ParentId != null, jobExecuteOptions);
-            await executor.Execute(executedJob.Value, mainJobIsAggregate && executedJob.Key == importServiceJob.Id, jobExecuteOptions, cancellationToken);
+            var executor = GetJobExecutor(true);
+            await executor.Execute(executedJob.Value.JobId, childJobProcessingQueue, cancellationToken : cancellationToken);
         }
     }
 
     public async Task StopWithFailedState(IImportServiceJob importServiceJob, Exception exception, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
-        var executingJobs = (await importServiceJob.GetExecutionServiceJobs()).ToList();
+        var executingChildJobs = (await importServiceJob.GetExecutionServiceJobs())
+            .Where(j=>!string.IsNullOrEmpty(j.Value.JobId) && j.Value.JobId != importServiceJob.JobId).ToList();
 
-        foreach (var executedJob in executingJobs)
+        var serverName = !string.IsNullOrEmpty(jobExecuteOptions?.ChildServerName)
+            ? jobExecuteOptions.ChildServerName
+            : !string.IsNullOrEmpty(jobExecuteOptions?.ServerName) ? jobExecuteOptions.ServerName : null;
+
+        foreach (var executedJob in executingChildJobs)
         {
-            var executor = GetJobExecutor(executedJob.Value.ParentId != null, jobExecuteOptions);
-            await executor.StopWithFailedState(executedJob.Value, exception, jobExecuteOptions, cancellationToken);
+            StopWithFailedState(executedJob.Value.JobId!, exception, serverName);
 
             if (executedJob.Value.ParentId == importServiceJob.Id)
                 _backgroundJobClient.Delete(executedJob.Value.JobId);
-        }        
+        }
+        
+        //todo
+        StopWithFailedState(importServiceJob.JobId, exception, jobExecuteOptions?.ServerName);
+    }
+
+    private void StopWithFailedState(string jobId, Exception exception, string? serverName)
+    {
+        var failedState = !string.IsNullOrEmpty(serverName) ? new FailedState(exception, serverName) : new FailedState(exception);
+        failedState.Reason = exception.Message;
+
+        _backgroundJobClient.ChangeState(jobId, failedState);
     }
 }

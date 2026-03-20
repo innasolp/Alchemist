@@ -33,8 +33,9 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         string name,
         IShopModel shopModel,
         IShopImportSettings shopImportSettings,
-        IImportServiceFactory importServiceFactory)
-        : base(null)
+        IImportServiceFactory importServiceFactory, 
+        ServiceExecuteOptions? serviceExecuteOptions = null)
+        : base(null, serviceExecuteOptions)
     {
         _shopImportServiceJobFactory = shopImportServiceJobFactory;
         _name = name;

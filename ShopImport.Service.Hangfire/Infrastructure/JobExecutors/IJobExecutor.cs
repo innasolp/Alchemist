@@ -2,9 +2,7 @@
 
 internal interface IJobExecutor
 {
-    Task Enqueue(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default);
+    Task<string> Enqueue<T>(Func<T, Task> jobTask, string waitingQueue, CancellationToken cancellationToken = default);
 
-    Task Execute(IImportServiceJob importServiceJob, bool isAggregate = false, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default);
-
-    Task StopWithFailedState(IImportServiceJob importServiceJob, Exception exception, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default);
+    Task Execute(string jobId, string processingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default);
 }

@@ -21,7 +21,12 @@
       },
       "TimerOptions": {
         "Value": {
-          "SecondsInterval" : 10800
+          "SecondsInterval": 10800
+        }
+      },
+      "ServiceExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
         }
       },
       "LoadStages": {
@@ -29,9 +34,9 @@
           {
             "Type": "RecursiveJsonCategoryFromHtmlLoader",
             "CategoryLoadOptions": {
-              "HtmlSearchFactoryOptions": {                
-                  "SearchMatchType": 1,
-                  "SearchElementType": 0                
+              "HtmlSearchFactoryOptions": {
+                "SearchMatchType": 1,
+                "SearchElementType": 0
               },
               "HtmlSearchOptions": {
                 "Tag": "div",
@@ -118,6 +123,11 @@
       "TimerOptions": {
         "Value": {
           "SecondsInterval": 10800
+        }
+      },
+      "ServiceExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
         }
       },
       "LoadStages": {

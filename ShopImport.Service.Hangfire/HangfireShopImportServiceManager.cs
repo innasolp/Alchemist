@@ -62,8 +62,14 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             executionJobs.ToList().ForEach(j => _allServiceJobs.TryAdd(j.Key, j.Value));
 
             SubscribeServiceToFailedHandler(serviceJob);
-
-            await _jobExecuteManager.Enqueue(serviceJob, _jobExecuteOptions, cancellationToken);
+            
+            await _jobExecuteManager.Enqueue<IHagfireServiceJobManager>(serviceJob, 
+                (jobManager, job)=> 
+                        jobManager.Execute(job.Id,
+                        job.ImportService.Name,
+                        job is AggregateShopImportServiceJob, //todo
+                        job.ParentId, cancellationToken, null),           
+                    _jobExecuteOptions, cancellationToken);
 
             return (serviceJob.Id, serviceJob.ImportService);
         }
