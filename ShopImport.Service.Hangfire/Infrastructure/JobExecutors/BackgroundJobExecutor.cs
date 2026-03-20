@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Hangfire.States;
+using System.Linq.Expressions;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
 
@@ -7,15 +8,15 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
 {
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    public Task<string> Enqueue<T>(Func<T, Task> jobTask, string waitingQueue, CancellationToken cancellationToken = default)
+    public Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask, string waitingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default)
     {
-        var jobId = _backgroundJobClient.Create<T>(
-                     obj => jobTask(obj),
+        var jobId = _backgroundJobClient.Create(
+                     jobTask,
                      new EnqueuedState(waitingQueue));
         return Task.FromResult(jobId);
     }
 
-    public Task Execute(string jobId, string processingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task Execute<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default)
     {
         _backgroundJobClient.ChangeState(jobId, new EnqueuedState(processingQueue));
         return Task.CompletedTask;

@@ -1,13 +1,14 @@
 ﻿using Hangfire;
-using Hangfire.States;
+using Hangfire.Storage;
+using ShopImport.Service.Hangfire.Infrastructure.JobExecutors.Expression;
+using System.Linq.Expressions;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
 
-internal class RecurringJobExecutor(IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager) : IJobExecutor
+internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : IJobExecutor
 {
-    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
-
     private readonly IRecurringJobManager _recurringJobManager = recurringJobManager;
+
     private const int DefaultIntervalInSeconds = 10800;
 
     private static string ToCron(int seconds)
@@ -26,41 +27,43 @@ internal class RecurringJobExecutor(IBackgroundJobClient backgroundJobClient, IR
         return $"0 0 */{(int)interval.TotalDays} * *";
     }
 
-    public Task<string> Enqueue<T>(Func<T, Task> jobTask, string waitingQueue, CancellationToken cancellationToken = default)
-    {
-        var jobId = _backgroundJobClient.Create<T>(
-                     obj => jobTask(obj),
-                     new EnqueuedState(waitingQueue));
-        return Task.FromResult(jobId);
-    }
-
-    public Task Execute(string jobId, string processingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask, 
+        string waitingQueue, 
+        ServiceExecuteOptions? serviceExecuteOptions = null, 
+        CancellationToken cancellationToken = default)
     {
         var cron = ToCron(serviceExecuteOptions?.IntervalInSeconds ?? DefaultIntervalInSeconds);
 
+        var jobArgs = jobTask.GetArguments();
+
+        var recurringJobId = jobArgs?.OfType<string>().FirstOrDefault() 
+            ?? jobArgs?.FirstOrDefault()?.ToString() 
+            ?? Guid.NewGuid().ToString();
+
+        _recurringJobManager.AddOrUpdate(recurringJobId,
+                waitingQueue,
+                jobTask,
+                cron);
+
+        return Task.FromResult(recurringJobId);
+    }
+
+    public Task Execute<T>(string recurringJobId, string processingQueue, CancellationToken cancellationToken = default)
+    {
         using var connection = JobStorage.Current.GetConnection();
-        var jobData = connection.GetJobData(jobId);
+        
+        var recurringJobDto = connection.GetRecurringJobs().FirstOrDefault(x => x.Id == recurringJobId);//GetRecurringJobByLastJobId(connection, recurringJobId);
 
-        var method = jobData.Job.Method;
-        if (!method.ReturnType.IsAssignableTo(typeof(Task)))
-            throw new InvalidOperationException($"Returntype of job {jobId} is not Task.");
-
-        var activator = JobActivator.Current;
-
-        var recurringJobName = jobData.Job.Args.OfType<string>().FirstOrDefault() ?? jobId;
-
-        var context = new JobActivatorContext(connection, new BackgroundJob(jobId, jobData.Job, jobData.CreatedAt, null), new HangfireTokenAdapter(cancellationToken));
-
-        using (var scope = activator.BeginScope(context))
+        if (recurringJobDto?.Job != null)
         {
-            var instance = scope.Resolve(jobData.Job.Type);
+            var expression = recurringJobDto.Job.ToExpression<T, Task>();
 
-            _recurringJobManager.AddOrUpdate(recurringJobName, () => method.Invoke(instance, jobData.Job.Args.ToArray()), cron);
+            _recurringJobManager.RemoveIfExists(recurringJobId);
+
+            _recurringJobManager.AddOrUpdate(recurringJobId, processingQueue, expression, recurringJobDto.Cron);
+            
+            _recurringJobManager.Trigger(recurringJobId);
         }
-
-        _recurringJobManager.Trigger(recurringJobName);
-
-        _backgroundJobClient.Delete(jobId);
 
         return Task.CompletedTask;
     }

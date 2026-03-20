@@ -1,8 +1,12 @@
-﻿namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+﻿using System.Linq.Expressions;
+
+namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
 
 internal interface IJobExecutor
 {
-    Task<string> Enqueue<T>(Func<T, Task> jobTask, string waitingQueue, CancellationToken cancellationToken = default);
+    Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask, string waitingQueue, 
+        ServiceExecuteOptions? serviceExecuteOptions = null, 
+        CancellationToken cancellationToken = default);
 
-    Task Execute(string jobId, string processingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default);
+    Task Execute<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default);
 }

@@ -1,5 +1,7 @@
 ﻿using Hangfire;
 using Hangfire.States;
+using ShopImport.Service.Hangfire.Infrastructure.JobExecutors.Expression;
+using System.Linq.Expressions;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
 
@@ -20,7 +22,7 @@ internal class JobExecuteManager : IJobExecuteManager
         _backgroundJobClient = backgroundJobClient;
         _recurringJobManager = recurringJobManager;
         _backgroundJobExecutor = new BackgroundJobExecutor(_backgroundJobClient);
-        _recurringJobExecutor = new RecurringJobExecutor(_backgroundJobClient, _recurringJobManager);
+        _recurringJobExecutor = new RecurringJobExecutor(_recurringJobManager);
         _scheduledJobExecutor = new ScheduledJobExecutor(_backgroundJobClient);
     }
 
@@ -46,28 +48,36 @@ internal class JobExecuteManager : IJobExecuteManager
     }
 
     public async Task Enqueue<T>(IImportServiceJob importServiceJob,
-        Func<T, IImportServiceJob, Task> execute,
+        Expression<Func<T, IImportServiceJob, Task>> execute,
         JobExecuteOptions jobExecuteOptions,
         CancellationToken cancellationToken = default)
     {
         var coreExecutor = GetJobExecutor(importServiceJob.ParentId != null, importServiceJob.ServiceExecuteOptions);
-        await coreExecutor.Enqueue<T>((obj) => execute(obj, importServiceJob), jobExecuteOptions.WaitingQueue, cancellationToken);
+        var coreJobExpression = execute.BindSecondParameter(importServiceJob);
+        importServiceJob.JobId = await coreExecutor.Enqueue(coreJobExpression, 
+                                        jobExecuteOptions.WaitingQueue,
+                                        importServiceJob.ServiceExecuteOptions, 
+                                        cancellationToken);
 
         var childJobs = await importServiceJob.GetСhildJobs();
 
         foreach (var executedJob in childJobs)
         {
             var executor = GetJobExecutor(true);
-            var jobId = await executor.Enqueue<T>((obj)=>execute(obj, executedJob.Value), jobExecuteOptions.WaitingQueue, cancellationToken);
+            var jobExpression = execute.BindSecondParameter(executedJob.Value);
+            executedJob.Value.JobId = await executor.Enqueue(jobExpression,
+                jobExecuteOptions.WaitingQueue,
+                executedJob.Value.ServiceExecuteOptions,
+                cancellationToken);
         }
     }
 
-    public async Task Execute(IImportServiceJob importServiceJob, 
+    public async Task Execute<T>(IImportServiceJob importServiceJob, 
         JobExecuteOptions jobExecuteOptions,
         CancellationToken cancellationToken = default)
     {
         var coreExecutor = GetJobExecutor(importServiceJob.ParentId != null, importServiceJob.ServiceExecuteOptions);
-        await coreExecutor.Execute(importServiceJob.JobId, jobExecuteOptions.WaitingQueue, importServiceJob.ServiceExecuteOptions, cancellationToken);
+        await coreExecutor.Execute<T>(importServiceJob.JobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
 
         var childJobs = await importServiceJob.GetСhildJobs();
 
@@ -76,7 +86,7 @@ internal class JobExecuteManager : IJobExecuteManager
         foreach (var executedJob in childJobs)
         {
             var executor = GetJobExecutor(true);
-            await executor.Execute(executedJob.Value.JobId, childJobProcessingQueue, cancellationToken : cancellationToken);
+            await executor.Execute<T>(executedJob.Value.JobId, childJobProcessingQueue, cancellationToken : cancellationToken);
         }
     }
 

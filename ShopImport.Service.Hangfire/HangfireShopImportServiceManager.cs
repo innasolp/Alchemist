@@ -141,7 +141,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        return _jobExecuteManager.Execute(serviceJob, _jobExecuteOptions, cancellationToken);
+        return _jobExecuteManager.Execute<IHagfireServiceJobManager>(serviceJob, _jobExecuteOptions, cancellationToken);
     }
 
     private static async Task StartServiceAsync(IImportService importService, CancellationToken cancellationToken)
@@ -218,14 +218,16 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             await shopCategoryListener.On(productShopCategory);
     }
 
-    Task IHagfireServiceJobManager.Execute(Guid guid, string displayName, bool isAggregate = false, Guid? parentId = null, CancellationToken cancellationToken = default, PerformContext? performContext = null)
+    Task IHagfireServiceJobManager.Execute(Guid id, string displayName, bool isAggregate = false, Guid? parentId = null, CancellationToken cancellationToken = default, PerformContext? performContext = null)
     {
         var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             performContext?.CancellationToken.ShutdownToken ?? default);
-        var serviceJob = GetExecutingServiceJob(guid);
+        var serviceJob = GetExecutingServiceJob(id);
 
         if (performContext != null)
         {
+            serviceJob.JobId = performContext.BackgroundJob.Id;
+
             foreach (var contextEnricher in _performContextEnrichers)
                 contextEnricher.Enrich(performContext, serviceJob, _allServiceJobs);
         }
@@ -233,8 +235,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         try
         {
             var startTask = StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
-
-            if(performContext != null) serviceJob.JobId = performContext.BackgroundJob.Id;
 
             return startTask;
         }
