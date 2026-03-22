@@ -1,9 +1,9 @@
 ﻿using Hangfire;
 using Hangfire.Storage;
-using ShopImport.Service.Hangfire.Infrastructure.JobExecutors.Expression;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Expression;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
 
 internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : IJobExecutor
 {
@@ -50,7 +50,7 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
 
     public Task Execute<T>(string recurringJobId, string processingQueue, CancellationToken cancellationToken = default)
     {
-        using var connection = JobStorage.Current.GetConnection();
+        using var connection = global::Hangfire.JobStorage.Current.GetConnection();
         
         var recurringJobDto = connection.GetRecurringJobs().FirstOrDefault(x => x.Id == recurringJobId);//GetRecurringJobByLastJobId(connection, recurringJobId);
 

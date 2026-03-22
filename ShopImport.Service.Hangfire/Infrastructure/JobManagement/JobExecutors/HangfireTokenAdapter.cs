@@ -1,6 +1,6 @@
 ﻿using Hangfire;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
 
 internal class HangfireTokenAdapter(CancellationToken token) : IJobCancellationToken
 {

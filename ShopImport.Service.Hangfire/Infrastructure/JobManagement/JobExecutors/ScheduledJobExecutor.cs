@@ -3,7 +3,7 @@ using Hangfire.States;
 using Hangfire.Storage.Monitoring;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
 
 internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : IJobExecutor
 {
@@ -38,7 +38,7 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
 
     private static ScheduledJobDto? GetScheduledJobDto(string jobId)
     {
-        var monitoringApi = JobStorage.Current.GetMonitoringApi();
+        var monitoringApi = global::Hangfire.JobStorage.Current.GetMonitoringApi();
         var scheduledJobs = monitoringApi.ScheduledJobs(0, 1000);
         var job = scheduledJobs.FirstOrDefault(x => x.Key == jobId);
 

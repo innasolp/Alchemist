@@ -1,4 +1,4 @@
-﻿namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+﻿namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
 
 internal static class ImportServiceJobExtensions
 {

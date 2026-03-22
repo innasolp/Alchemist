@@ -1,9 +1,10 @@
 ﻿using Hangfire;
 using Hangfire.States;
-using ShopImport.Service.Hangfire.Infrastructure.JobExecutors.Expression;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Expression;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
 internal class JobExecuteManager : IJobExecuteManager
 {

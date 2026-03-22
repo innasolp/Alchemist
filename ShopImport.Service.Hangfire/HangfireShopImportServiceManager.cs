@@ -10,7 +10,7 @@ using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Infrastructure;
-using ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 using ShopImport.Service.Hangfire.Models;
 using System.Collections.Concurrent;
 

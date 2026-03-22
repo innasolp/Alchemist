@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ShopImport.Service.Hangfire;
 using ShopImport.Service.Hangfire.Infrastructure;
-using ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 using ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
 using StackExchange.Redis;
 

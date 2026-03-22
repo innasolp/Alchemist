@@ -2,7 +2,7 @@
 using Hangfire.States;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
 
 internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) : IJobExecutor
 {

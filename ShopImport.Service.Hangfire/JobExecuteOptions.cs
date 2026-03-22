@@ -13,4 +13,6 @@ public class JobExecuteOptions
     public required string ProcessingQueue { get; set; }
 
     public string? ChildProcessingQueue { get; set; }
+
+    public int ChildJobCountPerParent { get; set; } = 3;
 }

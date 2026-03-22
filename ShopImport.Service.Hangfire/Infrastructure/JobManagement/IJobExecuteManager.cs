@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
 internal interface IJobExecuteManager
 {
