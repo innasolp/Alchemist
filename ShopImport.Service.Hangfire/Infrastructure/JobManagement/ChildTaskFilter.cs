@@ -1,22 +1,27 @@
 ﻿using Hangfire;
 using Hangfire.Server;
+using Microsoft.Extensions.DependencyInjection;
 namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
-internal class ChildTaskFilter(IJobStorage jobStorage) : IServerFilter
+internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilter
 {
-    private readonly IJobStorage _jobStorage = jobStorage;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
     public void OnPerformed(PerformedContext filterContext)
     {
         var jobId = filterContext.BackgroundJob.Id;
-        var parentJobId = _jobStorage.GetParentJobId(jobId);
-        
+
+        using var scope = _scopeFactory.CreateScope();
+        var jobStorage = scope.ServiceProvider.GetRequiredService<IJobStorage>();
+
+        var parentJobId = jobStorage.GetParentJobId(jobId);
+
         if (string.IsNullOrEmpty(parentJobId)) return;
 
-        _jobStorage.UpdateJobState(jobId, 2);            
+        jobStorage.UpdateJobState(jobId, 2);
 
-         // todo
-         RecurringJob.TriggerJob("child-orchestrator-tick");        
+        // todo
+        RecurringJob.TriggerJob("child-orchestrator-tick");
     }
 
     public void OnPerforming(PerformingContext filterContext) { }
