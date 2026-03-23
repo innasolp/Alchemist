@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.ChildJobStorages;
+namespace Hangfire.AggregateJobs.ChildJobStorages;
 
 internal class ChildJobDbContext : DbContext
 {

@@ -1,6 +1,6 @@
-﻿namespace ShopImport.Service.Hangfire;
+﻿namespace Hangfire.AggregateJobs;
 
-internal class ServiceExecuteOptions
+public class JobExecuteOptions
 {
     public int? EnqueuedInSeconds { get; set; } = null;
 

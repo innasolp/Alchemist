@@ -1,14 +1,13 @@
-﻿using Hangfire;
-using Hangfire.States;
+﻿using Hangfire.States;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
+namespace Hangfire.AggregateJobs.JobExecutors;
 
 internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) : IJobExecutor
 {
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    public Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask, string waitingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask, string waitingQueue, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
         var jobId = _backgroundJobClient.Create(
                      jobTask,
@@ -27,8 +26,8 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
         return Task.FromResult(Execute<T>(jobId, processingQueue));
     }
 
-    public bool IsAccessible(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
+    public bool IsAccessible(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null)
     {
-        return isChild || (serviceExecuteOptions?.IntervalInSeconds == null && serviceExecuteOptions?.EnqueuedInSeconds == null);
+        return isChild || (jobExecuteOptions?.IntervalInSeconds == null && jobExecuteOptions?.EnqueuedInSeconds == null);
     }
 }

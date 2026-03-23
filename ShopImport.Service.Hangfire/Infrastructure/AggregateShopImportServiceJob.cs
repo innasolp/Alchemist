@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings;
+using Hangfire.AggregateJobs;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service;
@@ -34,8 +35,8 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         IShopModel shopModel,
         IShopImportSettings shopImportSettings,
         IImportServiceFactory importServiceFactory, 
-        ServiceExecuteOptions? serviceExecuteOptions = null)
-        : base(null, serviceExecuteOptions)
+        JobExecuteOptions? jobExecuteOptions = null)
+        : base(null, jobExecuteOptions)
     {
         _shopImportServiceJobFactory = shopImportServiceJobFactory;
         _name = name;

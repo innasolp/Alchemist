@@ -1,7 +1,7 @@
 ﻿using Hangfire.Common;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Expression;
+namespace Hangfire.AggregateJobs.JobExecutors.Expression;
 
 internal static class ExpressionExtensions
 {

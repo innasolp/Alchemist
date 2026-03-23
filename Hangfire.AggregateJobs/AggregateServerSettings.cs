@@ -1,6 +1,6 @@
-﻿namespace ShopImport.Service.Hangfire;
+﻿namespace Hangfire.AggregateJobs;
 
-public class JobExecuteOptions
+public class AggregateServerSettings
 {
     public required string ServerName { get; set; }
 

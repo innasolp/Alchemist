@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Expression;
+namespace Hangfire.AggregateJobs.JobExecutors.Expression;
 
 internal class ParameterBinder(ParameterExpression parameter, object value) : ExpressionVisitor
 {

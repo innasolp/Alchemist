@@ -1,7 +1,7 @@
-﻿using Hangfire;
-using Hangfire.Server;
+﻿using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
+
+namespace Hangfire.AggregateJobs;
 
 internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilter
 {

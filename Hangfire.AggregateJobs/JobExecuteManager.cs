@@ -1,10 +1,9 @@
-﻿using Hangfire;
+﻿using Hangfire.AggregateJobs.JobExecutors;
+using Hangfire.AggregateJobs.JobExecutors.Expression;
 using Hangfire.States;
-using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
-using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Expression;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
+namespace Hangfire.AggregateJobs;
 
 internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors, 
     IBackgroundJobClient backgroundJobClient, 
@@ -21,42 +20,51 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
     public async Task Enqueue<T, TJob>(TJob coreJob,
         IEnumerable<TJob> childJobs,
         Expression<Func<T, TJob, Task>> execute,
-        JobExecuteOptions jobExecuteOptions,
-        ServiceExecuteOptions? serviceExecuteOptions = null,
+        AggregateServerSettings aggregateServerSettings,
+        JobExecuteOptions? jobExecuteOptions = null,
         Action<TJob, string>? setJobIdAction = null,
+        IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
         CancellationToken cancellationToken = default)
     {
-        var coreExecutor = _jobExecutors.FirstOrDefault(e=>e.IsAccessible(serviceExecuteOptions: serviceExecuteOptions)) ?? DefaultJobExecutor;
-        
+        var coreExecutor = _jobExecutors.FirstOrDefault(e=>e.IsAccessible(jobExecuteOptions: jobExecuteOptions)) ?? DefaultJobExecutor;
+       
         var coreJobExpression = execute.BindSecondParameter(coreJob);
         var coreJobId = await coreExecutor.EnqueueAsync(coreJobExpression, 
-                                        jobExecuteOptions.WaitingQueue,
-                                        serviceExecuteOptions, 
+                                        aggregateServerSettings.WaitingQueue,
+                                        jobExecuteOptions, 
                                         cancellationToken);
         setJobIdAction?.Invoke(coreJob, coreJobId);
 
-        foreach (var executedJob in childJobs)
+        if(childJobEnrichers != null)
+            foreach (var childJobEnricher in childJobEnrichers)
+                childJobEnricher.Enrich(coreJobId, coreJob, coreJob);
+
+        foreach (var childJob in childJobs)
         {
             var executor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(true)) ?? DefaultJobExecutor;
 
-            var jobExpression = execute.BindSecondParameter(executedJob);
+            var jobExpression = execute.BindSecondParameter(childJob);
             
             var jobId = await executor.EnqueueAsync(jobExpression,
-                jobExecuteOptions.WaitingQueue,
+                aggregateServerSettings.WaitingQueue,
                 cancellationToken : cancellationToken);
-            
-            setJobIdAction?.Invoke(executedJob, jobId);
+
+            if (childJobEnrichers != null)
+                foreach (var childJobEnricher in childJobEnrichers)
+                    childJobEnricher.Enrich(jobId, childJob, coreJob);
+
+            setJobIdAction?.Invoke(childJob, jobId);
         }
     }
 
     public async Task Execute<T, TJob>(string coreJobId,
         IEnumerable<string> childJobIds,
+        AggregateServerSettings aggregateServerSettings,
         JobExecuteOptions jobExecuteOptions,
-        ServiceExecuteOptions serviceExecuteOptions,
         CancellationToken cancellationToken = default)
     {
-        var coreExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(serviceExecuteOptions : serviceExecuteOptions)) ?? DefaultJobExecutor;
-        var parentJobId = await coreExecutor.ExecuteAsync<T>(coreJobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
+        var coreExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(jobExecuteOptions : jobExecuteOptions)) ?? DefaultJobExecutor;
+        var parentJobId = await coreExecutor.ExecuteAsync<T>(coreJobId, aggregateServerSettings.ProcessingQueue, cancellationToken);
         var parentJobCreatedAt = DateTime.Now;       
 
         foreach (var executedJobId in childJobIds)
@@ -66,11 +74,14 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
         }
     }
 
-    public async Task StopWithFailedState(string coreJobId, IEnumerable<string> childJobIds, Exception exception, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public async Task StopWithFailedState(string coreJobId, IEnumerable<string> childJobIds, 
+        Exception exception, 
+        AggregateServerSettings? aggregateServerSettings = null, 
+        CancellationToken cancellationToken = default)
     {
-        var serverName = !string.IsNullOrEmpty(jobExecuteOptions?.ChildServerName)
-            ? jobExecuteOptions.ChildServerName
-            : !string.IsNullOrEmpty(jobExecuteOptions?.ServerName) ? jobExecuteOptions.ServerName : null;
+        var serverName = !string.IsNullOrEmpty(aggregateServerSettings?.ChildServerName)
+            ? aggregateServerSettings.ChildServerName
+            : !string.IsNullOrEmpty(aggregateServerSettings?.ServerName) ? aggregateServerSettings.ServerName : null;
 
         foreach (var jobId in childJobIds)
         {
@@ -79,7 +90,7 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
             _backgroundJobClient.Delete(jobId);
         }
         
-        StopWithFailedState(coreJobId, exception, jobExecuteOptions?.ServerName);
+        StopWithFailedState(coreJobId, exception, aggregateServerSettings?.ServerName);
     }
 
     private void StopWithFailedState(string jobId, Exception exception, string? serverName)

@@ -1,8 +1,9 @@
-﻿using Import.Interfaces;
+﻿using Hangfire.AggregateJobs;
+using Import.Interfaces;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
-internal abstract class ImportServiceJob(Guid? parentId = null, ServiceExecuteOptions? serviceExecuteOptions = null) : IImportServiceJob
+internal abstract class ImportServiceJob(Guid? parentId = null, JobExecuteOptions? jobExecuteOptions = null) : IImportServiceJob
 {
     public abstract IImportService ImportService { get; }
 
@@ -14,7 +15,7 @@ internal abstract class ImportServiceJob(Guid? parentId = null, ServiceExecuteOp
 
     public abstract int SourceId { get; }
 
-    public ServiceExecuteOptions? ServiceExecuteOptions { get; } = serviceExecuteOptions;
+    public JobExecuteOptions? JobExecuteOptions { get; } = jobExecuteOptions;
 
     protected virtual Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {

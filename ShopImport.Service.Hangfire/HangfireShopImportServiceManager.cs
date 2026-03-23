@@ -2,6 +2,7 @@
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
+using Hangfire.AggregateJobs;
 using Hangfire.Server;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
@@ -10,7 +11,6 @@ using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Infrastructure;
-using ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 using ShopImport.Service.Hangfire.Models;
 using System.Collections.Concurrent;
 
@@ -20,8 +20,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     IShopDataService shopDataService,
     IImportServiceJobFactory importServiceJobFactory,
     IJobExecuteManager jobExecuteManager,
-    JobExecuteOptions jobExecuteOptions,
-    IEnumerable<IPerformContextEnricher> performContextEnrichers) 
+    AggregateServerSettings aggregateServerSettings,
+    IEnumerable<IChildJobEnricher<IImportServiceJob>> childJobEnrichers)
     : IShopImportServiceJobManager
 {
     private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories = shopServiceFactories;
@@ -32,9 +32,9 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private readonly IJobExecuteManager _jobExecuteManager = jobExecuteManager;
 
-    private readonly JobExecuteOptions _jobExecuteOptions = jobExecuteOptions;
+    private readonly AggregateServerSettings _aggregateServerSettings = aggregateServerSettings;
 
-    private readonly IEnumerable<IPerformContextEnricher> _performContextEnrichers = performContextEnrichers;
+    private readonly IEnumerable<IChildJobEnricher<IImportServiceJob>> _childJobEnrichers = childJobEnrichers;
 
     private readonly ConcurrentDictionary<Guid, IImportServiceJob> _allServiceJobs = [];
 
@@ -72,9 +72,10 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
                         job.ImportService.Name,
                         job is AggregateShopImportServiceJob, //todo
                         job.ParentId, cancellationToken, null),
-                    _jobExecuteOptions,
-                    serviceJob.ServiceExecuteOptions,
+                    _aggregateServerSettings,
+                    serviceJob.JobExecuteOptions,
                     (importServiceJob, jobId)=> importServiceJob.JobId = jobId,
+                    _childJobEnrichers,
                     cancellationToken);
 
             return (serviceJob.Id, serviceJob.ImportService);
@@ -126,7 +127,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             var childJobIds = await importServiceJob.GetСhildJobIds();
 
             //todo
-            await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId, childJobIds, eventArgs.Exception, _jobExecuteOptions, CancellationToken.None);
+            await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId, childJobIds, eventArgs.Exception, _aggregateServerSettings, CancellationToken.None);
         }
     }
 
@@ -154,8 +155,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
         await _jobExecuteManager.Execute<IHagfireServiceJobManager, IImportServiceJob>(serviceJob.JobId,
             childJobIds,
-            _jobExecuteOptions,
-            serviceJob.ServiceExecuteOptions,
+            _aggregateServerSettings,
+            serviceJob.JobExecuteOptions,
             cancellationToken);
     }
 
@@ -242,9 +243,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         if (performContext != null)
         {
             serviceJob.JobId = performContext.BackgroundJob.Id;
-
-            foreach (var contextEnricher in _performContextEnrichers)
-                contextEnricher.Enrich(performContext, serviceJob, _allServiceJobs);
         }
 
         try

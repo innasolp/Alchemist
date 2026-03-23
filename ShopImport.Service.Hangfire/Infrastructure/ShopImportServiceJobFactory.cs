@@ -1,5 +1,6 @@
 ﻿using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
+using Hangfire.AggregateJobs;
 using Import.Factory.Interfaces;
 using Import.Service;
 using Import.Settings.Interfaces;
@@ -29,7 +30,7 @@ internal class ShopImportServiceJobFactory(ILoggerFactory loggerFactory,
         if(source is not IShopModel shopModel)
             throw new InvalidOperationException($"Invalid source type {source.GetType().Name}. Must be assignable from {nameof(IShopModel)}.");
 
-        var serviceExecutionOptions = importSettings.GetService(nameof(ServiceExecuteOptions))?.GetServiceValue<ServiceExecuteOptions>();
+        var serviceExecutionOptions = importSettings.GetService(nameof(JobExecuteOptions))?.GetServiceValue<JobExecuteOptions>();
 
         if (!isAggregate)
         {

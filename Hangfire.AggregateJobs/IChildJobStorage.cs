@@ -1,4 +1,4 @@
-﻿namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
+﻿namespace Hangfire.AggregateJobs;
 
 internal interface IChildJobStorage
 {
