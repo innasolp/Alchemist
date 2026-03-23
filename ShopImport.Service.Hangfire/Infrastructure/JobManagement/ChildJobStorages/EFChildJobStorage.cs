@@ -15,17 +15,13 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
     public async Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots)
     {
         return await _dbContext.ChildJobEntries
-                    .Where(j => j.Status == 0)
-                    // Выбираем уникальных родителей
-                    .Select(j => j.ParentJobId)
-                    .Distinct()
-                    // Для каждого родителя берем N записей
+                    .Where(j => j.Status == JobStatus.Enqueued)
+                    .Select(j => j.ParentJobId).Distinct()                    
                     .SelectMany(parentId => _dbContext.ChildJobEntries
-                        .Where(child => child.ParentJobId == parentId && child.Status == 0)
+                        .Where(child => child.ParentJobId == parentId && child.Status == JobStatus.Enqueued)
                         .OrderBy(child => child.CreatedAt)
                         .Take(childJobCountPerParent)
                     )
-                    // Применяем общий лимит и берем только ID
                     .Take(freeSlots)
                     .Select(j => j.JobId)
                     .ToListAsync(); ;
@@ -37,7 +33,7 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
         return entry?.ParentJobId;
     }
 
-    public void UpdateJobsState(IEnumerable<string> jobIds, int state)
+    public void UpdateJobsState(IEnumerable<string> jobIds, JobStatus state)
     {
         _dbContext.ChildJobEntries
            .Where(j => jobIds.Contains(j.JobId))
@@ -46,7 +42,7 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
         _dbContext.SaveChanges();
     }
 
-    public async Task UpdateJobsStateAsync(IEnumerable<string> jobIds, int state)
+    public async Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state)
     {
         await _dbContext.ChildJobEntries
            .Where(j => jobIds.Contains(j.JobId))
@@ -55,7 +51,7 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
         await _dbContext.SaveChangesAsync();
     }
 
-    public void UpdateJobState(string jobId, int state)
+    public void UpdateJobState(string jobId, JobStatus state)
     {
         _dbContext.ChildJobEntries
            .Where(j => j.JobId == jobId)

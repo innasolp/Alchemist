@@ -6,6 +6,8 @@ namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
 internal class ChildJobOrchestrator(IBackgroundJobClient jobClient, IChildJobStorage childJobStorage)
 {
+    public const string Task = "child-orchestrator-tick";
+
     private readonly IBackgroundJobClient _jobClient = jobClient;
 
     private readonly IChildJobStorage _childJobStorage = childJobStorage;
@@ -35,7 +37,7 @@ internal class ChildJobOrchestrator(IBackgroundJobClient jobClient, IChildJobSto
             _jobClient.ChangeState(jobId, new EnqueuedState(processingChildQueue));
         }
 
-        await _childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, 1);
+        await _childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
     }
 
     private static int? GetServerWorkerCount(IMonitoringApi monitoringApi, string serverName)

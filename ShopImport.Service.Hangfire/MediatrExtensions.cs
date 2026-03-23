@@ -120,7 +120,7 @@ public static class MediatrExtensions
 
         var recurringJobManager = host.Services.GetRequiredService<IRecurringJobManager>();
 
-        recurringJobManager.AddOrUpdate<ChildJobOrchestrator>("child-orchestrator-tick",
+        recurringJobManager.AddOrUpdate<ChildJobOrchestrator>(ChildJobOrchestrator.Task,
             x => x.Dispatch(jobExecuteOptions.ChildJobCountPerParent,
                             jobExecuteOptions.ChildServerName,
                             jobExecuteOptions.ChildProcessingQueue),

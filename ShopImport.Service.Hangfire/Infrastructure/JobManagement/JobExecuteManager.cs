@@ -45,67 +45,68 @@ internal class JobExecuteManager : IJobExecuteManager
         return _backgroundJobExecutor;
     }
 
-    public async Task Enqueue<T>(IImportServiceJob importServiceJob,
-        Expression<Func<T, IImportServiceJob, Task>> execute,
+    public async Task Enqueue<T, TJob>(TJob coreJob,
+        IEnumerable<TJob> childJobs,
+        Expression<Func<T, TJob, Task>> execute,
         JobExecuteOptions jobExecuteOptions,
+        ServiceExecuteOptions? serviceExecuteOptions = null,
+        Action<TJob, string>? setJobIdAction = null,
         CancellationToken cancellationToken = default)
     {
-        var coreExecutor = GetJobExecutor(importServiceJob.ParentId != null, importServiceJob.ServiceExecuteOptions);
-        var coreJobExpression = execute.BindSecondParameter(importServiceJob);
-        importServiceJob.JobId = await coreExecutor.Enqueue(coreJobExpression, 
+        var coreExecutor = GetJobExecutor(serviceExecuteOptions: serviceExecuteOptions);
+        
+        var coreJobExpression = execute.BindSecondParameter(coreJob);
+        var coreJobId = await coreExecutor.Enqueue(coreJobExpression, 
                                         jobExecuteOptions.WaitingQueue,
-                                        importServiceJob.ServiceExecuteOptions, 
+                                        serviceExecuteOptions, 
                                         cancellationToken);
-
-        var childJobs = await importServiceJob.GetСhildJobs();
+        setJobIdAction?.Invoke(coreJob, coreJobId);
 
         foreach (var executedJob in childJobs)
         {
             var executor = GetJobExecutor(true);
-            var jobExpression = execute.BindSecondParameter(executedJob.Value);
-            executedJob.Value.JobId = await executor.Enqueue(jobExpression,
+            var jobExpression = execute.BindSecondParameter(executedJob);
+            
+            var jobId = await executor.Enqueue(jobExpression,
                 jobExecuteOptions.WaitingQueue,
-                executedJob.Value.ServiceExecuteOptions,
-                cancellationToken);
+                cancellationToken : cancellationToken);
+            
+            setJobIdAction?.Invoke(executedJob, jobId);
         }
     }
 
-    public async Task Execute<T>(IImportServiceJob importServiceJob, 
+    public async Task Execute<T, TJob>(string coreJobId,
+        IEnumerable<string> childJobIds,
         JobExecuteOptions jobExecuteOptions,
+        ServiceExecuteOptions serviceExecuteOptions,
         CancellationToken cancellationToken = default)
     {
-        var coreExecutor = GetJobExecutor(importServiceJob.ParentId != null, importServiceJob.ServiceExecuteOptions);
-        var parentJobId = await coreExecutor.Execute<T>(importServiceJob.JobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
-        var parentJobCreatedAt = DateTime.Now;
+        var coreExecutor = GetJobExecutor(serviceExecuteOptions : serviceExecuteOptions);
+        var parentJobId = await coreExecutor.Execute<T>(coreJobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
+        var parentJobCreatedAt = DateTime.Now;       
 
-        var childJobs = await importServiceJob.GetСhildJobs();
-
-        foreach (var executedJob in childJobs)
+        foreach (var executedJobId in childJobIds)
         {
             await _childJobStorage.CreateChildJobEntryAsync(
-                new ChildJobEntry { JobId = executedJob.Value.JobId, ParentJobId = parentJobId, Status = 0, ParentCreatedAt= parentJobCreatedAt });
+                new ChildJobEntry { JobId = executedJobId, ParentJobId = parentJobId, Status = 0, ParentCreatedAt = parentJobCreatedAt });
         }
     }
 
-    public async Task StopWithFailedState(IImportServiceJob importServiceJob, Exception exception, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
+    public async Task StopWithFailedState(string coreJobId, IEnumerable<string> childJobIds, Exception exception, JobExecuteOptions? jobExecuteOptions = null, CancellationToken cancellationToken = default)
     {
-        var executingChildJobs = (await importServiceJob.GetExecutionServiceJobs())
-            .Where(j=>!string.IsNullOrEmpty(j.Value.JobId) && j.Value.JobId != importServiceJob.JobId).ToList();
-
         var serverName = !string.IsNullOrEmpty(jobExecuteOptions?.ChildServerName)
             ? jobExecuteOptions.ChildServerName
             : !string.IsNullOrEmpty(jobExecuteOptions?.ServerName) ? jobExecuteOptions.ServerName : null;
 
-        foreach (var executedJob in executingChildJobs)
+        foreach (var jobId in childJobIds)
         {
-            StopWithFailedState(executedJob.Value.JobId!, exception, serverName);
+            StopWithFailedState(jobId, exception, serverName);
 
-            if (executedJob.Value.ParentId == importServiceJob.Id)
-                _backgroundJobClient.Delete(executedJob.Value.JobId);
+            _backgroundJobClient.Delete(jobId);
         }
         
         //todo
-        StopWithFailedState(importServiceJob.JobId, exception, jobExecuteOptions?.ServerName);
+        StopWithFailedState(coreJobId, exception, jobExecuteOptions?.ServerName);
     }
 
     private void StopWithFailedState(string jobId, Exception exception, string? serverName)

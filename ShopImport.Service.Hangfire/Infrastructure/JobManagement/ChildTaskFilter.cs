@@ -18,10 +18,10 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
 
         if (string.IsNullOrEmpty(parentJobId)) return;
 
-        childJobStorage.UpdateJobState(jobId, 2);
+        childJobStorage.UpdateJobState(jobId, JobStatus.Completed);
 
         // todo
-        RecurringJob.TriggerJob("child-orchestrator-tick");
+        RecurringJob.TriggerJob(ChildJobOrchestrator.Task);
     }
 
     public void OnPerforming(PerformingContext filterContext) { }
