@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ShopImport.Service.Hangfire.Infrastructure;
-using ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
+using ShopImport.Service.Hangfire.Infrastructure.Enrichers;
 
 namespace ShopImport.Service.Hangfire;
 

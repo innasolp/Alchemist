@@ -2,6 +2,7 @@
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
+using Hangfire;
 using Hangfire.AggregateJobs;
 using Hangfire.Server;
 using Import.Factory.Interfaces;
@@ -71,7 +72,10 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
                         jobManager.Execute(job.Id,
                         job.ImportService.Name,
                         job is AggregateShopImportServiceJob, //todo
-                        job.ParentId, cancellationToken, null),
+                        job.ParentId,
+                        null, 
+                        cancellationToken,
+                        null),
                     _aggregateServerSettings,
                     serviceJob.JobExecuteOptions,
                     (importServiceJob, jobId)=> importServiceJob.JobId = jobId,
@@ -228,15 +232,21 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         }
 
         //todo
-        if (_coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop?.Id
+        if (_coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop?.Id 
                     && s.Value.ImportService is IListener<IProductShopCategory> shopCategoryListener).Value.ImportService
             is IListener<IProductShopCategory> shopCategoryListener)
             await shopCategoryListener.On(productShopCategory);
     }
 
-    Task IHagfireServiceJobManager.Execute(Guid id, string displayName, bool isAggregate = false, Guid? parentId = null, CancellationToken cancellationToken = default, PerformContext? performContext = null)
+    async Task IHagfireServiceJobManager.Execute(Guid id, 
+        string displayName, 
+        bool isAggregate = false, 
+        Guid? parentId = null,
+        IJobCancellationToken? jobCancellationToken = null,
+        CancellationToken cancellationToken = default,
+        PerformContext? performContext = null)
     {
-        var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+        var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, jobCancellationToken.ShutdownToken,
             performContext?.CancellationToken.ShutdownToken ?? default);
         var serviceJob = GetExecutingServiceJob(id);
 
@@ -247,9 +257,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
         try
         {
-            var startTask = StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
-
-            return startTask;
+            await StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
         }
         finally
         {

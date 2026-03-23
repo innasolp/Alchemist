@@ -8,5 +8,11 @@ public interface IHagfireServiceJobManager
 {
     [DisplayName("{1}")]
     [AutomaticRetry(Attempts =0)]
-    Task Execute(Guid id, string displayName, bool isAggregate = false, Guid? parentId = null, CancellationToken cancellationToken = default, PerformContext? performContext = null);
+    Task Execute(Guid id,
+        string displayName, 
+        bool isAggregate = false,
+        Guid? parentId = null,
+        IJobCancellationToken? jobCancellationToken = null,
+        CancellationToken cancellationToken = default,
+        PerformContext? performContext = null);
 }

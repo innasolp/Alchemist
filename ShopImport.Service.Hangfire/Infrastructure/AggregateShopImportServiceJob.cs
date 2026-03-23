@@ -44,7 +44,24 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         _importServiceFactory = importServiceFactory;
         _shopImportSettings = shopImportSettings;
         _aggregateImportService = new AggregateService(logger, name, OnExecuteService);
-        InitializeImportServiceJobs();
+        _aggregateImportService.ConnectedAsync += AggregateImportServiceConnectedAsync;   
+    }
+
+    private async Task AggregateImportServiceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs)
+    {
+        if (sender is not IAggregateImportService aggregateImportService) return;
+
+        if (!eventArgs.Connected || eventArgs.CancellationToken.IsCancellationRequested)
+        {
+            var children = _importServiceJobs.ToDictionary();
+            foreach (var childJob in children)
+            {
+                await aggregateImportService.TryRemove(childJob.Value.ImportService);
+                childJob.Value.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
+            }
+
+            _importServiceJobs.Clear();
+        }
     }
 
     private void InitializeImportServiceJobs()
@@ -58,6 +75,24 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
             _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
 
             _aggregateImportService.Enqueue(importServiceJob.ImportService);
+
+            importServiceJob.ImportService.ConnectedAsync += ChildServiceConnectedAsync;
+        }
+    }
+
+    private async Task ChildServiceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs)
+    {
+        if (sender is not IImportService importService) return;
+
+        if (!eventArgs.Connected || eventArgs.CancellationToken.IsCancellationRequested)
+        {
+            var serviceJob = _importServiceJobs.FirstOrDefault(x => x.Value.ImportService.Name == importService.Name);
+            if (serviceJob.Value == null) return;
+
+            await _aggregateImportService.TryRemove(serviceJob.Value.ImportService);
+            serviceJob.Value.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
+
+            _importServiceJobs.Remove(serviceJob.Key);
         }
     }
 
@@ -68,6 +103,9 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
 
     protected override Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {
+        if (_importServiceJobs.Count == 0)
+            InitializeImportServiceJobs();
+
         IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>
         {
             { Id, this }
