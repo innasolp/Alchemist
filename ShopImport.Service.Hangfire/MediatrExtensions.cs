@@ -16,6 +16,8 @@ using Microsoft.Extensions.Hosting;
 using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 using ShopImport.Service.Hangfire.Infrastructure.JobManagement.ChildJobStorages;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Filter;
 using ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
 using StackExchange.Redis;
 
@@ -43,9 +45,7 @@ public static class MediatrExtensions
 
             services.AddHangfireInfrastructure(hangfireConnectionString, jobExecuteOptions ?? defaultJobExecuteOptions, childStorageOptionsAction, configure);
 
-            services.AddSingleton<IJobExecuteManager, JobExecuteManager>();
-            services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();
-            services.AddSingleton<IPerformContextEnricher, ParentTagEnricher>();
+            services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();            
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -84,6 +84,7 @@ public static class MediatrExtensions
             config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700" });
 
             config.UseFilter(new ChildTaskFilter(sp.GetRequiredService<IServiceScopeFactory>()));
+            config.UseFilter(new ChangeQueueFilter());
 
             configure?.Invoke(config);           
                         
@@ -95,7 +96,15 @@ public static class MediatrExtensions
 
         services.AddScoped<IChildJobStorage, EFChildJobStorage>();
 
-        services.AddSingleton<ChildJobOrchestrator>();
+        services.AddSingleton<ChildJobOrchestrator<IHagfireServiceJobManager>>();
+
+        services.AddScoped<IJobExecuteManager, JobExecuteManager>();
+
+        services.AddScoped<IJobExecutor, BackgroundJobExecutor>();
+        services.AddScoped<IJobExecutor, RecurringJobExecutor>();
+        services.AddScoped<IJobExecutor, ScheduledJobExecutor>();
+
+        services.AddSingleton<IPerformContextEnricher, ParentTagEnricher>();
 
         services.AddHangfireServer(options =>
         {
@@ -120,7 +129,7 @@ public static class MediatrExtensions
 
         var recurringJobManager = host.Services.GetRequiredService<IRecurringJobManager>();
 
-        recurringJobManager.AddOrUpdate<ChildJobOrchestrator>(ChildJobOrchestrator.Task,
+        recurringJobManager.AddOrUpdate<ChildJobOrchestrator<IHagfireServiceJobManager>>(ChildJobOrchestrator.Task,
             x => x.Dispatch(jobExecuteOptions.ChildJobCountPerParent,
                             jobExecuteOptions.ChildServerName,
                             jobExecuteOptions.ChildProcessingQueue),
@@ -130,7 +139,7 @@ public static class MediatrExtensions
     private static void ClearChildJobStorage(IHost host)
     {
         using var scope = host.Services.CreateScope();
-        var childJobDbContext = host.Services.GetRequiredService<ChildJobDbContext>();
+        var childJobDbContext = scope.ServiceProvider.GetRequiredService<ChildJobDbContext>();
         childJobDbContext.Database.EnsureDeleted();
         childJobDbContext.Database.EnsureCreated();
     }

@@ -1,14 +1,19 @@
 ﻿using Hangfire;
-using Hangfire.States;
 using Hangfire.Storage;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
-internal class ChildJobOrchestrator(IBackgroundJobClient jobClient, IChildJobStorage childJobStorage)
+internal static class ChildJobOrchestrator
 {
-    public const string Task = "child-orchestrator-tick";
+    public const string Task = "child-orchestrator-tick";    
+}
 
-    private readonly IBackgroundJobClient _jobClient = jobClient;
+internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, IBackgroundJobClient backgroundJobClient, IChildJobStorage childJobStorage)
+{
+    private readonly IEnumerable<IJobExecutor> _jobExecutors = jobExecutors;
+
+    private readonly BackgroundJobExecutor DefaultJobExecutor = new(backgroundJobClient);
 
     private readonly IChildJobStorage _childJobStorage = childJobStorage;
 
@@ -34,7 +39,8 @@ internal class ChildJobOrchestrator(IBackgroundJobClient jobClient, IChildJobSto
 
         foreach (var jobId in jobIdsToActivate)
         {
-            _jobClient.ChangeState(jobId, new EnqueuedState(processingChildQueue));
+            var jobExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(isChild: true)) ?? DefaultJobExecutor;
+            jobExecutor.Execute<T>(jobId, processingChildQueue);           
         }
 
         await _childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, JobStatus.Processing);

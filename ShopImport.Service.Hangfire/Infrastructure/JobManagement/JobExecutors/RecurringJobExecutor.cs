@@ -27,7 +27,7 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
         return $"0 0 */{(int)interval.TotalDays} * *";
     }
 
-    public Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask,
+    public Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask,
         string waitingQueue,
         ServiceExecuteOptions? serviceExecuteOptions = null,
         CancellationToken cancellationToken = default)
@@ -48,12 +48,27 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
         return Task.FromResult(recurringJobId);
     }
 
-    public Task<string> Execute<T>(string recurringJobId, string processingQueue, CancellationToken cancellationToken = default)
+    public Task<string> ExecuteAsync<T>(string recurringJobId, string processingQueue, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(Execute<T>(recurringJobId, processingQueue));
+    }
+
+    private static RecurringJobDto? GetRecurringJob(IStorageConnection connection, string recurringId)
+    {
+        return connection.GetRecurringJobs().FirstOrDefault(p => p.Id == recurringId);
+    }
+
+    public bool IsAccessible(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
+    {
+        return !isChild && serviceExecuteOptions?.IntervalInSeconds != null;
+    }
+
+    public string Execute<T>(string recurringJobId, string processingQueue)
     {
         using var connection = JobStorage.Current.GetConnection();
 
-        var recurringJobDto = GetRecurringJob(connection, recurringJobId) 
-            ?? throw new InvalidOperationException($"No recurring job with id {recurringJobId}");        
+        var recurringJobDto = GetRecurringJob(connection, recurringJobId)
+            ?? throw new InvalidOperationException($"No recurring job with id {recurringJobId}");
 
         var expression = recurringJobDto.Job.ToExpression<T, Task>();
 
@@ -65,11 +80,6 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
 
         var lastRecurringJob = GetRecurringJob(connection, recurringJobId);
 
-        return Task.FromResult(lastRecurringJob?.LastJobId);
-    }
-
-    private static RecurringJobDto? GetRecurringJob(IStorageConnection connection, string recurringId)
-    {
-        return connection.GetRecurringJobs().FirstOrDefault(p => p.Id == recurringId);
+        return lastRecurringJob?.LastJobId;
     }
 }

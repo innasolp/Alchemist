@@ -20,7 +20,6 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
 
         childJobStorage.UpdateJobState(jobId, JobStatus.Completed);
 
-        // todo
         RecurringJob.TriggerJob(ChildJobOrchestrator.Task);
     }
 

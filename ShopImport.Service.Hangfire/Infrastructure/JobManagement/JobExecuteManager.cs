@@ -6,44 +6,17 @@ using System.Linq.Expressions;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
-internal class JobExecuteManager : IJobExecuteManager
+internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors, 
+    IBackgroundJobClient backgroundJobClient, 
+    IChildJobStorage childJobStorage) : IJobExecuteManager
 {
-    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IEnumerable<IJobExecutor> _jobExecutors = jobExecutors;
 
-    private readonly IRecurringJobManager _recurringJobManager;
+    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    private readonly IChildJobStorage _childJobStorage;
+    private readonly IChildJobStorage _childJobStorage = childJobStorage;
 
-    private readonly BackgroundJobExecutor _backgroundJobExecutor;
-
-    private readonly RecurringJobExecutor _recurringJobExecutor;
-
-    private readonly ScheduledJobExecutor _scheduledJobExecutor;
-
-    public JobExecuteManager(IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager, IChildJobStorage childJobStorage)
-    {
-        _backgroundJobClient = backgroundJobClient;
-        _recurringJobManager = recurringJobManager;
-        _childJobStorage = childJobStorage;
-
-        _backgroundJobExecutor = new BackgroundJobExecutor(_backgroundJobClient);
-        _recurringJobExecutor = new RecurringJobExecutor(_recurringJobManager);
-        _scheduledJobExecutor = new ScheduledJobExecutor(_backgroundJobClient);
-    }
-
-    private IJobExecutor GetJobExecutor(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
-    {
-        if (isChild)
-            return _backgroundJobExecutor;
-
-        if (serviceExecuteOptions?.IntervalInSeconds != null)
-            return _recurringJobExecutor;
-
-        if (serviceExecuteOptions?.EnqueuedInSeconds != null)
-            return _scheduledJobExecutor;
-
-        return _backgroundJobExecutor;
-    }
+    private readonly BackgroundJobExecutor DefaultJobExecutor = new(backgroundJobClient);
 
     public async Task Enqueue<T, TJob>(TJob coreJob,
         IEnumerable<TJob> childJobs,
@@ -53,10 +26,10 @@ internal class JobExecuteManager : IJobExecuteManager
         Action<TJob, string>? setJobIdAction = null,
         CancellationToken cancellationToken = default)
     {
-        var coreExecutor = GetJobExecutor(serviceExecuteOptions: serviceExecuteOptions);
+        var coreExecutor = _jobExecutors.FirstOrDefault(e=>e.IsAccessible(serviceExecuteOptions: serviceExecuteOptions)) ?? DefaultJobExecutor;
         
         var coreJobExpression = execute.BindSecondParameter(coreJob);
-        var coreJobId = await coreExecutor.Enqueue(coreJobExpression, 
+        var coreJobId = await coreExecutor.EnqueueAsync(coreJobExpression, 
                                         jobExecuteOptions.WaitingQueue,
                                         serviceExecuteOptions, 
                                         cancellationToken);
@@ -64,10 +37,11 @@ internal class JobExecuteManager : IJobExecuteManager
 
         foreach (var executedJob in childJobs)
         {
-            var executor = GetJobExecutor(true);
+            var executor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(true)) ?? DefaultJobExecutor;
+
             var jobExpression = execute.BindSecondParameter(executedJob);
             
-            var jobId = await executor.Enqueue(jobExpression,
+            var jobId = await executor.EnqueueAsync(jobExpression,
                 jobExecuteOptions.WaitingQueue,
                 cancellationToken : cancellationToken);
             
@@ -81,8 +55,8 @@ internal class JobExecuteManager : IJobExecuteManager
         ServiceExecuteOptions serviceExecuteOptions,
         CancellationToken cancellationToken = default)
     {
-        var coreExecutor = GetJobExecutor(serviceExecuteOptions : serviceExecuteOptions);
-        var parentJobId = await coreExecutor.Execute<T>(coreJobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
+        var coreExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(serviceExecuteOptions : serviceExecuteOptions)) ?? DefaultJobExecutor;
+        var parentJobId = await coreExecutor.ExecuteAsync<T>(coreJobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
         var parentJobCreatedAt = DateTime.Now;       
 
         foreach (var executedJobId in childJobIds)
@@ -105,7 +79,6 @@ internal class JobExecuteManager : IJobExecuteManager
             _backgroundJobClient.Delete(jobId);
         }
         
-        //todo
         StopWithFailedState(coreJobId, exception, jobExecuteOptions?.ServerName);
     }
 

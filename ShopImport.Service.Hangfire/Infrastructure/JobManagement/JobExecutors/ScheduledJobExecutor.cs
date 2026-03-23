@@ -1,6 +1,5 @@
 ﻿using Hangfire;
 using Hangfire.States;
-using Hangfire.Storage.Monitoring;
 using System.Linq.Expressions;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
@@ -11,37 +10,60 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
 
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    public Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask, string waitingQueue,
+    private const string ProcessingQueueParameterName = "ProcessingQueue";
+
+    private const string EnqueuedInParameterName = "EnqueuedIn";
+
+    public Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask, string waitingQueue,
         ServiceExecuteOptions? serviceExecuteOptions = null,
         CancellationToken cancellationToken = default)
     {
-        var enqueuedIn = serviceExecuteOptions?.EnqueuedInSeconds != null 
-            ? TimeSpan.FromSeconds(serviceExecuteOptions.EnqueuedInSeconds.Value) 
-            : DefaultEnqueuedIn;
-
         var jobId = _backgroundJobClient.Create(
                      waitingQueue,
                      jobTask,
-                     new ScheduledState(enqueuedIn));
-        
-        return Task.FromResult(jobId);
-    }
+                     new EnqueuedState(waitingQueue));
 
-    public Task<string> Execute<T>(string jobId, string processingQueue,  CancellationToken cancellationToken = default)
-    {
-        var scheduledJob = GetScheduledJobDto(jobId);
-       
-        _backgroundJobClient.ChangeState(jobId, new ScheduledState(scheduledJob?.EnqueueAt - DateTime.UtcNow ?? DefaultEnqueuedIn));
+        var enqueuedIn = serviceExecuteOptions?.EnqueuedInSeconds != null
+            ? TimeSpan.FromSeconds(serviceExecuteOptions.EnqueuedInSeconds.Value)
+            : DefaultEnqueuedIn;
+
+        SetJobParameter(jobId, EnqueuedInParameterName, enqueuedIn.ToString());
 
         return Task.FromResult(jobId);
     }
 
-    private static ScheduledJobDto? GetScheduledJobDto(string jobId)
+    public Task<string> ExecuteAsync<T>(string jobId, string processingQueue,  CancellationToken cancellationToken = default)
     {
-        var monitoringApi = JobStorage.Current.GetMonitoringApi();
-        var scheduledJobs = monitoringApi.ScheduledJobs(0, 1000);
-        var job = scheduledJobs.FirstOrDefault(x => x.Key == jobId);
+        return Task.FromResult(Execute<T>(jobId, processingQueue));
+    }
 
-        return !string.IsNullOrEmpty(job.Key) ? job.Value : null;
+    public bool IsAccessible(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
+    {
+        return !isChild && serviceExecuteOptions?.IntervalInSeconds == null && serviceExecuteOptions?.EnqueuedInSeconds != null;
+    }
+
+    public string Execute<T>(string jobId, string processingQueue)
+    {
+        var enqueuedInParam = GetJobParameter(jobId, EnqueuedInParameterName);
+
+        var enqueuedIn = TimeSpan.TryParse(enqueuedInParam, out var enqueuedInVal) ? enqueuedInVal : DefaultEnqueuedIn;
+
+        SetJobParameter(jobId, ProcessingQueueParameterName, processingQueue);
+
+        _backgroundJobClient.ChangeState(jobId, new ScheduledState(enqueuedIn));
+
+        return jobId;
+    }
+
+    private static void SetJobParameter(string jobId, string parameterName, string parameterValue)
+    {
+        using var connection = JobStorage.Current.GetConnection();
+        connection.SetJobParameter(jobId, parameterName, parameterValue);
+    }
+    
+    private static string GetJobParameter(string jobId, string parameterName)
+    {
+        using var connection = JobStorage.Current.GetConnection();
+        return connection.GetJobParameter(jobId, parameterName);
     }
 }

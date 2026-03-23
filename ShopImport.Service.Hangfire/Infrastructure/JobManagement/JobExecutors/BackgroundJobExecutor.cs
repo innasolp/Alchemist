@@ -8,7 +8,7 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
 {
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    public Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask, string waitingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default)
+    public Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask, string waitingQueue, ServiceExecuteOptions? serviceExecuteOptions = null, CancellationToken cancellationToken = default)
     {
         var jobId = _backgroundJobClient.Create(
                      jobTask,
@@ -16,9 +16,19 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
         return Task.FromResult(jobId);
     }
 
-    public Task<string> Execute<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default)
+    public string Execute<T>(string jobId, string processingQueue)
     {
         _backgroundJobClient.ChangeState(jobId, new EnqueuedState(processingQueue));
-        return Task.FromResult(jobId);
+        return jobId;
+    }
+
+    public Task<string> ExecuteAsync<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(Execute<T>(jobId, processingQueue));
+    }
+
+    public bool IsAccessible(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
+    {
+        return isChild || (serviceExecuteOptions?.IntervalInSeconds == null && serviceExecuteOptions?.EnqueuedInSeconds == null);
     }
 }

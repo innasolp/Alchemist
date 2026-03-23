@@ -62,9 +62,11 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             executionJobs.ToList().ForEach(j => _allServiceJobs.TryAdd(j.Key, j.Value));
 
             SubscribeServiceToFailedHandler(serviceJob);
-            
+
+            var childJobs = await serviceJob.GetСhildJobs();
+
             await _jobExecuteManager.Enqueue<IHagfireServiceJobManager, IImportServiceJob>(serviceJob,
-                executionJobs.Where(j=>j.Value.ParentId == serviceJob.Id).Select(j=>j.Value),
+                childJobs,
                 (jobManager, job)=> 
                         jobManager.Execute(job.Id,
                         job.ImportService.Name,
@@ -121,7 +123,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         if(!eventArgs.Connected && eventArgs.Exception != null
             && _allServiceJobs.TryGetValue(serviceJobId, out var importServiceJob) && !string.IsNullOrEmpty(importServiceJob.JobId))
         {
-            var childJobIds = (await importServiceJob.GetExecutionServiceJobs()).Where(j => j.Value.ParentId == importServiceJob.Id).Select(j=>j.Value.JobId);
+            var childJobIds = await importServiceJob.GetСhildJobIds();
 
             //todo
             await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId, childJobIds, eventArgs.Exception, _jobExecuteOptions, CancellationToken.None);
@@ -148,7 +150,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private async Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        var childJobIds = (await serviceJob.GetExecutionServiceJobs()).Where(j => j.Value.ParentId == serviceJob.Id).Select(j=>j.Value.JobId);
+        var childJobIds = await serviceJob.GetСhildJobIds();
+
         await _jobExecuteManager.Execute<IHagfireServiceJobManager, IImportServiceJob>(serviceJob.JobId,
             childJobIds,
             _jobExecuteOptions,
