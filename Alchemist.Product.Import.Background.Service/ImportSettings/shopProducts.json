@@ -57,7 +57,7 @@
           "QueueLimit": 12
         }
       },
-      "ServiceExecuteOptions": {
+      "JobExecuteOptions": {
         "Value": {
           "IntervalInSeconds": 86400
         }
@@ -119,7 +119,7 @@
           "QueueLimit": 20
         }
       },
-      "ServiceExecuteOptions": {
+      "JobExecuteOptions": {
         "Value": {
           "IntervalInSeconds": 86400
         }

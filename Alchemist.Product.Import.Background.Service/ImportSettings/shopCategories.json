@@ -24,7 +24,7 @@
           "SecondsInterval": 10800
         }
       },
-      "ServiceExecuteOptions": {
+      "JobExecuteOptions": {
         "Value": {
           "IntervalInSeconds": 86400
         }
@@ -125,7 +125,7 @@
           "SecondsInterval": 10800
         }
       },
-      "ServiceExecuteOptions": {
+      "JobExecuteOptions": {
         "Value": {
           "IntervalInSeconds": 86400
         }

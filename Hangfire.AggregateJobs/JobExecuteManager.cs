@@ -46,7 +46,7 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
             var jobExpression = execute.BindSecondParameter(childJob);
             
             var jobId = await executor.EnqueueAsync(jobExpression,
-                aggregateServerSettings.WaitingQueue,
+                aggregateServerSettings.ChildWaitingQueue,
                 cancellationToken : cancellationToken);
 
             if (childJobEnrichers != null)

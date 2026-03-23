@@ -1,4 +1,5 @@
-﻿using Hangfire.AggregateJobs.JobExecutors;
+﻿using Hangfire.AggregateJobs.Filters;
+using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.Storage;
 
 namespace Hangfire.AggregateJobs;
@@ -17,6 +18,8 @@ internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, I
     private readonly IChildJobStorage _childJobStorage = childJobStorage;
 
     [DisableConcurrentExecution(timeoutInSeconds: 10)]
+    [ShortExpiration(minutes:10)]
+    [JobDisplayName(nameof(ChildJobOrchestrator))]
     public async Task Dispatch(int childJobCountPerParent, string childServer, string processingChildQueue)
     {
         var storage = JobStorage.Current;
