@@ -15,11 +15,16 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using DependencyInjection.AssemblyExtensions;
 using Hangfire;
+using Hangfire.AggregateJobs;
 using Hangfire.Console;
+using Hangfire.Redis.StackExchange;
+using Hangfire.Tags;
+using Hangfire.Tags.Redis.StackExchange;
 using Import.Factory.Logging;
 using Import.Service;
 using Import.Settings.Interfaces;
 using Message.RabbitMQ.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Configuration.Extensions;
 using Serilog.HangfireConsoleContextSink;
@@ -29,9 +34,8 @@ using Shop.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
 using ShopImport.Service.Hangfire;
 using ShopSettings.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using WebLoader.Interfaces;
-using Hangfire.AggregateJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +54,17 @@ AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
 var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOptions").Get<AggregateServerSettings>();
 builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"),
+    (config, connectionString)=>
+    {
+        ClearRedisDataBase(connectionString);
+        config.UseRedisStorage(connectionString, new RedisStorageOptions
+        {
+            // Увеличьте этот таймаут, если задача длится дольше 30 минут
+            InvisibilityTimeout = TimeSpan.FromHours(3)
+        });
+
+        config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700" });
+    },
     (options)=> options.UseNpgsql(builder.Configuration.GetConnectionString("ChildJobStoragePostgres")),
     hangfireOptions,
     (config) =>
@@ -130,6 +145,18 @@ static void AddShopSettingsAPIService(WebApplicationBuilder builder, out string 
 {
     settingsAPIHost = builder.Configuration.GetSection("SettingsAPIHost").Get<string>();
     builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient), out var settingsHttpClientBuilder);
+}
+
+static void ClearRedisDataBase(string hangfireConnectionString)
+{
+    var redis = ConnectionMultiplexer.Connect($"{hangfireConnectionString},allowAdmin=true");
+
+    var endpoints = redis.GetEndPoints();
+    foreach (var endpoint in endpoints)
+    {
+        var server = redis.GetServer(endpoint);
+        server.FlushDatabase();
+    }
 }
 
 static void AddShopImporters(IServiceCollection services, IConfiguration configuration)
