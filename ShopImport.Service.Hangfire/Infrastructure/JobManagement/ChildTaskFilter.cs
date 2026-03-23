@@ -12,13 +12,13 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
         var jobId = filterContext.BackgroundJob.Id;
 
         using var scope = _scopeFactory.CreateScope();
-        var jobStorage = scope.ServiceProvider.GetRequiredService<IJobStorage>();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
 
-        var parentJobId = jobStorage.GetParentJobId(jobId);
+        var parentJobId = childJobStorage.GetParentJobId(jobId);
 
         if (string.IsNullOrEmpty(parentJobId)) return;
 
-        jobStorage.UpdateJobState(jobId, 2);
+        childJobStorage.UpdateJobState(jobId, 2);
 
         // todo
         RecurringJob.TriggerJob("child-orchestrator-tick");

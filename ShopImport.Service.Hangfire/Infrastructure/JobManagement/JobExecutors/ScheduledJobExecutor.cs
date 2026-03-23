@@ -27,18 +27,18 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
         return Task.FromResult(jobId);
     }
 
-    public Task Execute<T>(string jobId, string processingQueue,  CancellationToken cancellationToken = default)
+    public Task<string> Execute<T>(string jobId, string processingQueue,  CancellationToken cancellationToken = default)
     {
         var scheduledJob = GetScheduledJobDto(jobId);
        
         _backgroundJobClient.ChangeState(jobId, new ScheduledState(scheduledJob?.EnqueueAt - DateTime.UtcNow ?? DefaultEnqueuedIn));
 
-        return Task.CompletedTask;
+        return Task.FromResult(jobId);
     }
 
     private static ScheduledJobDto? GetScheduledJobDto(string jobId)
     {
-        var monitoringApi = global::Hangfire.JobStorage.Current.GetMonitoringApi();
+        var monitoringApi = JobStorage.Current.GetMonitoringApi();
         var scheduledJobs = monitoringApi.ScheduledJobs(0, 1000);
         var job = scheduledJobs.FirstOrDefault(x => x.Key == jobId);
 

@@ -16,9 +16,9 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
         return Task.FromResult(jobId);
     }
 
-    public Task Execute<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default)
+    public Task<string> Execute<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default)
     {
         _backgroundJobClient.ChangeState(jobId, new EnqueuedState(processingQueue));
-        return Task.CompletedTask;
+        return Task.FromResult(jobId);
     }
 }

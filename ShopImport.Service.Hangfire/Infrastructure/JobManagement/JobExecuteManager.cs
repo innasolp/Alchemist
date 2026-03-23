@@ -12,16 +12,20 @@ internal class JobExecuteManager : IJobExecuteManager
 
     private readonly IRecurringJobManager _recurringJobManager;
 
+    private readonly IChildJobStorage _childJobStorage;
+
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
 
     private readonly RecurringJobExecutor _recurringJobExecutor;
 
     private readonly ScheduledJobExecutor _scheduledJobExecutor;
 
-    public JobExecuteManager(IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager)
+    public JobExecuteManager(IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager, IChildJobStorage childJobStorage)
     {
         _backgroundJobClient = backgroundJobClient;
         _recurringJobManager = recurringJobManager;
+        _childJobStorage = childJobStorage;
+
         _backgroundJobExecutor = new BackgroundJobExecutor(_backgroundJobClient);
         _recurringJobExecutor = new RecurringJobExecutor(_recurringJobManager);
         _scheduledJobExecutor = new ScheduledJobExecutor(_backgroundJobClient);
@@ -39,13 +43,6 @@ internal class JobExecuteManager : IJobExecuteManager
             return _scheduledJobExecutor;
 
         return _backgroundJobExecutor;
-    }
-
-    private static string GetChildProcessingQueue(JobExecuteOptions jobExecuteOptions)
-    {
-        return !string.IsNullOrEmpty(jobExecuteOptions.ChildProcessingQueue) 
-            ? jobExecuteOptions.ChildProcessingQueue 
-            : jobExecuteOptions.ProcessingQueue;
     }
 
     public async Task Enqueue<T>(IImportServiceJob importServiceJob,
@@ -78,16 +75,15 @@ internal class JobExecuteManager : IJobExecuteManager
         CancellationToken cancellationToken = default)
     {
         var coreExecutor = GetJobExecutor(importServiceJob.ParentId != null, importServiceJob.ServiceExecuteOptions);
-        await coreExecutor.Execute<T>(importServiceJob.JobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
+        var parentJobId = await coreExecutor.Execute<T>(importServiceJob.JobId, jobExecuteOptions.ProcessingQueue, cancellationToken);
+        var parentJobCreatedAt = DateTime.Now;
 
         var childJobs = await importServiceJob.GetСhildJobs();
 
-        var childJobProcessingQueue = GetChildProcessingQueue(jobExecuteOptions);
-
         foreach (var executedJob in childJobs)
         {
-            var executor = GetJobExecutor(true);
-            await executor.Execute<T>(executedJob.Value.JobId, childJobProcessingQueue, cancellationToken : cancellationToken);
+            await _childJobStorage.CreateChildJobEntryAsync(
+                new ChildJobEntry { JobId = executedJob.Value.JobId, ParentJobId = parentJobId, Status = 0, ParentCreatedAt= parentJobCreatedAt });
         }
     }
 

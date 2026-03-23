@@ -8,5 +8,5 @@ internal interface IJobExecutor
         ServiceExecuteOptions? serviceExecuteOptions = null, 
         CancellationToken cancellationToken = default);
 
-    Task Execute<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default);
+    Task<string> Execute<T>(string jobId, string processingQueue, CancellationToken cancellationToken = default);
 }

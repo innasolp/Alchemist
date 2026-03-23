@@ -4,17 +4,18 @@ using Hangfire.Storage;
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
-internal class ChildJobOrchestrator(IBackgroundJobClient jobClient, IJobStorage childJobStorage, JobStorage storage)
+internal class ChildJobOrchestrator(IBackgroundJobClient jobClient, IChildJobStorage childJobStorage)
 {
     private readonly IBackgroundJobClient _jobClient = jobClient;
 
-    private readonly IJobStorage _childJobStorage = childJobStorage;
+    private readonly IChildJobStorage _childJobStorage = childJobStorage;
 
-    private readonly JobStorage _storage = storage;
-
-    public async Task Dispatch(int childJobCountPerParent,string childServer, string processingChildQueue)
+    [DisableConcurrentExecution(timeoutInSeconds: 10)]
+    public async Task Dispatch(int childJobCountPerParent, string childServer, string processingChildQueue)
     {
-        ar monitoring = _storage.GetMonitoringApi();
+        var storage = JobStorage.Current;
+
+        var monitoring = storage.GetMonitoringApi();
 
         var serverWorkerCount = GetServerWorkerCount(monitoring, childServer);
         if (serverWorkerCount == null) return;
@@ -41,7 +42,7 @@ internal class ChildJobOrchestrator(IBackgroundJobClient jobClient, IJobStorage 
     {
         var servers = monitoringApi.Servers();
 
-        var server = servers.FirstOrDefault(s => s.Name == serverName);
+        var server = servers.FirstOrDefault(s => s.Name.Contains(serverName, StringComparison.InvariantCultureIgnoreCase));
 
         return server?.WorkersCount;
     }

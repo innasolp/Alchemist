@@ -2,14 +2,14 @@
 
 namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.ChildJobStorages;
 
-internal class JobDbContext : DbContext
+internal class ChildJobDbContext : DbContext
 {
-    public JobDbContext()
+    public ChildJobDbContext()
     {
         Database.EnsureCreated();
     }
 
-    public JobDbContext(DbContextOptions options) : base(options)
+    public ChildJobDbContext(DbContextOptions options) : base(options)
     {
         Database.EnsureCreated();
     }
@@ -32,7 +32,8 @@ internal class JobDbContext : DbContext
             entity.Property(e => e.JobId).HasColumnName("job_id").HasMaxLength(255);
             entity.Property(e => e.ParentJobId).HasMaxLength(1024).HasColumnName("parent_job_id");
             entity.Property(e => e.Status).HasColumnName("status");
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(e => e.ParentCreatedAt).HasColumnName("parent_created_at").IsRequired();
         });
     }
 }

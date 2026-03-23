@@ -1,6 +1,6 @@
 ﻿namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 
-internal interface IJobStorage
+internal interface IChildJobStorage
 {
     Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots);
 
@@ -11,4 +11,6 @@ internal interface IJobStorage
     void UpdateJobState(string jobId, int state);
 
     string? GetParentJobId(string jobId);
+
+    Task CreateChildJobEntryAsync(ChildJobEntry childJobEntry);
 }

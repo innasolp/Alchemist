@@ -27,17 +27,17 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
         return $"0 0 */{(int)interval.TotalDays} * *";
     }
 
-    public Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask, 
-        string waitingQueue, 
-        ServiceExecuteOptions? serviceExecuteOptions = null, 
+    public Task<string> Enqueue<T>(Expression<Func<T, Task>> jobTask,
+        string waitingQueue,
+        ServiceExecuteOptions? serviceExecuteOptions = null,
         CancellationToken cancellationToken = default)
     {
         var cron = ToCron(serviceExecuteOptions?.IntervalInSeconds ?? DefaultIntervalInSeconds);
 
         var jobArgs = jobTask.GetArguments();
 
-        var recurringJobId = jobArgs?.OfType<string>().FirstOrDefault() 
-            ?? jobArgs?.FirstOrDefault()?.ToString() 
+        var recurringJobId = jobArgs?.OfType<string>().FirstOrDefault()
+            ?? jobArgs?.FirstOrDefault()?.ToString()
             ?? Guid.NewGuid().ToString();
 
         _recurringJobManager.AddOrUpdate(recurringJobId,
@@ -48,23 +48,28 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
         return Task.FromResult(recurringJobId);
     }
 
-    public Task Execute<T>(string recurringJobId, string processingQueue, CancellationToken cancellationToken = default)
+    public Task<string> Execute<T>(string recurringJobId, string processingQueue, CancellationToken cancellationToken = default)
     {
-        using var connection = global::Hangfire.JobStorage.Current.GetConnection();
-        
-        var recurringJobDto = connection.GetRecurringJobs().FirstOrDefault(x => x.Id == recurringJobId);//GetRecurringJobByLastJobId(connection, recurringJobId);
+        using var connection = JobStorage.Current.GetConnection();
 
-        if (recurringJobDto?.Job != null)
-        {
-            var expression = recurringJobDto.Job.ToExpression<T, Task>();
+        var recurringJobDto = GetRecurringJob(connection, recurringJobId) 
+            ?? throw new InvalidOperationException($"No recurring job with id {recurringJobId}");        
 
-            _recurringJobManager.RemoveIfExists(recurringJobId);
+        var expression = recurringJobDto.Job.ToExpression<T, Task>();
 
-            _recurringJobManager.AddOrUpdate(recurringJobId, processingQueue, expression, recurringJobDto.Cron);
-            
-            _recurringJobManager.Trigger(recurringJobId);
-        }
+        _recurringJobManager.RemoveIfExists(recurringJobId);
 
-        return Task.CompletedTask;
+        _recurringJobManager.AddOrUpdate(recurringJobId, processingQueue, expression, recurringJobDto.Cron);
+
+        _recurringJobManager.Trigger(recurringJobId);
+
+        var lastRecurringJob = GetRecurringJob(connection, recurringJobId);
+
+        return Task.FromResult(lastRecurringJob?.LastJobId);
+    }
+
+    private static RecurringJobDto? GetRecurringJob(IStorageConnection connection, string recurringId)
+    {
+        return connection.GetRecurringJobs().FirstOrDefault(p => p.Id == recurringId);
     }
 }
