@@ -1,7 +1,7 @@
 ﻿using Hangfire.Server;
 using Hangfire.Tags;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
+namespace ShopImport.Service.Hangfire.Infrastructure.Enrichers;
 
 internal class ParentTagEnricher : IPerformContextEnricher
 {

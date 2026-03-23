@@ -1,7 +1,7 @@
 ﻿using Hangfire.AggregateJobs;
 using Hangfire.Tags;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
+namespace ShopImport.Service.Hangfire.Infrastructure.Enrichers;
 
 internal class ParentJobTagEnricher : IChildJobEnricher<IImportServiceJob>
 {
