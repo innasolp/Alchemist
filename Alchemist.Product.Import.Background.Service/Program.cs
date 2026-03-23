@@ -29,7 +29,7 @@ using Shop.Interfaces;
 using ShopImport.Service.Category.Infrastructure;
 using ShopImport.Service.Hangfire;
 using ShopSettings.Interfaces;
-using System.Xml.Linq;
+using Microsoft.EntityFrameworkCore;
 using WebLoader.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +50,7 @@ AddShopSettingsAPIService(builder, out var settingsAPIHost);
 //builder.Host.AddImportServicesInfrastructure();
 var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOptions").Get<JobExecuteOptions>();
 builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"),
+    (options)=> options.UseNpgsql(builder.Configuration.GetConnectionString("ChildJobStoragePostgres")),
     hangfireOptions,
     (config) =>
     { 
@@ -85,6 +86,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseHangfireDashboard("/hangfire");
+app.UseChildJobOrchestrator(hangfireOptions);
 
 app.MapGet("/", () => "Hello ImportBackgroundService!");
 

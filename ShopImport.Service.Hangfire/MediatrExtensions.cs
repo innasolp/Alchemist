@@ -10,11 +10,14 @@ using Import.Service.Infrastructure.Handlers;
 using Mediator.Messages;
 using MediatR;
 using Message.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ShopImport.Service.Hangfire;
 using ShopImport.Service.Hangfire.Infrastructure;
-using ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.ChildJobStorages;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Filter;
 using ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
 using StackExchange.Redis;
 
@@ -26,6 +29,7 @@ public static class MediatrExtensions
 
     public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder, 
         string hangfireConnectionString,
+        Action<DbContextOptionsBuilder> childStorageOptionsAction,
         JobExecuteOptions? jobExecuteOptions = null, 
         Action<IGlobalConfiguration>? configure = null)
     {
@@ -39,11 +43,9 @@ public static class MediatrExtensions
                 cfg.RegisterServicesFromAssemblyContaining<AddShopImportServiceCommandHandler>();
             });
 
-            services.AddHangfire(hangfireConnectionString, jobExecuteOptions ?? defaultJobExecuteOptions, configure);
+            services.AddHangfireInfrastructure(hangfireConnectionString, jobExecuteOptions ?? defaultJobExecuteOptions, childStorageOptionsAction, configure);
 
-            services.AddSingleton<IJobExecuteManager, JobExecuteManager>();
-            services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();
-            services.AddSingleton<IPerformContextEnricher, ParentTagEnricher>();
+            services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();            
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -63,11 +65,15 @@ public static class MediatrExtensions
         });
     }
 
-    private static void AddHangfire(this IServiceCollection services, string hangfireConnectionString, JobExecuteOptions jobExecuteOptions, Action<IGlobalConfiguration>? configure = null)
+    private static void AddHangfireInfrastructure(this IServiceCollection services, 
+        string hangfireConnectionString, 
+        JobExecuteOptions jobExecuteOptions, 
+        Action<DbContextOptionsBuilder> childStorageOptionsAction,
+        Action<IGlobalConfiguration>? configure = null)
     {
         ClearRedisDataBase(hangfireConnectionString);
 
-        services.AddHangfire(config =>
+        services.AddHangfire((sp,config) =>
         {
             config.UseRedisStorage(hangfireConnectionString, new RedisStorageOptions
             {
@@ -75,21 +81,67 @@ public static class MediatrExtensions
                 InvisibilityTimeout = TimeSpan.FromHours(3)
             });
 
-            config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700"});
+            config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700" });
 
-            configure?.Invoke(config);
+            config.UseFilter(new ChildTaskFilter(sp.GetRequiredService<IServiceScopeFactory>()));
+            config.UseFilter(new ChangeQueueFilter());
+
+            configure?.Invoke(config);           
+                        
         });
 
-        services.AddSingleton(jobExecuteOptions);        
+        services.AddSingleton(jobExecuteOptions);
+
+        services.AddDbContext<ChildJobDbContext>(childStorageOptionsAction);
+
+        services.AddScoped<IChildJobStorage, EFChildJobStorage>();
+
+        services.AddSingleton<ChildJobOrchestrator<IHagfireServiceJobManager>>();
+
+        services.AddScoped<IJobExecuteManager, JobExecuteManager>();
+
+        services.AddScoped<IJobExecutor, BackgroundJobExecutor>();
+        services.AddScoped<IJobExecutor, RecurringJobExecutor>();
+        services.AddScoped<IJobExecutor, ScheduledJobExecutor>();
+
+        services.AddSingleton<IPerformContextEnricher, ParentTagEnricher>();
 
         services.AddHangfireServer(options =>
         {
             options.Queues = [jobExecuteOptions.ProcessingQueue, "default"];
-            options.WorkerCount = 20; //todo
+            options.WorkerCount = jobExecuteOptions.ParentWorkerCount;
             options.ServerName = jobExecuteOptions.ServerName;
         });
 
+        services.AddHangfireServer(options =>
+        {
+            options.Queues = [jobExecuteOptions.ChildProcessingQueue];
+            options.WorkerCount = jobExecuteOptions.ParentWorkerCount * jobExecuteOptions.ChildJobCountPerParent;
+            options.ServerName = jobExecuteOptions.ChildServerName;
+        });
+
         ThreadPool.SetMinThreads(100, 100);
+    }
+
+    public static void UseChildJobOrchestrator(this IHost host, JobExecuteOptions jobExecuteOptions)
+    {
+        ClearChildJobStorage(host);
+
+        var recurringJobManager = host.Services.GetRequiredService<IRecurringJobManager>();
+
+        recurringJobManager.AddOrUpdate<ChildJobOrchestrator<IHagfireServiceJobManager>>(ChildJobOrchestrator.Task,
+            x => x.Dispatch(jobExecuteOptions.ChildJobCountPerParent,
+                            jobExecuteOptions.ChildServerName,
+                            jobExecuteOptions.ChildProcessingQueue),
+            Cron.Minutely());        
+    }
+
+    private static void ClearChildJobStorage(IHost host)
+    {
+        using var scope = host.Services.CreateScope();
+        var childJobDbContext = scope.ServiceProvider.GetRequiredService<ChildJobDbContext>();
+        childJobDbContext.Database.EnsureDeleted();
+        childJobDbContext.Database.EnsureCreated();
     }
 
     private static void ClearRedisDataBase(string hangfireConnectionString)

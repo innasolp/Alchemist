@@ -54,7 +54,12 @@
       "RateLimiterOptions": {
         "Value": {
           "WindowMilliseconds": 6000,
-          "QueueLimit" :  12
+          "QueueLimit": 12
+        }
+      },
+      "ServiceExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
         }
       }
     }
@@ -112,6 +117,11 @@
         "Value": {
           "WindowMilliseconds": 10000,
           "QueueLimit": 20
+        }
+      },
+      "ServiceExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
         }
       }
     }

@@ -15,7 +15,8 @@
 		<PackageReference Include="Import.Service" Version="1.0.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
 		<PackageReference Include="Hangfire" Version="1.8.23" />
-
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
 	</ItemGroup>
 
   <ItemGroup>

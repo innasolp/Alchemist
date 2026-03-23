@@ -5,7 +5,8 @@ namespace ShopImport.Service.Hangfire.Infrastructure;
 
 internal class SingleShopImportServiceJob(IImportService importService,
     IShopModel shopModel,
-    Guid? parentId = null) : ImportServiceJob(parentId)
+    Guid? parentId = null,
+    ServiceExecuteOptions? serviceExecuteOptions = null) : ImportServiceJob(parentId, serviceExecuteOptions)
 {
     private readonly IShopModel shopModel = shopModel;
 
