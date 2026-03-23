@@ -1,4 +1,5 @@
-﻿using Import.Interfaces;
+﻿using Hangfire.AggregateJobs;
+using Import.Interfaces;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
@@ -14,7 +15,7 @@ internal interface IImportServiceJob
 
     Guid? ParentId { get; }
 
-    ServiceExecuteOptions? ServiceExecuteOptions { get; }
+    JobExecuteOptions? JobExecuteOptions { get; }
 
     Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs();
 }

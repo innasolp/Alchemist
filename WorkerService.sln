@@ -299,6 +299,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceState", "ServiceStat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopImport.KeyHash.XxHash64", "ShopImport.KeyHash.XxHash64\ShopImport.KeyHash.XxHash64.csproj", "{BEDCF965-7C66-49BC-844A-6E028308B7DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.AggregateJobs", "Hangfire.AggregateJobs\Hangfire.AggregateJobs.csproj", "{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1204,6 +1206,16 @@ Global
 		{BEDCF965-7C66-49BC-844A-6E028308B7DF}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
 		{BEDCF965-7C66-49BC-844A-6E028308B7DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEDCF965-7C66-49BC-844A-6E028308B7DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1334,6 +1346,7 @@ Global
 		{62471D6E-7CE0-4BF8-89C1-E8CE488BCC31} = {0E0940DC-363D-48B9-9472-D3BCC675A2FD}
 		{87817AE3-8665-41AC-874E-194134DBC1AA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{BEDCF965-7C66-49BC-844A-6E028308B7DF} = {87817AE3-8665-41AC-874E-194134DBC1AA}
+		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F} = {E99D4DC2-F128-4567-B4FD-23E62E79FC7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

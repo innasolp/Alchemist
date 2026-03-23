@@ -1,9 +1,8 @@
-﻿using Hangfire;
+﻿using Hangfire.AggregateJobs.JobExecutors.Expression;
 using Hangfire.Storage;
-using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Expression;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
+namespace Hangfire.AggregateJobs.JobExecutors;
 
 internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : IJobExecutor
 {
@@ -29,10 +28,10 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
 
     public Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask,
         string waitingQueue,
-        ServiceExecuteOptions? serviceExecuteOptions = null,
+        JobExecuteOptions? jobExecuteOptions = null,
         CancellationToken cancellationToken = default)
     {
-        var cron = ToCron(serviceExecuteOptions?.IntervalInSeconds ?? DefaultIntervalInSeconds);
+        var cron = ToCron(jobExecuteOptions?.IntervalInSeconds ?? DefaultIntervalInSeconds);
 
         var jobArgs = jobTask.GetArguments();
 
@@ -58,9 +57,9 @@ internal class RecurringJobExecutor(IRecurringJobManager recurringJobManager) : 
         return connection.GetRecurringJobs().FirstOrDefault(p => p.Id == recurringId);
     }
 
-    public bool IsAccessible(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
+    public bool IsAccessible(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null)
     {
-        return !isChild && serviceExecuteOptions?.IntervalInSeconds != null;
+        return !isChild && jobExecuteOptions?.IntervalInSeconds != null;
     }
 
     public string Execute<T>(string recurringJobId, string processingQueue)

@@ -1,7 +1,7 @@
 ﻿using Hangfire.Common;
 using Hangfire.States;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors.Filter;
+namespace Hangfire.AggregateJobs.JobExecutors.Filter;
 
 internal class ChangeQueueFilter : JobFilterAttribute, IElectStateFilter
 {

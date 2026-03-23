@@ -1,4 +1,5 @@
-﻿using Import.Interfaces;
+﻿using Hangfire.AggregateJobs;
+using Import.Interfaces;
 using ShopImport.Service.Hangfire.Models;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
@@ -6,7 +7,7 @@ namespace ShopImport.Service.Hangfire.Infrastructure;
 internal class SingleShopImportServiceJob(IImportService importService,
     IShopModel shopModel,
     Guid? parentId = null,
-    ServiceExecuteOptions? serviceExecuteOptions = null) : ImportServiceJob(parentId, serviceExecuteOptions)
+    JobExecuteOptions? jobExecuteOptions = null) : ImportServiceJob(parentId, jobExecuteOptions)
 {
     private readonly IShopModel shopModel = shopModel;
 

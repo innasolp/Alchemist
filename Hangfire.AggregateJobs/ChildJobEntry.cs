@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
+namespace Hangfire.AggregateJobs;
 
 [JsonConverter(typeof(JsonStringEnumConverter<JobStatus>))]
 public enum JobStatus

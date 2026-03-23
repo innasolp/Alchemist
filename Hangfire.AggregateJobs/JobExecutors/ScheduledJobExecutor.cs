@@ -1,8 +1,7 @@
-﻿using Hangfire;
-using Hangfire.States;
+﻿using Hangfire.States;
 using System.Linq.Expressions;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
+namespace Hangfire.AggregateJobs.JobExecutors;
 
 internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : IJobExecutor
 {
@@ -15,7 +14,7 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
     private const string EnqueuedInParameterName = "EnqueuedIn";
 
     public Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask, string waitingQueue,
-        ServiceExecuteOptions? serviceExecuteOptions = null,
+        JobExecuteOptions? jobExecuteOptions = null,
         CancellationToken cancellationToken = default)
     {
         var jobId = _backgroundJobClient.Create(
@@ -23,8 +22,8 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
                      jobTask,
                      new EnqueuedState(waitingQueue));
 
-        var enqueuedIn = serviceExecuteOptions?.EnqueuedInSeconds != null
-            ? TimeSpan.FromSeconds(serviceExecuteOptions.EnqueuedInSeconds.Value)
+        var enqueuedIn = jobExecuteOptions?.EnqueuedInSeconds != null
+            ? TimeSpan.FromSeconds(jobExecuteOptions.EnqueuedInSeconds.Value)
             : DefaultEnqueuedIn;
 
         SetJobParameter(jobId, EnqueuedInParameterName, enqueuedIn.ToString());
@@ -37,9 +36,9 @@ internal class ScheduledJobExecutor(IBackgroundJobClient backgroundJobClient) : 
         return Task.FromResult(Execute<T>(jobId, processingQueue));
     }
 
-    public bool IsAccessible(bool isChild = false, ServiceExecuteOptions? serviceExecuteOptions = null)
+    public bool IsAccessible(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null)
     {
-        return !isChild && serviceExecuteOptions?.IntervalInSeconds == null && serviceExecuteOptions?.EnqueuedInSeconds != null;
+        return !isChild && jobExecuteOptions?.IntervalInSeconds == null && jobExecuteOptions?.EnqueuedInSeconds != null;
     }
 
     public string Execute<T>(string jobId, string processingQueue)

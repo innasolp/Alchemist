@@ -31,6 +31,7 @@ using ShopImport.Service.Hangfire;
 using ShopSettings.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using WebLoader.Interfaces;
+using Hangfire.AggregateJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,7 +87,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseHangfireDashboard("/hangfire");
-app.UseChildJobOrchestrator(hangfireOptions);
+app.UseImportServiceChildJobOrchestrator(hangfireOptions);
 
 app.MapGet("/", () => "Hello ImportBackgroundService!");
 

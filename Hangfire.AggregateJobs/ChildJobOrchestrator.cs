@@ -1,8 +1,7 @@
-﻿using Hangfire;
+﻿using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.Storage;
-using ShopImport.Service.Hangfire.Infrastructure.JobManagement.JobExecutors;
 
-namespace ShopImport.Service.Hangfire.Infrastructure.JobManagement;
+namespace Hangfire.AggregateJobs;
 
 internal static class ChildJobOrchestrator
 {
