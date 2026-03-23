@@ -10,7 +10,7 @@ using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Infrastructure;
-using ShopImport.Service.Hangfire.Infrastructure.JobExecutors;
+using ShopImport.Service.Hangfire.Infrastructure.JobManagement;
 using ShopImport.Service.Hangfire.Models;
 using System.Collections.Concurrent;
 
@@ -63,7 +63,19 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
             SubscribeServiceToFailedHandler(serviceJob);
 
-            await _jobExecuteManager.Enqueue(serviceJob, _jobExecuteOptions, cancellationToken);
+            var childJobs = await serviceJob.GetСhildJobs();
+
+            await _jobExecuteManager.Enqueue<IHagfireServiceJobManager, IImportServiceJob>(serviceJob,
+                childJobs,
+                (jobManager, job)=> 
+                        jobManager.Execute(job.Id,
+                        job.ImportService.Name,
+                        job is AggregateShopImportServiceJob, //todo
+                        job.ParentId, cancellationToken, null),
+                    _jobExecuteOptions,
+                    serviceJob.ServiceExecuteOptions,
+                    (importServiceJob, jobId)=> importServiceJob.JobId = jobId,
+                    cancellationToken);
 
             return (serviceJob.Id, serviceJob.ImportService);
         }
@@ -111,7 +123,10 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         if(!eventArgs.Connected && eventArgs.Exception != null
             && _allServiceJobs.TryGetValue(serviceJobId, out var importServiceJob) && !string.IsNullOrEmpty(importServiceJob.JobId))
         {
-            await _jobExecuteManager.StopWithFailedState(importServiceJob, eventArgs.Exception, _jobExecuteOptions, CancellationToken.None);
+            var childJobIds = await importServiceJob.GetСhildJobIds();
+
+            //todo
+            await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId, childJobIds, eventArgs.Exception, _jobExecuteOptions, CancellationToken.None);
         }
     }
 
@@ -133,9 +148,15 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         return (serviceJob.ImportService, Task.Run(() => startTask, cancellationToken));
     }
 
-    private Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
+    private async Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        return _jobExecuteManager.Execute(serviceJob, _jobExecuteOptions, cancellationToken);
+        var childJobIds = await serviceJob.GetСhildJobIds();
+
+        await _jobExecuteManager.Execute<IHagfireServiceJobManager, IImportServiceJob>(serviceJob.JobId,
+            childJobIds,
+            _jobExecuteOptions,
+            serviceJob.ServiceExecuteOptions,
+            cancellationToken);
     }
 
     private static async Task StartServiceAsync(IImportService importService, CancellationToken cancellationToken)
@@ -212,14 +233,16 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             await shopCategoryListener.On(productShopCategory);
     }
 
-    Task IHagfireServiceJobManager.Execute(Guid guid, string displayName, bool isAggregate = false, Guid? parentId = null, CancellationToken cancellationToken = default, PerformContext? performContext = null)
+    Task IHagfireServiceJobManager.Execute(Guid id, string displayName, bool isAggregate = false, Guid? parentId = null, CancellationToken cancellationToken = default, PerformContext? performContext = null)
     {
         var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             performContext?.CancellationToken.ShutdownToken ?? default);
-        var serviceJob = GetExecutingServiceJob(guid);
+        var serviceJob = GetExecutingServiceJob(id);
 
         if (performContext != null)
         {
+            serviceJob.JobId = performContext.BackgroundJob.Id;
+
             foreach (var contextEnricher in _performContextEnrichers)
                 contextEnricher.Enrich(performContext, serviceJob, _allServiceJobs);
         }
@@ -227,8 +250,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         try
         {
             var startTask = StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
-
-            if(performContext != null) serviceJob.JobId = performContext.BackgroundJob.Id;
 
             return startTask;
         }

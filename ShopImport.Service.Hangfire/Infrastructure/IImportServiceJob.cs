@@ -14,5 +14,7 @@ internal interface IImportServiceJob
 
     Guid? ParentId { get; }
 
+    ServiceExecuteOptions? ServiceExecuteOptions { get; }
+
     Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs();
 }

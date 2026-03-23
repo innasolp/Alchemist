@@ -1,4 +1,5 @@
 ﻿using Alchemist.Import.Settings;
+using Alchemist.Import.Settings.Extensions;
 using Import.Factory.Interfaces;
 using Import.Service;
 using Import.Settings.Interfaces;
@@ -28,10 +29,12 @@ internal class ShopImportServiceJobFactory(ILoggerFactory loggerFactory,
         if(source is not IShopModel shopModel)
             throw new InvalidOperationException($"Invalid source type {source.GetType().Name}. Must be assignable from {nameof(IShopModel)}.");
 
+        var serviceExecutionOptions = importSettings.GetService(nameof(ServiceExecuteOptions))?.GetServiceValue<ServiceExecuteOptions>();
+
         if (!isAggregate)
         {
             var importService = importServiceFactory.Create(name, source, shopImportSettings);
-            return new SingleShopImportServiceJob(importService, shopModel, parentId);
+            return new SingleShopImportServiceJob(importService, shopModel, parentId, serviceExecutionOptions);
         }
         else
         {
@@ -42,7 +45,8 @@ internal class ShopImportServiceJobFactory(ILoggerFactory loggerFactory,
                 name, 
                 shopModel, 
                 shopImportSettings, 
-                importServiceFactory);
+                importServiceFactory,
+                serviceExecutionOptions);
         }
     }
 }
