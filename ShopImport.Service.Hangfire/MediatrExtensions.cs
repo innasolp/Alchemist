@@ -3,8 +3,6 @@ using Autofac.Extensions.DependencyInjection;
 using BackgroundTaskQueue;
 using Hangfire;
 using Hangfire.AggregateJobs;
-using Hangfire.Redis.StackExchange;
-using Hangfire.Tags;
 using Import.Service.Infrastructure;
 using Import.Service.Infrastructure.Handlers;
 using Mediator.Messages;
@@ -15,8 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Hangfire.Infrastructure.PerformContextEnrichers;
-using StackExchange.Redis;
-using Hangfire.Tags.Redis.StackExchange;
 
 namespace ShopImport.Service.Hangfire;
 
@@ -27,6 +23,7 @@ public static class MediatrExtensions
 
     public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder, 
         string hangfireConnectionString,
+        Action<IGlobalConfiguration, string> configureHangfireStorage,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
         AggregateServerSettings? aggregateServerSettings = null, 
         Action<IGlobalConfiguration>? configure = null)
@@ -41,7 +38,11 @@ public static class MediatrExtensions
                 cfg.RegisterServicesFromAssemblyContaining<AddShopImportServiceCommandHandler>();
             });
 
-            services.AddHangfireInfrastructure(hangfireConnectionString, aggregateServerSettings ?? defaultAggregateServerSettings, childStorageOptionsAction, configure);
+            services.AddHangfireInfrastructure(hangfireConnectionString, 
+                aggregateServerSettings ?? defaultAggregateServerSettings,
+                configureHangfireStorage,
+                childStorageOptionsAction, 
+                configure);
 
             services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();            
         });
@@ -66,26 +67,16 @@ public static class MediatrExtensions
     private static void AddHangfireInfrastructure(this IServiceCollection services,
         string hangfireConnectionString,
         AggregateServerSettings aggregateServerSettings,
+        Action<IGlobalConfiguration, string> configureHangfireStorage,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
         Action<IGlobalConfiguration>? configure = null)
     {
-        ClearRedisDataBase(hangfireConnectionString);
-
-       services.AddSingleton(aggregateServerSettings);
+        services.AddSingleton(aggregateServerSettings);
 
         services.AddHangfireAggreateJobs<IHagfireServiceJobManager>(hangfireConnectionString,
             aggregateServerSettings,
             childStorageOptionsAction,
-            (config, connectionString) =>
-            {
-                config.UseRedisStorage(connectionString, new RedisStorageOptions
-                {
-                    // Увеличьте этот таймаут, если задача длится дольше 30 минут
-                    InvisibilityTimeout = TimeSpan.FromHours(3)
-                });
-
-                config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700" });
-            },
+            configureHangfireStorage,
         configure);
 
         services.AddScoped<IChildJobEnricher<IImportServiceJob>, ParentJobTagEnricher>();
@@ -97,17 +88,5 @@ public static class MediatrExtensions
     {
         host.UseChildJobOrchestrator<IHagfireServiceJobManager>(aggregateServerSettings);
         host.ClearChildJobStorage();
-    }
-    
-    private static void ClearRedisDataBase(string hangfireConnectionString)
-    {
-        var redis = ConnectionMultiplexer.Connect($"{hangfireConnectionString},allowAdmin=true");
-
-        var endpoints = redis.GetEndPoints();
-        foreach (var endpoint in endpoints)
-        {
-            var server = redis.GetServer(endpoint);
-            server.FlushDatabase();
-        }
-    }
+    }    
 }
