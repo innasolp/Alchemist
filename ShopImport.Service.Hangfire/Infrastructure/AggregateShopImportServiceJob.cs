@@ -51,7 +51,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
     {
         if (sender is not IAggregateImportService aggregateImportService) return;
 
-        if (!eventArgs.Connected || eventArgs.CancellationToken.IsCancellationRequested)
+        if (!eventArgs.Connected)
         {
             var children = _importServiceJobs.ToDictionary();
             foreach (var childJob in children)
