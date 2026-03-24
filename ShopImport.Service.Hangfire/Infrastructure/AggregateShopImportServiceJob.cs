@@ -55,12 +55,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob, IDisposable
         {
             var children = _importServiceJobs.ToDictionary();
             foreach (var childJob in children)
-            {
-                await aggregateImportService.TryRemove(childJob.Value.ImportService);
-                childJob.Value.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
-            }
-
-            _importServiceJobs.Clear();
+                await RemoveChildJob(childJob.Value);   
         }
     }
 
@@ -89,11 +84,17 @@ internal class AggregateShopImportServiceJob : ImportServiceJob, IDisposable
             var serviceJob = _importServiceJobs.FirstOrDefault(x => x.Value.ImportService.Name == importService.Name);
             if (serviceJob.Value == null || !string.IsNullOrEmpty(serviceJob.Value.JobId)) return;
 
-            await _aggregateImportService.TryRemove(serviceJob.Value.ImportService);
-            serviceJob.Value.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
-
-            _importServiceJobs.Remove(serviceJob.Key);
+            await RemoveChildJob(serviceJob.Value);
         }
+    }
+
+    private async Task RemoveChildJob(IImportServiceJob childJob)
+    {
+        await _aggregateImportService.TryRemove(childJob.ImportService);
+
+        childJob.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
+
+        _importServiceJobs.Remove(childJob.Id);
     }
 
     private async Task OnExecuteService(IImportService importService, CancellationToken cancellationToken)

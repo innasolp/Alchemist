@@ -103,7 +103,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     {
         SubscribeServiceToFailedHandler(importServiceJob);
 
-        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == importServiceJob.Id).ToList();
+        var childJobs = GetChildJobs(importServiceJob.Id);
         foreach (var childJob in childJobs)
             SubscribeServiceToFailedHandler(childJob.Value);
     }
@@ -124,10 +124,14 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
         if(!eventArgs.Connected && _allServiceJobs.TryGetValue(serviceJobId, out var importServiceJob))
         {
-            var childJobs = await importServiceJob.GetСhildJobs();
+            var childJobs = GetChildJobs(importServiceJob.Id);
 
             if (eventArgs.Exception != null && !string.IsNullOrEmpty(importServiceJob.JobId))
-                 await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId, childJobs.Select(j=>j.JobId), eventArgs.Exception, _aggregateServerSettings, CancellationToken.None);
+                    await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId,
+                        childJobs.Where(j => !string.IsNullOrEmpty(j.Value.JobId)).Select(j => j.Value.JobId!),
+                        eventArgs.Exception,
+                        _aggregateServerSettings,
+                        CancellationToken.None);
         }
     }
 
@@ -160,7 +164,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private async Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        var existingChildJobs = _allServiceJobs.Where(x => x.Value.ParentId == serviceJob.Id).ToDictionary();
+        var existingChildJobs = GetChildJobs(serviceJob.Id);
 
         var childJobIds = (existingChildJobs.Count == 0) 
             ? await serviceJob.GetСhildJobIds() 
@@ -288,19 +292,26 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private void RemoveJobWithChildren(IImportServiceJob deletedServiceJob)
     {
-        _allServiceJobs.TryRemove(deletedServiceJob.Id, out var deletedJob);
+        RemoveImportServiceJob(deletedServiceJob);
 
-        UnsubscribeServiceFromConnectedHandler(deletedServiceJob);
-
-        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == deletedServiceJob.Id).ToList();
+        var childJobs = GetChildJobs(deletedServiceJob.Id);
         foreach (var childJob in childJobs)
         {
-            _allServiceJobs.TryRemove(childJob.Key, out var deletedChildJob);   
-            
-            UnsubscribeServiceFromConnectedHandler(childJob.Value);
-            
+            RemoveImportServiceJob(childJob.Value);
+
             if (childJob.Value.JobId != null)
                 _jobExecuteManager.DeleteJob(childJob.Value.JobId);
         }
+    }
+
+    private void RemoveImportServiceJob(IImportServiceJob importServiceJob)
+    {
+        _allServiceJobs.TryRemove(importServiceJob.Id, out var deletedChildJob);
+        UnsubscribeServiceFromConnectedHandler(importServiceJob);
+    }
+
+    private IReadOnlyDictionary<Guid, IImportServiceJob> GetChildJobs(Guid parentId)
+    {
+        return _allServiceJobs.Where(j => j.Value.ParentId == parentId).ToDictionary();
     }
 }
