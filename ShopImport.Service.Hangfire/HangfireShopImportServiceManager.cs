@@ -195,13 +195,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             : serviceJob;
     }
 
-    private IImportServiceJob GetExecutingServiceJob(Guid guid)
-    {
-        return !_allServiceJobs.TryGetValue(guid, out var serviceJob)
-            ? throw new InvalidOperationException($"Service with id {guid} not found.")
-            : serviceJob;
-    }
-
     private List<IImportServiceJob> GetExecutingServiceJobs(Guid coreJobGuid)
     {
         return [.. _allServiceJobs.Where(j=>j.Key == coreJobGuid || j.Value.ParentId == coreJobGuid).Select(j=>j.Value)];
@@ -257,45 +250,57 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         CancellationToken cancellationToken = default,
         PerformContext? performContext = null)
     {
-        var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, 
-            jobCancellationToken?.ShutdownToken ?? default,
-            performContext?.CancellationToken.ShutdownToken ?? default);
-
-        var serviceJob = GetExecutingServiceJob(id);
-
+        if (!_allServiceJobs.TryGetValue(id, out var serviceJob) || 
+            (parentId is not null && !_allServiceJobs.TryGetValue(parentId.Value, out var _)))
+            throw new JobDeletedException($"Job {id} {displayName} is deleted.");
+        
         if (performContext != null)
         {
             serviceJob.JobId = performContext.BackgroundJob.Id;
         }
+        
+        using var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, 
+            jobCancellationToken?.ShutdownToken ?? default,
+            performContext?.CancellationToken.ShutdownToken ?? default);
 
         try
         {
+            if(jobCancellationToken?.ShutdownToken != default)
+                linkedTokenSource.Token.Register((state) =>
+                {
+                    if (state is not (CancellationToken jobToken, IImportServiceJob job)) return;
+
+                    if(jobToken.IsCancellationRequested)
+                        job.JobId = null;
+
+                }, (jobCancellationToken?.ShutdownToken, serviceJob) );
+
             await StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
-        }
-        catch(OperationCanceledException)
-        {
-            if(jobCancellationToken?.ShutdownToken.IsCancellationRequested == true)
-            {
-                RemoveJobWithChildren(serviceJob);
-            }
         }
         finally
         {
-            linkedTokenSource.Dispose();
+            if (jobCancellationToken?.ShutdownToken.IsCancellationRequested == true)
+            {
+                RemoveJobWithChildren(serviceJob);
+            }            
         }
     }
 
     private void RemoveJobWithChildren(IImportServiceJob deletedServiceJob)
     {
+        _allServiceJobs.TryRemove(deletedServiceJob.Id, out var deletedJob);
+
         UnsubscribeServiceFromConnectedHandler(deletedServiceJob);
 
         var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == deletedServiceJob.Id).ToList();
         foreach (var childJob in childJobs)
         {
+            _allServiceJobs.TryRemove(childJob.Key, out var deletedChildJob);   
+            
             UnsubscribeServiceFromConnectedHandler(childJob.Value);
-            _allServiceJobs.TryRemove(childJob.Key, out var deletedChildJob);
+            
+            if (childJob.Value.JobId != null)
+                _jobExecuteManager.DeleteJob(childJob.Value.JobId);
         }
-
-        _allServiceJobs.TryRemove(deletedServiceJob.Id, out var deletedJob);        
     }
 }

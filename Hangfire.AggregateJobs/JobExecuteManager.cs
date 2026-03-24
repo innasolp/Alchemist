@@ -17,6 +17,12 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
 
     private readonly BackgroundJobExecutor DefaultJobExecutor = new(backgroundJobClient);
 
+    public void DeleteJob(string jobId)
+    {
+        _childJobStorage.UpdateJobState(jobId, JobStatus.Deleted);
+        _backgroundJobClient.Delete(jobId);        
+    }
+
     public async Task Enqueue<T, TJob>(TJob coreJob,
         IEnumerable<TJob> childJobs,
         Expression<Func<T, TJob, Task>> execute,

@@ -9,7 +9,7 @@ using ShopImport.Service.Hangfire.Models;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
-internal class AggregateShopImportServiceJob : ImportServiceJob
+internal class AggregateShopImportServiceJob : ImportServiceJob, IDisposable
 {
     private readonly IImportServiceFactory _importServiceFactory;
 
@@ -87,7 +87,7 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
         if (!eventArgs.Connected || eventArgs.CancellationToken.IsCancellationRequested)
         {
             var serviceJob = _importServiceJobs.FirstOrDefault(x => x.Value.ImportService.Name == importService.Name);
-            if (serviceJob.Value == null) return;
+            if (serviceJob.Value == null || !string.IsNullOrEmpty(serviceJob.Value.JobId)) return;
 
             await _aggregateImportService.TryRemove(serviceJob.Value.ImportService);
             serviceJob.Value.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
@@ -115,5 +115,12 @@ internal class AggregateShopImportServiceJob : ImportServiceJob
             result.Add(serviceJob.Key, serviceJob.Value);
 
         return Task.FromResult((IReadOnlyDictionary<Guid, IImportServiceJob>)result);
+    }
+
+    public void Dispose()
+    {
+        _aggregateImportService.ConnectedAsync -= AggregateImportServiceConnectedAsync;
+        foreach (var childJob in _importServiceJobs)
+            childJob.Value.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
     }
 }

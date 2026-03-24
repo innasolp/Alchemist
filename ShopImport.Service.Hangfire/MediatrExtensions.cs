@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using BackgroundTaskQueue;
 using Hangfire;
 using Hangfire.AggregateJobs;
+using Hangfire.States;
 using Import.Service.Infrastructure;
 using Import.Service.Infrastructure.Handlers;
 using Mediator.Messages;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Hangfire.Infrastructure.Enrichers;
+using ShopImport.Service.Hangfire.Infrastructure.Filters;
 
 namespace ShopImport.Service.Hangfire;
 
@@ -73,11 +75,19 @@ public static class MediatrExtensions
     {
         services.AddSingleton(aggregateServerSettings);
 
+        void importConfigure(IGlobalConfiguration config)
+        {
+            configure?.Invoke(config);
+
+            config.UseFilter(new DeletedStateFilter());
+        }
+
         services.AddHangfireAggreateJobs<IHagfireServiceJobManager>(hangfireConnectionString,
             aggregateServerSettings,
             childStorageOptionsAction,
             configureHangfireStorage,
-        configure);
+            importConfigure
+            );       
 
         services.AddScoped<IChildJobEnricher<IImportServiceJob>, ParentJobTagEnricher>();
 

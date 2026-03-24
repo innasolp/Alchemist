@@ -24,4 +24,6 @@ public interface IJobExecuteManager
         Exception exception,
         AggregateServerSettings? aggregateServerSettings = null, 
         CancellationToken cancellationToken = default);
+
+    void DeleteJob(string jobId);
 }
