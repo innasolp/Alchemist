@@ -66,7 +66,7 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
     public async Task Execute<T, TJob>(string coreJobId,
         IEnumerable<string> childJobIds,
         AggregateServerSettings aggregateServerSettings,
-        JobExecuteOptions jobExecuteOptions,
+        JobExecuteOptions? jobExecuteOptions,
         CancellationToken cancellationToken = default)
     {
         var coreExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(jobExecuteOptions : jobExecuteOptions)) ?? DefaultJobExecutor;

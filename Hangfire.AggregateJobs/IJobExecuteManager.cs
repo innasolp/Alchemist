@@ -16,7 +16,7 @@ public interface IJobExecuteManager
     Task Execute<T, TJob>(string coreJobId,
         IEnumerable<string> childJobIds,
         AggregateServerSettings aggregateServerSettings,
-        JobExecuteOptions jobExecuteOptions,
+        JobExecuteOptions? jobExecuteOptions,
         CancellationToken cancellationToken = default);
 
     Task StopWithFailedState(string coreJobId, 

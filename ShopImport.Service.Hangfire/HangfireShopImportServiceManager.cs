@@ -139,7 +139,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     {
         if (_serviceConnectedHandlers.TryGetValue(childJob.Id, out var childConnectedEventHandler))
         {
-            childJob.ImportService.ConnectedAsync += childConnectedEventHandler;
+            childJob.ImportService.ConnectedAsync -= childConnectedEventHandler;
             _serviceConnectedHandlers.TryRemove(childJob.Id, out var removedEventHandler);            
         }
     }
@@ -164,16 +164,19 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private async Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(serviceJob.JobId))
+            throw new InvalidOperationException($"Import service {serviceJob.ImportService.Name} was not enqueued.");
+
         var existingChildJobs = GetChildJobs(serviceJob.Id);
 
-        var childJobIds = (existingChildJobs.Count == 0) 
-            ? await serviceJob.GetСhildJobIds() 
-            : existingChildJobs.Values.Select(x=>x.JobId);
+        var childJobs = (existingChildJobs.Count == 0) 
+            ? [.. await serviceJob.GetСhildJobs()]
+            : existingChildJobs.Values.ToList();
 
         SubscribeServiceWithChildrenToFailedHandler(serviceJob);
 
         await _jobExecuteManager.Execute<IHagfireServiceJobManager, IImportServiceJob>(serviceJob.JobId,
-            childJobIds,
+            childJobs.Where(x=>!string.IsNullOrEmpty(x.JobId)).Select(x=>x.JobId!),
             _aggregateServerSettings,
             serviceJob.JobExecuteOptions,
             cancellationToken);

@@ -31,7 +31,7 @@ public static class DIExtensions
 
         services.AddScoped<IChildJobStorage, EFChildJobStorage>();
 
-        services.AddSingleton<ChildJobOrchestrator<T>>();
+        services.AddScoped<ChildJobOrchestrator<T>>();
 
         services.AddScoped<IJobExecuteManager, JobExecuteManager>();
 
