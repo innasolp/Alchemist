@@ -62,8 +62,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             var executionJobs = await serviceJob.GetExecutionServiceJobs();
             executionJobs.ToList().ForEach(j => _allServiceJobs.TryAdd(j.Key, j.Value));
 
-            SubscribeServiceToFailedHandler(serviceJob);
-
             var childJobs = await serviceJob.GetСhildJobs();
 
             await _jobExecuteManager.Enqueue<IHagfireServiceJobManager, IImportServiceJob>(serviceJob,
@@ -101,23 +99,22 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         return _importServiceJobFactory.CreateServiceJob(serviceFactory, shopImportSettings, name, source, shopImportSettings.IsAggregate);
     }
 
+    private void SubscribeServiceWithChildrenToFailedHandler(IImportServiceJob importServiceJob)
+    {
+        SubscribeServiceToFailedHandler(importServiceJob);
+
+        var childJobs = GetChildJobs(importServiceJob.Id);
+        foreach (var childJob in childJobs)
+            SubscribeServiceToFailedHandler(childJob.Value);
+    }
+
     private void SubscribeServiceToFailedHandler(IImportServiceJob importServiceJob)
     {
-        async Task serviceConnectedEventHandler (object sender, ConnectedAsyncEventArgs args) 
+        async Task serviceConnectedEventHandler(object sender, ConnectedAsyncEventArgs args)
             => await ImportServiceConnectedAsync(sender, args, importServiceJob.Id);
 
         if (_serviceConnectedHandlers.TryAdd(importServiceJob.Id, serviceConnectedEventHandler))
             importServiceJob.ImportService.ConnectedAsync += serviceConnectedEventHandler;
-
-        var childJobs = _allServiceJobs.Where(j => j.Value.ParentId == importServiceJob.Id).ToList();
-        foreach(var childJob in childJobs)
-        {
-            async Task childConnectedEventHandler (object sender, ConnectedAsyncEventArgs args) 
-                => await ImportServiceConnectedAsync(sender, args, childJob.Value.Id);
-
-            if (_serviceConnectedHandlers.TryAdd(childJob.Value.Id, childConnectedEventHandler))
-                childJob.Value.ImportService.ConnectedAsync += childConnectedEventHandler;
-        }            
     }
 
     private async Task ImportServiceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs, Guid serviceJobId)
@@ -125,13 +122,25 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         if (sender is not IImportService importService)
             throw new InvalidOperationException($"Invalid sender type {sender.GetType().Name}. Sender must be assignable to {nameof(IImportService)}");
 
-        if(!eventArgs.Connected && eventArgs.Exception != null
-            && _allServiceJobs.TryGetValue(serviceJobId, out var importServiceJob) && !string.IsNullOrEmpty(importServiceJob.JobId))
+        if(!eventArgs.Connected && _allServiceJobs.TryGetValue(serviceJobId, out var importServiceJob))
         {
-            var childJobIds = await importServiceJob.GetСhildJobIds();
+            var childJobs = GetChildJobs(importServiceJob.Id);
 
-            //todo
-            await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId, childJobIds, eventArgs.Exception, _aggregateServerSettings, CancellationToken.None);
+            if (eventArgs.Exception != null && !string.IsNullOrEmpty(importServiceJob.JobId))
+                    await _jobExecuteManager.StopWithFailedState(importServiceJob.JobId,
+                        childJobs.Where(j => !string.IsNullOrEmpty(j.Value.JobId)).Select(j => j.Value.JobId!),
+                        eventArgs.Exception,
+                        _aggregateServerSettings,
+                        CancellationToken.None);
+        }
+    }
+
+    private void UnsubscribeServiceFromConnectedHandler(IImportServiceJob childJob)
+    {
+        if (_serviceConnectedHandlers.TryGetValue(childJob.Id, out var childConnectedEventHandler))
+        {
+            childJob.ImportService.ConnectedAsync -= childConnectedEventHandler;
+            _serviceConnectedHandlers.TryRemove(childJob.Id, out var removedEventHandler);            
         }
     }
 
@@ -155,10 +164,19 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private async Task StartService(IImportServiceJob serviceJob, CancellationToken cancellationToken)
     {
-        var childJobIds = await serviceJob.GetСhildJobIds();
+        if (string.IsNullOrEmpty(serviceJob.JobId))
+            throw new InvalidOperationException($"Import service {serviceJob.ImportService.Name} was not enqueued.");
+
+        var existingChildJobs = GetChildJobs(serviceJob.Id);
+
+        var childJobs = (existingChildJobs.Count == 0) 
+            ? [.. await serviceJob.GetСhildJobs()]
+            : existingChildJobs.Values.ToList();
+
+        SubscribeServiceWithChildrenToFailedHandler(serviceJob);
 
         await _jobExecuteManager.Execute<IHagfireServiceJobManager, IImportServiceJob>(serviceJob.JobId,
-            childJobIds,
+            childJobs.Where(x=>!string.IsNullOrEmpty(x.JobId)).Select(x=>x.JobId!),
             _aggregateServerSettings,
             serviceJob.JobExecuteOptions,
             cancellationToken);
@@ -180,13 +198,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     private IImportServiceJob GetCoreServiceJob(Guid guid)
     {
         return !_coreServiceJobs.TryGetValue(guid, out var serviceJob)
-            ? throw new InvalidOperationException($"Service with id {guid} not found.")
-            : serviceJob;
-    }
-
-    private IImportServiceJob GetExecutingServiceJob(Guid guid)
-    {
-        return !_allServiceJobs.TryGetValue(guid, out var serviceJob)
             ? throw new InvalidOperationException($"Service with id {guid} not found.")
             : serviceJob;
     }
@@ -246,22 +257,64 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         CancellationToken cancellationToken = default,
         PerformContext? performContext = null)
     {
-        var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, jobCancellationToken.ShutdownToken,
-            performContext?.CancellationToken.ShutdownToken ?? default);
-        var serviceJob = GetExecutingServiceJob(id);
-
+        if (!_allServiceJobs.TryGetValue(id, out var serviceJob) || 
+            (parentId is not null && !_allServiceJobs.TryGetValue(parentId.Value, out var _)))
+            throw new JobDeletedException($"Job {id} {displayName} is deleted.");
+        
         if (performContext != null)
         {
             serviceJob.JobId = performContext.BackgroundJob.Id;
         }
+        
+        using var linkedTokenSource =  CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, 
+            jobCancellationToken?.ShutdownToken ?? default,
+            performContext?.CancellationToken.ShutdownToken ?? default);
 
         try
         {
+            if(jobCancellationToken?.ShutdownToken != default)
+                linkedTokenSource.Token.Register((state) =>
+                {
+                    if (state is not (CancellationToken jobToken, IImportServiceJob job)) return;
+
+                    if(jobToken.IsCancellationRequested)
+                        job.JobId = null;
+
+                }, (jobCancellationToken?.ShutdownToken, serviceJob) );
+
             await StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
         }
         finally
         {
-            linkedTokenSource.Dispose();
+            if (jobCancellationToken?.ShutdownToken.IsCancellationRequested == true)
+            {
+                RemoveJobWithChildren(serviceJob);
+            }            
         }
+    }
+
+    private void RemoveJobWithChildren(IImportServiceJob deletedServiceJob)
+    {
+        RemoveImportServiceJob(deletedServiceJob);
+
+        var childJobs = GetChildJobs(deletedServiceJob.Id);
+        foreach (var childJob in childJobs)
+        {
+            RemoveImportServiceJob(childJob.Value);
+
+            if (childJob.Value.JobId != null)
+                _jobExecuteManager.DeleteJob(childJob.Value.JobId);
+        }
+    }
+
+    private void RemoveImportServiceJob(IImportServiceJob importServiceJob)
+    {
+        _allServiceJobs.TryRemove(importServiceJob.Id, out var deletedChildJob);
+        UnsubscribeServiceFromConnectedHandler(importServiceJob);
+    }
+
+    private IReadOnlyDictionary<Guid, IImportServiceJob> GetChildJobs(Guid parentId)
+    {
+        return _allServiceJobs.Where(j => j.Value.ParentId == parentId).ToDictionary();
     }
 }

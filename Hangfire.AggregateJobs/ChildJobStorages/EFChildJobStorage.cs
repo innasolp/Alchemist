@@ -14,17 +14,20 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
 
     public async Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots)
     {
-        return await _dbContext.ChildJobEntries
-                    .Where(j => j.Status == JobStatus.Enqueued)
-                    .Select(j => j.ParentJobId).Distinct()                    
-                    .SelectMany(parentId => _dbContext.ChildJobEntries
-                        .Where(child => child.ParentJobId == parentId && child.Status == JobStatus.Enqueued)
-                        .OrderBy(child => child.CreatedAt)
-                        .Take(childJobCountPerParent)
-                    )
-                    .Take(freeSlots)
-                    .Select(j => j.JobId)
-                    .ToListAsync(); ;
+        var sql = @"SELECT job_id
+                    FROM (
+                        SELECT job_id, 
+                               ROW_NUMBER() OVER(PARTITION BY parent_job_id ORDER BY created_at) as rn
+                        FROM child_job_entry
+                        WHERE status = 0
+                    ) t
+                    WHERE rn <= {0}
+                    LIMIT {1}";
+
+       return await _dbContext.ChildJobEntries
+            .FromSqlRaw(sql, childJobCountPerParent, freeSlots)
+            .Select(j => j.JobId)
+            .ToListAsync();
     }
 
     public string? GetParentJobId(string jobId)

@@ -61,7 +61,8 @@ builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.Ge
         config.UseRedisStorage(connectionString, new RedisStorageOptions
         {
             // Увеличьте этот таймаут, если задача длится дольше 30 минут
-            InvisibilityTimeout = TimeSpan.FromHours(3)
+            InvisibilityTimeout = TimeSpan.FromHours(3),
+            ExpiryCheckInterval = TimeSpan.FromMinutes(1)
         });
 
         config.UseTagsWithRedis(new TagsOptions { TagColor = "#1e8700" });

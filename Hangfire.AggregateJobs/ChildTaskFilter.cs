@@ -18,9 +18,8 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
 
         if (string.IsNullOrEmpty(parentJobId)) return;
 
-        childJobStorage.UpdateJobState(jobId, JobStatus.Completed);
-
-        RecurringJob.TriggerJob(ChildJobOrchestrator.Task);
+        childJobStorage.UpdateJobState(jobId, 
+            filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed);
     }
 
     public void OnPerforming(PerformingContext filterContext) { }

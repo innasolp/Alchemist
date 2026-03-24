@@ -1,6 +1,7 @@
 ﻿using Hangfire.AggregateJobs.Filters;
 using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hangfire.AggregateJobs;
 
@@ -9,15 +10,15 @@ internal static class ChildJobOrchestrator
     public const string Task = "child-orchestrator-tick";    
 }
 
-internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, IBackgroundJobClient backgroundJobClient, IChildJobStorage childJobStorage)
+internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, IBackgroundJobClient backgroundJobClient, IServiceScopeFactory serviceScopeFactory)
 {
     private readonly IEnumerable<IJobExecutor> _jobExecutors = jobExecutors;
 
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+
     private readonly BackgroundJobExecutor DefaultJobExecutor = new(backgroundJobClient);
 
-    private readonly IChildJobStorage _childJobStorage = childJobStorage;
-
-    [DisableConcurrentExecution(timeoutInSeconds: 10)]
+    [DisableConcurrentExecution(timeoutInSeconds: 30)]
     [ShortExpiration(minutes:10)]
     [JobDisplayName(nameof(ChildJobOrchestrator))]
     public async Task Dispatch(int childJobCountPerParent, string childServer, string processingChildQueue)
@@ -35,17 +36,21 @@ internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, I
         int freeSlots = serverWorkerCount.Value - busy;
         if (freeSlots <= 0) return;
 
-        var jobIdsToActivate = await _childJobStorage.GetChildJobIdsForProcessing(childJobCountPerParent, freeSlots);
+        using var scope = _serviceScopeFactory.CreateScope();
+
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
+
+        var jobIdsToActivate = await childJobStorage.GetChildJobIdsForProcessing(childJobCountPerParent, freeSlots);
 
         if (!jobIdsToActivate.Any()) return;
 
         foreach (var jobId in jobIdsToActivate)
         {
             var jobExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(isChild: true)) ?? DefaultJobExecutor;
-            jobExecutor.Execute<T>(jobId, processingChildQueue);           
+            jobExecutor.Execute<T>(jobId, processingChildQueue);
         }
 
-        await _childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
+        await childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
     }
 
     private static int? GetServerWorkerCount(IMonitoringApi monitoringApi, string serverName)

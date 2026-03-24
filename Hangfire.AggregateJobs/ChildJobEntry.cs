@@ -8,7 +8,8 @@ public enum JobStatus
 {
     Enqueued = 0,
     Processing = 1,
-    Completed = 2
+    Completed = 2,
+    Deleted = 3
 }
 
 internal class ChildJobEntry
