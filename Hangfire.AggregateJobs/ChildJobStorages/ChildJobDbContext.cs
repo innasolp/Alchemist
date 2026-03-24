@@ -6,12 +6,10 @@ internal class ChildJobDbContext : DbContext
 {
     public ChildJobDbContext()
     {
-        Database.EnsureCreated();
     }
 
     public ChildJobDbContext(DbContextOptions options) : base(options)
     {
-        Database.EnsureCreated();
     }
 
     public virtual DbSet<ChildJobEntry> ChildJobEntries { get; set; }

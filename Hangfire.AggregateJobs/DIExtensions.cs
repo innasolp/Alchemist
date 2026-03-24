@@ -13,7 +13,9 @@ public static class DIExtensions
         AggregateServerSettings aggregateServerSettings,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
         Action<IGlobalConfiguration, string> configureStorage,
-        Action<IGlobalConfiguration>? configure = null)
+        Action<IGlobalConfiguration>? configure = null,
+        Action<BackgroundJobServerOptions>? parentServerConfigure = null,
+        Action<BackgroundJobServerOptions>? childServerConfigure = null)
     {
         services.AddHangfire((sp, config) =>
         {
@@ -29,7 +31,7 @@ public static class DIExtensions
 
         services.AddScoped<IChildJobStorage, EFChildJobStorage>();
 
-        services.AddSingleton<ChildJobOrchestrator<T>>();
+        services.AddScoped<ChildJobOrchestrator<T>>();
 
         services.AddScoped<IJobExecuteManager, JobExecuteManager>();
 
@@ -42,6 +44,8 @@ public static class DIExtensions
             options.Queues = [aggregateServerSettings.ProcessingQueue, "default"];
             options.WorkerCount = aggregateServerSettings.ParentWorkerCount;
             options.ServerName = aggregateServerSettings.ServerName;
+
+            parentServerConfigure?.Invoke(options);
         });
 
         services.AddHangfireServer(options =>
@@ -49,6 +53,8 @@ public static class DIExtensions
             options.Queues = [aggregateServerSettings.ChildProcessingQueue];
             options.WorkerCount = aggregateServerSettings.ParentWorkerCount * aggregateServerSettings.ChildJobCountPerParent;
             options.ServerName = aggregateServerSettings.ChildServerName;
+
+            childServerConfigure?.Invoke(options);
         });
 
         return services;
