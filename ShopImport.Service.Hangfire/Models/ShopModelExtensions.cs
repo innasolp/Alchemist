@@ -3,10 +3,9 @@ using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Category;
 using Alchemist.Import.Settings.Product;
 using Shop.Interfaces;
-using ShopImport.Service.Hangfire.Models;
 using ShopSettings.Interfaces;
 
-namespace Import.Service.Commands.Models;
+namespace ShopImport.Service.Hangfire.Models;
 
 public static class ShopModelExtensions
 {

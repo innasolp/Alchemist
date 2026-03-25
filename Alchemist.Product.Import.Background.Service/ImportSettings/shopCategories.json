@@ -16,7 +16,14 @@
       },
       "HostRequestOptions": {
         "Value": {
-          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions"
+          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions",
+          "LoadingType": "Response",
+          "TimeouteMillseconds": 15000
+        }
+      },
+      "RequestOptions": {
+        "Value": {
+          "LoadingType": "Api"
         }
       },
       "TimerOptions": {

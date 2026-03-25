@@ -1,11 +1,9 @@
-﻿using Alchemist.Import.Settings;
-using Alchemist.Import.Settings.Extensions;
+﻿using Alchemist.Import.Settings.Extensions;
 using Hangfire.AggregateJobs;
 using Import.Factory.Interfaces;
 using Import.Service;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
-using ShopImport.Service.Hangfire.Models;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
@@ -17,35 +15,35 @@ internal class ShopImportServiceJobFactory(ILoggerFactory loggerFactory,
 
     private readonly IImportServiceLogFactory _importServiceLogFactory = importServiceLogFactory;
 
-    public IImportServiceJob CreateServiceJob(IImportServiceFactory importServiceFactory, 
+    public IImportServiceJob CreateServiceJob<TImportSource, TImportSourceItem>(IImportServiceFactory importServiceFactory, 
         IImportSettings importSettings,
         string name, 
-        IImportSource source,
+        TImportSource source,
         bool isAggregate = false,
         Guid? parentId = null)
+         where TImportSource :
+        IImportSource,
+        ISplittableSource<TImportSource>, 
+        IIdentificableSource, 
+        ISourceItemCollection<TImportSource,
+            TImportSourceItem>
     {
-        if (importSettings is not IShopImportSettings shopImportSettings)
-            throw new InvalidOperationException($"Invalid import settings type {importSettings.GetType().Name}. Must be assignable from {nameof(IShopImportSettings)}.");
-
-        if(source is not IShopModel shopModel)
-            throw new InvalidOperationException($"Invalid source type {source.GetType().Name}. Must be assignable from {nameof(IShopModel)}.");
-
         var serviceExecutionOptions = importSettings.GetService(nameof(JobExecuteOptions))?.GetServiceValue<JobExecuteOptions>();
 
         if (!isAggregate)
         {
-            var importService = importServiceFactory.Create(name, source, shopImportSettings);
-            return new SingleShopImportServiceJob(importService, shopModel, parentId, serviceExecutionOptions);
+            var importService = importServiceFactory.Create(name, source, importSettings);
+            return new SingleImportServiceJob<TImportSource>(importService, source, parentId, serviceExecutionOptions);
         }
         else
         {
             var logger = _loggerFactory.CreateLogger<AggregateService>();
-            var serviceLogger = _importServiceLogFactory.GetLogger(logger, name, source, shopImportSettings);
-            return new AggregateShopImportServiceJob(this,
+            var serviceLogger = _importServiceLogFactory.GetLogger(logger, name, source, importSettings);
+            return new AggregateImportServiceJob<TImportSource, TImportSourceItem>(this,
                 serviceLogger, 
-                name, 
-                shopModel, 
-                shopImportSettings, 
+                name,
+                source,
+                importSettings, 
                 importServiceFactory,
                 serviceExecutionOptions);
         }

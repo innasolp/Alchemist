@@ -18,6 +18,8 @@ internal class ProductShopModel : ShopModel, IProductShopModel
     
     IEnumerable<IProductShopCategory> IProductShopSource.Categories => Categories;
 
+    protected override ShopModelType Type => ShopModelType.Product;
+
     protected ProductShopModel CopyCore()
     {
         return new ProductShopModel
@@ -36,10 +38,22 @@ internal class ProductShopModel : ShopModel, IProductShopModel
     {
         foreach (var shopCategory in Categories)
         {
-            var copy = CopyCore();
-            copy.Name += $"_{shopCategory.Category}";
-            copy.Categories.Add(shopCategory);
-            yield return copy;
+             yield return CreateByCategory(shopCategory);
         }
+    }
+
+    protected override IShopModel AddSourceItem(IProductShopCategory shopCategory)
+    {
+        Categories.Add(shopCategory);
+
+        return CreateByCategory(shopCategory);
+    }
+
+    private ProductShopModel CreateByCategory(IProductShopCategory shopCategory)
+    {
+        var copy = CopyCore();
+        copy.Name += $"_{shopCategory.Category}";
+        copy.Categories.Add(shopCategory);
+        return copy;
     }
 }
