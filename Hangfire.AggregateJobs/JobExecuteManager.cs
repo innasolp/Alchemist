@@ -1,25 +1,26 @@
 ﻿using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.AggregateJobs.JobExecutors.Expression;
 using Hangfire.States;
+using Microsoft.Extensions.DependencyInjection;
 using System.Linq.Expressions;
 
 namespace Hangfire.AggregateJobs;
 
 internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors, 
     IBackgroundJobClient backgroundJobClient, 
-    IChildJobStorage childJobStorage) : IJobExecuteManager
+    IServiceScopeFactory serviceScopeFactory) : IJobExecuteManager
 {
     private readonly IEnumerable<IJobExecutor> _jobExecutors = jobExecutors;
 
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    private readonly IChildJobStorage _childJobStorage = childJobStorage;
-
     private readonly BackgroundJobExecutor DefaultJobExecutor = new(backgroundJobClient);
 
     public void DeleteJob(string jobId)
     {
-        _childJobStorage.UpdateJobState(jobId, JobStatus.Deleted);
+        using var scope = serviceScopeFactory.CreateScope();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
+        childJobStorage.UpdateJobState(jobId, JobStatus.Deleted);
         _backgroundJobClient.Delete(jobId);        
     }
 
@@ -71,11 +72,14 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
     {
         var coreExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(jobExecuteOptions : jobExecuteOptions)) ?? DefaultJobExecutor;
         var parentJobId = await coreExecutor.ExecuteAsync<T>(coreJobId, aggregateServerSettings.ProcessingQueue, cancellationToken);
-        var parentJobCreatedAt = DateTime.Now;       
+        var parentJobCreatedAt = DateTime.Now;
+
+        using var scope = serviceScopeFactory.CreateScope();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
 
         foreach (var executedJobId in childJobIds)
         {
-            await _childJobStorage.CreateChildJobEntryAsync(
+            await childJobStorage.CreateChildJobEntryAsync(
                 new ChildJobEntry { JobId = executedJobId, ParentJobId = parentJobId, Status = 0, ParentCreatedAt = parentJobCreatedAt });
         }
     }

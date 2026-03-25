@@ -9,6 +9,6 @@ internal sealed class QueueShopCategoryToServicesCommandHandler(IShopImportServi
 
     public async Task Handle(QueueShopCategoryToServicesCommand request, CancellationToken cancellationToken)
     {
-        await _serviceRepository.AddShopCategory(request.ShopCategory);
+        await _serviceRepository.AddShopCategory(request.ShopCategory, cancellationToken);
     }
 }

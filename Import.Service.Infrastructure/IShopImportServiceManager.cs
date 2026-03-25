@@ -4,5 +4,5 @@ namespace Import.Service.Infrastructure;
 
 public interface IShopImportServiceManager : IServiceManager
 {
-    Task AddShopCategory(ShopCategory shopCategory);
+    Task AddShopCategory(ShopCategory shopCategory, CancellationToken cancellationToken);
 }
