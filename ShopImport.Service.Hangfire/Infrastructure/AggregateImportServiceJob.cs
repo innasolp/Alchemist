@@ -1,23 +1,26 @@
-﻿using Alchemist.Import.Settings;
-using Hangfire.AggregateJobs;
+﻿using Hangfire.AggregateJobs;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service;
+using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
-using ShopImport.Service.Hangfire.Models;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
-internal class AggregateShopImportServiceJob : ImportServiceJob, IDisposable
+internal class AggregateImportServiceJob<TImportSource, TSourceItem> : ImportServiceJob, ISourceItemListenerJob<TSourceItem>, IDisposable
+    where TImportSource : IImportSource,
+    ISplittableSource<TImportSource>, 
+    IIdentificableSource,
+    ISourceItemCollection<TImportSource, TSourceItem>
 {
     private readonly IImportServiceFactory _importServiceFactory;
 
-    private readonly IShopImportSettings _shopImportSettings;
+    private readonly IImportSettings _importSettings;
 
-    private readonly IShopModel _shopModel;
+    private readonly TImportSource _importSource;
 
-    private readonly IImportServiceJobFactory _shopImportServiceJobFactory;
+    private readonly IImportServiceJobFactory _importServiceJobFactory;
 
     private readonly string _name;
 
@@ -27,22 +30,24 @@ internal class AggregateShopImportServiceJob : ImportServiceJob, IDisposable
 
     public override IImportService ImportService => _aggregateImportService;
 
-    public override int SourceId => _shopModel.Id;
+    public override int SourceId => _importSource.Id;
 
-    public AggregateShopImportServiceJob(IImportServiceJobFactory shopImportServiceJobFactory,
+    protected override bool IsAggregate => true;
+
+    public AggregateImportServiceJob(IImportServiceJobFactory importServiceJobFactory,
         ILogger logger,
         string name,
-        IShopModel shopModel,
-        IShopImportSettings shopImportSettings,
+        TImportSource importSource,
+        IImportSettings importSettings,
         IImportServiceFactory importServiceFactory, 
         JobExecuteOptions? jobExecuteOptions = null)
         : base(null, jobExecuteOptions)
     {
-        _shopImportServiceJobFactory = shopImportServiceJobFactory;
+        _importServiceJobFactory = importServiceJobFactory;
         _name = name;
-        _shopModel = shopModel;
+        _importSource = importSource;
         _importServiceFactory = importServiceFactory;
-        _shopImportSettings = shopImportSettings;
+        _importSettings = importSettings;
         _aggregateImportService = new AggregateService(logger, name, OnExecuteService);
         _aggregateImportService.ConnectedAsync += AggregateImportServiceConnectedAsync;   
     }
@@ -61,18 +66,10 @@ internal class AggregateShopImportServiceJob : ImportServiceJob, IDisposable
 
     private void InitializeImportServiceJobs()
     {
-        var executionSources = _shopModel.Split();
+        var executionSources = _importSource.Split();
 
-        foreach (var source in executionSources)
-        {
-            var serviceName = $"{_name}/{(source as IImportSource).Name}";
-            var importServiceJob = _shopImportServiceJobFactory.CreateServiceJob(_importServiceFactory, _shopImportSettings, serviceName, _shopModel, false, Id);
-            _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
-
-            _aggregateImportService.Enqueue(importServiceJob.ImportService);
-
-            importServiceJob.ImportService.ConnectedAsync += ChildServiceConnectedAsync;
-        }
+        foreach (var source in executionSources)        
+            AddNewImportServiceJob(source);        
     }
 
     private async Task ChildServiceConnectedAsync(object sender, ConnectedAsyncEventArgs eventArgs)
@@ -123,5 +120,26 @@ internal class AggregateShopImportServiceJob : ImportServiceJob, IDisposable
         _aggregateImportService.ConnectedAsync -= AggregateImportServiceConnectedAsync;
         foreach (var childJob in _importServiceJobs)
             childJob.Value.ImportService.ConnectedAsync -= ChildServiceConnectedAsync;
+    }
+
+    IImportServiceJob ISourceItemListenerJob<TSourceItem>.AddSource(TSourceItem message)
+    {
+        var source = _importSource.AddSourceItem(message);
+        return AddNewImportServiceJob(source);
+    }
+
+    private IImportServiceJob AddNewImportServiceJob(TImportSource source)
+    {
+        var serviceName = $"{_name}/{source.Name}";
+        var importServiceJob = _importServiceJobFactory.CreateServiceJob<TImportSource, TSourceItem>(
+                    _importServiceFactory, _importSettings, serviceName, _importSource, false, Id);
+        
+        _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
+
+        _aggregateImportService.Enqueue(importServiceJob.ImportService);
+
+        importServiceJob.ImportService.ConnectedAsync += ChildServiceConnectedAsync;
+
+        return importServiceJob;
     }
 }

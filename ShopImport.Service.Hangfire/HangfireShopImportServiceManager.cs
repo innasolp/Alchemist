@@ -7,7 +7,6 @@ using Hangfire.AggregateJobs;
 using Hangfire.Server;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
-using Import.Service.Commands.Models;
 using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
 using Shop.Interfaces;
@@ -23,7 +22,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     IJobExecuteManager jobExecuteManager,
     AggregateServerSettings aggregateServerSettings,
     IEnumerable<IChildJobEnricher<IImportServiceJob>> childJobEnrichers)
-    : IShopImportServiceJobManager
+    : IShopImportServiceJobManager, IAsyncDisposable
 {
     private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories = shopServiceFactories;
 
@@ -45,16 +44,18 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private readonly SemaphoreSlim _addServiceSemaphoreSlim = new(1);
 
-    private List<IImportSource> ShopModels { get; } = [];
+    private readonly SemaphoreSlim _shopCategorySemaphoreSlim = new(1);
+
+    private List<IShopModel> ShopModels { get; } = [];
+
+    private readonly List<ShopCategory> _waitingShopCategories = [];
 
     public async Task<(Guid guid, IImportService service)> AddShopImportService(string name, IShopImportSettings shopImportSettings, CancellationToken cancellationToken = default)
     {
         await _addServiceSemaphoreSlim.WaitAsync(cancellationToken);
         try
         {
-            var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings, cancellationToken);
-            if (!ShopModels.Any(s => s.Name == ((IImportSource)shopModel).Name))
-                ShopModels.Add(shopModel);
+            IShopModel shopModel = await GetShopModelAsync(shopImportSettings, cancellationToken);
 
             var serviceJob = CreateImportServiceJob(name, shopImportSettings, shopModel);
             _coreServiceJobs.TryAdd(serviceJob.Id, serviceJob);
@@ -66,17 +67,17 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
             await _jobExecuteManager.Enqueue<IHagfireServiceJobManager, IImportServiceJob>(serviceJob,
                 childJobs,
-                (jobManager, job)=> 
+                (jobManager, job) =>
                         jobManager.Execute(job.Id,
                         job.ImportService.Name,
-                        job is AggregateShopImportServiceJob, //todo
+                        job.IsAggregate, //todo
                         job.ParentId,
-                        null, 
+                        null,
                         cancellationToken,
                         null),
                     _aggregateServerSettings,
                     serviceJob.JobExecuteOptions,
-                    (importServiceJob, jobId)=> importServiceJob.JobId = jobId,
+                    (importServiceJob, jobId) => importServiceJob.JobId = jobId,
                     _childJobEnrichers,
                     cancellationToken);
 
@@ -88,6 +89,27 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         }
     }
 
+    private async Task<IShopModel> GetShopModelAsync(IShopImportSettings shopImportSettings, CancellationToken cancellationToken)
+    {
+        var shopModel = await _shopDataService.GetShopModelAsync(shopImportSettings, cancellationToken);
+        
+        if (!ShopModels.Any(s => s.Name == shopModel.Name && s.Type == shopModel.Type))
+        {
+            ShopModels.Add(shopModel);
+
+            var waitingCategories = _waitingShopCategories.Where(x => x.ShopId == shopModel.Id).ToList();
+            waitingCategories.ForEach(x =>
+            {
+                if (!shopModel.RootCategories.Any(c=>c.ItemId == x.ItemId))
+                    shopModel.RootCategories.Add(x.ToProductShopCategoryModel());
+
+                _waitingShopCategories.Remove(x);
+            });
+        }
+
+        return shopModel;
+    }
+
     private IImportServiceJob CreateImportServiceJob(string name, IShopImportSettings shopImportSettings, IShopModel source)
     {
         var importServiceSettings = shopImportSettings.GetImportService()
@@ -96,7 +118,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         var serviceFactory = _shopServiceFactories.FirstOrDefault(f => f.ServiceImplementationType.Name == importServiceSettings.ImplementationTypeName)
             ?? throw new InvalidOperationException($"Service type {importServiceSettings.ImplementationTypeName} not found.");
 
-        return _importServiceJobFactory.CreateServiceJob(serviceFactory, shopImportSettings, name, source, shopImportSettings.IsAggregate);
+        return _importServiceJobFactory.CreateServiceJob<IShopModel, IProductShopCategory>(serviceFactory, shopImportSettings, name, source, shopImportSettings.IsAggregate);
     }
 
     private void SubscribeServiceWithChildrenToFailedHandler(IImportServiceJob importServiceJob)
@@ -223,30 +245,61 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     {
         var executingTasks = GetExecutingServiceJobs(serviceJob.Id).Select(e=>e.ImportService.Stop(cancellationToken));
         return Task.WhenAll(executingTasks);
-    }
+    }    
 
-    private readonly Lock _shopModelsLock = new();
-
-    public async Task AddShopCategory(ShopCategory shopCategory)
+    public async Task AddShopCategory(ShopCategory shopCategory, CancellationToken cancellationToken)
     {
-        ProductShopModel? shop;
-        IProductShopCategory? productShopCategory;
-        lock (_shopModelsLock)
-        {
-            shop = ShopModels.OfType<ProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
+        await _shopCategorySemaphoreSlim.WaitAsync(cancellationToken);
 
-            if (shop?.RootCategories.Any(c => c.ItemId == shopCategory.ItemId) != true)
+        try
+        {
+            var shop = ShopModels.OfType<IProductShopModel>().FirstOrDefault(s => s.Id == shopCategory.ShopId);
+
+            if(shop == null)
+            {
+                _waitingShopCategories.Add(shopCategory);
+                return;
+            }
+
+            if (shop?.RootCategories.Any(c => c.ItemId == shopCategory.ItemId) != false)
                 return;
 
-            productShopCategory = shopCategory.ToProductShopCategoryModel();
-            shop?.Categories.Add(productShopCategory);
-        }
+            var productShopCategory = shopCategory.ToProductShopCategoryModel();
 
-        //todo
-        if (_coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop?.Id 
-                    && s.Value.ImportService is IListener<IProductShopCategory> shopCategoryListener).Value.ImportService
-            is IListener<IProductShopCategory> shopCategoryListener)
-            await shopCategoryListener.On(productShopCategory);
+            var sourceServiceJob = _coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop.Id);
+            if (sourceServiceJob.Key == default) return;
+
+            if (sourceServiceJob.Value.IsAggregate
+                && sourceServiceJob.Value is ISourceItemListenerJob<IProductShopCategory> shopCategoryListenerJob)
+            {
+                var newServiceJob = shopCategoryListenerJob.AddSource(productShopCategory);
+
+                await _jobExecuteManager.Enqueue<IHagfireServiceJobManager, IImportServiceJob>(newServiceJob,
+                        [],
+                        (jobManager, job) =>
+                                jobManager.Execute(job.Id,
+                                job.ImportService.Name,
+                                job.IsAggregate, //todo
+                                job.ParentId,
+                                null,
+                                cancellationToken,
+                                null),
+                            _aggregateServerSettings,
+                            newServiceJob.JobExecuteOptions,
+                            (importServiceJob, jobId) => importServiceJob.JobId = jobId,
+                            _childJobEnrichers,
+                            cancellationToken);
+            }
+            else if (!sourceServiceJob.Value.IsAggregate &&
+                sourceServiceJob.Value.ImportService is IListener<IProductShopCategory> shopCategoryListener)
+            {
+                await shopCategoryListener.On(productShopCategory, cancellationToken);
+            }
+        }
+        finally
+        {
+            ReleaseSemaphoreIfNeed(_shopCategorySemaphoreSlim);
+        }
     }
 
     async Task IHagfireServiceJobManager.Execute(Guid id, 
@@ -316,5 +369,24 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     private IReadOnlyDictionary<Guid, IImportServiceJob> GetChildJobs(Guid parentId)
     {
         return _allServiceJobs.Where(j => j.Value.ParentId == parentId).ToDictionary();
+    }
+
+    private static void ReleaseSemaphoreIfNeed(SemaphoreSlim semaphoreSlim)
+    {
+        if (semaphoreSlim.CurrentCount < 1)
+        {
+            semaphoreSlim.Release();
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        ReleaseSemaphoreIfNeed(_shopCategorySemaphoreSlim);
+        _shopCategorySemaphoreSlim.Dispose();
+
+        ReleaseSemaphoreIfNeed(_addServiceSemaphoreSlim);
+        _addServiceSemaphoreSlim.Dispose();
+
+        return ValueTask.CompletedTask;
     }
 }
