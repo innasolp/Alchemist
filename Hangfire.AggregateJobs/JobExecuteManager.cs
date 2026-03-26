@@ -31,36 +31,54 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
         Action<TJob, string>? setJobIdAction = null,
         IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
         CancellationToken cancellationToken = default)
+        where TJob : class?
     {
-        var coreExecutor = _jobExecutors.FirstOrDefault(e=>e.IsAccessible(jobExecuteOptions: jobExecuteOptions)) ?? DefaultJobExecutor;
-       
-        var coreJobExpression = execute.BindSecondParameter(coreJob);
-        var coreJobId = await coreExecutor.EnqueueAsync(coreJobExpression, 
-                                        aggregateServerSettings.WaitingQueue,
-                                        jobExecuteOptions, 
-                                        cancellationToken);
-        setJobIdAction?.Invoke(coreJob, coreJobId);
-
-        if(childJobEnrichers != null)
-            foreach (var childJobEnricher in childJobEnrichers)
-                childJobEnricher.Enrich(coreJobId, coreJob, coreJob);
+        await EnqueueJob(coreJob, 
+            execute,
+            aggregateServerSettings.WaitingQueue, 
+            coreJob,
+            jobExecuteOptions, 
+            setJobIdAction,
+            childJobEnrichers, 
+            cancellationToken);
 
         foreach (var childJob in childJobs)
         {
-            var executor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(true)) ?? DefaultJobExecutor;
-
-            var jobExpression = execute.BindSecondParameter(childJob);
-            
-            var jobId = await executor.EnqueueAsync(jobExpression,
-                aggregateServerSettings.ChildWaitingQueue,
-                cancellationToken : cancellationToken);
-
-            if (childJobEnrichers != null)
-                foreach (var childJobEnricher in childJobEnrichers)
-                    childJobEnricher.Enrich(jobId, childJob, coreJob);
-
-            setJobIdAction?.Invoke(childJob, jobId);
+            await EnqueueJob(childJob,
+            execute,
+            aggregateServerSettings.ChildWaitingQueue,
+            coreJob,
+            jobExecuteOptions,
+            setJobIdAction,
+            childJobEnrichers,
+            cancellationToken);
         }
+    }
+
+    private async Task EnqueueJob<T, TJob>(TJob job,
+        Expression<Func<T, TJob, Task>> execute,
+        string queue,
+        TJob? parentJob = null,
+        JobExecuteOptions? jobExecuteOptions = null,
+        Action<TJob, string>? setJobIdAction = null,
+        IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
+        CancellationToken cancellationToken = default)
+        where TJob : class?
+    {
+        var executor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(parentJob != null && job != parentJob, jobExecuteOptions))
+            ?? DefaultJobExecutor;
+
+        var jobExpression = execute.BindSecondParameter(job);
+
+        var jobId = await executor.EnqueueAsync(jobExpression,
+            queue,
+            cancellationToken: cancellationToken);
+
+        if (childJobEnrichers != null)
+            foreach (var childJobEnricher in childJobEnrichers)
+                childJobEnricher.Enrich(jobId, job, parentJob);
+
+        setJobIdAction?.Invoke(job, jobId);
     }
 
     public async Task Execute<T, TJob>(string coreJobId,
@@ -73,10 +91,12 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
         var parentJobId = await coreExecutor.ExecuteAsync<T>(coreJobId, aggregateServerSettings.ProcessingQueue, cancellationToken);
         var parentJobCreatedAt = DateTime.Now;       
 
+        await _childJobStorage.CreateParentJobEntryAsync(new ParentJobEntry { JobId = parentJobId, CreatedAt = parentJobCreatedAt, Status = JobStatus.Processing });
+
         foreach (var executedJobId in childJobIds)
         {
             await _childJobStorage.CreateChildJobEntryAsync(
-                new ChildJobEntry { JobId = executedJobId, ParentJobId = parentJobId, Status = 0, ParentCreatedAt = parentJobCreatedAt });
+                new ChildJobEntry { JobId = executedJobId, ParentJobId = parentJobId, Status = 0 });
         }
     }
 
