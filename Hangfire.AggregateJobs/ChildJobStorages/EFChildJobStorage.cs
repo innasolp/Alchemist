@@ -6,6 +6,11 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
 {
     private readonly ChildJobDbContext _dbContext = dbContext;
 
+    public bool ParentJobExists(string jobId)
+    {
+        return _dbContext.ParentJobEntries.Any(x=>x.JobId ==  jobId);
+    }
+
     public async Task CreateChildJobEntryAsync(ChildJobEntry childJobEntry)
     {
         await _dbContext.AddAsync(childJobEntry);
@@ -28,29 +33,40 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
         var childstatusEnqueued = 0;
         var parentstatusExecuting = 1;
 
-        var sql = $@" WITH running_counts AS (
-            SELECT ""parent_job_id"", COUNT(*) as ""active_count""
-            FROM ""child_job_entry""
-            WHERE ""status"" = 1
-            GROUP BY ""parent_job_id""
-        ),
-        ranked_jobs AS (
-            SELECT c.*, p.""created_at"" as ""parent_created_at"",
-                   ROW_NUMBER() OVER (PARTITION BY c.""parent_job_id"" ORDER BY c.""created_at"" ASC) 
-                   + COALESCE(r.""active_count"", 0) as ""adjusted_rank""
-            FROM ""child_job_entry"" c
-            INNER JOIN ""parent_job_entry"" p ON c.""parent_job_id"" = p.""job_id""
-            LEFT JOIN running_counts r ON c.""parent_job_id"" = r.""parent_job_id""
-            WHERE c.""status"" = {childstatusEnqueued} 
-              AND p.""status"" = {parentstatusExecuting}
-        )
-        SELECT ""job_id"", ""parent_job_id"", ""status"", ""created_at""
-        FROM ranked_jobs
-        ORDER BY 
-            CASE WHEN ""adjusted_rank"" <= {childJobCountPerParent} THEN 0 ELSE 1 END ASC,
-            ""parent_created_at"" ASC,
-            ""created_at"" ASC
-        LIMIT {freeSlots}";
+        var sql = $@"WITH running_counts AS (
+                SELECT 
+                    parent_job_id, 
+                    COUNT(*) as active_count
+                FROM child_job_entry
+                WHERE status = {childstatusEnqueued}
+                GROUP BY parent_job_id
+            ),
+            ranked_jobs AS (
+                SELECT 
+                    c.*, 
+                    p.created_at as parent_created_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY c.parent_job_id 
+                        ORDER BY c.created_at ASC
+                    ) + COALESCE(r.active_count, 0) as adjusted_rank
+                FROM child_job_entry c
+                INNER JOIN parent_job_entry p ON c.parent_job_id = p.job_id
+                LEFT JOIN running_counts r ON c.parent_job_id = r.parent_job_id
+                WHERE c.status = {childstatusEnqueued} 
+                  AND p.status = {parentstatusExecuting}
+            )
+            -- 3. Финальная сортировка и выборка
+            SELECT 
+                job_id, 
+                parent_job_id, 
+                status, 
+                created_at
+            FROM ranked_jobs
+            ORDER BY 
+                CASE WHEN adjusted_rank <= {childJobCountPerParent} THEN 0 ELSE 1 END ASC,
+                parent_created_at ASC,
+                created_at ASC
+            LIMIT {freeSlots}";
 
        return await _dbContext.ChildJobEntries
             .FromSqlRaw(sql)

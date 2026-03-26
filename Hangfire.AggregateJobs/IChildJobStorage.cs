@@ -19,4 +19,6 @@ internal interface IChildJobStorage
     void DeleteParentJob(string jobId);
 
     void UpdateParentJobState(string jobId, JobStatus state);
+
+    bool ParentJobExists(string jobId);
 }
