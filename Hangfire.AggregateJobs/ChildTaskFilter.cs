@@ -23,7 +23,7 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
             return;
         }
 
-        childJobStorage.UpdateJobState(jobId,
+        childJobStorage.UpdateChildJobState(jobId,
         filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed);
     }
 

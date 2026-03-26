@@ -2,7 +2,7 @@
 
 namespace Hangfire.AggregateJobs;
 
-internal class ParentJobEntry
+public class ParentJobEntry
 {
     [Key]
     public required string JobId { get; set; }
