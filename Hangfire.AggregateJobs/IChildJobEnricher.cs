@@ -1,8 +1,6 @@
-﻿using Hangfire.Storage;
-
-namespace Hangfire.AggregateJobs;
+﻿namespace Hangfire.AggregateJobs;
 
 public interface IChildJobEnricher<T>
 {
-    void Enrich(string jobId, T job, T parentJob);
+    void Enrich(string jobId, T job, T? parentJob);
 }

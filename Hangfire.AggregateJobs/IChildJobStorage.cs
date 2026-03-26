@@ -13,4 +13,12 @@ internal interface IChildJobStorage
     string? GetParentJobId(string jobId);
 
     Task CreateChildJobEntryAsync(ChildJobEntry childJobEntry);
+
+    Task CreateParentJobEntryAsync(ParentJobEntry parentJobEntry);
+
+    void DeleteParentJob(string jobId);
+
+    void UpdateParentJobState(string jobId, JobStatus state);
+
+    bool ParentJobExists(string jobId);
 }

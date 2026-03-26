@@ -14,6 +14,8 @@ internal class ChildJobDbContext : DbContext
 
     public virtual DbSet<ChildJobEntry> ChildJobEntries { get; set; }
 
+    public virtual DbSet<ParentJobEntry> ParentJobEntries { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -31,7 +33,17 @@ internal class ChildJobDbContext : DbContext
             entity.Property(e => e.ParentJobId).HasMaxLength(1024).HasColumnName("parent_job_id");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").IsRequired();
-            entity.Property(e => e.ParentCreatedAt).HasColumnName("parent_created_at").IsRequired();
+        });
+
+        modelBuilder.Entity<ParentJobEntry>(entity =>
+        {
+            entity.HasKey(e => e.JobId).HasName("parent_job_entry_pk");
+
+            entity.ToTable("parent_job_entry");
+
+            entity.Property(e => e.JobId).HasColumnName("job_id").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(e => e.Status).HasColumnName("status").IsRequired();
         });
     }
 }
