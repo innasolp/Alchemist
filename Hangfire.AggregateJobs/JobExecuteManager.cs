@@ -90,7 +90,7 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
     {
         var coreExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(jobExecuteOptions : jobExecuteOptions)) ?? DefaultJobExecutor;
         var parentJobId = await coreExecutor.ExecuteAsync<T>(coreJobId, aggregateServerSettings.ProcessingQueue, cancellationToken);
-        var parentJobCreatedAt = DateTime.Now;       
+        var parentJobCreatedAt = DateTime.Now;
 
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
@@ -101,6 +101,8 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
         {
             await childJobStorage.CreateChildJobEntryAsync(
                 new ChildJobEntry { JobId = executedJobId, ParentJobId = parentJobId, Status = 0 });
+            await childJobStorage.CreateChildJobEntryAsync(
+                new ChildJobEntry { JobId = executedJobId, ParentJobId = parentJobId, Status = 0, ParentCreatedAt = parentJobCreatedAt });
         }
     }
 
