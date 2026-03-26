@@ -272,22 +272,32 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             {
                 var newServiceJob = shopCategoryListenerJob.AddSource(productShopCategory);
 
-                await _jobExecuteManager.EnqueueChild<IHagfireServiceJobManager, IImportServiceJob>(newServiceJob,
-                        (jobManager, job) =>
-                                jobManager.Execute(job.Id,
-                                job.ImportService.Name,
-                                job.IsAggregate,
-                                job.ParentId,
-                                null,
-                                cancellationToken,
-                                null),
-                            _aggregateServerSettings,
-                            shopCategoryListenerJob as IImportServiceJob,
-                            (shopCategoryListenerJob as IImportServiceJob)?.JobId,
-                            newServiceJob.JobExecuteOptions,
-                            (importServiceJob, jobId) => importServiceJob.JobId = jobId,
-                            _childJobEnrichers,
-                            cancellationToken);
+                _allServiceJobs.TryAdd(newServiceJob.Id, newServiceJob);
+
+                try
+                {
+                    await _jobExecuteManager.EnqueueChild<IHagfireServiceJobManager, IImportServiceJob>(newServiceJob,
+                            (jobManager, job) =>
+                                    jobManager.Execute(job.Id,
+                                    job.ImportService.Name,
+                                    job.IsAggregate,
+                                    job.ParentId,
+                                    null,
+                                    cancellationToken,
+                                    null),
+                                _aggregateServerSettings,
+                                shopCategoryListenerJob as IImportServiceJob,
+                                (shopCategoryListenerJob as IImportServiceJob)?.JobId,
+                                newServiceJob.JobExecuteOptions,
+                                (importServiceJob, jobId) => importServiceJob.JobId = jobId,
+                                _childJobEnrichers,
+                                cancellationToken);
+                }
+                catch
+                {
+                    _allServiceJobs.TryRemove(newServiceJob.Id, out var _);
+                    throw;
+                }
             }
             else if (_coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop.Id && !s.Value.IsAggregate
                      && s.Value.ImportService is IListener<IProductShopCategory>).Value?.ImportService
@@ -348,6 +358,9 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private void RemoveJobWithChildren(IImportServiceJob deletedServiceJob)
     {
+        if(!string.IsNullOrEmpty(deletedServiceJob.JobId))
+            _jobExecuteManager.DeleteParentJob(deletedServiceJob.JobId);
+
         RemoveImportServiceJob(deletedServiceJob);
 
         var childJobs = GetChildJobs(deletedServiceJob.Id);
@@ -356,7 +369,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             RemoveImportServiceJob(childJob.Value);
 
             if (childJob.Value.JobId != null)
-                _jobExecuteManager.DeleteJob(childJob.Value.JobId);
+                _jobExecuteManager.DeleteChildJob(childJob.Value.JobId);
         }
     }
 

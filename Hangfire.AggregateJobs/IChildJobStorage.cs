@@ -1,24 +1,28 @@
 ﻿namespace Hangfire.AggregateJobs;
 
-internal interface IChildJobStorage
+public interface IChildJobStorage
 {
     Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots);
 
-    Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state);
+    Task UpdateChildJobsStateAsync(IEnumerable<string> jobIds, JobStatus state);
 
-    void UpdateJobsState(IEnumerable<string> jobIds, JobStatus state);
-
-    void UpdateJobState(string jobId, JobStatus state);
+    void UpdateChildJobState(string jobId, JobStatus state);
 
     string? GetParentJobId(string jobId);
+
+    Task<ParentJobEntry?> GetParentJobAsync(string jobId);
 
     Task CreateChildJobEntryAsync(ChildJobEntry childJobEntry);
 
     Task CreateParentJobEntryAsync(ParentJobEntry parentJobEntry);
 
-    void DeleteParentJob(string jobId);
+    Task DeleteParentJobAsync(string jobId);
 
     void UpdateParentJobState(string jobId, JobStatus state);
 
+    Task UpdateParentJobStateAsync(string jobId, JobStatus state);
+
     bool ParentJobExists(string jobId);
+
+    Task UpdateParentJobIdAsync(IEnumerable<string> jobIds, string parentJobId);
 }

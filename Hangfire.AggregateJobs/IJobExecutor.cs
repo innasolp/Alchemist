@@ -2,7 +2,7 @@
 
 namespace Hangfire.AggregateJobs;
 
-internal interface IJobExecutor
+public interface IJobExecutor
 {
     Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> jobTask, string waitingQueue, 
         JobExecuteOptions? jobExecuteOptions = null, 
@@ -12,5 +12,5 @@ internal interface IJobExecutor
 
     string Execute<T>(string jobId, string processingQueue);
 
-    bool IsAccessible(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null);
+    bool IsAccessible(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null, params object?[] parameters);
 }

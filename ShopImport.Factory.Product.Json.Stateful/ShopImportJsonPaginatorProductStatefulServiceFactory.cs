@@ -32,8 +32,7 @@ internal class ShopImportJsonPaginatorProductStatefulServiceFactory(ILogger<Shop
         return new ShopImportHttpJsonPagingCategoryProductsStatefulService(logger as ILogger<ShopImportHttpJsonPagingCategoryProductsStatefulService>,
             browserService,
             shopModel.Url,
-            //todo
-            $"{shopModel.Name}_product",
+            name,
             shopModel.Categories,
             productItemHandler,
             productShopImportSettings.ProductUrlFormat,
