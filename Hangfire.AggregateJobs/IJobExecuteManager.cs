@@ -11,7 +11,8 @@ public interface IJobExecuteManager
         JobExecuteOptions? jobExecuteOptions = null,
         Action<TJob, string>? setJobIdAction = null,
         IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default)
+        where TJob : class?;
 
     Task Execute<T, TJob>(string coreJobId,
         IEnumerable<string> childJobIds,

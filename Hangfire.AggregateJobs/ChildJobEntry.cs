@@ -19,5 +19,4 @@ internal class ChildJobEntry
     public required string ParentJobId { get; set; }
     public JobStatus Status { get; set; } = JobStatus.Enqueued;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public required DateTime ParentCreatedAt { get; set; }
 }
