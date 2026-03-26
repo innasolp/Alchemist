@@ -68,9 +68,10 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
                 created_at ASC
             LIMIT {freeSlots}";
 
-       return await _dbContext.ChildJobEntries
-            .FromSqlRaw(sql)
-            .Select(j => j.JobId)
+        return await _dbContext.ChildJobEntries
+                .FromSqlRaw(sql)
+                .Select(j => j.JobId)
+            .AsNoTracking()
             .ToListAsync();
     }
 

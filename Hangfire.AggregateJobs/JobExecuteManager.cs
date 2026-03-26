@@ -55,8 +55,36 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
             cancellationToken);
         }
     }
+    public async Task EnqueueChild<T, TJob>(TJob job,
+        Expression<Func<T, TJob, Task>> execute,
+        AggregateServerSettings aggregateServerSettings,
+        TJob? parentJob = null,
+        string? parentJobId = null,
+        JobExecuteOptions? jobExecuteOptions = null,
+        Action<TJob, string>? setJobIdAction = null,
+        IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
+        CancellationToken cancellationToken = default)
+        where TJob : class?
+    {
+        var jobId = await EnqueueJob(job,
+            execute,
+            aggregateServerSettings.ChildWaitingQueue,
+            parentJob,
+            jobExecuteOptions,
+            setJobIdAction,
+            childJobEnrichers,
+            cancellationToken);
 
-    private async Task EnqueueJob<T, TJob>(TJob job,
+        if (string.IsNullOrEmpty(parentJobId)) return;
+
+        using var scope = serviceScopeFactory.CreateScope();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
+
+        await childJobStorage.CreateChildJobEntryAsync(new ChildJobEntry { JobId = jobId, ParentJobId = parentJobId, Status = JobStatus.Enqueued });
+    }
+
+
+    private async Task<string> EnqueueJob<T, TJob>(TJob job,
         Expression<Func<T, TJob, Task>> execute,
         string queue,
         TJob? parentJob = null,
@@ -75,11 +103,13 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
             queue,
             cancellationToken: cancellationToken);
 
+        setJobIdAction?.Invoke(job, jobId);
+
         if (childJobEnrichers != null)
             foreach (var childJobEnricher in childJobEnrichers)
                 childJobEnricher.Enrich(jobId, job, parentJob);
 
-        setJobIdAction?.Invoke(job, jobId);
+        return jobId;
     }
 
     public async Task Execute<T, TJob>(string coreJobId,

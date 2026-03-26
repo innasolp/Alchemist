@@ -266,35 +266,35 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
             var productShopCategory = shopCategory.ToProductShopCategoryModel();
 
-            var sourceServiceJob = _coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop.Id);
-            if (sourceServiceJob.Key == default) return;
-
-            if (sourceServiceJob.Value.IsAggregate
-                && sourceServiceJob.Value is ISourceItemListenerJob<IProductShopCategory> shopCategoryListenerJob)
+            if (_coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop.Id && s.Value.IsAggregate
+                     && s.Value is ISourceItemListenerJob<IProductShopCategory>).Value
+                                is ISourceItemListenerJob<IProductShopCategory> shopCategoryListenerJob)
             {
                 var newServiceJob = shopCategoryListenerJob.AddSource(productShopCategory);
 
-                await _jobExecuteManager.Enqueue<IHagfireServiceJobManager, IImportServiceJob>(newServiceJob,
-                        [],
+                await _jobExecuteManager.EnqueueChild<IHagfireServiceJobManager, IImportServiceJob>(newServiceJob,
                         (jobManager, job) =>
                                 jobManager.Execute(job.Id,
                                 job.ImportService.Name,
-                                job.IsAggregate, //todo
+                                job.IsAggregate,
                                 job.ParentId,
                                 null,
                                 cancellationToken,
                                 null),
                             _aggregateServerSettings,
+                            shopCategoryListenerJob as IImportServiceJob,
+                            (shopCategoryListenerJob as IImportServiceJob)?.JobId,
                             newServiceJob.JobExecuteOptions,
                             (importServiceJob, jobId) => importServiceJob.JobId = jobId,
                             _childJobEnrichers,
                             cancellationToken);
             }
-            else if (!sourceServiceJob.Value.IsAggregate &&
-                sourceServiceJob.Value.ImportService is IListener<IProductShopCategory> shopCategoryListener)
+            else if (_coreServiceJobs.FirstOrDefault(s => s.Value.SourceId == shop.Id && !s.Value.IsAggregate
+                     && s.Value.ImportService is IListener<IProductShopCategory>).Value?.ImportService
+                                 is IListener<IProductShopCategory> shopCategoryListener)
             {
                 await shopCategoryListener.On(productShopCategory, cancellationToken);
-            }
+            }            
         }
         finally
         {
