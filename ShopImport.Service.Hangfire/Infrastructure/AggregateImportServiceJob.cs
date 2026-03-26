@@ -132,7 +132,7 @@ internal class AggregateImportServiceJob<TImportSource, TSourceItem> : ImportSer
     {
         var serviceName = $"{_name}/{source.Name}";
         var importServiceJob = _importServiceJobFactory.CreateServiceJob<TImportSource, TSourceItem>(
-                    _importServiceFactory, _importSettings, serviceName, _importSource, false, Id);
+                    _importServiceFactory, _importSettings, serviceName, source, false, Id);
         
         _importServiceJobs.Add(importServiceJob.Id, importServiceJob);
 
