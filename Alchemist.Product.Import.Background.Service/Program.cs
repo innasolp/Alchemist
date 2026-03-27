@@ -52,8 +52,7 @@ AddShopAPIService(builder, out var restApiHost);
 
 AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
-//builder.Host.AddImportServicesInfrastructure();
-var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOptions").Get<JobExecuteOptions>();
+var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOptions").Get<AggregateServerSettings>();
 builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"),
     (config, connectionString)=>
     {
@@ -147,6 +146,18 @@ static void AddShopSettingsAPIService(WebApplicationBuilder builder, out string 
 {
     settingsAPIHost = builder.Configuration.GetSection("SettingsAPIHost").Get<string>();
     builder.Services.AddRestApiClient<IShopSettingsDataService, SettingsAPIClient>(builder.Configuration, "SettingsAPIHost", nameof(SettingsAPIClient), out var settingsHttpClientBuilder);
+}
+
+static void ClearRedisDataBase(string hangfireConnectionString)
+{
+    var redis = ConnectionMultiplexer.Connect($"{hangfireConnectionString},allowAdmin=true");
+
+    var endpoints = redis.GetEndPoints();
+    foreach (var endpoint in endpoints)
+    {
+        var server = redis.GetServer(endpoint);
+        server.FlushDatabase();
+    }
 }
 
 static void ClearRedisDataBase(string hangfireConnectionString)
