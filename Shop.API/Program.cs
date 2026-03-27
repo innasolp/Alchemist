@@ -1,6 +1,5 @@
 using Alchemist.Common;
 using Alchemist.Log.Extensions;
-using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using BackgroundTaskQueue;
 using CustomConfigurationProvider;
@@ -25,7 +24,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2")));
+builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
 builder.Services.AddUnboundedBackgroundQueue();
 

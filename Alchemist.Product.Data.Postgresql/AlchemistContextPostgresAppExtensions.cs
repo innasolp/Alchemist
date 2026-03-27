@@ -14,6 +14,9 @@ public static  class AlchemistContextPostgresAppExtensions
 
         using var context = factory.CreateDbContext();
 
-        context.Database.Migrate();
+        if (context.Database.CanConnect())
+        {
+            context.Database.Migrate();
+        }
     }
 }
