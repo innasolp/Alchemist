@@ -36,6 +36,7 @@
 	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
 	  <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>

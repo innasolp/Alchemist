@@ -1,6 +1,5 @@
 using Alchemist.Common;
 using Alchemist.Log.Extensions;
-using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using BackgroundTaskQueue;
 using CustomConfigurationProvider;
@@ -25,7 +24,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
+builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
 builder.Services.AddUnboundedBackgroundQueue();
 
@@ -68,6 +67,8 @@ app.UseHsts();
 app.MapControllers();
 
 app.UseSerilogRequestLogging();
+
+app.UseAlchemyPostgresqlMigration();
 
 app.Run();
 
