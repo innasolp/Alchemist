@@ -160,18 +160,6 @@ static void ClearRedisDataBase(string hangfireConnectionString)
     }
 }
 
-static void ClearRedisDataBase(string hangfireConnectionString)
-{
-    var redis = ConnectionMultiplexer.Connect($"{hangfireConnectionString},allowAdmin=true");
-
-    var endpoints = redis.GetEndPoints();
-    foreach (var endpoint in endpoints)
-    {
-        var server = redis.GetServer(endpoint);
-        server.FlushDatabase();
-    }
-}
-
 static void AddShopImporters(IServiceCollection services, IConfiguration configuration)
 {
     services.RegisterServiceImplementationsFromPathDILoad($"{Utils.GetAppPath()}\\{configuration.GetSection("ShopImportServiceStatePath").Value}");
