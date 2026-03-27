@@ -7,13 +7,11 @@ public partial class AlchemyContext : DbContext
     private readonly DateChangedInterceptor _dateChangedInterceptor = new();
     public AlchemyContext()
     {
-        Database.EnsureCreated();
     }
 
-    public AlchemyContext(DbContextOptions<AlchemyContext> options)
+    public AlchemyContext(DbContextOptions options)
         : base(options)
     {
-        Database.EnsureCreated();
     }
 
     public virtual DbSet<Brand> Brands { get; set; }

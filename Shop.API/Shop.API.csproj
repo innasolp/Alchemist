@@ -11,13 +11,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.4" />
-    <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
+    <PackageReference Include="Message.SignalR.HubMessage.DependencyInjection" Version="1.0.0.5" />
+    <PackageReference Include="Message.Interfaces" Version="1.0.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.4" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 	<PackageReference Include="MediatR" Version="14.0.0" />
-	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.2" />
+	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
