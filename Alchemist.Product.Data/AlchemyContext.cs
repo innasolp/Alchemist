@@ -5,8 +5,6 @@ namespace Alchemist.Product.Data;
 
 public abstract partial  class AlchemyContext : DbContext
 {
-    private readonly DateChangedInterceptor _dateChangedInterceptor = new();
-
     public AlchemyContext()
     {
     }
@@ -58,7 +56,6 @@ public abstract partial  class AlchemyContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        optionsBuilder.AddInterceptors(_dateChangedInterceptor);
         base.OnConfiguring(optionsBuilder);
     }
 
