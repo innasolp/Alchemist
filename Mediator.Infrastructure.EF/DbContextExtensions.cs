@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UnitOfWork;
 
 namespace Mediator.Infrastructure.EF;
 
@@ -8,8 +7,8 @@ public static class DbContextExtensions
     public static async Task<T> Create<T>(this DbContext dbContext,  T entity, CancellationToken cancellationToken = default) 
         where T : class
     {
-        var added = await dbContext.Set<T>().AddAsync(entity, cancellationToken);
-        return await Task.FromResult(added.Entity);
+        await dbContext.Set<T>().AddAsync(entity, cancellationToken);
+        return entity;
     }
 
     public static async Task<TEntity?> GetById<TEntity,TId>(this DbContext dbContext, TId id, CancellationToken cancellationToken = default)
@@ -37,7 +36,7 @@ public static class DbContextExtensions
         
         return entities.Count > 1
             ? throw new EntityWarningException($"multiple entities with name {name}", entities.FirstOrDefault())
-            : await Task.FromResult(entities.FirstOrDefault());
+            : entities.FirstOrDefault();
     }
 
     public static async Task<TEntity?> FindByName<TEntity>(this DbContext dbContext, string name, Func<TEntity, string[]> nameProperties
@@ -53,6 +52,6 @@ public static class DbContextExtensions
 
         return entities.Count > 1
             ? throw new EntityWarningException($"multiple entities with name {name}", entities.FirstOrDefault())
-            : await Task.FromResult(entities.FirstOrDefault());
+            : entities.FirstOrDefault();
     }
 }

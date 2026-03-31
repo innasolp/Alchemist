@@ -18,6 +18,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 	<PackageReference Include="MediatR" Version="14.0.0" />
 	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>

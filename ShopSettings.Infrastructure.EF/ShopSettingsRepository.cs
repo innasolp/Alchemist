@@ -25,7 +25,7 @@ public sealed class ShopSettingsRepository(AlchemyContext context) : IShopSettin
         return _context.ShopSettings.FirstOrDefaultAsync(s => s.ShopId == shopId && s.Type == settingType && s.IsActual != false, cancellationToken);
     }
 
-    public async Task<Alchemist.Product.Data.ShopSettings?> SaveShopSettings(Alchemist.Product.Data.ShopSettings shopSettings, CancellationToken cancellationToken = default)
+    public async Task<Alchemist.Product.Data.ShopSettings> SaveShopSettings(Alchemist.Product.Data.ShopSettings shopSettings, CancellationToken cancellationToken = default)
     {
         await SetShopSettingsActuality(shopSettings.ShopId, shopSettings.Type, shopSettings.Id, cancellationToken);
 
