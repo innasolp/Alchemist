@@ -17,15 +17,22 @@ public class ProductModule : MediatorModule
 
     protected override void RegisterTypes(ContainerBuilder builder)
     {
-        builder.RegisterType(typeof(AlchemyContext)).As(typeof(DbContext));
+        builder.Register(c =>
+        {
+            var factory = c.Resolve<IDbContextFactory<AlchemyContext>>();
+            return factory.CreateDbContext();
+        })
+        .AsSelf()
+        .As<DbContext>()
+        .InstancePerLifetimeScope();
 
-        builder.RegisterType(typeof(ShopProductRepository)).As(typeof(IShopProductRepository));
-        builder.RegisterType(typeof(ProductComponentRepository)).As(typeof(IProductComponentRepository));
-        builder.RegisterType(typeof(ProductPurposeRepository)).As(typeof(IProductPurposeRepository));
-        builder.RegisterType(typeof(ProductPurposeTypeRepository)).As(typeof(IProductPurposeTypeRepository));
-        builder.RegisterType(typeof(ProductRepository)).As(typeof(IProductRepository));
-        builder.RegisterType(typeof(ShopProductPriceRepository)).As(typeof(IShopProductPriceRepository));
-        builder.RegisterType(typeof(CurrencyRepository)).As(typeof(ICurrencyRepository));
-        builder.RegisterType(typeof(ShopProductCategoryRepository)).As(typeof(IShopProductCategoryRepository));
+        builder.RegisterType(typeof(ShopProductRepository)).As(typeof(IShopProductRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(ProductComponentRepository)).As(typeof(IProductComponentRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(ProductPurposeRepository)).As(typeof(IProductPurposeRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(ProductPurposeTypeRepository)).As(typeof(IProductPurposeTypeRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(ProductRepository)).As(typeof(IProductRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(ShopProductPriceRepository)).As(typeof(IShopProductPriceRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(CurrencyRepository)).As(typeof(ICurrencyRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(ShopProductCategoryRepository)).As(typeof(IShopProductCategoryRepository)).InstancePerLifetimeScope();
     }
 }

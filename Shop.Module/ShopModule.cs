@@ -21,10 +21,17 @@ public class ShopModule  : MediatorModule
 
     protected override void RegisterTypes(ContainerBuilder builder)
     {
-        builder.RegisterType(typeof(AlchemyContext)).As(typeof(DbContext));
-        
-        builder.RegisterType(typeof(ShopRepository)).As(typeof(IShopRepository));
-        builder.RegisterType(typeof(ShopCategoryRepository)).As(typeof(IShopCategoryRepository));     
+        builder.Register(c =>
+        {
+            var factory = c.Resolve<IDbContextFactory<AlchemyContext>>();
+            return factory.CreateDbContext();
+        })
+        .AsSelf()
+        .As<DbContext>()
+        .InstancePerLifetimeScope();
+
+        builder.RegisterType(typeof(ShopRepository)).As(typeof(IShopRepository)).InstancePerLifetimeScope();
+        builder.RegisterType(typeof(ShopCategoryRepository)).As(typeof(IShopCategoryRepository)).InstancePerLifetimeScope();     
         
         builder.RegisterGeneric(typeof(CreateCommandHandler<>)).As(typeof(ICreateCommandHandler<>));
         

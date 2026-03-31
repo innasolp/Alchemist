@@ -27,16 +27,16 @@ public static class TestRepository
         var shopSettings = new Product.Data.ShopSettings
         {
             ShopId = shopId,
-            Type = ShopSettingType.Category,
-            Name = $"{shopName}_product"
-        };
+            Type = ShopSettingType.Product,
+            Name = $"{shopName}_product",
 
-        shopSettings.JsonValue = JsonSerializer.Serialize(new
+            JsonValue = JsonSerializer.Serialize(new
             {
                 ProductUrlFormat = $"https://product_{Guid.NewGuid()}",
                 CategoryUrlFormat = $"https://product_category_{shopName}",
             }
-        );
+            )
+        };
 
         return shopSettings;
     }
