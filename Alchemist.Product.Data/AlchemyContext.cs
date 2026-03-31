@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Alchemist.Product.Data.Interceptors;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alchemist.Product.Data;
 
-public partial class AlchemyContext : DbContext
+public abstract partial  class AlchemyContext : DbContext
 {
-    private readonly DateChangedInterceptor _dateChangedInterceptor = new();
     public AlchemyContext()
     {
     }
@@ -56,7 +56,6 @@ public partial class AlchemyContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        optionsBuilder.AddInterceptors(_dateChangedInterceptor);
         base.OnConfiguring(optionsBuilder);
     }
 

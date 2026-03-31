@@ -1,6 +1,5 @@
 using Alchemist.Common;
 using Alchemist.Log.Extensions;
-using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.GrpcService.Services;
 using Alchemist.Product.Module;
@@ -37,7 +36,7 @@ TypeAdapterConfig.GlobalSettings.Default.NameMatchingStrategy(NameMatchingStrate
 builder.Configuration.SetAppSettingsCustomJsonConfigurationProvider();
 builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, EnvironmentConfigurationRule>();
 
-builder.Services.AddDbContextFactory<AlchemyContextPostgres>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
+builder.Services.AddAlchemyPostgresContextFactory(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
 builder.Host.AddMediatorInfrastructure<ProductModule>();
 

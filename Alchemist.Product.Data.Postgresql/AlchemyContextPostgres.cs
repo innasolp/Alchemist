@@ -2,13 +2,8 @@
 
 namespace Alchemist.Product.Data.Postgresql;
 
-public class AlchemyContextPostgres: AlchemyContext
+internal class AlchemyContextPostgres(DbContextOptions<AlchemyContextPostgres> options) : AlchemyContext(options)
 {
-    public AlchemyContextPostgres(DbContextOptions<AlchemyContextPostgres> options)
-        : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -83,5 +78,4 @@ public class AlchemyContextPostgres: AlchemyContext
             entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
         });
     }
-
 }

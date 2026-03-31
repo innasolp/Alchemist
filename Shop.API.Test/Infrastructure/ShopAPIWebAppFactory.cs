@@ -27,7 +27,7 @@ public abstract class ShopAPIWebAppFactory : DbContextWebAppFactory<ShopAPIProgr
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
-        return services.AddDbContextFactory<AlchemyContextPostgres>(optionsBuilder =>
+        return services.AddAlchemyPostgresContextFactory(optionsBuilder =>
         optionsBuilder.UseNpgsql(_postgreSqlContainer.BuildConnectionString(DataBase)));
     }
     public Task InitializeAsync()
