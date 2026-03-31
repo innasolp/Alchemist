@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace Alchemist.Product.Data;
+namespace Alchemist.Product.Data.Interceptors;
 
 public class DateChangedInterceptor : SaveChangesInterceptor
 {
@@ -26,7 +26,7 @@ public class DateChangedInterceptor : SaveChangesInterceptor
             if(entry.Entity is IAddedTsEnity addedTsEnity && (await entry.GetDatabaseValuesAsync(cancellationToken))?["AddedTs"] is DateTime addedTs)            
                 addedTsEnity.AddedTs = addedTs;            
             
-            (entry.Entity as IUpdatedTsEntity).UpdatedTs = DateTime.Now;            
+            (entry.Entity as IUpdatedTsEntity)!.UpdatedTs = DateTime.Now;            
         }
     }
 }

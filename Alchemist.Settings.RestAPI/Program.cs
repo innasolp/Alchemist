@@ -23,7 +23,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 // Add services to the container.
 
-builder.Services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(options =>
+builder.Services.AddAlchemyPostgresContextFactory(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
 
 builder.Services.AddUnboundedBackgroundQueue();
@@ -68,6 +68,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseSerilogRequestLogging();
+
+app.UseAlchemyPostgresqlMigration();
 
 app.Run();
 

@@ -28,7 +28,7 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
-        return services.AddDbContextFactory<AlchemyContext, AlchemyContextPostgresFactory>(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
+        return services.AddAlchemyPostgresContextFactory(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
     }
 
     protected override void ConfigureServices(IServiceCollection services)

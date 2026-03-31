@@ -23,10 +23,17 @@ public class ShopSettingsModule : MediatorModule
 
     protected override void RegisterTypes(ContainerBuilder builder)
     {
-        builder.RegisterType(typeof(AlchemyContext)).As(typeof(DbContext));
+        builder.Register(c =>
+        {
+            var factory = c.Resolve<IDbContextFactory<AlchemyContext>>();
+            return factory.CreateDbContext();
+        })
+        .AsSelf()
+        .As<DbContext>()
+        .InstancePerLifetimeScope(); 
 
-        builder.RegisterType(typeof(EFUnitOfWork<AlchemyContext>)).As(typeof(IUnitOfWork<IDbContextTransaction>));
-        builder.RegisterType(typeof(ShopSettingsRepository)).As(typeof(IShopSettingsRepository));
+        builder.RegisterType(typeof(EFUnitOfWork<AlchemyContext>)).As(typeof(IUnitOfWork<IDbContextTransaction>)).InstancePerLifetimeScope(); 
+        builder.RegisterType(typeof(ShopSettingsRepository)).As(typeof(IShopSettingsRepository)).InstancePerLifetimeScope(); 
 
         builder.RegisterType(typeof(SaveShopSettingsCommandHandler<IDbContextTransaction>))
             .As(typeof(IRequestHandler<SaveShopSettingsCommand, Alchemist.Product.Data.ShopSettings>));
