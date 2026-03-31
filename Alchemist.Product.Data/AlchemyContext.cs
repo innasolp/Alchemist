@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Alchemist.Product.Data.Interceptors;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alchemist.Product.Data;
 
-public partial class AlchemyContext : DbContext
+public abstract partial  class AlchemyContext : DbContext
 {
     private readonly DateChangedInterceptor _dateChangedInterceptor = new();
+
     public AlchemyContext()
     {
     }

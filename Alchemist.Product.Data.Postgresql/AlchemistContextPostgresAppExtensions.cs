@@ -10,7 +10,7 @@ public static  class AlchemistContextPostgresAppExtensions
     {
         using var scope = app.Services.CreateScope();
 
-        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AlchemyContextPostgres>>();
+        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AlchemyContext>>();
 
         using var context = factory.CreateDbContext();
 
