@@ -62,4 +62,15 @@ public class ShopCategoryRepository(AlchemyContext context) : IShopCategoryRepos
     {
         return Context.ShopCategories.FirstOrDefaultAsync(sc => sc.ShopId == shopId && sc.ItemId == itemId, cancellationToken);
     }
+
+    public async Task<bool?> CheckCategoryForAncestorItem(int id, int ancestorItemId, CancellationToken cancellationToken = default)
+    {
+        return await Context.ShopCategories
+            .Where(e => e.Id == id)
+            .Select(e => (bool?)Context.ShopCategories
+                .Where(ancestor => ancestor.ItemId == ancestorItemId)
+                .Any(ancestor => e.Path.Contains("/" + ancestor.Id + "/"))
+            )
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+    }
 }

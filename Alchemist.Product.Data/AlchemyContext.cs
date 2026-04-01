@@ -1,5 +1,4 @@
-﻿using Alchemist.Product.Data.Interceptors;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Alchemist.Product.Data;
 
@@ -261,6 +260,12 @@ public abstract partial  class AlchemyContext : DbContext
             entity.Property(e => e.Url)
                 .HasMaxLength(255)
                 .HasColumnName("url");
+            entity.Property(e => e.Path)
+                .HasColumnType("text")
+                .HasColumnName("path");
+
+            entity.HasIndex(e => new { e.Path }).HasDatabaseName("ix_categories_path");
+            entity.HasIndex(e => new { e.ParentId }).IsDescending(false).HasDatabaseName("ix_categories_parentid");
 
             entity.SetChangedTsColumns();
         });

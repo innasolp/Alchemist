@@ -21,4 +21,6 @@ public interface IShopDataService
     Task<IShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId, CancellationToken cancellationToken = default);
 
     Task<List<IShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default);
+
+    Task<bool?> CheckCategoryForItemAncestor(int id, int ancestorItemId, CancellationToken cancellationToken = default);
 }

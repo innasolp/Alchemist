@@ -261,8 +261,11 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
                 return;
             }
 
-            if (shop?.RootCategories.Any(c => c.ItemId == shopCategory.ItemId) != false)
+            if (shop.RootCategories.Any() && !await CheckForRootCategoryInAncestor(shopCategory.Id, shop.RootCategories, cancellationToken))
+            {
+                _waitingShopCategories.Add(shopCategory);
                 return;
+            }
 
             var productShopCategory = shopCategory.ToProductShopCategoryModel();
 
@@ -310,6 +313,22 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         {
             ReleaseSemaphoreIfNeed(_shopCategorySemaphoreSlim);
         }
+    }
+
+    private async Task<bool> CheckForRootCategoryInAncestor(int id, IEnumerable<IProductShopCategory> rootCategories, CancellationToken cancellationToken)
+    {
+        var hasAncestorInRootCategories = false;
+
+        foreach (var rootCategory in rootCategories)
+        {
+            if ((await _shopDataService.CheckCategoryForItemAncestor(id, rootCategory.ItemId, cancellationToken)) == true)
+            {
+                hasAncestorInRootCategories = true;
+                break;
+            }
+        }
+
+        return hasAncestorInRootCategories;
     }
 
     async Task IHagfireServiceJobManager.Execute(Guid id, 

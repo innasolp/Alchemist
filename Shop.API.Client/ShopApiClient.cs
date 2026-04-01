@@ -33,6 +33,17 @@ public class ShopApiClient : IShopDataService
         return await response.Content.ReadFromJsonAsync<ShopCategory>(cancellationToken: cancellationToken);
     }
 
+    public async Task<bool?> CheckCategoryForItemAncestor(int id, int ancestorItemId, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync($"api/ShopCategory/checkancestoritem/{id}/{ancestorItemId}", cancellationToken);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return default;
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<bool>(cancellationToken: cancellationToken);
+    }
+
     public async Task<IShop> CreateShop(IShop shop, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop.To<Shop>(), cancellationToken);

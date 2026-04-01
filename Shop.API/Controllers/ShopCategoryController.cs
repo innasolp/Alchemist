@@ -70,4 +70,19 @@ public class ShopCategoryController(ILogger<ShopCategoryController> logger, IMed
             TypedResults.Ok(shopCategories) :
             TypedResults.NotFound(parentId);
     }
+
+    [HttpGet("checkancestoritem/{id:int}/{ancestorItemId:int}", Name = nameof(CheckCategoryForAncestorItem))]
+    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<bool>>> CheckCategoryForAncestorItem(int id, 
+        int ancestorItemId,
+        CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+            return TypedResults.BadRequest(id);
+
+        var hasAncestor = await _mediator.Send(new CheckCategoryForAncestorItemrRequest(id, ancestorItemId), cancellationToken);
+
+        return hasAncestor.HasValue ?
+            TypedResults.Ok(hasAncestor.Value) :
+            TypedResults.NotFound(id);
+    }
 }
