@@ -17,6 +17,10 @@ internal abstract class ImportServiceJob(Guid? parentId = null, JobExecuteOption
 
     public JobExecuteOptions? JobExecuteOptions { get; } = jobExecuteOptions;
 
+    protected abstract bool IsAggregate { get; }
+
+    bool IImportServiceJob.IsAggregate => IsAggregate;
+
     protected virtual Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs()
     {
         IDictionary<Guid, IImportServiceJob> result = new Dictionary<Guid, IImportServiceJob>() { { Id, this } };

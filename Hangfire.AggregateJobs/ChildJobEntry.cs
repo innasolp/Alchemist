@@ -12,7 +12,7 @@ public enum JobStatus
     Deleted = 3
 }
 
-internal class ChildJobEntry
+public class ChildJobEntry
 {
     [Key]
     public required string JobId { get; set; }

@@ -50,7 +50,7 @@ internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, I
             jobExecutor.Execute<T>(jobId, processingChildQueue);
         }
 
-        await childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
+        await childJobStorage.UpdateChildJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
     }
 
     private static int? GetServerWorkerCount(IMonitoringApi monitoringApi, string serverName)

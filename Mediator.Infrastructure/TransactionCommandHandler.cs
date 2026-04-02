@@ -26,7 +26,8 @@ public abstract class TransactionCommandHandler<T, TCommand, TTransaction, TUnit
         }
         catch
         {
-            await UnitOfWork.RollbackTransactionAsync(transaction!, cancellationToken);
+            if(transaction != null)
+                await UnitOfWork.RollbackTransactionAsync(transaction, cancellationToken);
 
             throw;
         }

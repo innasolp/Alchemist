@@ -1,18 +1,30 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Import.Settings.Interfaces;
 using Shop.Interfaces;
+using ShopImport.Service.Hangfire.Infrastructure;
 using System.ComponentModel;
 
 namespace ShopImport.Service.Hangfire.Models;
 
-interface IShopModel : IImportSource, IShop 
+enum ShopModelType
+{
+    Product = 1,
+    Category = 2
+}
+
+interface IShopModel : 
+    IImportSource,
+    ISplittableSource,
+    ISplittableSource<IShopModel>,
+    IIdentificableSource ,
+    ISourceItemCollection<IShopModel, IProductShopCategory>
 {
     IList<IProductShopCategory> RootCategories { get; }
 
-    IEnumerable<IShopModel> Split();
+    ShopModelType Type { get; }
 }
 
-internal abstract class ShopModel : IShopModel
+internal abstract class ShopModel : IShopModel, IShop
 {    
     public int Id { get; set; }
 
@@ -20,12 +32,13 @@ internal abstract class ShopModel : IShopModel
     public string Url { get; set; }
     public string? Caption { get; set; }
 
-    public List<IProductShopCategory> RootCategories { get; } = [];
-
-    string IShop.Name { get => Name; set => Name = value; }
-    string IShop.Url { get => Url; set => Url = value; }
+    public List<IProductShopCategory> RootCategories { get; } = [];    
 
     IList<IProductShopCategory> IShopModel.RootCategories => RootCategories;
+
+    protected abstract ShopModelType Type { get; }
+
+    ShopModelType IShopModel.Type => Type;
 
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string prop = "")
@@ -35,7 +48,19 @@ internal abstract class ShopModel : IShopModel
 
     protected abstract IEnumerable<IShopModel> Split();
 
-    IEnumerable<IShopModel> IShopModel.Split()
+    protected abstract IShopModel AddSourceItem(IProductShopCategory item);
+
+    IShopModel ISourceItemCollection<IShopModel, IProductShopCategory>.AddSourceItem(IProductShopCategory item)
+    {
+        return AddSourceItem(item); 
+    }
+
+    IEnumerable<IImportSource> ISplittableSource.Split()
+    {
+        return Split();
+    }
+
+    IEnumerable<IShopModel> ISplittableSource<IShopModel>.Split()
     {
         return Split();
     }

@@ -1,6 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Product;
-using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 
 namespace ShopImport.Service.Hangfire.Models;
 
@@ -12,11 +12,13 @@ internal class ProductShopModel : ShopModel, IProductShopModel
     
     public string CategoryUrl{ get; set; }
 
-    public ObservableCollection<IProductShopCategory> Categories { get; } = [];
+    public BlockingCollection<IProductShopCategory> Categories { get; } = [];
 
     public int? PageProductCount { get; set; }
     
     IEnumerable<IProductShopCategory> IProductShopSource.Categories => Categories;
+
+    protected override ShopModelType Type => ShopModelType.Product;
 
     protected ProductShopModel CopyCore()
     {
@@ -36,10 +38,22 @@ internal class ProductShopModel : ShopModel, IProductShopModel
     {
         foreach (var shopCategory in Categories)
         {
-            var copy = CopyCore();
-            copy.Name += $"_{shopCategory.Category}";
-            copy.Categories.Add(shopCategory);
-            yield return copy;
+             yield return CreateByCategory(shopCategory);
         }
+    }
+
+    protected override IShopModel AddSourceItem(IProductShopCategory shopCategory)
+    {
+        Categories.TryAdd(shopCategory);
+
+        return CreateByCategory(shopCategory);
+    }
+
+    private ProductShopModel CreateByCategory(IProductShopCategory shopCategory)
+    {
+        var copy = CopyCore();
+        copy.Name += $"_{shopCategory.Category}";
+        copy.Categories.TryAdd(shopCategory);
+        return copy;
     }
 }

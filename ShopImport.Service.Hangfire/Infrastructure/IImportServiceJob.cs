@@ -18,4 +18,6 @@ internal interface IImportServiceJob
     JobExecuteOptions? JobExecuteOptions { get; }
 
     Task<IReadOnlyDictionary<Guid, IImportServiceJob>> GetExecutionServiceJobs();
+
+    bool IsAggregate { get; }
 }

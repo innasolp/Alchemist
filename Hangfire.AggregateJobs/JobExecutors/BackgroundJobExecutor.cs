@@ -26,8 +26,9 @@ internal class BackgroundJobExecutor(IBackgroundJobClient backgroundJobClient) :
         return Task.FromResult(Execute<T>(jobId, processingQueue));
     }
 
-    public bool IsAccessible(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null)
+    public bool IsAccessible(bool isChild = false, JobExecuteOptions? jobExecuteOptions = null, params object?[] parameters)
     {
-        return isChild || (jobExecuteOptions?.IntervalInSeconds == null && jobExecuteOptions?.EnqueuedInSeconds == null);
+        return (parameters?.Length > 0) == false &&
+            (isChild || (jobExecuteOptions?.IntervalInSeconds == null && jobExecuteOptions?.EnqueuedInSeconds == null));
     }
 }

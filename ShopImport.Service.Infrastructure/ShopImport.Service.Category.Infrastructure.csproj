@@ -8,8 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.7" />
-		<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.5" />
-		<PackageReference Include="Import.Factory.Service" Version="1.0.0.5" />
+		<PackageReference Include="Import.Factory.Service" Version="1.0.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>

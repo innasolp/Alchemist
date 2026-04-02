@@ -12,6 +12,17 @@ public interface IJobExecuteManager
         Action<TJob, string>? setJobIdAction = null,
         IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
         CancellationToken cancellationToken = default)
+         where TJob : class?;
+
+    Task EnqueueChild<T, TJob>(TJob job,
+        Expression<Func<T, TJob, Task>> execute,
+        AggregateServerSettings aggregateServerSettings,
+        TJob? parentJob = null,
+        string? parentJobId=null,
+        JobExecuteOptions? jobExecuteOptions = null,
+        Action<TJob, string>? setJobIdAction = null,
+        IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
+        CancellationToken cancellationToken = default)
         where TJob : class?;
 
     Task Execute<T, TJob>(string coreJobId,
@@ -26,5 +37,7 @@ public interface IJobExecuteManager
         AggregateServerSettings? aggregateServerSettings = null, 
         CancellationToken cancellationToken = default);
 
-    void DeleteJob(string jobId);
+    void DeleteChildJob(string jobId);
+
+    void DeleteParentJob(string jobId);
 }
