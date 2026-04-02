@@ -10,13 +10,11 @@ internal static class ChildJobOrchestrator
     public const string Task = "child-orchestrator-tick";    
 }
 
-internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, IBackgroundJobClient backgroundJobClient, IServiceScopeFactory serviceScopeFactory)
+internal class ChildJobOrchestrator<T>(IJobExecutorRegistry jobExecutorRegistry, IServiceScopeFactory serviceScopeFactory)
 {
-    private readonly IEnumerable<IJobExecutor> _jobExecutors = jobExecutors;
+    private readonly IJobExecutorRegistry _jobExecutorRegistry = jobExecutorRegistry;
 
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-
-    private readonly BackgroundJobExecutor DefaultJobExecutor = new(backgroundJobClient);
 
     [DisableConcurrentExecution(timeoutInSeconds: 30)]
     [ShortExpiration(minutes:10)]
@@ -46,7 +44,7 @@ internal class ChildJobOrchestrator<T>(IEnumerable<IJobExecutor> jobExecutors, I
 
         foreach (var jobId in jobIdsToActivate)
         {
-            var jobExecutor = _jobExecutors.FirstOrDefault(e => e.IsAccessible(isChild: true)) ?? DefaultJobExecutor;
+            var jobExecutor = _jobExecutorRegistry.Get(isChild: true);
             jobExecutor.Execute<T>(jobId, processingChildQueue);
         }
 

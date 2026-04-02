@@ -23,5 +23,7 @@ public static class AppExtensions
                             aggregateServerSettings.ChildServerName,
                             aggregateServerSettings.ChildProcessingQueue),
             Cron.Minutely());
+
+        recurringJobManager.AddOrUpdate<IdleJobChecker>(IdleJobChecker.Task, x => x.Dispatch(null), Cron.Minutely());
     }
 }

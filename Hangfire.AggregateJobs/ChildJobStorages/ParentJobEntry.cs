@@ -9,5 +9,7 @@ public class ParentJobEntry
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
     public JobStatus Status { get; set; } = JobStatus.Enqueued;
 }

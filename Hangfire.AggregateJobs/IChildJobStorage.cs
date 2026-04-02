@@ -1,4 +1,7 @@
-﻿namespace Hangfire.AggregateJobs;
+﻿using Hangfire.AggregateJobs.ChildJobStorages;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Hangfire.AggregateJobs;
 
 public interface IChildJobStorage
 {
@@ -18,11 +21,17 @@ public interface IChildJobStorage
 
     Task DeleteParentJobAsync(string jobId);
 
-    void UpdateParentJobState(string jobId, JobStatus state);
+    void UpdateParentJobState(string jobId, JobStatus state, DateTime updateAt);
 
-    Task UpdateParentJobStateAsync(string jobId, JobStatus state);
+    Task UpdateParentJobStateAsync(string jobId, JobStatus state, DateTime updateAt);
+
+    Task UpdateParentJobDateAsync(string jobId, DateTime updateAt);
 
     bool ParentJobExists(string jobId);
 
     Task UpdateParentJobIdAsync(IEnumerable<string> jobIds, string parentJobId);
+
+    Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings);
+
+    Task<IEnumerable<string>> GetIdleParentJobsIds(DateTime currentDate, CancellationToken cancellationToken = default);
 }

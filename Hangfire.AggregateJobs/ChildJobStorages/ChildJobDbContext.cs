@@ -16,6 +16,8 @@ internal class ChildJobDbContext : DbContext
 
     public virtual DbSet<ParentJobEntry> ParentJobEntries { get; set; }
 
+    public virtual DbSet<ParentJobIdleSettings> ParentJobIdleSettings { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -33,6 +35,8 @@ internal class ChildJobDbContext : DbContext
             entity.Property(e => e.ParentJobId).HasMaxLength(1024).HasColumnName("parent_job_id");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").IsRequired();
+
+            entity.HasIndex(e => new { e.ParentJobId }).HasDatabaseName("ix_child_job_entry_parent_job_id");
         });
 
         modelBuilder.Entity<ParentJobEntry>(entity =>
@@ -43,7 +47,18 @@ internal class ChildJobDbContext : DbContext
 
             entity.Property(e => e.JobId).HasColumnName("job_id").HasMaxLength(255).IsRequired();
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").IsRequired();
             entity.Property(e => e.Status).HasColumnName("status").IsRequired();
+        });
+
+        modelBuilder.Entity<ParentJobIdleSettings>(entity =>
+        {
+            entity.HasKey(e => e.JobId).HasName("parent_job_idle_settings_pk");
+
+            entity.ToTable("parent_job_idle_settings");
+
+            entity.Property(e => e.JobId).HasColumnName("job_id").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.IdleTimeInSeconds).HasColumnName("idle_sconds").IsRequired();
         });
     }
 }
