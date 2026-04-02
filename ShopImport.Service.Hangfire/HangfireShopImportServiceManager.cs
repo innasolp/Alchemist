@@ -42,9 +42,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     private readonly ConcurrentDictionary<Guid, AsyncEventHandler<ConnectedAsyncEventArgs>> _serviceConnectedHandlers = [];
 
-    private readonly SemaphoreSlim _addServiceSemaphoreSlim = new(1);
-
-    private readonly SemaphoreSlim _shopCategorySemaphoreSlim = new(1);
+    private readonly SemaphoreSlim _serviceSemaphoreSlim = new(1);
 
     private List<IShopModel> ShopModels { get; } = [];
 
@@ -52,7 +50,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     public async Task<(Guid guid, IImportService service)> AddShopImportService(string name, IShopImportSettings shopImportSettings, CancellationToken cancellationToken = default)
     {
-        await _addServiceSemaphoreSlim.WaitAsync(cancellationToken);
+        await _serviceSemaphoreSlim.WaitAsync(cancellationToken);
         try
         {
             IShopModel shopModel = await GetShopModelAsync(shopImportSettings, cancellationToken);
@@ -85,7 +83,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         }
         finally
         {
-            _addServiceSemaphoreSlim.Release();
+            _serviceSemaphoreSlim.Release();
         }
     }
 
@@ -249,7 +247,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     public async Task AddShopCategory(ShopCategory shopCategory, CancellationToken cancellationToken)
     {
-        await _shopCategorySemaphoreSlim.WaitAsync(cancellationToken);
+        await _serviceSemaphoreSlim.WaitAsync(cancellationToken);
 
         try
         {
@@ -311,7 +309,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         }
         finally
         {
-            ReleaseSemaphoreIfNeed(_shopCategorySemaphoreSlim);
+            ReleaseSemaphoreIfNeed(_serviceSemaphoreSlim);
         }
     }
 
@@ -413,11 +411,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
     public ValueTask DisposeAsync()
     {
-        ReleaseSemaphoreIfNeed(_shopCategorySemaphoreSlim);
-        _shopCategorySemaphoreSlim.Dispose();
-
-        ReleaseSemaphoreIfNeed(_addServiceSemaphoreSlim);
-        _addServiceSemaphoreSlim.Dispose();
+        ReleaseSemaphoreIfNeed(_serviceSemaphoreSlim);
+        _serviceSemaphoreSlim.Dispose();
 
         return ValueTask.CompletedTask;
     }

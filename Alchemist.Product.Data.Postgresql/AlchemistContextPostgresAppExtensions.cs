@@ -8,17 +8,6 @@ public static  class AlchemistContextPostgresAppExtensions
 {
     private static readonly SemaphoreSlim _createDbSemaphoreSlim = new(1, 1);
 
-    public static void UseAlchemyPostgresqlMigration(this IHost app)
-    {
-        using var scope = app.Services.CreateScope();
-
-        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AlchemyContext>>();
-
-        using var context = factory.CreateDbContext();
-
-        context.Database.Migrate();
-    }
-
     public static async Task UseAlchemyPostgresqlMigrationAsync(this IHost app)
     {
         using var scope = app.Services.CreateScope();
@@ -36,12 +25,10 @@ public static  class AlchemistContextPostgresAppExtensions
         {
             await _createDbSemaphoreSlim.WaitAsync();
 
-            if (!await CheckDatabaseExistsAsync(connectionString))
-            {
+            if (!await CheckDatabaseExistsAsync(connectionString))            
                 await CreateDatabaseAsync(connectionString);
-
-                await context.Database.MigrateAsync();
-            }
+            
+            await context.Database.MigrateAsync();
         }
         catch (Npgsql.PostgresException ex) when (ex.SqlState == "55P03")
         {}
@@ -63,14 +50,19 @@ public static  class AlchemistContextPostgresAppExtensions
     {
         var builder = new Npgsql.NpgsqlConnectionStringBuilder(connectionString);
         var targetDb = builder.Database;
+
+        if (string.IsNullOrEmpty(targetDb))
+            throw new ArgumentException($"Not database in  {connectionString}", nameof(connectionString));
+
         builder.Database = "postgres";
 
         using var masterConn = new Npgsql.NpgsqlConnection(builder.ConnectionString);
         try
         {
             await masterConn.OpenAsync();
-            
-            using var checkCmd = new Npgsql.NpgsqlCommand($"SELECT 1 FROM pg_database WHERE datname = '{targetDb}'", masterConn);
+
+            using var checkCmd = new Npgsql.NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname = @dbName", masterConn);
+            checkCmd.Parameters.AddWithValue("dbName", targetDb);
 
             return await checkCmd.ExecuteScalarAsync() != null;
         }

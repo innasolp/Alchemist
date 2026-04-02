@@ -12,35 +12,37 @@ public class MaterialPathInterceptor : SaveChangesInterceptor
         var context = eventData.Context;
         if (context == null) return result;
 
-        var materialPathEntities = context.ChangeTracker.Entries<IMaterialPathEntity>()
-            .Where(e => e.State == EntityState.Unchanged)
+        var materialPathEntities = context.ChangeTracker.Entries()
+            .Where(e => e.Entity is IMaterialPathEntity && e.State == EntityState.Unchanged)
             .GroupBy(e => e.Entity.GetType());
 
         foreach (var group in materialPathEntities)
         {
             if (!_changes.ContainsKey(group.Key)) _changes[group.Key] = [];
-            _changes[group.Key].AddRange(group.Select(e => e.Entity.Id));
+            _changes[group.Key].AddRange(group.Select(e => (e.Entity as IMaterialPathEntity)!.Id));
         }
 
         if(_changes.Count != 0)
             context.Database.SetCommandTimeout(600);
 
-        foreach (var change in _changes)
+        try
         {
-            var entityType = change.Key;
-            var ids = change.Value.Distinct().Cast<object>().ToArray();
-            if (ids.Length == 0) continue;
+            foreach (var change in _changes)
+            {
+                var entityType = change.Key;
+                var ids = change.Value.Distinct().Cast<object>().ToArray();
+                if (ids.Length == 0) continue;
 
-            var entityMetadata = context.Model.FindEntityType(entityType);
+                var entityMetadata = context.Model.FindEntityType(entityType);
 
-            if (entityMetadata == null) continue;
+                if (entityMetadata == null) continue;
 
-            var tableName = entityMetadata.GetTableName();
-            var schema = entityMetadata.GetSchema() ?? "public";
-            var fullTableName = $"\"{entityMetadata.GetSchema() ?? "public"}\".\"{entityMetadata.GetTableName()}\"";
-            var placeholders = string.Join(",", ids.Select((_, i) => $"{{{i}}}"));
+                var tableName = entityMetadata.GetTableName();
+                var schema = entityMetadata.GetSchema() ?? "public";
+                var fullTableName = $"\"{entityMetadata.GetSchema() ?? "public"}\".\"{entityMetadata.GetTableName()}\"";
+                var placeholders = string.Join(",", ids.Select((_, i) => $"{{{i}}}"));
 
-            var sql = $@"
+                var sql = $@"
                WITH RECURSIVE tree AS (
                     SELECT 
                         c.id, 
@@ -66,7 +68,12 @@ public class MaterialPathInterceptor : SaveChangesInterceptor
                 WHERE c.id = t.id 
                   AND (c.path IS NULL OR c.path <> t.new_path)";
 
-            await context.Database.ExecuteSqlRawAsync(sql, ids);
+                await context.Database.ExecuteSqlRawAsync(sql, ids);
+            }
+        }
+        finally
+        {
+            _changes.Clear();
         }
 
         return await base.SavedChangesAsync(eventData, result, cancellationToken);
@@ -78,8 +85,9 @@ public class MaterialPathInterceptor : SaveChangesInterceptor
         if (context == null) return result;
 
         var entries = context.ChangeTracker.Entries()
-            .Where(e => e.Entity is IMaterialPathEntity && (e.State == EntityState.Added || (e.State == EntityState.Modified &&
-                        e.Properties.Any(p => p.Metadata.Name == nameof (IMaterialPathEntity.ParentId) && p.IsModified))))
+            .Where(e => e.Entity is IMaterialPathEntity
+                       && e.State == EntityState.Modified
+                       && e.Properties.Any(p => p.Metadata.Name == nameof (IMaterialPathEntity.ParentId) && p.IsModified))
             .ToList();
 
         foreach (var entry in entries)
@@ -87,7 +95,7 @@ public class MaterialPathInterceptor : SaveChangesInterceptor
             var type = entry.Entity.GetType();
             if (!_changes.ContainsKey(type)) _changes[type] = [];
 
-            if (entry.State == EntityState.Modified && entry.Entity is IMaterialPathEntity materialPathEntity && materialPathEntity.ParentId.HasValue)
+            if (entry.Entity is IMaterialPathEntity materialPathEntity && materialPathEntity.ParentId.HasValue)
             {
                 var parentId = materialPathEntity.ParentId.Value;
                 if (parentId == materialPathEntity.Id) throw new Exception("Self-reference cycle");

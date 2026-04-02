@@ -168,9 +168,9 @@ internal class JobExecuteManager(IEnumerable<IJobExecutor> jobExecutors,
         using var connection = JobStorage.Current.GetConnection();
         var jobData = connection.GetJobData(jobId);
 
-        return jobData.State == "Enqueued" ? JobStatus.Enqueued :
-                     jobData.State == "Processing" ? JobStatus.Processing:
-                     jobData.State == "Successed" ? JobStatus.Completed
+        return jobData.State == EnqueuedState.StateName ? JobStatus.Enqueued :
+                     jobData.State == ProcessingState.StateName ? JobStatus.Processing:
+                     jobData.State == SucceededState.StateName ? JobStatus.Completed
                                                   : JobStatus.Deleted;
     }
 

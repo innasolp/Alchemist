@@ -57,7 +57,7 @@ public static class ShopModelExtensions
                 }
 
                 if (shopCategories.Count > 0)
-                    shopCategories?.ForEach(c => productShopModel.Categories.Add(c.ToProductShopCategoryModel()));
+                    shopCategories?.ForEach(c => productShopModel.Categories.TryAdd(c.ToProductShopCategoryModel()));
                 //todo
                 else
                    shopImportSettings.RootCategories.ToList().ForEach(c => productShopModel.RootCategories.Add(new ProductShopCategoryModel { Category = c.Url, ItemId = c.Item, Path = c.Url }));
@@ -67,11 +67,11 @@ public static class ShopModelExtensions
                 var allShopCategories = await shopDataService.GetShopCategories(productShopModel.Id, cancellationToken);
                 var categories2 = new List<IShopCategory>(allShopCategories);
                 var lastShopCategories = allShopCategories.Where(c => !categories2.Any(c2 => c2.ParentId == c.Id)).ToList();
-                lastShopCategories.ForEach(c => productShopModel.Categories.Add(c.ToProductShopCategoryModel()));
+                lastShopCategories.ForEach(c => productShopModel.Categories.TryAdd(c.ToProductShopCategoryModel()));
             }
         }
         else
-            shopImportSettings.RootCategories?.ToList().ForEach(c => productShopModel.Categories.Add(new ProductShopCategoryModel { Category = c.Url, ItemId = c.Item, Path = c.Url }));
+            shopImportSettings.RootCategories?.ToList().ForEach(c => productShopModel.Categories.TryAdd(new ProductShopCategoryModel { Category = c.Url, ItemId = c.Item, Path = c.Url }));
 
         return productShopModel;
     }

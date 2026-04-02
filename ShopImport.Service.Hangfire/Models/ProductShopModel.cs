@@ -1,7 +1,6 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Settings.Product;
 using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
 
 namespace ShopImport.Service.Hangfire.Models;
 
@@ -54,7 +53,7 @@ internal class ProductShopModel : ShopModel, IProductShopModel
     {
         var copy = CopyCore();
         copy.Name += $"_{shopCategory.Category}";
-        copy.Categories.Add(shopCategory);
+        copy.Categories.TryAdd(shopCategory);
         return copy;
     }
 }
