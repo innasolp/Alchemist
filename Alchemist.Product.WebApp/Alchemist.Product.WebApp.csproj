@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
 	<PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
-	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.0.1" />
+	<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
   </ItemGroup>
 
 	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
