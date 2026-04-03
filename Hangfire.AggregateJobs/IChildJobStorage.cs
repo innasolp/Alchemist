@@ -25,7 +25,7 @@ public interface IChildJobStorage
 
     Task UpdateParentJobStateAsync(string jobId, JobStatus state, DateTime updateAt);
 
-    Task UpdateParentJobDateAsync(string jobId, DateTime updateAt);
+    void UpdateParentJobDate(string jobId, DateTime updateAt);
 
     bool ParentJobExists(string jobId);
 

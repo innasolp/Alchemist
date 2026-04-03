@@ -58,7 +58,7 @@ internal class ChildJobDbContext : DbContext
             entity.ToTable("parent_job_idle_settings");
 
             entity.Property(e => e.JobId).HasColumnName("job_id").HasMaxLength(255).IsRequired();
-            entity.Property(e => e.IdleTimeInSeconds).HasColumnName("idle_sconds").IsRequired();
+            entity.Property(e => e.IdleTimeInSeconds).HasColumnName("idle_seconds").IsRequired();
         });
     }
 }

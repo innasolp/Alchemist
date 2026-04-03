@@ -155,13 +155,13 @@ LIMIT {freeSlots}";
         return _dbContext.ParentJobEntries.Where(x => x.JobId == jobId).FirstOrDefaultAsync();
     }
 
-    public async Task UpdateParentJobDateAsync(string jobId, DateTime updateAt)
+    public void UpdateParentJobDate(string jobId, DateTime updateAt)
     {
-        await _dbContext.ParentJobEntries
+        _dbContext.ParentJobEntries
            .Where(j => j.JobId == jobId)
-           .ExecuteUpdateAsync(s => s.SetProperty(b => b.UpdatedAt, updateAt));
+           .ExecuteUpdate(s => s.SetProperty(b => b.UpdatedAt, updateAt));
 
-        await _dbContext.SaveChangesAsync();
+        _dbContext.SaveChanges();
     }
 
     public async Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings)

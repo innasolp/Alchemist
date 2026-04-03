@@ -26,7 +26,7 @@ internal class IdleJobChecker(IServiceScopeFactory serviceScopeFactory, IBackgro
         {
             _backgroundJobClient.Delete(idleJobId);
 
-            childJobStorage.UpdateChildJobState(idleJobId, JobStatus.Deleted);
+            childJobStorage.UpdateParentJobState(idleJobId, JobStatus.Deleted, DateTime.Now);
         }
     }
 }

@@ -68,7 +68,7 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-await app.UseAlchemyPostgresqlMigrationWithRedisLockAsync(builder.Configuration.GetConnectionString("RedisStore"));
+await app.UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync("RedisStore");
 
 app.Run();
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
@@ -7,8 +8,24 @@ namespace Alchemist.Product.Data.Postgresql;
 
 public static  class AlchemistContextPostgresAppExtensions
 {
+    public static async Task UseAlchemyPostgresqlMigrationAsync(this IHost app)
+    {
+        using var scope = app.Services.CreateScope();
+
+        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AlchemyContext>>();
+
+        using var context = factory.CreateDbContext();
+
+        try
+        {
+            await MigratePostgresIfNeedAsync(context);
+        }
+        catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P04" || ex.SqlState == "55P03")
+        {}        
+    }
+
     public static async Task UseAlchemyPostgresqlMigrationWithRedisLockAsync(this IHost app, string redisConnectionString,
-        int expirySeconds = 30, int waitSeconds = 20, int retrySeconds = 1)
+        int expirySeconds = 60, int waitSeconds = 60, int retrySeconds = 1)
     {        
         TimeSpan expiry = TimeSpan.FromSeconds(expirySeconds);
         TimeSpan wait = TimeSpan.FromSeconds(waitSeconds);
@@ -29,21 +46,27 @@ public static  class AlchemistContextPostgresAppExtensions
 
         var myLock = new RedisLock(db, resourceId, expiry);
 
-        bool isLocked = await myLock.AcquireWithRetryAsync(
-            waitTimeout: wait,
-            retryDelay: retry
-        );
-
-        if (isLocked)
+        while (true)
         {
-            try
+            if (await myLock.AcquireWithRetryAsync(waitTimeout: wait, retryDelay: retry))
             {
-                await MigratePostgresIfNeedAsync(context);
+                try
+                {
+                    await MigratePostgresIfNeedAsync(context);
+                    return;
+                }
+                finally
+                {
+                    await myLock.ReleaseAsync();
+                }
             }
-            finally
+            else
             {
-                await myLock.ReleaseAsync();
+                var pending = await context.Database.GetPendingMigrationsAsync();
+                if (!pending.Any()) return;
             }
+
+            await Task.Delay(retry);
         }
     }
 
@@ -112,5 +135,16 @@ public static  class AlchemistContextPostgresAppExtensions
         {
             await masterConn.CloseAsync();
         }
+    }
+
+    public static async Task UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync(this IHost app, string redisConnectionSection)       
+    {
+        var conf = app.Services.GetRequiredService<IConfiguration>();
+
+        var redisConnectionString = conf?.GetConnectionString(redisConnectionSection);
+        if (!string.IsNullOrEmpty(redisConnectionString))
+            await app.UseAlchemyPostgresqlMigrationWithRedisLockAsync(redisConnectionString);
+        else
+            await app.UseAlchemyPostgresqlMigrationAsync();
     }
 }

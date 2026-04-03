@@ -21,7 +21,7 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
             childJobStorage.UpdateChildJobState(jobId,
             filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed);
 
-            childJobStorage.UpdateParentJobDateAsync(parentJobId, DateTime.Now);
+            childJobStorage.UpdateParentJobDate(parentJobId, DateTime.Now);
         }
         else if (childJobStorage.ParentJobExists(jobId))
         {
