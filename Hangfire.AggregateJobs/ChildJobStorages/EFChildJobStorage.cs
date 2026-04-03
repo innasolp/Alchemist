@@ -123,20 +123,20 @@ LIMIT {freeSlots}";
         _dbContext.SaveChanges();
     }
 
-    public void UpdateParentJobState(string jobId, JobStatus state)
+    public void UpdateParentJobState(string jobId, JobStatus state, DateTime updateAt)
     {
         _dbContext.ParentJobEntries
            .Where(j => j.JobId == jobId)
-           .ExecuteUpdate(s => s.SetProperty(b => b.Status, state));
+           .ExecuteUpdate(s => s.SetProperty(b => b.Status, state).SetProperty(b=>b.UpdatedAt, updateAt));
 
         _dbContext.SaveChanges();
     }
 
-    public async Task UpdateParentJobStateAsync(string jobId, JobStatus state)
+    public async Task UpdateParentJobStateAsync(string jobId, JobStatus state, DateTime updateAt)
     {
         await _dbContext.ParentJobEntries
            .Where(j => j.JobId == jobId)
-           .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state));
+           .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state).SetProperty(b => b.UpdatedAt, updateAt));
 
         await _dbContext.SaveChangesAsync();
     }
@@ -153,5 +153,34 @@ LIMIT {freeSlots}";
     public Task<ParentJobEntry?> GetParentJobAsync(string jobId)
     {
         return _dbContext.ParentJobEntries.Where(x => x.JobId == jobId).FirstOrDefaultAsync();
+    }
+
+    public void UpdateParentJobDate(string jobId, DateTime updateAt)
+    {
+        _dbContext.ParentJobEntries
+           .Where(j => j.JobId == jobId)
+           .ExecuteUpdate(s => s.SetProperty(b => b.UpdatedAt, updateAt));
+
+        _dbContext.SaveChanges();
+    }
+
+    public async Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings)
+    {
+        await _dbContext.AddAsync(parentJobIdleSettings);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<string>> GetIdleParentJobsIds(DateTime currentDate, CancellationToken cancellationToken = default)
+    {
+        var query = from parent in _dbContext.ParentJobEntries
+                    join settings in _dbContext.ParentJobIdleSettings on parent.JobId equals settings.JobId
+                    where parent.Status == JobStatus.Processing
+                    where parent.UpdatedAt < currentDate.AddSeconds(-settings.IdleTimeInSeconds)
+                    where !_dbContext.ChildJobEntries.Any(c =>
+                        c.ParentJobId == parent.JobId &&
+                        (c.Status == JobStatus.Enqueued || c.Status == JobStatus.Processing))
+                    select parent.JobId;
+
+        return await query.ToListAsync(cancellationToken);
     }
 }

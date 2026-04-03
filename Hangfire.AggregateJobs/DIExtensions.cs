@@ -1,4 +1,5 @@
 ﻿using Hangfire.AggregateJobs.ChildJobStorages;
+using Hangfire.AggregateJobs.Filters;
 using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.AggregateJobs.JobExecutors.Filter;
 using Microsoft.EntityFrameworkCore;
@@ -32,12 +33,15 @@ public static class DIExtensions
         services.AddScoped<IChildJobStorage, EFChildJobStorage>();
 
         services.AddScoped<ChildJobOrchestrator<T>>();
+        services.AddScoped<IdleJobChecker>();
 
         services.AddScoped<IJobExecuteManager, JobExecuteManager>();
 
         services.AddScoped<IJobExecutor, BackgroundJobExecutor>();
         services.AddScoped<IJobExecutor, RecurringJobExecutor>();
-        services.AddScoped<IJobExecutor, ScheduledJobExecutor>();       
+        services.AddScoped<IJobExecutor, ScheduledJobExecutor>();   
+        
+        services.AddScoped<IJobExecutorRegistry, JobExecutorRegistry>();
 
         services.AddHangfireServer(options =>
         {

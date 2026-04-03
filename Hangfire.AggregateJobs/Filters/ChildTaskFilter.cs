@@ -1,7 +1,7 @@
 ﻿using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Hangfire.AggregateJobs;
+namespace Hangfire.AggregateJobs.Filters;
 
 internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilter
 {
@@ -16,15 +16,19 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
 
         var parentJobId = childJobStorage.GetParentJobId(jobId);
 
-        if (string.IsNullOrEmpty(parentJobId) && childJobStorage.ParentJobExists(jobId))
+        if (!string.IsNullOrEmpty(parentJobId))
+        {
+            childJobStorage.UpdateChildJobState(jobId,
+            filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed);
+
+            childJobStorage.UpdateParentJobDate(parentJobId, DateTime.Now);
+        }
+        else if (childJobStorage.ParentJobExists(jobId))
         {
             childJobStorage.UpdateParentJobState(jobId,
-                filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed);
-            return;
+                filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed,
+                DateTime.Now);
         }
-
-        childJobStorage.UpdateChildJobState(jobId,
-        filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed);
     }
 
     public void OnPerforming(PerformingContext filterContext) { }

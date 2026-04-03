@@ -94,7 +94,7 @@ app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
 
-await app.UseAlchemyPostgresqlMigrationAsync();
+await app.UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync("RedisStore");
 
 app.UseRouting();
 

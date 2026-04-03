@@ -7,7 +7,9 @@ public class ParentJobEntry
     [Key]
     public required string JobId { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     public JobStatus Status { get; set; } = JobStatus.Enqueued;
 }

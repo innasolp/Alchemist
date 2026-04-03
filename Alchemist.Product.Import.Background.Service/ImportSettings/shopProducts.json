@@ -59,7 +59,8 @@
       },
       "JobExecuteOptions": {
         "Value": {
-          "IntervalInSeconds": 86400
+          "IntervalInSeconds": 86400,
+          "IdleTimeInSeconds": 3600
         }
       }
     }
@@ -121,7 +122,8 @@
       },
       "JobExecuteOptions": {
         "Value": {
-          "IntervalInSeconds": 86400
+          "IntervalInSeconds": 86400,
+          "IdleTimeInSeconds" : 3600
         }
       }
     }
