@@ -2,8 +2,6 @@
 using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
-using Autofac.Core;
-using Hangfire;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service.Commands.Models;
@@ -15,7 +13,7 @@ using System.Collections.Concurrent;
 
 namespace ShopImport.Service.Infrastructure.Module;
 
-internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> shopServiceFactories, IShopDataService shopDataService) : IShopImportServiceRepository
+internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopServiceFactories, IShopDataService shopDataService) : IShopImportServiceManager
 {
     private readonly ConcurrentDictionary<Guid, ServiceItem> _services = new();    
 
@@ -61,7 +59,7 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
         return serviceFactory.Create(name, source, shopImportSettings);
     }
 
-    Task<(Guid guid, IImportService service)> IServiceRepository.AddImportService(string name, IImportSettings importSettings, 
+    Task<(Guid guid, IImportService service)> IServiceManager.AddImportService(string name, IImportSettings importSettings, 
         CancellationToken cancellationToken)
     {
         if(importSettings is not IShopImportSettings shopImportSettings)
@@ -133,7 +131,7 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
 
     private readonly Lock _shopModelsLock = new();
 
-    public async Task AddShopCategory(ShopCategory shopCategory)
+    public async Task AddShopCategory(ShopCategory shopCategory, CancellationToken cancellationToken)
     {
         ProductShopModel? shop;
         IProductShopCategory? productShopCategory;
@@ -151,6 +149,6 @@ internal class ShopImportServiceRepository(IEnumerable<IImportServiceFactory> sh
         if (_services.FirstOrDefault(s => s.Value.SourceId == shop?.Id
                     && s.Value.Service is IListener<IProductShopCategory> shopCategoryListener).Value.Service
             is IListener<IProductShopCategory> shopCategoryListener)
-            await shopCategoryListener.On(productShopCategory);
+            await shopCategoryListener.On(productShopCategory, cancellationToken);
     }
 }

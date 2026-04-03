@@ -17,7 +17,6 @@
     <ProjectReference Include="..\Alchemist.Import.Settings.Category\Alchemist.Import.Settings.Category.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
     <ProjectReference Include="..\Import.Service.Infrastructure\Import.Service.Infrastructure.csproj" />
-    <ProjectReference Include="..\LongRunningTask\LongRunningTask.csproj" />
     <ProjectReference Include="..\Mediator.Messages\Mediator.Messages.csproj" />
     <ProjectReference Include="..\Shop.Entities\Shop.Interfaces.csproj" />
   </ItemGroup>
