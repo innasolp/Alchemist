@@ -1,49 +1,63 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
 
 namespace Alchemist.Product.Data.Postgresql;
 
 public static  class AlchemistContextPostgresAppExtensions
 {
-    private static readonly SemaphoreSlim _createDbSemaphoreSlim = new(1, 1);
+    public static async Task UseAlchemyPostgresqlMigrationWithRedisLockAsync(this IHost app, string redisConnectionString,
+        int expirySeconds = 30, int waitSeconds = 20, int retrySeconds = 1)
+    {        
+        TimeSpan expiry = TimeSpan.FromSeconds(expirySeconds);
+        TimeSpan wait = TimeSpan.FromSeconds(waitSeconds);
+        TimeSpan retry = TimeSpan.FromSeconds(retrySeconds);
 
-    public static async Task UseAlchemyPostgresqlMigrationAsync(this IHost app)
-    {
+        var redisMultiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
+
+        var db = redisMultiplexer.GetDatabase();
+
         using var scope = app.Services.CreateScope();
 
         var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AlchemyContext>>();
 
         using var context = factory.CreateDbContext();
 
+        var builder = new Npgsql.NpgsqlConnectionStringBuilder(context.Database.GetConnectionString());
+        var resourceId = $"{builder.Host}_{builder.Port}_{builder.Database}";
+
+        var myLock = new RedisLock(db, resourceId, expiry);
+
+        bool isLocked = await myLock.AcquireWithRetryAsync(
+            waitTimeout: wait,
+            retryDelay: retry
+        );
+
+        if (isLocked)
+        {
+            try
+            {
+                await MigratePostgresIfNeedAsync(context);
+            }
+            finally
+            {
+                await myLock.ReleaseAsync();
+            }
+        }
+    }
+
+    private static async Task MigratePostgresIfNeedAsync(DbContext context)
+    {
         var connectionString = context.Database.GetConnectionString();
 
         if (string.IsNullOrEmpty(connectionString))
             throw new InvalidOperationException($"No connection string for db context");
 
-        try
-        {
-            await _createDbSemaphoreSlim.WaitAsync();
+        if (!await CheckDatabaseExistsAsync(connectionString))
+            await CreateDatabaseAsync(connectionString);
 
-            if (!await CheckDatabaseExistsAsync(connectionString))            
-                await CreateDatabaseAsync(connectionString);
-            
-            await context.Database.MigrateAsync();
-        }
-        catch (Npgsql.PostgresException ex) when (ex.SqlState == "55P03")
-        {}
-        finally
-        {
-            ReleaseSemaphoreIfNeed(_createDbSemaphoreSlim);
-        }
-    }
-
-    private static void ReleaseSemaphoreIfNeed(SemaphoreSlim semaphoreSlim)
-    {
-        if (semaphoreSlim.CurrentCount < 1)
-        {
-            semaphoreSlim.Release();
-        }
+        await context.Database.MigrateAsync();
     }
 
     private static async Task<bool> CheckDatabaseExistsAsync(string connectionString)
