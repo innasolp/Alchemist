@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
-using Alchemist.Test.DBApiWebAppFactory;
 using Alchemist.Test.Log;
+using Alchemist.Test.DBApiWebAppFactory.Context;
 
 namespace Alchemist.Test.ShopApiFactory;
 
-public class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort, bool ensureDeleted = true) 
-    : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
+public class ShopAPIContextWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort, bool ensureDeleted = true) 
+    : DBContextAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
 {
     private readonly TestServer _signalRServer = signalRServer;
 
@@ -19,7 +19,7 @@ public class ShopAPIWebAppFactory(string connectionString, TestServer signalRSer
 
     private readonly List<Product.Data.Shop> _initialShops = [];
    
-    public ShopAPIWebAppFactory(string connectionString, TestServer signalRServer, bool ensureDeleted = true)
+    public ShopAPIContextWebAppFactory(string connectionString, TestServer signalRServer, bool ensureDeleted = true)
         : this(connectionString, signalRServer, 8050, 8051, ensureDeleted) { }
 
     public FixtureLoggerFactoryContext FixtureLoggingContext   { get; } = new FixtureLoggerFactoryContext();

@@ -5,7 +5,7 @@ namespace Alchemist.Test.ShopApiFactory;
 
 internal class ShopAPIWebAppFactoryTestDataImpl(string connectionString, TestServer signalRServer, int httpPort, int httpsPort, Action<AlchemyContext> fillTestData, 
     bool ensureDeleted = true)
-    : ShopAPIWebAppFactory(connectionString, signalRServer, httpPort, httpsPort, ensureDeleted)
+    : ShopAPIContextWebAppFactory(connectionString, signalRServer, httpPort, httpsPort, ensureDeleted)
 {
     private readonly Action<AlchemyContext> _fillTestData = fillTestData;
 
@@ -19,7 +19,7 @@ public static class ShopApiHelper
 {
     public static HttpClient CreateShopApiClient(string alchemyDbConnectionString, int httpPort, int httpsPort, TestServer signalRTestServer, bool ensureDeleted = true)
     {
-        var shopApiWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, signalRTestServer, httpPort, httpsPort, ensureDeleted);
+        var shopApiWebAppFactory = new ShopAPIContextWebAppFactory(alchemyDbConnectionString, signalRTestServer, httpPort, httpsPort, ensureDeleted);
         var httpClient = new HttpClient
         {
             BaseAddress = new Uri(shopApiWebAppFactory.ServerAddress)

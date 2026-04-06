@@ -1,6 +1,6 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Test.DBApiWebAppFactory;
+using Alchemist.Test.DBApiWebAppFactory.Context;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;

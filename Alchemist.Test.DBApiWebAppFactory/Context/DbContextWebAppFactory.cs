@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Alchemist.Test.DBApiWebAppFactory;
+namespace Alchemist.Test.DBApiWebAppFactory.Context;
 
 public abstract class DbContextWebAppFactory<TEntryPoint, TDbContext> : TestWebAppFactory<TEntryPoint>
     where TEntryPoint : class

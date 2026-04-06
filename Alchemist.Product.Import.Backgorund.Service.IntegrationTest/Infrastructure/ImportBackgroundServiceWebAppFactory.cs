@@ -34,7 +34,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     private SettingsAPIWebAppFactory? _settingsAPIWebAppFactory;
 
-    private ShopAPIWebAppFactory? _shopAPIWebAppFactory;
+    private ShopAPIContextWebAppFactory? _shopAPIWebAppFactory;
 
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
@@ -126,7 +126,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
         var alchemyDbConnectionString = _postgreSqlContainer.BuildConnectionString(_dataBase);
 
-        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, _shopAPIHttpPort, _shopAPIHttpsPort);
+        _shopAPIWebAppFactory = new ShopAPIContextWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, _shopAPIHttpPort, _shopAPIHttpsPort);
         ShopApiClient = _shopAPIWebAppFactory.CreateClient();
 
         _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, _settingsAPIHttpPort, _settingsAPIHttpsPort);

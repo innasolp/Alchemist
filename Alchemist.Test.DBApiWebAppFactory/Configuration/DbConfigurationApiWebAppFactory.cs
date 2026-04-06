@@ -4,15 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Alchemist.Test.DBApiWebAppFactory;
+namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
-public abstract class DbAPIWebAppFactory<TEntryPoint, TDbContext>(bool ensureDeleted) : DbContextWebAppFactory<TEntryPoint, TDbContext>
+public abstract class DbConfigurationApiWebAppFactory<TEntryPoint, TDbContext> 
+    : DbConfigurationWebAppFactory<TEntryPoint, TDbContext>
      where TEntryPoint : class
     where TDbContext : DbContext
 {
-    private readonly bool _ensureDeleted = ensureDeleted;
-
-    private IHost _host;
+    private IHost? _host;
 
     public string ServerAddress
     {
@@ -29,22 +28,6 @@ public abstract class DbAPIWebAppFactory<TEntryPoint, TDbContext>(bool ensureDel
         {
             // This forces WebApplicationFactory to bootstrap the server  
             using var _ = CreateDefaultClient();
-        }
-    }
-
-    protected override void ConfigureServiceProvider(IServiceProvider serviceProvider)
-    {
-        using var appContext = serviceProvider.GetRequiredService<TDbContext>();
-        try
-        {
-            if (_ensureDeleted) appContext.Database.EnsureDeleted();
-            appContext.Database.EnsureCreated();
-
-            FillTestData(appContext);
-        }
-        catch
-        {
-            throw;
         }
     }
 

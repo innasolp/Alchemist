@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Shop.API.Test.Infrastructure;
 
-public class ShopAPISignalRWebAppFactory(TestServer signalRServer) : ShopAPIWebAppFactory
+public class ShopAPISignalRWebAppFactory(TestServer signalRServer) : ShopAPIContextWebAppFactory
 {
     private readonly TestServer _signalRServer = signalRServer;
 

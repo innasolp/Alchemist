@@ -27,6 +27,7 @@
     <ProjectReference Include="..\Alchemist.Test.DBApiWebAppFactory\Alchemist.Test.DBApiWebAppFactory.csproj" />
     <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
     <ProjectReference Include="..\Alchemist.Test.SignalRWebAppFactory\Alchemist.Test.SignalRWebAppFactory.csproj" />
+    <ProjectReference Include="..\ShopImport.Test.DbApiWebAppFactory.Postgresql\ShopImport.Test.DbApiWebAppFactory.Postgresql.csproj" />
     <ProjectReference Include="..\Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj" />
   </ItemGroup>
 

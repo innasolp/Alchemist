@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
-using Alchemist.Test.DBApiWebAppFactory;
 using Mapster;
+using Alchemist.Test.DBApiWebAppFactory.Context;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
 internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer) 
-    : DBAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8052, 8053)
+    : DBContextAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8052, 8053)
 {
     private readonly TestServer _signalRServer = signalRServer;
 
@@ -40,4 +40,3 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
         Configure?.Invoke(services);
     }
 }
-

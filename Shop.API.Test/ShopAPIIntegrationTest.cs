@@ -1,10 +1,24 @@
+using Alchemist.Product.Data;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Shop.API.Test.Infrastructure;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Shop.API.Test;
 
-public class ShopAPIIntegrationTest : ShopAPITestFixture<ShopAPISignlRMockWebAppFactory>
+public class ShopAPISignlRMockWebAppFactory : ShopApiConfigurationWebAppFactory
+{
+    public ShopAPISignlRMockWebAppFactory() 
+        : base("DbContext2", "alchemy", SignalRCommon.ConfigureSignalRMock)
+    { 
+    }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {}
+}
+
+public class ShopAPIIntegrationTest : ShopAPIConfigurationTestFixture<ShopAPISignlRMockWebAppFactory>
 {
     private readonly HttpClient _httpClient;
 

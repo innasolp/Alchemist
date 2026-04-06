@@ -1,17 +1,17 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
-using Alchemist.Test.DBApiWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Alchemist.Test.SignalRWebAppFactory;
 using Alchemist.Test.Log;
+using Alchemist.Test.DBApiWebAppFactory.Context;
 
 namespace Alchemist.Test.SettingsAPIFactory;
 
 public class SettingsAPIWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort, bool ensureDeleted = true) 
-    : DBAPIKestrelWebAppFactory<SettingsAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
+    : DBContextAPIKestrelWebAppFactory<SettingsAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
 {
     private readonly string _connectionString = connectionString;
 

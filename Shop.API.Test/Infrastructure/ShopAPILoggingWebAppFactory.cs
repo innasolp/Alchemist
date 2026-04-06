@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Shop.API.Test.Infrastructure;
 
-public class ShopAPILoggingWebAppFactory: ShopAPISignlRMockWebAppFactory
+public class ShopAPILoggingWebAppFactory: ShopAPISignlRContextMockWebAppFactory
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 

@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Shop.API.Test;
 
-public class ShopApiLoggingIntegrationTest: ShopAPITestFixture<ShopAPILoggingWebAppFactory>
+public class ShopApiLoggingIntegrationTest: ShopAPIContextTestFixture<ShopAPILoggingWebAppFactory>
 {
     record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
