@@ -13,7 +13,7 @@ using Testcontainers.PostgreSql;
 
 namespace Alchemist.Settings.RestAPI.Test;
 
-public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgram, AlchemyContext>, ILoggedContext, IAsyncLifetime
+public class SettingsAPIContextWebAppFactory : DbContextWebAppFactory<SettingsAPIProgram, AlchemyContext>, ILoggedContext, IAsyncLifetime
 {
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
@@ -21,13 +21,13 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
-    public event Action<WebHostBuilderContext, IServiceCollection> ConfigureContextServices;
+    public event Action<WebHostBuilderContext, IServiceCollection>? ConfigureContextServices;
 
     public Shop[] Shops { get; } = new Shop[2];
 
     public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
 
-    public SettingsAPIWebAppFactory()
+    public SettingsAPIContextWebAppFactory()
     {
         _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
 

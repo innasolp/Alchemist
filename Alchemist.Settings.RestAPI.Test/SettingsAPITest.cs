@@ -8,12 +8,12 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Settings.RestAPI.Test;
 
-public class SettingsAPITest(SettingsAPIWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
-    : LoggedContextTestFixture<SettingsAPIWebAppFactory, SettingsAPIProgram>(webAppFactory, outputHelper)
+public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    : LoggedContextTestFixture<SettingsApiConfigurationPostgresWebAppFactory, SettingsAPIProgram>(webAppFactory, outputHelper)
 {
     private record ShopSettingsWithServices(Product.Data.ShopSettings ShopSettings, Product.Data.ShopSettings[] Services);
 
-    private Mock<ILogger> _loggerMock = new();
+    private readonly Mock<ILogger> _loggerMock = new();
 
     private  const string ShopSettingsCreatedMessageFormat = "Shop settings created with id={0}";   
 

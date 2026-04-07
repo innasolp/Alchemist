@@ -1,0 +1,60 @@
+﻿using Alchemist.Product.Data;
+using Alchemist.Test.Log;
+using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.SignalRWebAppFactory;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using ShopImport.Test.DbApiWebAppFactory.Postgresql;
+using Test.PostresqlTestContainer;
+
+namespace Alchemist.Settings.RestAPI.Test;
+
+public class SettingsApiConfigurationPostgresWebAppFactory
+    : DbApiConfigurationContainerWebAppFactory<SettingsAPIProgram, AlchemyContext, PostgresqlTestDbContainer>, ILoggedContext
+{
+    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
+
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
+
+    public event Action<WebHostBuilderContext, IServiceCollection>? ConfigureContextServices;
+
+    public Shop[] Shops { get; } = new Shop[2];
+
+    public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
+
+    public SettingsApiConfigurationPostgresWebAppFactory() 
+        : base("ConnectionString:DbContext2", "test_db_settings", 5432, "postgres", "P@ssw0rd")
+    {
+        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
+        _signalRApplicationFactory.CreateClient();
+    }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        services.SetSignalRHubTestSender(_signalRApplicationFactory.Server, ["events"]);
+
+        FixtureLoggingContext.ConfigureServices(services);
+
+        ConfigureContextServices?.Invoke(context, services);
+    }
+
+    protected override void FillTestData(AlchemyContext dbContext)
+    {
+        Shops[0] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
+        Shops[1] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
+
+        dbContext.SaveChanges();
+
+        var shopSettings = TestRepository.CreateCategoryShopSettings(Shops[0].Id, Shops[0].Name);
+
+        dbContext.ShopSettings.Add(shopSettings);
+        dbContext.SaveChanges();
+        var savedShopSettings = dbContext.ShopSettings.FirstOrDefault();
+
+        var serviceSettings = TestRepository.CreateShopSettingsServicesTestData(Shops[0].Id, savedShopSettings.Id);
+        serviceSettings.ForEach(s => dbContext.ShopSettings.Add(s));
+        dbContext.SaveChanges();
+    }
+}
