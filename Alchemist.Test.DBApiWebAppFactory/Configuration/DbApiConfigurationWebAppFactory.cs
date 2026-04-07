@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
-public abstract class DbConfigurationApiWebAppFactory<TEntryPoint, TDbContext> 
+public abstract class DbApiConfigurationWebAppFactory<TEntryPoint, TDbContext> 
     : DbConfigurationWebAppFactory<TEntryPoint, TDbContext>
      where TEntryPoint : class
     where TDbContext : DbContext

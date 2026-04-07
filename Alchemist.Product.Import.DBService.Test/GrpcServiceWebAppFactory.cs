@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class GrpcServiceWebAppFactory(string connectionString) : DBContextAPIKestrelWebAppFactory<GrpcServiceProgramm, AlchemyContext>(false, 8070, 8071)
+public class GrpcServiceWebAppFactory(string connectionString) : DbApiAPIKestrelContextContainerWebAppFactory<GrpcServiceProgramm, AlchemyContext>(false, 8070, 8071)
 {  
     private readonly string _connectionString = connectionString;
 

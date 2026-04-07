@@ -11,7 +11,7 @@ using Alchemist.Test.DBApiWebAppFactory.Context;
 namespace Alchemist.Test.ShopApiFactory;
 
 public class ShopAPIContextWebAppFactory(string connectionString, TestServer signalRServer, int httpPort, int httpsPort, bool ensureDeleted = true) 
-    : DBContextAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
+    : DbApiAPIKestrelContextContainerWebAppFactory<ShopAPIProgram, AlchemyContext>(ensureDeleted, httpPort, httpsPort)
 {
     private readonly TestServer _signalRServer = signalRServer;
 

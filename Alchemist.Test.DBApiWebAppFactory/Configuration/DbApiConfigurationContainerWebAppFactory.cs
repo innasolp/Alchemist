@@ -1,51 +1,53 @@
-﻿using Alchemist.Test.DBApiWebAppFactory.Configuration;
+﻿using Alchemist.Test.Server.Fixtures;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Test.DbContainer.Abstractions;
 
-namespace ShopImport.Test.DbApiWebAppFactory.Postgresql;
+namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
-public abstract class DbApiConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer> 
-    : DbConfigurationWebAppFactory<TEntryPoint, TDbContext>, IAsyncLifetime
+public abstract class DbApiConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>
+    (string connectionStringSection, string database, int port, string user, string password)
+    : DbConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>(connectionStringSection, database, port, user, password)
     where TEntryPoint : class
     where TDbContext : DbContext
     where TTestDbContainer : ITestDbContainer, new()
 {
-    private readonly TTestDbContainer _testDbContainer = new();
+    private IHost? _host;
 
-    private readonly string _host = Guid.NewGuid().ToString();
-
-    protected override string ConnectionStringSection { get; }
-
-    private string? _connectionString;
-
-    private readonly string _database;
-
-    private readonly string _user;
-    private readonly string _password;
-    private readonly int _port;
-
-    protected override string ConnectionString => _connectionString ?? "";
-
-    public DbApiConfigurationContainerWebAppFactory(string connectionStringSection, string database, int port, string user, string password)
+    public string ServerAddress
     {
-        ConnectionStringSection = connectionStringSection;
-        _database = database;
-        _user = user;
-        _password = password;
-        _port = port;
-
-        _testDbContainer.Build(_host, port, password);
+        get
+        {
+            EnsureServer();
+            return ClientOptions.BaseAddress.ToString();
+        }
     }
 
-    public async Task InitializeAsync()
+    private void EnsureServer()
     {
-        await _testDbContainer.StartAsync();
-
-        _connectionString = _testDbContainer.BuildConnectionString(_database, _port, _user, _password);
+        if (_host is null)
+        {
+            // This forces WebApplicationFactory to bootstrap the server  
+            using var _ = CreateDefaultClient();
+        }
     }
 
-    Task IAsyncLifetime.DisposeAsync()
+    protected override IHost CreateHost(IHostBuilder builder)
     {
-        return _testDbContainer.StopAsync();
+        var testHost = builder.CreateTestHostUseAddressConfiguration(ConfigureHostAdresses, out _host);
+
+        ClientOptions.BaseAddress = _host.GetBaseAddress();
+
+        using var scope = testHost.Services.CreateScope();
+        ConfigureServiceProvider(scope.ServiceProvider);
+
+        return testHost;
+    }
+
+    protected virtual void ConfigureHostAdresses(IWebHostBuilder builder)
+    {
+        builder.UseKestrel();
     }
 }

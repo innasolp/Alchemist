@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
-public abstract class DbConfigurationApiKestrelWebAppFactory<TEntryPoint, TDbContext>(int httpPort, int httpsPort) 
+public abstract class DbApiKestrelConfigurationWebAppFactory<TEntryPoint, TDbContext>(int httpPort, int httpsPort) 
     : DbConfigurationWebAppFactory<TEntryPoint, TDbContext>
      where TEntryPoint : class
     where TDbContext : DbContext

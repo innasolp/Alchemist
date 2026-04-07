@@ -39,6 +39,7 @@ public abstract class DbConfigurationWebAppFactory<TEntryPoint, TDbContext>
 
         return host;
     }
+
     protected virtual void ConfigureServiceProvider(IServiceProvider serviceProvider)
     {
         using var appContext = serviceProvider.GetRequiredService<TDbContext>();

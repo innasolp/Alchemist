@@ -1,17 +1,17 @@
 ﻿using Alchemist.Product.Data;
+using Alchemist.Test.DBApiWebAppFactory.Configuration;
 using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using ShopImport.Test.DbApiWebAppFactory.Postgresql;
 using Test.PostresqlTestContainer;
 
 namespace Alchemist.Settings.RestAPI.Test;
 
 public class SettingsApiConfigurationPostgresWebAppFactory
-    : DbApiConfigurationContainerWebAppFactory<SettingsAPIProgram, AlchemyContext, PostgresqlTestDbContainer>, ILoggedContext
+    : DbConfigurationContainerWebAppFactory<SettingsAPIProgram, AlchemyContext, PostgresqlTestDbContainer>, ILoggedContext
 {
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 

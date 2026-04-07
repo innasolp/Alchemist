@@ -11,7 +11,7 @@ using Alchemist.Test.DBApiWebAppFactory.Context;
 namespace Alchemist.Product.Import.DBService.Test;
 
 internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer) 
-    : DBContextAPIKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8052, 8053)
+    : DbApiAPIKestrelContextContainerWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8052, 8053)
 {
     private readonly TestServer _signalRServer = signalRServer;
 

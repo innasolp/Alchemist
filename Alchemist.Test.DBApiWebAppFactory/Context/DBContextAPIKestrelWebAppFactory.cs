@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Test.DBApiWebAppFactory.Context;
 
-public abstract class DBContextAPIKestrelWebAppFactory<TEntryPoint, TDbContext>(bool ensureDeleted, int httpPort, int httpsPort) 
+public abstract class DbApiAPIKestrelContextContainerWebAppFactory<TEntryPoint, TDbContext>(bool ensureDeleted, int httpPort, int httpsPort) 
     : DbContextAPIWebAppFactory<TEntryPoint, TDbContext>(ensureDeleted)
      where TEntryPoint : class
     where TDbContext : DbContext
