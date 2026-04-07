@@ -1,12 +1,31 @@
 ﻿using Alchemist.Product.GrpcService.Tests.Infrastructure;
+using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Grpc.Core;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLoggingWebAppFactory, GrpcServiceProgramm>, IDisposable
+public class AlchemistGrpcLoggingConfigurationWebAppFactory : AlchemistGrpcConfigurationPostgresWebAppFactory
+{
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+
+    public AlchemistGrpcLoggingConfigurationWebAppFactory() : base("test_ci_db_grpc_logging")
+    {
+    }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        base.ConfigureWebHostBuilderContext(context, services);
+
+        FixtureLoggingContext.ConfigureServices(services);
+    }
+}
+
+public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLoggingConfigurationWebAppFactory, GrpcServiceProgramm>, IDisposable
 {
     record TestLogMessage (LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
@@ -14,11 +33,9 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
     
     private readonly List<TestLogMessage> _messages = [];
 
-    public AlchemistGrpcLoggingIntegrationTest(AlchemistGrpcLoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    public AlchemistGrpcLoggingIntegrationTest(AlchemistGrpcLoggingConfigurationWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
         : base(webAppFactory, outputHelper)
     {
-        WebAppFactory.DataBase = "test_ci_db_grpc_logging";
-
         var grpcChannel = webAppFactory.CreateChannel("http://localhost");
         _client = new AlchemyGrpcService.AlchemyGrpcServiceClient(grpcChannel);
 

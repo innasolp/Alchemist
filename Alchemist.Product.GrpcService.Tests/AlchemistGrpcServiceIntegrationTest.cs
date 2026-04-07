@@ -5,14 +5,20 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcServiceIntegrationTest : TestFixture<AlchemistGrpcWebAppFactory, GrpcServiceProgramm>
+public class TestAlchemistGrpcConfigurationWebAppFactory : AlchemistGrpcConfigurationPostgresWebAppFactory
+{
+    public TestAlchemistGrpcConfigurationWebAppFactory() : base("test_ci_db_grpc")
+    {
+    }
+}
+
+public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpcConfigurationWebAppFactory, GrpcServiceProgramm>
 {
     private readonly AlchemyGrpcService.AlchemyGrpcServiceClient _client;
 
-    public AlchemistGrpcServiceIntegrationTest(AlchemistGrpcWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    public AlchemistGrpcServiceIntegrationTest(TestAlchemistGrpcConfigurationWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
         : base(webAppFactory, outputHelper)
     {
-        WebAppFactory.DataBase = "test_ci_db_grpc";
         var grpcChannel = webAppFactory.CreateChannel("http://localhost");
         _client = new AlchemyGrpcService.AlchemyGrpcServiceClient(grpcChannel);
     }

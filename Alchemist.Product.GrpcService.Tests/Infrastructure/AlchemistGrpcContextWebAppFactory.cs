@@ -9,13 +9,13 @@ using Testcontainers.PostgreSql;
 
 namespace Alchemist.Product.GrpcService.Tests.Infrastructure;
 
-public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<GrpcServiceProgramm, AlchemyContext>, IAsyncLifetime
+public class AlchemistGrpcContextWebAppFactory : DbContextWebAppFactory<GrpcServiceProgramm, AlchemyContext>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgreSqlContainer;
 
     private readonly string _host = Guid.NewGuid().ToString();
 
-    public AlchemistGrpcWebAppFactory()
+    public AlchemistGrpcContextWebAppFactory()
     {
         _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(_host);
     }
