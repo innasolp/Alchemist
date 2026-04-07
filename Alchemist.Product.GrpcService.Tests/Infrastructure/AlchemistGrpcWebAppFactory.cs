@@ -17,7 +17,7 @@ public class AlchemistGrpcWebAppFactory : DbContextWebAppFactory<GrpcServiceProg
 
     public AlchemistGrpcWebAppFactory()
     {
-        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(_host);
+        _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(_host);
     }
 
     protected override void FillTestData(AlchemyContext dbContext)

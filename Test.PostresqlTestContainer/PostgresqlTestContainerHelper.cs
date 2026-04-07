@@ -4,7 +4,7 @@ using Testcontainers.PostgreSql;
 
 namespace Test.PostresqlTestContainer;
 
-public static class PostresqlTestContainerHelper
+public static class PostgresqlTestContainerHelper
 {
     public static PostgreSqlContainer BuildPostgreSqlContainer(string host, int port = 5432, string password = "P@ssw0rd")
     {

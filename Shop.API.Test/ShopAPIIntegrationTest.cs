@@ -1,4 +1,3 @@
-using Alchemist.Product.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Shop.API.Test.Infrastructure;
@@ -10,7 +9,7 @@ namespace Shop.API.Test;
 public class ShopAPISignlRMockWebAppFactory : ShopApiConfigurationWebAppFactory
 {
     public ShopAPISignlRMockWebAppFactory() 
-        : base("DbContext2", "alchemy", SignalRCommon.ConfigureSignalRMock)
+        : base("ConnectionStrings:DbContext2", "test_shop", SignalRCommon.ConfigureSignalRMock)
     { 
     }
 

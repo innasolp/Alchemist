@@ -297,7 +297,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopImport.KeyHash.XxHash64
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.AggregateJobs", "Hangfire.AggregateJobs\Hangfire.AggregateJobs.csproj", "{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopImport.Test.DbApiWebAppFactory.Postgresql", "ShopImport.Test.DbApiWebAppFactory.Postgresql\ShopImport.Test.DbApiWebAppFactory.Postgresql.csproj", "{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.DbContainer.Abstractions", "Test.DbContainer.Abstractions\Test.DbContainer.Abstractions.csproj", "{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1205,16 +1205,16 @@ Global
 		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.import_shops|Any CPU.Build.0 = Release|Any CPU
 		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.import_core|Any CPU.ActiveCfg = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.import_core|Any CPU.Build.0 = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.import_settings|Any CPU.Build.0 = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.import_shops|Any CPU.Build.0 = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1345,7 +1345,7 @@ Global
 		{87817AE3-8665-41AC-874E-194134DBC1AA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{BEDCF965-7C66-49BC-844A-6E028308B7DF} = {87817AE3-8665-41AC-874E-194134DBC1AA}
 		{3E3EEC3F-B132-4588-93C6-5841BEB3B63F} = {E99D4DC2-F128-4567-B4FD-23E62E79FC7B}
-		{46DE3A04-3B52-437E-B55C-BBBD4D0CD5A5} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
+		{3EBEDB07-F5A3-4EA8-AB4D-458BB5471747} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

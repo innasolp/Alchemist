@@ -1,11 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Alchemist.Test.Log;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shop.API.Test.Infrastructure;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Shop.API.Test;
 
-public class ShopApiLoggingIntegrationTest: ShopAPIContextTestFixture<ShopAPILoggingWebAppFactory>
+public class ShopAPIConfigurationLoggingWebAppFactory : ShopApiConfigurationWebAppFactory
+{
+    public ShopAPIConfigurationLoggingWebAppFactory() : base("ConnectionStrings:DbContext2", "test_ci_db_logging", SignalRCommon.ConfigureSignalRMock)
+    {
+    }
+
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        FixtureLoggingContext.ConfigureServices(services);
+    }
+}
+
+public class ShopApiLoggingIntegrationTest: ShopAPIConfigurationTestFixture<ShopAPIConfigurationLoggingWebAppFactory>
 {
     record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
@@ -19,10 +36,10 @@ public class ShopApiLoggingIntegrationTest: ShopAPIContextTestFixture<ShopAPILog
 
     private const string ResponseBodyEvent = "ResponseBody";
 
-    public ShopApiLoggingIntegrationTest(ShopAPILoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
+    public ShopApiLoggingIntegrationTest(ShopAPIConfigurationLoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
         : base(webAppFactory, outputHelper)
     {
-        WebAppFactory.DataBase = "test_ci_db_logging";
+        //WebAppFactory.DataBase = "test_ci_db_logging";
         WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
         _httpClient = WebAppFactory.CreateClient();
     }

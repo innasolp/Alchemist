@@ -70,7 +70,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         _shopAPIHttpsPort = shopAPIHttpsPort;
         _settingsAPIHttpPort = settingsAPIHttpPort;
         _settingsAPIHttpsPort = settingsAPIHttpsPort;
-        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+        _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
 
         var settings = new ConfigurationBuilder()
               .AddJsonFile("appsettings.json")

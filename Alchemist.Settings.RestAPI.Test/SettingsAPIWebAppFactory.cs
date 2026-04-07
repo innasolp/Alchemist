@@ -29,7 +29,7 @@ public class SettingsAPIWebAppFactory : DbContextWebAppFactory<SettingsAPIProgra
 
     public SettingsAPIWebAppFactory()
     {
-        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+        _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
 
         _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
         _signalRApplicationFactory.CreateClient();

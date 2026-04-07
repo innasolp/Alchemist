@@ -3,17 +3,19 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using ShopImport.Test.DbApiWebAppFactory.Postgresql;
+using Test.PostresqlTestContainer;
 
 namespace Shop.API.Test.Infrastructure;
 
-public abstract class ShopApiConfigurationWebAppFactory(string connectionStringSection, string database, Action<IServiceCollection> configureServices) 
-    : DbApiConfigurationPostgresWebAppFactory<ShopAPIProgram, AlchemyContext>(connectionStringSection, database)
+public abstract class ShopApiConfigurationWebAppFactory(string connectionStringSection, string database, Action<IServiceCollection>? configureServices = null) 
+    : DbApiConfigurationContainerWebAppFactory<ShopAPIProgram, AlchemyContext, PostgresqlTestDbContainer>(connectionStringSection, database, 5432, "postgres", "P@ssw0rd")
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
 
-        builder.ConfigureTestServices(configureServices);
+        if(configureServices != null)
+            builder.ConfigureTestServices(configureServices);
     }
 
     protected override void FillTestData(AlchemyContext dbContext)

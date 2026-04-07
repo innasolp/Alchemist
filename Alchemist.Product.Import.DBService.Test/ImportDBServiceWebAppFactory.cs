@@ -44,7 +44,7 @@ public class ImportDBServiceWebAppFactory : TestWebAppFactory<ImportDbServicePro
 
         _dataBase = settings.GetSection("alchemydb").Get<string>() ?? "test_ci_db";
 
-        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+        _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
         
         _signalRApplicationFactory = new WebApplicationFactory<Startup>();
         _signalRApplicationFactory.CreateClient();            

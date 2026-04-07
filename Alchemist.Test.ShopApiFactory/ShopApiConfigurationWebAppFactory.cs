@@ -8,12 +8,10 @@ using Alchemist.Test.SignalRWebAppFactory;
 
 namespace Alchemist.Test.ShopApiFactory;
 
-public abstract class ShopApiConfigurationWebAppFactory(string connectionStringSection,
-    string connectionString,
-    TestServer signalRServer,
+public abstract class ShopApiConfigurationWebAppFactory(TestServer signalRServer,
     int httpPort,
     int httpsPort)
-    : DbConfigurationApiKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(connectionStringSection, connectionString, httpPort, httpsPort)
+    : DbConfigurationApiKestrelWebAppFactory<ShopAPIProgram, AlchemyContext>(httpPort, httpsPort)
 {
     private readonly TestServer _signalRServer = signalRServer;
 
