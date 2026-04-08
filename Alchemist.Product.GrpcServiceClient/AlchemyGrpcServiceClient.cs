@@ -17,7 +17,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
 
     private readonly IEnumerable<Interceptor> _interceptors;
 
-    public AlchemyGrpcServiceClient(GrpcChannel channel) : this(channel, Array.Empty<Interceptor>())
+    public AlchemyGrpcServiceClient(GrpcChannel channel) : this(channel, [])
     {
     }
 

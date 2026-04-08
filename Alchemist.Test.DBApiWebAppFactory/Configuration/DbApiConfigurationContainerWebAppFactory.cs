@@ -8,11 +8,11 @@ using Test.DbContainer.Abstractions;
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
 public abstract class DbApiConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>
-    (string connectionStringSection, string database, int port, string user, string password)
-    : DbConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>(connectionStringSection, database, port, user, password)
+    (string connectionStringSection, string database, int port, string user, string password, TTestDbContainer? testDbContainer = null)
+    : DbConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>(connectionStringSection, database, port, user, password, testDbContainer)
     where TEntryPoint : class
     where TDbContext : DbContext
-    where TTestDbContainer : ITestDbContainer, new()
+    where TTestDbContainer : class, ITestDbContainer, new()
 {
     private IHost? _host;
 
@@ -49,5 +49,13 @@ public abstract class DbApiConfigurationContainerWebAppFactory<TEntryPoint, TDbC
     protected virtual void ConfigureHostAdresses(IWebHostBuilder builder)
     {
         builder.UseKestrel();
+    }
+
+    public virtual HttpClient GetHostHttpClient()
+    {
+        EnsureServer();
+        var httpClient = CreateClient();
+        httpClient.BaseAddress = new Uri(ServerAddress);
+        return httpClient;
     }
 }

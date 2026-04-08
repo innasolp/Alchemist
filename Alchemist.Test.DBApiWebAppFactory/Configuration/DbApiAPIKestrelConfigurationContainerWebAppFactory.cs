@@ -7,11 +7,11 @@ using Test.DbContainer.Abstractions;
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
 public abstract class DbApiAPIKestrelConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>
-    (string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort)
-    : DbConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>(connectionStringSection, database, dbPort, user, password)
+    (string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort, TTestDbContainer? testDbContainer = null)
+    : DbApiConfigurationContainerWebAppFactory<TEntryPoint, TDbContext, TTestDbContainer>(connectionStringSection, database, dbPort, user, password, testDbContainer)
     where TEntryPoint : class
     where TDbContext : DbContext
-    where TTestDbContainer : ITestDbContainer, new()
+    where TTestDbContainer : class, ITestDbContainer, new()
 {
     public int HttpPort { get; set; } = httpPort;
 

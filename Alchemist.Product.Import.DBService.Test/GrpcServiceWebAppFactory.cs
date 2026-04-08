@@ -1,28 +1,19 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.Data.Postgresql;
-using Alchemist.Test.DBApiWebAppFactory.Context;
+using Alchemist.Test.DBApiWebAppFactory.Configuration;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Test.PostresqlTestContainer;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class GrpcServiceWebAppFactory(string connectionString) : DbApiAPIKestrelContextContainerWebAppFactory<GrpcServiceProgramm, AlchemyContext>(false, 8070, 8071)
+public class GrpcServiceWebAppFactory(string database, int httpPort, int httpsPort) 
+    : DbApiAPIKestrelConfigurationContainerWebAppFactory<GrpcServiceProgramm, AlchemyContext, PostgresqlTestDbContainer>
+    ("ConnectionStrings:DbContext2", database, 5432, "postgres", "P@ssw0rd", httpPort, httpsPort)
 {  
-    private readonly string _connectionString = connectionString;
-
-    public event Action<IServiceCollection> ConfigureServices;
-
-    protected override IServiceCollection AddDbContext(IServiceCollection services)
-    {
-        return services.AddAlchemyPostgresContextFactory(optionsBuilder =>
-                optionsBuilder.UseNpgsql(_connectionString));
-    }
+    public event Action<IServiceCollection>? ConfigureServices;
 
     protected override void FillTestData(AlchemyContext dbContext)
-    {
-        //todo
-    }    
+    {}    
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {

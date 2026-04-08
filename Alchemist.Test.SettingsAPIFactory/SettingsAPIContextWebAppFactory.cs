@@ -34,8 +34,6 @@ public class SettingsAPIContextWebAppFactory(string connectionString, TestServer
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        base.ConfigureWebHostBuilderContext(context, services);
-
         services.SetSignalRHubTestSender(_signalRServer, ["events"]);
 
         FixtureLoggingContext.ConfigureServices(services);

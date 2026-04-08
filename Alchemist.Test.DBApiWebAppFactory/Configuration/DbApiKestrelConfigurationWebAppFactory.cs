@@ -1,7 +1,6 @@
 ﻿using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
@@ -14,8 +13,13 @@ public abstract class DbApiKestrelConfigurationWebAppFactory<TEntryPoint, TDbCon
 
     public int HttpsPort { get; set; } = httpsPort;
 
-    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        context.Configuration.SetKestrelLocalhostPortsConfig(HttpPort, HttpsPort);    
+        base.ConfigureWebHost(builder);
+
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            context.Configuration.SetKestrelLocalhostPortsConfig(HttpPort, HttpsPort);
+        });
     }
 }

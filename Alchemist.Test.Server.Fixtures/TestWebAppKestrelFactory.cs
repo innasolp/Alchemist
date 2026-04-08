@@ -15,8 +15,16 @@ public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) 
         builder.UseKestrel();
     }
 
-    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        context.Configuration.SetKestrelLocalhostPortsConfig(HttpPort, HttpsPort);
+        base.ConfigureWebHost(builder);
+
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            context.Configuration.SetKestrelLocalhostPortsConfig(HttpPort, HttpsPort);
+        });
     }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {}
 }

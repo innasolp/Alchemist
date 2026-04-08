@@ -13,10 +13,11 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer>
     (string connectionStringSection, string database, int dbPort, string user, string password,
     int httpPort,
     int httpsPort,
-    TestServer signalRServer)
+    TestServer signalRServer,
+     TTestDbContainer? testDbContainer = null)
     : DbApiAPIKestrelConfigurationContainerWebAppFactory<ShopAPIProgram, AlchemyContext, TTestDbContainer>
-    (connectionStringSection, database, dbPort, user, password, httpPort, httpsPort)
-    where TTestDbContainer : ITestDbContainer, new()
+    (connectionStringSection, database, dbPort, user, password, httpPort, httpsPort, testDbContainer)
+    where TTestDbContainer : class, ITestDbContainer, new()
 {
     private readonly TestServer _signalRServer = signalRServer;
 

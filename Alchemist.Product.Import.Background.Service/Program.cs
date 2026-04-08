@@ -17,6 +17,7 @@ using DependencyInjection.AssemblyExtensions;
 using Hangfire;
 using Hangfire.AggregateJobs;
 using Hangfire.Console;
+using Hangfire.Dashboard;
 using Hangfire.Redis.StackExchange;
 using Hangfire.Tags;
 using Hangfire.Tags.Redis.StackExchange;
@@ -69,8 +70,10 @@ builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.Ge
     (options)=> options.UseNpgsql(builder.Configuration.GetConnectionString("ChildJobStoragePostgres")),
     hangfireOptions,
     (config) =>
-    { 
-        config.UseConsole();
+    {
+        if (DashboardRoutes.Routes.FindDispatcher("/console/1234567890a_suffix")?.Item1 == null)
+            config.UseConsole();
+        
         config.AddAggregateConsoleContextFilter();
     });
 

@@ -1,23 +1,18 @@
 ﻿using Alchemist.Product.Data;
-using Alchemist.Product.Data.Postgresql;
-using Alchemist.Product.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
 using Mapster;
-using Alchemist.Test.DBApiWebAppFactory.Context;
+using Alchemist.Test.ShopApiFactory;
+using Test.PostresqlTestContainer;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRServer) 
-    : DbApiAPIKestrelContextContainerWebAppFactory<ShopAPIProgram, AlchemyContext>(true, 8052, 8053)
+internal class ShopAPIWebAppFactory(string database, int httpPort, int httpsPort, TestServer signalRServer)
+    : ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer>("ConnectionStrings:DbContext2",
+            database, 5432, "postgres", "P@ssw0rd", httpPort, httpsPort, signalRServer)
 {
-    private readonly TestServer _signalRServer = signalRServer;
-
-    private readonly string _connectionString = connectionString;
-
-    public event Action<IServiceCollection> Configure;
+    public event Action<IServiceCollection>? Configure;
 
     protected override void FillTestData(AlchemyContext dbContext)
     {
@@ -26,16 +21,10 @@ internal class ShopAPIWebAppFactory(string connectionString, TestServer signalRS
         dbContext.SaveChanges();
     }
 
-    protected override IServiceCollection AddDbContext(IServiceCollection services)
-    {
-        return services.AddAlchemyPostgresContextFactory(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
-    }
 
-    protected override void ConfigureServices(IServiceCollection services)
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        base.ConfigureServices(services);
-
-        services.SetSignalRHubTestSender(_signalRServer, ["events"]);
+        base.ConfigureWebHostBuilderContext(context, services);
 
         Configure?.Invoke(services);
     }

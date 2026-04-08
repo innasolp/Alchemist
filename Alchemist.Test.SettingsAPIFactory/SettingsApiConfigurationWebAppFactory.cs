@@ -10,10 +10,11 @@ using Alchemist.Test.SignalRWebAppFactory;
 namespace Alchemist.Test.SettingsAPIFactory;
 
 public class SettingsApiConfigurationWebAppFactory<TTestDbContainer>
-    (string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort, TestServer signalRServer)
+    (string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort, TestServer signalRServer,
+     TTestDbContainer? testDbContainer = null)
     : DbApiAPIKestrelConfigurationContainerWebAppFactory<SettingsAPIProgram, AlchemyContext, TTestDbContainer>
-    (connectionStringSection, database, dbPort, user, password, httpPort, httpsPort)
-    where TTestDbContainer : ITestDbContainer, new()
+    (connectionStringSection, database, dbPort, user, password, httpPort, httpsPort, testDbContainer)
+    where TTestDbContainer : class, ITestDbContainer, new()
 {
     private readonly TestServer _signalRServer = signalRServer;
 

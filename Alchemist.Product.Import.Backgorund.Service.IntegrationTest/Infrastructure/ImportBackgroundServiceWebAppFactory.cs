@@ -93,16 +93,16 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        ShopApiClient = _shopAPIWebAppFactory.CreateClient();
-
-        ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
-
         FixtureLoggingContext.ConfigureServices(services);
 
         _configuration = context.Configuration;
 
+        ShopApiClient = _shopAPIWebAppFactory.CreateClient();
         services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(ShopApiClient));
+
+        ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
         services.InterceptImplementation<IShopSettingsDataService, SettingsAPIClient>(new SettingsAPIClient(ShopSettingsApiClient));
+
         services.InterceptImplementation<ILoaderServiceFactory, BrowserServiceClientFactory>
             ((services) => services.AddBrowserServiceClientFactory(_browserServiceFactory.ServerAddress));
 
@@ -133,8 +133,8 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     async Task IAsyncLifetime.DisposeAsync()
     {
-        await _settingsAPIWebAppFactory.DisposeAsync();
+        await (_settingsAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
 
-        await _shopAPIWebAppFactory.DisposeAsync();
+        await (_shopAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
     }
 }

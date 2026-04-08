@@ -47,4 +47,11 @@ public abstract class DbApiConfigurationWebAppFactory<TEntryPoint, TDbContext>
     {
         builder.UseKestrel();
     }
+
+    public virtual HttpClient GetHostHttpClient()
+    {
+        var httpClient = Server.CreateClient();
+        httpClient.BaseAddress = new Uri(ServerAddress);
+        return httpClient;
+    }
 }

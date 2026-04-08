@@ -7,9 +7,9 @@ public abstract class DbConfigurationContainerWebAppFactory<TEntryPoint, TDbCont
     : DbConfigurationWebAppFactory<TEntryPoint, TDbContext>, IAsyncLifetime
     where TEntryPoint : class
     where TDbContext : DbContext
-    where TTestDbContainer : ITestDbContainer, new()
+    where TTestDbContainer : class, ITestDbContainer, new()
 {
-    private readonly TTestDbContainer _testDbContainer = new();
+    private readonly TTestDbContainer _testDbContainer;
 
     private readonly string _host = Guid.NewGuid().ToString();
 
@@ -25,13 +25,15 @@ public abstract class DbConfigurationContainerWebAppFactory<TEntryPoint, TDbCont
 
     protected override string ConnectionString => _connectionString ?? "";
 
-    public DbConfigurationContainerWebAppFactory(string connectionStringSection, string database, int port, string user, string password)
+    public DbConfigurationContainerWebAppFactory(string connectionStringSection, string database, int port, string user, string password, 
+        TTestDbContainer? testDbContainer = null)
     {
         ConnectionStringSection = connectionStringSection;
         _database = database;
         _user = user;
         _password = password;
         _port = port;
+        _testDbContainer = testDbContainer ?? new TTestDbContainer();
 
         _testDbContainer.Build(_host, port, password);
     }
