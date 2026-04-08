@@ -10,7 +10,8 @@ namespace Shop.API.Test;
 
 public class ShopAPIConfigurationLoggingWebAppFactory : ShopApiConfigurationWebAppFactory
 {
-    public ShopAPIConfigurationLoggingWebAppFactory() : base("ConnectionStrings:DbContext2", "test_ci_db_logging", SignalRCommon.ConfigureSignalRMock)
+    public ShopAPIConfigurationLoggingWebAppFactory() 
+        : base("ConnectionStrings:DbContext2", "test_ci_db_logging", SignalRCommon.ConfigureSignalRMock, httpPort:8048, httpsPort: 8049)
     {
     }
 
@@ -18,6 +19,7 @@ public class ShopAPIConfigurationLoggingWebAppFactory : ShopApiConfigurationWebA
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
+        base.ConfigureWebHostBuilderContext (context, services);
         FixtureLoggingContext.ConfigureServices(services);
     }
 }
@@ -27,8 +29,6 @@ public class ShopApiLoggingIntegrationTest: ShopAPIConfigurationTestFixture<Shop
     record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
     private readonly List<TestLogMessage> _messages = [];
-
-    private readonly HttpClient _httpClient;
 
     private const string HttpLogCategory = "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware";
 
@@ -41,7 +41,6 @@ public class ShopApiLoggingIntegrationTest: ShopAPIConfigurationTestFixture<Shop
     {
         //WebAppFactory.DataBase = "test_ci_db_logging";
         WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
-        _httpClient = WebAppFactory.CreateClient();
     }
 
     private void Log(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception)
@@ -55,10 +54,18 @@ public class ShopApiLoggingIntegrationTest: ShopAPIConfigurationTestFixture<Shop
         _messages.Clear();
 
         var name = "TestShop";
-        var response = await _httpClient.GetAsync($"api/Shop/byName?name={name}");
-        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
 
-        Assert.Equal(1, _messages.Count(m => m.eventId.Name == ResponseBodyEvent && m.categoryName.Contains(HttpLogCategory) && m.logLevel == LogLevel.Information));
+        try
+        {
+            var httpClient = WebAppFactory.GetHostHttpClient(); var response = await httpClient.GetAsync($"api/Shop/byName?name={name}");
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+
+            Assert.Equal(1, _messages.Count(m => m.eventId.Name == ResponseBodyEvent && m.categoryName.Contains(HttpLogCategory) && m.logLevel == LogLevel.Information));
+        }
+        finally
+        {
+            await WebAppFactory.ResetDatabaseAsync();
+        }
     }
 
     [Fact]
@@ -67,8 +74,17 @@ public class ShopApiLoggingIntegrationTest: ShopAPIConfigurationTestFixture<Shop
         _messages.Clear();
 
         var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew", Id = 1 };
-        var response = await _httpClient.PutAsJsonAsync($"api/Shop", shop);
 
-        Assert.Equal(1, _messages.Count(m =>m.categoryName.Contains(HttpExceptionHandler) && m.logLevel == LogLevel.Error));
+        try
+        {
+            var httpClient = WebAppFactory.GetHostHttpClient(); 
+            var response = await httpClient.PutAsJsonAsync($"api/Shop", shop);
+
+            Assert.Equal(1, _messages.Count(m => m.categoryName.Contains(HttpExceptionHandler) && m.logLevel == LogLevel.Error));
+        }
+        finally
+        {
+            await WebAppFactory.ResetDatabaseAsync();
+        }
     }
 }

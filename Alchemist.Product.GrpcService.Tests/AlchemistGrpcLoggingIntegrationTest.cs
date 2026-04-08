@@ -13,7 +13,7 @@ public class AlchemistGrpcLoggingConfigurationWebAppFactory : AlchemistGrpcConfi
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
-    public AlchemistGrpcLoggingConfigurationWebAppFactory() : base("test_ci_db_grpc_logging")
+    public AlchemistGrpcLoggingConfigurationWebAppFactory() : base("test_ci_db_grpc_logging", 8072, 8073)
     {
     }
 

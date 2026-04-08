@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Test.Server.Fixtures;
 
@@ -9,11 +10,6 @@ public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) 
     public int HttpPort { get; set; } = httpPort;
 
     public int HttpsPort { get; set; } = httpsPort;
-
-    protected override void ConfigureHostAdresses(IWebHostBuilder builder)
-    {
-        builder.UseKestrel();
-    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -27,4 +23,20 @@ public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) 
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {}
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var testHost = builder.CreateTestHostUseAddressConfiguration(ConfigureHostAdresses, out _host);
+
+        ClientOptions.BaseAddress = _host.GetBaseAddress();
+
+        ConfigureHost(_host);
+
+        return testHost;
+    }
+
+    protected virtual void ConfigureHostAdresses(IWebHostBuilder builder)
+    {
+        builder.UseKestrel();
+    }
 }

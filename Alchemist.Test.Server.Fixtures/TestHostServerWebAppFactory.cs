@@ -1,15 +1,12 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public abstract class TestHostServerWebAppFactory<TEntryPoint> : TestWebAppFactory<TEntryPoint>
+public abstract class TestHostServerWebAppFactory<TEntryPoint> : TestWebAppFactory<TEntryPoint>, IWebHostConfigure
     where TEntryPoint : class
 {
-
-    private IHost _host;
-
-    protected IHost Host => _host;
+    protected IHost? _host;
 
     public string ServerAddress
     {
@@ -17,6 +14,21 @@ public abstract class TestHostServerWebAppFactory<TEntryPoint> : TestWebAppFacto
         {
             EnsureServer();
             return ClientOptions.BaseAddress.ToString();
+        }
+    }
+
+
+    private Action<IHost>? _configureHost;
+
+    event Action<IHost> IWebHostConfigure.ConfigureHost
+    {
+        add
+        {
+            _configureHost += value;
+        }
+        remove
+        {
+            _configureHost -= value;
         }
     }
 
@@ -28,15 +40,33 @@ public abstract class TestHostServerWebAppFactory<TEntryPoint> : TestWebAppFacto
             using var _ = CreateDefaultClient();
         }
     }
-    
+
+
     protected override IHost CreateHost(IHostBuilder builder)
     {
         var testHost = builder.CreateTestHostUseAddressConfiguration(ConfigureHostAdresses, out _host);
 
-        ClientOptions.BaseAddress = _host.GetBaseAddress();        
+        ClientOptions.BaseAddress = _host.GetBaseAddress();
+
+        ConfigureHost(_host);
 
         return testHost;
     }
 
-    protected abstract void ConfigureHostAdresses(IWebHostBuilder builder);    
+    protected virtual void ConfigureHostAdresses(IWebHostBuilder builder)
+    {
+        builder.UseKestrel();
+    }
+
+    protected void ConfigureHost(IHost host)
+    {
+        _configureHost?.Invoke(host);
+    }
+
+    public virtual HttpClient GetHostHttpClient()
+    {
+        var httpClient = CreateClient();
+        httpClient.BaseAddress = new Uri(ServerAddress);
+        return httpClient;
+    }
 }

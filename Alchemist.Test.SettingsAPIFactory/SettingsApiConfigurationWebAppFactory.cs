@@ -6,22 +6,61 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Test.DbContainer.Abstractions;
 using Alchemist.Test.SignalRWebAppFactory;
+using Alchemist.Test.Server.Fixtures;
+using Xunit;
 
 namespace Alchemist.Test.SettingsAPIFactory;
 
-public class SettingsApiConfigurationWebAppFactory<TTestDbContainer>
-    (string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort, TestServer signalRServer,
-     TTestDbContainer? testDbContainer = null)
-    : DbApiAPIKestrelConfigurationContainerWebAppFactory<SettingsAPIProgram, AlchemyContext, TTestDbContainer>
-    (connectionStringSection, database, dbPort, user, password, httpPort, httpsPort, testDbContainer)
+internal class SettingsApiConfigurationDbInterceptor<TTestDbContainer, TDbRespawner>
+    (SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> webHostConfigure, 
+    string connectionStringSection, 
+    string database, 
+    string user, 
+    string password,
+    int port,
+    TTestDbContainer? testDbContainer = null,
+    TDbRespawner? dbRespawner = null)
+    : DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner>
+    (webHostConfigure, connectionStringSection, database, user, password, port, testDbContainer, dbRespawner)
     where TTestDbContainer : class, ITestDbContainer, new()
+    where TDbRespawner : class, IDatabaseRespawner, new()
 {
-    private readonly TestServer _signalRServer = signalRServer;
+    protected override void FillTestData(AlchemyContext dbContext)
+    {}
+}
+
+public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> : TestWebAppKestrelFactory<SettingsAPIProgram>, IAsyncLifetime
+    where TTestDbContainer : class, ITestDbContainer, new()
+    where TDbRespawner : class, IDatabaseRespawner, new()
+{
+    private readonly TestServer _signalRServer;
+
+    private readonly SettingsApiConfigurationDbInterceptor<TTestDbContainer, TDbRespawner> _dbInterceptor;
+
+    public SettingsApiConfigurationWebAppFactory(string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort, 
+        TestServer signalRServer, 
+        TTestDbContainer? testDbContainer = null,
+        TDbRespawner? dbRespawner = null) 
+        : base(httpPort, httpsPort)
+    {
+        _signalRServer = signalRServer;
+
+        _dbInterceptor = new SettingsApiConfigurationDbInterceptor<TTestDbContainer, TDbRespawner>(this, 
+            connectionStringSection, 
+            database, 
+            user, 
+            password, 
+            dbPort, 
+            testDbContainer, 
+            dbRespawner);
+    }
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
-    protected override void FillTestData(AlchemyContext dbContext)
-    {}
+    public Task InitializeAsync()
+    {
+        return _dbInterceptor.InitializeAsync();
+    }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
@@ -30,5 +69,10 @@ public class SettingsApiConfigurationWebAppFactory<TTestDbContainer>
         services.SetSignalRHubTestSender(_signalRServer, ["events"]);
 
         FixtureLoggingContext.ConfigureServices(services);
+    }
+
+    Task IAsyncLifetime.DisposeAsync()
+    {
+        return _dbInterceptor.DisposeAsync();
     }
 }

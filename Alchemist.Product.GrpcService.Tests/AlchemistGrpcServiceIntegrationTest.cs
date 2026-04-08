@@ -7,7 +7,7 @@ namespace Alchemist.Product.GrpcService.Tests;
 
 public class TestAlchemistGrpcConfigurationWebAppFactory : AlchemistGrpcConfigurationPostgresWebAppFactory
 {
-    public TestAlchemistGrpcConfigurationWebAppFactory() : base("test_ci_db_grpc")
+    public TestAlchemistGrpcConfigurationWebAppFactory() : base("test_ci_db_grpc", 8074, 8075)
     {
     }
 }
@@ -16,7 +16,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
 {
     private readonly AlchemyGrpcService.AlchemyGrpcServiceClient _client;
 
-    public AlchemistGrpcServiceIntegrationTest(TestAlchemistGrpcConfigurationWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    public AlchemistGrpcServiceIntegrationTest(TestAlchemistGrpcConfigurationWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
         : base(webAppFactory, outputHelper)
     {
         var grpcChannel = webAppFactory.CreateChannel("http://localhost");
@@ -26,54 +26,85 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
     [Fact]
     public async Task FindBrandSuccessWhenNameExists()
     {
-        var brandName = "Elizavecca";        
-        var response = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName});
+        var brandName = "Elizavecca";
 
-        Assert.NotNull(response);
-        Assert.Equal(brandName, response.Name);
+        try
+        {
+            var response = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName });
+
+            Assert.NotNull(response);
+            Assert.Equal(brandName, response.Name);
+        }
+        finally
+        {
+            await WebAppFactory.ResetDatabaseAsync();
+        }
     }
 
     [Fact]
     public async Task FindBrandByNameThrowsBadRequestRpcExceptionWhenNameIsEmpty()
     {
-        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+        try
         {
-            await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "" });
-        });
+            var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+            {
+                await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "" });
+            });
 
-        OutputHelper.WriteLine(rpcException.Message);
-        OutputHelper.WriteLine(rpcException.StackTrace);
+            OutputHelper.WriteLine(rpcException.Message);
+            OutputHelper.WriteLine(rpcException.StackTrace);
 
-        Assert.Equal(StatusCode.InvalidArgument, rpcException.Status.StatusCode);
+            Assert.Equal(StatusCode.InvalidArgument, rpcException.Status.StatusCode);
+        }
+        finally
+        {
+            await WebAppFactory.ResetDatabaseAsync();
+        }
     }
 
     [Fact]
     public async Task FindBrandByNameThrowsNotFoundRpcExceptionWhenNameNotExists()
     {
         var brandName = Guid.NewGuid().ToString();
-        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+
+        try
         {
-            await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName });
-        });
+            var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+            {
+                await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName });
+            });
 
-        OutputHelper.WriteLine(rpcException.Message);
-        OutputHelper.WriteLine(rpcException.StackTrace);
+            OutputHelper.WriteLine(rpcException.Message);
+            OutputHelper.WriteLine(rpcException.StackTrace);
 
-        Assert.Equal(StatusCode.NotFound, rpcException.Status.StatusCode);
+            Assert.Equal(StatusCode.NotFound, rpcException.Status.StatusCode);
+        }
+        finally
+        {
+            await WebAppFactory.ResetDatabaseAsync();
+        }
     }
 
     [Fact]
     public async Task CreateBrandSuccessWhenNameIsValid()
     {
         var brand = new CreateBrandRequest { Name = Guid.NewGuid().ToString() };
-        var createResponse = await _client.CreateBrandAsync(brand);
 
-        Assert.NotNull(createResponse);
-        Assert.Equal(brand.Name, createResponse.Name);
+        try
+        {
+            var createResponse = await _client.CreateBrandAsync(brand);
 
-        var findResponse = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brand.Name });
-        Assert.NotNull(findResponse);
-        Assert.Equal(createResponse.Id, findResponse.Id);
+            Assert.NotNull(createResponse);
+            Assert.Equal(brand.Name, createResponse.Name);
+
+            var findResponse = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brand.Name });
+            Assert.NotNull(findResponse);
+            Assert.Equal(createResponse.Id, findResponse.Id);
+        }
+        finally
+        {
+            await WebAppFactory.ResetDatabaseAsync();
+        }
     }
 
     [Fact]
@@ -88,8 +119,6 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
             Itemurl = Guid.NewGuid().ToString(),
             Price = 0.0
         };
-        var reply = await _client.CreateShopProductAsync(createShopProductRequest);
-        
         var createShopProductRequestInvalid = new CreateShopProductRequest
         {
             Apiurl = Guid.NewGuid().ToString(),
@@ -100,14 +129,23 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
             Price = 0.0
         };
 
-        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+        try
         {
-            await _client.CreateShopProductAsync(createShopProductRequestInvalid);
-        });
+            var reply = await _client.CreateShopProductAsync(createShopProductRequest);
 
-        OutputHelper.WriteLine(rpcException.Message);
-        OutputHelper.WriteLine(rpcException.StackTrace);
+            var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+            {
+                await _client.CreateShopProductAsync(createShopProductRequestInvalid);
+            });
 
-        Assert.Equal(StatusCode.Internal, rpcException.Status.StatusCode);
+            OutputHelper.WriteLine(rpcException.Message);
+            OutputHelper.WriteLine(rpcException.StackTrace);
+
+            Assert.Equal(StatusCode.Internal, rpcException.Status.StatusCode);
+        }
+        finally
+        {
+            await WebAppFactory.ResetDatabaseAsync();
+        }
     }
 }

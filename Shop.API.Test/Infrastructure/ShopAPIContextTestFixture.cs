@@ -13,6 +13,6 @@ public class ShopAPIContextTestFixture<TWebAppFactory>(TWebAppFactory webAppFact
 }
 public class ShopAPIConfigurationTestFixture<TWebAppFactory>(TWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
     : TestFixture<TWebAppFactory, ShopAPIProgram>(webAppFactory, outputHelper)
-    where TWebAppFactory: DbConfigurationWebAppFactory<ShopAPIProgram, AlchemyContext>
+    where TWebAppFactory: TestHostServerWebAppFactory<ShopAPIProgram>
 {
 }

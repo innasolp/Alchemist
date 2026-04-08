@@ -31,9 +31,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     private readonly int _settingsAPIHttpPort;
     private readonly int _settingsAPIHttpsPort;
 
-    private readonly SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer> _settingsAPIWebAppFactory;
+    private readonly SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner> _settingsAPIWebAppFactory;
 
-    private readonly ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer> _shopAPIWebAppFactory;
+    private readonly ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner> _shopAPIWebAppFactory;
 
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
@@ -77,10 +77,10 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
         _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(browserServiceHttpPort, browserServiceHttpsPort);
 
-        _shopAPIWebAppFactory = new ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer>
+        _shopAPIWebAppFactory = new ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer,PostgresDbRespawner>
             ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _shopAPIHttpPort, _shopAPIHttpsPort, _signalRApplicationFactory.Server);
 
-        _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer>
+        _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>
             ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server);
     }
 

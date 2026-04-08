@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 namespace Alchemist.Product.Import.DBService.Test;
 
 internal class ShopAPIWebAppFactory(string database, int httpPort, int httpsPort, TestServer signalRServer)
-    : ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer>("ConnectionStrings:DbContext2",
+    : ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>("ConnectionStrings:DbContext2",
             database, 5432, "postgres", "P@ssw0rd", httpPort, httpsPort, signalRServer)
 {
     public event Action<IServiceCollection>? Configure;
@@ -20,7 +20,6 @@ internal class ShopAPIWebAppFactory(string database, int httpPort, int httpsPort
         shops.ForEach(s => dbContext.Shops.Add(s.Adapt<Data.Shop>()));
         dbContext.SaveChanges();
     }
-
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
