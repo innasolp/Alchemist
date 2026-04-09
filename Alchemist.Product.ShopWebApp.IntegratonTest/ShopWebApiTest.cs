@@ -6,67 +6,112 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
-public class ShopWebAppApiFactory : ShopWebAppLifetimeTestContainerFactory
+public class ShopWebAppApiFactory : ShopApiConfigurationLoggedWebAppFactory
 {
-    public ShopWebAppApiFactory() : base (true, 8402,8403,8060,8061, Common.ConfigurationHelper.GetSectionValue("ShopWebApiTestDb"))
+    public ShopWebAppApiFactory() : base(true, 8402, 8403, 8060, 8061,
+        "ConnectionStrings:DbContext2",
+        Common.ConfigurationHelper.GetSectionValue("ShopWebApiTestDb"))
     {
     }
 }
 
 public class ShopWebApiTest(ShopWebAppApiFactory webAppFactory, ITestOutputHelper outputHelper)
-    : TestFixture<ShopWebAppApiFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
+    : LoggedContextTestFixture<ShopWebAppApiFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
 {
     [Fact]
     public async Task SwaggerGenerationSuccessAsync()
     {
         var swaggerUrl = "/swagger/index.html";
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.GetAsync(swaggerUrl);       
-        response.EnsureSuccessStatusCode();
+
+        try
+        {
+            var httpClient = WebAppFactory.CreateClient();
+            var response = await httpClient.GetAsync(swaggerUrl);
+            response.EnsureSuccessStatusCode();
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
     public async Task HelloResponseSuccessAsync()
     {
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.GetAsync("/");
-        response.EnsureSuccessStatusCode();
-        var hello = await response.Content.ReadAsStringAsync();
-        Assert.Equal("Hello ShopWebApp API!", hello);
+        try
+        {
+            var httpClient = WebAppFactory.CreateClient();
+            var response = await httpClient.GetAsync("/");
+            response.EnsureSuccessStatusCode();
+            var hello = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Hello ShopWebApp API!", hello);
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
     public async Task GetViewContentSuccessAsync()
     {
-        var httpClient = WebAppFactory.CreateClient();
-
-        var data = new ShopApiData { HRefFormat = "/Shop/{0}" };
         var url = $"/ShopApi/ShopList";
-        var response = await httpClient.PostAsync(url, JsonContent.Create(data));
+        var data = new ShopApiData { HRefFormat = "/Shop/{0}" };
 
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            var httpClient = WebAppFactory.CreateClient();
 
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains("shop_item", content);
+            var response = await httpClient.PostAsync(url, JsonContent.Create(data));
+
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("shop_item", content);
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
     public async Task LoadShopTabSuccessAsync()
     {
         var url = "/ShopApi/Shop/1";
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.PostAsync(url, null);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
 
         try
         {
-            Assert.Contains("left-menu-ul shopsList", content);            
+            var httpClient = WebAppFactory.CreateClient();
+            var response = await httpClient.PostAsync(url, null);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            try
+            {
+                Assert.Contains("left-menu-ul shopsList", content);
+            }
+            catch
+            {
+                OutputHelper.WriteLine(content);
+                throw;
+            }
         }
         catch
         {
-            OutputHelper.WriteLine(content);
+            OutputErrors();
+            OutputWarnings();
+
             throw;
         }
     }
@@ -75,20 +120,30 @@ public class ShopWebApiTest(ShopWebAppApiFactory webAppFactory, ITestOutputHelpe
     public async Task NewShopSuccessAsync()
     {
         var url = "/ShopApi/Shop/New";
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.PostAsync(url, null);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-
         try
         {
-            Assert.Contains("left-menu-ul shopsList", content);
-            Assert.DoesNotContain("shop_item selected", content);
+            var httpClient = WebAppFactory.CreateClient();
+            var response = await httpClient.PostAsync(url, null);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            try
+            {
+                Assert.Contains("left-menu-ul shopsList", content);
+                Assert.DoesNotContain("shop_item selected", content);
+            }
+            catch
+            {
+                OutputHelper.WriteLine(content);
+                throw;
+            }
         }
         catch
         {
-            OutputHelper.WriteLine(content);
+            OutputErrors();
+            OutputWarnings();
+
             throw;
         }
     }

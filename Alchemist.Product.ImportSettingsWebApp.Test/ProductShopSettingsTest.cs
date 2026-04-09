@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class ProductShopSettingsTestImportSettingsWebAppFactory()
-    : ImportSettingsWebAppTestContainerLifetimeFactory(false,
+    : ImportSettingsTestContainerContextLifetimeWebAppFactory(false,
         8096, 8097,
         8226, 8227,
         Common.ConfigurationHelper.GetSectionValue("ProductSettingsTestDb"),

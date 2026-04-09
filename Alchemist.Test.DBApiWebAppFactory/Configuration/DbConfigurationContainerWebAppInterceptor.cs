@@ -1,11 +1,10 @@
 ﻿using Alchemist.Test.Server.Fixtures;
 using Microsoft.EntityFrameworkCore;
-using Respawn;
 using Test.DbContainer.Abstractions;
 
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
-public abstract class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContainer, TDbRespawner>
+public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContainer, TDbRespawner>
     : DbConfigurationWebAppInterceptor<TDbContext>, IAsyncLifetime
     where TDbContext : DbContext
     where TTestDbContainer : class, ITestDbContainer, new()
@@ -29,14 +28,17 @@ public abstract class DbConfigurationContainerWebAppInterceptor<TDbContext, TTes
 
     private readonly string _host = Guid.NewGuid().ToString();
 
-    protected DbConfigurationContainerWebAppInterceptor(IWebHostConfigure webHostConfigure, 
+    private readonly Action<TDbContext>? _fillTestData;
+
+    public DbConfigurationContainerWebAppInterceptor(IWebHostConfigure webHostConfigure, 
         string connectionStringSection,
         string database,
         string user, 
         string password,
         int port, 
         TTestDbContainer? testDbContainer = null,
-        TDbRespawner? dbRespawner = null) : base(webHostConfigure)
+        TDbRespawner? dbRespawner = null,
+        Action<TDbContext>? fillTestData = null) : base(webHostConfigure)
     {
         _testDbContainer = testDbContainer ?? new TTestDbContainer();
 
@@ -48,10 +50,17 @@ public abstract class DbConfigurationContainerWebAppInterceptor<TDbContext, TTes
         _password = password;
         _port = port;
 
+        _fillTestData = fillTestData;
+
         _testDbContainer.Build(_host, port, password);
     }
 
     protected override string ConnectionString => _connectionString ?? "";
+
+    protected override void FillTestData(TDbContext dbContext)
+    {
+        _fillTestData?.Invoke(dbContext);
+    }
 
     public Task DisposeAsync()
     {

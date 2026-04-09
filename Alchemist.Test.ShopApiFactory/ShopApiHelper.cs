@@ -59,5 +59,28 @@ public static class ShopApiHelper
             signalRTestServer, fillTestData: fillTestData);
         var httpClient = shopApiWebAppFactory.GetHostHttpClient();
         return httpClient;
+    }    
+
+    public static ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> CreateShopApiWebAppFactory<TTestDbContainer, TDbRespawner>(string alchemyDbConnectionStringSection,
+        string database,
+        int httpPort,
+        int httpsPort,
+        TestServer signalRTestServer,
+        Action<AlchemyContext>? fillTestData = null, 
+        int dbPort = 5432,
+        string dbUser = "postgres",
+        string dbPassword = "P@ssw0rd")
+    where TTestDbContainer : class, ITestDbContainer, new()
+    where TDbRespawner : class, IDatabaseRespawner, new()
+    {
+        var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(alchemyDbConnectionStringSection,
+            database,
+            dbPort,
+            dbUser,
+            dbPassword,
+            httpPort, httpsPort, 
+            signalRTestServer, fillTestData: fillTestData);
+        
+        return shopApiWebAppFactory;
     }
 }

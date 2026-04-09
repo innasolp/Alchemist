@@ -8,24 +8,11 @@ using Test.PostresqlTestContainer;
 
 namespace Shop.API.Test.Infrastructure;
 
-internal class ShopDbConfigurationContainerWebAppInterceptor(ShopApiConfigurationWebAppFactory webHostConfigure,
-    string connectionStringSection,
-    string database) 
-    : DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner>
-    (webHostConfigure, connectionStringSection, database, "postgres", "P@ssw0rd", 5432)
-{
-    protected override void FillTestData(AlchemyContext dbContext)
-    {
-        dbContext.Shops.Add(new Alchemist.Product.Data.Shop { Name = "TestShop", Url = "https://testshop1" });
-        dbContext.SaveChanges();
-    }
-}
-
 public abstract class ShopApiConfigurationWebAppFactory : TestWebAppKestrelFactory<ShopAPIProgram>, IAsyncLifetime
 {
     private readonly Action<IServiceCollection>? _configureServices;
 
-    private readonly ShopDbConfigurationContainerWebAppInterceptor _dbInterceptor;
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner> _dbInterceptor;
 
     protected ShopApiConfigurationWebAppFactory(string connectionStringSection, 
     string database, 
@@ -35,12 +22,19 @@ public abstract class ShopApiConfigurationWebAppFactory : TestWebAppKestrelFacto
     {
         _configureServices = configureServices;
 
-        _dbInterceptor = new ShopDbConfigurationContainerWebAppInterceptor(this, connectionStringSection, database);
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner>
+            (this, connectionStringSection, database, "postgres", "P@ssw0rd", 5432, fillTestData : FillTestData);
     }
 
     public Task InitializeAsync()
     {
         return _dbInterceptor.InitializeAsync();
+    }
+
+    protected static void FillTestData(AlchemyContext dbContext)
+    {
+        dbContext.Shops.Add(new Alchemist.Product.Data.Shop { Name = "TestShop", Url = "https://testshop1" });
+        dbContext.SaveChanges();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

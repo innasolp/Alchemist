@@ -2,6 +2,6 @@
   <ItemGroup>    
   </ItemGroup>
 	<Target Name="NpmLinkPackage" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
-		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
+		<Exec Command="npm link alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
 	</Target>
 </Project>

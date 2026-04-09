@@ -43,7 +43,7 @@ public static class ShopWebAppHelper
         int shopApiHttpPort,
         int shopApiHttpsPort,
         TestServer signalRTestServer,
-        Action<AlchemyContext> fillTestData)
+        Action<AlchemyContext>? fillTestData = null)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
     {
@@ -54,9 +54,31 @@ public static class ShopWebAppHelper
             shopApiHttpsPort,
             signalRTestServer,
             fillTestData);
+
         var shopWebAppApiFactory = new ShopWebAppFactory(true, httpPort, httpsPort, shopApiClient);
         var httpClient = shopWebAppApiFactory.GetHostHttpClient();
         return httpClient;
     }
 
+    public static ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(string connectionStringSection,
+        string shopDatabase,
+        int httpPort,
+        int httpsPort,
+        int shopApiHttpPort,
+        int shopApiHttpsPort,
+        TestServer signalRTestServer,
+        Action<AlchemyContext>? fillTestData = null)
+    where TTestDbContainer : class, ITestDbContainer, new()
+    where TDbRespawner : class, IDatabaseRespawner, new()
+    {
+        var shopWebAppApiFactory = new ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(true, httpPort, httpsPort,
+            shopApiHttpPort,
+            shopApiHttpsPort,
+            signalRTestServer,
+            connectionStringSection,
+            shopDatabase,
+            fillTestData : fillTestData);
+
+        return shopWebAppApiFactory;
+    }
 }

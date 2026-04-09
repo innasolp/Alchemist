@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Alchemist.Test.ShopWebAppFactory;
 
-public abstract class ShopWebAppLifetimeFactory(bool isApi, int httpPort, int httpsPort, int shopAPIHttpPort, int shopAPIHttpsPort, TestServer signalRTestServer)
+public abstract class ShopContextLifetimeWebAppFactory(bool isApi, int httpPort, int httpsPort, int shopAPIHttpPort, int shopAPIHttpsPort, TestServer signalRTestServer)
     : TestWebAppKestrelFactory<ShopWebAppProgram>(httpPort, httpsPort), IAsyncLifetime
 {
     private readonly bool _isApi = isApi;    

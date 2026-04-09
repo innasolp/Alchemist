@@ -6,8 +6,8 @@ using Testcontainers.PostgreSql;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
 
-public class ShopWebAppLifetimeTestContainerFactory(bool isApi, int httpPort, int httpsPort, int shopAPIHttpPort, int shopAPIHttpsPort, string database)
-    : ShopWebAppLifetimeFactory(isApi, httpPort, httpsPort, shopAPIHttpPort, shopAPIHttpsPort, new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>().Server)
+public class ShopContextTestContainerLifetimeWebAppFactory(bool isApi, int httpPort, int httpsPort, int shopAPIHttpPort, int shopAPIHttpsPort, string database)
+    : ShopContextLifetimeWebAppFactory(isApi, httpPort, httpsPort, shopAPIHttpPort, shopAPIHttpsPort, new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>().Server)
 {
     private readonly string _database = database;
     private readonly PostgreSqlContainer _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());

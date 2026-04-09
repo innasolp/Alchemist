@@ -8,20 +8,21 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
-public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFactory, ITestOutputHelper outputHelper) 
-    : LoggedContextTestFixture<ShopWebAppApiLoggedFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
+public class ShopWebApiHttpInterceptionTest(ShopApiConfigurationLoggedWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    : LoggedContextTestFixture<ShopApiConfigurationLoggedWebAppFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
 {
     [Fact]
     public async Task InfoMiddlewareLogSuccessAsync()
     {
-        var httpClient = WebAppFactory.CreateClient();
-
         var data = new ShopApiData { HRefFormat = "/Shop/{0}" };
-        var url = $"/ShopApi/ShopList";
-        var response = await httpClient.PostAsync(url, JsonContent.Create(data));
+        var url = $"/ShopApi/ShopList";        
 
         try
         {
+            var httpClient = WebAppFactory.CreateClient();
+
+            var response = await httpClient.PostAsync(url, JsonContent.Create(data));
+
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             Assert.Contains(LogMessages, (msg) => msg.LogLevel == LogLevel.Information && msg.Message.Contains(url));
@@ -38,17 +39,17 @@ public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFac
     [Fact]
     public async Task GlobalExceptionHandlerLogSuccessAsync()
     {
-        var httpClient = WebAppFactory.CreateClient();
-
         var data = new ShopApiData { HRefFormat = "/Shop/{0}" , ShopId = new Random().Next(100, 1000) };
         var url = $"/ShopApi/ShopList";
-        var response = await httpClient.PostAsync(url, JsonContent.Create(data));
 
         try
         {
+            var httpClient = WebAppFactory.CreateClient();
+            var response = await httpClient.PostAsync(url, JsonContent.Create(data));
+
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
-            Assert.Contains(LogMessages, 
+            Assert.Contains(LogMessages,
                 (msg) => msg.LogLevel == LogLevel.Error && msg.Exception?.Message.Contains("not found") == true);
         }
         catch
@@ -59,5 +60,4 @@ public class ShopWebApiHttpInterceptionTest(ShopWebAppApiLoggedFactory webAppFac
             throw;
         }
     }
-
 }

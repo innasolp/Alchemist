@@ -7,20 +7,37 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Test.PostresqlTestContainer;
-using Microsoft.EntityFrameworkCore;
 
 namespace Alchemist.Settings.RestAPI.Test;
 
-internal class SettingsDbInterceptor(SettingsApiConfigurationPostgresWebAppFactory webHostConfigure) 
-    : DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner>(webHostConfigure,
-        "ConnectionStrings:DbContext2", "test_db_settings", "postgres", "P@ssw0rd", 5432)
+public class SettingsApiConfigurationPostgresWebAppFactory
+    : TestWebAppKestrelFactory<SettingsAPIProgram>, ILoggedContext, IAsyncLifetime
 {
+    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
+
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner> _dbInterceptor;
+
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
+
+    public event Action<WebHostBuilderContext, IServiceCollection>? ConfigureContextServices;
+
     public Shop[] Shops { get; } = new Shop[2];
 
-    protected override void FillTestData(AlchemyContext dbContext)
-    {
-        var cnstr = dbContext.Database.GetConnectionString();
+    public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
 
+    public SettingsApiConfigurationPostgresWebAppFactory() : base(8202, 8203)
+    {
+        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
+        _signalRApplicationFactory.CreateClient();
+
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner>(this,
+            "ConnectionStrings:DbContext2", "test_db_settings", "postgres", "P@ssw0rd", 5432, fillTestData : FillTestData);
+    }
+
+    protected void FillTestData(AlchemyContext dbContext)
+    {
         Shops[0] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
         Shops[1] = dbContext.Shops.Add(new Shop { Name = "TestShop1", Url = "https://testshop2" }).Entity;
 
@@ -36,31 +53,7 @@ internal class SettingsDbInterceptor(SettingsApiConfigurationPostgresWebAppFacto
         serviceSettings.ForEach(s => dbContext.ShopSettings.Add(s));
         dbContext.SaveChanges();
     }
-}
 
-public class SettingsApiConfigurationPostgresWebAppFactory
-    : TestWebAppKestrelFactory<SettingsAPIProgram>, ILoggedContext, IAsyncLifetime
-{
-    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
-
-    private readonly SettingsDbInterceptor _dbInterceptor;
-
-    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
-    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
-
-    public event Action<WebHostBuilderContext, IServiceCollection>? ConfigureContextServices;
-
-    public Shop[] Shops => _dbInterceptor.Shops;
-
-    public TestServer SignalRTestServer => _signalRApplicationFactory.Server;
-
-    public SettingsApiConfigurationPostgresWebAppFactory() : base(8202, 8203)
-    {
-        _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
-        _signalRApplicationFactory.CreateClient();
-
-        _dbInterceptor = new SettingsDbInterceptor(this);
-    }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {

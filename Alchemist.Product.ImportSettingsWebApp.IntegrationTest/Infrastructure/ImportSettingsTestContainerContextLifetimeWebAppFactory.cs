@@ -1,17 +1,21 @@
 ﻿using Alchemist.Test.ImportSettingsWebApp.Factory;
-using Alchemist.Test.SettingsAPIFactory;
+using Alchemist.Test.Log;
+using Alchemist.Test.SignalRWebAppFactory;
 using Test.PostresqlTestContainer;
 using Testcontainers.PostgreSql;
 
-namespace Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
+namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest.Infrastructure;
 
-public class ImportSettingsWebAppTestContainerLifetimeFactory(bool isApi, int httpPort, int httpsPort,
+public class ImportSettingsTestContainerContextLifetimeWebAppFactory(bool isApi, int httpPort, int httpsPort,
     int settingsApiHttpPort, int settingsApiHttpsPort,
     string database,
     int? shopApiHttpPort = null, int? shopApiHttpsPort = null,
-    int? shopWebappApiHttpPort = null, int? shopWebAppApiHttpsPort = null)
-    : ImportSettingsWebLifetimeFactory(isApi, httpPort, httpsPort, settingsApiHttpPort, settingsApiHttpsPort,
-        Common.SignalRTestServer,
+    int? shopWebappApiHttpPort = null, int? shopWebAppApiHttpsPort = null
+    )
+    : ImportSettingsContextLifetimeWebAppFactory(isApi,
+        httpPort, httpsPort,
+        settingsApiHttpPort, settingsApiHttpsPort,
+        new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>().Server,
         shopApiHttpPort, shopApiHttpsPort,
         shopWebappApiHttpPort, shopWebAppApiHttpsPort)
 {
@@ -26,17 +30,6 @@ public class ImportSettingsWebAppTestContainerLifetimeFactory(bool isApi, int ht
     protected override async Task<string> GetShopSettingsDbConnectionString()
     {
         return _postgreSqlContainer.BuildConnectionString(database ?? "test_ci_db");
-    }
-
-    protected override async Task<HttpClient> CreateSettingsApiHttpClient()
-    {
-        var connectionString = await GetShopSettingsDbConnectionString();
-
-        InitializeShopWebAppHttpClientIfAvailable(connectionString);
-
-        return SettingsApiHelper.CreateSettingsApiHttpClient(connectionString, settingsApiHttpPort,
-            settingsApiHttpsPort, Common.SignalRTestServer,
-             (dbContext) => Common.FillTestData(dbContext, [1, 2, 3, 4]));
     }
 
     protected override async Task LifetimeDisposeAsync()

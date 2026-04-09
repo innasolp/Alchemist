@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class ServiceSettingsTestImportSettingsWebAppFactory()
-    : ImportSettingsWebAppTestContainerLifetimeFactory(false,
+    : ImportSettingsTestContainerContextLifetimeWebAppFactory(false,
         8092, 8093,
         8222, 8223,
         Common.ConfigurationHelper.GetSectionValue("ServiceSettingsTestDb"),

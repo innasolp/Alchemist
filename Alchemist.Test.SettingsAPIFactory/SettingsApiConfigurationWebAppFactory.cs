@@ -11,34 +11,13 @@ using Xunit;
 
 namespace Alchemist.Test.SettingsAPIFactory;
 
-internal class SettingsApiConfigurationDbInterceptor<TTestDbContainer, TDbRespawner>
-    (SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> webHostConfigure, 
-    string connectionStringSection, 
-    string database, 
-    string user, 
-    string password,
-    int port,
-    TTestDbContainer? testDbContainer = null,
-    TDbRespawner? dbRespawner = null,
-    Action<AlchemyContext>? fillTestData = null)
-    : DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner>
-    (webHostConfigure, connectionStringSection, database, user, password, port, testDbContainer, dbRespawner)
-    where TTestDbContainer : class, ITestDbContainer, new()
-    where TDbRespawner : class, IDatabaseRespawner, new()
-{
-    protected override void FillTestData(AlchemyContext dbContext)
-    {
-        fillTestData?.Invoke(dbContext);
-    }
-}
-
 public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> : TestWebAppKestrelFactory<SettingsAPIProgram>, IAsyncLifetime
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
 {
     private readonly TestServer _signalRServer;
 
-    private readonly SettingsApiConfigurationDbInterceptor<TTestDbContainer, TDbRespawner> _dbInterceptor;
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner> _dbInterceptor;
 
     public SettingsApiConfigurationWebAppFactory(string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort, 
         TestServer signalRServer, 
@@ -49,7 +28,7 @@ public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawne
     {
         _signalRServer = signalRServer;
 
-        _dbInterceptor = new SettingsApiConfigurationDbInterceptor<TTestDbContainer, TDbRespawner>(this, 
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner>(this, 
             connectionStringSection, 
             database, 
             user, 

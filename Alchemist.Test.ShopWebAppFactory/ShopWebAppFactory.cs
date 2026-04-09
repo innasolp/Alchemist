@@ -1,6 +1,5 @@
 ﻿using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
-
 using Microsoft.Extensions.DependencyInjection;
 using Shop.API.Client;
 using Shop.Interfaces;

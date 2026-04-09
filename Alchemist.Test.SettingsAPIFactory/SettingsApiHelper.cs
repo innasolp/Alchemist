@@ -59,4 +59,25 @@ public static class SettingsApiHelper
 
         return settingsApiFactory.GetHostHttpClient();
     }
+
+    public static SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner>
+        (string alchemyDbConnectionStringSection,
+        string database,
+        int httpPort,
+        int httpsPort,
+        TestServer signalRTestServer, 
+        int dbPort = 5432,
+        string dbUser = "postgres",
+        string dbPawword = "P@ssw0rd",
+        Action<AlchemyContext>? fillTestData = null)
+        where TTestDbContainer : class, ITestDbContainer, new()
+    where TDbRespawner : class, IDatabaseRespawner, new()
+    {
+        return new SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(alchemyDbConnectionStringSection,
+            database,
+            dbPort, dbUser, dbPawword,
+            httpPort, httpsPort,
+            signalRTestServer,
+            fillTestData : fillTestData);
+    }
 }

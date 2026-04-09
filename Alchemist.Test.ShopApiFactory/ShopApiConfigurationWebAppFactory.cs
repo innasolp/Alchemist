@@ -11,20 +11,6 @@ using Xunit;
 
 namespace Alchemist.Test.ShopApiFactory;
 
-internal class ShopApiDbConfigurationInterceptor<TTestDbContainer, TDbRespawner>(ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> webHostConfigure,
-    Action<AlchemyContext> fillTestData,
-    string connectionStringSection, string database, string user, string password, int port,
-    TTestDbContainer? testDbContainer = null, TDbRespawner? dbRespawner = null)
-    : DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner>
-    (webHostConfigure, connectionStringSection, database, user, password, port, testDbContainer, dbRespawner)
-    where TTestDbContainer : class, ITestDbContainer, new()
-    where TDbRespawner : class, IDatabaseRespawner, new()
-{
-    protected override void FillTestData(AlchemyContext dbContext)
-    {
-        fillTestData(dbContext);
-    }
-}
 
 public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> : TestWebAppKestrelFactory<ShopAPIProgram>, IAsyncLifetime
     where TTestDbContainer : class, ITestDbContainer, new()
@@ -32,7 +18,7 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> :
 {
     private readonly TestServer _signalRServer;
 
-    private readonly ShopApiDbConfigurationInterceptor<TTestDbContainer, TDbRespawner> _dbInterceptor;
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner> _dbInterceptor;
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
@@ -49,15 +35,15 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> :
     {
         _signalRServer = signalRServer;
 
-        _dbInterceptor = new ShopApiDbConfigurationInterceptor<TTestDbContainer, TDbRespawner>(this,
-            fillTestData ?? FillTestData,
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner>(this,
             connectionStringSection, 
             database,
             user, 
             password,
             dbPort,
             testDbContainer,
-            dbRespawner);
+            dbRespawner,
+            fillTestData ?? FillTestData);
     }
     
     protected virtual void FillTestData(AlchemyContext dbContext)
