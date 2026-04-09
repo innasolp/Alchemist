@@ -17,7 +17,7 @@ public class ProductWebAppTestContainerLifetimeFactory(int httpPort, int httpsPo
         settingsWebAppApiHttpPort, settingsWebAppApiHttspPort,
         Common.SignalRTestServer)
 {
-    private readonly PostgreSqlContainer _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+    private readonly PostgreSqlContainer _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
 
     public override async Task InitializeAsync()
     {

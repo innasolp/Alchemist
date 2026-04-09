@@ -43,13 +43,14 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> :
     int httpsPort,
     TestServer signalRServer,
      TTestDbContainer? testDbContainer = null,
-     TDbRespawner? dbRespawner = null) : base
+     TDbRespawner? dbRespawner = null,
+     Action<AlchemyContext>? fillTestData = null) : base
     (httpPort, httpsPort)
     {
         _signalRServer = signalRServer;
 
         _dbInterceptor = new ShopApiDbConfigurationInterceptor<TTestDbContainer, TDbRespawner>(this,
-            FillTestData,
+            fillTestData ?? FillTestData,
             connectionStringSection, 
             database,
             user, 
@@ -65,7 +66,6 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> :
         _initialShops.ForEach(s => dbContext.Shops.Add(s));
         dbContext.SaveChanges();
     }
-
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {

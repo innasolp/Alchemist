@@ -1,5 +1,6 @@
 ﻿using Alchemist.Product.Data;
 using Microsoft.AspNetCore.TestHost;
+using Test.DbContainer.Abstractions;
 
 namespace Alchemist.Test.ShopApiFactory;
 
@@ -34,6 +35,29 @@ public static class ShopApiHelper
         var shopApiWebAppFactory = new ShopAPIWebAppFactoryTestDataImpl(alchemyDbConnectionString, signalRTestServer, httpPort, httpsPort, fillTestData, ensureDeleted);
         var httpClient = shopApiWebAppFactory.CreateClient();
         httpClient.BaseAddress = new Uri(shopApiWebAppFactory.ServerAddress);
+        return httpClient;
+    }
+
+    public static HttpClient CreateShopApiClient<TTestDbContainer, TDbRespawner>(string alchemyDbConnectionStringSection,
+        string database,
+        int httpPort,
+        int httpsPort,
+        TestServer signalRTestServer,
+        Action<AlchemyContext>? fillTestData = null, 
+        int dbPort = 5432,
+        string dbUser = "postgres",
+        string dbPassword = "P@ssw0rd")
+    where TTestDbContainer : class, ITestDbContainer, new()
+    where TDbRespawner : class, IDatabaseRespawner, new()
+    {
+        var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(alchemyDbConnectionStringSection,
+            database,
+            dbPort,
+            dbUser,
+            dbPassword,
+            httpPort, httpsPort, 
+            signalRTestServer, fillTestData: fillTestData);
+        var httpClient = shopApiWebAppFactory.GetHostHttpClient();
         return httpClient;
     }
 }

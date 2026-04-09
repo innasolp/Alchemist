@@ -19,14 +19,17 @@ internal class SettingsApiConfigurationDbInterceptor<TTestDbContainer, TDbRespaw
     string password,
     int port,
     TTestDbContainer? testDbContainer = null,
-    TDbRespawner? dbRespawner = null)
+    TDbRespawner? dbRespawner = null,
+    Action<AlchemyContext>? fillTestData = null)
     : DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner>
     (webHostConfigure, connectionStringSection, database, user, password, port, testDbContainer, dbRespawner)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
 {
     protected override void FillTestData(AlchemyContext dbContext)
-    {}
+    {
+        fillTestData?.Invoke(dbContext);
+    }
 }
 
 public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> : TestWebAppKestrelFactory<SettingsAPIProgram>, IAsyncLifetime
@@ -40,7 +43,8 @@ public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawne
     public SettingsApiConfigurationWebAppFactory(string connectionStringSection, string database, int dbPort, string user, string password, int httpPort, int httpsPort, 
         TestServer signalRServer, 
         TTestDbContainer? testDbContainer = null,
-        TDbRespawner? dbRespawner = null) 
+        TDbRespawner? dbRespawner = null,
+        Action<AlchemyContext>? fillTestData = null) 
         : base(httpPort, httpsPort)
     {
         _signalRServer = signalRServer;
@@ -52,7 +56,8 @@ public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawne
             password, 
             dbPort, 
             testDbContainer, 
-            dbRespawner);
+            dbRespawner,
+            fillTestData);
     }
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();

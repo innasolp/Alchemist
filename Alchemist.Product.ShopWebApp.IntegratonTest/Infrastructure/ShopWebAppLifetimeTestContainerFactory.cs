@@ -10,7 +10,7 @@ public class ShopWebAppLifetimeTestContainerFactory(bool isApi, int httpPort, in
     : ShopWebAppLifetimeFactory(isApi, httpPort, httpsPort, shopAPIHttpPort, shopAPIHttpsPort, new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>().Server)
 {
     private readonly string _database = database;
-    private readonly PostgreSqlContainer _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
+    private readonly PostgreSqlContainer _postgreSqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
 
     public override async Task InitializeAsync()
     {
