@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Alchemist.Test.ImportSettingsWebApp.Factory;
 
-public class ImportSettingsShopClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(bool isApi,
+public class ImportSettingsShopClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(bool isApi,
     int httpPort,
     int httpsPort,
     TestServer signalRTestServer,
@@ -34,6 +34,7 @@ public class ImportSettingsShopClientConfigurationWebAppFactory<TTestDbContainer
         fillSettingsTestData)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
+    where TDbChecker : class, IDbChecker, new()
 {
     private TestHostServerWebAppFactory<SettingsAPIProgram>? _settingsApiFactory;
 
@@ -57,7 +58,7 @@ public class ImportSettingsShopClientConfigurationWebAppFactory<TTestDbContainer
         var shopPorts = new int?[] { shopWebappApiHttpPort, shopWebAppApiHttpsPort, shopApiHttpPort, shopApiHttpsPort };
         if (shopPorts.All(p => p.HasValue))
         {
-            _shopWebAppFactory = ShopWebAppHelper.CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(shopDbConnectionStringSection,
+            _shopWebAppFactory = ShopWebAppHelper.CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(shopDbConnectionStringSection,
             shopDatabase,
             shopWebappApiHttpPort!.Value,
             shopWebAppApiHttpsPort!.Value,
@@ -77,7 +78,7 @@ public class ImportSettingsShopClientConfigurationWebAppFactory<TTestDbContainer
         TestServer signalRServer, 
         Action<AlchemyContext>? fillTestData = null)
     {
-        _settingsApiFactory = SettingsApiHelper.CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner>(settingsDbConnectionStringSection,
+        _settingsApiFactory = SettingsApiHelper.CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(settingsDbConnectionStringSection,
             settingsDatabase,
             settingsApiHttpPort,
             settingsApiHttpsPort,

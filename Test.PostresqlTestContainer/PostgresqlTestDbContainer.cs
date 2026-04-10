@@ -1,5 +1,6 @@
 ﻿using Test.DbContainer.Abstractions;
 using Testcontainers.PostgreSql;
+using Xunit;
 
 namespace Test.PostresqlTestContainer;
 
@@ -20,17 +21,20 @@ public class PostgresqlTestDbContainer : ITestDbContainer
         return _postgresqlContainer.BuildConnectionString(dataBase, publicPort, user, password);
     }
 
-    public Task StartAsync(CancellationToken cancellationToken = default)
+    public Task InitializeAsync()
     {
         if (_postgresqlContainer == null)
             throw new InvalidOperationException("PostgresqlTestContainer not built yet.");
 
-        return _postgresqlContainer.StartAsync(cancellationToken);
+        return _postgresqlContainer.StartAsync();
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken = default)
+    async Task IAsyncLifetime.DisposeAsync()
     {
         if (_postgresqlContainer != null)
-            await _postgresqlContainer.StopAsync(cancellationToken);
+        {
+            await _postgresqlContainer.StopAsync();
+            await _postgresqlContainer.DisposeAsync();
+        }       
     }
 }

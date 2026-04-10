@@ -1,8 +1,10 @@
 ﻿namespace Test.DbContainer.Abstractions;
 
-public interface IDatabaseRespawner
+public interface IDatabaseRespawner : IAsyncDisposable
 {
-    Task InitializeAsync(string database, string connectionString, string initializeConnectionString);
+    Task InitializeAsync(string connectionString);
 
     Task ResetDatabaseAsync();
+
+    bool IsInitialized { get; }
 }

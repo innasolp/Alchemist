@@ -38,7 +38,7 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
         }
         finally
         {
-           await WebAppFactory.ResetDatabaseAsync();
+           //await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -53,7 +53,7 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            //await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -68,7 +68,7 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            //await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -92,7 +92,7 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            //await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -110,7 +110,7 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            //await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 }

@@ -11,23 +11,25 @@ public abstract class DatabaseRespawner : IDatabaseRespawner
 
     protected abstract IDbAdapter DbAdapter { get; }
 
-    public virtual async Task InitializeAsync(string database, string dbconnectionString, string initializeConnectionString)
-    {
-        if(!await CheckDatabaseAsync(database, initializeConnectionString)) return;
+    public bool IsInitialized { get; private set; }
 
+    public virtual async Task InitializeAsync(string dbconnectionString)
+    {
         _dbConnection = GetDbConnection(dbconnectionString);
 
         if(_dbConnection.State != System.Data.ConnectionState.Open)
             await _dbConnection.OpenAsync();
 
-        _respawner = await Respawner.CreateAsync(_dbConnection, new RespawnerOptions
-        {
-            DbAdapter = DbAdapter,
-            SchemasToInclude = new[] { "public" }
-        });
+        _respawner = await Respawner.CreateAsync(_dbConnection, GetRespawnerOptions());
+
+        IsInitialized = true;
     }
 
-    protected abstract Task<bool> CheckDatabaseAsync(string database, string initializeConnectionString);
+    protected virtual RespawnerOptions GetRespawnerOptions() => new()
+    {
+        DbAdapter = DbAdapter,
+        SchemasToInclude = ["public"]
+    };
 
     protected abstract DbConnection GetDbConnection(string connectionString);
 
@@ -36,5 +38,15 @@ public abstract class DatabaseRespawner : IDatabaseRespawner
         return _respawner != null && _dbConnection != null
             ? _respawner.ResetAsync(_dbConnection)
             : Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dbConnection != null)
+        {
+            await _dbConnection.DisposeAsync();
+            _dbConnection = null;
+        }
+        GC.SuppressFinalize(this);
     }
 }

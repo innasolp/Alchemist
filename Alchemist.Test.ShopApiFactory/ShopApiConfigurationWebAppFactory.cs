@@ -12,13 +12,14 @@ using Xunit;
 namespace Alchemist.Test.ShopApiFactory;
 
 
-public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> : TestWebAppKestrelFactory<ShopAPIProgram>, IAsyncLifetime
+public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker> : TestWebAppKestrelFactory<ShopAPIProgram>, IAsyncLifetime
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
+    where TDbChecker : class, IDbChecker, new()
 {
     private readonly TestServer _signalRServer;
 
-    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner> _dbInterceptor;
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker> _dbInterceptor;
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
@@ -30,12 +31,13 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> :
     TestServer signalRServer,
      TTestDbContainer? testDbContainer = null,
      TDbRespawner? dbRespawner = null,
+     TDbChecker? dbChecker = null,
      Action<AlchemyContext>? fillTestData = null) : base
     (httpPort, httpsPort)
     {
         _signalRServer = signalRServer;
 
-        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner>(this,
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker>(this,
             connectionStringSection, 
             database,
             user, 
@@ -43,6 +45,7 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> :
             dbPort,
             testDbContainer,
             dbRespawner,
+            dbChecker,
             fillTestData ?? FillTestData);
     }
     
@@ -72,8 +75,8 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> :
         return _dbInterceptor.DisposeAsync();
     }
 
-    public Task ResetDatabaseAsync()
+    public Task ResetDatabaseIfAvailableAsync()
     {
-        return _dbInterceptor.ResetDatabaseAsync();
+        return _dbInterceptor.ResetDatabaseIfAvailableAsync();
     }
 }

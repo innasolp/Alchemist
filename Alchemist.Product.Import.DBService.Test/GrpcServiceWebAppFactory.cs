@@ -9,13 +9,13 @@ namespace Alchemist.Product.Import.DBService.Test;
 
 public class GrpcServiceWebAppFactory : TestWebAppKestrelFactory<GrpcServiceProgramm>, IAsyncLifetime
 {
-    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner> _dbInterceptor;
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker> _dbInterceptor;
 
     public event Action<IServiceCollection>? ConfigureServices;
 
     public GrpcServiceWebAppFactory(string database, int httpPort = 8070, int httpsPort = 8071) : base(httpPort, httpsPort)
     {
-        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner>
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>
             (this, "ConnectionStrings:DbContext2", database, "postgres", "P@ssw0rd", 5432);
     }
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
@@ -36,8 +36,8 @@ public class GrpcServiceWebAppFactory : TestWebAppKestrelFactory<GrpcServiceProg
         return _dbInterceptor.DisposeAsync();
     }
 
-    public Task ResetDatabaseAsync()
+    public Task ResetDatabaseIfAvailableAsync()
     {
-        return _dbInterceptor.ResetDatabaseAsync();
+        return _dbInterceptor.ResetDatabaseIfAvailableAsync();
     }
 }

@@ -36,7 +36,7 @@ public static class ShopWebAppHelper
         return httpClient;
     }
 
-    public static HttpClient CreateShopWebAppApiHttpClient<TTestDbContainer, TDbRespawner>(string connectionStringSection,
+    public static HttpClient CreateShopWebAppApiHttpClient<TTestDbContainer, TDbRespawner, TDbChecker>(string connectionStringSection,
         string shopDatabase,
         int httpPort,
         int httpsPort,
@@ -46,8 +46,9 @@ public static class ShopWebAppHelper
         Action<AlchemyContext>? fillTestData = null)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
+    where TDbChecker : class, IDbChecker, new()
     {
-        var shopApiClient = ShopApiHelper.CreateShopApiClient<TTestDbContainer, TDbRespawner>
+        var shopApiClient = ShopApiHelper.CreateShopApiClient<TTestDbContainer, TDbRespawner, TDbChecker>
             (connectionStringSection,
             shopDatabase,
             shopApiHttpPort,
@@ -60,7 +61,8 @@ public static class ShopWebAppHelper
         return httpClient;
     }
 
-    public static ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(string connectionStringSection,
+    public static ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker> 
+        CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(string connectionStringSection,
         string shopDatabase,
         int httpPort,
         int httpsPort,
@@ -70,8 +72,9 @@ public static class ShopWebAppHelper
         Action<AlchemyContext>? fillTestData = null)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
+    where TDbChecker : class, IDbChecker, new()
     {
-        var shopWebAppApiFactory = new ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(true, httpPort, httpsPort,
+        var shopWebAppApiFactory = new ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(true, httpPort, httpsPort,
             shopApiHttpPort,
             shopApiHttpsPort,
             signalRTestServer,

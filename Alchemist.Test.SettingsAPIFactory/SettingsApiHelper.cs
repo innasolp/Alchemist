@@ -37,7 +37,7 @@ public static class SettingsApiHelper
         return settingsApiHttpClient;
     }
 
-    public static HttpClient CreateSettingsApiHttpClient<TTestDbContainer, TDbRespawner>
+    public static HttpClient CreateSettingsApiHttpClient<TTestDbContainer, TDbRespawner, TDbChecker>
         (string alchemyDbConnectionStringSection,
         string database,
         int httpPort,
@@ -48,9 +48,10 @@ public static class SettingsApiHelper
         string dbPawword = "P@ssw0rd",
         Action<AlchemyContext>? fillTestData = null)
         where TTestDbContainer : class, ITestDbContainer, new()
-    where TDbRespawner : class, IDatabaseRespawner, new()
-    {
-        var settingsApiFactory = new SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(alchemyDbConnectionStringSection,
+        where TDbRespawner : class, IDatabaseRespawner, new()
+        where TDbChecker : class, IDbChecker, new()
+    {        
+        var settingsApiFactory = new SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,
             dbPort, dbUser, dbPawword,
             httpPort, httpsPort,
@@ -60,7 +61,8 @@ public static class SettingsApiHelper
         return settingsApiFactory.GetHostHttpClient();
     }
 
-    public static SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner>
+    public static SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>
+        CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>
         (string alchemyDbConnectionStringSection,
         string database,
         int httpPort,
@@ -71,9 +73,10 @@ public static class SettingsApiHelper
         string dbPawword = "P@ssw0rd",
         Action<AlchemyContext>? fillTestData = null)
         where TTestDbContainer : class, ITestDbContainer, new()
-    where TDbRespawner : class, IDatabaseRespawner, new()
-    {
-        return new SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(alchemyDbConnectionStringSection,
+        where TDbRespawner : class, IDatabaseRespawner, new()
+        where TDbChecker : class, IDbChecker, new()
+    {        
+        return new SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,
             dbPort, dbUser, dbPawword,
             httpPort, httpsPort,

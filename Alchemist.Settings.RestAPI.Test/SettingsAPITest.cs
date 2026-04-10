@@ -40,7 +40,7 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -80,7 +80,7 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -138,7 +138,7 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -165,7 +165,7 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }    
 }

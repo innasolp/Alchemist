@@ -8,7 +8,7 @@ using TestCommon = Alchemist.Product.WebApp.Test.Infrastructure.Common;
 
 namespace Alchemist.Product.WebApp.Test;
 
-public class TestProductWebAppFactory : ProductAggregatorConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>
+public class TestProductWebAppFactory : ProductAggregatorConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>
 {
     private static readonly string database = Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb");
 

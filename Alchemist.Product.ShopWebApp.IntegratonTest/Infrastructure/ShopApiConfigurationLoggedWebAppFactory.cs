@@ -8,7 +8,7 @@ using Test.PostresqlTestContainer;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest.Infrastructure;
 
-public class ShopApiConfigurationLoggedWebAppFactory : ShopApiClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>, ILoggedContext    
+public class ShopApiConfigurationLoggedWebAppFactory : ShopApiClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>, ILoggedContext    
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 

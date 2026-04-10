@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Alchemist.Test.ImportSettingsWebApp.Factory;
 
-public class ImportSettingsShopHttpClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(bool isApi,
+public class ImportSettingsShopHttpClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(bool isApi,
     int httpPort,
     int httpsPort,
     HttpClient shopWebAppClient,
@@ -22,12 +22,13 @@ public class ImportSettingsShopHttpClientConfigurationWebAppFactory<TTestDbConta
         fillSettingsTestData : fillSettingsTestData)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
+    where TDbChecker : class, IDbChecker, new()
 {
-    private SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>? _settingsApiFactory;
+    private SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>? _settingsApiFactory;
 
     protected override async Task<HttpClient> CreateSettingsApiWebHttpClientAsync(int settingsApiHttpPort, int settingsApiHttpsPort, TestServer signalRServer, Action<AlchemyContext>? fillTestData = null)
     {
-        _settingsApiFactory = SettingsApiHelper.CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner>(settingsDbConnectionStringSection,
+        _settingsApiFactory = SettingsApiHelper.CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(settingsDbConnectionStringSection,
             settingsDatabase,
             settingsApiHttpPort,
             settingsApiHttpsPort,
@@ -57,8 +58,8 @@ public class ImportSettingsShopHttpClientConfigurationWebAppFactory<TTestDbConta
         await base.LifetimeDisposeAsync();
     }
 
-    public Task ResetDatabaseAsync()
+    public Task ResetDatabaseIfAvailableAsync()
     {
-        return _settingsApiFactory != null ? _settingsApiFactory.ResetDatabaseAsync() : Task.CompletedTask;
+        return _settingsApiFactory != null ? _settingsApiFactory.ResetDatabaseIfAvailableAsync() : Task.CompletedTask;
     }
 }

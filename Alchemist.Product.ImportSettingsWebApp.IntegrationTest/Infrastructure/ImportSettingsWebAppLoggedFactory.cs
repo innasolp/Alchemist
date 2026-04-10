@@ -9,7 +9,7 @@ using Test.PostresqlTestContainer;
 namespace Alchemist.Product.ImportSettingsWebApp.IntegrationTest.Infrastructure;
 
 public class ImportSettingsWebAppLoggedFactory 
-    : ImportSettingsShopClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>, ILoggedContext
+    : ImportSettingsShopClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>, ILoggedContext
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 

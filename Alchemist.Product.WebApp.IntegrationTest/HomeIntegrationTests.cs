@@ -11,7 +11,7 @@ using TestCommon = Alchemist.Product.WebApp.IntegrationTest.Infrastructure.Commo
 
 namespace Alchemist.Product.WebApp.IntegrationTest;
 
-public class TestProductWebAppFactory : ProductAggregatorConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>, ILoggedContext
+public class TestProductWebAppFactory : ProductAggregatorConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>, ILoggedContext
 {
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 

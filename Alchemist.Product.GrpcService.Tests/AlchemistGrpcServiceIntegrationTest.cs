@@ -37,7 +37,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -58,7 +58,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -81,7 +81,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -103,7 +103,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -145,7 +145,7 @@ public class AlchemistGrpcServiceIntegrationTest : TestFixture<TestAlchemistGrpc
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 }

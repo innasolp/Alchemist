@@ -38,7 +38,7 @@ public static class ShopApiHelper
         return httpClient;
     }
 
-    public static HttpClient CreateShopApiClient<TTestDbContainer, TDbRespawner>(string alchemyDbConnectionStringSection,
+    public static HttpClient CreateShopApiClient<TTestDbContainer, TDbRespawner, TDbChecker>(string alchemyDbConnectionStringSection,
         string database,
         int httpPort,
         int httpsPort,
@@ -49,8 +49,9 @@ public static class ShopApiHelper
         string dbPassword = "P@ssw0rd")
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
+     where TDbChecker : class, IDbChecker, new()    
     {
-        var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(alchemyDbConnectionStringSection,
+        var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,
             dbPort,
             dbUser,
@@ -61,7 +62,8 @@ public static class ShopApiHelper
         return httpClient;
     }    
 
-    public static ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> CreateShopApiWebAppFactory<TTestDbContainer, TDbRespawner>(string alchemyDbConnectionStringSection,
+    public static ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker> 
+        CreateShopApiWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(string alchemyDbConnectionStringSection,
         string database,
         int httpPort,
         int httpsPort,
@@ -72,8 +74,9 @@ public static class ShopApiHelper
         string dbPassword = "P@ssw0rd")
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
-    {
-        var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(alchemyDbConnectionStringSection,
+        where TDbChecker : class, IDbChecker, new()    
+        {
+        var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,
             dbPort,
             dbUser,

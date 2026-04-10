@@ -9,7 +9,7 @@ using TestCommon = Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure.Co
 namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class ProductShopSettingsTestImportSettingsWebAppFactory()
-    : ImportSettingsShopClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>(false,
+    : ImportSettingsShopClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>(false,
         8426, 8427,
         TestCommon.SignalRTestServer,
         8078, 8079,

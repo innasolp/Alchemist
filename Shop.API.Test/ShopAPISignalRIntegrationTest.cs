@@ -68,7 +68,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
         }
         finally
         {
-            await shopAPIFactory.ResetDatabaseAsync();
+            await shopAPIFactory.ResetDatabaseIfAvailableAsync();
             await (shopAPIFactory as IAsyncLifetime).DisposeAsync();
         }
     }
@@ -94,7 +94,7 @@ public class ShopAPISignalRIntegrationTest : TestFixture<SignalRLogContextWebApp
         }
         finally
         {
-            await shopAPIFactory.ResetDatabaseAsync();
+            await shopAPIFactory.ResetDatabaseIfAvailableAsync();
             await (shopAPIFactory as IAsyncLifetime).DisposeAsync();
         }
     }

@@ -64,7 +64,7 @@ public class ShopApiLoggingIntegrationTest: ShopAPIConfigurationTestFixture<Shop
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            // await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
@@ -84,7 +84,7 @@ public class ShopApiLoggingIntegrationTest: ShopAPIConfigurationTestFixture<Shop
         }
         finally
         {
-            await WebAppFactory.ResetDatabaseAsync();
+            // await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 }

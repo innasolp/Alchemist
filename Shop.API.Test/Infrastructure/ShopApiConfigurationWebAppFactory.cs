@@ -12,7 +12,7 @@ public abstract class ShopApiConfigurationWebAppFactory : TestWebAppKestrelFacto
 {
     private readonly Action<IServiceCollection>? _configureServices;
 
-    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner> _dbInterceptor;
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker> _dbInterceptor;
 
     protected ShopApiConfigurationWebAppFactory(string connectionStringSection, 
     string database, 
@@ -22,7 +22,7 @@ public abstract class ShopApiConfigurationWebAppFactory : TestWebAppKestrelFacto
     {
         _configureServices = configureServices;
 
-        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner>
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>
             (this, connectionStringSection, database, "postgres", "P@ssw0rd", 5432, fillTestData : FillTestData);
     }
 
@@ -50,8 +50,8 @@ public abstract class ShopApiConfigurationWebAppFactory : TestWebAppKestrelFacto
         return _dbInterceptor.DisposeAsync();
     }
 
-    public Task ResetDatabaseAsync()
+    public Task ResetDatabaseIfAvailableAsync()
     {
-        return _dbInterceptor.ResetDatabaseAsync();
+        return _dbInterceptor.ResetDatabaseIfAvailableAsync();
     }
 }

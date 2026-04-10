@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Alchemist.Test.ProductWebAppFactory;
 
-public class ProductAggregatorConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(int httpPort, int httpsPort,
+public class ProductAggregatorConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(int httpPort, int httpsPort,
     int shopApiHttpPort, int shopApiHttpsPort,
     int shopWebAppApiHttpPort, int shopWebAppApiHttpsPort,
     string shopDataBaseConnectionStringSection, string shopDatabase, 
@@ -37,10 +37,11 @@ public class ProductAggregatorConfigurationWebAppFactory<TTestDbContainer, TDbRe
         fillSettingsTestData)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
+    where TDbChecker : class, IDbChecker, new()
 {
-    private ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>? _shopWebAppFactory;
+    private ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>? _shopWebAppFactory;
 
-    private ImportSettingsShopHttpClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>? _settingsWebAppFactory;
+    private ImportSettingsShopHttpClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>? _settingsWebAppFactory;
 
     protected override async Task<HttpClient> CreateSettingsWebAppHttpClientAsync(int settingsApiHttpPort, 
         int settingsApiHttpsPort, 
@@ -51,7 +52,7 @@ public class ProductAggregatorConfigurationWebAppFactory<TTestDbContainer, TDbRe
         TestServer signalRTestServer,
         HttpClient shopWebAppHttpClient, Action<AlchemyContext>? fillTestData = null)
     {
-        _settingsWebAppFactory = new ImportSettingsShopHttpClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>(true,
+        _settingsWebAppFactory = new ImportSettingsShopHttpClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(true,
             settingsWebAppApiHttpPort,
             settingsWebAppApiHttspPort,
             shopWebAppHttpClient,
@@ -76,7 +77,7 @@ public class ProductAggregatorConfigurationWebAppFactory<TTestDbContainer, TDbRe
         string dataBaseConnectionStringSection,
         string database, Action<AlchemyContext>? fillTestData = null)
     {
-        _shopWebAppFactory = ShopWebAppHelper.CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(dataBaseConnectionStringSection,
+        _shopWebAppFactory = ShopWebAppHelper.CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(dataBaseConnectionStringSection,
             database,
             shopWebAppApiHttpPort,
             shopWebAppApiHttspPort,
@@ -107,6 +108,6 @@ public class ProductAggregatorConfigurationWebAppFactory<TTestDbContainer, TDbRe
             await _shopWebAppFactory.ResetDatabaseAsync();
 
         if(_settingsWebAppFactory != null)
-            await _settingsWebAppFactory.ResetDatabaseAsync();
+            await _settingsWebAppFactory.ResetDatabaseIfAvailableAsync();
     }
 }
