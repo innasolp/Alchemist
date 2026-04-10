@@ -1,61 +1,108 @@
-using Alchemist.Product.WebApp.IntegrationTest.Infrastructure;
+using Alchemist.Test.Log;
+using Alchemist.Test.ProductWebAppFactory;
 using Alchemist.Test.Server.Fixtures;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using Test.PostresqlTestContainer;
 using Xunit.Abstractions;
+using TestCommon = Alchemist.Product.WebApp.IntegrationTest.Infrastructure.Common;
 
 namespace Alchemist.Product.WebApp.IntegrationTest;
 
-public class TestProductWebAppFactory : ProductWebAppTestContainerLifetimeFactory
+public class TestProductWebAppFactory : ProductAggregatorConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>, ILoggedContext
 {
-    public TestProductWebAppFactory() : base(7102, 7103,
-        8060, 8061,
-        7500, 7501,
-      8406, 8407,
-      7088, 7089,
-        Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb"))
-    { }
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
+
+    public TestProductWebAppFactory()
+        : base(7102, 7103,
+            8060, 8061,
+            7500, 7501,
+            "ConnectionStrings:DbContext2", Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb"),
+            8202, 8203,
+            8406, 8407,
+            "ConnectionStrings:DbContext2", Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb"),
+            TestCommon.SignalRTestServer)
+    {
+    }
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        base.ConfigureWebHostBuilderContext(context, services);
+
+        FixtureLoggingContext.ConfigureServices(services);
+    }
 }
 
-public class HomeIntegrationTests(TestProductWebAppFactory factory, ITestOutputHelper outputHelper) : TestFixture<TestProductWebAppFactory, ProductWebAppProgramm>(factory, outputHelper)
+public class HomeIntegrationTests(TestProductWebAppFactory factory, ITestOutputHelper outputHelper)
+    : LoggedContextTestFixture<TestProductWebAppFactory, ProductWebAppProgramm>(factory, outputHelper)
 {
     [Fact]
     public async Task Get_Root_Redirects_To_ShopRoot()
     {
-        // prevent automatic redirect so we can assert location header
-        var client = WebAppFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        try
+        {
+            var client = WebAppFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
-        var resp = await client.GetAsync("/");
+            var resp = await client.GetAsync("/");
 
-        Assert.Equal(HttpStatusCode.Redirect, resp.StatusCode);
-        Assert.NotNull(resp.Headers.Location);
-        Assert.Equal("/Shop/", resp.Headers.Location!.ToString());
+            Assert.Equal(HttpStatusCode.Redirect, resp.StatusCode);
+            Assert.NotNull(resp.Headers.Location);
+            Assert.Equal("/Shop/", resp.Headers.Location!.ToString());
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
     public async Task Get_ShopRoot_Returns_OK()
     {
-        var client = WebAppFactory.CreateClient();
+        try
+        {
+            var client = WebAppFactory.CreateClient();
 
-        var resp = await client.GetAsync("/Shop/");
+            var resp = await client.GetAsync("/Shop/");
 
-        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
 
-        // basic sanity: page content should be non-empty
-        var content = await resp.Content.ReadAsStringAsync();
-        Assert.False(string.IsNullOrWhiteSpace(content));
+            var content = await resp.Content.ReadAsStringAsync();
+            Assert.False(string.IsNullOrWhiteSpace(content));
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
     public async Task Get_ImportSettingsRoot_Returns_OK()
     {
-        var client = WebAppFactory.CreateClient();
+        try
+        {
+            var client = WebAppFactory.CreateClient();
 
-        var resp = await client.GetAsync("/Import/Settings");
+            var resp = await client.GetAsync("/Import/Settings");
 
-        // controller action for Import/Settings should return view result; at minimum expect 200 OK.
-        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
-        var content = await resp.Content.ReadAsStringAsync();
-        Assert.False(string.IsNullOrWhiteSpace(content));
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var content = await resp.Content.ReadAsStringAsync();
+            Assert.False(string.IsNullOrWhiteSpace(content));
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 }

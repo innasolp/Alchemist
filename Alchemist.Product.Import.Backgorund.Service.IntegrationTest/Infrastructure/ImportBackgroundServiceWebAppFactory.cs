@@ -20,7 +20,6 @@ using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
 using Test.PostresqlTestContainer;
-using Testcontainers.PostgreSql;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
@@ -32,9 +31,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     private readonly int _settingsAPIHttpPort;
     private readonly int _settingsAPIHttpsPort;
 
-    private SettingsAPIWebAppFactory? _settingsAPIWebAppFactory;
+    private readonly SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker> _settingsAPIWebAppFactory;
 
-    private ShopAPIWebAppFactory? _shopAPIWebAppFactory;
+    private readonly ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker> _shopAPIWebAppFactory;
 
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
@@ -44,12 +43,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     private IConfiguration? _configuration;
 
-    private readonly PostgreSqlContainer _postgreSqlContainer;
-
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
-
 
     public FixtureLoggerFactoryContext? SettingsApiFixtureLoggingContext => _settingsAPIWebAppFactory?.FixtureLoggingContext;
 
@@ -59,7 +55,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     public HttpClient? ShopSettingsApiClient { get; private set; }
 
-    public HttpClient? ShopApiClient { get; private set; }   
+    public HttpClient? ShopApiClient { get; private set; }
 
     public ImportBackgroundServiceWebAppFactory(string dataBaseSection,
         int shopAPIHttpPort, int shopAPIHttpsPort,
@@ -70,8 +66,6 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         _shopAPIHttpsPort = shopAPIHttpsPort;
         _settingsAPIHttpPort = settingsAPIHttpPort;
         _settingsAPIHttpsPort = settingsAPIHttpsPort;
-        _postgreSqlContainer = PostresqlTestContainerHelper.BuildPostgreSqlContainer(Guid.NewGuid().ToString());
-
         var settings = new ConfigurationBuilder()
               .AddJsonFile("appsettings.json")
               .Build();
@@ -82,8 +76,14 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         _signalRApplicationFactory.CreateClient();        
 
         _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(browserServiceHttpPort, browserServiceHttpsPort);
-    }  
-     
+
+        _shopAPIWebAppFactory = new ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer,PostgresDbRespawner, PostgresDbChecker>
+            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _shopAPIHttpPort, _shopAPIHttpsPort, _signalRApplicationFactory.Server);
+
+        _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>
+            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server);
+    }
+
     public IMessageReceiver CreateImportItemReceiver()
     {
         return _importItemsHost.CreateSubscriber(Services,
@@ -97,8 +97,12 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
         _configuration = context.Configuration;
 
+        ShopApiClient = _shopAPIWebAppFactory.CreateClient();
         services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(ShopApiClient));
+
+        ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
         services.InterceptImplementation<IShopSettingsDataService, SettingsAPIClient>(new SettingsAPIClient(ShopSettingsApiClient));
+
         services.InterceptImplementation<ILoaderServiceFactory, BrowserServiceClientFactory>
             ((services) => services.AddBrowserServiceClientFactory(_browserServiceFactory.ServerAddress));
 
@@ -122,19 +126,15 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     public async Task InitializeAsync()
     {
-        await _postgreSqlContainer.StartAsync();
-
-        var alchemyDbConnectionString = _postgreSqlContainer.BuildConnectionString(_dataBase);
-
-        _shopAPIWebAppFactory = new ShopAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, _shopAPIHttpPort, _shopAPIHttpsPort);
-        ShopApiClient = _shopAPIWebAppFactory.CreateClient();
-
-        _settingsAPIWebAppFactory = new SettingsAPIWebAppFactory(alchemyDbConnectionString, _signalRApplicationFactory.Server, _settingsAPIHttpPort, _settingsAPIHttpsPort);
-        ShopSettingsApiClient = _settingsAPIWebAppFactory.CreateClient();
+        await _shopAPIWebAppFactory.InitializeAsync();
+        
+        await _settingsAPIWebAppFactory.InitializeAsync();
     }
 
     async Task IAsyncLifetime.DisposeAsync()
     {
-        await _postgreSqlContainer.DisposeAsync();
+        await (_settingsAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
+
+        await (_shopAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
     }
 }

@@ -48,7 +48,7 @@ builder.Services.AddHostedService<ImportItemHandlerService>();
 
 builder.Services.AddAuthentication("https");
 
-builder.WebHost.UseUrls("http://localhost:8230", "https://localhost:8231");
+//builder.WebHost.UseUrls("http://localhost:8230", "https://localhost:8231");
 
 
 var app = builder.Build();

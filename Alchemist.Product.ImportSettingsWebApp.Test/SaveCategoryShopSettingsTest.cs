@@ -1,14 +1,23 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
+using Alchemist.Test.ImportSettingsWebApp.Factory;
+using Test.PostresqlTestContainer;
 using Xunit.Abstractions;
+using TestCommon = Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure.Common;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class SaveCategoryShopSettingsTestImportSettingsWebAppFactory()
-    : ImportSettingsWebAppTestContainerLifetimeFactory(false,
+    : ImportSettingsShopClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>(false,
+        8428, 8429,
+        TestCommon.SignalRTestServer,
+        8080, 8081,
+        "ConnectionStrings:DbContext2",
+        Common.ConfigurationHelper.GetSectionValue("SaveCategorySettingsTestDb"),
+        "ConnectionStrings:DbContext2",
+        Common.ConfigurationHelper.GetSectionValue("SaveCategorySettingsTestDb"),
         8098, 8099,
         8228, 8229,
-        Common.ConfigurationHelper.GetSectionValue("SaveCategorySettingsTestDb"),
-        8428, 8429, 8080, 8081)
+        fillSettingsTestData: (context) => TestCommon.FillTestData(context, [1, 2, 3, 4]))
 {
 }
 

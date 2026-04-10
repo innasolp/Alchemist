@@ -4,33 +4,46 @@ using Xunit.Abstractions;
 
 namespace Alchemist.Product.ShopWebApp.IntegratonTest;
 
-public class ShopWebAppMvcFactory : ShopWebAppLifetimeTestContainerFactory
+public class ShopWebAppMvcFactory : ShopApiConfigurationLoggedWebAppFactory
 {
-    public ShopWebAppMvcFactory() : base(false, 8404, 8405, 8062, 8063, Common.ConfigurationHelper.GetSectionValue("ShopMvcTestDb"))
+    public ShopWebAppMvcFactory() : base(false, 8404, 8405, 8062, 8063,
+        "ConnectionStrings:DbContext2",
+        Common.ConfigurationHelper.GetSectionValue("ShopMvcTestDb"))
     {
     }
 }
 
 public class ShopWebMvcTest(ShopWebAppMvcFactory webAppFactory, ITestOutputHelper outputHelper)
-    : TestFixture<ShopWebAppMvcFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
+    : LoggedContextTestFixture<ShopWebAppMvcFactory, ShopWebAppProgram>(webAppFactory, outputHelper)
 {
     [Fact]
     public async Task IndexPageSuccessAsync()
     {
         var url = "/";
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
 
         try
         {
-            Assert.Contains("id=\"shopsTab\"", content);
+            var httpClient = WebAppFactory.CreateClient();
+            var response = await httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            try
+            {
+                Assert.Contains("id=\"shopsTab\"", content);
+            }
+            catch
+            {
+                OutputHelper.WriteLine(content);
+                throw;
+            }
         }
         catch
         {
-            OutputHelper.WriteLine(content);
+            OutputErrors();
+            OutputWarnings();
+
             throw;
         }
     }

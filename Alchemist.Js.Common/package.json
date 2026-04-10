@@ -57,7 +57,7 @@
   "license": "ISC",
   "description": "alchemist js common methods",
   "devDependencies": {
-    "eslint": "^9.35.0"
+    "eslint": "^9.36.0"
   },
   "dependencies": {
     "acorn": "^8.15.0",

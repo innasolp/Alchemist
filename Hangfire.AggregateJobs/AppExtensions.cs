@@ -1,6 +1,7 @@
 ﻿using Hangfire.AggregateJobs.ChildJobStorages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Data.Common;
 
 namespace Hangfire.AggregateJobs;
 
@@ -10,7 +11,13 @@ public static class AppExtensions
     {
         using var scope = host.Services.CreateScope();
         var childJobDbContext = scope.ServiceProvider.GetRequiredService<ChildJobDbContext>();
-        childJobDbContext.Database.EnsureDeleted();
+
+        try
+        {
+            childJobDbContext.Database.EnsureDeleted();
+        }
+        catch (DbException ex) when (ex.SqlState == "3D000"){}
+
         childJobDbContext.Database.EnsureCreated();
     }
 

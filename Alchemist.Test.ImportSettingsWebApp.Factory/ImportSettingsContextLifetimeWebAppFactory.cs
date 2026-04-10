@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Alchemist.Test.ImportSettingsWebApp.Factory;
 
-public abstract class ImportSettingsWebLifetimeFactory(bool isApi, int httpPort, int httpsPort,
+public abstract class ImportSettingsContextLifetimeWebAppFactory(bool isApi, int httpPort, int httpsPort,
     int settingsApiHttpPort, int settingsApiHttpsPort,
     TestServer signalRTestServer,
     int? shopApiHttpPort = null, int? shopApiHttpsPort = null,

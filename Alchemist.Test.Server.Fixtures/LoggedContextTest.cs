@@ -27,12 +27,21 @@ public abstract class LoggedContextTest(ITestOutputHelper outputHelper)
     {
         var errors = _logMessages.Where(m => m.LogLevel == LogLevel.Error);
         if (!errors.Any()) return;
+
         OutputHelper.WriteLine("Errors:");
+
         foreach (var error in errors)
         {
             OutputHelper.WriteLine($"{error.Message} : {error.Exception?.Message ?? ""}");
             if (error.Exception != null)
                 OutputHelper.WriteLine(error.Exception.StackTrace);
+
+            if(error.Exception?.InnerException != null)
+            {
+                OutputHelper.WriteLine("Inner exception :");
+                OutputHelper.WriteLine(error.Exception.InnerException.Message);
+                OutputHelper.WriteLine(error.Exception.InnerException.StackTrace);
+            }
         }
     }
 

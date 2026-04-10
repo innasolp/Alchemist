@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Alchemist.Test.DBApiWebAppFactory;
+namespace Alchemist.Test.DBApiWebAppFactory.Context;
 
-public abstract class DbAPIWebAppFactory<TEntryPoint, TDbContext>(bool ensureDeleted) : DbContextWebAppFactory<TEntryPoint, TDbContext>
+public abstract class DbContextAPIWebAppFactory<TEntryPoint, TDbContext>(bool ensureDeleted) : DbContextWebAppFactory<TEntryPoint, TDbContext>
      where TEntryPoint : class
     where TDbContext : DbContext
 {
     private readonly bool _ensureDeleted = ensureDeleted;
 
-    private IHost _host;
+    private IHost? _host;
 
     public string ServerAddress
     {

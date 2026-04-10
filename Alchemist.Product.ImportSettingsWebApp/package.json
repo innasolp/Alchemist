@@ -8,19 +8,24 @@
     },
     "./importsettings.app.min": {
       "import": "./wwwroot/js/importsettings.app.min.js"
+    },
+    "./importsettings.app.start": {
+      "import": "./wwwroot/js/start.js"
     }
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "github.com/innasolp",
+  "author": "innasolp",
   "license": "ISC",
   "description": "importsettings js methods",
   "devDependencies": {
-    "eslint": "^9.35.0"
+    "eslint": "^9.36.0"
   },
   "dependencies": {
+    "alchemist_common": "1.0.0",
+    "alchemist_css_common": "1.0.0",
     "acorn": "^8.15.0",
     "acorn-jsx": "^5.3.2",
     "ajv": "^6.12.6",
@@ -94,10 +99,6 @@
     "which": "^2.0.2",
     "word-wrap": "^1.2.5",
     "yocto-queue": "^0.1.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/github.com/innasolp.git"
   },
   "bugs": {
     "url": "https://github.com/github.com/innasolp/issues"
