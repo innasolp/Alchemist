@@ -45,29 +45,30 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
-	
-	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+
+	<Target Name="NpmLinkPackage" AfterTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
+	</Target>
+
+	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build">
 		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
 	</Target>
 
-	<Target Name="CopyNpmCssToWwwRoot" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+
+	<Target Name="CopyNpmCssToWwwRoot" BeforeTargets="Build">
 		<ItemGroup>
 			<NpmCssFiles Include="..\node_modules\alchemist_css_common\src\*.*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(NpmCssFiles)" DestinationFolder="wwwroot/css/common/%(RecursiveDir)" />
 	</Target>
 
-	<Target Name="CopyNpmLibsToWwwRoot" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+	<Target Name="CopyNpmLibsToWwwRoot" BeforeTargets="Build">
 		<ItemGroup>
 			<NpmLibFiles Include="..\node_modules\alchemist_common\mvc\*.*" />
 			<JQueryConfirmLibFiles Include="..\node_modules\jquery-confirm\dist\*.*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(NpmLibFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
 		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
-	</Target>
-
-	<Target Name="NpmLinkPackage" AfterTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
-		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
 	</Target>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.2752196">
   <ItemGroup>    
   </ItemGroup>
-	<Target Name="NpmLinkPackage" BeforeTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
-		<Exec Command="npm link alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
+	<Target Name="NpmLinkPackage" AfterTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
 	</Target>
 </Project>
