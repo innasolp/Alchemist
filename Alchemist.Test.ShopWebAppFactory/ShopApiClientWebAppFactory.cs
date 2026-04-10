@@ -15,16 +15,16 @@ public abstract class ShopApiClientWebAppFactory(bool isApi, int httpPort, int h
 
     protected abstract TestHostServerWebAppFactory<ShopAPIProgram> CreateShopApiFactory(int shopAPIHttpPort, int shopAPIHttpsPort, TestServer signalRTestServer);
 
-    private TestHostServerWebAppFactory<ShopAPIProgram>? _shopApiFactory;
+    protected TestHostServerWebAppFactory<ShopAPIProgram>? ShopApiFactory { get; private set; }
 
     public virtual async Task InitializeAsync()
     {
-        _shopApiFactory = CreateShopApiFactory(shopAPIHttpPort, shopAPIHttpsPort, signalRTestServer);
+        ShopApiFactory = CreateShopApiFactory(shopAPIHttpPort, shopAPIHttpsPort, signalRTestServer);
 
-        if (_shopApiFactory is IAsyncLifetime asyncLifetimeFactory)        
+        if (ShopApiFactory is IAsyncLifetime asyncLifetimeFactory)        
             await asyncLifetimeFactory.InitializeAsync();
 
-        _shopApiClient = _shopApiFactory.GetHostHttpClient(); 
+        _shopApiClient = ShopApiFactory.GetHostHttpClient(); 
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -46,7 +46,7 @@ public abstract class ShopApiClientWebAppFactory(bool isApi, int httpPort, int h
     {
         _shopApiClient?.Dispose();
 
-        if (_shopApiFactory is IAsyncLifetime asyncLifetimeFactory)
+        if (ShopApiFactory is IAsyncLifetime asyncLifetimeFactory)
             await asyncLifetimeFactory.DisposeAsync();
     }
 

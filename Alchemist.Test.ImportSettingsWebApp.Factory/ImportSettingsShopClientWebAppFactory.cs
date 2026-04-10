@@ -1,4 +1,5 @@
-﻿using Alchemist.Settings.RestAPIClient;
+﻿using Alchemist.Product.Data;
+using Alchemist.Settings.RestAPIClient;
 using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -13,60 +14,38 @@ public abstract class ImportSettingsShopClientWebAppFactory(bool isApi, int http
     int settingsApiHttpPort, int settingsApiHttpsPort,
     TestServer signalRTestServer,
     int? shopApiHttpPort = null, int? shopApiHttpsPort = null,
-    int? shopWebappApiHttpPort = null, int? shopWebAppApiHttpsPort = null
+    int? shopWebappApiHttpPort = null, int? shopWebAppApiHttpsPort = null,
+    Action<AlchemyContext>? fillShopTestData = null,
+    Action<AlchemyContext>? fillSettingsTestData = null
     ) : TestWebAppKestrelFactory<ImportSettingsWebAppProgramm>(httpPort, httpsPort), IAsyncLifetime
 {
     private HttpClient? _settingsApiHttpClient;
 
     private HttpClient? _shopWebAppApiHttpClient = null;
 
-    private TestHostServerWebAppFactory<SettingsAPIProgram>? _settingsApiFactory;
-
-    private TestHostServerWebAppFactory<ShopWebAppProgram>? _shopWebAppFactory;
-
-    //protected abstract Task<string> GetShopSettingsDbConnectionString();
-
-    //protected abstract Task<HttpClient> CreateShopWebAppHttpClient(int shopWebappApiHttpPort,
-    //    int shopWebAppApiHttpsPort, 
-    //    int shopApiHttpPort, 
-    //    int shopApiHttpsPort,
-    //    TestServer signalRServer);
-
-    protected abstract TestHostServerWebAppFactory<ShopWebAppProgram> CreateShopWebAppFactory(int shopWebappApiHttpPort,
-        int shopWebAppApiHttpsPort, 
-        int shopApiHttpPort, 
-        int shopApiHttpsPort,
-        TestServer signalRServer);
-
-    //protected abstract Task<HttpClient> CreateSettingsApiHttpClient(int settingsApiHttpPort, int settingsApiHttpsPort, TestServer signalRServer);
+    protected abstract Task<HttpClient?> CreateShopWebAppHttpClientAsync(int? shopWebappApiHttpPort,
+        int? shopWebAppApiHttpsPort, 
+        int? shopApiHttpPort, 
+        int? shopApiHttpsPort,
+        TestServer signalRServer,
+        Action<AlchemyContext>? fillTestData = null);
     
-    protected abstract TestHostServerWebAppFactory<SettingsAPIProgram> CreateSettingsApiWebAppFactory(int settingsApiHttpPort, 
+    protected abstract Task<HttpClient> CreateSettingsApiWebHttpClientAsync(
+        int settingsApiHttpPort, 
         int settingsApiHttpsPort, 
-        TestServer signalRServer);
+        TestServer signalRServer,
+        Action<AlchemyContext>? fillTestData = null);
 
     public virtual async Task InitializeAsync()
     {
-        var shopPorts = new int?[] { shopWebappApiHttpPort, shopWebAppApiHttpsPort, shopApiHttpPort, shopApiHttpsPort };
-        if (shopPorts.All(p => p.HasValue))
-        {
-            _shopWebAppFactory = CreateShopWebAppFactory(shopWebappApiHttpPort!.Value,
-                shopWebAppApiHttpsPort!.Value,
-                    shopApiHttpPort!.Value,
-                    shopApiHttpsPort!.Value,
-                    signalRTestServer);
+       _shopWebAppApiHttpClient = await CreateShopWebAppHttpClientAsync(shopWebappApiHttpPort,
+                shopWebAppApiHttpsPort,
+                    shopApiHttpPort,
+                    shopApiHttpsPort,
+                    signalRTestServer,
+                    fillShopTestData);
 
-            if (_shopWebAppFactory is IAsyncLifetime asyncLifetimeShopFactory)
-                await asyncLifetimeShopFactory.InitializeAsync();
-
-            _shopWebAppApiHttpClient = _shopWebAppFactory.GetHostHttpClient();
-        }
-
-        _settingsApiFactory = CreateSettingsApiWebAppFactory(settingsApiHttpPort, settingsApiHttpsPort, signalRTestServer);
-
-        if (_settingsApiFactory is IAsyncLifetime asyncLifetimeSettingsApiFactory)
-            await asyncLifetimeSettingsApiFactory.InitializeAsync();
-
-        _settingsApiHttpClient = _settingsApiFactory.GetHostHttpClient();
+        _settingsApiHttpClient = await CreateSettingsApiWebHttpClientAsync(settingsApiHttpPort, settingsApiHttpsPort, signalRTestServer, fillSettingsTestData);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -95,17 +74,7 @@ public abstract class ImportSettingsShopClientWebAppFactory(bool isApi, int http
     }
 
     protected virtual async Task LifetimeDisposeAsync()
-    {
-        if(_shopWebAppFactory is IAsyncLifetime asyncLifetimeShopFactory)
-            await asyncLifetimeShopFactory.DisposeAsync();
-
-        _shopWebAppApiHttpClient?.Dispose();
-
-        if (_settingsApiFactory is IAsyncLifetime asyncLifetimeSettingsFactory)
-            await asyncLifetimeSettingsFactory.DisposeAsync();
-
-        _settingsApiHttpClient?.Dispose();
-    }
+    { }
 
     Task IAsyncLifetime.DisposeAsync()
     {

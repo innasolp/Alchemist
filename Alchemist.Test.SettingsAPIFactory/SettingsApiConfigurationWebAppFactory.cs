@@ -59,4 +59,9 @@ public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawne
     {
         return _dbInterceptor.DisposeAsync();
     }
+
+    public Task ResetDatabaseAsync()
+    {
+        return _dbInterceptor.ResetDatabaseAsync();
+    }
 }

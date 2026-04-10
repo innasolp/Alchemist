@@ -1,8 +1,10 @@
-﻿using Alchemist.Test.Server.Fixtures;
+﻿using Alchemist.Product.Data;
+using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.ShopWebAppFactory;
 using Microsoft.AspNetCore.TestHost;
 using Test.DbContainer.Abstractions;
+using Xunit;
 
 namespace Alchemist.Test.ImportSettingsWebApp.Factory;
 
@@ -19,27 +21,72 @@ public class ImportSettingsShopClientConfigurationWebAppFactory<TTestDbContainer
     int? shopApiHttpPort = null,
     int? shopApiHttpsPort = null,
     int? shopWebappApiHttpPort = null,
-    int? shopWebAppApiHttpsPort = null)
-    : ImportSettingsShopClientWebAppFactory(isApi, httpPort, httpsPort, settingsApiHttpPort, settingsApiHttpsPort, signalRTestServer, shopApiHttpPort, shopApiHttpsPort, shopWebappApiHttpPort, shopWebAppApiHttpsPort)
+    int? shopWebAppApiHttpsPort = null,
+    Action<AlchemyContext>? fillShopTestData = null,
+    Action<AlchemyContext>? fillSettingsTestData = null)
+    : ImportSettingsShopClientWebAppFactory(isApi,
+        httpPort, httpsPort, 
+        settingsApiHttpPort, settingsApiHttpsPort, 
+        signalRTestServer,
+        shopApiHttpPort, shopApiHttpsPort, 
+        shopWebappApiHttpPort, shopWebAppApiHttpsPort,
+        fillShopTestData,
+        fillSettingsTestData)
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
 {
-    protected override TestHostServerWebAppFactory<ShopWebAppProgram> CreateShopWebAppFactory(int shopWebappApiHttpPort, int shopWebAppApiHttpsPort, int shopApiHttpPort, int shopApiHttpsPort, TestServer signalRServer)
+    private TestHostServerWebAppFactory<SettingsAPIProgram>? _settingsApiFactory;
+
+    private TestHostServerWebAppFactory<ShopWebAppProgram>? _shopWebAppFactory;
+
+    protected override async Task LifetimeDisposeAsync()
     {
-        return ShopWebAppHelper.CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(shopDbConnectionStringSection,
-            shopDatabase,
-            shopWebappApiHttpPort,
-            shopWebAppApiHttpsPort,
-            shopApiHttpPort,
-            shopApiHttpsPort, signalRServer);
+        if (_shopWebAppFactory is IAsyncLifetime asyncLifetimeShopFactory)
+            await asyncLifetimeShopFactory.DisposeAsync();
+
+        if (_settingsApiFactory is IAsyncLifetime asyncLifetimeSettingsFactory)
+            await asyncLifetimeSettingsFactory.DisposeAsync();
+
+        await base.LifetimeDisposeAsync();
     }
 
-    protected override TestHostServerWebAppFactory<SettingsAPIProgram> CreateSettingsApiWebAppFactory(int settingsApiHttpPort, int settingsApiHttpsPort, TestServer signalRServer)
+    protected override async Task<HttpClient?> CreateShopWebAppHttpClientAsync(int? shopWebappApiHttpPort, 
+        int? shopWebAppApiHttpsPort,
+        int? shopApiHttpPort, int? shopApiHttpsPort, TestServer signalRServer, Action<AlchemyContext>? fillTestData = null)
     {
-        return SettingsApiHelper.CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner>(settingsDbConnectionStringSection,
+        var shopPorts = new int?[] { shopWebappApiHttpPort, shopWebAppApiHttpsPort, shopApiHttpPort, shopApiHttpsPort };
+        if (shopPorts.All(p => p.HasValue))
+        {
+            _shopWebAppFactory = ShopWebAppHelper.CreateShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespawner>(shopDbConnectionStringSection,
+            shopDatabase,
+            shopWebappApiHttpPort!.Value,
+            shopWebAppApiHttpsPort!.Value,
+            shopApiHttpPort!.Value,
+            shopApiHttpsPort!.Value, signalRServer, fillTestData);
+
+            if (_shopWebAppFactory is IAsyncLifetime asyncLifetimeShopFactory)
+                await asyncLifetimeShopFactory.InitializeAsync();
+
+            return _shopWebAppFactory.GetHostHttpClient();
+        }
+        else return null;
+    }
+
+    protected override async Task<HttpClient> CreateSettingsApiWebHttpClientAsync(int settingsApiHttpPort,
+        int settingsApiHttpsPort,
+        TestServer signalRServer, 
+        Action<AlchemyContext>? fillTestData = null)
+    {
+        _settingsApiFactory = SettingsApiHelper.CreateSettingsApiWebAppFactory<TTestDbContainer, TDbRespawner>(settingsDbConnectionStringSection,
             settingsDatabase,
             settingsApiHttpPort,
             settingsApiHttpsPort,
-            signalRServer);
+            signalRServer, 
+            fillTestData : fillTestData);
+
+        if (_settingsApiFactory is IAsyncLifetime asyncLifetimeSettingsApiFactory)
+            await asyncLifetimeSettingsApiFactory.InitializeAsync();
+
+        return _settingsApiFactory.GetHostHttpClient();
     }
 }

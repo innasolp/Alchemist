@@ -1,19 +1,28 @@
 ﻿using Alchemist.Product.ImportSettingsWebApp.Models;
 using Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure;
 using Alchemist.Test.Functional.Playwright;
+using Alchemist.Test.ImportSettingsWebApp.Factory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using System.Collections.ObjectModel;
+using Test.PostresqlTestContainer;
 using Xunit.Abstractions;
+using TestCommon = Alchemist.Product.ImportSettingsWebApp.Test.Infrastructure.Common;
 
 namespace Alchemist.Product.ImportSettingsWebApp.Test;
 
 public class ServiceSettingsTestImportSettingsWebAppFactory()
-    : ImportSettingsTestContainerContextLifetimeWebAppFactory(false,
+    : ImportSettingsShopClientConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>(false,
+        8422, 8423,
+        TestCommon.SignalRTestServer,
+        8074, 8075,
+        "ConnectionStrings:DbContext2",
+        Common.ConfigurationHelper.GetSectionValue("ServiceSettingsTestDb"),
+        "ConnectionStrings:DbContext2",
+        Common.ConfigurationHelper.GetSectionValue("ServiceSettingsTestDb"),
         8092, 8093,
         8222, 8223,
-        Common.ConfigurationHelper.GetSectionValue("ServiceSettingsTestDb"),
-        8422, 8423, 8074, 8075)
+        fillSettingsTestData: (context) => TestCommon.FillTestData(context, [1, 2, 3, 4]))
 {
 }
 

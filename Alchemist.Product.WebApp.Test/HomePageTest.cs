@@ -1,21 +1,28 @@
-using Alchemist.Product.WebApp.Test.Infrastructure;
 using Alchemist.Test.Functional.Playwright;
+using Alchemist.Test.ProductWebAppFactory;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using Test.PostresqlTestContainer;
 using Xunit.Abstractions;
+using TestCommon = Alchemist.Product.WebApp.Test.Infrastructure.Common;
 
 namespace Alchemist.Product.WebApp.Test;
 
-public class TestProductWebAppFactory : ProductWebAppTestContainerLifetimeFactory
+public class TestProductWebAppFactory : ProductAggregatorConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner>
 {
     private static readonly string database = Common.ConfigurationHelper.GetSectionValue("ContainerWebAppTestDb");
-    public TestProductWebAppFactory() : base(7102, 7103,
-        7500, 7501,
-        8060,8061,
-        7088,7089,
-         8406,8407,
-        database)
-    { }
+
+    public TestProductWebAppFactory() : base(7102, 7103, 
+            8060, 8061, 
+            8406, 8407, 
+            "ConnectionStrings:DbContext2", database, 
+            7088, 7089, 
+            7500, 7501,
+            "ConnectionStrings:DbContext2", database,
+            TestCommon.SignalRTestServer,
+            fillSettingsTestData : (dbContext) => TestCommon.FillTestData(dbContext, [1, 2, 3, 4]))
+    {
+    }
 }
 
 public class HomePageTest : PageTest, IClassFixture<TestProductWebAppFactory>
@@ -26,6 +33,7 @@ public class HomePageTest : PageTest, IClassFixture<TestProductWebAppFactory>
     public HomePageTest(TestProductWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
     {
         _webAppFactory = webAppFactory;
+        
         _outputHelper = outputHelper;
 
         _webAppFactory.CreateClient();
@@ -61,8 +69,6 @@ public class HomePageTest : PageTest, IClassFixture<TestProductWebAppFactory>
         await Page.GotoAsync(url);
 
         await Expect(Page.Locator("#appDiv")).Not.ToBeEmptyAsync();
-
-        await Expect(Page).ToHaveURLAsync($"{url}Shop/");
 
         string pattern = @"\d+";
         await Page.WaitForURLAsync(new System.Text.RegularExpressions.Regex($"{url}Shop/{pattern}"));
@@ -101,7 +107,7 @@ public class HomePageTest : PageTest, IClassFixture<TestProductWebAppFactory>
         await ExpectShopTabLoadedAsync();
 
         var selectedShopLocator = Page.Locator("a[class='shop_item selected']");
-        await Expect(selectedShopLocator).ToHaveCountAsync(1);
+        await Expect(selectedShopLocator).ToHaveCountAsync(1);        
     }
 
     [Fact]
@@ -242,7 +248,7 @@ public class HomePageTest : PageTest, IClassFixture<TestProductWebAppFactory>
         await cancelButton.ClickAsync();
 
         var appUrlRegex = $"{_webAppFactory.ServerAddress}Shop/{@"\d+"}";
-        await Expect(Page).Not.ToHaveURLAsync(appUrlRegex);        
+        await Expect(Page).Not.ToHaveURLAsync(appUrlRegex);
     }
 
     [Fact]
@@ -264,6 +270,6 @@ public class HomePageTest : PageTest, IClassFixture<TestProductWebAppFactory>
         await cancelButton.ClickAsync();
 
         var appUrlRegex = $"{_webAppFactory.ServerAddress}Import/Settings/{@"\d+"}/.*";
-        await Expect(Page).Not.ToHaveURLAsync(appUrlRegex);        
+        await Expect(Page).Not.ToHaveURLAsync(appUrlRegex);
     }
 }

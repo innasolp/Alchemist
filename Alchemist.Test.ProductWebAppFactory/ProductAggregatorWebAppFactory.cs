@@ -1,4 +1,5 @@
-﻿using Alchemist.Test.Server.Fixtures;
+﻿using Alchemist.Product.Data;
+using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -16,62 +17,47 @@ public abstract class ProductAggregatorWebAppFactory(int httpPort, int httpsPort
     int settingsWebAppApiHttpPort, int settingsWebAppApiHttspPort,
     string settingsDataBaseConnectionStringSection,
      string settingsDatabase,
-    TestServer signalRTestServer)
+    TestServer signalRTestServer,
+    Action<AlchemyContext>? fillShopTestData = null,
+    Action<AlchemyContext>? fillSettingsTestData = null)
     : TestWebAppKestrelFactory<ProductWebAppProgramm>(httpPort, httpsPort), IAsyncLifetime
 {
     private HttpClient? _shopWebAppApiClient;
 
     private HttpClient? _importSettingsWebAppApiClient;
 
-    private TestHostServerWebAppFactory<ShopWebAppProgram>? _shopWebAppFactory;
-
-    private TestHostServerWebAppFactory<ImportSettingsWebAppProgramm>? _settingsWebAppFactory;
-
-    protected abstract TestHostServerWebAppFactory<ImportSettingsWebAppProgramm> CreateSettingsWebAppFactory(int settingsApiHttpPort,
+    protected abstract Task<HttpClient> CreateSettingsWebAppHttpClientAsync(int settingsApiHttpPort,
         int settingsApiHttpsPort,
     int settingsWebAppApiHttpPort, 
     int settingsWebAppApiHttspPort,
     string settingsDataBaseConnectionStringSection,
      string settingsDatabase,
     TestServer signalRTestServer,
-    int shopWebAppApiHttpPort, int shopWebAppApiHttspPort);
+    HttpClient shopWebAppHttpClient,
+    Action<AlchemyContext>? fillTestData);
 
-    protected abstract TestHostServerWebAppFactory<ShopWebAppProgram> CreateShopWebAppFactory(int shopApiHttpPort, int shopApiHttpsPort,
+    protected abstract Task<HttpClient> CreateShopWebAppHttpClientAsync(int shopApiHttpPort, int shopApiHttpsPort,
      int shopWebAppApiHttpPort, int shopWebAppApiHttspPort, TestServer signalRTestServer,
      string dataBaseConnectionStringSection, 
-     string database);
+     string database,
+     Action<AlchemyContext>? fillTestData);
 
     public async Task InitializeAsync()
     {
-        _shopWebAppFactory = CreateShopWebAppFactory(shopApiHttpPort, shopApiHttpsPort, shopWebAppApiHttpPort, shopWebAppApiHttspPort,
-            signalRTestServer, shopDataBaseConnectionStringSection, shopDatabase);
+        _shopWebAppApiClient = await CreateShopWebAppHttpClientAsync(shopApiHttpPort, shopApiHttpsPort, shopWebAppApiHttpPort, shopWebAppApiHttspPort,
+            signalRTestServer, shopDataBaseConnectionStringSection, shopDatabase, fillShopTestData);
 
-        if (_shopWebAppFactory is IAsyncLifetime asyncLifetimeShopWebAppFactory)
-            await asyncLifetimeShopWebAppFactory.InitializeAsync();
-
-        _shopWebAppApiClient = _shopWebAppFactory.GetHostHttpClient();
-
-        _settingsWebAppFactory = CreateSettingsWebAppFactory(settingsApiHttpPort, settingsApiHttpsPort, settingsWebAppApiHttpPort, settingsWebAppApiHttspPort,
+        _importSettingsWebAppApiClient = await CreateSettingsWebAppHttpClientAsync(settingsApiHttpPort, settingsApiHttpsPort, settingsWebAppApiHttpPort, settingsWebAppApiHttspPort,
             settingsDataBaseConnectionStringSection, settingsDatabase, signalRTestServer,
-            shopWebAppApiHttpPort, shopWebAppApiHttspPort);
-
-        if (_settingsWebAppFactory is IAsyncLifetime asyncLifetimeSettingsWebAppFactory)
-            await asyncLifetimeSettingsWebAppFactory.InitializeAsync();
-
-        _importSettingsWebAppApiClient = _settingsWebAppFactory.GetHostHttpClient();
+            _shopWebAppApiClient, fillSettingsTestData);
     }
 
-    async Task IAsyncLifetime.DisposeAsync()
+    protected virtual async Task DisposeLifetimeAsync()
+    {}
+
+    Task IAsyncLifetime.DisposeAsync()
     {
-        if (_shopWebAppFactory is IAsyncLifetime asyncLifetimeShopWebAppFactory)
-            await asyncLifetimeShopWebAppFactory.DisposeAsync();
-
-        _shopWebAppApiClient?.Dispose();
-
-        if (_settingsWebAppFactory is IAsyncLifetime asyncLifetimeSettingsWebAppFactory)
-            await asyncLifetimeSettingsWebAppFactory.InitializeAsync();
-
-        _importSettingsWebAppApiClient?.Dispose();
+        return DisposeLifetimeAsync();
     }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)

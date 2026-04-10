@@ -29,4 +29,11 @@ public class ShopApiClientConfigurationWebAppFactory<TTestDbContainer, TDbRespaw
            signalRTestServer,
            fillTestData : fillTestData);
     }
+
+    public Task ResetDatabaseAsync()
+    {
+        return ShopApiFactory is ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner> shopApiContainerFactory
+            ? shopApiContainerFactory.ResetDatabaseAsync()
+            : Task.CompletedTask;
+    }
 }
