@@ -1,5 +1,4 @@
-﻿using Alchemist.Import.Settings;
-using Alchemist.Import.Settings.Extensions;
+﻿using Alchemist.Import.Settings.Extensions;
 using Import.Settings.Interfaces;
 using ShopSettings.Interfaces;
 using System.Text.Json;

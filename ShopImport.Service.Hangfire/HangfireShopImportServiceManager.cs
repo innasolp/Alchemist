@@ -4,11 +4,14 @@ using Alchemist.Import.Settings.Extensions;
 using Alchemist.Product.Entities;
 using Hangfire;
 using Hangfire.AggregateJobs;
+using Hangfire.AggregateJobs.ChildJobStorages;
 using Hangfire.Server;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Polly;
 using Shop.Interfaces;
 using ShopImport.Service.Hangfire.Infrastructure;
 using ShopImport.Service.Hangfire.Models;
@@ -21,7 +24,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     IImportServiceJobFactory importServiceJobFactory,
     IJobExecuteManager jobExecuteManager,
     AggregateServerSettings aggregateServerSettings,
-    IEnumerable<IChildJobEnricher<IImportServiceJob>> childJobEnrichers)
+    IEnumerable<IChildJobEnricher<IImportServiceJob>> childJobEnrichers,
+    IServiceScopeFactory serviceScopeFactory)
     : IShopImportServiceJobManager, IAsyncDisposable
 {
     private readonly IEnumerable<IImportServiceFactory> _shopServiceFactories = shopServiceFactories;
@@ -337,9 +341,13 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         CancellationToken cancellationToken = default,
         PerformContext? performContext = null)
     {
-        if (!_allServiceJobs.TryGetValue(id, out var serviceJob) || 
-            (parentId is not null && !_allServiceJobs.TryGetValue(parentId.Value, out var _)))
-            throw new JobDeletedException($"Job {id} {displayName} is deleted.");
+        var retryPolicy = Policy
+        .Handle<NotLoadedException>()
+        .WaitAndRetry(
+            retryCount: 5, 
+            sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(10, retryAttempt)));
+
+        var serviceJob = await retryPolicy.Execute(() => GetServiceJobAsync(id, parentId, displayName));        
         
         if (performContext != null)
         {
@@ -371,6 +379,25 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
                 RemoveJobWithChildren(serviceJob);
             }            
         }
+    }
+
+    private async Task<IImportServiceJob> GetServiceJobAsync(Guid id, Guid? parentId, string displayName)
+    {
+        if (!_allServiceJobs.TryGetValue(id, out var serviceJob) ||
+            (parentId is not null && !_allServiceJobs.TryGetValue(parentId.Value, out var _)))
+        {
+            using var scope = serviceScopeFactory.CreateScope();
+            var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
+
+            var jobEntry = await childJobStorage.GetJobAsync(id.ToString());
+
+            if(jobEntry?.Status == JobStatus.Deleted)
+               throw new JobDeletedException($"Job {id} {displayName} is deleted.");
+
+            throw new NotLoadedException($"Service {displayName} job {id} has not loaded yet.");
+        }
+
+        return serviceJob;
     }
 
     private void RemoveJobWithChildren(IImportServiceJob deletedServiceJob)

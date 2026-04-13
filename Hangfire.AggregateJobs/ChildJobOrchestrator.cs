@@ -1,4 +1,5 @@
-﻿using Hangfire.AggregateJobs.Filters;
+﻿using Hangfire.AggregateJobs.ChildJobStorages;
+using Hangfire.AggregateJobs.Filters;
 using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +37,7 @@ internal class ChildJobOrchestrator<T>(IJobExecutorRegistry jobExecutorRegistry,
 
         using var scope = _serviceScopeFactory.CreateScope();
 
-        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
         var jobIdsToActivate = await childJobStorage.GetChildJobIdsForProcessing(childJobCountPerParent, freeSlots);
 
@@ -48,7 +49,7 @@ internal class ChildJobOrchestrator<T>(IJobExecutorRegistry jobExecutorRegistry,
             jobExecutor.Execute<T>(jobId, processingChildQueue);
         }
 
-        await childJobStorage.UpdateChildJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
+        await childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
     }
 
     private static int? GetServerWorkerCount(IMonitoringApi monitoringApi, string serverName)

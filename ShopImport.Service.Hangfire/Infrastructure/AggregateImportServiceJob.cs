@@ -40,8 +40,9 @@ internal class AggregateImportServiceJob<TImportSource, TSourceItem> : ImportSer
         TImportSource importSource,
         IImportSettings importSettings,
         IImportServiceFactory importServiceFactory, 
+        Guid id,
         JobExecuteOptions? jobExecuteOptions = null)
-        : base(null, jobExecuteOptions)
+        : base(id, null, jobExecuteOptions)
     {
         _importServiceJobFactory = importServiceJobFactory;
         _name = name;

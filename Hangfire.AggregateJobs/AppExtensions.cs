@@ -10,7 +10,7 @@ public static class AppExtensions
     public static void ClearChildJobStorage(this IHost host)
     {
         using var scope = host.Services.CreateScope();
-        var childJobDbContext = scope.ServiceProvider.GetRequiredService<ChildJobDbContext>();
+        var childJobDbContext = scope.ServiceProvider.GetRequiredService<AggregateJobDbContext>();
 
         try
         {
@@ -32,5 +32,11 @@ public static class AppExtensions
             Cron.Minutely());
 
         recurringJobManager.AddOrUpdate<IdleJobChecker>(IdleJobChecker.Task, x => x.Dispatch(null), Cron.Minutely());
+
+
+        //todo
+        using var scope = host.Services.CreateScope();
+        var childJobDbContext = scope.ServiceProvider.GetRequiredService<AggregateJobDbContext>();
+        childJobDbContext.Database.EnsureCreated();
     }
 }

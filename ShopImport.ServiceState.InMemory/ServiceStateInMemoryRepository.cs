@@ -54,7 +54,6 @@ public class ServiceStateInMemoryRepository(IMemoryCache cache) : IServiceStateR
     {
         _isConnected = success;
 
-        // Safe event invocation: capture and iterate to isolate handler failures
         var handlers = ConnectedAsync;
         if (handlers == null)
             return;

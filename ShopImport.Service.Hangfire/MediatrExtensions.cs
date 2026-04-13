@@ -97,6 +97,6 @@ public static class MediatrExtensions
     public static void UseImportServiceChildJobOrchestrator(this IHost host, AggregateServerSettings aggregateServerSettings)
     {
         host.UseChildJobOrchestrator<IHagfireServiceJobManager>(aggregateServerSettings);
-        host.ClearChildJobStorage();
+        //host.ClearChildJobStorage();
     }    
 }

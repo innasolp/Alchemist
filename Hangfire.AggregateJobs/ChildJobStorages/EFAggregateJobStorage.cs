@@ -2,30 +2,24 @@
 
 namespace Hangfire.AggregateJobs.ChildJobStorages;
 
-internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
+internal class EFAggregateJobStorage(AggregateJobDbContext dbContext) : IAggregateJobStorage
 {
-    private readonly ChildJobDbContext _dbContext = dbContext;
+    private readonly AggregateJobDbContext _dbContext = dbContext;
 
-    public bool ParentJobExists(string jobId)
+    public bool JobExists(string jobId)
     {
-        return _dbContext.ParentJobEntries.Any(x=>x.JobId ==  jobId);
+        return _dbContext.JobEntries.Any(x=>x.JobId ==  jobId);
     }
 
-    public async Task CreateChildJobEntryAsync(ChildJobEntry childJobEntry)
+    public async Task CreateJobEntryAsync(JobEntry childJobEntry)
     {
         await _dbContext.AddAsync(childJobEntry);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task CreateParentJobEntryAsync(ParentJobEntry parentJobEntry)
+    public async Task DeleteJobAsync(string jobId)
     {
-        await _dbContext.AddAsync(parentJobEntry);
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task DeleteParentJobAsync(string jobId)
-    {
-        await _dbContext.ParentJobEntries.Where(x => x.JobId == jobId).ExecuteDeleteAsync();
+        await _dbContext.JobEntries.Where(x => x.JobId == jobId).ExecuteDeleteAsync();
         await _dbContext.SaveChangesAsync();
     }
 
@@ -41,8 +35,8 @@ internal class EFChildJobStorage(ChildJobDbContext dbContext) : IChildJobStorage
     SELECT 
         parent_job_id, 
         COUNT(*) as active_count
-    FROM child_job_entry
-    WHERE status = {childstatusExecuting}
+    FROM job_entry
+    WHERE status = {childstatusExecuting} and parent_job_id is not null
     GROUP BY parent_job_id
 ),
 active_parents AS (
@@ -50,9 +44,9 @@ active_parents AS (
         p.job_id,
         p.created_at as parent_created_at,
         COALESCE(r.active_count, 0) as current_active
-    FROM parent_job_entry p
+    FROM job_entry p
     LEFT JOIN running_counts r ON p.job_id = r.parent_job_id
-    WHERE p.status IN ({parentstatusExecuting}, {parentstatusEnqueued})
+    WHERE p.parent_job_id is null and p.status IN ({parentstatusExecuting}, {parentstatusEnqueued})
 ),
 ranked_jobs AS (
     SELECT 
@@ -64,7 +58,7 @@ ranked_jobs AS (
             PARTITION BY c.parent_job_id 
             ORDER BY c.created_at ASC
         ) as queue_pos
-    FROM child_job_entry c
+    FROM job_entry c
     INNER JOIN active_parents ap ON c.parent_job_id = ap.job_id
     WHERE c.status = {childstatusEnqueued}
 )
@@ -92,7 +86,7 @@ ORDER BY
     parent_created_at ASC
 LIMIT {freeSlots}";
 
-        return await _dbContext.ChildJobEntries
+        return await _dbContext.JobEntries
                 .FromSqlRaw(sql)
                 .Select(j => j.JobId)
             .AsNoTracking()
@@ -101,40 +95,31 @@ LIMIT {freeSlots}";
 
     public string? GetParentJobId(string jobId)
     {
-       var entry = _dbContext.ChildJobEntries.FirstOrDefault(c=>c.JobId ==  jobId);
+       var entry = _dbContext.JobEntries.FirstOrDefault(c=>c.JobId ==  jobId);
         return entry?.ParentJobId;
     }
 
-    public async Task UpdateChildJobsStateAsync(IEnumerable<string> jobIds, JobStatus state)
+    public async Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state)
     {
-        await _dbContext.ChildJobEntries
+        await _dbContext.JobEntries
            .Where(j => jobIds.Contains(j.JobId))
            .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state));
 
         await _dbContext.SaveChangesAsync();
     }
 
-    public void UpdateChildJobState(string jobId, JobStatus state)
+    public void UpdateJobState(string jobId, JobStatus state, DateTime updateAt)
     {
-        _dbContext.ChildJobEntries
-           .Where(j => j.JobId == jobId)
-           .ExecuteUpdate(s => s.SetProperty(b => b.Status, state));
-        
-        _dbContext.SaveChanges();
-    }
-
-    public void UpdateParentJobState(string jobId, JobStatus state, DateTime updateAt)
-    {
-        _dbContext.ParentJobEntries
+        _dbContext.JobEntries
            .Where(j => j.JobId == jobId)
            .ExecuteUpdate(s => s.SetProperty(b => b.Status, state).SetProperty(b=>b.UpdatedAt, updateAt));
 
         _dbContext.SaveChanges();
     }
 
-    public async Task UpdateParentJobStateAsync(string jobId, JobStatus state, DateTime updateAt)
+    public async Task UpdateJobStateAsync(string jobId, JobStatus state, DateTime updateAt)
     {
-        await _dbContext.ParentJobEntries
+        await _dbContext.JobEntries
            .Where(j => j.JobId == jobId)
            .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state).SetProperty(b => b.UpdatedAt, updateAt));
 
@@ -143,25 +128,11 @@ LIMIT {freeSlots}";
 
     public async Task UpdateParentJobIdAsync(IEnumerable<string> jobIds, string parentJobId)
     {
-        await _dbContext.ChildJobEntries
+        await _dbContext.JobEntries
            .Where(j => jobIds.Contains(j.JobId))
            .ExecuteUpdateAsync(s => s.SetProperty(b => b.ParentJobId, parentJobId));
 
         await _dbContext.SaveChangesAsync();
-    }
-
-    public Task<ParentJobEntry?> GetParentJobAsync(string jobId)
-    {
-        return _dbContext.ParentJobEntries.Where(x => x.JobId == jobId).FirstOrDefaultAsync();
-    }
-
-    public void UpdateParentJobDate(string jobId, DateTime updateAt)
-    {
-        _dbContext.ParentJobEntries
-           .Where(j => j.JobId == jobId)
-           .ExecuteUpdate(s => s.SetProperty(b => b.UpdatedAt, updateAt));
-
-        _dbContext.SaveChanges();
     }
 
     public async Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings)
@@ -172,15 +143,20 @@ LIMIT {freeSlots}";
 
     public async Task<IEnumerable<string>> GetIdleParentJobsIds(DateTime currentDate, CancellationToken cancellationToken = default)
     {
-        var query = from parent in _dbContext.ParentJobEntries
+        var query = from parent in _dbContext.JobEntries
                     join settings in _dbContext.ParentJobIdleSettings on parent.JobId equals settings.JobId
                     where parent.Status == JobStatus.Processing
                     where parent.UpdatedAt < currentDate.AddSeconds(-settings.IdleTimeInSeconds)
-                    where !_dbContext.ChildJobEntries.Any(c =>
+                    where !_dbContext.JobEntries.Any(c =>
                         c.ParentJobId == parent.JobId &&
                         (c.Status == JobStatus.Enqueued || c.Status == JobStatus.Processing))
                     select parent.JobId;
 
         return await query.ToListAsync(cancellationToken);
+    }
+
+    public Task<JobEntry?> GetJobAsync(string jobId)
+    {
+        return _dbContext.JobEntries.Where(x => x.JobId == jobId).FirstOrDefaultAsync();
     }
 }

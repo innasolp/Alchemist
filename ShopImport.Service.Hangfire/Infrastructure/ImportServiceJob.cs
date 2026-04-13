@@ -3,11 +3,11 @@ using Import.Interfaces;
 
 namespace ShopImport.Service.Hangfire.Infrastructure;
 
-internal abstract class ImportServiceJob(Guid? parentId = null, JobExecuteOptions? jobExecuteOptions = null) : IImportServiceJob
+internal abstract class ImportServiceJob(Guid id, Guid? parentId = null, JobExecuteOptions? jobExecuteOptions = null) : IImportServiceJob
 {
     public abstract IImportService ImportService { get; }
 
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; } = id;
 
     public string? JobId { get; set; }
 
