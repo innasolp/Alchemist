@@ -19,7 +19,7 @@ internal sealed class StartServiceCommandHandler(IServiceManager serviceReposito
 
             try
             {
-                await _publisher.Publish(new ServiceStartedEvent(eventArgs.Connected, new ServiceMessage(request.Guid, service.Name)), eventArgs.CancellationToken);
+                await PublishConnectedEvent(request.Guid, service, eventArgs.Connected, eventArgs.CancellationToken);
             }
             finally
             {
@@ -27,20 +27,36 @@ internal sealed class StartServiceCommandHandler(IServiceManager serviceReposito
             }
         }
 
-        var (service, startTask) = _serviceRepository.StartServiceTask(request.Guid, cancellationToken);
+        var (connecting, service, startTask) = _serviceRepository.StartService(request.Guid, cancellationToken);
 
-        service.ConnectedAsync += serviceConnectedAsync;
-
-        await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
-
-        try
+        if (!service.Connected)
         {
-            await startTask;
+            service.ConnectedAsync += serviceConnectedAsync;
+
+            await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
+
+            if(!connecting && startTask != null)
+                try
+                {
+                    await startTask;
+                }
+                catch
+                {
+                    service.ConnectedAsync -= serviceConnectedAsync;
+                    throw;
+                }
         }
-        catch
+        else
         {
-            service.ConnectedAsync -= serviceConnectedAsync;
-            throw;
-        }
+            await PublishConnectedEvent(request.Guid, service, true, cancellationToken);
+
+            if(!connecting && startTask != null)
+                 await startTask;
+        }        
+    }
+
+    private Task PublishConnectedEvent(Guid id, IImportService service, bool connected, CancellationToken cancellationToken)
+    {
+        return _publisher.Publish(new ServiceStartedEvent(connected, new ServiceMessage(id, service.Name)), cancellationToken);
     }
 }

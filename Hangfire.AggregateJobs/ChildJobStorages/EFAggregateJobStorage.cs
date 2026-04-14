@@ -1,15 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Immutable;
 
 namespace Hangfire.AggregateJobs.ChildJobStorages;
 
 internal class EFAggregateJobStorage(AggregateJobDbContext dbContext) : IAggregateJobStorage
 {
     private readonly AggregateJobDbContext _dbContext = dbContext;
-
-    public bool JobExists(string jobId)
-    {
-        return _dbContext.JobEntries.Any(x=>x.JobId ==  jobId);
-    }
 
     public async Task CreateJobEntryAsync(JobEntry childJobEntry)
     {
@@ -93,12 +89,6 @@ LIMIT {freeSlots}";
             .ToListAsync();
     }
 
-    public string? GetParentJobId(string jobId)
-    {
-       var entry = _dbContext.JobEntries.FirstOrDefault(c=>c.JobId ==  jobId);
-        return entry?.ParentJobId;
-    }
-
     public async Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state)
     {
         await _dbContext.JobEntries
@@ -141,7 +131,7 @@ LIMIT {freeSlots}";
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<string>> GetIdleParentJobsIds(DateTime currentDate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<string>> GetIdleParentJobsIdsAsync(DateTime currentDate, CancellationToken cancellationToken = default)
     {
         var query = from parent in _dbContext.JobEntries
                     join settings in _dbContext.ParentJobIdleSettings on parent.JobId equals settings.JobId
@@ -155,8 +145,25 @@ LIMIT {freeSlots}";
         return await query.ToListAsync(cancellationToken);
     }
 
-    public Task<JobEntry?> GetJobAsync(string jobId)
+    public Task<JobEntry?> GetJobByExecutionIdAsync(string executionId)
     {
-        return _dbContext.JobEntries.Where(x => x.JobId == jobId).FirstOrDefaultAsync();
+        return _dbContext.JobEntries.Where(x => x.ExecutionId == executionId).FirstOrDefaultAsync();
+    }
+
+    public Task<bool> JobExecutionExistsAsync(string executionId)
+    {
+        return _dbContext.JobEntries.AnyAsync(x => x.ExecutionId == executionId);
+    }
+
+    public async Task<IEnumerable<string>> GetJobIdsByExecutionIdsAsync(IEnumerable<string> executionIds)
+    {
+        return await _dbContext.JobEntries
+           .Where(j => executionIds.Contains(j.ExecutionId))
+           .Select(j=>j.JobId).ToListAsync();
+    }
+
+    public JobEntry? GetJobByExecutionId(string executionId)
+    {
+        return _dbContext.JobEntries.Where(x => x.ExecutionId == executionId).FirstOrDefault();
     }
 }

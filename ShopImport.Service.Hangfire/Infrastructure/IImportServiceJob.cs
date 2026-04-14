@@ -11,8 +11,6 @@ internal interface IImportServiceJob
 
     Guid Id { get; }
 
-    string? JobId { get; set; }
-
     Guid? ParentId { get; }
 
     JobExecuteOptions? JobExecuteOptions { get; }

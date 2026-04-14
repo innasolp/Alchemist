@@ -21,5 +21,13 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
         childJobStorage.UpdateJobState(jobId, newJobState, DateTime.Now);
     }
 
-    public void OnPerforming(PerformingContext filterContext) { }
+    public void OnPerforming(PerformingContext filterContext)
+    {
+        var jobId = filterContext.BackgroundJob.Id;
+
+        using var scope = _scopeFactory.CreateScope();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
+
+        childJobStorage.UpdateJobState(jobId, JobStatus.Processing, DateTime.Now);
+    }
  }

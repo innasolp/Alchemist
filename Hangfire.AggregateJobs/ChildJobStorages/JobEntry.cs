@@ -9,6 +9,8 @@ public class JobEntry
 
     public string? ParentJobId { get; set; }
 
+    public string? ExecutionId { get; set; }
+
     public JobStatus Status { get; set; } = JobStatus.Enqueued;
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;

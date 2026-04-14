@@ -31,6 +31,7 @@ internal class AggregateJobDbContext : DbContext
 
             entity.Property(e => e.JobId).HasColumnName("job_id").HasMaxLength(1024);
             entity.Property(e => e.ParentJobId).HasMaxLength(1024).HasColumnName("parent_job_id");
+            entity.Property(e => e.ExecutionId).HasMaxLength(1024).HasColumnName("execution_id");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").IsRequired();
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").IsRequired();

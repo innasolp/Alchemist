@@ -21,7 +21,7 @@ internal class IdleJobChecker(IServiceScopeFactory serviceScopeFactory, IBackgro
 
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        var idleJobIds = await childJobStorage.GetIdleParentJobsIds(DateTime.Now, jobCancellationToken?.ShutdownToken ?? default);
+        var idleJobIds = await childJobStorage.GetIdleParentJobsIdsAsync(DateTime.Now, jobCancellationToken?.ShutdownToken ?? default);
 
         foreach (var idleJobId in idleJobIds)
         {

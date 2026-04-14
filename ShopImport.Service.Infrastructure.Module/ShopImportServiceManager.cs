@@ -79,7 +79,7 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
         await Task.WhenAll(tasks);
     }
 
-    public (IImportService service, Task startTask) StartServiceTask(Guid guid, CancellationToken cancellationToken)
+    public (bool connecting, IImportService service, Task startTask) StartService(Guid guid, CancellationToken cancellationToken)
     {
         if (!_services.TryGetValue(guid, out var serviceItem))
             throw new InvalidOperationException($"Service with id {guid} not found.");
@@ -88,7 +88,7 @@ internal class ShopImportServiceManager(IEnumerable<IImportServiceFactory> shopS
 
         var startTask = StartAndDisposeAsync(serviceItem.Service, linkedCts);
 
-        return (serviceItem.Service, startTask);
+        return (false, serviceItem.Service, startTask);
     }
 
     static async Task StartAndDisposeAsync(IImportService service, CancellationTokenSource linkedCts)

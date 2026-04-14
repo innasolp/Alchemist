@@ -25,19 +25,17 @@ public interface IJobExecuteManager
         CancellationToken cancellationToken = default)
         where TJob : class?;
 
-    Task Execute<T, TJob>(string coreJobId,
+    Task Execute<T, TJob>(string coreExecutionId,
         IEnumerable<string> childJobIds,
         AggregateServerSettings aggregateServerSettings,
         JobExecuteOptions? jobExecuteOptions,
         CancellationToken cancellationToken = default);
 
-    Task StopWithFailedState(string coreJobId, 
+    Task StopWithFailedState(string coreExecutionId, 
         IEnumerable<string> childJobIds, 
         Exception exception,
         AggregateServerSettings? aggregateServerSettings = null, 
         CancellationToken cancellationToken = default);
 
-    void DeleteChildJob(string jobId);
-
-    void DeleteParentJob(string jobId);
+    Task Delete(string executionId);
 }

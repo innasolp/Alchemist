@@ -9,8 +9,6 @@ internal abstract class ImportServiceJob(Guid id, Guid? parentId = null, JobExec
 
     public Guid Id { get; } = id;
 
-    public string? JobId { get; set; }
-
     public Guid? ParentId { get; } = parentId;
 
     public abstract int SourceId { get; }
