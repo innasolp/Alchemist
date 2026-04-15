@@ -1,5 +1,4 @@
-﻿using Hangfire.AggregateJobs.ChildJobStorages;
-using Hangfire.AggregateJobs.Filters;
+﻿using Hangfire.AggregateJobs.Filters;
 using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,8 +47,6 @@ internal class ChildJobOrchestrator<T>(IJobExecutorRegistry jobExecutorRegistry,
             var jobExecutor = _jobExecutorRegistry.Get(isChild: true);
             jobExecutor.Execute<T>(jobId, processingChildQueue);
         }
-
-        await childJobStorage.UpdateJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
     }
 
     private static int? GetServerWorkerCount(IMonitoringApi monitoringApi, string serverName)

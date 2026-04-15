@@ -6,8 +6,6 @@ public interface IAggregateJobStorage
 {
     Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots, CancellationToken cancellationToken = default);
 
-    Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state, CancellationToken cancellationToken = default);
-
     Task CreateJobEntryAsync(JobEntry childJobEntry, CancellationToken cancellationToken = default);
 
     Task DeleteJobEntryAsync(string jobId, CancellationToken cancellationToken = default);  

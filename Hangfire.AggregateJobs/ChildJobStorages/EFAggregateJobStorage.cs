@@ -90,15 +90,6 @@ LIMIT {freeSlots}";
             .ToListAsync(cancellationToken);
     }
 
-    public async Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state, CancellationToken cancellationToken = default)
-    {
-        await _dbContext.JobEntries
-           .Where(j => jobIds.Contains(j.JobId))
-           .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state), cancellationToken);
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
     public void UpdateJobEntryState(string jobId, JobStatus state, DateTime updateAt)
     {
         _dbContext.JobEntries
