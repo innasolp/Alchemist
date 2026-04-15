@@ -31,7 +31,7 @@ public static  class AlchemistContextPostgresAppExtensions
         TimeSpan wait = TimeSpan.FromSeconds(waitSeconds);
         TimeSpan retry = TimeSpan.FromSeconds(retrySeconds);
 
-        var redisMultiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
+        using var redisMultiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
 
         var db = redisMultiplexer.GetDatabase();
 

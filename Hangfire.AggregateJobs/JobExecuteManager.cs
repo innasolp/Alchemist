@@ -200,10 +200,13 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         using var connection = JobStorage.Current.GetConnection();
         var jobData = connection.GetJobData(jobId);
 
-        return jobData.State == EnqueuedState.StateName ? JobStatus.Enqueued :
-                     jobData.State == ProcessingState.StateName ? JobStatus.Processing:
-                     jobData.State == SucceededState.StateName ? JobStatus.Completed
-                                                  : JobStatus.Deleted;
+        var state = jobData?.State;
+
+        return state == EnqueuedState.StateName
+            ? JobStatus.Enqueued
+            : state == ProcessingState.StateName
+            ? JobStatus.Processing
+            : state == SucceededState.StateName ? JobStatus.Completed : JobStatus.Deleted;
     }
 
     public async Task StopWithFailedState(string coreExecutionId, IEnumerable<string> childExecutionIds, 
