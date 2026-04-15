@@ -1,7 +1,7 @@
-﻿using Alchemist.Import.Settings;
-using Alchemist.Import.Settings.Extensions;
+﻿using Alchemist.Import.Settings.Extensions;
 using Import.Factory.Interfaces;
 using Import.Interfaces;
+using Import.LoaderSettings;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Headers;
@@ -28,29 +28,31 @@ public class BrowserServiceClientFactory : ILoaderServiceFactory
 
     public ILoaderService Create(string name, IImportSettings importSettings)
     {
-        if(importSettings is not IShopImportSettings shopImportSettings)
+        if (importSettings is not IHostSettings hostSettings)
             throw new InvalidDataException($"invalid settings type {importSettings.GetType().Name}.");
 
-        var webLoaderSettings = shopImportSettings.GetWebLoader<IServiceSettings>() ??
+        if (string.IsNullOrWhiteSpace(hostSettings.Host) || !Uri.TryCreate(hostSettings.Host, UriKind.Absolute, out _))
+            throw new InvalidDataException($"Invalid host value for settings {name}.");
+
+        var webLoaderSettings = importSettings.GetWebLoader<IServiceSettings>() ??
             throw new InvalidDataException($"Webloader in settings {name} not exists.");
        
-        var requestHeadersService = shopImportSettings.GetRequestHeaders<IServiceSettings>();
+        var requestHeadersService = importSettings.GetRequestHeaders<IServiceSettings>();
         var requestHeaders = requestHeadersService?.GetServiceValue<RequestHeaders>();
 
-        var hostRequestOptions = shopImportSettings.GetService("HostRequestOptions")?.GetServiceValue<RequestOptions>();
+        var hostRequestOptions = importSettings.GetService("HostRequestOptions")?.GetServiceValue<RequestOptions>();
 
-        var rateLimiterOptions = shopImportSettings.GetService("RateLimiterOptions")?.GetServiceValue<RateLimiterOptions>();
-        var webLoader = _webLoaderHostFactory.GetRateLimiterWebLoader(webLoaderSettings, shopImportSettings.ShopUrl, rateLimiterOptions);
-
+        var rateLimiterOptions = importSettings.GetService("RateLimiterOptions")?.GetServiceValue<RateLimiterOptions>();
+        var webLoader = _webLoaderHostFactory.GetRateLimiterWebLoader(webLoaderSettings, hostSettings.Host, rateLimiterOptions);
         
         return new BrowserServiceClient(
             _httpClient,
             name,
-            shopImportSettings.ShopUrl,
+            hostSettings.Host,
             webLoader,
             hostRequestOptions,
-            shopImportSettings.GetBrowserDataLoader<IServiceSettings>()?.ImplementationTypeName,
-            shopImportSettings.GetBrowserLauncher<IServiceSettings>()?.ImplementationTypeName,
+            importSettings.GetBrowserDataLoader<IServiceSettings>()?.ImplementationTypeName,
+            importSettings.GetBrowserLauncher<IServiceSettings>()?.ImplementationTypeName,
             requestHeaders);
     }
 }

@@ -3,12 +3,13 @@ using System.Collections;
 using System.Text.Json.Serialization;
 using Alchemist.Import.Settings;
 using ShopSettings.Interfaces;
+using Import.LoaderSettings;
 
 namespace Alchemist.Product.Import.Background.Settings;
 
-public abstract class ShopImportSettings : IShopImportSettings, IShopSettings
+public abstract class ShopImportSettings : IShopImportSettings, IShopSettings, IHostSettings
 {
-    public bool? Perfomance { get; set; }
+    public bool IsAggregate { get; set; } = false;
 
     [JsonIgnore]
     public int Id { get; set; }
@@ -35,4 +36,5 @@ public abstract class ShopImportSettings : IShopImportSettings, IShopSettings
     bool? IShopSettings.IsActual { get ; set; }
     string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     ShopSettingType IShopSettings.Type { get => ShopSettingType; set => throw new InvalidOperationException(); }
+    string IHostSettings.Host { get => ShopUrl; set => ShopUrl = value; }
 }

@@ -2,9 +2,9 @@
 using Grpc.Net.Client;
 using Alchemist.Product.GrpcService;
 using Grpc.Core.Interceptors;
-using Grpc.Client.Interceptors;
+using GrpcExtensions.Client.Interceptors;
 using Alchemist.Product.Interfaces;
-using Grpc.Message.Extensions;
+using GrpcExtensions.Message;
 using Mapster;
 
 namespace Alchemist.Product.GrpcServiceClient;
@@ -17,7 +17,7 @@ public class AlchemyGrpcServiceClient : IProductDataService
 
     private readonly IEnumerable<Interceptor> _interceptors;
 
-    public AlchemyGrpcServiceClient(GrpcChannel channel) : this(channel, Array.Empty<Interceptor>())
+    public AlchemyGrpcServiceClient(GrpcChannel channel) : this(channel, [])
     {
     }
 

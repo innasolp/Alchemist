@@ -1,13 +1,12 @@
-﻿using Import.Service.Infrastructure;
-using MediatR;
+﻿using MediatR;
 
-namespace Import.Service.Commands.Handlers;
+namespace Import.Service.Infrastructure.Handlers;
 
-internal sealed class StopAllServicesCommandHandler(IServiceRepository serviceRepository,
+internal sealed class StopAllServicesCommandHandler(IServiceManager serviceRepository,
     IPublisher publisher) :
     IRequestHandler<StopAllServicesCommand>
 {
-    private readonly IServiceRepository _serviceRepository = serviceRepository;
+    private readonly IServiceManager _serviceRepository = serviceRepository;
 
     private readonly IPublisher _publisher = publisher;
 

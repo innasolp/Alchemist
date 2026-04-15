@@ -1,14 +1,13 @@
 ﻿using Import.Interfaces;
-using Import.Service.Infrastructure;
 using MediatR;
 
-namespace Import.Service.Commands.Handlers;
+namespace Import.Service.Infrastructure.Handlers;
 
-internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepository,
+internal sealed class StartServiceCommandHandler(IServiceManager serviceRepository,
     IPublisher publisher)
     : IRequestHandler<StartServiceCommand>
 {
-    private readonly IServiceRepository _serviceRepository = serviceRepository;
+    private readonly IServiceManager _serviceRepository = serviceRepository;
 
     private readonly IPublisher _publisher = publisher;
 
@@ -20,7 +19,7 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
 
             try
             {
-                await _publisher.Publish(new ServiceStartedEvent(eventArgs.Success, new ServiceMessage(request.Guid, service.Name)), eventArgs.CancellationToken);
+                await PublishConnectedEvent(request.Guid, service, eventArgs.Connected, eventArgs.CancellationToken);
             }
             finally
             {
@@ -28,21 +27,36 @@ internal sealed class StartServiceCommandHandler(IServiceRepository serviceRepos
             }
         }
 
-        IImportService? service = null;
+        var (connecting, service, startTask) = _serviceRepository.StartService(request.Guid, cancellationToken);
 
-        try
+        if (!service.Connected)
         {
-            (service, var startTask) = _serviceRepository.StartServiceTask(request.Guid, cancellationToken);
-            
             service.ConnectedAsync += serviceConnectedAsync;
 
-            await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);            
-            
-            await startTask;
+            await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
+
+            if(!connecting && startTask != null)
+                try
+                {
+                    await startTask;
+                }
+                catch
+                {
+                    service.ConnectedAsync -= serviceConnectedAsync;
+                    throw;
+                }
         }
-        finally
+        else
         {
-            if (service != null) service.ConnectedAsync -= serviceConnectedAsync;
-        }
+            await PublishConnectedEvent(request.Guid, service, true, cancellationToken);
+
+            if(!connecting && startTask != null)
+                 await startTask;
+        }        
+    }
+
+    private Task PublishConnectedEvent(Guid id, IImportService service, bool connected, CancellationToken cancellationToken)
+    {
+        return _publisher.Publish(new ServiceStartedEvent(connected, new ServiceMessage(id, service.Name)), cancellationToken);
     }
 }

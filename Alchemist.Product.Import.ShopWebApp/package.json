@@ -5,7 +5,8 @@
     "del": "^8.0.1",
     "gulp": "^5.0.1",
     "jquery-validation-unobtrusive": "^4.0.0",
-    "alchemist_common" : "1.0.0"
+    "alchemist_common" : "1.0.0",
+    "alchemist_css_common" : "1.0.0"
   },
   "description": "shop js methods",
   "main": "app.js",
@@ -15,15 +16,14 @@
     },
     "./shop.app.min": {
       "import": "./wwwroot/js/shop.app.min.js"
+    },
+    "./shop.app.start": {
+      "import": "./wwwroot/js/start.js"
     }
   },
-  "devDependencies": { "eslint": "^9.35.0" },
+  "devDependencies": { "eslint": "^9.36.0" },
     "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/github.com/innasolp.git"
     },
     "keywords": [],
     "author": "innasolp",

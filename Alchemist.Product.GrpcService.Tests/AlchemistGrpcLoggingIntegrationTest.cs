@@ -1,24 +1,43 @@
 ﻿using Alchemist.Product.GrpcService.Tests.Infrastructure;
+using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Grpc.Core;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Alchemist.Product.GrpcService.Tests;
 
-public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLoggingWebAppFactory, GrpcServiceProgramm>, IDisposable
+public class AlchemistGrpcLoggingConfigurationWebAppFactory : AlchemistGrpcConfigurationPostgresWebAppFactory, ILoggedContext
 {
-    record TestLogMessage (LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
+
+    public AlchemistGrpcLoggingConfigurationWebAppFactory() : base("test_ci_db_grpc_logging", 8072, 8073)
+    {
+    }
+
+    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
+    {
+        base.ConfigureWebHostBuilderContext(context, services);
+
+        FixtureLoggingContext.ConfigureServices(services);
+    }
+}
+
+public class AlchemistGrpcLoggingIntegrationTest : LoggedContextTestFixture<AlchemistGrpcLoggingConfigurationWebAppFactory, GrpcServiceProgramm>, IDisposable
+{
+    record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
     private readonly AlchemyGrpcService.AlchemyGrpcServiceClient _client;
-    
+
     private readonly List<TestLogMessage> _messages = [];
 
-    public AlchemistGrpcLoggingIntegrationTest(AlchemistGrpcLoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    public AlchemistGrpcLoggingIntegrationTest(AlchemistGrpcLoggingConfigurationWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
         : base(webAppFactory, outputHelper)
     {
-        WebAppFactory.DataBase = "test_ci_db_grpc_logging";
-
         var grpcChannel = webAppFactory.CreateChannel("http://localhost");
         _client = new AlchemyGrpcService.AlchemyGrpcServiceClient(grpcChannel);
 
@@ -36,15 +55,25 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
         var brandName = "Elizavecca";
         _messages.Clear();
 
-        var response = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName });
+        try
+        {
+            var response = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = brandName });
 
-        Assert.NotNull(response);
-        Assert.Equal(brandName, response.Name);
+            Assert.NotNull(response);
+            Assert.Equal(brandName, response.Name);
 
-        Assert.Equal(1, _messages.Count(m=>
-            m.logLevel == LogLevel.Information
-            && m.message.Contains("HttpStatusCode: 200")
-            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+            Assert.Equal(1, _messages.Count(m =>
+                m.logLevel == LogLevel.Information
+                && m.message.Contains("HttpStatusCode: 200")
+                && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
@@ -52,31 +81,51 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
     {
         _messages.Clear();
 
-        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+        try
         {
-            await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "" });
-        });       
+            var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+            {
+                await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "" });
+            });
 
-        Assert.Equal(StatusCode.InvalidArgument, rpcException.Status.StatusCode);
-        
-        Assert.Equal(1, _messages.Count(m=> m.logLevel == LogLevel.Error
-            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+            Assert.Equal(StatusCode.InvalidArgument, rpcException.Status.StatusCode);
+
+            Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Error
+                && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
     public async Task FindBrandByNameLogErrorNotFoundWhenNameNotExists()
-    {        
+    {
         _messages.Clear();
 
-        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+        try
         {
-            await _client.FindBrandByNameAsync(new FindByNameRequest { Name = Guid.NewGuid().ToString() });
-        });
+            var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+            {
+                await _client.FindBrandByNameAsync(new FindByNameRequest { Name = Guid.NewGuid().ToString() });
+            });
 
-        Assert.Equal(StatusCode.NotFound, rpcException.Status.StatusCode);
+            Assert.Equal(StatusCode.NotFound, rpcException.Status.StatusCode);
 
-        Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Error
-            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+            Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Error
+                && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
@@ -84,17 +133,27 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
     {
         _messages.Clear();
 
-        await _client.CreateShopProductAsync(new CreateShopProductRequest { Shopid=1, Productid = 1, Itemurl = Guid.NewGuid().ToString() });
-
-        var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+        try
         {
             await _client.CreateShopProductAsync(new CreateShopProductRequest { Shopid = 1, Productid = 1, Itemurl = Guid.NewGuid().ToString() });
-        });
 
-        Assert.Equal(StatusCode.Internal, rpcException.Status.StatusCode);
+            var rpcException = await Assert.ThrowsAsync<RpcException>(async () =>
+            {
+                await _client.CreateShopProductAsync(new CreateShopProductRequest { Shopid = 1, Productid = 1, Itemurl = Guid.NewGuid().ToString() });
+            });
 
-        Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Error
-            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.CreateShopProduct))));
+            Assert.Equal(StatusCode.Internal, rpcException.Status.StatusCode);
+
+            Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Error
+                && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.CreateShopProduct))));
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
     }
 
     [Fact]
@@ -102,14 +161,19 @@ public class AlchemistGrpcLoggingIntegrationTest : TestFixture<AlchemistGrpcLogg
     {
         _messages.Clear();
 
-        var result = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "infinite" });       
+        try
+        {
+            var result = await _client.FindBrandByNameAsync(new FindByNameRequest { Name = "infinite" });
 
-        Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Warning
-            && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
-    }
+            Assert.Equal(1, _messages.Count(m => m.logLevel == LogLevel.Warning
+                && m.message.Contains(nameof(AlchemyGrpcService.AlchemyGrpcServiceClient.FindBrandByName))));
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
 
-    public void Dispose()
-    {
-        WebAppFactory.FixtureLoggingContext.LoggedMessage -= Log;        
+            throw;
+        }
     }
 }

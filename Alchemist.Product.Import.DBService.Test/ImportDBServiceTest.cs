@@ -18,85 +18,142 @@ using Mediator.Infrastructure;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
-public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
-    : TestFixture<ImportDBServiceWebAppFactory, ImportDbServiceProgram>(webAppFactory, outputHelper)
+public class ImportDBServiceTest(ITestOutputHelper outputHelper) : LoggedContextTest(outputHelper)
 {
-
     private readonly Mock<IMediator> _mediator = new();
-        
-    [Fact]
-    public async Task HelloResponseWhenStartingSuccess()
+
+    //public  ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    //    : base(webAppFactory, outputHelper)
+    //{
+    //    WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
+    //}
+
+    private async Task<ImportDBServiceWebAppFactory> CreateWebAppFactoryAsync(string database, int[] ports)
     {
-        WebAppFactory.StartGrpc();
-        var httpClient = WebAppFactory.CreateClient();
+        if (ports.Length < 6)
+            throw new Exception($"ports in range must be greator equals 6");
+        var webAppFactory = new ImportDBServiceWebAppFactory(ports[0], ports[1],database,  ports[2], ports[3], ports[4], ports[5]);
 
-        var response = await httpClient.GetAsync("/");
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        await webAppFactory.InitializeAsync();
 
-        var hello = await response.Content.ReadAsStringAsync();
-        Assert.Equal("Hello ImportDBService!", hello);
+        webAppFactory.FixtureLoggingContext.LoggedMessage += Log;
+
+        return webAppFactory;
     }
 
+
     [Fact]
-    public async Task WaitForImportCategoryItemReceiveByShopService()
+    public async Task HelloResponseWhenStartingSuccessAsync()
     {
-        void setTestRepository(IServiceCollection services) => services.InterceptImplementation(_mediator.Object);        
+        var WebAppFactory = await CreateWebAppFactoryAsync("test_import_db_hello", [8232, 8233, 8052, 8053, 8072, 8073]);
 
-        WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;        
-
-        var categoryMessage = CreateTestCategoryData();
-
-        var shop = new Data.Shop { Id = 1, Name = categoryMessage.ShopName, Url = categoryMessage.ShopUrl };
-
-        var shopCategoryCreateResetEvent = new AsyncAutoResetEvent();
-        _mediator.Setup(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r => r.Name == categoryMessage.ShopName), It.IsAny<CancellationToken>()))
-            .Returns((FindByNameRequest<Data.Shop> req, CancellationToken cancellationToken) =>
-            {
-                return Task.FromResult(shop.Adapt<Data.Shop>());
-            });
-        _mediator.Setup(r => r.Send(It.IsAny<CreateCommand<Data.ShopCategory>>(), It.IsAny<CancellationToken>()))
-            .Returns((CreateCommand<Data.ShopCategory> req, CancellationToken cancellationToken) =>
-            {
-                shopCategoryCreateResetEvent.Set();
-                return Task.FromResult(new Data.ShopCategory
-                {
-                    Id = 2,
-                    ShopId = shop.Id,
-                    ItemId = categoryMessage.ShopCategory.ItemId,
-                    Category = categoryMessage.ShopCategory.Category
-                });
-            });
-        
-        var messageReceiver = WebAppFactory.Services.GetRequiredService<IMessageReceiver>();
-        var connectionResetEvent = SetAutoResetEventOnConnectionChanged(messageReceiver);
-        if (!messageReceiver.IsConnected)
+        try
         {
-            var connectionWaiting = connectionResetEvent.WaitAsync();
-            await connectionWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
+            await WebAppFactory.InitializeAsync();
+
+            var httpClient = WebAppFactory.CreateClient();
+            var response = await httpClient.GetAsync("/");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var hello = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Hello ImportDBService!", hello);
         }
-
-        var eventName = WebAppFactory.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>();        
-
-        await Task.Delay(5000);
-
-        var testSender = WebAppFactory.CreateTestSender();
-        await testSender.Start();        
-        
-        var shopCreatedWaiting = shopCategoryCreateResetEvent.WaitAsync();
-        await testSender.Send(new ImportShopCategoryCommand(categoryMessage), eventName);
-        await shopCreatedWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
-
-        _mediator.Verify(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r => r.Name == categoryMessage.ShopName), It.IsAny<CancellationToken>())); 
-        _mediator.Verify(r => r.Send(It.Is <GetShopCategoryByShopIdAndItemIdRequest>(r=>r.ShopId == shop.Id && r.ItemId == categoryMessage.ShopCategory.ItemId)
-            ,It.IsAny<CancellationToken>()));
-       
-        WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;
+        catch
+        {
+            await (WebAppFactory as IAsyncLifetime).DisposeAsync();
+            throw;
+        }
     }
 
     [Fact]
-    public async Task WaitForImportProductItemReceiveByGrpcService()
+    public async Task WaitForImportCategoryItemReceiveByShopServiceAsync()
     {
-        void setTestRepository(IServiceCollection services) => services.InterceptImplementation(_mediator.Object);        
+        void setTestRepository(IServiceCollection services) => services.InterceptImplementation(_mediator.Object);
+
+        var WebAppFactory = await CreateWebAppFactoryAsync("test_import_db_category", [8234, 8235, 8054, 8055, 8074, 8075]);
+
+        try
+        {
+            WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;
+
+            await WebAppFactory.InitializeAsync();
+
+            var categoryMessage = CreateTestCategoryData();
+
+            var shop = new Data.Shop { Id = 1, Name = categoryMessage.ShopName, Url = categoryMessage.ShopUrl };
+
+            var shopCategoryCreateResetEvent = new AsyncAutoResetEvent();
+            _mediator.Setup(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r => r.Name == categoryMessage.ShopName), It.IsAny<CancellationToken>()))
+                .Returns((FindByNameRequest<Data.Shop> req, CancellationToken cancellationToken) =>
+                {
+                    return Task.FromResult(shop.Adapt<Data.Shop>());
+                });
+            _mediator.Setup(r => r.Send(It.IsAny<CreateCommand<Data.ShopCategory>>(), It.IsAny<CancellationToken>()))
+                .Returns((CreateCommand<Data.ShopCategory> req, CancellationToken cancellationToken) =>
+                {
+                    shopCategoryCreateResetEvent.Set();
+                    return Task.FromResult(new Data.ShopCategory
+                    {
+                        Id = 2,
+                        ShopId = shop.Id,
+                        ItemId = categoryMessage.ShopCategory.ItemId,
+                        Category = categoryMessage.ShopCategory.Category
+                    });
+                });
+
+            WebAppFactory.CreateClient();
+
+            var messageReceiver = WebAppFactory.Services.GetRequiredService<IMessageReceiver>();
+            var connectionResetEvent = SetAutoResetEventOnConnectionChanged(messageReceiver);
+            if (!messageReceiver.IsConnected)
+            {
+                var connectionWaiting = connectionResetEvent.WaitAsync();
+                await connectionWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
+            }
+
+            var eventName = WebAppFactory.Configuration.GetSection("RabbitMQCategoryEvent").Get<string>();
+
+            await Task.Delay(5000);
+
+            var testSender = WebAppFactory.CreateTestSender();
+            await testSender.Start();
+
+            try
+            {
+
+                var shopCreatedWaiting = shopCategoryCreateResetEvent.WaitAsync();
+                await testSender.Send(new ImportShopCategoryCommand(categoryMessage), eventName);
+                await shopCreatedWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
+
+                _mediator.Verify(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r => r.Name == categoryMessage.ShopName), It.IsAny<CancellationToken>()));
+                _mediator.Verify(r => r.Send(It.Is<GetShopCategoryByShopIdAndItemIdRequest>(r => r.ShopId == shop.Id && r.ItemId == categoryMessage.ShopCategory.ItemId)
+                    , It.IsAny<CancellationToken>()));
+            }
+            catch
+            {
+                OutputErrors();
+                OutputWarnings();
+
+                throw;
+            }
+            finally
+            {
+                WebAppFactory.ShopAPIWebAppFactory.Configure -= setTestRepository;
+            }
+        }
+        catch
+        {
+            await (WebAppFactory as IAsyncLifetime).DisposeAsync();
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task WaitForImportProductItemReceiveByGrpcServiceAsync()
+    {
+        void setTestRepository(IServiceCollection services) => services.InterceptImplementation(_mediator.Object);
+
+        var WebAppFactory = await CreateWebAppFactoryAsync("test_import_db_product", [8236, 8237, 8056, 8057, 8076, 8077]);
 
         WebAppFactory.GrpcWebAppFactory.ConfigureServices += setTestRepository;
         WebAppFactory.ShopAPIWebAppFactory.Configure += setTestRepository;
@@ -118,39 +175,61 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
                 return Task.FromResult(productData.ShopProduct.Adapt<Data.ShopProduct>());
             });
 
-        WebAppFactory.StartGrpc();
-
-        var messageReceiver = WebAppFactory.Services.GetRequiredService<IMessageReceiver>();
-        var connectionResetEvent = SetAutoResetEventOnConnectionChanged(messageReceiver);
-        if (!messageReceiver.IsConnected)
+        try
         {
-            var connectionWaiting = connectionResetEvent.WaitAsync();
-            await connectionWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
+            await WebAppFactory.InitializeAsync();
+
+            WebAppFactory.CreateClient();
+
+            var messageReceiver = WebAppFactory.Services.GetRequiredService<IMessageReceiver>();
+            var connectionResetEvent = SetAutoResetEventOnConnectionChanged(messageReceiver);
+            if (!messageReceiver.IsConnected)
+            {
+                var connectionWaiting = connectionResetEvent.WaitAsync();
+                await connectionWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
+            }
+
+            var eventName = WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>();
+
+            await Task.Delay(2000);
+
+            var testSender = WebAppFactory.CreateTestSender();
+            await testSender.Start();
+
+            await testSender.Send(new ImportBeautyAndHealthProductCommand(productData), eventName);
+
+            try
+            {
+                var productFindWaiting = shopProductFindResetEvent.WaitAsync();
+                await productFindWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
+
+                _mediator.Verify(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r => r.Name == productData.ShopName), It.IsAny<CancellationToken>()));
+                _mediator.Verify(r => r.Send(It.Is<GetShopProductByShopAndItemIdRequest>(r => r.ShopId == shop.Id && r.ItemId == productData.ShopProduct.ItemId)
+                    , It.IsAny<CancellationToken>()));
+            }
+            catch
+            {
+                OutputErrors();
+                OutputWarnings();
+
+                throw;
+            }
+            finally
+            {
+                WebAppFactory.GrpcWebAppFactory.ConfigureServices -= setTestRepository;
+            }
         }
-
-        var eventName = WebAppFactory.Configuration.GetSection("RabbitMQProductEvent").Get<string>();
-
-        await Task.Delay(2000);
-
-        var testSender = WebAppFactory.CreateTestSender();
-        await testSender.Start();
-
-        await testSender.Send(new ImportBeautyAndHealthProductCommand(productData), eventName);
-
-        var productFindWaiting = shopProductFindResetEvent.WaitAsync();
-        await productFindWaiting.WaitAsync(TimeSpan.FromMilliseconds(20000), cancellationToken: default);
-
-        _mediator.Verify(r => r.Send(It.Is<FindByNameRequest<Data.Shop>>(r => r.Name == productData.ShopName), It.IsAny<CancellationToken>())); 
-        _mediator.Verify(r => r.Send(It.Is<GetShopProductByShopAndItemIdRequest>(r => r.ShopId == shop.Id && r.ItemId == productData.ShopProduct.ItemId)
-            , It.IsAny<CancellationToken>()));
-
-        WebAppFactory.GrpcWebAppFactory.ConfigureServices -= setTestRepository;
+        catch
+        {
+            await (WebAppFactory as IAsyncLifetime).DisposeAsync();
+            throw;
+        }
     }
 
     private static AsyncAutoResetEvent SetAutoResetEventOnConnectionChanged(IMessageProcessor messageProcessor)
     {
         var autoResetEvent = new AsyncAutoResetEvent();
-        messageProcessor.ConnectionChanged += async (sender, args) =>
+        messageProcessor.ConnectionStateChanged += async (sender, args) =>
         {
             autoResetEvent.Set();
         };
@@ -177,7 +256,9 @@ public class ImportDBServiceTest(ImportDBServiceWebAppFactory webAppFactory, ITe
             },
 
             ShopName = Guid.NewGuid().ToString(),
-            ShopUrl = Guid.NewGuid().ToString()
+            ShopUrl = Guid.NewGuid().ToString(),
+
+            ProductType = new ProductType { Name = "TestProductType" }
         };
     }
 

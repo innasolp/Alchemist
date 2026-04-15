@@ -9,4 +9,6 @@ public interface IShopCategoryRepository
     Task<List<ShopCategory>> GetAllCategoryChildren(int parentId, CancellationToken cancellationToken = default);
 
     Task<ShopCategory?> GetShopCategoryByShopIdAndItemId(int shopId, int itemId, CancellationToken cancellationToken = default);
+
+    Task<bool?> CheckCategoryForAncestorItem(int id, int ancestorId, CancellationToken cancellationToken = default);
 }

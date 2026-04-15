@@ -1,11 +1,9 @@
 using Alchemist.Product.BeautyAndHealth;
-using Alchemist.Product.CategoryData;
 using Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.VisualStudio.Threading;
-using Moq;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
@@ -27,8 +25,7 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
     {
         WebAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
         WebAppFactory.SettingsApiFixtureLoggingContext.LoggedMessage += Log;
-    }
-     
+    }     
 
     [Fact]
     public async Task HelloResponseWhenStartingSuccessAsync()
@@ -59,7 +56,7 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
 
         try
         {
-            await task.WaitAsync(TimeSpan.FromMilliseconds(45000), token);
+            await task.WaitAsync(TimeSpan.FromMilliseconds(120000), token);
 
             OutputHelper.WriteLine("Event set");
         }

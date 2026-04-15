@@ -7,8 +7,6 @@ namespace Alchemist.Import.Settings.Test.Model;
 
 public abstract class TestShopImportSettings : IShopImportSettings, IShopSettings
 {
-    public bool? Perfomance { get; set; }
-
     [JsonIgnore]
     public int Id { get; set; }
 
@@ -34,4 +32,6 @@ public abstract class TestShopImportSettings : IShopImportSettings, IShopSetting
     bool? IShopSettings.IsActual { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     ShopSettingType IShopSettings.Type { get => Type; set {; } }
+
+    public bool IsAggregate { get ; set; }
 }

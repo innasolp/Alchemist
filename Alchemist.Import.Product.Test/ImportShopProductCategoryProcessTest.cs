@@ -1,14 +1,38 @@
 ﻿using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.ProductService.Test.Infrastructure;
 using Import.Interfaces;
+using Import.Interfaces.Exceptions;
 using Import.Service.Test.Infrastructure;
 using Moq;
+using ShopImport.Product.Service.Test.Infrastructure;
 using Xunit.Abstractions;
 
 namespace Alchemist.Import.ProductService.Test;
 
-public class ImportShopProductCategoryProcessTest : ImportProductsTest
+public class ImportShopProductCategoryProcessTest : ImportProductsTest<TestImportProductService<TestCategory, TestProductItem>>
 {
+    protected override TestImportProductService<TestCategory, TestProductItem> CreateService(string name)
+    {
+        return new TestImportProductService<TestCategory, TestProductItem>(
+            LoggerMock.Object,
+            name,
+             ProductShopModelMock.Object,
+             LoaderMock.Object,
+             ProductItemHandlerMock.Object,
+             1000);
+    }
+
+    protected TestImportProductService<TestCategory, TestProductItem> CreateService(string name, int pageProductCount)
+    {
+        return new TestImportProductService<TestCategory, TestProductItem>(
+            LoggerMock.Object,
+            name,
+             ProductShopModelMock.Object,
+             LoaderMock.Object,
+             ProductItemHandlerMock.Object,
+             pageProductCount);
+    }
+
     public ImportShopProductCategoryProcessTest(ITestOutputHelper outputHelper) : base(outputHelper)
     {
         LoaderMock.SetupLoadCookies();
@@ -21,7 +45,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         LoaderMock.Reset();
         LoaderMock.SetupStartSuccess();
 
-        var categoryMock = TestHelper.CreateCategoryMock();
+        var categoryMock = TestHelper.CreateProductShopCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
         ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns($"{Guid.NewGuid()}_{{0}}");
@@ -38,14 +62,14 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         LoaderMock.SetupStartSuccess();
         LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
-        var categoryMock = TestHelper.CreateCategoryMock();
+        var categoryMock = TestHelper.CreateProductShopCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
         ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns(Guid.NewGuid().ToString());
 
         var categoryUrl = ProductShopModelMock.Object.GetCategoryPageUrl(categoryMock.Object, 1);
         var productCount = new Random().Next(10, 20);
-        var categoryProducts = TestHelper.CreateCategoryWithProducts(productCount);
+        var categoryProducts = TestHelper.CreateCategoryWithProducts(productCount, productCount, 1);
 
         var requestData = new object();
         LoaderMock.SetupGetRequestData(requestData);
@@ -71,7 +95,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         LoaderMock.SetupStartSuccess();
         LoaderMock.Setup(s => s.Name).Returns($"{Guid.NewGuid()}");
 
-        var categoryMock = TestHelper.CreateCategoryMock();
+        var categoryMock = TestHelper.CreateProductShopCategoryMock();
         ProductShopModelMock.Object.Categories.Add(categoryMock.Object);
 
         ProductShopModelMock.Setup(s => s.CategoryUrlFormat).Returns($"{Guid.NewGuid()}_{{0}}_{{1}}");
@@ -87,8 +111,8 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
         for (int i = 0; i < pageCount; i++)
         {
             var categoryPageUrl = ProductShopModelMock.Object.GetCategoryPageUrl(categoryMock.Object, i + 1);
-            var categoryProducts = TestHelper.CreateCategoryWithProducts(10);
-            categoryProducts.TotalCount = 10 * pageCount;
+            var productCount = 10;
+            var categoryProducts = TestHelper.CreateCategoryWithProducts(productCount, productCount * pageCount, i+1);
             LoaderMock.SetupLoadItem(categoryPageUrl, requestData, categoryProducts);
 
             var productItems = categoryProducts.CategoryProductItems.ToDictionary(service.GetTestApiUrl, TestHelper.CreateProductItem);
@@ -108,7 +132,7 @@ public class ImportShopProductCategoryProcessTest : ImportProductsTest
     {
         var exceptionFormat = "test exception {0}";
         var service = SetupServiceWithCategoryProcessException(Guid.NewGuid().ToString(),
-            item => new LoaderServiceException(string.Format(exceptionFormat, item)),
+            item => new NoActionLoaderServiceException(string.Format(exceptionFormat, item)),
             10,
             out var categoryProducts,
             out var categoryUrl);

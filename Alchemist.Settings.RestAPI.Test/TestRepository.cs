@@ -14,10 +14,9 @@ public static class TestRepository
         {
             ShopId = shopId,
             Type = ShopSettingType.Category,
-            Name = $"{shopName}_category"
+            Name = $"{shopName}_category",
+            JsonValue = JsonSerializer.Serialize(new { CategorySourceUrl = $"https://category_{shopName}" })
         };
-
-        shopSettings.JsonValue = JsonSerializer.Serialize(new { CategorySourceUrl = $"https://category_{shopName}" });
 
         return shopSettings;
     }

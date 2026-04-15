@@ -8,10 +8,7 @@ using Alchemist.Product.Import.DBService;
 using Alchemist.Product.Interfaces;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
-using Grpc.Client.RequestInterceptor;
 using Grpc.Core.Interceptors;
-using Http.DelegatingRequestSender;
-using Http.RequestHandling.PerfomanceCounter;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog;
 using Serilog.Configuration.Extensions;
@@ -27,15 +24,10 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 
 builder.Services.AddGrpcServiceClient<IProductDataService, Alchemist.Product.GrpcServiceClient.AlchemyGrpcServiceClient>(builder.Configuration, "GrpcAPIHost");
-builder.Services.AddSingleton<Interceptor, GrpcClientRequestInterceptor>();
-builder.Services.AddPerfomanceCounter<Interceptor, GrpcClientRequestInterceptor>((logger) => new SerilogUrlLogger<PerfomanceCounter<GrpcClientRequestInterceptor>>(logger));
 
 builder.Services.ConfigureDefaultHttps();
 builder.Services.AddRestApiClient<IShopDataService, ShopApiClient>(builder.Configuration, "RestAPIHost", nameof(ShopApiClient), out var shopHttpClientBuilder);
 var restApiHost = builder.Configuration.GetSection("RestAPIHost").Get<string>();
-builder.Services.AddHttpMessageDelegatingHandler<RequestDelegatingHandler>(shopHttpClientBuilder);
-
-builder.Services.AddPerfomanceCounter<RequestDelegatingHandler>((logger) => new SerilogUrlLogger<PerfomanceCounter<RequestDelegatingHandler>>(logger));
 
 var rabbitMQOptions = builder.Configuration.GetRabbitMQOptions("RabbitMqServiceOptions", "RabbitMqQueueOptions", "RabbitMqExchangeOptions");
 builder.Services.AddRabbitMQMessageReceiver(rabbitMQOptions);
@@ -56,7 +48,7 @@ builder.Services.AddHostedService<ImportItemHandlerService>();
 
 builder.Services.AddAuthentication("https");
 
-builder.WebHost.UseUrls("http://localhost:8230", "https://localhost:8231");
+//builder.WebHost.UseUrls("http://localhost:8230", "https://localhost:8231");
 
 
 var app = builder.Build();
@@ -66,8 +58,6 @@ app.UseAuthentication();
 //app.UseHsts();
 
 app.UseHttpsRedirection();
-
-(app as IHost).UsePerfomanceCounters();
 
 //app.UseAuthorization();
 
@@ -83,13 +73,6 @@ static void AddLogging(IConfiguration configuration, ILoggingBuilder loggingBuil
     var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
     loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, typeof(ImportItemHandlerService).Name);
-    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: "alchemygrpcservice", EventIds.Perfomance.Id, serviceName: "AlchemyGrpcClient");
-    loggerConfiguration.AddPerfomanceCounter(logContextFile, logPath, url: restApiHost, EventIds.Perfomance.Id, serviceName: "AlchemyRestAPIClient");
-
-    loggerConfiguration.AddContextPropertyConfig(logContextFile, $"{logPath}/Perfomance", "Host", "Perfomance",
-        [new PropertyExpression("=", [SerilogExpressions.EventId, EventIds.Perfomance.Id])],
-        ["Url"]);
-
     loggerConfiguration.SetSerilog(loggingBuilder);
 }
 

@@ -1,6 +1,7 @@
-﻿using Alchemist.Import.Product.Json.Service;
+﻿using Alchemist.Import.Factory.Product.Json.Infrastructure;
 using Alchemist.Import.Products.Interfaces;
 using Alchemist.Import.Products.Json;
+using Alchemist.Import.Products.Service;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Web;
@@ -17,7 +18,12 @@ internal class ShopImportHttpJsonCategoryProductsService(ILogger<ShopImportHttpJ
     string categoryUrlFormat,
     string sourceName,
     ImportProductJsonServiceOptions importProductJsonServiceOptions)
-    : ShopImportJsonCategoryProductsService<CategoryProducts, Product>(logger, loader, url, serviceName, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, importProductJsonServiceOptions)
+    : ShopImportCategoryProductsService<CategoryProducts, Infrastructure.Product>(logger, loader, url, shopCategories, itemHandler, productUrlFormat, categoryUrlFormat, sourceName, 
+        new CategoryUrlPaging<CategoryProducts>(),
+        new CustomCategoryJsonSerializer<CategoryProducts>(importProductJsonServiceOptions),
+        importProductJsonServiceOptions)
 {
+    public override string Name => serviceName;
+
     protected override string PreparePath(string path) => HttpUtility.UrlEncode(path);
 }

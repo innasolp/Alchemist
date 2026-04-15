@@ -1,4 +1,5 @@
 ﻿using Alchemist.Common;
+using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,35 @@ public static class SerilogConfigurationExtensions
         return loggerConfiguration.ReadFrom.Configuration(configuration);
     }
 
+    public static LoggerConfiguration AddContextConfig(this LoggerConfiguration loggerConfiguration, string logContextFile)
+    {
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddJsonFile(logContextFile);
+        var configuration = configurationBuilder.Build();
+        return loggerConfiguration.ReadFrom.Configuration(configuration);
+    }
+
+    public static LoggerConfiguration AddContextPropertiesConfig(this LoggerConfiguration loggerConfiguration, 
+        string logContextFile,
+        IDictionary<string, string[]> configurationProperties,
+        string? contextPropertyName = null)
+    {
+        var configurationBuilder = new ConfigurationBuilder();
+
+        var source = configurationBuilder.AddCustomJsonConfigurationProvider(logContextFile);
+
+        foreach (var configurationProperty in configurationProperties)
+        {
+            var rule = new SerilogContextArrayPropertyConfigurationRule(configurationProperty.Key, configurationProperty.Value);
+            source.AddCustomConfigurationRule(rule);
+        }
+
+        if (!string.IsNullOrEmpty(contextPropertyName)) source.AddContextPropertyNameRule(contextPropertyName);
+
+        var configuration = configurationBuilder.Build();
+        return loggerConfiguration.ReadFrom.Configuration(configuration);
+    }
+
     public static LoggerConfiguration AddContextPropertyConfig(this LoggerConfiguration loggerConfiguration, 
         string logContextFile,
         string logPath, 
@@ -44,7 +74,7 @@ public static class SerilogConfigurationExtensions
         var configurationBuilder = new ConfigurationBuilder();
         var source = configurationBuilder.AddCustomJsonConfigurationProvider(logContextFile);
 
-        source.AddLogPathRule(logPath, [ "path", "pathFormat" ]);
+        source.AddLogPathRule(logPath);
         source.AddContextPropertyNameRule(contextPropertyName);
         if(!string.IsNullOrEmpty(sourceContext)) source.AddSourceContextFilterRule(sourceContext);
         propertyExpressions?.ToList().ForEach(source.AddExpressionFilterRule);
@@ -65,6 +95,7 @@ public static class SerilogConfigurationExtensions
         return configurationBuilder.Build();
     }
 
+    [Obsolete]
     public static LoggerConfiguration AddPerfomanceCounter(this LoggerConfiguration loggerConfiguration,
         string logContextFile,
         string logPath,

@@ -1,17 +1,16 @@
 ﻿using Alchemist.Import.Settings.DataAdapter;
-using Import.Service.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using ShopSettings.Interfaces;
 
-namespace Import.Service.Commands.Handlers;
+namespace Import.Service.Infrastructure.Handlers;
 
-internal sealed class AddShopImportServiceFromShopSettingsCommandHandler(IServiceRepository serviceRepository,
+internal sealed class AddShopImportServiceFromShopSettingsCommandHandler(IServiceManager serviceRepository,
     [FromKeyedServices(ServiceKeys.ProcessedImportSettings)] IDictionary<ShopSettingType, ISettingsDataAdapter> dataAdapters,
     IPublisher publisher) 
     : IRequestHandler<AddShopImportServiceFromShopSettingsCommand, Guid>
 {
-    private readonly IServiceRepository _serviceRepository = serviceRepository;
+    private readonly IServiceManager _serviceRepository = serviceRepository;
 
     private readonly IDictionary<ShopSettingType, ISettingsDataAdapter> _dataAdapters = dataAdapters;
 

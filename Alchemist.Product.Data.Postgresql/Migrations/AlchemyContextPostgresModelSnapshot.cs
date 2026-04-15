@@ -454,12 +454,23 @@ namespace Alchemist.Product.Data.Postgresql.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("url");
 
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("path");
+
                     b.HasKey("Id")
                         .HasName("shop_category_pk");
 
                     b.HasIndex("ShopId", "ItemId")
                         .IsUnique()
                         .HasDatabaseName("shop_category_itemid_unique");
+
+                    b.HasIndex("Path").
+                        HasDatabaseName("ix_categories_path");
+
+                    b.HasIndex("ParentId").
+                        HasDatabaseName("ix_categories_parentid");
 
                     b.ToTable("shop_category", (string)null);
                 });

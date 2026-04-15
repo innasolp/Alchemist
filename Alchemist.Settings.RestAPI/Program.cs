@@ -24,7 +24,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 // Add services to the container.
 
 builder.Services.AddAlchemyPostgresContextFactory(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext")));
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2")));
 
 builder.Services.AddUnboundedBackgroundQueue();
 
@@ -69,7 +69,7 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-app.UseAlchemyPostgresqlMigration();
+await app.UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync("RedisStore");
 
 app.Run();
 

@@ -4,11 +4,10 @@
     "Caption": "Ozon",
     "ShopUrl": "https://www.ozon.ru",
     "CategorySourceUrl": "https://www.ozon.ru",
-    "Perfomance": true,
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesTimerService",
-        "AssemblyPath": "Import\\Categories\\Services\\Timer",
+        "ImplementationTypeName": "ShopImportCategoriesSimpleService",
+        "AssemblyPath": "Import\\Categories\\Services",
         "ServiceProviderPath": "Import\\Categories\\Json"
       },
       "WebLoader": {
@@ -17,7 +16,24 @@
       },
       "HostRequestOptions": {
         "Value": {
-          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions"
+          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions",
+          "LoadingType": "Response",
+          "TimeouteMillseconds": 15000
+        }
+      },
+      "RequestOptions": {
+        "Value": {
+          "LoadingType": "Api"
+        }
+      },
+      "TimerOptions": {
+        "Value": {
+          "SecondsInterval": 10800
+        }
+      },
+      "JobExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
         }
       },
       "LoadStages": {
@@ -25,9 +41,9 @@
           {
             "Type": "RecursiveJsonCategoryFromHtmlLoader",
             "CategoryLoadOptions": {
-              "HtmlSearchFactoryOptions": {                
-                  "SearchMatchType": 1,
-                  "SearchElementType": 0                
+              "HtmlSearchFactoryOptions": {
+                "SearchMatchType": 1,
+                "SearchElementType": 0
               },
               "HtmlSearchOptions": {
                 "Tag": "div",
@@ -90,11 +106,10 @@
     "ShopUrl": "https://goldapple.ru",
     "CategorySourceUrl": "https://goldapple.ru",
     "Caption": "Золотое яблоко",
-    "Perfomance": true,
     "Services": {
       "ImportService": {
-        "ImplementationTypeName": "ShopImportCategoriesTimerService",
-        "AssemblyPath": "Import\\Categories\\Services\\Timer",
+        "ImplementationTypeName": "ShopImportCategoriesSimpleService",
+        "AssemblyPath": "Import\\Categories\\Services",
         "ServiceProviderPath": "Import\\Categories"
 
       },
@@ -110,6 +125,16 @@
       "RequestOptions": {
         "Value": {
           "RouteUrlFormat": "https://goldapple.ru/web/api/v3/catalog/navigation"
+        }
+      },
+      "TimerOptions": {
+        "Value": {
+          "SecondsInterval": 10800
+        }
+      },
+      "JobExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
         }
       },
       "LoadStages": {

@@ -7,12 +7,12 @@ using ShopSettings.Interfaces;
 
 namespace Alchemist.Test.ImportSettingsWebApp.Factory;
 
-public class ImportSettingsWebAppFactory(bool isApi, string? shopApiHost, int httpPort, int httpsPort,
+public class ImportSettingsWebAppFactory(bool isApi, string? shopWebAppApiHost, int httpPort, int httpsPort,
     HttpClient settingsApiClient) : TestWebAppKestrelFactory<ImportSettingsWebAppProgramm>(httpPort, httpsPort)
 {
     private readonly bool _isApi = isApi;
 
-    private readonly string? _shopApiHost = shopApiHost;
+    private readonly string? _shopWebAppApiHost = shopWebAppApiHost;
 
     private readonly HttpClient _settingsApiClient = settingsApiClient;
 
@@ -34,7 +34,7 @@ public class ImportSettingsWebAppFactory(bool isApi, string? shopApiHost, int ht
 
         services.InterceptImplementation<IShopSettingsDataService, SettingsAPIClient>(new SettingsAPIClient(_settingsApiClient));
 
-        if(!_isApi && !string.IsNullOrEmpty(_shopApiHost)) SetProxyHost(context.Configuration, "shopCluster", "user", _shopApiHost);
+        if(!_isApi && !string.IsNullOrEmpty(_shopWebAppApiHost)) SetProxyHost(context.Configuration, "shopCluster", "user", _shopWebAppApiHost);
     }
 
     private static void SetProxyHost(IConfiguration configuration, string cluster, string destinationName, string destinationHost)

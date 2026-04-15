@@ -15,7 +15,7 @@ public class EventedCommandHandler<T, TCommand, TEvent, TCommandHandler>(TComman
     public async Task<T> Handle(TCommand request, CancellationToken cancellationToken)
     {
         var result = await Handler.Handle(request, cancellationToken);
-        await EventPublisher.Publish(new TEvent() { Entity = result , CreationDate = DateTime.UtcNow, EventName = eventName}, cancellationToken);
+        await EventPublisher.Publish(new TEvent() { Entity = result , CreationDate = DateTime.Now, EventName = eventName}, cancellationToken);
         return result;
     }
 }

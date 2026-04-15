@@ -15,27 +15,38 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
     string productPathFormat,
     string categoryPathFormat,
     string sourceName,
+    ICategoryPaging<TCategory> categoryPaging,
+    IItemSerializer<TCategory> categorySerializer,
     ImportProductServiceOptions importProductServiceOptions) : ImportService(logger, loader, url), IListener<IProductShopCategory>
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
 {
-    public record CountResult(int SuccessCount, int UnsuccessCount);
+    public enum AttemptResult
+    {
+        AttemptsReachedTheMaximum,
+        AttemptsAvailable,
+        Success
+    }
 
     protected sealed record ImportProduct(IProductItem ProductItem, string SourceName, string SourcePath, Stream Stream) : IImportProduct
     {
     }
 
-    private readonly IProductItemHandler _itemHandler = itemHandler;
+    protected readonly IProductItemHandler ItemHandler = itemHandler;
 
     private readonly SemaphoreSlim _categoryListenerSemaphoreSlim = new(1, 1);
 
     protected ConcurrentQueue<IProductShopCategory> Categories { get; } = new ConcurrentQueue<IProductShopCategory>(shopCategories);
 
-    private readonly string _productPathFormat = productPathFormat;
+    protected readonly string ProductPathFormat = productPathFormat;
 
-    private readonly string _categoryPathFormat = categoryPathFormat;
+    protected readonly string СategoryPathFormat = categoryPathFormat;
 
-    private readonly string _sourceName = sourceName;
+    protected readonly string SourceName = sourceName;
+
+    private readonly ICategoryPaging<TCategory> _categoryPaging = categoryPaging;
+
+    private readonly IItemSerializer<TCategory> _categorySerializer = categorySerializer;
 
     protected virtual int MaxUnsuccessRequestCount => 10;
 
@@ -63,6 +74,11 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
     protected override async Task ProcessAsync(CancellationToken stoppingToken)
     {
+        await ProcessCategories(stoppingToken);
+    }
+
+    protected virtual async Task ProcessCategories(CancellationToken stoppingToken)
+    {
         while (!stoppingToken.IsCancellationRequested)
         {
             if (Categories.IsEmpty)
@@ -75,8 +91,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
             while (!Categories.IsEmpty && concurrentCategories.Count < ConcurrentCategoryTaskCount)
             {
-                if (Categories.TryDequeue(out var productShopCategory))
-                    concurrentCategories.Add(productShopCategory);
+                if (Categories.TryDequeue(out var productShopCategory) && productShopCategory != null)
+                    concurrentCategories.Add(productShopCategory);                                
             }
 
             try
@@ -90,78 +106,83 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    private async Task ProcessCategoryAsync(IProductShopCategory category, CancellationToken stoppingToken)
+    protected virtual Task ProcessCategoryAsync(IProductShopCategory category, CancellationToken stoppingToken)
     {
-        int successProductCount = 0;
-        int unsuccessProductCount = 0;
-        int page = 1;
-        bool? isEndOfCategory = null;
-        var attemptsCount = 0;
+        var categoryState = CategoryProcessState.Start(category.Path);
 
-        var categoryPagePath = GetCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page);
+        return ProcessCategoryAsync(category, categoryState, stoppingToken);
+    }
+
+    protected async Task ProcessCategoryAsync(IProductShopCategory category, CategoryProcessState categoryState, CancellationToken stoppingToken)
+    {
+        bool? isEndOfCategory = null;
+
+        if(string.IsNullOrEmpty(categoryState.CategoryPagePath))
+            categoryState.CategoryPagePath = _categoryPaging.GetCategoryPagePath(category, 
+                СategoryPathFormat,
+                ImportProductServiceOptions.CategoryPathFormatType, 
+                categoryState.Page);
 
         while (isEndOfCategory != true)
         {
-            var (success, categoryResult, categoryPageResult) = await TryProcessCategoryPageAsync(categoryPagePath, category.ItemId, category.Path, page, stoppingToken);
+            var (success, categoryResult, successCount) = await TryProcessCategoryPageAsync(categoryState.CategoryPagePath,
+                category.ItemId,
+                category.Path, 
+                categoryState.Page, 
+                stoppingToken);
 
-            if (!success)
+            var attemptResult = ApplyCategoryStateAttempts(category, categoryState, success);
+            
+            if (attemptResult == AttemptResult.AttemptsReachedTheMaximum)
+                break;            
+            
+            if (attemptResult == AttemptResult.AttemptsAvailable)            
+                continue;
+
+            if (successCount == null)
             {
-                attemptsCount++;
-
-                if (attemptsCount == MaxUnsuccessRequestCount)
-                {
-                    Logger.LogError(ImportProductLogMessages.FailedToLoadCategoryPageAfterAttempts, category.Path, page, MaxUnsuccessRequestCount);
-                    break;
-                }
-
+                categoryState.CategoryPagePath = _categoryPaging.GetCategoryPagePath(category, СategoryPathFormat, 
+                    ImportProductServiceOptions.CategoryPathFormatType, 
+                    categoryState.Page, 
+                    categoryResult);
                 continue;
             }
-            else
-                attemptsCount = 0;
 
-            if (categoryPageResult == null)
-            {
-                categoryPagePath = GetCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page, categoryResult);
-                continue;
-            }
+            var nextCategoryPagePath = _categoryPaging.GetNextCategoryPagePath(category, СategoryPathFormat, 
+                ImportProductServiceOptions.CategoryPathFormatType,
+                categoryState.Page,
+                categoryResult);
+            categoryState.CategoryPagePath = nextCategoryPagePath;
 
-            successProductCount += categoryPageResult?.SuccessCount ?? 0;
-            unsuccessProductCount += categoryPageResult?.UnsuccessCount ?? 0;
+            categoryState.ApplyPageIterationResult(successCount, categoryResult?.CategoryProductItems.Length);
 
-            isEndOfCategory = categoryResult != null && (IsLastPage(categoryResult, page) == true
-                || IsEndOfCategory(categoryResult, successProductCount + unsuccessProductCount) == true);
+            isEndOfCategory = categoryResult != null && (IsLastPage(categoryResult, categoryState.Page) == true
+                || IsEndOfCategory(categoryResult, categoryState.AllProductCount) == true);
 
-            var nextCategoryPagePath = GetNextCategoryPagePath(category, _categoryPathFormat, ImportProductServiceOptions.CategoryPathFormatType, page, categoryResult);
-            categoryPagePath = nextCategoryPagePath;
-            page++;
+            categoryState.IncrementPage();
         }
 
-        Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, category.Category, successProductCount, unsuccessProductCount);
+        Logger.LogInformation(ImportProductLogMessages.CategoryCompletedInfo, category.Category, categoryState.SuccessProductCount, categoryState.UnsuccessProductCount);
     }
 
-    protected virtual object[] GetCategoryPathArguments(IProductShopCategory productShopCategory, PathFormatType pathFormatType)
+    protected AttemptResult ApplyCategoryStateAttempts(IProductShopCategory category, CategoryProcessState categoryState, bool success)
     {
-        return pathFormatType switch
+        if (!success)
         {
-            PathFormatType.ItemId => [productShopCategory.ItemId],
-            PathFormatType.Path => [PreparePath(productShopCategory.Path)],
-            PathFormatType.CategoryWithItemId => [PreparePath(productShopCategory.Category), productShopCategory.ItemId],
-            _ => [productShopCategory.Path],
-        };
-    }
+            categoryState.IncrementAttempts();
 
-    protected virtual string GetCategoryPagePath(IProductShopCategory productShopCategory, string pathFormat, PathFormatType pathFormatType, int page, TCategory? category = null)
-    {
-        List<object> args = [.. GetCategoryPathArguments(productShopCategory, pathFormatType), page];
+            if (categoryState.AttemptsCount == MaxUnsuccessRequestCount)
+            {
+                Logger.LogError(ImportProductLogMessages.FailedToLoadCategoryPageAfterAttempts, category.Path, categoryState.Page, MaxUnsuccessRequestCount);
+                return AttemptResult.AttemptsReachedTheMaximum;
+            }
 
-        return string.Format(pathFormat, args: [.. args]);
-    }
+            return AttemptResult.AttemptsAvailable;
+        }
+        else
+            categoryState.ResetAttempts();
 
-    protected abstract string PreparePath(string path);
-
-    protected virtual string GetNextCategoryPagePath(IProductShopCategory productShopCategory, string pathFormat, PathFormatType pathFormatType, int page, TCategory? category = null)
-    {
-        return GetCategoryPagePath(productShopCategory,pathFormat, pathFormatType, page + 1, category);
+        return AttemptResult.Success;
     }
 
     protected bool? IsLastPage(TCategory category, int page)
@@ -179,26 +200,39 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         return null;
     }
 
-    protected virtual async Task<(bool success, TCategory?, CountResult? result)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, string categoryPath, int page, CancellationToken stoppingToken)
+    protected virtual async Task<(bool success, TCategory?, int? successCount)> TryProcessCategoryPageAsync(string categoryPagePath, int categoryItemId, string categoryPath, int page, CancellationToken stoppingToken)
     {
         var loaderData = GetLoaderData();
         var (success, category) = await TryGetCategoryFromPathAsync(categoryPagePath,
-            ImportProductServiceOptions.CategoryLoadData != null 
-                ? new object?[] { loaderData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } } 
+            ImportProductServiceOptions.CategoryLoadData != null
+                ? new object?[] { loaderData, ImportProductServiceOptions.CategoryLoadData, new string[] { $"{categoryItemId}", $"{page}" } }
                 : loaderData,
-            categoryPath, 
+            categoryPath,
             page,
             stoppingToken);
 
         if (!success)
         {
             Logger.LogInformation(ImportProductLogMessages.CategoryNotLoadedFromUrl, categoryPagePath);
-            return (false, default(TCategory), default(CountResult));
+            return (false, default, default);
         }
 
-        if(!(category?.CategoryProductItems?.Length > 0))
+        if (!(category?.CategoryProductItems?.Length > 0))
             return (true, category, default);
+        int successCount = await ProcessCategoryProductItems(categoryItemId, category, stoppingToken);
 
+        if (successCount == category.CategoryProductItems.Length)
+            Logger.LogInformation(ImportProductLogMessages.CategoryProductsForUrlWereProcessedSuccesfullInfo, categoryPagePath, successCount);
+        else if (successCount == 0)
+            Logger.LogInformation(ImportProductLogMessages.CategoryProductsWereNotLoadedError, categoryPagePath);
+        else if (successCount < category.CategoryProductItems.Length)
+            Logger.LogInformation(ImportProductLogMessages.NotAllCategoryProductsForUrlWereProcessedWarning, categoryPagePath);
+
+        return (true, category, successCount);
+    }
+
+    protected virtual async Task<int> ProcessCategoryProductItems(int categoryItemId, TCategory category, CancellationToken stoppingToken)
+    {
         var successCount = 0;
         foreach (var categoryProductItem in category.CategoryProductItems)
         {
@@ -208,22 +242,37 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
                 successCount++;
         }
 
-        if (successCount == category.CategoryProductItems.Length)
-            Logger.LogInformation(ImportProductLogMessages.CategoryProductsForUrlWereProcessedSuccesfullInfo, categoryPagePath, successCount);
-        else if (successCount == 0)
-            Logger.LogInformation(ImportProductLogMessages.CategoryProductsWereNotLoadedError, categoryPagePath);
-        else if (successCount < category.CategoryProductItems.Length)
-            Logger.LogInformation(ImportProductLogMessages.NotAllCategoryProductsForUrlWereProcessedWarning, categoryPagePath);
-
-        return (true, category, new CountResult(successCount, category.CategoryProductItems.Length - successCount));
+        return successCount;
     }
 
-    protected async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
+    protected virtual async Task<bool> TryProcessCategoryProductAsync(ICategoryProductItem categoryProductItem, CancellationToken cancellationToken)
     {
-        var path = GetProductAbsolutePath(_productPathFormat, categoryProductItem);
+        var path = GetProductAbsolutePath(ProductPathFormat, categoryProductItem);
 
         var loaderData = GetLoaderData();
+        (bool success, Stream? stream) = await TryLoadProductItemAsync(categoryProductItem, path, loaderData, cancellationToken);
 
+        if (!success || stream is null)
+        {
+            if (stream is not null)
+                await stream.DisposeAsync();
+
+            Logger.LogInformation(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, path);
+            return false;
+        }
+
+        var productItem = CreateProductItemFromCategoryProductItem(categoryProductItem, path);
+
+        Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, productItem.Name, path);
+
+        await TryHandleProduct(productItem, stream, cancellationToken);
+        await stream.DisposeAsync();
+
+        return true;
+    }
+
+    protected async Task<(bool success, Stream? stream)> TryLoadProductItemAsync(ICategoryProductItem categoryProductItem, string path, object? loaderData, CancellationToken cancellationToken)
+    {
         bool success;
         Stream? stream;
         try
@@ -240,34 +289,22 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             throw;
         }
 
-        if (!success || stream is null)
-        {
-            if (stream is not null)
-                await stream.DisposeAsync();
+        return (success, stream);
+    }
 
-            Logger.LogInformation(ImportProductLogMessages.ProductWasNotLoadedFromUrlWithError, path);
-            return false;
-        }  
-
-        var productItem = CreateProductItemFromCategoryItem(categoryProductItem, path);        
-
-        Logger.LogInformation(ImportProductLogMessages.ProductHasBeenSuccessfullyLoadedFromUrl, productItem.Name, path);
-
+    protected async Task<bool> TryHandleProduct(TProductItem productItem, Stream stream, CancellationToken cancellationToken)
+    {
         try
         {
-            var result = await _itemHandler.HandleItem(new ImportProduct(productItem, _sourceName, Host, stream), cancellationToken);
+            var result = await ItemHandler.HandleItem(new ImportProduct(productItem, SourceName, Host, stream), cancellationToken);
             Logger.LogInformation(ImportProductLogMessages.ProductFromUrlHandledWithStatusInfo, productItem.Name, productItem.AbsolutePath, result);
+            return true;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Logger.LogError(e, ImportProductLogMessages.ProductFromUrlHandlingFailed, productItem.AbsolutePath);
+            return false;
         }
-        finally
-        {
-            await stream.DisposeAsync();
-        }
-
-        return true;
     }
 
     protected virtual async Task<(bool success, TCategory? result)> TryGetCategoryFromPathAsync(string dataPath, object? requestData, string categoryPath, int page, CancellationToken token)
@@ -298,9 +335,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
 
         try
         {
-            var item = await DeserializeCategoryFromStream(stream, cancellationToken: token); 
-            return (true, item);
-            
+            var item = await _categorySerializer.DeserializeFromStream(stream, cancellationToken: token); 
+            return (true, item);            
         }
         catch (JsonException ex)
         {
@@ -313,12 +349,7 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
         }
     }
 
-    protected virtual async Task<TCategory?> DeserializeCategoryFromStream(Stream stream, CancellationToken cancellationToken = default)
-    {
-        return await JsonSerializer.DeserializeAsync<TCategory>(stream, cancellationToken: cancellationToken);
-    }
-
-    protected TProductItem CreateProductItemFromCategoryItem(ICategoryProductItem categoryProductItem, string productPath)
+    protected TProductItem CreateProductItemFromCategoryProductItem(ICategoryProductItem categoryProductItem, string productPath)
     {  
         var productItem = new TProductItem
         {
@@ -350,6 +381,8 @@ public abstract class ShopImportCategoryProductsService<TCategory, TProductItem>
             _ => string.Format(productPathFormat, productItem.ItemPath),
         };
     }
+
+    protected abstract string PreparePath(string path);
 
     protected override void Dispose()
     {

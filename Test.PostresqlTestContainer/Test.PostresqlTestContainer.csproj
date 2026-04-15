@@ -10,5 +10,9 @@
 		<PackageReference Include="Testcontainers.PostgreSql" Version="4.10.0" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\Test.DbContainer.Abstractions\Test.DbContainer.Abstractions.csproj" />
+	</ItemGroup>
 
 </Project>

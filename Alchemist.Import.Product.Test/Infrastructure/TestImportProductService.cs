@@ -2,6 +2,7 @@
 using Alchemist.Import.Products.Service;
 using Import.Interfaces;
 using Microsoft.Extensions.Logging;
+using ShopImport.Product.Service.Test.Infrastructure;
 
 namespace Alchemist.Import.ProductService.Test.Infrastructure;
 
@@ -16,6 +17,8 @@ public class TestImportProductService<TCategory, TProductItem>(ILogger logger,
         shopModel.ProductUrl,
             shopModel.CategoryUrlFormat,
             shopModel.Name,
+            new TestCategoryPaging<TCategory>(),
+            new SimpleCategoryJsonSerializer<TCategory>(),
             new ImportProductServiceOptions { PageProductCount = pageProductCount })
     where TCategory : class, ICategoryProducts, new()
     where TProductItem : class, IProductItem, new()
