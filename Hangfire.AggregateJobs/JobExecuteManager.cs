@@ -39,13 +39,15 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         CancellationToken cancellationToken = default)
         where TJob : class?
     {
-        var (parentJobId, parentExecutionId) = await EnqueueJob(coreJob, 
+        var parentJobId = await EnqueueJob(coreJob, 
             execute,
             aggregateServerSettings.WaitingQueue, 
             coreJob,
             jobExecuteOptions, 
             childJobEnrichers, 
             cancellationToken);
+
+        var parentExecutionId = GetExecutionId(execute, coreJob);
 
         setJobIdAction?.Invoke(coreJob, parentJobId);
 
@@ -59,13 +61,15 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
 
         foreach (var childJob in childJobs)
         {
-            var (childJobId, childExecutionId) = await EnqueueJob(childJob,
+            var childJobId = await EnqueueJob(childJob,
             execute,
             aggregateServerSettings.ChildWaitingQueue,
             coreJob,
             jobExecuteOptions,
             childJobEnrichers,
             cancellationToken);
+
+            var childExecutionId = GetExecutionId(execute, childJob);
 
             setJobIdAction?.Invoke(childJob, childJobId);
 
@@ -77,15 +81,15 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
     public async Task EnqueueChild<T, TJob>(TJob job,
         Expression<Func<T, TJob, Task>> execute,
         AggregateServerSettings aggregateServerSettings,
-        TJob? parentJob = null,
-        string? parentExecutionId = null,
-        JobExecuteOptions? jobExecuteOptions = null,
+         string parentExecutionId,
+        TJob parentJob,
+       JobExecuteOptions? jobExecuteOptions = null,
         Action<TJob, string>? setJobIdAction = null,
         IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
         CancellationToken cancellationToken = default)
         where TJob : class?
     {
-        var (jobId, executionId) = await EnqueueJob(job,
+        var jobId = await EnqueueJob(job,
             execute,
             aggregateServerSettings.ChildWaitingQueue,
             parentJob,
@@ -93,9 +97,9 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
             childJobEnrichers,
             cancellationToken);
 
+        var executionId = GetExecutionId(execute, job);
+        
         setJobIdAction?.Invoke(job, jobId);
-
-        if (string.IsNullOrEmpty(parentExecutionId)) return;
 
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
@@ -103,13 +107,13 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         var parentJobEntry = await childJobStorage.GetJobByExecutionIdAsync(parentExecutionId);        
 
         await childJobStorage.CreateJobEntryAsync(new JobEntry { JobId = jobId,
-            ParentJobId = parentJobEntry?.ParentJobId, 
+            ParentJobId = parentJobEntry?.JobId, 
             Status = JobStatus.Enqueued, 
             ExecutionId = executionId });
     }
 
 
-    private async Task<(string jobId, string? executionId)> EnqueueJob<T, TJob>(TJob job,
+    private async Task<string> EnqueueJob<T, TJob>(TJob job,
         Expression<Func<T, TJob, Task>> execute,
         string queue,
         TJob? parentJob = null,
@@ -121,8 +125,6 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         var executor = _jobExecutorRegistry.Get(parentJob != null && job != parentJob, jobExecuteOptions);
 
         var jobExpression = execute.BindSecondParameter(job);
-        var executionId = jobExpression.GetArguments()?.FirstOrDefault()?.ToString();
-
         var jobId = await executor.EnqueueAsync(jobExpression,
             queue,
             cancellationToken: cancellationToken);
@@ -131,7 +133,14 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
             foreach (var childJobEnricher in childJobEnrichers)
                 childJobEnricher.Enrich(jobId, job, parentJob);
 
-        return (jobId, executionId);
+        return jobId;
+    }
+
+    private static string? GetExecutionId<T, TJob>(Expression<Func<T, TJob, Task>> execute, TJob job)
+          where TJob : class?
+    {
+        var jobExpression = execute.BindSecondParameter(job);
+        return jobExpression.GetArguments()?.FirstOrDefault()?.ToString(); 
     }
 
     public async Task Execute<T, TJob>(string coreExecutionId,

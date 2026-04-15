@@ -105,8 +105,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
                             cancellationToken,
                             null),
                         _aggregateServerSettings,
+                        serviceJob.ParentId.ToString()!,
                         serviceJob,
-                        serviceJob.ParentId?.ToString(),
                         childJob.JobExecuteOptions,
                         null,
                         _childJobEnrichers,
@@ -165,15 +165,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         return _importServiceJobFactory.CreateServiceJob<IShopModel, IProductShopCategory>(serviceFactory, shopImportSettings, name, source, shopImportSettings.IsAggregate);
     }
 
-    private void SubscribeServiceWithChildrenToFailedHandler(IImportServiceJob importServiceJob)
-    {
-        SubscribeServiceToFailedHandler(importServiceJob);
-
-        var childJobs = GetChildJobs(importServiceJob.Id);
-        foreach (var childJob in childJobs)
-            SubscribeServiceToFailedHandler(childJob.Value);
-    }
-
     private void SubscribeServiceToFailedHandler(IImportServiceJob importServiceJob)
     {
         async Task serviceConnectedEventHandler(object sender, ConnectedAsyncEventArgs args)
@@ -193,7 +184,6 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
             var childJobs = GetChildJobs(importServiceJob.Id);
 
             if (eventArgs.Exception != null)
-
                     await _jobExecuteManager.StopWithFailedState(importServiceJob.Id.ToString(),
                         childJobs.Select(j => j.Value.Id.ToString()),
                         eventArgs.Exception,
@@ -223,7 +213,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
     public (bool connecting, IImportService service, Task? startTask) StartService(Guid guid, CancellationToken cancellationToken = default)
     {
         var serviceJob = GetCoreServiceJob(guid);
-        var connecting = GetCoreServiceJobConnecting(guid);
+        var connecting = GetCoreServiceJobIsProcessing(guid);
         
         var startTask = !connecting && !serviceJob.ImportService.Connected 
             ? StartService(serviceJob, cancellationToken) 
@@ -238,9 +228,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
         var childJobs = (existingChildJobs.Count == 0) 
             ? [.. await serviceJob.GetСhildJobs()]
-            : existingChildJobs.Values.ToList();
-
-        SubscribeServiceWithChildrenToFailedHandler(serviceJob);
+            : existingChildJobs.Values.ToList();        
 
         await _jobExecuteManager.Execute<IHagfireServiceJobManager, IImportServiceJob>(serviceJob.Id.ToString(),
             childJobs.Select(x=>x.Id.ToString()),
@@ -262,13 +250,13 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         }
     }
     
-    private bool GetCoreServiceJobConnecting(Guid guid)
+    private bool GetCoreServiceJobIsProcessing(Guid guid)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
         var jobEntry = childJobStorage.GetJobByExecutionId(guid.ToString());
-        return jobEntry?.Status != JobStatus.Processing;
+        return jobEntry?.Status == JobStatus.Processing;
     }
 
     private IImportServiceJob GetCoreServiceJob(Guid guid)
@@ -343,8 +331,8 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
                                     cancellationToken,
                                     null),
                                 _aggregateServerSettings,
-                                shopCategoryListenerJob as IImportServiceJob,
-                                (shopCategoryListenerJob as IImportServiceJob)?.Id.ToString(),
+                                (shopCategoryListenerJob as IImportServiceJob)!.Id.ToString(),
+                                (shopCategoryListenerJob as IImportServiceJob)!,
                                 newServiceJob.JobExecuteOptions,
                                 null,
                                 _childJobEnrichers,
@@ -410,22 +398,16 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
 
         try
         {
-            //todo
-            if(jobCancellationToken?.ShutdownToken != default)
-                linkedTokenSource.Token.Register((state) =>
-                {
-                    if (state is not (CancellationToken jobToken, IImportServiceJob job)) return;
-
-                }, (jobCancellationToken?.ShutdownToken, serviceJob) );
+            SubscribeServiceToFailedHandler(serviceJob);
 
             await StartServiceAsync(serviceJob.ImportService, linkedTokenSource.Token);
         }
         finally
         {
-            if (jobCancellationToken?.ShutdownToken.IsCancellationRequested == true)
-            {
-                RemoveJobWithChildren(serviceJob);
-            }
+            if (jobCancellationToken?.ShutdownToken.IsCancellationRequested == true)            
+                RemoveJobWithChildren(serviceJob); 
+            else
+                UnsubscribeServiceFromConnectedHandler(serviceJob);
         }
     }
 
