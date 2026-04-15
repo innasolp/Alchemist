@@ -57,7 +57,7 @@ var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOption
 builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"),
     (config, connectionString)=>
     {
-        ClearRedisDataBase(connectionString);
+        //ClearRedisDataBase(connectionString);
         config.UseRedisStorage(connectionString, new RedisStorageOptions
         {
             // Увеличьте этот таймаут, если задача длится дольше 30 минут

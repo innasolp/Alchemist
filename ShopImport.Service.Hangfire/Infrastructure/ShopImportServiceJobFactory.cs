@@ -30,10 +30,13 @@ internal class ShopImportServiceJobFactory(ILoggerFactory loggerFactory,
     {
         var serviceExecutionOptions = importSettings.GetService(nameof(JobExecuteOptions))?.GetServiceValue<JobExecuteOptions>();
 
+        var obj = new { Name = name, SourceName = source.Name, SourceUrl = source.Url };
+        var id = GuidGenerator.ToDeterministicGuid(obj);
+
         if (!isAggregate)
         {
             var importService = importServiceFactory.Create(name, source, importSettings);
-            return new SingleImportServiceJob<TImportSource>(importService, source, parentId, serviceExecutionOptions);
+            return new SingleImportServiceJob<TImportSource>(importService, source, id, parentId, serviceExecutionOptions);
         }
         else
         {
@@ -45,6 +48,7 @@ internal class ShopImportServiceJobFactory(ILoggerFactory loggerFactory,
                 source,
                 importSettings, 
                 importServiceFactory,
+                id,
                 serviceExecutionOptions);
         }
     }

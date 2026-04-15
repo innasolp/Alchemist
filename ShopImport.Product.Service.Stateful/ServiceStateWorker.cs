@@ -32,13 +32,13 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
     public Task ResetAsync(CancellationToken cancellationToken)
     {
         _serviceState.Reset();
-        return _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);
+        return _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
     }
 
     public Task ResetLoadedCategoryPageAsync(CancellationToken cancellationToken)
     {
         _serviceState.Category = null;
-        return _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);
+        return _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
     }
 
     public Task SetProductShopCategoryIfNeedAsync(IProductShopCategory category, CancellationToken cancellationToken)
@@ -86,15 +86,20 @@ internal class ServiceStateWorker<TCategory>(IServiceStateRepository serviceStat
         await _serviceStateRepository.Save(_serviceStateKey, _serviceState, cancellationToken);
     }
 
-    public Task CloseAsync(CancellationToken cancellationToken = default)
+    public async Task RemoveAsync(CancellationToken cancellationToken = default)
     {
-        _serviceState.Reset();
-        return _serviceStateRepository.Close(cancellationToken);
+        await _serviceStateRepository.Remove(_serviceStateKey, cancellationToken);        
+    }
+
+    public async Task CloseAsync(CancellationToken cancellationToken = default)
+    {        
+        await _serviceStateRepository.Close(cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
     {
         await CloseAsync();
+
         await _serviceStateRepository.DisposeAsync();
     }
 }

@@ -141,4 +141,19 @@ public abstract class ShopImportCategoryProductsStatefulService<TCategory, TProd
 
         return result;
     }
+
+    protected override async Task InvokeConnectedAsync(bool connected, Exception? exception = null, CancellationToken cancellationToken = default)
+    {
+        await base.InvokeConnectedAsync(connected, exception, cancellationToken);
+
+        if (!connected && exception == null)
+            await _serviceStateWorker.RemoveAsync(cancellationToken);
+    }
+
+    protected override async Task CloseAsync()
+    {
+        await _serviceStateWorker.CloseAsync();
+
+        await base.CloseAsync();
+    }
 }

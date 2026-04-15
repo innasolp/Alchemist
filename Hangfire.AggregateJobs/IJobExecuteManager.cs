@@ -17,27 +17,25 @@ public interface IJobExecuteManager
     Task EnqueueChild<T, TJob>(TJob job,
         Expression<Func<T, TJob, Task>> execute,
         AggregateServerSettings aggregateServerSettings,
-        TJob? parentJob = null,
-        string? parentJobId=null,
+        string parentExecutionId,
+        TJob parentJob,
         JobExecuteOptions? jobExecuteOptions = null,
         Action<TJob, string>? setJobIdAction = null,
         IEnumerable<IChildJobEnricher<TJob>>? childJobEnrichers = null,
         CancellationToken cancellationToken = default)
         where TJob : class?;
 
-    Task Execute<T, TJob>(string coreJobId,
+    Task Execute<T, TJob>(string coreExecutionId,
         IEnumerable<string> childJobIds,
         AggregateServerSettings aggregateServerSettings,
         JobExecuteOptions? jobExecuteOptions,
         CancellationToken cancellationToken = default);
 
-    Task StopWithFailedState(string coreJobId, 
+    Task StopWithFailedState(string coreExecutionId, 
         IEnumerable<string> childJobIds, 
         Exception exception,
         AggregateServerSettings? aggregateServerSettings = null, 
         CancellationToken cancellationToken = default);
 
-    void DeleteChildJob(string jobId);
-
-    void DeleteParentJob(string jobId);
+    Task Delete(string executionId);
 }

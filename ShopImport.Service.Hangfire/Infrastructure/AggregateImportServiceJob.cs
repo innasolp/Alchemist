@@ -40,8 +40,9 @@ internal class AggregateImportServiceJob<TImportSource, TSourceItem> : ImportSer
         TImportSource importSource,
         IImportSettings importSettings,
         IImportServiceFactory importServiceFactory, 
+        Guid id,
         JobExecuteOptions? jobExecuteOptions = null)
-        : base(null, jobExecuteOptions)
+        : base(id, null, jobExecuteOptions)
     {
         _importServiceJobFactory = importServiceJobFactory;
         _name = name;
@@ -79,7 +80,7 @@ internal class AggregateImportServiceJob<TImportSource, TSourceItem> : ImportSer
         if (!eventArgs.Connected || eventArgs.CancellationToken.IsCancellationRequested)
         {
             var serviceJob = _importServiceJobs.FirstOrDefault(x => x.Value.ImportService.Name == importService.Name);
-            if (serviceJob.Value == null || !string.IsNullOrEmpty(serviceJob.Value.JobId)) return;
+            if (serviceJob.Value == null) return;
 
             await RemoveChildJob(serviceJob.Value);
         }

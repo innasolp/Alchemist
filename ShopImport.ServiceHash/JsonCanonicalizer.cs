@@ -27,7 +27,6 @@ public static class JsonCanonicalizer
         {
             case JsonValueKind.Object:
                 writer.WriteStartObject();
-                // ГЛАВНОЕ: Сортируем свойства по имени перед записью
                 foreach (var prop in element.EnumerateObject().OrderBy(p => p.Name))
                 {
                     writer.WritePropertyName(prop.Name);

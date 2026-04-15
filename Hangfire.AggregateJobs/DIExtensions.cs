@@ -28,12 +28,11 @@ public static class DIExtensions
             configure?.Invoke(config);
         });
 
-        services.AddDbContext<ChildJobDbContext>(childStorageOptionsAction);
+        services.AddDbContext<AggregateJobDbContext>(childStorageOptionsAction);
 
-        services.AddScoped<IChildJobStorage, EFChildJobStorage>();
+        services.AddScoped<IAggregateJobStorage, EFAggregateJobStorage>();
 
-        services.AddScoped<ChildJobOrchestrator<T>>();
-        services.AddScoped<IdleJobChecker>();
+        services.AddScoped<ChildJobOrchestrator<T>>();        
 
         services.AddScoped<IJobExecuteManager, JobExecuteManager>();
 
@@ -62,5 +61,15 @@ public static class DIExtensions
         });
 
         return services;
+    }
+
+    public static IServiceCollection AddIddleJobClenUp(this IServiceCollection services)
+    {
+        return services.AddScoped<IdleJobChecker>();
+    }
+
+    public static IServiceCollection AddExpiredJobCleanUp(this IServiceCollection services)
+    {
+        return services.AddScoped<IExpiredJobCleanUpManager, ExpiredJobCleanUpManager>();
     }
 }

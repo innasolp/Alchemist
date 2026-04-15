@@ -1,4 +1,5 @@
-﻿using Hangfire.AggregateJobs.Filters;
+﻿using Hangfire.AggregateJobs.ChildJobStorages;
+using Hangfire.AggregateJobs.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Hangfire.AggregateJobs;
@@ -18,15 +19,15 @@ internal class IdleJobChecker(IServiceScopeFactory serviceScopeFactory, IBackgro
     {
         using var scope = _serviceScopeFactory.CreateScope();
 
-        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        var idleJobIds = await childJobStorage.GetIdleParentJobsIds(DateTime.Now, jobCancellationToken?.ShutdownToken ?? default);
+        var idleJobIds = await childJobStorage.GetIdleParentJobsIdsAsync(DateTime.Now, jobCancellationToken?.ShutdownToken ?? default);
 
         foreach (var idleJobId in idleJobIds)
         {
             _backgroundJobClient.Delete(idleJobId);
 
-            childJobStorage.UpdateParentJobState(idleJobId, JobStatus.Deleted, DateTime.Now);
+            childJobStorage.UpdateJobEntryState(idleJobId, JobStatus.Deleted, DateTime.Now);
         }
     }
 }

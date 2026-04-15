@@ -52,7 +52,7 @@ internal class ProductShopModel : ShopModel, IProductShopModel
     private ProductShopModel CreateByCategory(IProductShopCategory shopCategory)
     {
         var copy = CopyCore();
-        copy.Name += $"_{shopCategory.Category}";
+        copy.Name += $"_{shopCategory.Category} {shopCategory.Path.Replace("/", "_")}";
         copy.Categories.TryAdd(shopCategory);
         return copy;
     }

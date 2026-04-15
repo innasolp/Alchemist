@@ -1,4 +1,5 @@
-﻿using Hangfire.Server;
+﻿using Hangfire.AggregateJobs.ChildJobStorages;
+using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Hangfire.AggregateJobs.Filters;
@@ -12,24 +13,21 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
         var jobId = filterContext.BackgroundJob.Id;
 
         using var scope = _scopeFactory.CreateScope();
-        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        var parentJobId = childJobStorage.GetParentJobId(jobId);
+        var newJobState = filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted
+             : filterContext.Exception != null ? JobStatus.Failed : JobStatus.Completed;
 
-        if (!string.IsNullOrEmpty(parentJobId))
-        {
-            childJobStorage.UpdateChildJobState(jobId,
-            filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed);
-
-            childJobStorage.UpdateParentJobDate(parentJobId, DateTime.Now);
-        }
-        else if (childJobStorage.ParentJobExists(jobId))
-        {
-            childJobStorage.UpdateParentJobState(jobId,
-                filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted : JobStatus.Completed,
-                DateTime.Now);
-        }
+        childJobStorage.UpdateJobEntryState(jobId, newJobState, DateTime.Now);
     }
 
-    public void OnPerforming(PerformingContext filterContext) { }
+    public void OnPerforming(PerformingContext filterContext)
+    {
+        var jobId = filterContext.BackgroundJob.Id;
+
+        using var scope = _scopeFactory.CreateScope();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
+
+        childJobStorage.UpdateJobEntryState(jobId, JobStatus.Processing, DateTime.Now);
+    }
  }

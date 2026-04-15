@@ -8,7 +8,20 @@ public class ServiceStateRedisRepository(string connectionString) : IServiceStat
 {
     public bool IsConnected => _redis?.IsConnected == true && _database != null;
 
-    public event AsyncEventHandler<ConnectedAsyncEventArgs> ConnectedAsync;
+    private event AsyncEventHandler<ConnectedAsyncEventArgs>? ConnectedAsync;
+
+    event AsyncEventHandler<ConnectedAsyncEventArgs> IServiceStateRepository.ConnectedAsync
+    {
+        add
+        {
+            ConnectedAsync += value;
+        }
+
+        remove
+        {
+            ConnectedAsync -= value;
+        }
+    }
 
     private ConnectionMultiplexer? _redis;
 
@@ -49,7 +62,6 @@ public class ServiceStateRedisRepository(string connectionString) : IServiceStat
 
     protected async Task InvokeConnectedAsync(bool success, Exception? exception = null, CancellationToken cancellationToken = default)
     {
-        // Safe event invocation: capture and iterate to isolate handler failures
         var handlers = ConnectedAsync;
         if (handlers == null)
             return;

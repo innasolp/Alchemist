@@ -36,7 +36,7 @@ internal class ChildJobOrchestrator<T>(IJobExecutorRegistry jobExecutorRegistry,
 
         using var scope = _serviceScopeFactory.CreateScope();
 
-        var childJobStorage = scope.ServiceProvider.GetRequiredService<IChildJobStorage>();
+        var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
         var jobIdsToActivate = await childJobStorage.GetChildJobIdsForProcessing(childJobCountPerParent, freeSlots);
 
@@ -47,8 +47,6 @@ internal class ChildJobOrchestrator<T>(IJobExecutorRegistry jobExecutorRegistry,
             var jobExecutor = _jobExecutorRegistry.Get(isChild: true);
             jobExecutor.Execute<T>(jobId, processingChildQueue);
         }
-
-        await childJobStorage.UpdateChildJobsStateAsync(jobIdsToActivate, JobStatus.Processing);
     }
 
     private static int? GetServerWorkerCount(IMonitoringApi monitoringApi, string serverName)

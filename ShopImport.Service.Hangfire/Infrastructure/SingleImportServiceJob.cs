@@ -6,8 +6,9 @@ namespace ShopImport.Service.Hangfire.Infrastructure;
 
 internal class SingleImportServiceJob<TImportSource>(IImportService importService,
     TImportSource importSource,
+    Guid id,
     Guid? parentId = null,
-    JobExecuteOptions? jobExecuteOptions = null) : ImportServiceJob(parentId, jobExecuteOptions)
+    JobExecuteOptions? jobExecuteOptions = null) : ImportServiceJob(id, parentId, jobExecuteOptions)
     where TImportSource : IImportSource, IIdentificableSource
 {
     private readonly TImportSource _importSource = importSource;

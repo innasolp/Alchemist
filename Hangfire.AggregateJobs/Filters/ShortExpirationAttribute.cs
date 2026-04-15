@@ -4,7 +4,7 @@ using Hangfire.Storage;
 
 namespace Hangfire.AggregateJobs.Filters;
 
-internal class ShortExpirationAttribute(int minutes = 1) : JobFilterAttribute, IApplyStateFilter
+public class ShortExpirationAttribute(int minutes = 1) : JobFilterAttribute, IApplyStateFilter
 {
     private readonly int _minutes = minutes;
 
