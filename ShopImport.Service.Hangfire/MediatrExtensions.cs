@@ -3,7 +3,6 @@ using Autofac.Extensions.DependencyInjection;
 using BackgroundTaskQueue;
 using Hangfire;
 using Hangfire.AggregateJobs;
-using Hangfire.States;
 using Import.Service.Infrastructure;
 using Import.Service.Infrastructure.Handlers;
 using Mediator.Messages;
@@ -87,7 +86,11 @@ public static class MediatrExtensions
             childStorageOptionsAction,
             configureHangfireStorage,
             importConfigure
-            );       
+            );
+
+        services.AddIddleJobClenUp();
+
+        services.AddExpiredJobCleanUp();
 
         services.AddScoped<IChildJobEnricher<IImportServiceJob>, ParentJobTagEnricher>();
 
@@ -97,6 +100,9 @@ public static class MediatrExtensions
     public static void UseImportServiceChildJobOrchestrator(this IHost host, AggregateServerSettings aggregateServerSettings)
     {
         host.UseChildJobOrchestrator<IHagfireServiceJobManager>(aggregateServerSettings);
-        //host.ClearChildJobStorage();
-    }    
+
+        host.UseIddleJobCleanUp();
+
+        host.UseExpiredJobCleanUp();
+    }
 }

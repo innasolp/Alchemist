@@ -7,19 +7,20 @@ internal class EFAggregateJobStorage(AggregateJobDbContext dbContext) : IAggrega
 {
     private readonly AggregateJobDbContext _dbContext = dbContext;
 
-    public async Task CreateJobEntryAsync(JobEntry childJobEntry)
+    public async Task CreateJobEntryAsync(JobEntry childJobEntry, CancellationToken cancellationToken = default)
     {
-        await _dbContext.AddAsync(childJobEntry);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.AddAsync(childJobEntry, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteJobAsync(string jobId)
+    public async Task DeleteJobEntryAsync(string jobId, CancellationToken cancellationToken = default)
     {
-        await _dbContext.JobEntries.Where(x => x.JobId == jobId).ExecuteDeleteAsync();
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.JobEntries.Where(x => x.JobId == jobId).ExecuteDeleteAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots)
+    public async Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots,
+        CancellationToken cancellationToken = default)
     {
         var childstatusEnqueued = 0;
         var parentstatusExecuting = 1;
@@ -86,19 +87,19 @@ LIMIT {freeSlots}";
                 .FromSqlRaw(sql)
                 .Select(j => j.JobId)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state)
+    public async Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state, CancellationToken cancellationToken = default)
     {
         await _dbContext.JobEntries
            .Where(j => jobIds.Contains(j.JobId))
-           .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state));
+           .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state), cancellationToken);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public void UpdateJobState(string jobId, JobStatus state, DateTime updateAt)
+    public void UpdateJobEntryState(string jobId, JobStatus state, DateTime updateAt)
     {
         _dbContext.JobEntries
            .Where(j => j.JobId == jobId)
@@ -107,28 +108,28 @@ LIMIT {freeSlots}";
         _dbContext.SaveChanges();
     }
 
-    public async Task UpdateJobStateAsync(string jobId, JobStatus state, DateTime updateAt)
+    public async Task UpdateJobEntryStateAsync(string jobId, JobStatus state, DateTime updateAt, CancellationToken cancellationToken = default)
     {
         await _dbContext.JobEntries
            .Where(j => j.JobId == jobId)
-           .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state).SetProperty(b => b.UpdatedAt, updateAt));
+           .ExecuteUpdateAsync(s => s.SetProperty(b => b.Status, state).SetProperty(b => b.UpdatedAt, updateAt), cancellationToken);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateParentJobIdAsync(IEnumerable<string> jobIds, string parentJobId)
+    public async Task UpdateParentJobIdAsync(IEnumerable<string> jobIds, string parentJobId, CancellationToken cancellationToken = default)
     {
         await _dbContext.JobEntries
            .Where(j => jobIds.Contains(j.JobId))
-           .ExecuteUpdateAsync(s => s.SetProperty(b => b.ParentJobId, parentJobId));
+           .ExecuteUpdateAsync(s => s.SetProperty(b => b.ParentJobId, parentJobId), cancellationToken);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings)
+    public async Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings, CancellationToken cancellationToken = default)
     {
-        await _dbContext.AddAsync(parentJobIdleSettings);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.AddAsync(parentJobIdleSettings, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<string>> GetIdleParentJobsIdsAsync(DateTime currentDate, CancellationToken cancellationToken = default)
@@ -145,25 +146,51 @@ LIMIT {freeSlots}";
         return await query.ToListAsync(cancellationToken);
     }
 
-    public Task<JobEntry?> GetJobByExecutionIdAsync(string executionId)
+    public Task<JobEntry?> GetJobEntryByExecutionIdAsync(string executionId, CancellationToken cancellationToken = default)
     {
-        return _dbContext.JobEntries.Where(x => x.ExecutionId == executionId).FirstOrDefaultAsync();
+        return _dbContext.JobEntries.Where(x => x.ExecutionId == executionId).FirstOrDefaultAsync(cancellationToken);
     }
 
-    public Task<bool> JobExecutionExistsAsync(string executionId)
+    public Task<bool> JobExecutionExistsAsync(string executionId, CancellationToken cancellationToken = default)
     {
-        return _dbContext.JobEntries.AnyAsync(x => x.ExecutionId == executionId);
+        return _dbContext.JobEntries.AnyAsync(x => x.ExecutionId == executionId, cancellationToken);
     }
 
-    public async Task<IEnumerable<string>> GetJobIdsByExecutionIdsAsync(IEnumerable<string> executionIds)
+    public async Task<IEnumerable<(string ExecutionId, string JobId)>>
+        GetJobIdsByExecutionIdsAsync(IEnumerable<string> executionIds, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.JobEntries
+        var jobs = await _dbContext.JobEntries
            .Where(j => executionIds.Contains(j.ExecutionId))
-           .Select(j=>j.JobId).ToListAsync();
+           .Select(j => new { j.ExecutionId, j.JobId })
+           .ToListAsync(cancellationToken);
+
+        return jobs.Select( j=> (j.ExecutionId!, j.JobId));
     }
 
-    public JobEntry? GetJobByExecutionId(string executionId)
+    public JobEntry? GetJobEntryByExecutionId(string executionId)
     {
         return _dbContext.JobEntries.Where(x => x.ExecutionId == executionId).FirstOrDefault();
+    }
+
+    public async Task DeleteJobEntryByExecutionIdAsync(string executionId, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.JobEntries.Where(x => x.ExecutionId == executionId).ExecuteDeleteAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<string>> GetExpiredJobIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.JobEntries
+           .Where(j => j.Status == JobStatus.Completed || j.Status == JobStatus.Deleted || j.Status == JobStatus.Failed )
+           .Select(j => j.JobId )
+           .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<string>> GetChildJobIdsAsync(string parentJobId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.JobEntries
+           .Where(j => j.ParentJobId == parentJobId)
+           .Select(j => j.JobId)
+           .ToListAsync(cancellationToken);
     }
 }

@@ -32,8 +32,7 @@ public static class DIExtensions
 
         services.AddScoped<IAggregateJobStorage, EFAggregateJobStorage>();
 
-        services.AddScoped<ChildJobOrchestrator<T>>();
-        services.AddScoped<IdleJobChecker>();
+        services.AddScoped<ChildJobOrchestrator<T>>();        
 
         services.AddScoped<IJobExecuteManager, JobExecuteManager>();
 
@@ -62,5 +61,15 @@ public static class DIExtensions
         });
 
         return services;
+    }
+
+    public static IServiceCollection AddIddleJobClenUp(this IServiceCollection services)
+    {
+        return services.AddScoped<IdleJobChecker>();
+    }
+
+    public static IServiceCollection AddExpiredJobCleanUp(this IServiceCollection services)
+    {
+        return services.AddScoped<IExpiredJobCleanUpManager, ExpiredJobCleanUpManager>();
     }
 }

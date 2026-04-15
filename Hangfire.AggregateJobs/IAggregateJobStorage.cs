@@ -4,29 +4,35 @@ namespace Hangfire.AggregateJobs;
 
 public interface IAggregateJobStorage
 {
-    Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots);
+    Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots, CancellationToken cancellationToken = default);
 
-    Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state);
+    Task UpdateJobsStateAsync(IEnumerable<string> jobIds, JobStatus state, CancellationToken cancellationToken = default);
 
-    Task CreateJobEntryAsync(JobEntry childJobEntry);
+    Task CreateJobEntryAsync(JobEntry childJobEntry, CancellationToken cancellationToken = default);
 
-    Task DeleteJobAsync(string jobId);  
+    Task DeleteJobEntryAsync(string jobId, CancellationToken cancellationToken = default);  
+
+    Task DeleteJobEntryByExecutionIdAsync(string executionId, CancellationToken cancellationToken = default);  
     
-    Task<JobEntry?> GetJobByExecutionIdAsync(string executionId);    
+    Task<JobEntry?> GetJobEntryByExecutionIdAsync(string executionId, CancellationToken cancellationToken = default);    
 
-    JobEntry? GetJobByExecutionId(string executionId);    
+    JobEntry? GetJobEntryByExecutionId(string executionId);    
 
-    void UpdateJobState(string jobId, JobStatus state, DateTime updateAt);
+    void UpdateJobEntryState(string jobId, JobStatus state, DateTime updateAt);
 
-    Task UpdateJobStateAsync(string jobId, JobStatus state, DateTime updateAt);
+    Task UpdateJobEntryStateAsync(string jobId, JobStatus state, DateTime updateAt, CancellationToken cancellationToken = default);
 
-    Task<bool> JobExecutionExistsAsync(string executionId);
+    Task<bool> JobExecutionExistsAsync(string executionId, CancellationToken cancellationToken = default);
 
-    Task UpdateParentJobIdAsync(IEnumerable<string> jobIds, string parentJobId);
+    Task UpdateParentJobIdAsync(IEnumerable<string> jobIds, string parentJobId, CancellationToken cancellationToken = default);
 
-    Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings);
+    Task CreateParentJobIdleSettingsAsync(ParentJobIdleSettings parentJobIdleSettings, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<string>> GetIdleParentJobsIdsAsync(DateTime currentDate, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<string>> GetJobIdsByExecutionIdsAsync(IEnumerable<string> executionIds);
+    Task<IEnumerable<(string ExecutionId, string JobId)>> GetJobIdsByExecutionIdsAsync(IEnumerable<string> executionIds, CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<string>> GetExpiredJobIdsAsync(CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<string>> GetChildJobIdsAsync(string parentJobId, CancellationToken cancellationToken = default);
 }

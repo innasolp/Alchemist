@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Hangfire.AggregateJobs.Filters;
 using Hangfire.Server;
 using System.ComponentModel;
 
@@ -8,6 +9,7 @@ public interface IHagfireServiceJobManager
 {
     [DisplayName("{1}")]
     [AutomaticRetry(Attempts =0)]
+    [ShortExpiration(minutes: 10)]
     Task Execute(Guid id,
         string displayName, 
         bool isAggregate = false,

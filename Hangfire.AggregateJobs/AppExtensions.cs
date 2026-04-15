@@ -16,7 +16,7 @@ public static class AppExtensions
         {
             childJobDbContext.Database.EnsureDeleted();
         }
-        catch (DbException ex) when (ex.SqlState == "3D000"){}
+        catch (DbException ex) when (ex.SqlState == "3D000") { }
 
         childJobDbContext.Database.EnsureCreated();
     }
@@ -31,12 +31,21 @@ public static class AppExtensions
                             aggregateServerSettings.ChildProcessingQueue),
             Cron.Minutely());
 
-        recurringJobManager.AddOrUpdate<IdleJobChecker>(IdleJobChecker.Task, x => x.Dispatch(null), Cron.Minutely());
-
-
         //todo
         using var scope = host.Services.CreateScope();
         var childJobDbContext = scope.ServiceProvider.GetRequiredService<AggregateJobDbContext>();
         childJobDbContext.Database.EnsureCreated();
+    }
+
+    public static void UseIddleJobCleanUp(this IHost host)
+    {
+        var recurringJobManager = host.Services.GetRequiredService<IRecurringJobManager>();
+        recurringJobManager.AddOrUpdate<IdleJobChecker>(IdleJobChecker.Task, x => x.Dispatch(null), Cron.Minutely());
+    }
+
+    public static void UseExpiredJobCleanUp(this IHost host)
+    {
+        var recurringJobManager = host.Services.GetRequiredService<IRecurringJobManager>();
+        recurringJobManager.AddOrUpdate<IExpiredJobCleanUpManager>(ExpiredJobCleanUpManager.Task, x => x.Dispatch(null, null), Cron.MinuteInterval(10));
     }
 }

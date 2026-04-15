@@ -18,7 +18,7 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
         var newJobState = filterContext.CancellationToken.ShutdownToken.IsCancellationRequested ? JobStatus.Deleted
              : filterContext.Exception != null ? JobStatus.Failed : JobStatus.Completed;
 
-        childJobStorage.UpdateJobState(jobId, newJobState, DateTime.Now);
+        childJobStorage.UpdateJobEntryState(jobId, newJobState, DateTime.Now);
     }
 
     public void OnPerforming(PerformingContext filterContext)
@@ -28,6 +28,6 @@ internal class ChildTaskFilter(IServiceScopeFactory scopeFactory) : IServerFilte
         using var scope = _scopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        childJobStorage.UpdateJobState(jobId, JobStatus.Processing, DateTime.Now);
+        childJobStorage.UpdateJobEntryState(jobId, JobStatus.Processing, DateTime.Now);
     }
  }
