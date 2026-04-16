@@ -1,6 +1,6 @@
 ﻿namespace Db.Infrastructure;
 
-public interface IEvent
+public interface IEvent : INotification
 {
     DateTime CreationDate { get; }
 
