@@ -6,6 +6,7 @@ namespace Alchemist.Test.Server.Fixtures;
 
 public record TestLogMessage(LogLevel LogLevel, string CategoryName, EventId EventId, string Message, Exception? Exception);
 
+
 public abstract class LoggedContextTest(ITestOutputHelper outputHelper)
 {
     protected ITestOutputHelper OutputHelper { get; private set; } = outputHelper;
