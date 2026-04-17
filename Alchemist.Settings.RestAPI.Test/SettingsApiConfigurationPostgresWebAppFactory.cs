@@ -15,7 +15,7 @@ public class SettingsApiConfigurationPostgresWebAppFactory
 {
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
-    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker> _dbInterceptor;
+    private readonly DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper> _dbInterceptor;
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
@@ -32,7 +32,7 @@ public class SettingsApiConfigurationPostgresWebAppFactory
         _signalRApplicationFactory = new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
         _signalRApplicationFactory.CreateClient();
 
-        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>(this,
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>(this,
             "ConnectionStrings:DbContext2", "test_db_settings", "postgres", "P@ssw0rd", 5432, fillTestData : FillTestData);
     }
 

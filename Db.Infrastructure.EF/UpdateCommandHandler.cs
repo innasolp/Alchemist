@@ -14,3 +14,9 @@ public class UpdateCommandHandler<T, TUpdateCommand>(IUnitOfWork unitOfWork, DbC
         return Task.CompletedTask;
     }
 }
+
+public class UpdateCommandHandler<T>(IUnitOfWork unitOfWork, DbContext dbContext)
+    : UpdateCommandHandler<T, UpdateCommand<T>>(unitOfWork, dbContext)
+    where T : class
+{
+}

@@ -43,6 +43,8 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
+
         builder.ConfigureAppConfiguration((context, config) =>
         {
             _configureAppConfiguration?.Invoke(context, config);

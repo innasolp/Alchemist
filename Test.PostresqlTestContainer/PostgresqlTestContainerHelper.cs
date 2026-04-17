@@ -6,17 +6,15 @@ namespace Test.PostresqlTestContainer;
 
 public static class PostgresqlTestContainerHelper
 {
-    public static PostgreSqlContainer BuildPostgreSqlContainer(string host, int port = 5432, string password = "P@ssw0rd")
+    public static PostgreSqlContainer BuildPostgreSqlContainer(string host, int port = 5432, string user ="postgres", string password = "P@ssw0rd")
     {
         return new PostgreSqlBuilder("postgres:latest")
             .WithName(Guid.NewGuid().ToString("N"))
             .WithHostname(host)
-            .WithExposedPort(port)
-        .WithPortBinding(port, true)
-        .WithEnvironment("POSTGRES_PASSWORD", password)
-        .WithEnvironment("PGDATA", "/pgdata")
-        .WithTmpfsMount("/pgdata")
-        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("psql -U postgres -c \"select 1\""))
+           .WithPortBinding(port, true)
+        .WithPassword(password)
+        .WithUsername(user)
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("pg_isready"))
             .Build();
     }
 
@@ -28,7 +26,8 @@ public static class PostgresqlTestContainerHelper
             Port = postgreSqlContainer.GetMappedPublicPort(publicPort),
             Database = dataBase,
             Username = user,
-            Password = password
+            Password = password,
+            KeepAlive = 30
         };
 
         return sb.ConnectionString;

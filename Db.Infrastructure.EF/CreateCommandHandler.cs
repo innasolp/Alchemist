@@ -7,10 +7,15 @@ public class CreateCommandHandler<T, TCreateCommand>(IUnitOfWork unitOfWork, DbC
     : TransactionalCommandHandler<TCreateCommand>(unitOfWork)
     where TCreateCommand : CreateCommand<T>
     where T:class
-{    
-
+{
     protected override async Task HandleCommand(TCreateCommand command, CancellationToken cancellationToken)
     {
         await dbContext.Set<T>().AddAsync(command.Entity, cancellationToken);
     }
+}
+
+public class CreateCommandHandler<T>(IUnitOfWork unitOfWork, DbContext dbContext)
+    : CreateCommandHandler<T, CreateCommand<T>>(unitOfWork,dbContext)
+    where T : class
+{
 }

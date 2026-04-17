@@ -3,9 +3,17 @@ using Test.DbContainer.Abstractions;
 
 namespace Test.PostresqlTestContainer;
 
-public class PostgresDbChecker : IDbChecker
+public class PostgresDbHelper : IDbHelper
 {
-    public async Task<bool> CheckDatabaseAsync(string database, string initializeConnectionString)
+    public async Task CreateDatabaseAsync(string database, string masterConnectionString)
+    {
+        using var connection = new NpgsqlConnection(masterConnectionString);
+        await connection.OpenAsync();
+        using var command = new NpgsqlCommand($"CREATE DATABASE {database};", connection);
+        await command.ExecuteNonQueryAsync();
+    }
+
+    public async Task<bool> DatabaseExistsAsync(string database, string initializeConnectionString)
     {
         await using var connection = new NpgsqlConnection(initializeConnectionString);
 

@@ -33,6 +33,9 @@ public abstract class DbConfigurationWebAppInterceptor<TDbContext> : IDisposable
     protected virtual void ConfigureServiceProvider(IServiceProvider serviceProvider)
     {
         using var appContext = serviceProvider.GetRequiredService<TDbContext>();
+
+        appContext.Database.EnsureCreated();
+
         FillTestData(appContext);
     }
 

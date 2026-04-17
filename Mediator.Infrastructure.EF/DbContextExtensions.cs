@@ -8,6 +8,7 @@ public static class DbContextExtensions
         where T : class
     {
         await dbContext.Set<T>().AddAsync(entity, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
