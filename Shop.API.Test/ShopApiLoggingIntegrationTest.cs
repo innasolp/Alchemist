@@ -27,7 +27,8 @@ public class ShopAPIConfigurationLoggingWebAppFactory : ShopApiConfigurationWebA
     }
 }
 
-public class ShopApiLoggingIntegrationTest: LoggedContextTestFixture<ShopAPIConfigurationLoggingWebAppFactory, ShopAPIProgram>
+public class ShopApiLoggingIntegrationTest(ShopAPIConfigurationLoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+    : LoggedContextTestFixture<ShopAPIConfigurationLoggingWebAppFactory, ShopAPIProgram>(webAppFactory, outputHelper)
 {
     record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
 
@@ -36,12 +37,6 @@ public class ShopApiLoggingIntegrationTest: LoggedContextTestFixture<ShopAPIConf
     private const string HttpExceptionHandler = "GlobalExceptionHandler";
 
     private const string ResponseBodyEvent = "ResponseBody";
-
-    public ShopApiLoggingIntegrationTest(ShopAPIConfigurationLoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
-        : base(webAppFactory, outputHelper)
-    {
-        WebAppFactory.FixtureLoggingContext.LoggedMessage += Log;
-    }
 
     [Fact]
     public async Task LogOnGetShopSuccessAsync()

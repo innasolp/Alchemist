@@ -3,7 +3,6 @@ using Alchemist.Test.Log;
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shop.API.Test.Infrastructure;
@@ -12,10 +11,14 @@ using Xunit.Abstractions;
 
 namespace Shop.API.Test;
 
-public class SignalRLogConfigurationWebAppFactory()
-    : ShopApiConfigurationWebAppFactory("ConnectionStrings:DbContext2", "test_ci_db_signalr", httpPort:8052, httpsPort : 8053), ILoggedContext
+public class SignalRLogConfigurationWebAppFactory : ShopApiConfigurationWebAppFactory, ILoggedContext
 {
-    private readonly TestServer _signalRServer = SignalRCommon.SignalRTestServer;
+    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRFactory = SignalRCommon.SignalRWebAppFactory;
+
+    public SignalRLogConfigurationWebAppFactory() : base("ConnectionStrings:DbContext2", "test_ci_db_signalr", httpPort:8052, httpsPort : 8053)
+    {
+        _signalRFactory.CreateClient();
+    }
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
 
@@ -25,16 +28,29 @@ public class SignalRLogConfigurationWebAppFactory()
     {
         base.ConfigureWebHostBuilderContext(context, services);
 
-        FixtureLoggingContext.ConfigureServices(services);
-        services.SetSignalRHubTestSender(_signalRServer, ["events"]);
+        services.SetSignalRHubTestSender(_signalRFactory.Server, ["events"]);
+
+        _signalRFactory.FixtureLoggingContext.ConfigureServices(services);
+    }
+
+    internal void SubscribeSignalRLogMessage(LogMessage logMessage)
+    {
+        _signalRFactory.FixtureLoggingContext.LoggedMessage += logMessage;
+    }
+
+    internal void UnsubscribeSignalRLogMessage(LogMessage logMessage)
+    {
+        _signalRFactory.FixtureLoggingContext.LoggedMessage -= logMessage;
     }
 }
 
-public class ShopAPISignalRIntegrationTest(SignalRLogConfigurationWebAppFactory webAppFactory, ITestOutputHelper outputHelper)
-    : LoggedContextTestFixture<SignalRLogConfigurationWebAppFactory, ShopAPIProgram>(webAppFactory, outputHelper) //, IAsyncLifetime
+public class ShopAPISignalRIntegrationTest : LoggedContextTestFixture<SignalRLogConfigurationWebAppFactory, ShopAPIProgram> //, IAsyncLifetime
 {
-    record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
-        
+    public ShopAPISignalRIntegrationTest(SignalRLogConfigurationWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
+        : base(webAppFactory, outputHelper) //, IAsyncLifetime
+    {
+        WebAppFactory.SubscribeSignalRLogMessage(Log);
+    }
 
     [Fact]
     public async Task LogInfoSendMessageOnCreateShopAsync()
@@ -90,5 +106,12 @@ public class ShopAPISignalRIntegrationTest(SignalRLogConfigurationWebAppFactory 
         {
             await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
+    }
+
+    public override void Dispose()
+    {
+        WebAppFactory.UnsubscribeSignalRLogMessage(Log);
+
+        base.Dispose();
     }
 }

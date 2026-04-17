@@ -21,16 +21,16 @@ internal static class SignalRCommon
          
         services.AddSingleton(messageSenderMock.Object);
     }
+    
 
-    private static TestServer? _signalRTestServer;
+    private static SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRWebAppFactory;
 
-    public static TestServer SignalRTestServer
+    public static SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> SignalRWebAppFactory
     {
         get
         {
-            _signalRTestServer ??= new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>().Server;
-
-            return _signalRTestServer;
+            _signalRWebAppFactory ??= new SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext>();
+            return _signalRWebAppFactory;
         }
     }
 }
