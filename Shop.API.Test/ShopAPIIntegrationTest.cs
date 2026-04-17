@@ -1,3 +1,5 @@
+using Alchemist.Test.Log;
+using Alchemist.Test.Server.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Shop.API.Test.Infrastructure;
@@ -6,19 +8,27 @@ using Xunit.Abstractions;
 
 namespace Shop.API.Test;
 
-public class ShopAPISignlRMockWebAppFactory : ShopApiConfigurationWebAppFactory
+public class ShopAPISignlRMockWebAppFactory : ShopApiConfigurationWebAppFactory, ILoggedContext
 {
+    public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
+
+    FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
+
     public ShopAPISignlRMockWebAppFactory() 
         : base("ConnectionStrings:DbContext2", "test_shop", SignalRCommon.ConfigureSignalRMock)
     { 
     }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
-    {}
+    {
+        base.ConfigureWebHostBuilderContext(context, services);
+
+        FixtureLoggingContext.ConfigureServices(services);
+    }
 }
 
 public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
-    : ShopAPIConfigurationTestFixture<ShopAPISignlRMockWebAppFactory>(webAppFactory, outputHelper)
+    : LoggedContextTestFixture<ShopAPISignlRMockWebAppFactory, ShopAPIProgram>(webAppFactory, outputHelper)
 {
     [Fact]
     public async Task GetShopSuccessAsync()
@@ -36,6 +46,13 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
             Assert.NotNull(shop);
             Assert.Equal(name, shop.Name);
         }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
         finally
         {
            //await WebAppFactory.ResetDatabaseIfAvailableAsync();
@@ -51,6 +68,13 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
             var response = await httpClient.GetAsync($"api/Shop/byName?name={""}");
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
         }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
         finally
         {
             //await WebAppFactory.ResetDatabaseIfAvailableAsync();
@@ -65,6 +89,13 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
             using var httpClient = WebAppFactory.GetHostHttpClient();
             var response = await httpClient.GetAsync($"api/Shop/byName?name={Guid.NewGuid().ToString()}");
             Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
         }
         finally
         {
@@ -90,6 +121,13 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
             Assert.NotNull(shopNew);
             Assert.Equal(shop.Name, shopNew.Name);
         }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
         finally
         {
             //await WebAppFactory.ResetDatabaseIfAvailableAsync();
@@ -107,6 +145,13 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
             var response = await httpClient.PutAsJsonAsync($"api/Shop", shop);
 
             Assert.Equal(System.Net.HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
         }
         finally
         {

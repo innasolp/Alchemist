@@ -31,9 +31,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     private readonly int _settingsAPIHttpPort;
     private readonly int _settingsAPIHttpsPort;
 
-    private readonly SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker> _settingsAPIWebAppFactory;
+    private readonly SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper> _settingsAPIWebAppFactory;
 
-    private readonly ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker> _shopAPIWebAppFactory;
+    private readonly ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper> _shopAPIWebAppFactory;
 
     private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRApplicationFactory;
 
@@ -77,10 +77,10 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
         _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(browserServiceHttpPort, browserServiceHttpsPort);
 
-        _shopAPIWebAppFactory = new ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer,PostgresDbRespawner, PostgresDbChecker>
+        _shopAPIWebAppFactory = new ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer,PostgresDbRespawner, PostgresDbHelper>
             ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _shopAPIHttpPort, _shopAPIHttpsPort, _signalRApplicationFactory.Server);
 
-        _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbChecker>
+        _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>
             ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server);
     }
 

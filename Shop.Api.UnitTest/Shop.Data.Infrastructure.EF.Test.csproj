@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
@@ -18,7 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shop.API\Shop.API.csproj" />
+    <ProjectReference Include="..\Shop.Infrastructure.EF\Shop.Infrastructure.EF.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
+    <ProjectReference Include="..\Db.Infrastructure\Db.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shop.Data.Infrastructure\Shop.Data.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shop.Data.Infrastructure.EF\Shop.Data.Infrastructure.EF.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -49,7 +49,7 @@ public static class SettingsApiHelper
         Action<AlchemyContext>? fillTestData = null)
         where TTestDbContainer : class, ITestDbContainer, new()
         where TDbRespawner : class, IDatabaseRespawner, new()
-        where TDbChecker : class, IDbChecker, new()
+        where TDbChecker : class, IDbHelper, new()
     {        
         var settingsApiFactory = new SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,
@@ -74,7 +74,7 @@ public static class SettingsApiHelper
         Action<AlchemyContext>? fillTestData = null)
         where TTestDbContainer : class, ITestDbContainer, new()
         where TDbRespawner : class, IDatabaseRespawner, new()
-        where TDbChecker : class, IDbChecker, new()
+        where TDbChecker : class, IDbHelper, new()
     {        
         return new SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,

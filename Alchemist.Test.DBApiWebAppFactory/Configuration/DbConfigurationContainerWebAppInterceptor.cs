@@ -4,18 +4,18 @@ using Test.DbContainer.Abstractions;
 
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
 
-public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContainer, TDbRespawner, TDbChecker>
+public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContainer, TDbRespawner, TDbHelper>
     : DbConfigurationWebAppInterceptor<TDbContext>, IAsyncLifetime
     where TDbContext : DbContext
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
-    where TDbChecker : class, IDbChecker, new()
+    where TDbHelper : class, IDbHelper, new()
 {
     private readonly TTestDbContainer _testDbContainer;
 
     private readonly TDbRespawner _dbRespawner;
 
-    private readonly TDbChecker _dbChecker;
+    private readonly TDbHelper _dbHelper;
 
     protected override string ConnectionStringSection { get; }
 
@@ -41,22 +41,22 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
         int port, 
         TTestDbContainer? testDbContainer = null,
         TDbRespawner? dbRespawner = null,
-        TDbChecker? dbChecker = null,
+        TDbHelper? dbChecker = null,
         Action<TDbContext>? fillTestData = null) : base(webHostConfigure)
     {
         _testDbContainer = testDbContainer ?? new TTestDbContainer();
         _dbRespawner = dbRespawner ?? new TDbRespawner();
-        _dbChecker = dbChecker ?? new TDbChecker();
+        _dbHelper = dbChecker ?? new TDbHelper();
 
         ConnectionStringSection = connectionStringSection;
         _database = database;
         _user = user;
         _password = password;
         _port = port;
-
+        
         _fillTestData = fillTestData;
 
-        _testDbContainer.Build(_host, port, password);
+        _testDbContainer.Build(_host, port, user, password);
     }
 
     protected override string ConnectionString => _connectionString ?? "";
@@ -79,24 +79,17 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
     {
         await _testDbContainer.InitializeAsync();
 
-        _connectionString = _testDbContainer.BuildConnectionString(_database, _port, _user, _password);
+        var initializeConnectionString = _testDbContainer.BuildConnectionString("postgres", _port);
+        _connectionString = _testDbContainer.BuildConnectionString(_database, _port);
 
-        await InitializeRespawnerIfAvailableAsync(_connectionString);
-    }
-
-    private async Task InitializeRespawnerIfAvailableAsync(string connectionString)
-    {
-        var initializeConnectionString = _testDbContainer.BuildConnectionString("postgres", _port, _user, _password);
-
-        if (await _dbChecker.CheckDatabaseAsync(_database, initializeConnectionString))
-            await _dbRespawner.InitializeAsync(connectionString);
+        if (!await _dbHelper.DatabaseExistsAsync(_database, initializeConnectionString))
+            await _dbHelper.CreateDatabaseAsync(_database, initializeConnectionString);
+        else 
+            await _dbRespawner.InitializeAsync(_connectionString);
     }
 
     public async Task ResetDatabaseIfAvailableAsync()
-    {
-        if(!_dbRespawner.IsInitialized)
-            await InitializeRespawnerIfAvailableAsync(ConnectionString);
-
+    {  
         if (_dbRespawner.IsInitialized)
             await _dbRespawner.ResetDatabaseAsync();
     }

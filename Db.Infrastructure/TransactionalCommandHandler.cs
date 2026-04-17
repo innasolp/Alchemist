@@ -14,6 +14,8 @@ public abstract class TransactionalCommandHandler<TCommand>(IUnitOfWork unitOfWo
 
             await HandleCommand(command, cancellationToken);
 
+            await UnitOfWork.SaveChangesAsync(cancellationToken);
+
             await UnitOfWork.CommitTransactionAsync(cancellationToken);
         }
         catch

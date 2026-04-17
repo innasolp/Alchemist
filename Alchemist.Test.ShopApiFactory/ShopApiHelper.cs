@@ -49,7 +49,7 @@ public static class ShopApiHelper
         string dbPassword = "P@ssw0rd")
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
-     where TDbChecker : class, IDbChecker, new()    
+     where TDbChecker : class, IDbHelper, new()    
     {
         var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,
@@ -74,7 +74,7 @@ public static class ShopApiHelper
         string dbPassword = "P@ssw0rd")
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
-        where TDbChecker : class, IDbChecker, new()    
+        where TDbChecker : class, IDbHelper, new()    
         {
         var shopApiWebAppFactory = new ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker>(alchemyDbConnectionStringSection,
             database,

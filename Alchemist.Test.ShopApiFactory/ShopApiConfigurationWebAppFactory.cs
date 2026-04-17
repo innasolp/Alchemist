@@ -15,7 +15,7 @@ namespace Alchemist.Test.ShopApiFactory;
 public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, TDbChecker> : TestWebAppKestrelFactory<ShopAPIProgram>, IAsyncLifetime
     where TTestDbContainer : class, ITestDbContainer, new()
     where TDbRespawner : class, IDatabaseRespawner, new()
-    where TDbChecker : class, IDbChecker, new()
+    where TDbChecker : class, IDbHelper, new()
 {
     private readonly TestServer _signalRServer;
 

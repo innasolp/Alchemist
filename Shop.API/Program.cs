@@ -5,15 +5,14 @@ using BackgroundTaskQueue;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Log.Interceptors;
-using Mediator.Module.EF;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Loggers;
 using Shop.API;
-using Shop.Module;
 using Alchemist.WebApp.Api.Common;
 using Http.ErrorHandling;
+using Shop.Data.Infrastructure.EF;
 
 
 
@@ -28,7 +27,7 @@ builder.Services.AddAlchemyPostgresContextFactory(options => options.UseNpgsql(b
 
 builder.Services.AddUnboundedBackgroundQueue();
 
-builder.Host.AddMediatorInfrastructure(new ShopModule());
+builder.Host.AddShopInfrastructure();
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
@@ -68,7 +67,10 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-await app.UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync("RedisStore");
+if (!app.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
+{
+    await app.UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync("RedisStore");
+}
 
 app.Run();
 
