@@ -6,11 +6,11 @@ namespace Alchemist.Product.Data.Postgresql;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAlchemyPostgresContextFactory(this IServiceCollection services, Action<DbContextOptionsBuilder>? optionsAction = null)
+    public static IServiceCollection AddAlchemyPostgresContextFactory(this IServiceCollection services, Action<IServiceProvider, DbContextOptionsBuilder>? optionsAction = null)
     {
         services.AddDbContextFactory<AlchemyContextPostgres>((serviceProvider, optionsBuilder) =>
             {
-                optionsAction?.Invoke(optionsBuilder);
+                optionsAction?.Invoke(serviceProvider, optionsBuilder);
 
                 optionsBuilder.AddInterceptors(serviceProvider.GetRequiredService<DateChangedInterceptor>(),
                     serviceProvider.GetRequiredService <MaterialPathInterceptor>());
@@ -21,6 +21,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DateChangedInterceptor>();
 
         return services.AddSingleton<IDbContextFactory<AlchemyContext>>
-            (sp => new BaseContextFactoryAdapter<AlchemyContextPostgres, AlchemyContext>(sp.GetRequiredService<IDbContextFactory<AlchemyContextPostgres>>()));
+            (sp => 
+            new BaseContextFactoryAdapter<AlchemyContextPostgres, AlchemyContext>
+                (sp.GetRequiredService<IDbContextFactory<AlchemyContextPostgres>>()));
     }
 }

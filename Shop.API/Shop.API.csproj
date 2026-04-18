@@ -26,6 +26,7 @@
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Common\Alchemist.Common.csproj" />
     <ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
+    <ProjectReference Include="..\Db.Infrastructure.Messages\Db.Infrastructure.Messages.csproj" />
     <ProjectReference Include="..\Shop.Data.Infrastructure.EF\Shop.Data.Infrastructure.EF.csproj" />
   </ItemGroup>
 
