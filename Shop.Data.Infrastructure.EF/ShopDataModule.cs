@@ -17,6 +17,7 @@ public class ShopDataModule : Module
         })
         .AsSelf()
         .As<DbContext>()
+        .As<AlchemyContext>()
         .InstancePerLifetimeScope();
 
         builder.RegisterType(typeof(EFUnitOfWork<AlchemyContext>)).As(typeof(IUnitOfWork));

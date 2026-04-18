@@ -1,20 +1,21 @@
 using Alchemist.Common;
 using Alchemist.Log.Extensions;
+using Alchemist.Product.Data;
 using Alchemist.Product.Data.Postgresql;
+using Alchemist.WebApp.Api.Common;
 using BackgroundTaskQueue;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
+using Db.Infrastructure.EF.Outbox;
+using Db.Infrastructure.Messages;
+using Http.ErrorHandling;
 using Log.Interceptors;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Loggers;
 using Shop.API;
-using Alchemist.WebApp.Api.Common;
-using Http.ErrorHandling;
 using Shop.Data.Infrastructure.EF;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,11 +24,17 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 // Add services to the container.
 
-builder.Services.AddAlchemyPostgresContextFactory(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2")));
+var supportedEventTypes = builder.Configuration.GetSection("SupportedEvents").Get<List<SupportedEventType>>();
 
+builder.Services.AddAlchemyPostgresContextFactory((sp, options) =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2"));
+    options.AddOutbox(sp, supportedEventTypes);
+});
+builder.Services.AddOutboxProcessor<AlchemyContext>();
 builder.Services.AddUnboundedBackgroundQueue();
 
-builder.Host.AddShopInfrastructure();
+builder.Host.AddShopInfrastructure((builder)=>builder.AddBackgroundMessageHandlers());
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
 builder.Services.AddSignalRHubMessageSender(signalRUrl);
@@ -67,10 +74,14 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-if (!app.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
-{
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+    
+//if (!app.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
+//{
     await app.UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync("RedisStore");
-}
+//}
+
+await app.UseOutbox<AlchemyContext>();
 
 app.Run();
 
