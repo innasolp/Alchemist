@@ -30,7 +30,7 @@ public class AlchemistGrpcContextWebAppFactory : DbContextWebAppFactory<GrpcServ
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
-        return services.AddAlchemyPostgresContextFactory(optionsBuilder =>
+        return services.AddAlchemyPostgresContextFactory((sp,optionsBuilder) =>
             optionsBuilder.UseNpgsql(_postgreSqlContainer.BuildConnectionString(DataBase)));
     }
 

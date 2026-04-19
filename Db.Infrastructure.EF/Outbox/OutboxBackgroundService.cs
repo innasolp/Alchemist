@@ -70,9 +70,7 @@ internal class OutboxBackgroundService<TDbContext>(IServiceScopeFactory serviceS
 
         var entity = JsonSerializer.Deserialize(messageEntry.Payload, entityType);
 
-        var eventType = typeof(Event<>).MakeGenericType(entityType);
-        var @event = Activator.CreateInstance(eventType, entity, messageEntry.Category, messageEntry.CreatedAt); 
-
+        var eventType = typeof(IdentifiedEvent<>).MakeGenericType(entityType); 
         var handlerType = typeof(IEventHandler<,>).MakeGenericType(entityType,eventType);
 
         var handlers = scope.ServiceProvider.GetServices(handlerType).ToList();
@@ -86,6 +84,13 @@ internal class OutboxBackgroundService<TDbContext>(IServiceScopeFactory serviceS
             .Select(i => i.GetMethod("Handle"))
             .FirstOrDefault(m => m != null);
 
+            var messageHandleId = Guid.NewGuid().ToString();
+
+            var @event = Activator.CreateInstance(eventType, messageHandleId, entity, messageEntry.Category, messageEntry.CreatedAt);
+
+            if (handler is ICallback<string> callback)
+                callback.Callback += EventHandleCallback;
+
             var handle = method!.Invoke(handler, [@event, cancellationToken]);
             try
             {
@@ -98,6 +103,14 @@ internal class OutboxBackgroundService<TDbContext>(IServiceScopeFactory serviceS
         }
 
         return (errors.Count < handlers.Count, errors.ToArray());
+    }
+
+    private void EventHandleCallback(object? sender, EventArgs<string> e)
+    {
+        //todo ack handler
+
+        if (sender is ICallback<string> callback)
+            callback.Callback -= EventHandleCallback;
     }
 
     private async Task UpdateEventStateAsync(DbConnection dbConnection, Guid id, string state, string? error)

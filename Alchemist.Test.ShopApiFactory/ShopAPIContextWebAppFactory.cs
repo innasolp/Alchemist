@@ -33,7 +33,7 @@ public class ShopAPIContextWebAppFactory(string connectionString, TestServer sig
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
-        return services.AddAlchemyPostgresContextFactory(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
+        return services.AddAlchemyPostgresContextFactory((sp,optionsBuilder) => optionsBuilder.UseNpgsql(_connectionString));
     }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)

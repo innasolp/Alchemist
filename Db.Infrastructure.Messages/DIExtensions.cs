@@ -8,4 +8,9 @@ public static class DIExtensions
     {
         containerBuilder.RegisterGeneric(typeof(BackgroundMessageHandler<,>)).As(typeof(IEventHandler<,>));
     }
+
+    public static void AddCallbackBackgroundMessageHandlers(this ContainerBuilder containerBuilder)
+    {
+        containerBuilder.RegisterGeneric(typeof(CallbackBackgroundMessageHandler<,>)).As(typeof(IEventHandler<,>));
+    }
 }

@@ -34,10 +34,10 @@ builder.Services.AddAlchemyPostgresContextFactory((sp, options) =>
 builder.Services.AddOutboxProcessor<AlchemyContext>();
 builder.Services.AddUnboundedBackgroundQueue();
 
-builder.Host.AddShopInfrastructure((builder)=>builder.AddBackgroundMessageHandlers());
+builder.Host.AddShopInfrastructure((builder)=>builder.AddCallbackBackgroundMessageHandlers());
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
-builder.Services.AddSignalRHubMessageSender(signalRUrl);
+builder.Services.AddSignalRMessageHubAcknowledgefulSender(signalRUrl);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

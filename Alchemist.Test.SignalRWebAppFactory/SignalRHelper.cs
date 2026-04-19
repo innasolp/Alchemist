@@ -1,6 +1,6 @@
 ﻿using Message.Interfaces;
 using Message.SignalR;
-using Message.SignalR.DependencyInjection;
+using Message.SignalR.HubConnection.Extensions;
 using Message.SignalR.HubMessage;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;

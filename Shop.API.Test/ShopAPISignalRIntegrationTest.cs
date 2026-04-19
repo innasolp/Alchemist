@@ -13,7 +13,7 @@ namespace Shop.API.Test;
 
 public class SignalRLogConfigurationWebAppFactory : ShopApiConfigurationWebAppFactory, ILoggedContext
 {
-    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRFactory = new();// SignalRCommon.SignalRWebAppFactory;
+    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRFactory = new();
 
     public SignalRLogConfigurationWebAppFactory() : base("ConnectionStrings:DbContext2", "test_ci_db_signalr", httpPort:8052, httpsPort : 8053)
     {
@@ -33,7 +33,7 @@ public class SignalRLogConfigurationWebAppFactory : ShopApiConfigurationWebAppFa
         //todo
         if (!_signalRInjected)
         {
-            services.SetSignalRHubTestSender(_signalRFactory.Server, ["events"]);
+            services.SetSignalRHubTestAckSender(_signalRFactory.Server, ["events"]);
             _signalRInjected = true;
         }
     }
@@ -68,7 +68,7 @@ public class ShopAPISignalRIntegrationTest : LoggedContextTestFixture<SignalRLog
             var response = await shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
             Assert.True(response.IsSuccessStatusCode);
 
-            await Task.Delay(1000);
+            await Task.Delay(2000);
 
             Assert.Equal(2, LogMessages.Count(m => m.CategoryName.Contains(typeof(LogHubFilter).Name) && m.LogLevel == LogLevel.Information));
             Assert.Empty(LogMessages.Where(m => m.CategoryName.Contains(typeof(LogHubFilter).Name) && m.LogLevel == LogLevel.Error));
