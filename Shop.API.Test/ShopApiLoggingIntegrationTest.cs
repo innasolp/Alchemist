@@ -12,7 +12,7 @@ namespace Shop.API.Test;
 public class ShopAPIConfigurationLoggingWebAppFactory : ShopApiConfigurationWebAppFactory, ILoggedContext
 {
     public ShopAPIConfigurationLoggingWebAppFactory() 
-        : base("ConnectionStrings:DbContext2", "test_ci_db_logging", SignalRCommon.ConfigureSignalRMock, httpPort:8048, httpsPort: 8049)
+        : base("ConnectionStrings:DbContext2", "test_ci_db_logging", httpPort:8048, httpsPort: 8049)
     {
     }
 
@@ -23,6 +23,7 @@ public class ShopAPIConfigurationLoggingWebAppFactory : ShopApiConfigurationWebA
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
         base.ConfigureWebHostBuilderContext (context, services);
+        SignalRCommon.ConfigureSignalRMock(services);
         FixtureLoggingContext.ConfigureServices(services);
     }
 }
@@ -30,8 +31,6 @@ public class ShopAPIConfigurationLoggingWebAppFactory : ShopApiConfigurationWebA
 public class ShopApiLoggingIntegrationTest(ShopAPIConfigurationLoggingWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
     : LoggedContextTestFixture<ShopAPIConfigurationLoggingWebAppFactory, ShopAPIProgram>(webAppFactory, outputHelper)
 {
-    record TestLogMessage(LogLevel logLevel, string categoryName, EventId eventId, string message, Exception? exception);
-
     private const string HttpLogCategory = "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware";
 
     private const string HttpExceptionHandler = "GlobalExceptionHandler";

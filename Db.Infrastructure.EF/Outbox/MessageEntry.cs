@@ -2,6 +2,7 @@
 
 namespace Db.Infrastructure.EF.Outbox;
 
+
 internal class MessageEntry
 {
     [Key]
@@ -17,7 +18,7 @@ internal class MessageEntry
 
     public DateTime? ProcessedAt { get; set; }
 
-    public string State { get; set; } = "Created";
+    public string State { get; set; } = Outbox.State.Created.ToString();
 
     public string? Error { get; set; }
 }

@@ -9,5 +9,5 @@ public interface IWebHostBuilderConfigure
     event Action<WebHostBuilderContext, IConfigurationBuilder> ConfigureAppConfiguration;
     
 
-    event Action<WebHostBuilderContext, IServiceCollection> ConfigureWebHostBuilderContext;
+    event Action<WebHostBuilderContext, IServiceCollection> ConfigureWebHostBuilderContextServices;
 }

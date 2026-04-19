@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Data.Common;
@@ -23,47 +24,68 @@ internal class OutboxBackgroundService<TDbContext>(IServiceScopeFactory serviceS
             using var connection = context.Database.GetDbConnection();
 
             await connection.OpenAsync(stoppingToken);
+
+            IDbContextTransaction? transaction = null;
+
             try
             {
-
                 var newEvents = await connection.QueryAsync<MessageEntry>(
                     "SELECT id, category, event_type as eventType, payload, created_at as createdAt FROM message_entry WHERE state = @p0 and processed_at is null",
                     new { p0 = "created" });
 
+                transaction = await context.Database.BeginTransactionAsync(stoppingToken);
+
                 foreach (var @event in newEvents)
                 {
-                    var (success, errors) = await ProcessMessageAsync(@event, stoppingToken);
+                    var (success, errors) = await ProcessMessageAsync(scope, @event, stoppingToken);
                     var aggregateException = errors.Length > 0 ? new AggregateException(errors) : null;
                     await UpdateEventStateAsync(connection, @event.Id, success ? "processed" : "failed", aggregateException?.Message);
                 }
 
                 await DoCleanupAsync(context, _daysToKeep);
+
+                await transaction.CommitAsync(stoppingToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                if (transaction != null)
+                    await transaction.RollbackAsync(stoppingToken);
+
+                throw;
             }
             finally
             {
+                if(transaction != null)                
+                    await transaction.DisposeAsync();                
+
                 await connection.CloseAsync();
             }
         }
     }
 
-    private async Task<(bool successed, Exception[])> ProcessMessageAsync(MessageEntry messageEntry, CancellationToken cancellationToken = default)
+    private async Task<(bool successed, Exception[])> ProcessMessageAsync(IServiceScope scope, MessageEntry messageEntry, CancellationToken cancellationToken = default)
     {
-        var type = Type.GetType(messageEntry.EventType)
+        var entityType = Type.GetType(messageEntry.EventType)
             ?? throw new ArgumentException($"Message type {messageEntry.EventType} not found.", nameof(messageEntry));
 
-        var @event = JsonSerializer.Deserialize(messageEntry.Payload, type);
+        var entity = JsonSerializer.Deserialize(messageEntry.Payload, entityType);
 
-        var eventType = typeof(Event<>).MakeGenericType(type);
-        var handlerType = typeof(INotificationHandler<>).MakeGenericType(eventType);
+        var eventType = typeof(Event<>).MakeGenericType(entityType);
+        var @event = Activator.CreateInstance(eventType, entity, messageEntry.Category, messageEntry.CreatedAt); 
 
-        using var scope = _serviceScopeFactory.CreateAsyncScope();
+        var handlerType = typeof(IEventHandler<,>).MakeGenericType(entityType,eventType);
 
         var handlers = scope.ServiceProvider.GetServices(handlerType).ToList();
         var errors = new List<Exception>();
 
         foreach (var handler in handlers)
         {
-            var method = handlerType.GetMethod("Handle");
+            var method = handlerType
+            .GetInterfaces()
+            .Append(typeof(INotificationHandler<>)) // Добавляем сам интерфейс в список поиска
+            .Select(i => i.GetMethod("Handle"))
+            .FirstOrDefault(m => m != null);
+
             var handle = method!.Invoke(handler, [@event, cancellationToken]);
             try
             {

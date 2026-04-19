@@ -13,7 +13,7 @@ namespace Shop.API.Test;
 
 public class SignalRLogConfigurationWebAppFactory : ShopApiConfigurationWebAppFactory, ILoggedContext
 {
-    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRFactory = SignalRCommon.SignalRWebAppFactory;
+    private readonly SignalRLogContextWebAppFactory<FixtureLoggerFactoryContext> _signalRFactory = new();// SignalRCommon.SignalRWebAppFactory;
 
     public SignalRLogConfigurationWebAppFactory() : base("ConnectionStrings:DbContext2", "test_ci_db_signalr", httpPort:8052, httpsPort : 8053)
     {
@@ -24,13 +24,18 @@ public class SignalRLogConfigurationWebAppFactory : ShopApiConfigurationWebAppFa
 
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
+    private bool _signalRInjected = false;
+
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
         base.ConfigureWebHostBuilderContext(context, services);
 
-        services.SetSignalRHubTestSender(_signalRFactory.Server, ["events"]);
-
-        _signalRFactory.FixtureLoggingContext.ConfigureServices(services);
+        //todo
+        if (!_signalRInjected)
+        {
+            services.SetSignalRHubTestSender(_signalRFactory.Server, ["events"]);
+            _signalRInjected = true;
+        }
     }
 
     internal void SubscribeSignalRLogMessage(LogMessage logMessage)
@@ -63,7 +68,7 @@ public class ShopAPISignalRIntegrationTest : LoggedContextTestFixture<SignalRLog
             var response = await shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
             Assert.True(response.IsSuccessStatusCode);
 
-            await Task.Delay(5000);
+            await Task.Delay(1000);
 
             Assert.Equal(2, LogMessages.Count(m => m.CategoryName.Contains(typeof(LogHubFilter).Name) && m.LogLevel == LogLevel.Information));
             Assert.Empty(LogMessages.Where(m => m.CategoryName.Contains(typeof(LogHubFilter).Name) && m.LogLevel == LogLevel.Error));
