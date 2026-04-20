@@ -1,6 +1,9 @@
 using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SignalRWebAppFactory;
+using Message.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Threading;
 using Moq;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -49,27 +52,47 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
     { 
         var httpClient = WebAppFactory.CreateClient();
 
-        var receiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
+        string messageId = "";
+        async Task OnShopSettingsCreatedAsync(string msgId, Product.Data.ShopSettings settings)
+        {
+            messageId = msgId;
+            _loggerMock.Object.LogInformation(string.Format(ShopSettingsCreatedMessageFormat, settings.Id));
+        }
+        await using var receiver = SignalRHelper.CreateTestSignalRMessageHubAckReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         await receiver.Start();
-        receiver.On<Product.Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        await receiver.On<Product.Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
 
-        var productShopSettings = TestRepository.CreateProductShopSettings(WebAppFactory.Shops[1].Id, WebAppFactory.Shops[1].Name); 
+        var productShopSettings = TestRepository.CreateProductShopSettings(WebAppFactory.Shops[1].Id, WebAppFactory.Shops[1].Name);
+
+        var autoResetEvent = new AsyncAutoResetEvent();
+        bool shopSettingsCreated = false;
+        async Task shopSettingsCreatedAckAsync(object sender, AcknowlegeEventArgs e)
+        {
+            Assert.Equal(messageId, e.RequestId);
+            shopSettingsCreated = true;
+            autoResetEvent.Set();
+        }
+        await using var testMessageSender = WebAppFactory.Services.GetRequiredService<IAcknowlegefulMessageSender>();
+        testMessageSender.AcknowlegeCallbackAsync += shopSettingsCreatedAckAsync;
 
         try
         {
+            var cancellationTokenSource = new CancellationTokenSource();
             var response = await httpClient.PostAsJsonAsync($"api/Settings", productShopSettings);
 
             response.EnsureSuccessStatusCode();
 
+            cancellationTokenSource.CancelAfter(4000);
+
+            if (!shopSettingsCreated)
+                await autoResetEvent.WaitAsync(cancellationTokenSource.Token);
+
             var savedShopSettings = await response.Content.ReadFromJsonAsync<Product.Data.ShopSettings>();
 
-            Assert.NotEqual(0, savedShopSettings.Id);
-
-            await Task.Delay(500);
+            Assert.True(shopSettingsCreated);
+            Assert.Equal(productShopSettings.Name, savedShopSettings?.Name);            
 
             await receiver.Stop();
-
-            VerifyInfoLog(string.Format(ShopSettingsCreatedMessageFormat, savedShopSettings.Id));
         }
         catch
         {
@@ -82,21 +105,6 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
         {
             await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
-    }
-
-    private async Task OnShopSettingsCreatedAsync(Product.Data.ShopSettings settings)
-    {
-        _loggerMock.Object.LogInformation(string.Format(ShopSettingsCreatedMessageFormat, settings.Id));
-    }
-
-    private void VerifyInfoLog(string message)
-    {
-        _loggerMock.Verify(l => l.Log(
-               It.Is<LogLevel>(v => v == LogLevel.Information),
-               It.IsAny<EventId>(),
-               It.Is<It.IsAnyType>((v, t) => v.ToString() == message),
-               It.Is<Exception?>(v => v == null),
-               It.IsAny<Func<It.IsAnyType, Exception?, string>>()));
     }
 
     [Fact]

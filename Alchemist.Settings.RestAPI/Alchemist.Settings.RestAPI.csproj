@@ -22,7 +22,8 @@
     <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data.Postgresql\Alchemist.Product.Data.Postgresql.csproj" />
     <ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
-    <ProjectReference Include="..\ShopSettings.Module\ShopSettings.Module.csproj" />
+	  <ProjectReference Include="..\Db.Infrastructure.Messages\Db.Infrastructure.Messages.csproj" />
+    <ProjectReference Include="..\ShopSettings.Data.infrastructure.EF\ShopSettings.Data.infrastructure.EF.csproj" />
   </ItemGroup>
 
 </Project>

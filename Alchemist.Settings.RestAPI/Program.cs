@@ -8,13 +8,14 @@ using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Http.ErrorHandling;
 using Log.Interceptors;
-using Mediator.Module.EF;
 using Message.SignalR.HubMessage.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Loggers;
-using ShopSettings.Module;
 using Alchemist.WebApp.Api.Common;
+using ShopSettings.Data.infrastructure.EF;
+using Db.Infrastructure.EF.Outbox;
+using Db.Infrastructure.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,16 +24,21 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 // Add services to the container.
 
-builder.Services.AddAlchemyPostgresContextFactory((sp,options) =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2")));
+var supportedEventTypes = builder.Configuration.GetSection("SupportedEvents").Get<List<SupportedEventType>>();
 
+builder.Services.AddAlchemyPostgresContextFactory((sp,options) =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2"));
+    options.AddOutbox(sp, supportedEventTypes);
+});
+builder.Services.AddOutboxProcessor<AlchemyContext>();
 builder.Services.AddUnboundedBackgroundQueue();
 
 
-builder.Host.AddMediatorInfrastructure(new ShopSettingsModule());
+builder.Host.AddShopSettingsInfrastructure((builder) => builder.AddCallbackBackgroundMessageHandlers());
 
 var signalRUrl = builder.Configuration.GetSection("SignalRUrl").Get<string>();
-builder.Services.AddSignalRHubMessageSender(signalRUrl);
+builder.Services.AddSignalRMessageHubAcknowledgefulSender(signalRUrl);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -70,6 +76,8 @@ app.MapControllers();
 app.UseSerilogRequestLogging();
 
 await app.UseAlchemyPostgresqlMigrationWithRedisLockIfAvailableAsync("RedisStore");
+
+await app.UseOutbox<AlchemyContext>();
 
 app.Run();
 

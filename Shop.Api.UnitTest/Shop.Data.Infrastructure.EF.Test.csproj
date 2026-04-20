@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shop.Infrastructure.EF\Shop.Infrastructure.EF.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Data\Alchemist.Product.Data.csproj" />
     <ProjectReference Include="..\Db.Infrastructure\Db.Infrastructure.csproj" />
     <ProjectReference Include="..\Shop.Data.Infrastructure\Shop.Data.Infrastructure.csproj" />

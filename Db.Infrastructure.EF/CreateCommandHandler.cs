@@ -11,6 +11,7 @@ public class CreateCommandHandler<T, TCreateCommand>(IUnitOfWork unitOfWork, DbC
     protected override async Task HandleCommand(TCreateCommand command, CancellationToken cancellationToken)
     {
         await dbContext.Set<T>().AddAsync(command.Entity, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }
 

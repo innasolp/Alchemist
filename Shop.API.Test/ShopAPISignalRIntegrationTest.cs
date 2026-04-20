@@ -66,36 +66,7 @@ public class ShopAPISignalRIntegrationTest : LoggedContextTestFixture<SignalRLog
         : base(webAppFactory, outputHelper) //, IAsyncLifetime
     {
         WebAppFactory.SubscribeSignalRLogMessage(Log);
-    }
-
-    [Fact]
-    public async Task LogInfoSendMessageOnCreateShopAsync()
-    {        
-        var shop = new Alchemist.Product.Data.Shop() { Name = "TestShopNew", Url = "https://testshopnew" };
-
-        try
-        {
-            var shopAPIHttpClient = WebAppFactory.GetHostHttpClient();
-            var response = await shopAPIHttpClient.PutAsJsonAsync($"api/Shop", shop);
-            Assert.True(response.IsSuccessStatusCode);
-
-            await Task.Delay(3000);
-
-            Assert.Equal(2, LogMessages.Count(m => m.CategoryName.Contains(typeof(LogHubFilter).Name) && m.LogLevel == LogLevel.Information));
-            Assert.Empty(LogMessages.Where(m => m.CategoryName.Contains(typeof(LogHubFilter).Name) && m.LogLevel == LogLevel.Error));
-        }
-        catch
-        {
-            OutputErrors();
-            OutputWarnings();
-
-            throw;
-        }
-        finally
-        {
-            await WebAppFactory.ResetDatabaseIfAvailableAsync();
-        }            
-    }
+    }    
 
     [Fact]
     public async Task LogInfoAckSendMessageOnCreateShopAsync()
