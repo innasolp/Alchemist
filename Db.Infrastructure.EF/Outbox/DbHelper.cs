@@ -31,31 +31,55 @@ internal static class DbHelper
             CREATE TABLE IF NOT EXISTS message_handler (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 message_id UUID NOT NULL,       
-                handler_type VARCHAR(512) NOT NULL,
+                handler_type VARCHAR(1024) NOT NULL,
                 created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
                 processed_at timestamp without time zone,
                 state VARCHAR(32) NOT NULL DEFAULT 'Created',
-                error TEXT);";
+                error TEXT,
+                retry_count INTEGER NOT NULL DEFAULT 0);";
         await context.Database.ExecuteSqlRawAsync(tableSql, cancellationToken);
     }
 
-    public static async Task<IEnumerable<MessageEntry>> GetNewEvents(this DbConnection connection)
+    public static async Task<IEnumerable<MessageEntry>> GetNeedForHandleEvents(this DbConnection connection)
     {
         return await connection.QueryAsync<MessageEntry>(
-            "SELECT id, category, event_type as eventType, payload, created_at as createdAt FROM message_entry WHERE state = @p0 and processed_at is null",
-            new { p0 = "Created" });
+            @"SELECT id, category, event_type as eventType, payload, created_at as createdAt 
+            FROM message_entry 
+            WHERE state <> @p0 and state <> @p1",
+            new { p0 = State.Confirmed.ToString(), p1 = State.Failed.ToString() });
     }
 
     public static async Task UpdateMessageHandlerEntryAsync(this DbContext context, Guid id, string state, string? error = null)
     {
-        await context.Database.ExecuteSqlRawAsync(
-        "UPDATE message_handler SET state = @p0, processed_at = @p1, error = @p2 WHERE id = @p3",
+        const string sql = @"UPDATE message_handler SET state = @p0, processed_at = @p1, error = @p2, 
+            retry_count = (case when @p2 is not null AND @p2 <> '' THEN retry_count+1 ELSE retry_count end)    
+            WHERE id = @p3";
+
+        await context.Database.ExecuteSqlRawAsync(sql,
             state,
             DateTime.Now,
             error ?? "",
             id
         );
     }
+
+    public static async Task<IEnumerable<MessageHandlerEntry>> GetEventMessageHandlerAsync(this DbConnection connection, Guid messageId)
+    {
+        const string sql = @"SELECT id, 
+                            message_id as MessageId,  
+                            handler_type as HandlerType, 
+                            processed_at as ProcessedAt,  
+                            created_at as createdAt,
+                            state, 
+                            error, 
+                            retry_count as RetryCount 
+                            FROM message_handler   
+                            WHERE message_id = @p0";
+
+        return await connection.QueryAsync<MessageHandlerEntry>(sql,new { p0 = messageId });
+    }
+
+
     public static async Task UpdateEventStateAsync(this DbContext context, Guid id, string state)
     {
         string sql = "UPDATE message_entry SET state = @p0, processed_at = @p1 WHERE id = @p2";
@@ -80,23 +104,27 @@ internal static class DbHelper
 
     public static Task ConfirmEventsIfNoProcessingHandlers(this DbContext context)
     {
-        string sql = @"UPDATE message_entry m
+        const string sql = @"UPDATE message_entry m 
                         SET state = 'Confirmed',
-                            processed_at = @p0
-                        FROM message_entry m2
-                        LEFT JOIN message_handler mh 
-                            ON mh.message_id = m2.id 
-                            AND mh.state <> 'Confirmed'
-                        WHERE m.id = m2.id
-                          AND mh.id IS NULL
+                            processed_at = @p0 
+                        FROM message_entry m2 
+                        LEFT JOIN message_handler mh  
+                            ON mh.message_id = m2.id  
+                            AND mh.state <> 'Confirmed' 
+                        WHERE m.id = m2.id 
+                          AND mh.id IS NULL 
                         AND m.state = 'Processing'";
         return context.Database.ExecuteSqlRawAsync(sql, DateTime.Now);
     }
 
-    public static Task CreateMessageHandlerEntryAsync(this DbContext dbContext, MessageHandlerEntry messageHandlerEntry)
+    public static Task CreateMessageHandlerEntryIfNotExistsAsync(this DbContext dbContext, MessageHandlerEntry messageHandlerEntry)
     {
         return dbContext.Database.ExecuteSqlRawAsync(
-        "INSERT INTO message_handler (id, message_id, handler_type) VALUES ({0}, {1}, {2})",
+        @"INSERT INTO message_handler (id, message_id, handler_type) 
+            SELECT @p0, @p1, @p2
+            WHERE NOT EXISTS ( 
+                SELECT 1 FROM message_handler 
+                WHERE message_id = @p1 AND handler_type = @p2);",
         messageHandlerEntry.Id, messageHandlerEntry.MessageId, messageHandlerEntry.HandlerType);
     }
 }
