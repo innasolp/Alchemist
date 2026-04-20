@@ -18,4 +18,6 @@ internal class MessageHandlerEntry
     public string State { get; set; } = Outbox.State.Created.ToString();
 
     public string? Error { get; set; }
+
+    public int RetryCount { get; set; } = 0;
 }
