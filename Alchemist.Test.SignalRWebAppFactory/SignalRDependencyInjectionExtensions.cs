@@ -31,6 +31,27 @@ public static class SignalRDependencyInjectionExtensions
         return services;
     }
 
+    private static IServiceCollection SetSignalRTestAckSender(this IServiceCollection services, 
+        TestServer signalRServer,
+        string[] hubs,
+        Func<IServiceCollection,string, HttpMessageHandler, IServiceCollection> addMessageAckSender)
+    {
+        var hubConnectionDescriptors = services.Where(sd => sd.ServiceType == typeof(HubConnection)).ToList();
+        hubConnectionDescriptors.ForEach(d => services.Remove(d));
+
+        services.RemoveImplementations<IAcknowlegefulMessageSender>("SignalR");        
+
+        var handler = signalRServer.CreateHandler();
+
+        foreach (var hub in hubs)
+        {
+            var signalRUrl = $"{signalRServer.BaseAddress.AbsoluteUri}{hub}";
+            addMessageAckSender(services, signalRUrl, handler);
+        }
+
+        return services;
+    }
+
     public static IServiceCollection SetSignalRSimpleTestSender(this IServiceCollection services, TestServer signalRServer, string[] hubs)
     {
         return services.SetSignalRTestSender(signalRServer, hubs, (services, url, handler) => services.AddSignalRMessageSender(url, handler));
@@ -55,6 +76,27 @@ public static class SignalRDependencyInjectionExtensions
         addKeyedMessageSender(services, signalRUrl, handler, key);
 
         return services;
+    }
+
+    private static IServiceCollection SetSignalRTestAckSender(this IServiceCollection services, object key, TestServer signalRServer, string hub,
+        Func<IServiceCollection, string, HttpMessageHandler, object, IServiceCollection> addKeyedMessageAckSender)
+    {
+        var hubConnectionDescriptors = services.Where(sd => sd.ServiceType == typeof(HubConnection) &&
+                    sd.IsKeyedService && sd.ServiceKey == key).ToList();
+        hubConnectionDescriptors.ForEach(d => services.Remove(d));
+
+        services.RemoveKeyImplementations<IAcknowlegefulMessageSender>("SignalR", key);
+
+        var handler = signalRServer.CreateHandler();
+        var signalRUrl = $"{signalRServer.BaseAddress.AbsoluteUri}{hub}";
+        addKeyedMessageAckSender(services, signalRUrl, handler, key);
+
+        return services;
+    }
+
+    public static IServiceCollection SetSignalRHubTestAckSender(this IServiceCollection services, TestServer signalRServer, string[] hubs)
+    {
+        return services.SetSignalRTestAckSender(signalRServer, hubs, (services, url, handler) => services.AddSignalRMessageHubAcknowledgefulSender(url, handler));
     }
 
     public static IServiceCollection SetSignalRSimpleTestSender(this IServiceCollection services, object key, TestServer signalRServer, string hub)

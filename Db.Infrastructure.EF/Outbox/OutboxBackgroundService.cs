@@ -1,8 +1,7 @@
-﻿using Dapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Data.Common;
 using System.Text.Json;
 
 namespace Db.Infrastructure.EF.Outbox;
@@ -12,7 +11,7 @@ internal class OutboxBackgroundService<TDbContext>(IServiceScopeFactory serviceS
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
-    private const int _daysToKeep = 1;
+    private const int _hoursToKeepConfirmedMessages = 1;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -23,79 +22,112 @@ internal class OutboxBackgroundService<TDbContext>(IServiceScopeFactory serviceS
             using var connection = context.Database.GetDbConnection();
 
             await connection.OpenAsync(stoppingToken);
+
+            IDbContextTransaction? transaction = null;
+
             try
             {
+                IEnumerable<MessageEntry> newEvents = await connection.GetNewEvents();
 
-                var newEvents = await connection.QueryAsync<MessageEntry>(
-                    "SELECT id, category, event_type as eventType, payload, created_at as createdAt FROM message_entry WHERE state = @p0 and processed_at is null",
-                    new { p0 = "created" });
+                transaction = await context.Database.BeginTransactionAsync(stoppingToken);
 
                 foreach (var @event in newEvents)
                 {
-                    var (success, errors) = await ProcessMessageAsync(@event, stoppingToken);
-                    var aggregateException = errors.Length > 0 ? new AggregateException(errors) : null;
-                    await UpdateEventStateAsync(connection, @event.Id, success ? "processed" : "failed", aggregateException?.Message);
+                    await ProcessMessageAsync(scope, context, @event, stoppingToken);
+                    await context.UpdateEventStateAsync(@event.Id, State.Processing.ToString());
                 }
 
-                await DoCleanupAsync(context, _daysToKeep);
+                await context.ConfirmEventsIfNoProcessingHandlers();
+
+                await context.DoCleanupAsync(_hoursToKeepConfirmedMessages);
+
+                await transaction.CommitAsync(stoppingToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                if (transaction != null)
+                    await transaction.RollbackAsync(stoppingToken);
+
+                throw;
             }
             finally
             {
+                if(transaction != null)                
+                    await transaction.DisposeAsync();                
+
                 await connection.CloseAsync();
             }
         }
-    }
+    }    
 
-    private async Task<(bool successed, Exception[])> ProcessMessageAsync(MessageEntry messageEntry, CancellationToken cancellationToken = default)
+    private async Task ProcessMessageAsync(IServiceScope scope, TDbContext dbContext, MessageEntry messageEntry, CancellationToken cancellationToken = default)
     {
-        var type = Type.GetType(messageEntry.EventType)
+        var entityType = Type.GetType(messageEntry.EventType)
             ?? throw new ArgumentException($"Message type {messageEntry.EventType} not found.", nameof(messageEntry));
 
-        var @event = JsonSerializer.Deserialize(messageEntry.Payload, type);
+        var entity = JsonSerializer.Deserialize(messageEntry.Payload, entityType);
 
-        var eventType = typeof(Event<>).MakeGenericType(type);
-        var handlerType = typeof(INotificationHandler<>).MakeGenericType(eventType);
-
-        using var scope = _serviceScopeFactory.CreateAsyncScope();
+        var eventType = typeof(IdentifiedEvent<>).MakeGenericType(entityType); 
+        var handlerType = typeof(IEventHandler<,>).MakeGenericType(entityType,eventType);
 
         var handlers = scope.ServiceProvider.GetServices(handlerType).ToList();
-        var errors = new List<Exception>();
 
-        foreach (var handler in handlers)
+        if (handlers.Count > 0)
+            foreach (var handler in handlers)
+            {
+                await HandleMessage(dbContext, messageEntry, entity, eventType, handlerType, handler, cancellationToken);
+            }
+        else
+            await dbContext.UpdateEventStateAsync(messageEntry.Id, State.Confirmed.ToString());
+    }
+
+    private async Task HandleMessage(TDbContext dbContext, MessageEntry messageEntry, object? entity, Type eventType, Type handlerType, object? handler, CancellationToken cancellationToken)
+    {
+        var method = handlerType
+                    .GetInterfaces()
+                    .Append(typeof(INotificationHandler<>)) // Добавляем сам интерфейс в список поиска
+                    .Select(i => i.GetMethod("Handle"))
+                    .FirstOrDefault(m => m != null);
+
+        var messageHandleId = Guid.NewGuid();
+
+        var @event = Activator.CreateInstance(eventType, messageHandleId.ToString(), entity, messageEntry.Category, messageEntry.CreatedAt);
+
+        await dbContext.CreateMessageHandlerEntryAsync(
+                new MessageHandlerEntry { Id = messageHandleId, MessageId = messageEntry.Id, HandlerType = handler.GetType().AssemblyQualifiedName });
+
+        if (handler is ICallback<string> callback)
+            callback.Callback += EventHandleCallback;
+
+        var handle = method!.Invoke(handler, [@event, cancellationToken]);
+        try
         {
-            var method = handlerType.GetMethod("Handle");
-            var handle = method!.Invoke(handler, [@event, cancellationToken]);
-            try
-            {
-                await (Task)handle!;                
-            }
-            catch(Exception ex) 
-            {
-                errors.Add(ex);
-            }
+            await (Task)handle!;
+
+            var state = handler is ICallback<string> ? State.Processing.ToString() : State.Confirmed.ToString();
+            await UpdateMessageHandlerEntryAsync(messageHandleId, state);
         }
-
-        return (errors.Count < handlers.Count, errors.ToArray());
-    }
-
-    private async Task UpdateEventStateAsync(DbConnection dbConnection, Guid id, string state, string? error)
-    {
-        string sql = "UPDATE message_entry SET state = @state, processed_at = @processedat, error=@error WHERE id = @id";
-
-        int affectedRows = await dbConnection.ExecuteAsync(sql, new
+        catch (Exception ex)
         {
-            state,
-            id,
-            processedat = DateTime.Now,
-            error
-        });
+            await UpdateMessageHandlerEntryAsync(messageHandleId, State.Failed.ToString(), ex.Message);
+        }
     }
 
-    private static async Task DoCleanupAsync(TDbContext context, int daysToKeep)
+    private  Task UpdateMessageHandlerEntryAsync(Guid id, string state, string? error = null)
     {
-        string sql = "DELETE FROM message_entry WHERE created_at < @p0";
-        DateTime cutoffDate = DateTime.Now.AddDays(-daysToKeep);
+        using var scope = _serviceScopeFactory.CreateScope();
+        using var context = scope.ServiceProvider.GetRequiredService<TDbContext>();
 
-        int rowsDeleted = await context.Database.ExecuteSqlRawAsync(sql, cutoffDate);
+        return context.UpdateMessageHandlerEntryAsync(id, state, error);
     }
+
+    private async Task EventHandleCallback(object? sender, CallbackAsyncEventArgs<string> e)
+    {
+        await UpdateMessageHandlerEntryAsync(Guid.Parse(e.Value),
+            e.Exception == null ? State.Confirmed.ToString() : State.Processing.ToString(), 
+            e.Exception?.Message);
+
+        if (sender is ICallback<string> callback && e.Exception == null)
+            callback.Callback -= EventHandleCallback;
+    }  
 }

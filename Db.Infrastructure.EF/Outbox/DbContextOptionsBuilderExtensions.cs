@@ -8,7 +8,7 @@ public static class DbContextOptionsBuilderExtensions
     public static void AddOutbox(this  DbContextOptionsBuilder optionsBuilder, IServiceProvider serviceProvider,
         IReadOnlyList<SupportedEventType> supportedTypes)
     {
-        var entityEventPublisher = serviceProvider.GetRequiredService<IEntityEventPublisher>();
+        var entityEventPublisher = serviceProvider.GetRequiredService<IOutboxEventPublisher>();
 
         optionsBuilder.AddInterceptors(new OutboxSaveChangesInterceptor(supportedTypes, entityEventPublisher));
     }

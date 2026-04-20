@@ -10,7 +10,7 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
 {
     private Action<WebHostBuilderContext, IConfigurationBuilder>? _configureAppConfiguration;
 
-    event Action<WebHostBuilderContext, IConfigurationBuilder> IWebHostBuilderConfigure.ConfigureAppConfiguration
+    public event Action<WebHostBuilderContext, IConfigurationBuilder> ConfigureAppConfiguration
     {
         add
         {
@@ -22,23 +22,23 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
         }
     }
 
-    private Action<WebHostBuilderContext, IServiceCollection>? _configureWebHostBuilderContext;
+    private Action<WebHostBuilderContext, IServiceCollection>? _configureWebHostBuilderContextServices;
 
-    event Action<WebHostBuilderContext, IServiceCollection> IWebHostBuilderConfigure.ConfigureWebHostBuilderContext
+    public event Action<WebHostBuilderContext, IServiceCollection> ConfigureWebHostBuilderContextServices
     {
         add
         {
-            _configureWebHostBuilderContext += value;
+            _configureWebHostBuilderContextServices += value;
         }
         remove
         {
-            _configureWebHostBuilderContext -= value;
+            _configureWebHostBuilderContextServices -= value;
         }
     }
 
     protected virtual void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        _configureWebHostBuilderContext?.Invoke(context, services);
+        _configureWebHostBuilderContextServices?.Invoke(context, services);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -52,6 +52,6 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
 
         base.ConfigureWebHost(builder);
 
-        builder.ConfigureServices(ConfigureWebHostBuilderContext);
+        builder.ConfigureServices((context, services)=>ConfigureWebHostBuilderContext(context, services));
     }
 }

@@ -4,7 +4,8 @@
     "Projects": [
       {
         "Path": "Alchemist.Product.GrpcService\\Alchemist.Product.GrpcService.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "https"
       },
       {
         "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",

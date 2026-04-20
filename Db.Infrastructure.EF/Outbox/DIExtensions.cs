@@ -8,7 +8,7 @@ public static class DIExtensions
     public static IServiceCollection AddOutboxProcessor<TDbContext>(this IServiceCollection services)
         where TDbContext:DbContext
     {
-        services.AddScoped<IEntityEventPublisher, OutboxEntityEventPublisher>();
+        services.AddScoped<IOutboxEventPublisher, OutboxEntityEventPublisher>();
         return services.AddHostedService<OutboxBackgroundService<TDbContext>>();
     }
 }

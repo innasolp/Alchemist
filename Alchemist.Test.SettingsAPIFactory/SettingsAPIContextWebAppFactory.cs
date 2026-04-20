@@ -25,7 +25,7 @@ public class SettingsAPIContextWebAppFactory(string connectionString, TestServer
 
     protected override IServiceCollection AddDbContext(IServiceCollection services)
     {
-        return services.AddAlchemyPostgresContextFactory(optionsBuilder => optionsBuilder.UseNpgsql(_connectionString));
+        return services.AddAlchemyPostgresContextFactory((sp,optionsBuilder) => optionsBuilder.UseNpgsql(_connectionString));
     }
 
     protected override void FillTestData(AlchemyContext dbContext)
