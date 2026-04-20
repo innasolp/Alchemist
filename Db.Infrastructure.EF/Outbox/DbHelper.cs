@@ -1,8 +1,6 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Data.Common;
-using System.Runtime.CompilerServices;
 
 namespace Db.Infrastructure.EF.Outbox;
 
@@ -19,8 +17,7 @@ internal static class DbHelper
                 payload TEXT NOT NULL,
                 created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
                 processed_at timestamp without time zone,
-                state VARCHAR(32) NOT NULL DEFAULT 'Created',
-                error TEXT);";
+                state VARCHAR(32) NOT NULL DEFAULT 'Created');";
         await context.Database.ExecuteSqlRawAsync(tableSql, cancellationToken);
 
         string indexSql = "CREATE INDEX IF NOT EXISTS ix_message_entry_category ON message_entry (category);";
@@ -33,7 +30,8 @@ internal static class DbHelper
         string tableSql = @"
             CREATE TABLE IF NOT EXISTS message_handler (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                message_id UUID NOT NULL,                
+                message_id UUID NOT NULL,       
+                handler_type VARCHAR(512) NOT NULL,
                 created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
                 processed_at timestamp without time zone,
                 state VARCHAR(32) NOT NULL DEFAULT 'Created',
@@ -58,27 +56,22 @@ internal static class DbHelper
             id
         );
     }
-    public static async Task UpdateEventStateAsync(this DbContext context, Guid id, string state, string? error)
+    public static async Task UpdateEventStateAsync(this DbContext context, Guid id, string state)
     {
-        string sql = "UPDATE message_entry SET state = @p0, processed_at = @p1, error=@p2 WHERE id = @p3";
+        string sql = "UPDATE message_entry SET state = @p0, processed_at = @p1 WHERE id = @p2";
 
         int affectedRows = await context.Database.ExecuteSqlRawAsync(sql,
             state,
             DateTime.Now,
-            error ?? "",
             id
         );
     }
 
-    public static async Task DoCleanupAsync(this DbContext context, int daysToKeep, int hoursToKeepConfirmedMessages)
+    public static async Task DoCleanupAsync(this DbContext context, int hoursToKeepConfirmedMessages)
     {
         string sql = "DELETE FROM message_entry WHERE created_at < @p0 and state = 'Confirmed'";
         DateTime cutoffDateForConfirm = DateTime.Now.AddHours(-hoursToKeepConfirmedMessages);
         int rowsDeleted = await context.Database.ExecuteSqlRawAsync(sql, cutoffDateForConfirm);
-
-        sql = "DELETE FROM message_entry WHERE created_at < @p0 and state = 'Confirmed'";
-        DateTime cutoffDate = DateTime.Now.AddDays(-daysToKeep);
-        rowsDeleted = await context.Database.ExecuteSqlRawAsync(sql, cutoffDate);
 
         sql = "DELETE FROM message_handler WHERE created_at < @p0 and state = 'Confirmed'";
         cutoffDateForConfirm = DateTime.Now.AddHours(-hoursToKeepConfirmedMessages);
@@ -95,14 +88,15 @@ internal static class DbHelper
                             ON mh.message_id = m2.id 
                             AND mh.state <> 'Confirmed'
                         WHERE m.id = m2.id
-                          AND mh.id IS NULL";
+                          AND mh.id IS NULL
+                        AND m.state = 'Processing'";
         return context.Database.ExecuteSqlRawAsync(sql, DateTime.Now);
     }
 
     public static Task CreateMessageHandlerEntryAsync(this DbContext dbContext, MessageHandlerEntry messageHandlerEntry)
     {
         return dbContext.Database.ExecuteSqlRawAsync(
-        "INSERT INTO message_handler (id, message_id) VALUES ({0}, {1})",
-        messageHandlerEntry.Id, messageHandlerEntry.MessageId);
+        "INSERT INTO message_handler (id, message_id, handler_type) VALUES ({0}, {1}, {2})",
+        messageHandlerEntry.Id, messageHandlerEntry.MessageId, messageHandlerEntry.HandlerType);
     }
 }

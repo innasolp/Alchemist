@@ -52,6 +52,12 @@ public class SignalRLogConfigurationWebAppFactory : ShopApiConfigurationWebAppFa
     {
         _signalRFactory.FixtureLoggingContext.LoggedMessage -= logMessage;
     }
+
+    public override async ValueTask DisposeAsync()
+    {
+        await _signalRFactory.DisposeAsync();
+        await base.DisposeAsync();
+    }
 }
 
 public class ShopAPISignalRIntegrationTest : LoggedContextTestFixture<SignalRLogConfigurationWebAppFactory, ShopAPIProgram> //, IAsyncLifetime

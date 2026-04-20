@@ -9,6 +9,8 @@ internal class MessageHandlerEntry
 
     public Guid MessageId { get; set; }
 
+    public required string HandlerType { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public DateTime? ProcessedAt { get; set; }

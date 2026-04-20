@@ -4,5 +4,6 @@ internal enum State
 {
     Created,
     Processing,
-    Confirmed
+    Confirmed,
+    Failed
 }
