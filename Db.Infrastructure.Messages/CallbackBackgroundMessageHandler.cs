@@ -20,13 +20,13 @@ internal class CallbackBackgroundMessageHandler<T, TEvent>
         _messageSender.AcknowlegeCallbackAsync += AcknowlegeCallbackAsync;
     }
 
-    private async Task AcknowlegeCallbackAsync(object sender, AcknowlegeEventArgs eventArgs)
+    private Task AcknowlegeCallbackAsync(object sender, AcknowlegeEventArgs eventArgs)
     {
-        _callback?.Invoke(this, new EventArgs<string>(eventArgs.RequestId));
+        return _callback?.Invoke(this, new CallbackAsyncEventArgs<string>(eventArgs.RequestId)) ?? Task.CompletedTask;
     }
 
-    event EventHandler<EventArgs<string>>? _callback;
-    event EventHandler<EventArgs<string>> ICallback<string>.Callback
+    event AsyncEventHandler<CallbackAsyncEventArgs<string>>? _callback;
+    event AsyncEventHandler<CallbackAsyncEventArgs<string>> ICallback<string>.Callback
     {
         add
         {

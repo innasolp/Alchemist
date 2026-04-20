@@ -11,6 +11,6 @@ public static class DIExtensions
 
     public static void AddCallbackBackgroundMessageHandlers(this ContainerBuilder containerBuilder)
     {
-        containerBuilder.RegisterGeneric(typeof(CallbackBackgroundMessageHandler<,>)).As(typeof(IEventHandler<,>));
+        containerBuilder.RegisterGeneric(typeof(CallbackBackgroundMessageHandler<,>)).As(typeof(IEventHandler<,>)).SingleInstance();
     }
 }

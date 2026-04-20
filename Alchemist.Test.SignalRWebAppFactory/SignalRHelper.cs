@@ -52,5 +52,11 @@ public class SignalRHelper
     {
         return CreateSignalRMessageProcessor<SignalRMessageHubReceiver>(serviceProvider, signalRServer, hub,
             (logger, hubConnection) => new SignalRMessageHubReceiver(logger, hubConnection));
+    }  
+    
+    public static SignalRMessageHubAcknowledgefulReceiver CreateTestSignalRMessageHubAckReceiver(IServiceProvider serviceProvider, TestServer signalRServer, string hub)
+    {
+        return CreateSignalRMessageProcessor<SignalRMessageHubAcknowledgefulReceiver>(serviceProvider, signalRServer, hub,
+            (logger, hubConnection) => new SignalRMessageHubAcknowledgefulReceiver(logger, hubConnection));
     }    
 }
