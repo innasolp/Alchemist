@@ -76,31 +76,40 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
 
         var handlers = scope.ServiceProvider.GetServices(handlerType).ToList();
 
+        var messageHandlers = await dbConnection.GetEventMessageHandlerAsync(messageEntry.Id);
+
         if (handlers.Count > 0)
             foreach (var handler in handlers)
             {
-                if (await dbConnection.IsMessageHandlerNotProcessing(handler.GetType().FullName, messageEntry.Id, MaxHandleRetryCount))
-                    await HandleMessage(dbContext, messageEntry, entity, eventType, handlerType, handler, cancellationToken);
+                var messageHandler = messageHandlers.FirstOrDefault(mh => mh.HandlerType == handler.GetType().Name);
+
+                if (messageHandler == null || (messageHandler.State == State.Failed.ToString() && messageHandler.RetryCount < MaxHandleRetryCount))
+                {
+                    var messageHandlerId = messageHandler?.Id ?? Guid.NewGuid();
+
+                    if(messageHandler == null)
+                        await dbContext.CreateMessageHandlerEntryIfNotExistsAsync(
+                        new MessageHandlerEntry { Id = messageHandlerId,
+                            MessageId = messageEntry.Id, 
+                            HandlerType = handler.GetType().FullName });
+
+                    await HandleMessage(messageEntry, entity, eventType, handlerType, handler, messageHandlerId, cancellationToken);
+                }
             }
         else
             await dbContext.UpdateEventStateAsync(messageEntry.Id, State.Confirmed.ToString());
     }
 
-    private async Task HandleMessage(TDbContext dbContext, MessageEntry messageEntry, object? entity, Type eventType, Type handlerType, object? handler, CancellationToken cancellationToken)
+    private async Task HandleMessage(MessageEntry messageEntry, object? entity, Type eventType, Type handlerType, object? handler, Guid messageHandlerId, CancellationToken cancellationToken)
     {
         var method = handlerType
                     .GetInterfaces()
                     .Append(typeof(INotificationHandler<>)) // Добавляем сам интерфейс в список поиска
                     .Select(i => i.GetMethod("Handle"))
-                    .FirstOrDefault(m => m != null);
+                    .FirstOrDefault(m => m != null);        
 
-        var messageHandleId = Guid.NewGuid();
-
-        var @event = Activator.CreateInstance(eventType, messageHandleId.ToString(), entity, messageEntry.Category, messageEntry.CreatedAt);
-
-        await dbContext.CreateMessageHandlerEntryIfNotExistsAsync(
-                new MessageHandlerEntry { Id = messageHandleId, MessageId = messageEntry.Id, HandlerType = handler.GetType().FullName });
-
+        var @event = Activator.CreateInstance(eventType, messageHandlerId.ToString(), entity, messageEntry.Category, messageEntry.CreatedAt);
+                
         if (handler is ICallback<string> callback)
             callback.Callback += EventHandleCallback;
 
@@ -110,15 +119,11 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
             await (Task)handle!;
 
             var state = handler is ICallback<string> ? State.Processing.ToString() : State.Confirmed.ToString();
-            await UpdateMessageHandlerEntryAsync(messageHandleId, state);
-        }
-        catch (DbException)
-        {
-            throw;
+            await UpdateMessageHandlerEntryAsync(messageHandlerId, state);
         }
         catch (Exception ex)
         {
-            await UpdateMessageHandlerEntryAsync(messageHandleId, State.Failed.ToString(), ex.Message);
+            await UpdateMessageHandlerEntryAsync(messageHandlerId, State.Failed.ToString(), ex.Message);
         }
     }
 
@@ -134,8 +139,9 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
     {
         try
         {
+            var state = e.Exception == null ? State.Confirmed.ToString() : State.Failed.ToString();
             await UpdateMessageHandlerEntryAsync(Guid.Parse(e.Value),
-                e.Exception == null ? State.Confirmed.ToString() : State.Processing.ToString(),
+                state,
                 e.Exception?.Message);
         }
         catch (Exception ex)

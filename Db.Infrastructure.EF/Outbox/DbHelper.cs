@@ -45,7 +45,7 @@ internal static class DbHelper
         return await connection.QueryAsync<MessageEntry>(
             @"SELECT id, category, event_type as eventType, payload, created_at as createdAt 
             FROM message_entry 
-            WHERE state <> @p0 and state <> @p1 and processed_at is null",
+            WHERE state <> @p0 and state <> @p1",
             new { p0 = State.Confirmed.ToString(), p1 = State.Failed.ToString() });
     }
 
@@ -63,23 +63,22 @@ internal static class DbHelper
         );
     }
 
-    public static async Task<bool> IsMessageHandlerNotProcessing(this DbConnection connection, string handlerType, Guid messageId, int maxRetryCount)
+    public static async Task<IEnumerable<MessageHandlerEntry>> GetEventMessageHandlerAsync(this DbConnection connection, Guid messageId)
     {
-       const string sql = @"SELECT (EXISTS(SELECT 1 FROM message_handler 
-                WHERE message_id = @p0 and handler_type = @p1 and state = @p2 and retry_count < @p3) 
-                OR NOT EXISTS(SELECT 1 FROM message_handler 
-                WHERE message_id = @p0 and handler_type = @p1));";
+        const string sql = @"SELECT id, 
+                            message_id as MessageId,  
+                            handler_type as HandlerType, 
+                            processed_at as ProcessedAt,  
+                            created_at as createdAt,
+                            state, 
+                            error, 
+                            retry_count as RetryCount 
+                            FROM message_handler   
+                            WHERE message_id = @p0";
 
-        var result = await connection.QuerySingleAsync<bool>(sql, new
-        {
-            p0 = messageId,
-            p1 = handlerType,
-            p2 = State.Failed.ToString(),
-            p3 = maxRetryCount
-        });
-
-        return result;
+        return await connection.QueryAsync<MessageHandlerEntry>(sql,new { p0 = messageId });
     }
+
 
     public static async Task UpdateEventStateAsync(this DbContext context, Guid id, string state)
     {
