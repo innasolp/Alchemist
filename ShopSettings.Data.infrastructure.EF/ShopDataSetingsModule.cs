@@ -4,9 +4,9 @@ using Db.Infrastructure;
 using Db.Infrastructure.EF;
 using Microsoft.EntityFrameworkCore;
 
-namespace Shop.Data.Infrastructure.EF;
+namespace ShopSettings.Data.infrastructure.EF;
 
-public class ShopDataModule : Module
+public class ShopDataSetingsModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
@@ -30,7 +30,7 @@ public class ShopDataModule : Module
 
         builder.RegisterGeneric(typeof(GetByIdRequestHandler<>)).As(typeof(IRequestHandler<,>)).InstancePerLifetimeScope();
 
-        builder.RegisterAssemblyTypes(typeof(ShopDataModule).Assembly)
+        builder.RegisterAssemblyTypes(typeof(ShopDataSetingsModule).Assembly)
             .Where(t => t.Name.EndsWith("RequestHandler") || t.Name.EndsWith("CommandHandler"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();

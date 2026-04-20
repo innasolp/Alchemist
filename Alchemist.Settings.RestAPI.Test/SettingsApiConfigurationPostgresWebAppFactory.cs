@@ -54,10 +54,15 @@ public class SettingsApiConfigurationPostgresWebAppFactory
         dbContext.SaveChanges();
     }
 
+    private bool _signalRInjected = false;
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
-        services.SetSignalRHubTestSender(_signalRApplicationFactory.Server, ["events"]);
+        if (!_signalRInjected)
+        {
+            services.SetSignalRHubTestSender(_signalRApplicationFactory.Server, ["events"]);
+            _signalRInjected = true;
+        }
 
         FixtureLoggingContext.ConfigureServices(services);
 

@@ -1,4 +1,4 @@
-﻿namespace ShopSettings.Infrastructure;
+namespace ShopSettings.Data.Infrastructure;
 
 public static class Messages
 {

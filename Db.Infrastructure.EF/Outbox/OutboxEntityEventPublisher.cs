@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
 namespace Db.Infrastructure.EF.Outbox;
 
-internal class OutboxEntityEventPublisher(IServiceScopeFactory serviceScopeFactory) : IOutboxEventPublisher
+internal class OutboxEntityEventPublisher : IOutboxEventPublisher
 {
     public async Task Publish<T, TEvent>(TEvent notification, CancellationToken cancellationToken = default) where TEvent : OutboxEvent<T>
     {

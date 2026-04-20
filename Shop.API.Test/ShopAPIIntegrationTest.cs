@@ -33,7 +33,7 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
     : LoggedContextTestFixture<ShopAPISignlRMockWebAppFactory, ShopAPIProgram>(webAppFactory, outputHelper)
 {
     [Fact]
-    public async Task GetShopSuccessAsync()
+    public async Task GetShopByNameSuccessAsync()
     {
         var name = "TestShop";
 
@@ -58,6 +58,35 @@ public class ShopAPIIntegrationTest(ShopAPISignlRMockWebAppFactory webAppFactory
         finally
         {
            //await WebAppFactory.ResetDatabaseIfAvailableAsync();
+        }
+    }
+
+    [Fact]
+    public async Task GetShopByIdSuccessAsync()
+    {
+        var name = "TestShop";
+
+        try
+        {
+            using var httpClient = WebAppFactory.GetHostHttpClient();
+            var response = await httpClient.GetAsync($"api/Shop/1");
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+
+            var shop = await response.Content.ReadFromJsonAsync<Alchemist.Product.Data.Shop>();
+            Assert.NotNull(shop);
+            Assert.Equal(name, shop.Name);
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
+        finally
+        {
+            //await WebAppFactory.ResetDatabaseIfAvailableAsync();
         }
     }
 
