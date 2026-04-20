@@ -21,7 +21,7 @@ public abstract class DbConfigurationWebAppInterceptor<TDbContext> : IDisposable
         _webHostConfigure = webHostConfigure;
 
         _webHostConfigure.ConfigureAppConfiguration += ConfigureAppConfiguration;
-        _webHostConfigure.ConfigureWebHostBuilderContext += ConfigureWebHostBuilderContext;
+        _webHostConfigure.ConfigureWebHostBuilderContextServices += ConfigureWebHostBuilderContext;
         _webHostConfigure.ConfigureHost += ConfigureHost;
     }
 
@@ -47,7 +47,7 @@ public abstract class DbConfigurationWebAppInterceptor<TDbContext> : IDisposable
     public void Dispose()
     {
         _webHostConfigure.ConfigureAppConfiguration -= ConfigureAppConfiguration;
-        _webHostConfigure.ConfigureWebHostBuilderContext -= ConfigureWebHostBuilderContext;
+        _webHostConfigure.ConfigureWebHostBuilderContextServices -= ConfigureWebHostBuilderContext;
         _webHostConfigure.ConfigureHost -= ConfigureHost;
     }
 

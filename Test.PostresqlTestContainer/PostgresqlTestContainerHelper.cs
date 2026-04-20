@@ -14,7 +14,7 @@ public static class PostgresqlTestContainerHelper
            .WithPortBinding(port, true)
         .WithPassword(password)
         .WithUsername(user)
-        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("pg_isready"))
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(5432))
             .Build();
     }
 

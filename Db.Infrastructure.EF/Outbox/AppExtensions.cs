@@ -17,21 +17,9 @@ public static class AppExtensions
 
         try
         {
+            await context.CreateMessageEntryTableIfNotExistsAsync(cancellationToken).ConfigureAwait(false);
 
-            string tableSql = @"
-            CREATE TABLE IF NOT EXISTS message_entry (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                event_type VARCHAR(255) NOT NULL,
-                category VARCHAR(100) NOT NULL,
-                payload TEXT NOT NULL,
-                created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-                processed_at timestamp without time zone,
-                state VARCHAR(32) NOT NULL DEFAULT 'created',
-                error TEXT);";
-            await context.Database.ExecuteSqlRawAsync(tableSql, cancellationToken);
-
-            string indexSql = "CREATE INDEX IF NOT EXISTS ix_message_entry_category ON message_entry (category);";
-            await context.Database.ExecuteSqlRawAsync(indexSql, cancellationToken);
+            await context.CreateMessageHandlerTableIfNotExistsAsync(cancellationToken).ConfigureAwait(false);
 
             await transaction.CommitAsync(cancellationToken);
         }

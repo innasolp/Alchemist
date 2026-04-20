@@ -11,3 +11,8 @@ public interface IEvent<T> : IEvent
 {
     T Entity { get; }
 }
+
+public interface IIdentifiedEvent<T> : IEvent<T>
+{
+    string Id { get; }
+}

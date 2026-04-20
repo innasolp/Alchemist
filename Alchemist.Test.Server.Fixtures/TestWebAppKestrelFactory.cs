@@ -21,9 +21,6 @@ public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) 
         });
     }
 
-    protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
-    {}
-
     protected override IHost CreateHost(IHostBuilder builder)
     {
         var testHost = builder.CreateTestHostUseAddressConfiguration(ConfigureHostAdresses, out _host);
@@ -33,10 +30,5 @@ public class TestWebAppKestrelFactory<TEntryPoint>(int httpPort, int httpsPort) 
         ConfigureHost(_host);
 
         return testHost;
-    }
-
-    protected virtual void ConfigureHostAdresses(IWebHostBuilder builder)
-    {
-        builder.UseKestrel();
     }
 }

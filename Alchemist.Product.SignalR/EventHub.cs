@@ -1,6 +1,6 @@
 ﻿namespace Alchemist.Product.SignalR;
 
-public class EventHub : Message.SignalR.Hub.SignalRMessageHub
+public class EventHub : Message.SignalR.Hub.SignalRAcknowledgefulMessageHub
 {   
 
 }

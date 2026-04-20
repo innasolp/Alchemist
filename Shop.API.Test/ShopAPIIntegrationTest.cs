@@ -15,13 +15,15 @@ public class ShopAPISignlRMockWebAppFactory : ShopApiConfigurationWebAppFactory,
     FixtureLogContext ILoggedContext.FixtureLoggingContext => FixtureLoggingContext;
 
     public ShopAPISignlRMockWebAppFactory() 
-        : base("ConnectionStrings:DbContext2", "test_shop", SignalRCommon.ConfigureSignalRMock)
+        : base("ConnectionStrings:DbContext2", "test_shop")//, SignalRCommon.ConfigureSignalRMock)
     { 
     }
 
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
         base.ConfigureWebHostBuilderContext(context, services);
+
+        SignalRCommon.ConfigureSignalRMock(services);
 
         FixtureLoggingContext.ConfigureServices(services);
     }

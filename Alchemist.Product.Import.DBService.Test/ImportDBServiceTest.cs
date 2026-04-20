@@ -12,9 +12,9 @@ using Moq;
 using System.Net;
 using Xunit.Abstractions;
 using Mapster;
-using Shop.Infrastructure;
 using Alchemist.Product.Infrastructure;
 using Mediator.Infrastructure;
+using Shop.Data.Infrastructure;
 
 namespace Alchemist.Product.Import.DBService.Test;
 
