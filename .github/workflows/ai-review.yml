@@ -30,8 +30,10 @@ jobs:
             # Настройки VCS
             VCS__PROVIDER: "GITHUB"
             VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            # ВАЖНО: используем именно ://github.com
-            VCS__HTTP_CLIENT__API_URL: "https://github.com"
-            VCS__PIPELINE__OWNER: ${{ github.repository_owner }}
-            VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
-            VCS__PIPELINE__PULL_NUMBER: ${{ github.event.pull_request.number }}
+            # Вставляем полный путь API, чтобы инструмент прибавил к нему /repos/...
+            VCS__HTTP_CLIENT__API_URL: "https://api.github.com"
+            
+            # Проверьте эти параметры, возможно в них закралась лишняя косая черта
+            VCS__PIPELINE__OWNER: "innasolp"
+            VCS__PIPELINE__REPO: "Alchemist"
+            VCS__PIPELINE__PULL_NUMBER: "378"
