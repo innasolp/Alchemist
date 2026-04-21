@@ -16,14 +16,19 @@ jobs:
         uses: Nikita-Filonov/ai-review@main # Или конкретная версия
         env:
           # Настройки LLM
-          LLM__PROVIDER: "OPENROUTER"  # Обязательно КАПСОМ
+          LLM__PROVIDER: "OPENROUTER"
           LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_TOKEN }}
-          LLM__HTTP_CLIENT__BASE_URL: "https://openrouter.ai"
+          # Внимание: здесь теперь API_URL
+          LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai"
           LLM__MODEL_ID: "google/gemini-pro-1.5"
+          # Добавляем обязательное поле Meta
+          LLM__META__NAME: "openrouter"
         
           # Настройки VCS
-          VCS__PROVIDER: "GITHUB"     # Обязательно КАПСОМ
+          VCS__PROVIDER: "GITHUB"
           VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Для GitHub стандартный API URL:
+          VCS__HTTP_CLIENT__API_URL: "https://github.com"
           VCS__PIPELINE__OWNER: ${{ github.repository_owner }}
           VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
           VCS__PIPELINE__PULL_NUMBER: ${{ github.event.pull_request.number }}
