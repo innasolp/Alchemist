@@ -23,7 +23,7 @@ jobs:
             # Настройки LLM
             LLM__PROVIDER: "OPENROUTER"
             LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_TOKEN }}
-            LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai"
+            LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai/"
             LLM__MODEL_ID: "google/gemini-pro-1.5"
             LLM__META__NAME: "openrouter"
           
