@@ -1,0 +1,19 @@
+name: AI Code Review
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run AI Review
+        uses: Nikita-Filonov/ai-review@main # Или конкретная версия
+        env:
+          VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_TOKEN }}
