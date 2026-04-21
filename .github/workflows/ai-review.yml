@@ -23,9 +23,10 @@ jobs:
           # Настройки LLM
           LLM__PROVIDER: "OPENROUTER"
           LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_TOKEN }}
+          # Change: Remove the /v1 or add a trailing slash to see if it changes the routing
           LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai"
-          LLM__MODEL_ID: "google/gemini-2.0-flash-exp:free"
-          LLM__META__NAME: "AI-Review-Bot"
+          LLM__MODEL_ID: "meta-llama/llama-3.1-8b-instruct:free"
+          LLM__META__NAME: "https://github.com" # Put a URL here
         
           # Настройки VCS (Используем провайдер GITEA для обхода бага с URL)
           VCS__PROVIDER: "GITEA" 
