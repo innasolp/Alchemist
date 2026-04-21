@@ -24,7 +24,7 @@ jobs:
             LLM__PROVIDER: "OPENROUTER"
             LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_TOKEN }}
             LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai/"
-            LLM__MODEL_ID: "google/gemini-2.0-flash-exp:free"
+            LLM__MODEL_ID: "google/gemma-4-31b-it:free"
             LLM__META__NAME: "openrouter"
           
             # Настройки VCS
