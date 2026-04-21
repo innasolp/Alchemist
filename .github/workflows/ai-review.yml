@@ -20,20 +20,13 @@ jobs:
       - name: Run AI Review
         uses: Nikita-Filonov/ai-review@main # Или конкретная версия
         env:
-            # Настройки LLM
             LLM__PROVIDER: "OPENROUTER"
             LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_TOKEN }}
-            LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai/"
-            LLM__MODEL_ID: "google/gemma-4-31b-it:free"
-            LLM__META__NAME: "openrouter"
-          
-            # Настройки VCS
-            VCS__PROVIDER: "GITHUB"
-            VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            # Вставляем полный путь API, чтобы инструмент прибавил к нему /repos/...
-            VCS__HTTP_CLIENT__API_URL: "https://api.github.com"
+            # Try WITHOUT the trailing slash now, as some tool versions double it
+            LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai"
             
-            # Проверьте эти параметры, возможно в них закралась лишняя косая черта
-            VCS__PIPELINE__OWNER: "innasolp"
-            VCS__PIPELINE__REPO: "Alchemist"
-            VCS__PIPELINE__PULL_NUMBER: "378"
+            # Switch to a more stable free model
+            LLM__MODEL_ID: "google/gemini-2.0-flash-exp:free"
+            
+            # This field is often used as the 'X-Title' header in some tools
+            LLM__META__NAME: "AI-Review-Bot"
