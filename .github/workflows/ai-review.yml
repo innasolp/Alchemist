@@ -11,13 +11,17 @@ on:
 
 jobs:
   review:
-    # Запуск по PR, по кнопке или по комментарию /review
     if: |
       github.event_name == 'pull_request' || 
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/review'))
     
     runs-on: self-hosted
+    
+    # ПРИНУДИТЕЛЬНО ИСПОЛЬЗУЕМ POWERSHELL ВМЕСТО BASH
+    defaults:
+      run:
+        shell: pwsh
 
     steps:
       - name: Checkout Code
@@ -26,9 +30,15 @@ jobs:
           fetch-depth: 0
 
       - name: Health Check (Ollama)
-        # Проверка, что Ollama запущена на локальном сервере
+        # В PowerShell команда проверки будет выглядеть так:
         run: |
-          curl -fsSL http://localhost:11434/api/tags || (echo "Ollama is not running!" && exit 1)
+          try {
+            $response = Invoke-WebRequest -Uri http://localhost:11434/api/tags -UseBasicParsing
+            Write-Host "Ollama is running"
+          } catch {
+            Write-Error "Ollama is not running!"
+            exit 1
+          }
 
       - name: Ensure Model is Ready
         run: ollama pull qwen2.5-coder:1.5b
@@ -36,15 +46,10 @@ jobs:
       - name: AI Review
         uses: Nikita-Filonov/ai-review@v0.27.0
         env:
-          # GitHub Auth
           VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-          # LLM Settings
           LLM__PROVIDER: ollama
           LLM__OLLAMA__BASE_URL: http://localhost:11434
           LLM__MODEL: qwen2.5-coder:1.5b
-          
-          # Language and Prompts
           REVIEW__CORE__LANGUAGE: "English"
           REVIEW__CORE__SUMMARY_REPORT: true
           REVIEW__CORE__SYSTEM_PROMPT: |
@@ -53,9 +58,5 @@ jobs:
             1. Critical bugs and security vulnerabilities.
             2. Best practices (SOLID, DRY, KISS).
             3. Efficient use of LINQ, async/await, and memory management.
-            4. Logical errors.
-            Be concise and provide actionable feedback.
-          
-          # UI Settings
           VCS__PULL_REQUEST__COMMENTS__TYPE: inline
           VCS__PULL_REQUEST__COMMENTS__ON_MESSAGE_LEVEL: true
