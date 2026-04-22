@@ -1,38 +1,61 @@
 name: AI Code Review
 
-permissions:
-  contents: read
-  pull-requests: write  # Обязательно для комментариев
-
 on:
   pull_request:
     types: [opened, synchronize]
+    paths:
+      - '**.cs'
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
 
 jobs:
   review:
-    runs-on: ubuntu-latest
+    # Запуск по PR, по кнопке или по комментарию /review
+    if: |
+      github.event_name == 'pull_request' || 
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/review'))
+    
+    runs-on: self-hosted
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run AI Review
-        uses: Nikita-Filonov/ai-review@main # Или конкретная версия
+      - name: Health Check (Ollama)
+        # Проверка, что Ollama запущена на локальном сервере
+        run: |
+          curl -fsSL http://localhost:11434/api/tags || (echo "Ollama is not running!" && exit 1)
+
+      - name: Ensure Model is Ready
+        run: ollama pull qwen2.5-coder:1.5b
+
+      - name: AI Review
+        uses: Nikita-Filonov/ai-review@v0.27.0
         env:
-          # Настройки LLM
-          LLM__PROVIDER: "OPENROUTER"
-          LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_TOKEN }}
-          # Change: Remove the /v1 or add a trailing slash to see if it changes the routing
-          LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai"
-          LLM__MODEL_ID: "meta-llama/llama-3.1-8b-instruct:free"
-          LLM__META__NAME: "https://github.com" # Put a URL here
-        
-          # Настройки VCS (Используем провайдер GITEA для обхода бага с URL)
-          VCS__PROVIDER: "GITEA" 
+          # GitHub Auth
           VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Теперь этот URL точно будет использован:
-          VCS__HTTP_CLIENT__API_URL: "https://api.github.com"
-          VCS__PIPELINE__OWNER: "innasolp"
-          VCS__PIPELINE__REPO: "Alchemist"
-          VCS__PIPELINE__PULL_NUMBER: "378"
+          
+          # LLM Settings
+          LLM__PROVIDER: ollama
+          LLM__OLLAMA__BASE_URL: http://localhost:11434
+          LLM__MODEL: qwen2.5-coder:1.5b
+          
+          # Language and Prompts
+          REVIEW__CORE__LANGUAGE: "English"
+          REVIEW__CORE__SUMMARY_REPORT: true
+          REVIEW__CORE__SYSTEM_PROMPT: |
+            You are a Senior C#/.NET Software Engineer. 
+            Review the provided code changes for:
+            1. Critical bugs and security vulnerabilities.
+            2. Best practices (SOLID, DRY, KISS).
+            3. Efficient use of LINQ, async/await, and memory management.
+            4. Logical errors.
+            Be concise and provide actionable feedback.
+          
+          # UI Settings
+          VCS__PULL_REQUEST__COMMENTS__TYPE: inline
+          VCS__PULL_REQUEST__COMMENTS__ON_MESSAGE_LEVEL: true
