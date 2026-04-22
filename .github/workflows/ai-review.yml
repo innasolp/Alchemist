@@ -26,16 +26,25 @@ jobs:
       - name: Run AI Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Записываем весь конфиг в одну переменную как JSON
+          AI_CONFIG: >
+            {
+              "llm": {
+                "provider": "ollama",
+                "model": "qwen2.5-coder",
+                "extra_params": { "base_url": "http://localhost:11434" }
+              },
+              "vcs": {
+                "provider": "github"
+              }
+            }
         run: |
-          # Монтируем файл напрямую в корень контейнера (/)
-          # и в рабочую директорию проекта (/repo)
           docker run --rm \
             --network="host" \
+            -v $(pwd):/repo \
             -e GITHUB_TOKEN=$GITHUB_TOKEN \
             -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
             -e GITHUB_PULL_REQUEST_NUMBER=${{ github.event.pull_request.number }} \
-            -v $(pwd)/.ai-review.yaml:/.ai-review.yaml \
-            -v $(pwd)/.ai-review.yaml:/repo/.ai-review.yaml \
-            -v $(pwd):/repo \
+            -e SETTINGS_JSON="$AI_CONFIG" \
             nikitafilonov/ai-review:latest \
             ai-review review
