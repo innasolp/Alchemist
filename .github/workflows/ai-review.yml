@@ -1,51 +1,18 @@
 name: AI Code Review
-
 on:
-  # Запуск при открытии PR или добавлении новых коммитов
   pull_request:
     types: [opened, synchronize]
-    paths:
-      - '**.cs' # Анализируем только C# файлы
-  # Запуск по команде /review в комментариях
-  issue_comment:
-    types: [created]
-  # Возможность запустить вручную кнопкой
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pull-requests: write # Нужно для публикации комментариев в PR
-
 jobs:
   review:
-    # Условие: запускать, если это PR, ручной запуск или комментарий "/review"
-    if: |
-      github.event_name == 'pull_request' || 
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/review'))
-    
-    runs-on: [self-hosted, docker] # Используем ваш Docker-раннер
-
+    runs-on: self-hosted
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run AI Review (Final Docker Fix)
-        shell: bash
+      - uses: actions/checkout@v4
+      - name: Pull Model
+        run: docker exec -it ollama ollama pull qwen2.5-coder:1.5b
+      - name: Run AI Review
         run: |
-          docker run --rm \
-            --network host \
-            -v ${{ github.workspace }}:/src \
-            -e VCS__PROVIDER=GITHUB \
-            -e VCS__GITHUB__HTTP_CLIENT__API_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e VCS__GITHUB__PIPELINE__PULL_REQUEST__ID="${{ github.event.pull_request.number || github.event.issue.number }}" \
-            -e LLM__PROVIDER=OLLAMA \
-            -e LLM__OLLAMA__HTTP_CLIENT__BASE_URL="http://localhost:11434" \
-            -e LLM__OLLAMA__META__MODEL="qwen2.5-coder:1.5b" \
-            -e REVIEW__CORE__LANGUAGE=English \
-            -e REVIEW__CORE__SUMMARY_REPORT=true \
-            -e REVIEW__CORE__SYSTEM_PROMPT="You are a Senior C# Developer. Review code for bugs and logic errors." \
-            nikitafilonov/ai-review:latest ai-review run --path /src
-
+          docker run --rm --network="host" \
+            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -v $(pwd):/repo nikitafilonov/ai-review:latest \
+            ai-review review --provider ollama \
+            --model qwen2.5-coder:7b
