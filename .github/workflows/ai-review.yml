@@ -24,11 +24,19 @@ jobs:
       - name: AI Review
         uses: Nikita-Filonov/ai-review@v0.27.0
         env:
-          VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          env:
+          # ВАЖНО: Указываем провайдеров ЗАГЛАВНЫМИ буквами
+          VCS__PROVIDER: GITHUB
           LLM__PROVIDER: OLLAMA
-          # Ключевое изменение для Docker:
-          LLM__OLLAMA__BASE_URL: http://docker.internal
-          LLM__MODEL: qwen2.5-coder:1.5b
+
+          # Авторизация GitHub
+          VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Настройки Ollama (структура в соответствии с логами Pydantic)
+          LLM__OLLAMA__HTTP_CLIENT__BASE_URL: http://docker.internal
+          LLM__OLLAMA__META__MODEL: qwen2.5-coder:1.5b
+          
+          # Основные настройки ревью
           REVIEW__CORE__LANGUAGE: "English"
           REVIEW__CORE__SUMMARY_REPORT: true
           REVIEW__CORE__SYSTEM_PROMPT: |
@@ -37,4 +45,6 @@ jobs:
             1. Critical bugs and security vulnerabilities.
             2. Best practices (SOLID, DRY, KISS).
             3. Efficient use of LINQ, async/await, and memory management.
-          VCS__PULL_REQUEST__COMMENTS__TYPE: inline
+          
+          # Настройки комментариев
+          VCS__PULL_REQUEST__COMMENTS__TYPE: INLINE
