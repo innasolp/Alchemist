@@ -32,19 +32,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run AI Review (v0.64.0+)
+      - name: Run AI Review (Final Fix)
         shell: bash
         run: |
           docker run --rm \
             --network host \
             -v ${{ github.workspace }}:/src \
-            -e VCS__PROVIDER=GITHUB \
-            -e VCS__GITHUB__HTTP_CLIENT__API_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-            -e VCS__GITHUB__PIPELINE__PULL_REQUEST__ID=${{ github.event.pull_request.number || github.event.issue.number }} \
-            -e LLM__PROVIDER=OLLAMA \
-            -e LLM__OLLAMA__HTTP_CLIENT__BASE_URL=http://localhost:11434 \
-            -e LLM__OLLAMA__META__MODEL=qwen2.5-coder:1.5b \
-            -e REVIEW__CORE__LANGUAGE=English \
-            -e REVIEW__CORE__SUMMARY_REPORT=true \
-            -e REVIEW__CORE__SYSTEM_PROMPT="You are a Senior C# Developer. Review the code for logic errors, async/await misuses, and performance issues in LINQ. Be concise." \
-            nikitafilonov/ai-review:latest --path /src
+            nikitafilonov/ai-review:latest ai-review run \
+            --vcs-provider GITHUB \
+            --vcs-github-http-client-api-token "${{ secrets.GITHUB_TOKEN }}" \
+            --vcs-github-pipeline-pull-request-id "${{ github.event.pull_request.number || github.event.issue.number }}" \
+            --llm-provider OLLAMA \
+            --llm-ollama-http-client-base-url "http://localhost:11434" \
+            --llm-ollama-meta-model "qwen2.5-coder:1.5b" \
+            --review-core-language "English" \
+            --review-core-summary-report true \
+            --review-core-system-prompt "You are a Senior C# Developer. Review for logic and async errors." \
+            --path /src
