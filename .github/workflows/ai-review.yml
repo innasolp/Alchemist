@@ -25,11 +25,11 @@ jobs:
       - name: Run AI Review
         shell: powershell
         env:
-          # Токен и ID для связи с GitHub
           VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VCS__GITHUB__PIPELINE__PULL_REQUEST__ID: ${{ github.event.pull_request.number || github.event.issue.number }}
         run: |
-          ai-review run `
+          # Вызываем модуль через python, чтобы избежать проблем с путями PATH
+          python -m ai_review run `
             --vcs-provider GITHUB `
             --llm-provider OLLAMA `
             --llm-ollama-http-client-base-url "http://localhost:11434" `
