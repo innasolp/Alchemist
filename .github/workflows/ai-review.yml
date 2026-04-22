@@ -17,11 +17,6 @@ jobs:
       (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/review'))
     
     runs-on: self-hosted
-    
-    # ПРИНУДИТЕЛЬНО ИСПОЛЬЗУЕМ POWERSHELL ВМЕСТО BASH
-    defaults:
-      run:
-        shell: pwsh
 
     steps:
       - name: Checkout Code
@@ -30,17 +25,17 @@ jobs:
           fetch-depth: 0
 
       - name: Health Check (Ollama)
-        # В PowerShell команда проверки будет выглядеть так:
+        shell: powershell
         run: |
-          try {
-            $response = Invoke-WebRequest -Uri http://localhost:11434/api/tags -UseBasicParsing
-            Write-Host "Ollama is running"
-          } catch {
-            Write-Error "Ollama is not running!"
-            exit 1
+          $response = Invoke-WebRequest -Uri "http://localhost:11434/api/tags" -UseBasicParsing -ErrorAction SilentlyContinue
+          if ($null -eq $response) { 
+            Write-Error "Ollama is not running! Please start Ollama on your local machine."; exit 1 
+          } else { 
+            Write-Host "Ollama is active." 
           }
 
       - name: Ensure Model is Ready
+        shell: powershell
         run: ollama pull qwen2.5-coder:1.5b
 
       - name: AI Review
