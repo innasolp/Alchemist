@@ -10,9 +10,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@main
 
-      - name: Pull LLM Model
-        run: docker exec ollama ollama pull qwen2.5-coder
-
       - name: Run AI Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
