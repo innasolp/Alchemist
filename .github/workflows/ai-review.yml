@@ -8,9 +8,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run AI Review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker run --rm --network="host" \
-            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-            -v $(pwd):/repo nikitafilonov/ai-review:latest \
-            ai-review review --provider ollama \
-            --model qwen2.5-coder:7b
+            -e GITHUB_TOKEN=$GITHUB_TOKEN \
+            -e APP_LLM__PROVIDER=ollama \
+            -e APP_LLM__MODEL=qwen2.5-coder \
+            -e APP_LLM__EXTRA_PARAMS__BASE_URL=http://localhost:11434 \
+            -e APP_VCS__PROVIDER=github \
+            -e APP_VCS__BASE_URL=https://github.com \
+            -v $(pwd):/repo \
+            nikitafilonov/ai-review:latest \
+            ai-review review
