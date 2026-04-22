@@ -67,6 +67,9 @@ jobs:
           VCS__PIPELINE__PULL_NUMBER: ${{ inputs.pull-request-number }}
           VCS__PROVIDER: "GITHUB"
           LLM__PROVIDER: "OLLAMA"
+          LLM__OLLAMA__META: "{}"
+          LLM__OLLAMA__HTTP_CLIENT: "{}"
+          VCS__GITHUB__HTTP_CLIENT__API_URL: "https://github.com"
 
         with:
           review-command: ${{ inputs.review-command }}
