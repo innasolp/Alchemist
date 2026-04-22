@@ -1,14 +1,11 @@
-name: AI Code Review
+name: AI Code Review (Local Python)
+
 on:
   pull_request:
     types: [opened, synchronize]
   issue_comment:
     types: [created]
   workflow_dispatch:
-  
-permissions:
-  contents: read
-  pull-requests: write
 
 jobs:
   review:
@@ -17,30 +14,26 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/review'))
     
-    runs-on: self-hosted # Теперь это ваш Docker-раннер
+    runs-on: self-hosted # Ваш локальный раннер (run.cmd)
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: Login to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Run AI Review (Flat ENV Mode)
-        shell: bash
+      - name: Run AI Review
+        shell: powershell
+        env:
+          # Токен и ID для связи с GitHub
+          VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VCS__GITHUB__PIPELINE__PULL_REQUEST__ID: ${{ github.event.pull_request.number || github.event.issue.number }}
         run: |
-          docker run --rm \
-            --entrypoint ai-review \
-            -e VCS__PROVIDER=GITHUB \
-            -e VCS__GITHUB__HTTP_CLIENT__API_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-            -e VCS__GITHUB__PIPELINE__PULL_REQUEST__ID=${{ github.event.pull_request.number || github.event.issue.number }} \
-            -e LLM__PROVIDER=OLLAMA \
-            -e LLM__OLLAMA__HTTP_CLIENT__BASE_URL=http://docker.internal \
-            -e LLM__OLLAMA__META__MODEL=qwen2.5-coder:1.5b \
-            -e REVIEW__CORE__LANGUAGE=English \
-            -e REVIEW__CORE__SUMMARY_REPORT=true \
-            -e REVIEW__CORE__SYSTEM_PROMPT="Senior C# Developer. Check for bugs and logic errors." \
-            -v "${{ github.workspace }}:/src" \
-            nikitafilonov/ai-review:latest run --path /src
+          ai-review run `
+            --vcs-provider GITHUB `
+            --llm-provider OLLAMA `
+            --llm-ollama-http-client-base-url "http://localhost:11434" `
+            --llm-ollama-meta-model "qwen2.5-coder:1.5b" `
+            --review-core-language "English" `
+            --review-core-summary-report true `
+            --review-core-system-prompt "You are a Senior C# Developer. Review code for bugs and logic errors."
