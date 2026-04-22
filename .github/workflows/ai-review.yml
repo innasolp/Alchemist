@@ -29,17 +29,7 @@ jobs:
       - name: 🧱 Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: 🔍 Debug Ollama on Failure
-        if: failure()
-        run: |
-          echo "--- Контейнеры ---"
-          docker ps -a
-          echo "--- Логи Ollama ---"
-          docker logs ollama
-          echo "--- Проверка портов на хосте ---"
-          sudo netstat -tulpn | grep 11434 || echo "Порт 11434 не занят!"     
+          fetch-depth: 0      
 
       - name: ⏳ Wait for Ollama to start
         run: |
@@ -51,7 +41,17 @@ jobs:
             fi
             echo "⏳ Attempt $i: still waiting..."
             sleep 3
-          done          
+          done        
+
+      - name: 🔍 Debug Ollama on Failure
+        if: failure()
+        run: |
+          echo "--- Контейнеры ---"
+          docker ps -a
+          echo "--- Логи Ollama ---"
+          docker logs ollama
+          echo "--- Проверка портов на хосте ---"
+          sudo netstat -tulpn | grep 11434 || echo "Порт 11434 не занят!"         
 
       - name: 📦 Pull model
         run: |
