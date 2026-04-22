@@ -66,10 +66,12 @@ jobs:
           VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
           VCS__PIPELINE__PULL_NUMBER: ${{ inputs.pull-request-number }}
           VCS__PROVIDER: "GITHUB"
+          VCS__GITHUB__HTTP_CLIENT__API_URL: "https://api.github.com"
           LLM__PROVIDER: "OLLAMA"
-          LLM__OLLAMA__META: "{}"
           LLM__OLLAMA__HTTP_CLIENT: "{}"
-          VCS__GITHUB__HTTP_CLIENT__API_URL: "https://github.com"
-
+          LLM__META__MODEL: "MISTRAL"
+          LLM__META__MAX_TOKENS: "15000"
+          LLM__META__TEMPERATURE: "0.3"
+          LLM__HTTP_CLIENT__API_URL: "http://localhost:11434"
         with:
           review-command: ${{ inputs.review-command }}
