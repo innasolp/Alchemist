@@ -24,23 +24,6 @@ jobs:
       - name: AI Review
         uses: Nikita-Filonov/ai-review@v0.27.0
         env:
-          # Провайдеры (обязательно заглавными)
-          VCS__PROVIDER: GITHUB
-          LLM__PROVIDER: OLLAMA
-
-          # Настройки VCS GITHUB
-          # Путь: vcs -> GITHUB -> http_client -> api_token
+          # Эти переменные подставятся в .toml файл автоматически
           VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Путь: vcs -> GITHUB -> pipeline -> pull_request -> id
           VCS__GITHUB__PIPELINE__PULL_REQUEST__ID: ${{ github.event.pull_request.number || github.event.issue.number }}
-
-          # Настройки LLM OLLAMA
-          # Путь: llm -> OLLAMA -> http_client -> base_url
-          LLM__OLLAMA__HTTP_CLIENT__BASE_URL: http://docker.internal
-          # Путь: llm -> OLLAMA -> meta -> model
-          LLM__OLLAMA__META__MODEL: qwen2.5-coder:1.5b
-
-          # Параметры ревью
-          REVIEW__CORE__LANGUAGE: "English"
-          REVIEW__CORE__SUMMARY_REPORT: "true"
-          REVIEW__CORE__SYSTEM_PROMPT: "You are a Senior C# Developer. Review code for bugs and logic errors."
