@@ -6,7 +6,7 @@ provider = "GITHUB"
 api_token = "${VCS__GITHUB__HTTP_CLIENT__API_TOKEN}"
 
 [vcs.github.pipeline.pull_request]
-id = ${VCS__GITHUB__PIPELINE__PULL_REQUEST__ID}
+id = "${VCS__GITHUB__PIPELINE__PULL_REQUEST__ID}"
 
 [llm]
 provider = "OLLAMA"
