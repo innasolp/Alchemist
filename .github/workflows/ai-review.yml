@@ -10,19 +10,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@main
 
+      - name: Create Physical Config File
+        run: |
+          # Создаем файл настроек, который Pydantic точно увидит
+          cat <<EOF > config.yml
+          llm:
+            provider: ollama
+            model: qwen2.5-coder
+            extra_params:
+              base_url: http://localhost:11434
+          vcs:
+            provider: github
+          EOF
+
       - name: Run AI Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Запускаем, явно указывая путь к конфигу через флаг --config
           docker run --rm \
             --network="host" \
             -e GITHUB_TOKEN=$GITHUB_TOKEN \
             -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
             -e GITHUB_PULL_REQUEST_NUMBER=${{ github.event.pull_request.number }} \
-            -e AI_REVIEW_LLM__PROVIDER=$AI_REVIEW_LLM__PROVIDER \
-            -e AI_REVIEW_LLM__MODEL=$AI_REVIEW_LLM__MODEL \
-            -e AI_REVIEW_LLM__EXTRA_PARAMS__BASE_URL=$AI_REVIEW_LLM__EXTRA_PARAMS__BASE_URL \
-            -e AI_REVIEW_VCS__PROVIDER=$AI_REVIEW_VCS__PROVIDER \
+            -v $(pwd)/config.yml:/app/config.yml \
             -v $(pwd):/repo \
             nikitafilonov/ai-review:latest \
-            ai-review review
+            ai-review review --config /app/config.yml
