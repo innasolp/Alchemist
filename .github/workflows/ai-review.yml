@@ -25,20 +25,23 @@ jobs:
         uses: Nikita-Filonov/ai-review@v0.27.0
         env:
           env:
-          # ВАЖНО: Указываем провайдеров ЗАГЛАВНЫМИ буквами
+          # Провайдеры
           VCS__PROVIDER: GITHUB
           LLM__PROVIDER: OLLAMA
 
-          # Авторизация GitHub
+          # Настройки VCS (GitHub)
+          # Исправляет ошибки vcs.GITHUB.http_client и vcs.GITHUB.pipeline
           VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-          # Настройки Ollama (структура в соответствии с логами Pydantic)
+          VCS__GITHUB__PIPELINE__PULL_REQUEST__ID: ${{ github.event.pull_request.number || github.event.issue.number }}
+
+          # Настройки LLM (Ollama)
+          # Исправляет ошибки llm.OLLAMA.http_client и llm.OLLAMA.meta
           LLM__OLLAMA__HTTP_CLIENT__BASE_URL: http://docker.internal
           LLM__OLLAMA__META__MODEL: qwen2.5-coder:1.5b
-          
+
           # Основные настройки ревью
           REVIEW__CORE__LANGUAGE: "English"
-          REVIEW__CORE__SUMMARY_REPORT: true
+          REVIEW__CORE__SUMMARY_REPORT: "true"
           REVIEW__CORE__SYSTEM_PROMPT: |
             You are a Senior C#/.NET Software Engineer. 
             Review the provided code changes for:
@@ -47,4 +50,4 @@ jobs:
             3. Efficient use of LINQ, async/await, and memory management.
           
           # Настройки комментариев
-          VCS__PULL_REQUEST__COMMENTS__TYPE: INLINE
+          VCS__GITHUB__PULL_REQUEST__COMMENTS__TYPE: INLINE
