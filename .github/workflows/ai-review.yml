@@ -26,16 +26,16 @@ jobs:
         ports: [ 11434:11434 ]
 
     steps:
-      - name: 🧱 Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0      
+      - name: 🔍 Check Ollama Logs
+        run: |
+          docker ps -a
+          docker logs ollama   
 
       - name: ⏳ Wait for Ollama to start
         run: |
           echo "Waiting for Ollama service to become ready..."
           for i in $(seq 1 30); do
-            if curl -s http://127.0.0.1:11434/api/version; then
+            if curl -fsSL http://127.0.0.1:11434/api/version; then
               echo "✅ Ollama is ready."
               break
             fi
