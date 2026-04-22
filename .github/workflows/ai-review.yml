@@ -28,17 +28,17 @@ jobs:
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Run AI Review (Final Strategy)
+      - name: Run AI Review (Fixed Bash Syntax)
         shell: bash
         run: |
-          # 1. Создаем конфиг-файл на лету
-          cat <<EOF > ai-review.toml
+          # 1. Создаем конфиг-файл (используем простые кавычки для EOF, чтобы не экранировать внутри)
+          cat << 'EOF' > ai-review.toml
           [vcs]
           provider = "GITHUB"
           [vcs.github.http_client]
-          api_token = "${{ secrets.GITHUB_TOKEN }}"
+          api_token = "${VCS_TOKEN}"
           [vcs.github.pipeline.pull_request]
-          id = "${{ github.event.pull_request.number || github.event.issue.number }}"
+          id = "${PR_ID}"
           
           [llm]
           provider = "OLLAMA"
@@ -53,9 +53,11 @@ jobs:
           system_prompt = "You are a Senior C# Developer. Review code for bugs and logic errors."
           EOF
 
-          # 2. Запускаем Docker, пробрасывая этот конфиг внутрь
+          # 2. Запускаем Docker, подставляя переменные через env для безопасности
           docker run --rm \
-            -v \$(pwd)/ai-review.toml:/app/ai-review.toml \
-            -v ${{ github.workspace }}:/src \
+            -v "${{ github.workspace }}/ai-review.toml:/app/ai-review.toml" \
+            -v "${{ github.workspace }}:/src" \
             --entrypoint ai-review \
+            -e VCS_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
+            -e PR_ID="${{ github.event.pull_request.number || github.event.issue.number }}" \
             nikitafilonov/ai-review:latest run --path /src --config /app/ai-review.toml
