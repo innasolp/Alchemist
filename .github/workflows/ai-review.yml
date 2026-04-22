@@ -28,10 +28,10 @@ jobs:
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Run AI Review (Fixed Bash Syntax)
+      - name: Run AI Review (Final Mount Fix)
         shell: bash
         run: |
-          # 1. Создаем конфиг-файл (используем простые кавычки для EOF, чтобы не экранировать внутри)
+          # 1. Создаем конфиг-файл
           cat << 'EOF' > ai-review.toml
           [vcs]
           provider = "GITHUB"
@@ -50,14 +50,15 @@ jobs:
           [review.core]
           language = "English"
           summary_report = true
-          system_prompt = "You are a Senior C# Developer. Review code for bugs and logic errors."
+          system_prompt = "Senior C# Developer. Check for bugs and async/await issues."
           EOF
 
-          # 2. Запускаем Docker, подставляя переменные через env для безопасности
+          # 2. Запускаем с абсолютными путями
+          # Мы монтируем конфиг в корень (/) и код в (/src)
           docker run --rm \
-            -v "${{ github.workspace }}/ai-review.toml:/app/ai-review.toml" \
+            -v "${{ github.workspace }}/ai-review.toml:/ai-review.toml" \
             -v "${{ github.workspace }}:/src" \
             --entrypoint ai-review \
             -e VCS_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e PR_ID="${{ github.event.pull_request.number || github.event.issue.number }}" \
-            nikitafilonov/ai-review:latest run --path /src --config /app/ai-review.toml
+            nikitafilonov/ai-review:latest run --path /src --config /ai-review.toml
