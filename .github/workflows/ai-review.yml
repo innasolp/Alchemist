@@ -36,27 +36,30 @@ jobs:
           sleep 5
           curl -v http://127.0.0    
 
-      - name: ⏳ Wait for Ollama to start
+      - name: Network Debug
         run: |
-          echo "Waiting for Ollama service to become ready..."
-          for i in $(seq 1 30); do
-            if curl --noproxy "*" -fsSL http://127.0.0.1:11434/api/version; then
-              echo "✅ Ollama is ready."
-              break
-            fi
-            echo "⏳ Attempt $i: still waiting..."
-            sleep 3
-          done        
+          docker ps
+          sudo ss -tulpn | grep 11434
+          # Пробуем достучаться напрямую до IP контейнера, если localhost подведет
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ollama)
+          echo "Container IP: $CONTAINER_IP"
+          curl -I http://$CONTAINER_IP:11434/api/tags || echo "Direct IP failed"     
 
-      - name: 🔍 Debug Ollama on Failure
-        if: failure()
+      - name: ⏳ Wait for Ollama
         run: |
-          echo "--- Контейнеры ---"
-          docker ps -a
-          echo "--- Логи Ollama ---"
+          for i in {1..15}; do
+            # Пробуем и 127.0.0.1 и localhost
+            if curl -s -m 5 http://127.0.0; then
+              echo "✅ Ollama is up!"
+              exit 0
+            fi
+            echo "⏳ Waiting... ($i/15)"
+            sleep 3
+          done
+          echo "❌ Failed to connect"
           docker logs ollama
-          echo "--- Проверка портов на хосте ---"
-          sudo netstat -tulpn | grep 11434 || echo "Порт 11434 не занят!"         
+          exit 1
+  
 
       - name: 📦 Pull model
         run: |
