@@ -28,37 +28,19 @@ jobs:
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Run AI Review (Final Mount Fix)
+      - name: Run AI Review (Flat ENV Mode)
         shell: bash
         run: |
-          # 1. Создаем конфиг-файл
-          cat << 'EOF' > ai-review.toml
-          [vcs]
-          provider = "GITHUB"
-          [vcs.github.http_client]
-          api_token = "${VCS_TOKEN}"
-          [vcs.github.pipeline.pull_request]
-          id = "${PR_ID}"
-          
-          [llm]
-          provider = "OLLAMA"
-          [llm.ollama.http_client]
-          base_url = "http://docker.internal"
-          [llm.ollama.meta]
-          model = "qwen2.5-coder:1.5b"
-          
-          [review.core]
-          language = "English"
-          summary_report = true
-          system_prompt = "Senior C# Developer. Check for bugs and async/await issues."
-          EOF
-
-          # 2. Запускаем с абсолютными путями
-          # Мы монтируем конфиг в корень (/) и код в (/src)
           docker run --rm \
-            -v "${{ github.workspace }}/ai-review.toml:/ai-review.toml" \
-            -v "${{ github.workspace }}:/src" \
             --entrypoint ai-review \
-            -e VCS_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e PR_ID="${{ github.event.pull_request.number || github.event.issue.number }}" \
-            nikitafilonov/ai-review:latest run --path /src --config /ai-review.toml
+            -e VCS__PROVIDER=GITHUB \
+            -e VCS__GITHUB__HTTP_CLIENT__API_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -e VCS__GITHUB__PIPELINE__PULL_REQUEST__ID=${{ github.event.pull_request.number || github.event.issue.number }} \
+            -e LLM__PROVIDER=OLLAMA \
+            -e LLM__OLLAMA__HTTP_CLIENT__BASE_URL=http://docker.internal \
+            -e LLM__OLLAMA__META__MODEL=qwen2.5-coder:1.5b \
+            -e REVIEW__CORE__LANGUAGE=English \
+            -e REVIEW__CORE__SUMMARY_REPORT=true \
+            -e REVIEW__CORE__SYSTEM_PROMPT="Senior C# Developer. Check for bugs and logic errors." \
+            -v "${{ github.workspace }}:/src" \
+            nikitafilonov/ai-review:latest run --path /src
