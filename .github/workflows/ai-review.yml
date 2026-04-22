@@ -8,23 +8,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run AI Review
-        env:
-          # Переменные для самого приложения
-          AI_REVIEW_LLM__PROVIDER: ollama
-          AI_REVIEW_LLM__MODEL: qwen2.5-coder
-          AI_REVIEW_LLM__EXTRA_PARAMS__BASE_URL: http://localhost:11434
-          AI_REVIEW_VCS__PROVIDER: github
-          # Токен и контекст GitHub
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker run --rm --network="host" \
+          docker run --rm \
+            --network="host" \
+            -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
+            -e GITHUB_PULL_REQUEST_NUMBER=${{ github.event.pull_request.number }} \
             -e AI_REVIEW_LLM__PROVIDER=$AI_REVIEW_LLM__PROVIDER \
             -e AI_REVIEW_LLM__MODEL=$AI_REVIEW_LLM__MODEL \
             -e AI_REVIEW_LLM__EXTRA_PARAMS__BASE_URL=$AI_REVIEW_LLM__EXTRA_PARAMS__BASE_URL \
             -e AI_REVIEW_VCS__PROVIDER=$AI_REVIEW_VCS__PROVIDER \
-            -e GITHUB_TOKEN=$GITHUB_TOKEN \
-            -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
-            -e GITHUB_PULL_REQUEST_NUMBER=${{ github.event.pull_request.number }} \
-            -v $(pwd):/repo \
             nikitafilonov/ai-review:latest \
             ai-review review
