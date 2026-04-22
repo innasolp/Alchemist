@@ -25,23 +25,19 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Install ai-review
-        shell: bash
-        run: pip install ai-review==0.27.0
-
-      - name: Run AI Review
-        shell: bash
-        env:
-          # Токен GitHub
-          VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # ID пулл-реквеста
-          VCS__GITHUB__PIPELINE__PULL_REQUEST__ID: ${{ github.event.pull_request.number || github.event.issue.number }}
+      - name: Run AI Review (Docker)
+        # Используем официальный образ из GitHub Packages
         run: |
-          ai-review run \
-            --vcs-provider GITHUB \
-            --llm-provider OLLAMA \
-            --llm-ollama-http-client-base-url "http://docker.internal" \
-            --llm-ollama-meta-model "qwen2.5-coder:1.5b" \
-            --review-core-language "English" \
-            --review-core-summary-report true \
-            --review-core-system-prompt "You are a Senior C# Developer. Review code for bugs and logic errors."
+          docker run --rm \
+            -e VCS__PROVIDER=GITHUB \
+            -e VCS__GITHUB__HTTP_CLIENT__API_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -e VCS__GITHUB__PIPELINE__PULL_REQUEST__ID=${{ github.event.pull_request.number || github.event.issue.number }} \
+            -e LLM__PROVIDER=OLLAMA \
+            -e LLM__OLLAMA__HTTP_CLIENT__BASE_URL=http://docker.internal \
+            -e LLM__OLLAMA__META__MODEL=qwen2.5-coder:1.5b \
+            -e REVIEW__CORE__LANGUAGE=English \
+            -e REVIEW__CORE__SUMMARY_REPORT=true \
+            -e REVIEW__CORE__SYSTEM_PROMPT="You are a Senior C# Developer. Review code for bugs and logic errors." \
+            -v ${{ github.workspace }}:/src \
+            ghcr.io/nikitafilonov/ai-review:0.27.0 run --path /src
+
