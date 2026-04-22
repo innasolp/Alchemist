@@ -31,14 +31,15 @@ jobs:
       - name: Run AI Review (Docker)
         run: |
           docker run --rm \
-            -e VCS__PROVIDER=GITHUB \
-            -e VCS__GITHUB__HTTP_CLIENT__API_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-            -e VCS__GITHUB__PIPELINE__PULL_REQUEST__ID=${{ github.event.pull_request.number || github.event.issue.number }} \
-            -e LLM__PROVIDER=OLLAMA \
-            -e LLM__OLLAMA__HTTP_CLIENT__BASE_URL=http://docker.internal \
-            -e LLM__OLLAMA__META__MODEL=qwen2.5-coder:1.5b \
-            -e REVIEW__CORE__LANGUAGE=English \
-            -e REVIEW__CORE__SUMMARY_REPORT=true \
-            -e REVIEW__CORE__SYSTEM_PROMPT="Senior C# Developer review." \
             -v ${{ github.workspace }}:/src \
-            nikitafilonov/ai-review:latest ai-review run --path /src
+            nikitafilonov/ai-review:latest ai-review run \
+            --vcs-provider GITHUB \
+            --vcs-github-http-client-api-token "${{ secrets.GITHUB_TOKEN }}" \
+            --vcs-github-pipeline-pull-request-id "${{ github.event.pull_request.number || github.event.issue.number }}" \
+            --llm-provider OLLAMA \
+            --llm-ollama-http-client-base-url "http://docker.internal" \
+            --llm-ollama-meta-model "qwen2.5-coder:1.5b" \
+            --review-core-language "English" \
+            --review-core-summary-report true \
+            --review-core-system-prompt "You are a Senior C# Developer. Review code for bugs and logic errors." \
+            --path /src
