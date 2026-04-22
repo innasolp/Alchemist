@@ -34,7 +34,6 @@ jobs:
       - name: ⏳ Wait for Ollama to start
         run: |
           echo "Waiting for Ollama service to become ready..."
-          curl -fsSL http://docker.internal || (echo "Ollama is not running!" && exit 1)
           for i in $(seq 1 30); do
             if curl -s http://docker.internal:11434/api/version; then
               echo "✅ Ollama is ready."
