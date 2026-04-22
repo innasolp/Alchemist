@@ -69,9 +69,7 @@ jobs:
           VCS__GITHUB__HTTP_CLIENT__API_URL: "https://api.github.com"
           LLM__PROVIDER: "OLLAMA"
           LLM__OLLAMA__HTTP_CLIENT: "{}"
-          LLM__META__MODEL: "MISTRAL"
-          LLM__META__MAX_TOKENS: "15000"
-          LLM__META__TEMPERATURE: "0.3"
-          LLM__HTTP_CLIENT__API_URL: "http://localhost:11434"
+          LLM__OLLAMA__META__MODEL: "MISTRAL"
+          LLM__OLLAMA__HTTP_CLIENT__API_URL: "http://localhost:11434"
         with:
           review-command: ${{ inputs.review-command }}
