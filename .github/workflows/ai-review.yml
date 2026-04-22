@@ -41,4 +41,4 @@ jobs:
             -e REVIEW__CORE__SUMMARY_REPORT=true \
             -e REVIEW__CORE__SYSTEM_PROMPT="Senior C# Developer review." \
             -v ${{ github.workspace }}:/src \
-            nikitafilonov/ai-review:latest run --path /src
+            nikitafilonov/ai-review:latest --path /src
