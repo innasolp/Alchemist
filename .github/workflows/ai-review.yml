@@ -25,7 +25,7 @@ jobs:
         uses: Nikita-Filonov/ai-review@v0.27.0
         env:
           VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LLM__PROVIDER: ollama
+          LLM__PROVIDER: OLLAMA
           # Ключевое изменение для Docker:
           LLM__OLLAMA__BASE_URL: http://docker.internal
           LLM__MODEL: qwen2.5-coder:1.5b
