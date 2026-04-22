@@ -10,10 +10,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@main
 
-      - name: Create Physical Config File
+      - name: Create Config
         run: |
-          # Создаем файл настроек, который Pydantic точно увидит
-          cat <<EOF > config.yml
+          # Создаем файл с точным именем, которое ищет библиотека конфигурации
+          cat <<EOF > .ai-review.yaml
           llm:
             provider: ollama
             model: qwen2.5-coder
@@ -27,13 +27,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Запускаем, явно указывая путь к конфигу через флаг --config
+          # Монтируем файл напрямую в корень контейнера (/)
+          # и в рабочую директорию проекта (/repo)
           docker run --rm \
             --network="host" \
             -e GITHUB_TOKEN=$GITHUB_TOKEN \
             -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
             -e GITHUB_PULL_REQUEST_NUMBER=${{ github.event.pull_request.number }} \
-            -v $(pwd)/config.yml:/app/config.yml \
+            -v $(pwd)/.ai-review.yaml:/.ai-review.yaml \
+            -v $(pwd)/.ai-review.yaml:/repo/.ai-review.yaml \
             -v $(pwd):/repo \
             nikitafilonov/ai-review:latest \
-            ai-review review --config /app/config.yml
+            ai-review review
