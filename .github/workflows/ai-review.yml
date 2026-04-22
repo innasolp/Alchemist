@@ -29,15 +29,19 @@ jobs:
           VCS__PROVIDER: GITHUB
           LLM__PROVIDER: OLLAMA
 
-          # Авторизация и ID
+          # Структура для GITHUB (vcs.GITHUB.http_client и vcs.GITHUB.pipeline)
           VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VCS__GITHUB__PIPELINE__PULL_REQUEST__ID: ${{ github.event.pull_request.number || github.event.issue.number }}
 
-          # Настройки Ollama (в v0.25.0 они проще)
-          LLM__OLLAMA__BASE_URL: http://docker.internal
-          LLM__OLLAMA__MODEL: qwen2.5-coder:1.5b
+          # Структура для OLLAMA (llm.OLLAMA.http_client и llm.OLLAMA.meta)
+          # Именно эти ключи Pydantic ищет внутри объекта OLLAMA
+          LLM__OLLAMA__HTTP_CLIENT__BASE_URL: http://docker.internal
+          LLM__OLLAMA__META__MODEL: qwen2.5-coder:1.5b
 
-          # Основные параметры
+          # Параметры ревью
           REVIEW__CORE__LANGUAGE: "English"
           REVIEW__CORE__SUMMARY_REPORT: "true"
-          REVIEW__CORE__SYSTEM_PROMPT: "You are a Senior C# Developer. Review code for bugs and logic errors."
+          REVIEW__CORE__SYSTEM_PROMPT: "Senior C# Developer review."
+          
+          # Тип комментариев
+          VCS__GITHUB__PULL_REQUEST__COMMENTS__TYPE: INLINE
