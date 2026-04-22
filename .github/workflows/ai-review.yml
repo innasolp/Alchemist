@@ -47,4 +47,4 @@ jobs:
             -e REVIEW__CORE__LANGUAGE=English \
             -e REVIEW__CORE__SUMMARY_REPORT=true \
             -e REVIEW__CORE__SYSTEM_PROMPT="You are a Senior C# Developer. Review the code for logic errors, async/await misuses, and performance issues in LINQ. Be concise." \
-            nikitafilonov/ai-review:latest run --path /src
+            nikitafilonov/ai-review:latest --path /src
