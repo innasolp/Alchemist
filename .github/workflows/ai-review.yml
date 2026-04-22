@@ -22,8 +22,22 @@ jobs:
           fetch-depth: 0
 
       - name: AI Review
-        uses: Nikita-Filonov/ai-review@v0.27.0
+        # Откатываемся на версию с простым конфигом
+        uses: Nikita-Filonov/ai-review@v0.25.0
         env:
-          # Эти переменные подставятся в .toml файл автоматически
+          # Провайдеры
+          VCS__PROVIDER: GITHUB
+          LLM__PROVIDER: OLLAMA
+
+          # Авторизация и ID
           VCS__GITHUB__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VCS__GITHUB__PIPELINE__PULL_REQUEST__ID: ${{ github.event.pull_request.number || github.event.issue.number }}
+
+          # Настройки Ollama (в v0.25.0 они проще)
+          LLM__OLLAMA__BASE_URL: http://docker.internal
+          LLM__OLLAMA__MODEL: qwen2.5-coder:1.5b
+
+          # Основные параметры
+          REVIEW__CORE__LANGUAGE: "English"
+          REVIEW__CORE__SUMMARY_REPORT: "true"
+          REVIEW__CORE__SYSTEM_PROMPT: "You are a Senior C# Developer. Review code for bugs and logic errors."
