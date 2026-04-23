@@ -35,23 +35,33 @@ jobs:
       - name: Get git diff
         id: diff_step
         run: |
-          # Определяем базовую ветку: если это PR - берем base_ref, если нет - берем default ветку (master)
+          # 1. Автоматически определяем дефолтную ветку репозитория (если это не PR)
+          # Используем API или просто берем ту, куда указывает репозиторий
+          DEFAULT_BRANCH=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+          
+          # 2. Определяем базовую ветку для сравнения
           BASE_BRANCH="${{ github.base_ref }}"
           if [ -z "$BASE_BRANCH" ]; then
-            BASE_BRANCH="master" 
+            BASE_BRANCH=$DEFAULT_BRANCH
           fi
           
-          echo "Comparing against origin/$BASE_BRANCH"
+          echo "Base branch is determined as: $BASE_BRANCH"
           
-          # Выполняем diff
+          # 3. Подтягиваем базовую ветку, чтобы git её увидел
+          git fetch origin $BASE_BRANCH --depth=100
+          
+          # 4. Выполняем сравнение
           git diff origin/$BASE_BRANCH HEAD -- . ':(exclude)*.lock' > diff.txt
           
-          # Проверяем, не пустой ли файл
+          # 5. Выводим результат для следующих шагов
           if [ -s diff.txt ]; then
             echo "has_diff=true" >> $GITHUB_OUTPUT
+            echo "Changes found."
           else
             echo "has_diff=false" >> $GITHUB_OUTPUT
+            echo "No changes detected."
           fi
+
 
       - name: AI Review
         if: steps.diff_step.outputs.has_diff == 'true'
