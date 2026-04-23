@@ -65,44 +65,50 @@ jobs:
           OLLAMA_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
           MODEL: "qwen2.5-coder:1.5b"
         run: |
-          # 1. Store the diff in a variable for jq (safely via file)
-          # 2. Use the CHAT API instead of GENERATE for better instruction following
+          # Используем расширенный промпт для маленькой модели
+          cat << 'EOF' > instruction.txt
+          You are a professional code reviewer. Your task is to analyze the provided GIT DIFF.
+          
+          Follow these steps:
+          1. Briefly explain what changed in each file.
+          2. Check for architectural issues (DI, patterns, Outbox logic).
+          3. Look for security risks (connection strings, hardcoded secrets, resource disposal).
+          
+          Format: Use Markdown with Bold headers. Do NOT use JSON.
+          
+          GIT DIFF:
+          EOF
+
+          cat diff.txt >> instruction.txt
+
+          # Отправляем через API генерации, но с явным указанием не быть "JSON-ботом"
           jq -n \
             --arg model "$MODEL" \
-            --rawfile diff diff.txt \
+            --rawfile prompt instruction.txt \
             '{
-              model: $model,
-              messages: [
-                {
-                  role: "system",
-                  content: "You are a senior software architect. Provide a detailed, human-readable review of the code changes. Use bullet points and bold text. Do NOT use JSON. Focus on: 1. Overview, 2. Logic & Architecture, 3. Security/Bugs."
-                },
-                {
-                  role: "user",
-                  content: ("Review this code diff:\n\n" + $diff)
-                }
-              ],
-              stream: false,
-              options: { temperature: 0.1 }
+              model: $model, 
+              prompt: $prompt, 
+              stream: false, 
+              options: { 
+                temperature: 0.4, 
+                top_p: 0.9,
+                num_predict: 1000
+              }
             }' > payload.json
 
-          # 3. Send request to /api/chat instead of /api/generate
-          RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/chat" \
+          RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
             -H "Content-Type: application/json" \
             --data-binary @payload.json)
 
-          # 4. Extract content from the chat response format
-          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: No AI response"')
+          REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
 
-          # 5. Output with safe delimiter
+          # Безопасная передача в GitHub Actions
           EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           {
             echo "results<<$EOF_MARKER"
             echo "$REVIEW"
             echo "$EOF_MARKER"
           } >> "$GITHUB_OUTPUT"
-
-
           
       - name: Comment PR
         if: steps.diff_step.outputs.has_diff == 'true'
