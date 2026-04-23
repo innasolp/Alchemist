@@ -3,6 +3,7 @@ name: AI Code Review (via Tailscale)
 on:
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:  
 
 permissions:
   contents: read      # Для чтения кода
