@@ -63,7 +63,7 @@ jobs:
         id: ollama_step
         env:
           OLLAMA_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
-          MODEL: "qwen2.5-code:1.5b" # Changed to match your actual local tag
+          MODEL: "qwen2.5-coder:1.5b" # Changed to match your actual local tag
         run: |
           # 1. Create a structured System Prompt
           cat << 'EOF' > system_prompt.txt
