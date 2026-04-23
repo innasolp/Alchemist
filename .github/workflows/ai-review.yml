@@ -65,7 +65,7 @@ jobs:
       - name: Debug Connection
         run: |
           tailscale status
-          ping -c 3 [100.122.20.79]
+          ping -c 3 100.122.20.79
           curl -I --connect-timeout 5 ${{ secrets.OLLAMA_ENDPOINT }}/api/tags
 
       - name: AI Review
