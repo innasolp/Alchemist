@@ -1,7 +1,7 @@
 name: AI Code Review (via Tailscale)
 
 on:
-  pull_request_target: # Измените pull_request на это
+  pull_request: 
     types: [opened, synchronize]
   workflow_dispatch:  
 
