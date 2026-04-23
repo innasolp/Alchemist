@@ -75,20 +75,37 @@ jobs:
           OLLAMA_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
           MODEL: "qwen2.5-coder:1.5b"
         run: |
-          # Используем обычный curl, никакой защиты туннеля не нужно, так как сеть частная
-          JSON_PAYLOAD=$(jq -n --arg prompt "Review this code:\n$(cat diff.txt)" '{model: "'$MODEL'", prompt: $prompt, stream: false}')
-          
-          RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
+          # 1. Prepare the prompt safely using a file to avoid shell arg limits
+          echo "Review the following git diff and provide concise improvement suggestions:" > prompt.txt
+          cat diff.txt >> prompt.txt
+
+          # 2. Create the JSON payload using jq from files
+          jq -n --arg model "$MODEL" --arg prompt "$(<prompt.txt)" \
+            '{model: $model, prompt: $prompt, stream: false}' > payload.json
+
+          # 3. Increase timeout and capture HTTP status code
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$OLLAMA_URL/api/generate" \
             -H "Content-Type: application/json" \
-            -d "$JSON_PAYLOAD")
+            -d @payload.json)
+
+          # 4. Separate body and status
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Error: Ollama returned status $HTTP_STATUS"
+            echo "results=AI Review failed (Server error: $HTTP_STATUS)" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          # 5. Extract results
+          REVIEW=$(echo "$BODY" | jq -r '.response // "Error: Empty response from AI"')
           
-          REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
-          
-          {
-            echo "results<<EOF"
-            echo "$REVIEW"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          # 6. Save to output using a random delimiter for safety
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "results<<$EOF" >> "$GITHUB_OUTPUT"
+          echo "$REVIEW" >> "$GITHUB_OUTPUT"
+          echo "$EOF" >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
         if: steps.diff_step.outputs.has_diff == 'true'
