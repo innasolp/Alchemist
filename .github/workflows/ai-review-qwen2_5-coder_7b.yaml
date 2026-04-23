@@ -98,5 +98,6 @@ jobs:
         with:
           message: |
             ### 🤖 AI Code Review (Tailscale)
+            **Files checked:** `${{ steps.diff_step.outputs.files_checked }}`
             ${{ steps.ollama_step.outputs.results }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
