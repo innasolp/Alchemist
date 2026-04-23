@@ -18,6 +18,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check secrets availability
+        run: |
+          if [ -z "${{ secrets.YOUR_OAUTH_ID_NAME }}" ]; then
+            echo "Secret is EMPTY"
+            exit 1
+          fi    
+
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
         with:
