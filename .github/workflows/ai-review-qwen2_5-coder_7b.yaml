@@ -24,7 +24,7 @@ jobs:
             echo "Secret is EMPTY"
             exit 1
           fi    
-
+          
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
         with:
@@ -37,14 +37,12 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }} --depth=100
           git fetch origin ${{ github.head_ref }} --depth=100
-
           # 1. Получаем список файлов (исключая lock-файлы)
           FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- . ':(exclude)*.lock')
           
           # Сохраняем список файлов для комментария (заменяем переносы строк на запятые для краткости)
           FILE_LIST=$(echo "$FILES" | tr '\n' ' ' | sed 's/ $//')
           echo "files_checked=$FILE_LIST" >> $GITHUB_OUTPUT
-
           # 2. Генерируем сам diff
           git diff origin/${{ github.base_ref }}...HEAD -- . ':(exclude)*.lock' > diff.txt
           
@@ -53,7 +51,7 @@ jobs:
           else
             echo "has_diff=false" >> $GITHUB_OUTPUT
           fi
-
+          
       - name: Network Diagnostic
         run: |
           tailscale status
@@ -70,34 +68,29 @@ jobs:
           # 1. Create the prompt text in a file
           echo "Review this code diff for bugs and improvements:" > full_prompt.txt
           cat diff.txt >> full_prompt.txt
-
           # 2. Use jq --rawfile to safely load the text without hitting shell limits
           jq -n \
             --arg model "$MODEL" \
             --rawfile prompt full_prompt.txt \
             '{model: $model, prompt: $prompt, stream: false}' > payload.json
-
           # 3. Send the file directly to curl using @
           RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
             -H "Content-Type: application/json" \
             --data-binary @payload.json)
-
           # 4. Extract the response
           REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
-
           # 5. Safe multi-line output to GitHub Actions
           {
             echo "results<<EOF"
             echo "$REVIEW"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
-
+          
       - name: Comment PR
         if: steps.diff_step.outputs.has_diff == 'true'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
             ### 🤖 AI Code Review (Tailscale)
-            **Files checked:** `${{ steps.diff_step.outputs.files_checked }}`
             ${{ steps.ollama_step.outputs.results }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
