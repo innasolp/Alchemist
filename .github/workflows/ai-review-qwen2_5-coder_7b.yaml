@@ -65,44 +65,43 @@ jobs:
           OLLAMA_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
           MODEL: "qwen2.5-coder:1.5b"
         run: |
-          # 1. Create a strong descriptive prompt
-          cat << 'EOF' > system_prompt.txt
-          You are a Senior Software Architect. Provide a detailed, human-readable analysis of the following code changes. 
-          DO NOT return JSON. Use clear headings and bullet points.
-
-          Structure your response exactly like this:
-          1. **Overview**: A high-level summary of what these snippets do together.
-          2. **Component Breakdown**: Describe each class/method's role (e.g., Background Services, DbContext, Handlers).
-          3. **Architecture & Patterns**: Note the design patterns used (e.g., Outbox pattern, DI).
-          4. **Critical Analysis**: Point out potential bugs, security risks (like hardcoded strings), or performance issues.
-
-          Review the following git diff:
-          EOF
-
-          # 2. Append the diff
-          cat diff.txt >> system_prompt.txt
-
-          # 3. Create payload with lower temperature for stability
+          # 1. Store the diff in a variable for jq (safely via file)
+          # 2. Use the CHAT API instead of GENERATE for better instruction following
           jq -n \
             --arg model "$MODEL" \
-            --rawfile prompt system_prompt.txt \
-            '{model: $model, prompt: $prompt, stream: false, options: {temperature: 0.3, num_ctx: 4096}}' > payload.json
+            --rawfile diff diff.txt \
+            '{
+              model: $model,
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a senior software architect. Provide a detailed, human-readable review of the code changes. Use bullet points and bold text. Do NOT use JSON. Focus on: 1. Overview, 2. Logic & Architecture, 3. Security/Bugs."
+                },
+                {
+                  role: "user",
+                  content: ("Review this code diff:\n\n" + $diff)
+                }
+              ],
+              stream: false,
+              options: { temperature: 0.1 }
+            }' > payload.json
 
-          # 4. Request
-          RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
+          # 3. Send request to /api/chat instead of /api/generate
+          RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/chat" \
             -H "Content-Type: application/json" \
             --data-binary @payload.json)
 
-          # 5. Extract
-          REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
-          
-          # 6. Safe output
+          # 4. Extract content from the chat response format
+          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: No AI response"')
+
+          # 5. Output with safe delimiter
           EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           {
             echo "results<<$EOF_MARKER"
             echo "$REVIEW"
             echo "$EOF_MARKER"
           } >> "$GITHUB_OUTPUT"
+
 
           
       - name: Comment PR
