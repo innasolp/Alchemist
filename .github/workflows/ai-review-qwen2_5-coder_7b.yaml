@@ -63,38 +63,40 @@ jobs:
         id: ollama_step
         env:
           OLLAMA_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
-          MODEL: "qwen2.5-coder:1.5b" # Changed to match your actual local tag
+          MODEL: "qwen2.5-coder:1.5b"
         run: |
-          # 1. Create a structured System Prompt
+          # 1. Create a strong descriptive prompt
           cat << 'EOF' > system_prompt.txt
-          You are a Senior Software Architect and Security Expert. 
-          Review the following git diff and provide:
-          1. **Brief Summary**: What changed?
-          2. **Architecture**: Are there any design pattern violations or better ways to structure this?
-          3. **Security & Risks**: Check for vulnerabilities, race conditions, or performance bottlenecks.
-          4. **Logic Bugs**: Identify potential crashes or edge cases.
-          Keep it concise and professional.
+          You are a Senior Software Architect. Provide a detailed, human-readable analysis of the following code changes. 
+          DO NOT return JSON. Use clear headings and bullet points.
+
+          Structure your response exactly like this:
+          1. **Overview**: A high-level summary of what these snippets do together.
+          2. **Component Breakdown**: Describe each class/method's role (e.g., Background Services, DbContext, Handlers).
+          3. **Architecture & Patterns**: Note the design patterns used (e.g., Outbox pattern, DI).
+          4. **Critical Analysis**: Point out potential bugs, security risks (like hardcoded strings), or performance issues.
+
+          Review the following git diff:
           EOF
 
-          # 2. Combine System Prompt with the Diff
-          echo -e "\n--- CODE DIFF BEGIN ---\n" >> system_prompt.txt
+          # 2. Append the diff
           cat diff.txt >> system_prompt.txt
 
-          # 3. Use jq --rawfile to handle the large payload safely
+          # 3. Create payload with lower temperature for stability
           jq -n \
             --arg model "$MODEL" \
             --rawfile prompt system_prompt.txt \
-            '{model: $model, prompt: $prompt, stream: false, options: {temperature: 0.2}}' > payload.json
+            '{model: $model, prompt: $prompt, stream: false, options: {temperature: 0.3, num_ctx: 4096}}' > payload.json
 
-          # 4. API Request
+          # 4. Request
           RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
             -H "Content-Type: application/json" \
             --data-binary @payload.json)
 
-          # 5. Extract and format for GitHub Output
+          # 5. Extract
           REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
           
-          # Using a unique delimiter for multi-line support
+          # 6. Safe output
           EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           {
             echo "results<<$EOF_MARKER"
