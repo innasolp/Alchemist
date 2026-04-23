@@ -73,7 +73,7 @@ jobs:
         id: ollama_step
         env:
           OLLAMA_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
-          MODEL: "qwen2.5-coder:7b"
+          MODEL: "qwen2.5-coder:1.5b"
         run: |
           # Используем обычный curl, никакой защиты туннеля не нужно, так как сеть частная
           JSON_PAYLOAD=$(jq -n --arg prompt "Review this code:\n$(cat diff.txt)" '{model: "'$MODEL'", prompt: $prompt, stream: false}')
