@@ -35,31 +35,23 @@ jobs:
       - name: Get git diff
         id: diff_step
         run: |
-          # 1. Автоматически определяем дефолтную ветку репозитория (если это не PR)
-          # Используем API или просто берем ту, куда указывает репозиторий
-          DEFAULT_BRANCH=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+          git fetch origin ${{ github.base_ref }} --depth=100
+          git fetch origin ${{ github.head_ref }} --depth=100
+
+          # 1. Получаем список файлов (исключая lock-файлы)
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- . ':(exclude)*.lock')
           
-          # 2. Определяем базовую ветку для сравнения
-          BASE_BRANCH="${{ github.base_ref }}"
-          if [ -z "$BASE_BRANCH" ]; then
-            BASE_BRANCH=$DEFAULT_BRANCH
-          fi
+          # Сохраняем список файлов для комментария (заменяем переносы строк на запятые для краткости)
+          FILE_LIST=$(echo "$FILES" | tr '\n' ' ' | sed 's/ $//')
+          echo "files_checked=$FILE_LIST" >> $GITHUB_OUTPUT
+
+          # 2. Генерируем сам diff
+          git diff origin/${{ github.base_ref }}...HEAD -- . ':(exclude)*.lock' > diff.txt
           
-          echo "Base branch is determined as: $BASE_BRANCH"
-          
-          # 3. Подтягиваем базовую ветку, чтобы git её увидел
-          git fetch origin $BASE_BRANCH --depth=100
-          
-          # 4. Выполняем сравнение
-          git diff origin/$BASE_BRANCH HEAD -- . ':(exclude)*.lock' > diff.txt
-          
-          # 5. Выводим результат для следующих шагов
           if [ -s diff.txt ]; then
             echo "has_diff=true" >> $GITHUB_OUTPUT
-            echo "Changes found."
           else
             echo "has_diff=false" >> $GITHUB_OUTPUT
-            echo "No changes detected."
           fi
 
       - name: Network Diagnostic
