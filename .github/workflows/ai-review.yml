@@ -1,4 +1,4 @@
-name: AI Code Review (Alpine/Ollama)
+name: AI Code Review (via Tailscale)
 
 on:
   pull_request:
@@ -13,60 +13,46 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
       - name: Get git diff
         id: diff_step
         run: |
-          git diff origin/${{ github.base_ref }} HEAD -- . ':(exclude)*.lock' ':(exclude)*.json' > diff.txt
-          # Проверяем, есть ли что ревьюить
-          if [ -s diff.txt ]; then
-            echo "has_diff=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_diff=false" >> $GITHUB_OUTPUT
-          fi
+          git diff origin/${{ github.base_ref }} HEAD -- . ':(exclude)*.lock' > diff.txt
+          echo "has_diff=$( [ -s diff.txt ] && echo 'true' || echo 'false' )" >> $GITHUB_OUTPUT
 
-      - name: AI Review via Ollama
+      - name: AI Review
         if: steps.diff_step.outputs.has_diff == 'true'
         id: ollama_step
         env:
           OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
-          MODEL: "qwen2.5-coder:7b" 
+          MODEL: "qwen2.5-coder:7b"
         run: |
-          # 1. Формируем запрос
-          JSON_PAYLOAD=$(jq -n --arg prompt "Review this code:\n$(cat diff.txt)" \
-            '{model: "'$MODEL'", prompt: $prompt, stream: false}')
-
-          # 2. Делаем запрос и сохраняем ответ в файл (чтобы не потерять переносы строк)
-          curl --retry 3 -s -X POST "$OLLAMA_URL/api/generate" \
+          # Используем обычный curl, никакой защиты туннеля не нужно, так как сеть частная
+          JSON_PAYLOAD=$(jq -n --arg prompt "Review this code:\n$(cat diff.txt)" '{model: "'$MODEL'", prompt: $prompt, stream: false}')
+          
+          RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
             -H "Content-Type: application/json" \
-            -H "Bypass-Tunnel-Reminder: true" \
-            -d "$JSON_PAYLOAD" > response.json
-
-          # 3. ОТЛАДКА: Выводим ответ в логи GitHub, чтобы увидеть ошибку, если она есть
-          echo "--- RAW RESPONSE FROM SERVER ---"
-          cat response.json
-          echo -e "\n--------------------------------"
-
-          # 4. Проверяем, является ли ответ валидным JSON и содержит ли он поле response
-          if jq -e . response.json >/dev/null 2>&1; then
-            REVIEW=$(jq -r '.response // "AI returned empty response"' response.json)
-          else
-            REVIEW="❌ Error: Server returned non-JSON response. Check Action logs for details."
-          fi
-
-          # 5. Записываем в Output
+            -d "$JSON_PAYLOAD")
+          
+          REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
+          
           {
             echo "results<<EOF"
             echo "$REVIEW"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-
       - name: Comment PR
-        if: steps.diff_step.outputs.has_diff == 'true' && steps.ollama_step.outputs.results != ''
+        if: steps.diff_step.outputs.has_diff == 'true'
         uses: thollander/actions-comment-pull-request@v2
         with:
-          # Теперь обращаемся к outputs конкретного шага
           message: |
-            ### 🤖 AI Code Review
+            ### 🤖 AI Code Review (Tailscale)
             ${{ steps.ollama_step.outputs.results }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
