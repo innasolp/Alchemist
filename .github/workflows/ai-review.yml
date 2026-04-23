@@ -35,10 +35,10 @@ jobs:
       - name: Get git diff
         id: diff_step
         run: |
-          # Определяем базовую ветку: если это PR - берем base_ref, если нет - берем default ветку (main)
+          # Определяем базовую ветку: если это PR - берем base_ref, если нет - берем default ветку (master)
           BASE_BRANCH="${{ github.base_ref }}"
           if [ -z "$BASE_BRANCH" ]; then
-            BASE_BRANCH="main" 
+            BASE_BRANCH="master" 
           fi
           
           echo "Comparing against origin/$BASE_BRANCH"
