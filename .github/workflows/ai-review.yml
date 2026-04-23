@@ -1,75 +1,61 @@
-name: 🤖 AI Review
+name: AI Code Review (Alpine/Ollama)
 
 on:
-  workflow_dispatch:
-    inputs:
-      review-command:
-        type: choice
-        default: "run"
-        options: [ run, run-inline, run-context, run-summary ]
-        required: true
-        description: "AI Review command"
-
-      pull-request-number:
-        type: string
-        required: true
-        description: "Pull request number"
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
-  ai-review:
-    name: Run AI Review
+  review:
     runs-on: ubuntu-latest
-
-    services:
-      ollama:
-        image: ollama/ollama:latest
-        ports: [ 11434:11434 ]
-
     steps:
-      - name: 🧱 Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: ⏳ Wait for Ollama to start
+      - name: Get git diff
+        id: diff_step
         run: |
-          echo "Waiting for Ollama service to become ready..."
-          for i in $(seq 1 30); do
-            if curl -s http://localhost:11434/api/version; then
-              echo "✅ Ollama is ready."
-              break
-            fi
-            echo "⏳ Attempt $i: still waiting..."
-            sleep 3
-          done
+          git diff origin/${{ github.base_ref }} HEAD -- . ':(exclude)*.lock' ':(exclude)*.json' > diff.txt
+          # Проверяем, есть ли что ревьюить
+          if [ -s diff.txt ]; then
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_diff=false" >> $GITHUB_OUTPUT
+          fi
 
-      - name: 📦 Pull model
-        run: |
-          echo "📥 Downloading model 'mistral'..."
-          curl -X POST http://localhost:11434/api/pull \
-            -H "Content-Type: application/json" \
-            -d '{"model": "mistral"}'
-
-      - name: 🔥 Warm up model
-        run: |
-          echo "🔥 Warming up model..."
-          curl -s -X POST http://localhost:11434/api/chat \
-            -H "Content-Type: application/json" \
-            -d '{"model":"mistral","stream":false,"messages":[{"role":"user","content":"Hello!"}]}'
-          echo "✅ Warm-up complete."
-
-      - name: 🚀 Run AI Review
-        uses: Nikita-Filonov/ai-review@v0.64.0
+      - name: AI Review via Ollama
+        if: steps.diff_step.outputs.has_diff == 'true'
+        id: ollama_step
         env:
-          VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VCS__PIPELINE__OWNER: ${{ github.repository_owner }}
-          VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
-          VCS__PIPELINE__PULL_NUMBER: ${{ inputs.pull-request-number }}
-          VCS__PROVIDER: "GITHUB"
-          VCS__GITHUB__HTTP_CLIENT__API_URL: "https://api.github.com"
-          LLM__PROVIDER: "OLLAMA"
-          LLM__OLLAMA__HTTP_CLIENT: "{}"
-          LLM__OLLAMA__META__MODEL: "MISTRAL"
-          LLM__OLLAMA__HTTP_CLIENT__API_URL: "http://localhost:11434"
+          OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
+          MODEL: "qwen2.5-coder:7b" 
+        run: |
+          # Формируем JSON корректно через jq
+          JSON_PAYLOAD=$(jq -n --arg prompt "Review this code for bugs and logic errors. Keep it concise:\n$(cat diff.txt)" \
+            '{model: "'$MODEL'", prompt: $prompt, stream: false}')
+
+          RESPONSE=$(curl --retry 3 -s -X POST "$OLLAMA_URL/api/generate" \
+            -H "Content-Type: application/json" \
+            -H "Bypass-Tunnel-Reminder: true" \
+            -d "$JSON_PAYLOAD")
+
+          # Извлекаем текст
+          REVIEW=$(echo "$RESPONSE" | jq -r '.response // "No response from AI"')
+
+          # Записываем в Output шага (используем разделитель для многострочного текста)
+          {
+            echo "results<<EOF"
+            echo "$REVIEW"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR
+        if: steps.diff_step.outputs.has_diff == 'true' && steps.ollama_step.outputs.results != ''
+        uses: thollander/actions-comment-pull-request@v2
         with:
-          review-command: ${{ inputs.review-command }}
+          # Теперь обращаемся к outputs конкретного шага
+          message: |
+            ### 🤖 AI Code Review
+            ${{ steps.ollama_step.outputs.results }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
