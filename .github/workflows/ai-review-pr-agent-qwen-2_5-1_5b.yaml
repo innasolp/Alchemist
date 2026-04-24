@@ -81,10 +81,11 @@ jobs:
           CONFIG_MAX_MODEL_TOKENS: 16000
           OLLAMA_CONTEXT_LENGTH: 16000
           OLLAMA_API_BASE: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
+          OPENAI_KEY: "none"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: true
-          PR_REVIEWER.REQUIRE_SCORE_REVIEW: "false"
-          PR_REVIEWER.SYSTEM_PROMPT: "You are a suspicious Security Auditor..." 
+          PR_DESCRIPTION_PUBLISH_DESCRIPTION_AS_COMMENT: true
+          PR_REVIEWER_REQUIRE_SCORE_REVIEW: "false"
+          PR_REVIEWER_SYSTEM_PROMPT: "You are a suspicious Security Auditor..." 
           # 'with' must be at the same indentation level as 'uses' and 'env'
           GITHUB_ACTION_CONFIG_HANDLE_SYNCHRONIZE_EVENTS: true
         with:
