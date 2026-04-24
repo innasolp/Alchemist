@@ -75,7 +75,7 @@ jobs:
 
           
       - name: Run Ollama Code Review
-        uses: ./
+        uses: ray5273/ollama-pr-review-action@v1.0.0
         with:
           OLLAMA_API_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} # URL to your GPU server
           MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
