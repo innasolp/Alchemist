@@ -77,16 +77,21 @@ jobs:
       - name: PR Agent Action
         uses: Codium-ai/pr-agent@main
         env:
+          # Model & Connection
           CONFIG_MODEL: "ollama/qwen2.5-coder:3b"
-          CONFIG_MAX_MODEL_TOKENS: 16000
-          OLLAMA_CONTEXT_LENGTH: 16000
           OLLAMA_API_BASE: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
           OPENAI_KEY: "none"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Context Window
+          CONFIG_MAX_MODEL_TOKENS: 16000
+          OLLAMA_CONTEXT_LENGTH: 16000
+          
+          # Settings
           PR_DESCRIPTION_PUBLISH_DESCRIPTION_AS_COMMENT: true
           PR_REVIEWER_REQUIRE_SCORE_REVIEW: "false"
-          PR_REVIEWER_SYSTEM_PROMPT: "You are a suspicious Security Auditor..." 
-          # 'with' must be at the same indentation level as 'uses' and 'env'
+          PR_REVIEWER_SYSTEM_PROMPT: "You are a suspicious Security Auditor..."
           GITHUB_ACTION_CONFIG_HANDLE_SYNCHRONIZE_EVENTS: true
         with:
-             command: "/review"
+          # Use 'args' instead of 'command' for Docker-based actions
+          args: "/review"
