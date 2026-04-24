@@ -76,22 +76,29 @@ jobs:
         env:
           OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
           MODEL: "qwen2.5-coder:3b"
-        run: |         
-          # Проверка размера диффа
-          echo "Diff size: $(wc -c < diff.txt) bytes"
-          
-          # Ограничиваем ответ и добавляем таймаут
+        run: |
+          # 1. Create the prompt text in a file
+          echo "Review this code diff for bugs and improvements:" > full_prompt.txt
+          cat diff.txt >> full_prompt.txt
+          # 2. Use jq --rawfile to safely load the text without hitting shell limits
           jq -n \
             --arg model "$MODEL" \
             --rawfile prompt full_prompt.txt \
-            '{model: $model, prompt: $prompt, stream: false, options: {num_predict: 500, num_thread: 4}}' > payload.json
-          
-          # Добавляем -v (verbose) для curl, чтобы видеть, ушли ли данные
-          RESPONSE=$(curl -v -s -X POST "$OLLAMA_URL/api/generate" \
+            '{model: $model, prompt: $prompt, stream: false}' > payload.json
+          # 3. Send the file directly to curl using @
+          RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
             --connect-timeout 60 \
             --max-time 600 \
             -H "Content-Type: application/json" \
             --data-binary @payload.json)
+          # 4. Extract the response
+          REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
+          # 5. Safe multi-line output to GitHub Actions
+          {
+            echo "results<<EOF"
+            echo "$REVIEW"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
         if: steps.diff_step.outputs.has_diff == 'true'
