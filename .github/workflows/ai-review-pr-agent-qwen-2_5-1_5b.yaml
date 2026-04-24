@@ -87,5 +87,5 @@ jobs:
           PR_REVIEWER.SYSTEM_PROMPT: "You are a suspicious Security Auditor..." 
           # 'with' must be at the same indentation level as 'uses' and 'env'
           GITHUB_ACTION_CONFIG_HANDLE_SYNCHRONIZE_EVENTS: true
-          with:
-             command:"/review"
+        with:
+             command: "/review"
