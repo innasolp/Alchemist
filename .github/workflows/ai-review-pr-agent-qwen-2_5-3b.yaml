@@ -1,4 +1,4 @@
-name: AI Code Review (via Tailscale)
+name: AI Code Review Codium PR-agent (via Tailscale)
 
 on:
   pull_request: 
