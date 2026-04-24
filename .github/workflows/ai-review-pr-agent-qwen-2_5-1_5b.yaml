@@ -82,6 +82,6 @@ jobs:
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          RESPONSE_LANGUAGE: 'Korean'
+          RESPONSE_LANGUAGE: 'English'
           MODEL: 'qwen2.5-coder:3b'
           TRANSLATION_MODEL: 'qwen2.5-coder:3b'
