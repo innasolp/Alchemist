@@ -75,15 +75,21 @@ jobs:
           OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
           MODEL: "qwen2.5-coder:3b"
         run: |
-          # Используем обычный curl, никакой защиты туннеля не нужно, так как сеть частная
-          JSON_PAYLOAD=$(jq -n --arg prompt "Review this code:\n$(cat diff.txt)" '{model: "'$MODEL'", prompt: $prompt, stream: false}')
-          
+          # 1. Create the prompt text in a file
+          echo "Review this code diff for bugs and improvements:" > full_prompt.txt
+          cat diff.txt >> full_prompt.txt
+          # 2. Use jq --rawfile to safely load the text without hitting shell limits
+          jq -n \
+            --arg model "$MODEL" \
+            --rawfile prompt full_prompt.txt \
+            '{model: $model, prompt: $prompt, stream: false}' > payload.json
+          # 3. Send the file directly to curl using @
           RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
             -H "Content-Type: application/json" \
-            -d "$JSON_PAYLOAD")
-          
+            --data-binary @payload.json)
+          # 4. Extract the response
           REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: No AI response"')
-          
+          # 5. Safe multi-line output to GitHub Actions
           {
             echo "results<<EOF"
             echo "$REVIEW"
