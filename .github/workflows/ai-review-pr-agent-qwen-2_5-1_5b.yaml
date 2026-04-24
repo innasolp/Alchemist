@@ -79,18 +79,25 @@ jobs:
           OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
           MODEL: "qwen2.5-coder:1.5b"
         run: |
-          # 1. Читаем дифф в переменную (экранируя для JSON)
-          DIFF_CONTENT=$(cat diff.txt)
+          # 1. Очищаем дифф от лишнего шума (метаданных), оставляя только суть
+          # Это сильно экономит контекст и помогает модели не путаться
+          sed -E '/^(index|similarity|rename|new file|deleted file)/d' diff.txt > clean_diff.txt
 
-          # 2. Формируем JSON для Chat API (System + User роли)
+          # 2. Формируем запрос
+          # ВАЖНО: Добавляем требование "Check ALL files listed below"
           jq -n \
             --arg model "$MODEL" \
-            --arg system "You are a Senior Developer. For EACH file in the diff, provide:
-            1. Brief summary (what changed).
-            2. Potential bugs, security risks, or logic errors.
-            If no issues are found for a file, state 'No issues detected'.
-            Use Markdown table or bullet points." \
-            --arg user "Review the following changes:\n\n$(cat diff.txt)" \
+            --arg system "You are a professional code auditor.
+            I will provide a git diff. You MUST review EVERY file mentioned in the diff.
+            For each file:
+            - Write 'FILE: [filename]'
+            - Summary: what changed
+            - Issues: list bugs, leaks, or vulnerabilities (if none, say 'None')
+            
+            Be very strict and systematic." \
+            --arg user "Here is the code diff to analyze:
+            
+            $(cat clean_diff.txt)" \
             '{
               model: $model, 
               messages: [
@@ -99,11 +106,24 @@ jobs:
               ], 
               stream: false, 
               options: {
-                num_predict: 800, 
+                num_predict: 1000, 
                 temperature: 0.1,
-                num_ctx: 4096
+                num_ctx: 8192
               }
             }' > payload.json
+
+          # 3. Отправка (оставляем старый curl)
+          RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
+            -H "Content-Type: application/json" \
+            --data-binary @payload.json)
+
+          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: AI returned empty response"')
+
+          {
+            echo "results<<EOF"
+            echo "$REVIEW"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
             
           # 3. Отправляем на /api/chat
