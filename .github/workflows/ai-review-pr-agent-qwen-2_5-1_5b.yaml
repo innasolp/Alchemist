@@ -76,7 +76,7 @@ jobs:
         uses: Codium-ai/pr-agent@main
         env:
           CONFIG.MODEL_RESOURCES__DEFAULT_MODEL: "ollama/qwen2.5-coder:3b"
-          OPENAI.BASE_URL: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/v1"
+          OPENAI.BASE_URL: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
           OPENAI.API_KEY: "none"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: true
