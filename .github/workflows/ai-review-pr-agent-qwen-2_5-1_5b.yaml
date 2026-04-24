@@ -14,6 +14,9 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
+    permissions: # Добавьте этот блок
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
