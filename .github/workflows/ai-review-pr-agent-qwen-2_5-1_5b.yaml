@@ -79,34 +79,34 @@ jobs:
           OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
           MODEL: "qwen2.5-coder:1.5b"
         run: |
-          # 1. Prepare a clear instruction
-          cat <<EOF > instructions.txt
-          You are a professional code reviewer. 
-          Review the following git diff for bugs and improvements. 
-          Keep your response short and in Markdown format.
-          
-          --- DIFF START ---
-          $(cat diff.txt)
-          --- DIFF END ---
-          EOF
+          # 1. Читаем дифф в переменную (экранируя для JSON)
+          DIFF_CONTENT=$(cat diff.txt)
 
-          # 2. Build the JSON safely
+          # 2. Формируем JSON для Chat API (System + User роли)
           jq -n \
             --arg model "$MODEL" \
-            --rawfile prompt instructions.txt \
-            '{model: $model, prompt: $prompt, stream: false, options: {num_predict: 500}}' > payload.json
+            --arg system "You are a professional code reviewer. Review the provided git diff for bugs and security issues. Keep it brief." \
+            --arg user "Please review this diff:\n\n$DIFF_CONTENT" \
+            '{
+              model: $model, 
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ], 
+              stream: false, 
+              options: {num_predict: 500, temperature: 0.1}
+            }' > payload.json
 
-          # 3. Request
-          RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/generate" \
+          # 3. Отправляем на /api/chat
+          RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
             --max-time 1200 \
             -H "Content-Type: application/json" \
             --data-binary @payload.json)
 
-          # 4. Extract ONLY the AI text
-          # We use -r to get raw text and avoid extra quotes
-          REVIEW=$(echo "$RESPONSE" | jq -r '.response // "Error: AI returned empty response"')
+          # 4. Извлекаем ответ (в Chat API путь другой: .message.content)
+          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: AI returned empty response"')
 
-          # 5. Output for the next step
+          # 5. Вывод
           {
             echo "results<<EOF"
             echo "$REVIEW"
