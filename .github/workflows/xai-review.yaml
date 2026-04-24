@@ -1,0 +1,67 @@
+name: X AI Review by nikita filonov
+
+on:
+  workflow_dispatch:
+    inputs:
+      review-command:
+        type: choice
+        default: run
+        options:
+          - run
+          - run-inline
+          - run-context
+          - run-summary
+          - run-inline-reply
+          - run-summary-reply
+          - clear-inline
+          - clear-summary
+      pull-request-number:
+        type: string
+        required: true
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check secrets availability
+        run: |
+          if [ -z "${{ secrets.TS_7B_OAUTH_CLIENT_ID }}" ]; then
+            echo "Secret is EMPTY"
+            exit 1
+          fi    
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}         
+          tags: tag:ci     
+
+      - name: Network Diagnostic
+        run: |
+          tailscale status
+          # Пробуем просто достучаться до API
+          curl -v --connect-timeout 10 ${{ secrets.OLLAMA_ENDPOINT }}/api/tags      
+
+      - uses: Nikita-Filonov/ai-review@v0.64.0
+        with:
+          review-command: ${{ inputs.review-command }}
+        env:
+          # --- LLM configuration ---
+          LLM__PROVIDER: "OLLAMA"
+          LLM__META__MODEL: "qwen2.5-coder:3b"
+          LLM__META__MAX_TOKENS: "4096"
+          LLM__META__TEMPERATURE: "0.3"
+          LLM__HTTP_CLIENT__API_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
+          LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.TS_OAUTH_SECRET }}
+
+          # --- GitHub integration ---
+          VCS__PROVIDER: "GITHUB"
+          VCS__PIPELINE__OWNER: ${{ github.repository_owner }}
+          VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
+          VCS__PIPELINE__PULL_NUMBER: ${{ inputs.pull-request-number }}
+          VCS__HTTP_CLIENT__API_URL: "https://api.github.com"
+          VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
