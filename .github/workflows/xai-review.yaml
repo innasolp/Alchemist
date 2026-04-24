@@ -28,7 +28,7 @@ jobs:
 
       - name: Check secrets availability
         run: |
-          if [ -z "${{ secrets.TS_7B_OAUTH_CLIENT_ID }}" ]; then
+          if [ -z "${{ secrets.TS_OAUTH_CLIENT_ID }}" ]; then
             echo "Secret is EMPTY"
             exit 1
           fi    
