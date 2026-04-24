@@ -88,7 +88,7 @@ jobs:
           # 3. Send the file directly to curl using @
           RESPONSE=$(curl -s -X POST "$OLLAMA_URL/api/generate" \
             --connect-timeout 60 \
-            --max-time 600 \
+            --max-time 1200 \
             -H "Content-Type: application/json" \
             --data-binary @payload.json)
           # 4. Extract the response
