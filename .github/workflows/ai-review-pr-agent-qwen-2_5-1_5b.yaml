@@ -77,9 +77,22 @@ jobs:
       - name: PR Agent Action
         uses: Codium-ai/pr-agent@main
         env:
-          OPENAI_KEY: "none"
+          # Основное
+          OPENAI.KEY: "none"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG_MODEL: "ollama/qwen2.5-coder:3b"
-          OLLAMA_API_BASE: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
-          # This tells the agent what to do if no command is provided
-          PR_AGENT_COMMAND: "/review" 
+          CONFIG.MODEL: "ollama/qwen2.5-coder:3b"
+          OLLAMA.API_BASE: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
+          
+          # РАЗРЕШАЕМ SYNCHRONIZE (исправляет ваш лог)
+          GITHUB_ACTION_CONFIG.HANDLE_SYNCHRONIZE_EVENTS: "true"
+          
+          # Настройка команды по умолчанию
+          PR_AGENT.COMMAND: "/review"
+          
+          # Контекст
+          CONFIG.MAX_MODEL_TOKENS: 16000
+          OLLAMA.CONTEXT_LENGTH: 16000
+          
+          # Дополнительные настройки
+          PR_REVIEWER.REQUIRE_SCORE_REVIEW: "false"
+          PR_REVIEWER.SYSTEM_PROMPT: "You are a suspicious Security Auditor..."
