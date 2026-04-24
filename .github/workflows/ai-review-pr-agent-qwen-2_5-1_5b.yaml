@@ -77,7 +77,7 @@ jobs:
         id: ollama_step
         env:
           OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
-          MODEL: "qwen2.5-coder:3b"
+          MODEL: "qwen2.5-coder:1.5b"
         run: |
           # 1. Prepare a clear instruction
           cat <<EOF > instructions.txt
