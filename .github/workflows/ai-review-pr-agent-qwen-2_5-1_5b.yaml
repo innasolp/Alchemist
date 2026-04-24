@@ -72,80 +72,25 @@ jobs:
           echo "Test response on 'hi' from Ollama: $TEST_RESPONSE"
 
           
-      - name: AI Review
-        if: steps.diff_step.outputs.has_diff == 'true'
-        id: ollama_step
+      - name: PR Agent Action
+        uses: Codium-ai/pr-agent@main
         env:
-          OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
-          MODEL: "qwen2.5-coder:1.5b"
-        run: |
-          # 1. Очищаем дифф от лишнего шума (метаданных), оставляя только суть
-          # Это сильно экономит контекст и помогает модели не путаться
-          sed -E '/^(index|similarity|rename|new file|deleted file)/d' diff.txt > clean_diff.txt
-
-          # 2. Формируем запрос
-          # ВАЖНО: Добавляем требование "Check ALL files listed below"
-          jq -n \
-            --arg model "$MODEL" \
-            --arg system "You are a suspicious and paranoid Security Auditor. 
-            Your goal is to find at least one potential risk or improvement in every file.
-            
-            Follow this format for each file:
-            FILE: [name]
-            1. ANALYSIS: Think step-by-step. What could go wrong here? (e.g. race conditions, leaks, nulls, security)
-            2. SUMMARY: Brief change description.
-            3. ISSUES: List found risks. If you are 100% sure there are NO risks, explain why." \
-            --arg user "Analyze this diff with extreme prejudice:\n\n$(cat clean_diff.txt)" \
-            '{
-              model: $model, 
-              messages: [
-                {role: "system", content: $system},
-                {role: "user", content: $user}
-              ], 
-              stream: false, 
-              options: {
-                num_predict: 1000, 
-                temperature: 0.4,
-                num_ctx: 8192
-              }
-            }' > payload.json
-
-          # 3. Отправка (оставляем старый curl)
-          RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
-            -H "Content-Type: application/json" \
-            --data-binary @payload.json)
-
-          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: AI returned empty response"')
-
-          {
-            echo "results<<EOF"
-            echo "$REVIEW"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-            
-          # 3. Отправляем на /api/chat
-          RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
-            --max-time 1200 \
-            -H "Content-Type: application/json" \
-            --data-binary @payload.json)
-
-          # 4. Извлекаем ответ (в Chat API путь другой: .message.content)
-          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: AI returned empty response"')
-
-          # 5. Вывод
-          {
-            echo "results<<EOF"
-            echo "$REVIEW"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-
-      - name: Comment PR
-        if: steps.diff_step.outputs.has_diff == 'true'
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            ### 🤖 AI Code Review (Tailscale)
-            ${{ steps.ollama_step.outputs.results }}
+          # Настройки подключения к вашей Ollama
+          CONFIG.MODEL_RESOURCES__DEFAULT_MODEL: "ollama/qwen2.5-coder:3b"
+          # Важно: префикс ollama/ обязателен для интеграции через LiteLLM
+          OPENAI.BASE_URL: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/v1"
+          OPENAI.API_KEY: "none" # Ollama не требует ключа, но переменная нужна
+          
+          # Настройки GitHub
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Команды, которые выполнятся при открытии PR
+          PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: true
+          PR_REVIEWER.REQUIRE_SCORE_REVIEW: "false"
+          # Вы можете настроить промпт через ENV, если нужно сохранить "паранойю"
+          PR_REVIEWER.SYSTEM_PROMPT: "You are a suspicious Security Auditor..." 
+
+        # Если это новый PR - делаем полный обзор, если комментарий - обрабатываем команду
+         with:
+          command: >-
+            ${{ github.event.comment.body || '/review' }}
