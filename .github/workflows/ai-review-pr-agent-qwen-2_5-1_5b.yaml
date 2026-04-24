@@ -68,14 +68,14 @@ jobs:
           # Пробуем просто достучаться до API
           curl -v --connect-timeout 10 ${{ secrets.OLLAMA_ENDPOINT }}/api/tags  
           # пробуем отправить небольшой файл через POST
-          curl -X POST -d '{"model":"qwen2.5-coder:3b","prompt":"hi"}' ${{ secrets.OLLAMA_ENDPOINT }}/api/
+          curl -X POST -d '{"model":"qwen2.5-coder:1.5b","prompt":"hi"}' ${{ secrets.OLLAMA_ENDPOINT }}/api/
           
       - name: AI Review
         if: steps.diff_step.outputs.has_diff == 'true'
         id: ollama_step
         env:
           OLLAMA_URL: ${{ secrets.OLLAMA_ENDPOINT }}
-          MODEL: "qwen2.5-coder:3b"
+          MODEL: "qwen2.5-coder:1.5b"
         run: |
           # 1. Create the prompt text in a file
           echo "Review this code diff for bugs and improvements:" > full_prompt.txt
