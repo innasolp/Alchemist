@@ -68,31 +68,20 @@ jobs:
         run: |
           tailscale status
           # Пробуем просто достучаться до API
-          curl -v --connect-timeout 10 ${{ secrets.OLLAMA_ENDPOINT }}/api/tags  
+          curl -v --connect-timeout 10 ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/tags  
           # пробуем отправить небольшой файл через POST
-          TEST_RESPONSE=$(curl -X POST -d '{"model":"qwen2.5-coder:1.5b","prompt":"hi", "stream": false}' ${{ secrets.OLLAMA_ENDPOINT }}/api/generate)
+          TEST_RESPONSE=$(curl -X POST -d '{"model":"qwen2.5-coder:1.5b","prompt":"hi", "stream": false}' ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/generate)
           echo "Test response on 'hi' from Ollama: $TEST_RESPONSE"
 
           
-      - name: PR Agent Action
-        uses: Codium-ai/pr-agent@main
-        env:
-          # Основное
-          OPENAI.KEY: "none"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG.MODEL: "ollama/qwen2.5-coder:3b"
-          OLLAMA.API_BASE: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
-          
-          # РАЗРЕШАЕМ SYNCHRONIZE (исправляет ваш лог)
-          GITHUB_ACTION_CONFIG.HANDLE_SYNCHRONIZE_EVENTS: "true"
-          
-          # Настройка команды по умолчанию
-          PR_AGENT.COMMAND: "/review"
-          
-          # Контекст
-          CONFIG.MAX_MODEL_TOKENS: 16000
-          OLLAMA.CONTEXT_LENGTH: 16000
-          
-          # Дополнительные настройки
-          PR_REVIEWER.REQUIRE_SCORE_REVIEW: "false"
-          PR_REVIEWER.SYSTEM_PROMPT: "You are a suspicious Security Auditor..."
+      - name: Run Ollama Code Review
+        uses: ./
+        with:
+          OLLAMA_API_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} # URL to your GPU server
+          MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RESPONSE_LANGUAGE: 'Korean'
+          MODEL: 'qwen2.5-coder:3b'
+          TRANSLATION_MODEL: 'qwen2.5-coder:3b'
