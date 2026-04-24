@@ -1,0 +1,141 @@
+name: AI Code Review  qwen2.5-coder (via Tailscale)
+
+on:
+  pull_request: 
+    types: [opened, synchronize]
+  workflow_dispatch:  
+
+permissions:
+  contents: read      # Для чтения кода
+  pull-requests: write # ДЛЯ ЗАПИСИ КОММЕНТАРИЕВ (решает ошибку 403)    
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check secrets availability
+        run: |
+          if [ -z "${{ secrets.TS_OAUTH_CLIENT_ID }}" ]; then
+            echo "Secret is EMPTY"
+            exit 1
+          fi    
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}         
+          tags: tag:ci
+
+      - name: Get git diff
+        id: diff_step
+        run: |
+          # 1. Автоматически определяем дефолтную ветку репозитория (если это не PR)
+          # Используем API или просто берем ту, куда указывает репозиторий
+          DEFAULT_BRANCH=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+          
+          # 2. Определяем базовую ветку для сравнения
+          BASE_BRANCH="${{ github.base_ref }}"
+          if [ -z "$BASE_BRANCH" ]; then
+            BASE_BRANCH=$DEFAULT_BRANCH
+          fi
+          
+          echo "Base branch is determined as: $BASE_BRANCH"
+          
+          # 3. Подтягиваем базовую ветку, чтобы git её увидел
+          git fetch origin $BASE_BRANCH --depth=100
+          
+          # 4. Выполняем сравнение
+          git diff origin/$BASE_BRANCH HEAD -- . ':(exclude)*.lock' > diff.txt
+          
+          # 5. Выводим результат для следующих шагов
+          if [ -s diff.txt ]; then
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+            echo "Changes found."
+          else
+            echo "has_diff=false" >> $GITHUB_OUTPUT
+            echo "No changes detected."
+          fi
+          
+      - name: Network Diagnostic
+        run: |
+          tailscale status
+          # Пробуем просто достучаться до API
+          curl -v --connect-timeout 10 ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/tags  
+          # пробуем отправить небольшой файл через POST
+          TEST_RESPONSE=$(curl -X POST -d '{"model":"qwen2.5-coder:1.5b","prompt":"hi", "stream": false}' ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/generate)
+          echo "Test response on 'hi' from Ollama: $TEST_RESPONSE"
+          
+      - name: AI Review
+        if: steps.diff_step.outputs.has_diff == 'true'
+        id: ollama_step
+        env:
+          OLLAMA_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
+          MODEL: "qwen2.5-coder:3b"
+        run: |
+          # 1. Очищаем дифф от лишнего шума (метаданных), оставляя только суть
+          # Это сильно экономит контекст и помогает модели не путаться
+          sed -E '/^(index|similarity|rename|new file|deleted file)/d' diff.txt > clean_diff.txt
+          # 2. Формируем запрос
+          # ВАЖНО: Добавляем требование "Check ALL files listed below"
+          jq -n \
+            --arg model "$MODEL" \
+            --arg system "You are a suspicious and paranoid Security Auditor. 
+            Your goal is to find at least one potential risk or improvement in every file.
+            
+            Follow this format for each file:
+            FILE: [name]
+            1. ANALYSIS: Think step-by-step. What could go wrong here? (e.g. race conditions, leaks, nulls, security)
+            2. SUMMARY: Brief change description.
+            3. ISSUES: List found risks. If you are 100% sure there are NO risks, explain why." \
+            --arg user "Analyze this diff with extreme prejudice:\n\n$(cat clean_diff.txt)" \
+            '{
+              model: $model, 
+              messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+              ], 
+              stream: false, 
+              options: {
+                num_predict: 1000, 
+                temperature: 0.4,
+                num_ctx: 8192
+              }
+            }' > payload.json
+          # 3. Отправка (оставляем старый curl)
+          RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
+            -H "Content-Type: application/json" \
+            --data-binary @payload.json)
+          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: AI returned empty response"')
+          {
+            echo "results<<EOF"
+            echo "$REVIEW"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+            
+          # 3. Отправляем на /api/chat
+          RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
+            --max-time 1200 \
+            -H "Content-Type: application/json" \
+            --data-binary @payload.json)
+          # 4. Извлекаем ответ (в Chat API путь другой: .message.content)
+          REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // "Error: AI returned empty response"')
+          # 5. Вывод
+          {
+            echo "results<<EOF"
+            echo "$REVIEW"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+      - name: Comment PR
+        if: steps.diff_step.outputs.has_diff == 'true'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ### 🤖 AI Code Review (Tailscale)
+            ${{ steps.ollama_step.outputs.results }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
