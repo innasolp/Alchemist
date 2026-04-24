@@ -3,6 +3,8 @@ name: AI Code Review Codium PR-agent (via Tailscale)
 on:
   pull_request: 
     types: [opened, synchronize]
+  issue_comment:
+    types: [created]  
   workflow_dispatch:  
   
 permissions:
@@ -75,15 +77,15 @@ jobs:
       - name: PR Agent Action
         uses: Codium-ai/pr-agent@main
         env:
-          CONFIG.MODEL_RESOURCES__DEFAULT_MODEL: "ollama/qwen2.5-coder:3b"
-          OPENAI.BASE_URL: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
-          OPENAI.API_KEY: "none"
+          CONFIG_MODEL: "ollama/qwen2.5-coder:3b"
+          CONFIG_MAX_MODEL_TOKENS: 16000
+          OLLAMA_CONTEXT_LENGTH: 16000
+          OLLAMA_API_BASE: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: true
           PR_REVIEWER.REQUIRE_SCORE_REVIEW: "false"
           PR_REVIEWER.SYSTEM_PROMPT: "You are a suspicious Security Auditor..." 
-        # 'with' must be at the same indentation level as 'uses' and 'env'
-        with:
-          # This safe-check prevents the "invalid context" error
-          command: >-
-             ${{ github.event.pull_request.body || '/review' }}
+          # 'with' must be at the same indentation level as 'uses' and 'env'
+          GITHUB_ACTION_CONFIG_HANDLE_SYNCHRONIZE_EVENTS: true
+          with:
+             command:"/review"
