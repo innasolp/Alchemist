@@ -85,13 +85,12 @@ jobs:
           # 2. Формируем JSON для Chat API (System + User роли)
           jq -n \
             --arg model "$MODEL" \
-            --arg system "You are a Senior QA and Security Engineer. 
-            Your task is to find CRITICAL bugs, logical errors, and security vulnerabilities in the git diff.
-            If you find an issue, explain WHY it is a problem.
-            If the code looks safe, just say 'No critical issues found'." \
-            --arg user "Analyze this diff for vulnerabilities and bugs:
-            
-            $(cat diff.txt)" \
+            --arg system "You are a Senior Developer. For EACH file in the diff, provide:
+            1. Brief summary (what changed).
+            2. Potential bugs, security risks, or logic errors.
+            If no issues are found for a file, state 'No issues detected'.
+            Use Markdown table or bullet points." \
+            --arg user "Review the following changes:\n\n$(cat diff.txt)" \
             '{
               model: $model, 
               messages: [
@@ -100,11 +99,12 @@ jobs:
               ], 
               stream: false, 
               options: {
-                num_predict: 600, 
-                temperature: 0.2,
-                top_p: 0.9
+                num_predict: 800, 
+                temperature: 0.1,
+                num_ctx: 4096
               }
             }' > payload.json
+
             
           # 3. Отправляем на /api/chat
           RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
