@@ -75,22 +75,15 @@ jobs:
       - name: PR Agent Action
         uses: Codium-ai/pr-agent@main
         env:
-          # Настройки подключения к вашей Ollama
           CONFIG.MODEL_RESOURCES__DEFAULT_MODEL: "ollama/qwen2.5-coder:3b"
-          # Важно: префикс ollama/ обязателен для интеграции через LiteLLM
           OPENAI.BASE_URL: "${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/v1"
-          OPENAI.API_KEY: "none" # Ollama не требует ключа, но переменная нужна
-          
-          # Настройки GitHub
+          OPENAI.API_KEY: "none"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-          # Команды, которые выполнятся при открытии PR
           PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: true
           PR_REVIEWER.REQUIRE_SCORE_REVIEW: "false"
-          # Вы можете настроить промпт через ENV, если нужно сохранить "паранойю"
           PR_REVIEWER.SYSTEM_PROMPT: "You are a suspicious Security Auditor..." 
-
-        # Если это новый PR - делаем полный обзор, если комментарий - обрабатываем команду
-         with:
+        # 'with' must be at the same indentation level as 'uses' and 'env'
+        with:
+          # This safe-check prevents the "invalid context" error
           command: >-
-            ${{ github.event.comment.body || '/review' }}
+             ${{ github.event.pull_request.body || '/review' }}
