@@ -85,8 +85,13 @@ jobs:
           # 2. Формируем JSON для Chat API (System + User роли)
           jq -n \
             --arg model "$MODEL" \
-            --arg system "You are a professional code reviewer. Review the provided git diff for bugs and security issues. Keep it brief." \
-            --arg user "Please review this diff:\n\n$DIFF_CONTENT" \
+            --arg system "You are a Senior QA and Security Engineer. 
+            Your task is to find CRITICAL bugs, logical errors, and security vulnerabilities in the git diff.
+            If you find an issue, explain WHY it is a problem.
+            If the code looks safe, just say 'No critical issues found'." \
+            --arg user "Analyze this diff for vulnerabilities and bugs:
+            
+            $(cat diff.txt)" \
             '{
               model: $model, 
               messages: [
@@ -94,9 +99,13 @@ jobs:
                 {role: "user", content: $user}
               ], 
               stream: false, 
-              options: {num_predict: 500, temperature: 0.1}
+              options: {
+                num_predict: 600, 
+                temperature: 0.2,
+                top_p: 0.9
+              }
             }' > payload.json
-
+            
           # 3. Отправляем на /api/chat
           RESPONSE=$(curl -s -X POST "${OLLAMA_URL%/}/api/chat" \
             --max-time 1200 \
