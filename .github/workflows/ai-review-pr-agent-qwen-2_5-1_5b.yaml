@@ -87,17 +87,15 @@ jobs:
           # ВАЖНО: Добавляем требование "Check ALL files listed below"
           jq -n \
             --arg model "$MODEL" \
-            --arg system "You are a professional code auditor.
-            I will provide a git diff. You MUST review EVERY file mentioned in the diff.
-            For each file:
-            - Write 'FILE: [filename]'
-            - Summary: what changed
-            - Issues: list bugs, leaks, or vulnerabilities (if none, say 'None')
+            --arg system "You are a suspicious and paranoid Security Auditor. 
+            Your goal is to find at least one potential risk or improvement in every file.
             
-            Be very strict and systematic." \
-            --arg user "Here is the code diff to analyze:
-            
-            $(cat clean_diff.txt)" \
+            Follow this format for each file:
+            FILE: [name]
+            1. ANALYSIS: Think step-by-step. What could go wrong here? (e.g. race conditions, leaks, nulls, security)
+            2. SUMMARY: Brief change description.
+            3. ISSUES: List found risks. If you are 100% sure there are NO risks, explain why." \
+            --arg user "Analyze this diff with extreme prejudice:\n\n$(cat clean_diff.txt)" \
             '{
               model: $model, 
               messages: [
@@ -107,7 +105,7 @@ jobs:
               stream: false, 
               options: {
                 num_predict: 1000, 
-                temperature: 0.1,
+                temperature: 0.4,
                 num_ctx: 8192
               }
             }' > payload.json
