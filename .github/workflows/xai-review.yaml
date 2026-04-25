@@ -44,7 +44,7 @@ jobs:
         run: |
           tailscale status
           # Пробуем просто достучаться до API
-          curl -v --connect-timeout 10 ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/tags      
+          curl -v --connect-timeout 120 ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/tags      
 
       - uses: Nikita-Filonov/ai-review@v0.64.0
         env:
