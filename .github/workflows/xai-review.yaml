@@ -54,6 +54,7 @@ jobs:
           LLM__META__MAX_TOKENS: "2048"
           LLM__META__TEMPERATURE: "0.3"
           LLM__HTTP_CLIENT__API_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
+          LLM__HTTP_CLIENT__TIMEOUT: 600
 
           # --- GitHub integration ---
           VCS__PROVIDER: "GITHUB"
