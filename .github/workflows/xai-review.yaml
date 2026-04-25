@@ -50,8 +50,8 @@ jobs:
         env:
           # --- LLM configuration ---
           LLM__PROVIDER: "OLLAMA"
-          LLM__META__MODEL: "qwen2.5-coder:3b"
-          LLM__META__MAX_TOKENS: "2048"
+          LLM__META__MODEL: "qwen2.5-coder:7b"
+          LLM__META__MAX_TOKENS: "4096"
           LLM__META__TEMPERATURE: "0.3"
           LLM__HTTP_CLIENT__API_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
           LLM__HTTP_CLIENT__TIMEOUT: 600
