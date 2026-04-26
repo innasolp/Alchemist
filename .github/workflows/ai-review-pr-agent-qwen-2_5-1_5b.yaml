@@ -95,7 +95,7 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            --config_path=/app/.pr_agent.toml review
+            --config.path=/app/.pr_agent.toml review
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}    
 
