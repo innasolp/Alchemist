@@ -87,6 +87,8 @@ jobs:
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e CONFIG__AI_TIMEOUT="1200" \
+            -e CONFIG__DUPLICATE_EXAMPLES="true" \
+            -e PR_REVIEWER__REQUIRE_SCORE_ASSESSMENT="false" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" review
         env:
