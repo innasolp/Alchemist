@@ -74,16 +74,10 @@ jobs:
 
           
       - name: Run Ollama Code Review
-        uses: The-PR-Agent/pr-agent@main
+        uses: docker://codiumai/pr-agent:latest 
         with:
-          CONFIG_MODEL_PROVIDER: "OLLAMA"
-          CONFIG_OLLAMA_SERVER_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
-          OLLAMA_MODEL: "qwen2.5-coder:7b" 
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-          PR_REVIWER_REQUIRE_REVIEW_TO_PASS: "true"
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          RESPONSE_LANGUAGE: 'English'
-          MODEL: 'qwen2.5-coder:3b'
-          TRANSLATION_MODEL: 'qwen2.5-coder:3b'
+          CONFIG__MODEL: "OLLAMA/qwen2.5-coder:7b"
+          CONFIG__FALLBACK_MODELS: '["OLLAMA/2.5-coder:3b"]'
+          CONFIG__CUSTOM_MODEL_MAX_tokens: 8192
+          OLLAMA__API_BASE: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}          
+          GITHUB__USER_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
