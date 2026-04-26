@@ -76,8 +76,8 @@ jobs:
       - name: Run Ollama Code Review
         uses: docker://codiumai/pr-agent:latest 
         env:
-          CONFIG__MODEL: "OLLAMA/qwen2.5-coder:7b"
-          CONFIG__FALLBACK_MODELS: '["OLLAMA/2.5-coder:3b"]'
+          CONFIG__MODEL: "ollama/qwen2.5-coder:7b"
+          CONFIG__FALLBACK_MODELS: '["ollama/qwen2.5-coder:3b"]'
           CONFIG__CUSTOM_MODEL_MAX_tokens: 8192
           OLLAMA__API_BASE: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}          
           GITHUB__USER_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
