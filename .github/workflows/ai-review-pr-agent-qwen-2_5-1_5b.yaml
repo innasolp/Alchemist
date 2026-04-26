@@ -78,16 +78,22 @@ jobs:
           echo "Test response on 'hi' from Ollama: $TEST_RESPONSE"
 
           
-      - name: Run Ollama Code Review
-        run:  |
+      - name: Run PR Agent
+        run: |
+          # Создаем временный файл конфигурации, который 100% перебьет все остальные настройки
+          echo "[ollama]" > /tmp/local_config.toml
+          echo 'api_base = ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}' >> /tmp/local_config.toml
+          
           docker run --rm \
             -v ${{ github.workspace }}:/github/workspace \
+            -v /tmp/local_config.toml:/app/.pr_agent.toml \
             -w /app \
+            --network="host" \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="ollama/qwen2.5-coder:7b" \
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
-            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32768" \
+            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e OLLAMA__API_BASE=${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} \
-            -e GITHUB_EVENT_PATH="/github/workspace/${{ github.event_path }}" \
             codiumai/pr-agent:latest \
-            --pr_url="${{ github.event.pull_request.html_url }}" review
+            --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" review
+
