@@ -76,7 +76,7 @@ jobs:
           
       - name: Run PR Agent
         run: |
-          # Создаем файл конфигурации во временной папке
+          # Создаем файл конфигурации
           cat <<EOF > /tmp/.pr_agent.toml
           [litellm]
           timeout = 1200
@@ -89,15 +89,14 @@ jobs:
             -v ${{ github.workspace }}:/github/workspace \
             -v /tmp/.pr_agent.toml:/app/.pr_agent.toml \
             -w /app \
-            --network="host" \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="ollama/qwen2.5-coder:7b" \
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
+            -config_path=/app/.pr_agent.toml \
             review
         env:
-          # Безопасно прокидываем секрет в среду выполнения bash
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}     
 
