@@ -79,9 +79,10 @@ jobs:
           # Создаем файл конфигурации во временной папке
           cat <<EOF > /tmp/.pr_agent.toml
           [litellm]
-          timeout = 1200      
+          timeout = 1200
+          
           [ollama]
-          api_base = ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
+          api_base = "$OLLAMA_ENDPOINT"
           EOF
           
           docker run --rm \
@@ -96,4 +97,7 @@ jobs:
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
             review
+        env:
+          # Безопасно прокидываем секрет в среду выполнения bash
+          OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}     
 
