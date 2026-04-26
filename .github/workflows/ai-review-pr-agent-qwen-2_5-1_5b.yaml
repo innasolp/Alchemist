@@ -77,7 +77,7 @@ jobs:
       - name: Run PR Agent
         run: |
           CLEAN_IP=$(echo "$OLLAMA_ENDPOINT" | sed -e 's|^[^/]*//||' -e 's|:.*||')
-          
+      
           docker run --rm \
             -v ${{ github.workspace }}:/github/workspace \
             -w /app \
@@ -87,12 +87,10 @@ jobs:
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e CONFIG__AI_TIMEOUT="1200" \
-            -e PR_REVIEWER__REQUIRE_SCORE_ASSESSMENT="false" \
-            -e PR_REVIEWER__REQUIRE_ESTIMATE_EFFORT="false" \
-            -e PR_REVIEWER__EXTRA_INSTRUCTIONS="Пиши ревью простым текстом без использования блоков YAML, JSON и сложных тегов. Оставляй комментарии на русском языке." \
             codiumai/pr-agent:latest \
-            --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" review
+            --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
+            ask "Сделай подробное код-ревью этого пул-реквеста на русском языке. Укажи на возможные баги, проблемы с производительностью и предложи улучшения."
         env:
-           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
+          OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
    
 
