@@ -85,4 +85,4 @@ jobs:
             -e OLLAMA__API_BASE=${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} \
             -e GITHUB_EVENT_PATH="/github/workspace/${{ github.event_path }}" \
             codiumai/pr-agent:latest \
-            pr_agent/cli.py --pr_url="${{ github.event.pull_request.html_url }}" review
+            --pr_url="${{ github.event.pull_request.html_url }}" review
