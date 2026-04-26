@@ -1,10 +1,6 @@
 name: AI Code Review Codium PR-agent (via Tailscale)
 
 on:
-  pull_request: 
-    types: [opened, synchronize, reopened, ready_for_review]
-  issue_comment:
-    types: [created]  
   workflow_dispatch: 
     inputs:
       pr_number:
@@ -94,6 +90,7 @@ jobs:
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e OLLAMA__API_BASE=${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} \
+            -e OLLAMA__TIMEOUT="1200" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" review
 
