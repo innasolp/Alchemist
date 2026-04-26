@@ -2,7 +2,7 @@ name: AI Code Review Codium PR-agent (via Tailscale)
 
 on:
   pull_request: 
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened, ready_for_review]
   issue_comment:
     types: [created]  
   workflow_dispatch: 
@@ -74,10 +74,13 @@ jobs:
 
           
       - name: Run Ollama Code Review
-        uses: ray5273/ollama-pr-review-action@v1.0.0
+        uses: The-PR-Agent/pr-agent@main
         with:
-          OLLAMA_API_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} # URL to your GPU server
-          MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          CONFIG_MODEL_PROVIDER: "OLLAMA"
+          CONFIG_OLLAMA_SERVER_URL: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
+          OLLAMA_MODEL: "qwen2.5-coder:7b" 
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          PR_REVIWER_REQUIRE_REVIEW_TO_PASS: "true"
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
