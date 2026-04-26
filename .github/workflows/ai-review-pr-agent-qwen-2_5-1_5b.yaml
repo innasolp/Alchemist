@@ -76,9 +76,8 @@ jobs:
           
       - name: Run PR Agent
         run: |
-          # Вытаскиваем только IP/домен из вашего эндпоинта (убираем http:// и :11434)
           CLEAN_IP=$(echo "$OLLAMA_ENDPOINT" | sed -e 's|^[^/]*//||' -e 's|:.*||')
-          
+      
           docker run --rm \
             -v ${{ github.workspace }}:/github/workspace \
             -w /app \
@@ -89,7 +88,7 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            review
+            review --fallback_models.timeout=1200
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
    
