@@ -91,6 +91,6 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e OLLAMA__API_BASE=${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} \
             codiumai/pr-agent:latest \
-            --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" 
+            --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
             review --litellm.timeout=1200
 
