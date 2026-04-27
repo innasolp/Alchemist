@@ -86,10 +86,10 @@ jobs:
             -e CONFIG__MODEL="ollama/qwen2.5-coder:7b" \
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
-            -e CONFIG__AI_TIMEOUT="1200" \
+            -e PR_CODE_SUGGESTIONS__EXTRA_INSTRUCTIONS="Provide code improvement suggestions in English." \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask "You must analyze ALL changed files in this PR without exception. For each file, write a header with the filename and analyze it in English. Do not skip any files."
+            improve
             
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
