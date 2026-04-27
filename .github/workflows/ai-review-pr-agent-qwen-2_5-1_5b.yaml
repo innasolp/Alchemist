@@ -88,6 +88,7 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e CONFIG__AI_TIMEOUT="1200" \
             -e PR_CODE_SUGGESTIONS__EXTRA_INSTRUCTIONS="Provide code improvement suggestions in English." \
+            -e IGNORE__FILES='[".github/**/*", ".github/*"]' \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
             improve
