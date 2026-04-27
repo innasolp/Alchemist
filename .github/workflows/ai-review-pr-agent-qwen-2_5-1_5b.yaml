@@ -7,6 +7,15 @@ on:
         description: 'Input pull request number'
         required: true
         type: string
+      model_name:
+        description: 'Select Ollama model'
+        required: true
+        default: 'qwen2.5-coder:14b'
+        type: choice
+        options:
+          - 'qwen2.5-coder:14b'
+          - 'qwen2.5-coder:7b' 
+          - 'qwen2.5-coder:3b'  
   
 jobs:
   review:
@@ -70,7 +79,7 @@ jobs:
           # Пробуем просто достучаться до API
           curl -v --connect-timeout 10 ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/tags  
           # пробуем отправить небольшой файл через POST
-          TEST_RESPONSE=$(curl -X POST -d '{"model":"qwen2.5-coder:14b","prompt":"hi", "stream": false}' ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/generate)
+          TEST_RESPONSE=$(curl -X POST -d '{"model":${{ github.event.inputs.model_name }},"prompt":"hi", "stream": false}' ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/api/generate)
           echo "Test response on 'hi' from Ollama: $TEST_RESPONSE"
 
           
@@ -83,7 +92,7 @@ jobs:
             -w /app \
             --add-host="localhost:$CLEAN_IP" \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e CONFIG__MODEL="ollama/qwen2.5-coder:14b" \
+            -e CONFIG__MODEL="ollama/${{ github.event.inputs.model_name }}" \
             -e CONFIG__AI_TIMEOUT="1200" \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
@@ -101,7 +110,7 @@ jobs:
             -w /app \
             --add-host="localhost:$CLEAN_IP" \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e CONFIG__MODEL="ollama/qwen2.5-coder:14b" \
+            -e CONFIG__MODEL="ollama/${{ github.event.inputs.model_name }}" \
             -e CONFIG__AI_TIMEOUT="1200" \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
