@@ -123,6 +123,6 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask --pr_code "In ${{ github.event.inputs.language }}, point out any critical bugs, logical errors, or performance issues in the code changes."
+            ask --pr_code "Point out any critical bugs, logical errors, or performance issues in the code changes. Answer ONLY in ${{ github.event.inputs.language }} language."
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}  
