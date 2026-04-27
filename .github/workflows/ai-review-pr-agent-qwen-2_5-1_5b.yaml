@@ -106,24 +106,6 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask "In English, point out any critical bugs, logical errors, or performance issues in the code changes."
+            ask --pr_code "In English, point out any critical bugs, logical errors, or performance issues in the code changes."
         env:
-          OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}   
-
-       # Шаг 3: Рекомендации по улучшению
-      - name: PR Agent - Recommendations
-        run: |
-          CLEAN_IP=$(echo "$OLLAMA_ENDPOINT" | sed -e 's|^[^/]*//||' -e 's|:.*||')
-          docker run --rm \
-            -v ${{ github.workspace }}:/github/workspace \
-            -w /app \
-            --add-host="localhost:$CLEAN_IP" \
-            -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e CONFIG__MODEL="ollama/qwen2.5-coder:14b" \
-            -e CONFIG__AI_TIMEOUT="1200" \
-            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
-            codiumai/pr-agent:latest \
-            --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask "In English, suggest up to 5 best practices or style improvements for the code changes."
-        env:
-          OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}   
+          OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}  
