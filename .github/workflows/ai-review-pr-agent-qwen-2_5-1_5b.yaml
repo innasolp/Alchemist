@@ -89,7 +89,7 @@ jobs:
             -e CONFIG__AI_TIMEOUT="1200" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask "Analyze the changes in each file in English. Provide a file-by-file breakdown pointing out potential bugs, performance issues, and code style improvements."
+            ask "You must analyze ALL changed files in this PR without exception. For each file, write a header with the filename and analyze it in English. Do not skip any files."
             
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
