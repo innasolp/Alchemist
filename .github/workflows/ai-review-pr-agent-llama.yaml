@@ -1,4 +1,4 @@
-name: AI Code Review Codium PR-agent (via Tailscale)
+name: AI Code Review Codium PR-agent LLama (via Tailscale)
 
 on:
   workflow_dispatch: 
