@@ -16,6 +16,14 @@ on:
           - 'qwen2.5-coder:14b'
           - 'qwen2.5-coder:7b' 
           - 'qwen2.5-coder:3b'  
+      language:
+        description: 'Select response language'
+        required: true
+        default: 'English'
+        type: choice
+        options:
+          - 'English'
+          - 'Russian'
   
 jobs:
   review:
@@ -97,7 +105,7 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask "In English, provide a short summary of the main changes in this PR and describe what it does."
+            ask "In ${{ github.event.inputs.language }}, provide a short summary of the main changes in this PR and describe what it does."
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
 
@@ -115,6 +123,6 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask --pr_code "In English, point out any critical bugs, logical errors, or performance issues in the code changes."
+            ask --pr_code "In ${{ github.event.inputs.language }}, point out any critical bugs, logical errors, or performance issues in the code changes."
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}  
