@@ -95,6 +95,7 @@ jobs:
       - name: PR Agent - Description & Changes
         run: |
           docker run --rm \
+            --network=host \
             -v ${{ github.workspace }}:/github/workspace \
             -w /app \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
