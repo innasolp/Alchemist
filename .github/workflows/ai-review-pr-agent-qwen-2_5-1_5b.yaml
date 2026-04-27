@@ -89,7 +89,6 @@ jobs:
             -e CONFIG__AI_TIMEOUT="1200" \
             codiumai/pr-agent:latest \
             ask "Analyze the changes in each file in English. Provide a file-by-file breakdown pointing out potential bugs, performance issues, and code style improvements."
-            review
-
+            
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
