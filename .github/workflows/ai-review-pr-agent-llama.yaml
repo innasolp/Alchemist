@@ -97,7 +97,7 @@ jobs:
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="openai/${{ github.event.inputs.model_name }}" \
             -e CONFIG__AI_TIMEOUT="1200" \
-            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
+            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="4000" \
             -e OPENAI__API_BASE=${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
@@ -114,7 +114,7 @@ jobs:
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="openai/${{ github.event.inputs.model_name }}" \
             -e CONFIG__AI_TIMEOUT="1200" \
-            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
+            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="4000" \
             -e OPENAI__API_BASE=${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }} \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
