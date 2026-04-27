@@ -94,20 +94,17 @@ jobs:
       # Шаг 1: Изменения и описание
       - name: PR Agent - Description & Changes
         run: |
-          CLEAN_IP=$(echo "$OLLAMA_ENDPOINT" | sed -e 's|^[^/]*//||' -e 's|:.*||')
           docker run --rm \
             -v ${{ github.workspace }}:/github/workspace \
             -w /app \
-            --add-host="localhost:$CLEAN_IP" \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="ollama/${{ github.event.inputs.model_name }}" \
             -e CONFIG__AI_TIMEOUT="1200" \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
+            -e OLLAMA__API_BASE="${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
             ask "In ${{ github.event.inputs.language }}, provide a short summary of the main changes in this PR and describe what it does."
-        env:
-          OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
 
        # Шаг 2: Анализ кода на ошибки
       - name: PR Agent - Bug Analysis
