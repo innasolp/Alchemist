@@ -77,7 +77,7 @@ jobs:
       - name: Run PR Agent
         run: |
           CLEAN_IP=$(echo "$OLLAMA_ENDPOINT" | sed -e 's|^[^/]*//||' -e 's|:.*||')
-      
+          
           docker run --rm \
             -v ${{ github.workspace }}:/github/workspace \
             -w /app \
@@ -89,8 +89,7 @@ jobs:
             -e CONFIG__AI_TIMEOUT="1200" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask "Сделай подробное код-ревью этого пул-реквеста на русском языке. Укажи на возможные баги, проблемы с производительностью и предложи улучшения."
+            ask "Provide a detailed code review of this pull request in English. Point out potential bugs, performance issues, and suggest improvements."
+
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
-   
-
