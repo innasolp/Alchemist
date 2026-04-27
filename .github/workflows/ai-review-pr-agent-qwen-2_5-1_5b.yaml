@@ -112,6 +112,7 @@ jobs:
         run: |
           CLEAN_IP=$(echo "$OLLAMA_ENDPOINT" | sed -e 's|^[^/]*//||' -e 's|:.*||')
           docker run --rm \
+            --network=host \
             -v ${{ github.workspace }}:/github/workspace \
             -w /app \
             --add-host="localhost:$CLEAN_IP" \
