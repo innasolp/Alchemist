@@ -86,15 +86,13 @@ jobs:
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e CONFIG__MODEL="ollama/qwen2.5-coder:14b" \
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
-            -e CONFIG__AI_TIMEOUT="1200" \
+            -e CONFIG__AI_TIMEOUT="1800" \
             -e PR_CODE_SUGGESTIONS__NUM_CODE_SUGGESTIONS="3" \
-            -e PR_CODE_SUGGESTIONS__MAX_CONTEXT_TOKENS="4096" \
-            -e PR_CODE_SUGGESTIONS__CHUNKS_OVERLAP_TOKENS="500" \
             -e PR_CODE_SUGGESTIONS__EXTRA_INSTRUCTIONS="Provide code improvement suggestions in English." \
             -e IGNORE__FILES='[".github/**/*", ".github/*"]' \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            improve
+            ask "Review the changes in this PR and provide a detailed code review in English. Point out potential bugs, performance issues, and suggest improvements file by file."
             
         env:
           OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}
