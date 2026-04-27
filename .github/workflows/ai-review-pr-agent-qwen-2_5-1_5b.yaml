@@ -114,7 +114,6 @@ jobs:
             --network=host \
             -v ${{ github.workspace }}:/github/workspace \
             -w /app \
-            --add-host="localhost:$CLEAN_IP" \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="ollama/${{ github.event.inputs.model_name }}" \
             -e CONFIG__AI_TIMEOUT="1200" \
