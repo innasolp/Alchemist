@@ -83,6 +83,7 @@ jobs:
             -w /app \
             --add-host="localhost:$CLEAN_IP" \
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
+            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             -e CONFIG__MODEL="ollama/qwen2.5-coder:7b" \
             -e CONFIG__FALLBACK_MODELS='["ollama/qwen2.5-coder:3b"]' \
             -e CONFIG__AI_TIMEOUT="1200" \
