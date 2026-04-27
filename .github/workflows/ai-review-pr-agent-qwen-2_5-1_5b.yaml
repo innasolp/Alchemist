@@ -118,8 +118,7 @@ jobs:
             -e CONFIG__MODEL="ollama/${{ github.event.inputs.model_name }}" \
             -e CONFIG__AI_TIMEOUT="1200" \
             -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
+            -e OLLAMA__API_BASE="${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
-            ask "Point out any critical bugs, logical errors, or performance issues in the code changes. Answer ONLY in ${{ github.event.inputs.language }} language."
-        env:
-          OLLAMA_ENDPOINT: ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}  
+            ask "Point out any critical bugs, logical errors, or performance issues in the code changes. Answer ONLY in ${{ github.event.inputs.language }} language."       
