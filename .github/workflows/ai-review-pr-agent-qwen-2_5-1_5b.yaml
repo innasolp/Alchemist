@@ -85,6 +85,7 @@ jobs:
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="ollama/qwen2.5-coder:14b" \
             -e CONFIG__AI_TIMEOUT="1200" \
+            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
             ask "In English, provide a short summary of the main changes in this PR and describe what it does."
@@ -102,6 +103,7 @@ jobs:
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="ollama/qwen2.5-coder:14b" \
             -e CONFIG__AI_TIMEOUT="1200" \
+            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
             ask "In English, point out any critical bugs, logical errors, or performance issues in the code changes."
@@ -119,6 +121,7 @@ jobs:
             -e GITHUB__USER_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e CONFIG__MODEL="ollama/qwen2.5-coder:14b" \
             -e CONFIG__AI_TIMEOUT="1200" \
+            -e CONFIG__CUSTOM_MODEL_MAX_TOKENS="32000" \
             codiumai/pr-agent:latest \
             --pr_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr_number }}" \
             ask "In English, suggest up to 5 best practices or style improvements for the code changes."
