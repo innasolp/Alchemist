@@ -89,7 +89,8 @@ jobs:
 
       - name: Checking model in llama.cpp
         run: |
-            if curl -s ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/props | grep -qi "${{ github.event.inputs.model_name }}"; then
+            SEARCH_STRING=$(echo "${{ github.event.inputs.model_name }}" | sed 's/:/-/g')
+            if curl -s ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/props | grep -qi "$SEARCH_STRING"; then
               echo "✅ Model ${{ github.event.inputs.model_name }} loaded successfully."
             else
               echo "❌ Error: Model ${{ github.event.inputs.model_name }} not found in llama.cpp!"
