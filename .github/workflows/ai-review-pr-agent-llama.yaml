@@ -81,11 +81,20 @@ jobs:
             echo "No changes detected."
           fi
 
-      - name: Network Diagnostic
+      - name: Connect to llama
         run: |
           tailscale status
           # Пробуем просто достучаться до API
-          curl -v --connect-timeout 10 ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}         
+          curl -v --connect-timeout 10 ${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}/models
+
+      - name: Checking model in llama.cpp
+        run: |
+            if curl -s http://${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}:8080/props | grep -qi "{{ github.event.inputs.model_name }}"; then
+              echo "✅ Model {{ github.event.inputs.model_name }} loaded successfully."
+            else
+              echo "❌ Error: Model {{ github.event.inputs.model_name }} not found in llama.cpp!"
+              exit 1
+            fi  
           
       # Шаг 1: Изменения и описание
       - name: PR Agent - Description & Changes
