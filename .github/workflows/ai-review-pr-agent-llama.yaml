@@ -89,10 +89,10 @@ jobs:
 
       - name: Checking model in llama.cpp
         run: |
-            if curl -s http://${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}:8080/props | grep -qi "{{ github.event.inputs.model_name }}"; then
-              echo "✅ Model {{ github.event.inputs.model_name }} loaded successfully."
+            if curl -s http://${{ secrets.OLLAMA_QWEN_7B_ENDPOINT }}:8080/props | grep -qi "${{ github.event.inputs.model_name }}"; then
+              echo "✅ Model ${{ github.event.inputs.model_name }} loaded successfully."
             else
-              echo "❌ Error: Model {{ github.event.inputs.model_name }} not found in llama.cpp!"
+              echo "❌ Error: Model ${{ github.event.inputs.model_name }} not found in llama.cpp!"
               exit 1
             fi  
           
