@@ -28,6 +28,7 @@ on:
       review-command:
         type: choice
         default: run
+        required: true
         options:
           - run
           - run-inline
