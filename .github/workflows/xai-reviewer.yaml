@@ -47,6 +47,6 @@ jobs:
        pull-request-number: ${{ inputs.pr_number }}
        model_name: ${{ inputs.model_name }}
        provider: ${{ inputs.provider }}
-       review_command: ${{ inputs.review-command }}
+       review-command: ${{ inputs.review-command }}
      secrets: inherit 
      
