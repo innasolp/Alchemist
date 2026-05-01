@@ -27,7 +27,7 @@ on:
           - 'qwen2.5-coder:3b'  
       review-command:
         type: choice
-        default: run
+        default: 'run'
         required: true
         options:
           - run
