@@ -1,0 +1,12 @@
+@Shop.API_HostAddress = http://localhost:5111
+
+GET {{Shop.API_HostAddress}}/GetShop/
+Accept: application/json
+
+###
+
+GET {{Shop.API_HostAddress}}/GetShopList/
+Accept: application/json
+
+
+###

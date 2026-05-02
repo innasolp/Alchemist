@@ -1,44 +1,42 @@
 using Alchemist.Common;
-using Alchemist.Log.Serilog;
+using Alchemist.Log.Extensions;
 using Alchemist.Product.SignalR;
-using Http.ErrorHandling;
-using Http.Info;
+using Serilog;
 
+public partial class Program
+{
+    public static void Main(string[] args)
+    {
+        CreateHostBuilder(args).Build().Run();
+    }
 
-var builder = WebApplication.CreateBuilder(args);
+    public static IHostBuilder CreateHostBuilder(string[] args)
+    {
+        var builder = Host.CreateDefaultBuilder(args);       
 
-builder.Services.AddAuthentication("https");
+        builder.ConfigureLogging((hostContext, logging) =>
+        {
+            AddLog(hostContext.Configuration, logging);
+        });
 
-builder.Services.AddSignalR();      
+        builder.ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
 
-builder.Services.AddTransient<ErrorHandlerMiddleware<EventHub>>();
-builder.Services.AddSingleton<InfoLogMiddleware<EventHub>>();
+        return builder;
+    }
 
-var logPath = $"{Utils.GetAppPath()}/Logs";
-var serviceName = "SignalR";
-var appSerilogBuilder = new AppSerilogBuilder(builder);
-appSerilogBuilder.AddServiceBaseConfigs(serviceName);
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(InfoLogMiddleware<>).GetNameWithoutGenericArity());
-appSerilogBuilder.AddSourceContextLogConfig($"{logPath}/{serviceName}", typeof(GlobalExceptionHandler<>).GetNameWithoutGenericArity());
-appSerilogBuilder.SetSerilog();
+    private static void AddLog(IConfiguration configuration, ILoggingBuilder loggingBuilder)
+    {
+        var logPath = $"{Utils.GetAppPath()}/Logs";
+        var logContextFile = "log.property.json";
+        var serviceName = "SignalR";
+        var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
 
-var app = builder.Build();
+        loggerConfiguration.AddServiceBaseConfigs(logContextFile, logPath, serviceName);
+        loggerConfiguration.AddSourceContextConfig(logContextFile, $"{logPath}/{serviceName}", typeof(LogHubFilter).GetNameWithoutGenericArity());
 
-app.UseMiddleware<ErrorHandlerMiddleware<EventHub>>();
-app.UseMiddleware<InfoLogMiddleware<EventHub>>();
-
-app.UseAuthentication();
-
-app.MapGet("/", () => "Hello World!");
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
-app.MapHub<EventHub>("/events");
-app.MapHub<ImportHub>("/import");
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.Run();
+        loggerConfiguration.SetSerilog(loggingBuilder);
+    }
+}

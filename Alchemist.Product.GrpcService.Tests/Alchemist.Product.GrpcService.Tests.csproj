@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<InvariantGlobalization>true</InvariantGlobalization>
+	<IncludeHttpRuleProtos>true</IncludeHttpRuleProtos>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />    
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+	  <PackageReference Include="Grpc.Tools" Version="2.72.0"/>
+	  <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="9.0.12" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Alchemist.Product.GrpcService" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.Product.GrpcService\Alchemist.Product.GrpcService.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.DBApiWebAppFactory\Alchemist.Test.DBApiWebAppFactory.csproj" />
+    <ProjectReference Include="..\Alchemist.Test.Server.Fixtures\Alchemist.Test.Server.Fixtures.csproj" />
+    <ProjectReference Include="..\Test.PostresqlTestContainer\Test.PostresqlTestContainer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\Alchemist.Product.GrpcService\Protos\alchemygrpc.proto" GrpcServices="Client">
+      <Link>Protos\alchemygrpc.proto</Link>
+    </Protobuf>
+	  <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client" 
+				ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+	  <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client"
+				ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+
+  </ItemGroup>
+
+</Project>

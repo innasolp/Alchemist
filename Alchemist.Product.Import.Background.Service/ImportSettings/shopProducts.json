@@ -1,0 +1,131 @@
+{
+  "OzonProductsImport": {
+    "ShopName": "Ozon",
+    "Caption": "Ozon",
+    "ShopUrl": "https://www.ozon.ru",
+    "ProductUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}%26layout_container%3DpdpPage2column%26layout_page_index%3D2",
+    "ProductUrlFormatType": "Path",
+    "CategoryUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url={0}",
+    "CategoryUrlFormatType": "Path",
+    "IsAggregate": true,
+    "PageProductCount": 12,
+    "RootCategories": [
+      {
+        "Item": 6500,
+        "Url": "/category/krasota-i-zdorove-6500/"
+      }
+    ],
+    "Services": {
+      "ImportService": {
+        "ImplementationTypeName": "ShopImportHttpJsonPagingCategoryProductsStatefulService",
+        "AssemblyPath": "Import\\Products\\Json"
+      },
+      "WebLoader": {
+        "ImplementationTypeName": "ChromiumPatchright",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright",
+        "ServiceProviderPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "ItemHandler": {
+        "ImplementationTypeName": "BeautyAndHealthProduct"
+      },
+      "ProductJsonSettings": {
+        "AssemblyPath": "ImportSettings/ozon.product.settings.json"
+      },
+      "CategoryJsonSettings": {
+        "AssemblyPath": "ImportSettings/ozon.category.settings.json"
+      },
+      "HostRequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions",
+          "LoadingType": "WaitForUrl"
+        }
+      },
+      "CategoryRequestOptions": {
+        "Value": {
+          "LoadingType": "Simple",
+          "TimeouteMillseconds": 3000
+        }
+      },
+      "ProductRequestOptions": {
+        "Value": {
+          "LoadingType": "Api"
+        }
+      },
+      "RateLimiterOptions": {
+        "Value": {
+          "WindowMilliseconds": 6000,
+          "QueueLimit": 12
+        }
+      },
+      "JobExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400,
+          "IdleTimeInSeconds": 3600
+        }
+      }
+    }
+  },
+
+  "GoldAppleProductsImport": {
+    "ShopName": "Goldapple",
+    "Caption": "Золотое яблоко",
+    "ShopUrl": "https://goldapple.ru",
+    "ProductUrlFormat": "https://goldapple.ru{0}",
+    "CategoryUrlFormat": "https://goldapple.ru{0}?p={1}",
+    "PageProductCount": 20,
+    "IsAggregate": true,
+    "RootCategories": [
+      {
+        "Item": 1000000004,
+        "Url": "/uhod/"
+      }
+    ],
+    "Services": {
+      "ImportService": {
+        "ImplementationTypeName": "ShopImportHttpJsonCategoryProductsStatefulService",
+        "AssemblyPath": "Import\\Products\\Json"
+      },
+      "WebLoader": {
+        "ImplementationTypeName": "Chromium",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "ItemHandler": {
+        "ImplementationTypeName": "BeautyAndHealthProduct"
+      },
+      "ProductJsonSettings": {
+        "AssemblyPath": "ImportSettings/goldapple.product.settings.json"
+      },
+      "CategoryJsonSettings": {
+        "AssemblyPath": "ImportSettings/goldapple.category.settings.json"
+      },
+      "CategoryRequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://goldapple.ru/front/api/catalog/cards-list"
+        }
+      },
+      "ProductRequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://goldapple.ru/front/api/catalog/product-card/base/v3"
+        }
+      },
+      "HostRequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://goldapple.ru/front/api/apm/events",
+          "LoadingType": "Route"
+        }
+      },
+      "RateLimiterOptions": {
+        "Value": {
+          "WindowMilliseconds": 10000,
+          "QueueLimit": 20
+        }
+      },
+      "JobExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400,
+          "IdleTimeInSeconds" : 3600
+        }
+      }
+    }
+  }
+}

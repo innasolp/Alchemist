@@ -4,5 +4,5 @@ public interface ICategoryProducts
 {
     ICategoryProductItem[] CategoryProductItems { get; }
 
-    int TotalCount { get; }
+    int? TotalCount { get; }
 }

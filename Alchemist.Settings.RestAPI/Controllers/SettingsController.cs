@@ -1,101 +1,150 @@
-using Alchemist.DataService.Interfaces;
-using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
+using Alchemist.Product.Data;
+using Mediator.Infrastructure;
+using Mediator.Infrastructure.Request;
+using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
+using ShopSettings.Infrastructure;
 using System.Net;
-using System.Text.Json;
 
 namespace Alchemist.Settings.RestAPI.Controllers;
 
 [ApiController]
 [Route("api/Settings")]
-public class SettingsController(ILogger<SettingsController> logger, ISettingsRepository settingsRepository) : ControllerBase
+public class SettingsController(ILogger<SettingsController> logger, IMediator mediator) : ControllerBase
 {
-    private readonly ISettingsRepository _settingsRepository = settingsRepository;
+    public record ShopSettingsWithServices(Product.Data.ShopSettings ShopSettings, Product.Data.ShopSettings[] Services);
+
+    private readonly IMediator _mediator = mediator;
 
     private readonly ILogger<SettingsController> _logger = logger;
 
-    [HttpGet("shopSettings/byShopId/{shopId:int}/{shopSettingType:int}", Name = nameof(GetShopSettingsByShopId))]
-    public async Task<Results<BadRequest, NotFound, Ok<ShopSettings>>> GetShopSettingsByShopId(int shopId, int shopSettingType)
+    [HttpGet("byShopId/{shopId:int}/{shopSettingType:int}", Name = nameof(GetShopSettingsByShopId))]
+    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<Product.Data.ShopSettings>>> GetShopSettingsByShopId(int shopId, int shopSettingType, CancellationToken cancellationToken = default)
     {
-        if (shopId <= 0)
-            return TypedResults.BadRequest();
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.NotFound(shopId);
 
-        var shopSettings = await _settingsRepository.GetShopSettings(shopId, (ShopSettingType)shopSettingType);
-        return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound();
+        if (shopId < 0)
+            return TypedResults.BadRequest(shopId);
+
+        var shopSettings = await _mediator.Send( new GetShopSettingsByShopIdRequest(shopId, (ShopSettingType)shopSettingType), cancellationToken);
+        return shopSettings != null ? TypedResults.Ok(shopSettings) : TypedResults.NotFound(shopId);
     }
 
-    [HttpGet("shopSettings/byId/{id:int}", Name = nameof(GetShopSettingsById))]
-    public async Task<Results<BadRequest, NotFound, Ok<ShopSettings>>> GetShopSettingsById(int id)
+    [HttpGet("byId/{id:int}", Name = nameof(GetShopSettingsById))]
+    public async Task<Results<BadRequest<int>, NotFound<int>, Ok<Product.Data.ShopSettings>>> GetShopSettingsById(int id, CancellationToken cancellationToken = default)
     {
-        if (id <= 0)
-            return TypedResults.BadRequest();
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.NotFound(id);
 
-        var shopSettings = await _settingsRepository.GetShopSettings(id);
-        return shopSettings != null ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.NotFound();
+        if (id < 0)
+            return TypedResults.BadRequest(id);
+
+        var shopSettings = await _mediator.Send(new GetByIdRequest<Product.Data.ShopSettings>(id), cancellationToken);
+        return shopSettings != null ? TypedResults.Ok(shopSettings) : TypedResults.NotFound(id);
     }
 
-    [HttpPost("shopSettings", Name = nameof(SaveShopSettings))]
-    public async Task<Results<BadRequest<ShopSettings>, Created<ShopSettings>>> SaveShopSettings(ShopSettings shopSettings)
+
+    [HttpGet("byName", Name = nameof(GetShopSettingsByName))]
+    public async Task<Results<BadRequest, NotFound<string>, Ok<Product.Data.ShopSettings>>> GetShopSettingsByName(string name, CancellationToken cancellationToken = default)
     {
-        if (shopSettings == null || shopSettings.ShopId == 0 || shopSettings.JsonValue == null)
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.NotFound(name);
+
+        if (string.IsNullOrEmpty(name))
+            return TypedResults.BadRequest();
+
+        var shopSettings = await _mediator.Send(new FindByNameRequest<Product.Data.ShopSettings>(name, s=>s.Name), cancellationToken);
+        return shopSettings != null ? TypedResults.Ok(shopSettings) : TypedResults.NotFound(name);
+    }
+
+    [HttpPost(Name = nameof(SaveShopSettings))]
+    public async Task<Results<BadRequest,BadRequest<Product.Data.ShopSettings>, Created<Product.Data.ShopSettings>, Accepted<Product.Data.ShopSettings>>> 
+        SaveShopSettings(Product.Data.ShopSettings shopSettings, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.BadRequest();
+
+        if (shopSettings == null)
+            return TypedResults.BadRequest();
+
+        if (shopSettings.ShopId <= 0 || shopSettings.JsonValue == null)
             return TypedResults.BadRequest(shopSettings);
 
-        var newShopSettings = (await _settingsRepository.SaveShopSettings(shopSettings)).To<ShopSettings>();
+        var shopSettingsId = shopSettings.Id;
+        var savedShopSettings = await _mediator.Send(new SaveShopSettingsCommand(shopSettings), cancellationToken);        
 
-        var location = Url.Action(nameof(SaveShopSettings), new { id = newShopSettings.Id }) ?? $"/{newShopSettings.Id}";
-        return TypedResults.Created(location, newShopSettings);
-    }
+        var location = Url.Action(nameof(SaveShopSettings), new { id = savedShopSettings.Id }) ?? $"/{savedShopSettings.Id}";
+        return shopSettingsId == 0 
+            ? TypedResults.Created(location, savedShopSettings)
+            : TypedResults.Accepted(location, savedShopSettings);
+    }   
 
-    [HttpPost("shopSettings/save", Name = nameof(SaveShopSettingsWithServices))]
-    public async Task<Results<BadRequest<ArrayList>, StatusCodeHttpResult, Created<ArrayList>, Accepted<ArrayList>>>
-        SaveShopSettingsWithServices(ArrayList shopSettingsWithServices)
+
+    [HttpPost("save", Name = nameof(SaveShopSettingsWithServices))]
+    public async Task<Results<BadRequest, BadRequest<string>,  BadRequest<ShopSettingsWithServices>, StatusCodeHttpResult, Created<ShopSettingsWithServices>, Accepted<ShopSettingsWithServices>>>
+        SaveShopSettingsWithServices(ShopSettingsWithServices shopSettingsWithServices, CancellationToken cancellationToken = default)
     {
-        if (shopSettingsWithServices == null || shopSettingsWithServices.Count < 2 || shopSettingsWithServices.Contains(null))
+        if (shopSettingsWithServices == null || shopSettingsWithServices.ShopSettings == null)
+            return TypedResults.BadRequest();  
+
+        if (shopSettingsWithServices.ShopSettings.ShopId == 0 || shopSettingsWithServices.ShopSettings.JsonValue == null
+            || shopSettingsWithServices.Services == null || shopSettingsWithServices.Services.Any(s => s.JsonValue == null))
             return TypedResults.BadRequest(shopSettingsWithServices);
 
-        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        var initId = shopSettingsWithServices.ShopSettings.Id;
 
-        var shopSettings = JsonSerializer.Deserialize<ShopSettings>(shopSettingsWithServices[0].ToString(), options);
-        var services = JsonSerializer.Deserialize<ShopSettings[]>(shopSettingsWithServices[1].ToString(), options);
+        var saved = await _mediator.Send(
+            new SaveShopSettingsWithChildrenCommand(shopSettingsWithServices.ShopSettings, shopSettingsWithServices.Services), cancellationToken);
+        if (saved.shopSettings == null)
+            return TypedResults.StatusCode((int)HttpStatusCode.InternalServerError);        
 
-        if (shopSettings == null || shopSettings.ShopId == 0 || shopSettings.JsonValue == null
-            || services == null || services.Any(s => s.JsonValue == null))
-            return TypedResults.BadRequest(shopSettingsWithServices);
-
-        var initId = shopSettings.Id;
-
-        var allData = (await _settingsRepository.SaveShopSettings(shopSettings, services)).Select(s=>s.To<ShopSettings>()).ToList();
-        var shopSettingResult = allData.FirstOrDefault(s => s.Type != ShopSettingType.Service);
-        if (shopSettingResult == null)
-            return TypedResults.StatusCode((int)HttpStatusCode.InternalServerError);
-
-        var location = Url.Action(nameof(SaveShopSettingsWithServices), new { id = shopSettingResult.Id }) ?? $"/{shopSettingResult.Id}";
-        var result = new ArrayList { shopSettingResult, allData.Where(d => d.Type == ShopSettingType.Service).ToArray() };
+        var location = Url.Action(nameof(SaveShopSettingsWithServices), new { id = saved.shopSettings.Id }) ?? $"/{saved.shopSettings.Id}";
+        
+        var result = new ShopSettingsWithServices(saved.shopSettings, [.. saved.services]);
         return initId == 0 ? TypedResults.Created(location, result) : TypedResults.Accepted(location, result);
     }
-
-    [HttpPut("shopSettings/update", Name = nameof(UpdateShopSettings))]
-    public async Task<Results<BadRequest<ShopSettings>, Ok<ShopSettings>, StatusCodeHttpResult>> UpdateShopSettings(ShopSettings shopSettings)
+    
+    [HttpPut("update", Name = nameof(UpdateShopSettings))]
+    public async Task<Results<BadRequest, BadRequest<Product.Data.ShopSettings>, Accepted<Product.Data.ShopSettings>, NotFound<Product.Data.ShopSettings>>> 
+        UpdateShopSettings(Product.Data.ShopSettings shopSettings, CancellationToken cancellationToken = default)
     {
-        if (shopSettings == null || shopSettings.ShopId == 0 || shopSettings.JsonValue == null)
-            return TypedResults.BadRequest(shopSettings);
-
-        var result = await _settingsRepository.UpdateShopSettings(shopSettings);
-
-        var location = Url.Action(nameof(UpdateShopSettings), new { id = shopSettings.Id }) ?? $"/{shopSettings.Id}";
-        return result ? TypedResults.Ok(shopSettings.To<ShopSettings>()) : TypedResults.StatusCode(500);
-    }
-
-    [HttpGet("shopSettings/childSettings/{parentSettingsId:int}", Name = nameof(GetChildSettings))]
-    public async Task<Results<BadRequest, Ok<List<ShopSettings>>>> GetChildSettings(int parentSettingsId)
-    {
-        if (parentSettingsId <= 0)
+        if (cancellationToken.IsCancellationRequested)
             return TypedResults.BadRequest();
 
-        var childSettings = await _settingsRepository.GetChildSettings(parentSettingsId);
-        return TypedResults.Ok(childSettings.Select(c=>c.To<ShopSettings>()).ToList());
+        if (shopSettings == null)
+            return TypedResults.BadRequest();
+
+        if (shopSettings.ShopId <= 0 || shopSettings.JsonValue == null)
+            return TypedResults.BadRequest(shopSettings);
+
+        var result = await _mediator.Send(new UpdateCommand<Product.Data.ShopSettings>(shopSettings), cancellationToken);
+
+        var location = Url.Action(nameof(UpdateShopSettings), new { id = shopSettings.Id }) ?? $"/{shopSettings.Id}";
+        return result != null ? TypedResults.Accepted(location, shopSettings) : TypedResults.NotFound(shopSettings);
+    }
+
+    [HttpGet("childSettings/{parentSettingsId:int}", Name = nameof(GetChildSettings))]
+    public async Task<Results<BadRequest<int>, Ok<List<Product.Data.ShopSettings>>>> GetChildSettings(int parentSettingsId, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.BadRequest(parentSettingsId);
+
+        if (parentSettingsId <= 0)
+            return TypedResults.BadRequest(parentSettingsId);
+
+        var childSettings = await _mediator.Send(new GetChildSettingsRequest(parentSettingsId), cancellationToken);
+        return TypedResults.Ok(childSettings);
+    }
+
+    [HttpGet("allParents", Name = nameof(GetAllParentShopSettings))]
+    public async Task<Results<BadRequest<int>, Ok<List<Product.Data.ShopSettings>>>> GetAllParentShopSettings(CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return TypedResults.BadRequest(0);
+
+        var allParents = await _mediator.Send(new GetAllParentShopSettingsRequest(), cancellationToken);
+        return TypedResults.Ok(allParents);
     }
 }

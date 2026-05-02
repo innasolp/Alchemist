@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
+		<PackageReference Include="Testcontainers.RabbitMq" Version="4.10.0" />
+		<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.7" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Alchemist.Test.Host.Interfaces\Alchemist.Test.Host.Interfaces.csproj" />
+	</ItemGroup>
+
+
+	</Project>

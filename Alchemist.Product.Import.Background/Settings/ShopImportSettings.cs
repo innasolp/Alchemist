@@ -1,0 +1,40 @@
+﻿using Import.Settings.Interfaces;
+using System.Collections;
+using System.Text.Json.Serialization;
+using Alchemist.Import.Settings;
+using ShopSettings.Interfaces;
+using Import.LoaderSettings;
+
+namespace Alchemist.Product.Import.Background.Settings;
+
+public abstract class ShopImportSettings : IShopImportSettings, IShopSettings, IHostSettings
+{
+    public bool IsAggregate { get; set; } = false;
+
+    [JsonIgnore]
+    public int Id { get; set; }
+
+    public string Name { get; set; }
+
+    [JsonIgnore]
+    public int ShopId { get; set; }
+    
+    public Dictionary<string,ImportServiceSettings> Services { get; set; } = [];
+
+    IDictionary IImportSettings.Services => Services;
+
+    int? IShopSettings.ParentSettingsId 
+    { 
+        get { return null; }
+        set {; }
+    }
+
+    public abstract ShopSettingType ShopSettingType { get; }   
+
+    public string ShopName { get; set; }
+    public string ShopUrl { get; set; }
+    bool? IShopSettings.IsActual { get ; set; }
+    string IShopSettings.JsonValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    ShopSettingType IShopSettings.Type { get => ShopSettingType; set => throw new InvalidOperationException(); }
+    string IHostSettings.Host { get => ShopUrl; set => ShopUrl = value; }
+}

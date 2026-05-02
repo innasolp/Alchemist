@@ -1,0 +1,26 @@
+﻿@using Alchemist.Product.ShopWebApp.Models
+
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@functions
+{
+    string GetShopId() => Model.ShopId != null ? Model.ShopId.Value.ToString() : "null";
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }       
+
+    <script>
+        uploadShopList(@GetShopId(), loadShop);
+    </script>
+}
+
+<div id="shopsTab">
+    @await Html.PartialAsync($"~/Views/Shared/ShopTab.cshtml", Model);   
+</div>

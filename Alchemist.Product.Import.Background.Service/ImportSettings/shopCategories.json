@@ -1,0 +1,174 @@
+{
+  "OzonCategories": {
+    "ShopName": "Ozon",
+    "Caption": "Ozon",
+    "ShopUrl": "https://www.ozon.ru",
+    "CategorySourceUrl": "https://www.ozon.ru",
+    "Services": {
+      "ImportService": {
+        "ImplementationTypeName": "ShopImportCategoriesSimpleService",
+        "AssemblyPath": "Import\\Categories\\Services",
+        "ServiceProviderPath": "Import\\Categories\\Json"
+      },
+      "WebLoader": {
+        "ImplementationTypeName": "Chromium",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "HostRequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://www.ozon.ru/api/entrypoint-api.bx/page/json/v2?url=%2FsearchSuggestions",
+          "LoadingType": "Response",
+          "TimeouteMillseconds": 15000
+        }
+      },
+      "RequestOptions": {
+        "Value": {
+          "LoadingType": "Api"
+        }
+      },
+      "TimerOptions": {
+        "Value": {
+          "SecondsInterval": 10800
+        }
+      },
+      "JobExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
+        }
+      },
+      "LoadStages": {
+        "Value": [
+          {
+            "Type": "RecursiveJsonCategoryFromHtmlLoader",
+            "CategoryLoadOptions": {
+              "HtmlSearchFactoryOptions": {
+                "SearchMatchType": 1,
+                "SearchElementType": 0
+              },
+              "HtmlSearchOptions": {
+                "Tag": "div",
+                "SearchString": "id=state-catalogMenu",
+                "ValueString": "data-state"
+              },
+              "FirstNodePath": [ "data", "columns", "categories" ],
+              "CategoryPropertyPaths": {
+                "Url": {
+                  "PropertyName": "Url",
+                  "Path": "url"
+                },
+                "Description": {
+                  "PropertyName": "Description",
+                  "Path": "title"
+                },
+                "Name": {
+                  "PropertyName": "Name",
+                  "Path": "title"
+                },
+                "Children": {
+                  "PropertyName": "Children",
+                  "Path": "categories"
+                }
+              }
+            }
+          },
+          {
+            "Type": "JsonCategoryLoader",
+            "CategoryLoadOptions": {
+              "CategoriesApiUrlFormat": "https://www.ozon.ru/api/composer-api.bx/_action/v2/categoryChildV3?menuId=185&categoryId={0}",
+              "FirstNodePath": [ "data", "columns", "categories" ],
+              "CategoryPropertyPaths": {
+                "Url": {
+                  "PropertyName": "Url",
+                  "Path": "url"
+                },
+                "Description": {
+                  "PropertyName": "Description",
+                  "Path": "title"
+                },
+                "Name": {
+                  "PropertyName": "Name",
+                  "Path": "title"
+                },
+                "Children": {
+                  "PropertyName": "Children",
+                  "Path": "categories"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "GoldAppleCategories": {
+    "ShopName": "Goldapple",
+    "ShopUrl": "https://goldapple.ru",
+    "CategorySourceUrl": "https://goldapple.ru",
+    "Caption": "Золотое яблоко",
+    "Services": {
+      "ImportService": {
+        "ImplementationTypeName": "ShopImportCategoriesSimpleService",
+        "AssemblyPath": "Import\\Categories\\Services",
+        "ServiceProviderPath": "Import\\Categories"
+
+      },
+      "WebLoader": {
+        "ImplementationTypeName": "Chromium",
+        "AssemblyPath": "Libs\\webLoader\\Playwright\\ChromiumPatchright"
+      },
+      "HostRequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://goldapple.ru/front/api/apm/events"
+        }
+      },
+      "RequestOptions": {
+        "Value": {
+          "RouteUrlFormat": "https://goldapple.ru/web/api/v3/catalog/navigation"
+        }
+      },
+      "TimerOptions": {
+        "Value": {
+          "SecondsInterval": 10800
+        }
+      },
+      "JobExecuteOptions": {
+        "Value": {
+          "IntervalInSeconds": 86400
+        }
+      },
+      "LoadStages": {
+        "Value": [
+          {
+            "Type": "JsonCategoryLoader",
+            "CategoryLoadOptions": {
+              "FirstNodePath": [ "data", "general" ],
+              "CategoryPropertyPaths": {
+                "Url": {
+                  "PropertyName": "Url",
+                  "Path": "link"
+                },
+                "Description": {
+                  "PropertyName": "Description",
+                  "Path": "name"
+                },
+                "Name": {
+                  "PropertyName": "Name",
+                  "Path": "name"
+                },
+                "Children": {
+                  "PropertyName": "Children",
+                  "Path": "children"
+                },
+                "Id": {
+                  "PropertyName": "Id",
+                  "Path": "id"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

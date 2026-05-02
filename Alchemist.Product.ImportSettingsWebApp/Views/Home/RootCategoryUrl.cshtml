@@ -1,0 +1,37 @@
+﻿@using System.Text.Json
+@model CategoryUrlModel
+
+
+<h4>Root category</h4>
+<hr />
+<div id="rootCategoryDiv" onshow="alert('loaded')">
+</div>
+<form id="rootCategoryForm">
+    <div class="row" id="rootCategoryFormDiv">
+        <input type="hidden" name="ShopId" value="@Model.ShopId"/>
+        <input type="hidden" name="Guid" value="@Model.Guid" />
+        <div class="col-md-4">
+            <div class="flex">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Item" class="control-label"></label>
+                    <input asp-for="Item" class="form-control rootCategoryItem" />
+                    <span asp-validation-for="Item" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Url" class="control-label"></label>
+                    <input asp-for="Url" class="form-control rootCategoryUrl"/>
+                    <span asp-validation-for="Url" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label></label>
+                    <button type="button" class="save-root-category">
+                        <i class="fa fa-check edit-category-url" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+

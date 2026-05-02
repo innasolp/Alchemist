@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -22,20 +22,13 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Html.Factory\Alchemist.Import.Html.Factory.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Html\Alchemist.Import.Html.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Model\Alchemist.Import.Settings.Model.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Settings.Interfaces\Alchemist.Import.Settings.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Test.Model\Alchemist.Import.Settings.Test.Model.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Json.Extensions">
-      <HintPath>..\Libs\Json\Json.Extensions\Json.Extensions.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+ 
 
   <ItemGroup>
     <Using Include="Xunit" />

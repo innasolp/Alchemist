@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "asp.net",
+  "private": true,
+  "devDependencies": {
+  },
+  "dependencies": {
+    "del": "^8.0.1",
+    "gulp": "^5.0.1",
+    "jquery-validation-unobtrusive": "^4.0.0"
+  }
+}

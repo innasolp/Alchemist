@@ -1,0 +1,82 @@
+﻿@using System.Text.Json
+@using Alchemist.Product.ImportSettingsWebApp.Controllers
+@using ShopSettings.Interfaces
+
+@model ShopImportSettingsModel
+
+@functions {
+
+    public string GetServiceUploadOnChange(string serviceName) => "setServiceSettingsFromJson($('#settingsForm'), this.name, '"  + serviceName + "', (data)=>{setValIfValid('#" + serviceName + "', data.serviceTypeName); })";
+    
+}
+
+<div class="row">
+    <div id="importSettingsUploadDiv">
+        <form id="loadSettingsFromJsonForm">
+            <div class="form-group">
+                <file-upload class="import-settings" name="ImportSettings_(@Model.Name)_UploadFromJson"></file-upload>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-8">
+        <modal-div class="service-settings-modal"></modal-div>
+        <form id="settingsForm">            
+            <input type="hidden" asp-for="ShopId" />
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ShopSettingType" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control form-input" value="@Model.Name" id="ShopSettingsName" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div>
+                @if (Model.ShopSettingType == ShopSettingType.Product)
+                @await Html.PartialAsync($"~/Views/Home/ProductShopSettings.cshtml", Model)
+                                else if (Model.ShopSettingType == ShopSettingType.Category)
+                        @await Html.PartialAsync($"~/Views/Home/CategoryShopSettings.cshtml", Model)
+                
+                    </div>
+
+                        <div class="form-group">
+                            <label asp-for="ImportService" class="control-label"></label>
+                            @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml", 
+                                new PrimaryServiceModel(Model){ ServiceSettings =  Model.ImportService, Name="ImportService", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType , ClassName = "import-service"})                           
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="BrowserDataLoader" class="control-label"></label>                           
+                             @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml",
+                                new PrimaryServiceModel(Model) { ServiceSettings = Model.BrowserDataLoader, Name = "BrowserDataLoader", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType, ClassName = "browser-data-loader" })                             
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="BrowserLauncher" class="control-label"></label>                           
+                            @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml",
+                                new PrimaryServiceModel(Model) { ServiceSettings = Model.BrowserLauncher, Name = "BrowserLauncher", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType, ClassName = "browser-launcher" })                            
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="RequestHeaders" class="control-label"></label>
+                            <span asp-validation-for="RequestHeaders" class="text-danger"></span>
+                            <file-upload class="request-headers" data-name="RequestHeaders" name="RequestHeadersUploadFromJson"></file-upload>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="WebLoader" class="control-label"></label>                            
+                            @await Html.PartialAsync("~/Views/Home/PrimaryServiceDiv.cshtml",
+                                new PrimaryServiceModel(Model) { ServiceSettings = Model.WebLoader, Name = "WebLoader", ShopId = Model.ShopId, ShopSettingType = Model.ShopSettingType, ClassName = "web-loader" })
+                        </div>
+                        <div class="form-group-table">
+                            @if (Model.ShopSettingType == ShopSettingType.Category)
+                            {
+                                @await Html.PartialAsync($"~/Views/Home/ServiceSettingsTable.cshtml", Model)
+                            }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary form-button" id="saveImportSettingsBtn">
+                    Save
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>

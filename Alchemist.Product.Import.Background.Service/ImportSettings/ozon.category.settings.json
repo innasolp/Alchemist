@@ -1,0 +1,33 @@
+{
+  "PropertyNodePathes": {
+    "TotalCount": [
+      "seo/script/[.innerHTML]/.value/offers/offerCount"
+    ],
+    "CategoryProductItems": [
+      "widgetStates/tileGridDesktop%/.value/items"
+    ],
+    "PrevPage": [
+      "prevPage"
+    ],
+    "NextPage": [
+      "nextPage",
+      "widgetStates/infiniteVirtualPaginator%/.value/nextPage"
+    ]
+  },
+  "ItemJsonSettings": {
+    "CategoryProductItems": {
+      "PropertyNodePathes": {
+        "Name": [
+          "mainState/[type=textAtom]/textAtom/text"
+        ],
+        "Id": [
+          "sku"
+        ],
+        "ItemPath": [ "action/link" ],
+        "Brand": [ "mainState/[type=labelList]/labelList/items/[.testInfo]/[automatizationId=tile-list-paid-brand]/.parent/.parent/title" ],
+        "Price": [ "mainState/[type=priceV2]/priceV2/price/[textStyle=PRICE]/text/.price" ],
+        "Currency":[ "mainState/[type=priceV2]/priceV2/price/[textStyle=PRICE]/text/.currency" ]
+      }
+    }
+  }
+}

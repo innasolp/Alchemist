@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
+		<PackageReference Include="Import.Interfaces" Version="1.0.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Alchemist.BackgroundTaskQueue\BackgroundTaskQueue.csproj" />
+	  <ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
+	  <ProjectReference Include="..\Alchemist.Import\Alchemist.Import.csproj" />
+	  <ProjectReference Include="..\Alchemist.Messages.Common\Alchemist.Messages.Common.csproj" />
+	</ItemGroup>
+
+</Project>

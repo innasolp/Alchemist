@@ -1,6 +1,8 @@
-using Alchemist.Import.Settings.Model;
-using Json.Extensions;
+using Alchemist.Import.Settings.Extensions;
+using Alchemist.Import.Settings.Test.Model;
+using Json.FileExtensions;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using WebLoader.Common;
 
 namespace Alchemist.Import.ProductSettings.Tests;
@@ -12,27 +14,26 @@ public class SerializationTests
     [Fact]
     public async Task TestLoadProductSettings()
     {
-        var shopProductsSettings = await _productsJsonFileName.ReadFromJsonFileAsync<ShopImportSettings[]>();
+        var shopProductsSettings = await _productsJsonFileName.ReadFromJsonFileAsync<Dictionary<string,TestProductShopImportSettings>>();
 
         Assert.NotNull(shopProductsSettings);
-        Assert.Equal(2, shopProductsSettings.Length);
+        Assert.Equal(2, shopProductsSettings.Count);
 
-        var ozonSettings = shopProductsSettings.FirstOrDefault(s => s.Name == "Ozon");
+        var ozonSettings = shopProductsSettings.FirstOrDefault(s => s.Key == "Ozon").Value;
         Assert.NotNull(ozonSettings);
-        Assert.NotNull(ozonSettings.RequestHeaders);
-        Assert.NotNull(ozonSettings.RequestHeaders.Value);
-        Assert.NotNull(ozonSettings.WebLoader.AssemblyPath);
-        Assert.NotNull(ozonSettings.WebLoader.ImplementationTypeName);
+        Assert.NotNull(ozonSettings.GetRequestHeaders<TestImportServiceSettings>());
+        Assert.NotNull(ozonSettings.GetRequestHeaders<TestImportServiceSettings>().Value);
+        Assert.NotNull(ozonSettings.GetWebLoader<TestImportServiceSettings>().AssemblyPath);
+        Assert.NotNull(ozonSettings.GetWebLoader<TestImportServiceSettings>().ImplementationTypeName);
 
-        var requestHeaders = JsonSerializer.Deserialize<RequestHeaders>(ozonSettings.RequestHeaders.Value);
+        var requestHeaders = JsonSerializer.Deserialize<JsonObject>(ozonSettings.GetRequestHeaders<TestImportServiceSettings>().Value);
         Assert.NotNull(requestHeaders);
-        Assert.NotNull(requestHeaders.Headers);
 
 
-        var goldAppleSettings = shopProductsSettings.FirstOrDefault(s => s.Name == "GoldApple");
+        var goldAppleSettings = shopProductsSettings.FirstOrDefault(s => s.Key == "GoldApple").Value;
         Assert.NotNull(goldAppleSettings);
-        Assert.Null(goldAppleSettings.RequestHeaders);
-        Assert.NotNull(goldAppleSettings.WebLoader.AssemblyPath);
-        Assert.NotNull(goldAppleSettings.WebLoader.ImplementationTypeName);
+        Assert.Null(goldAppleSettings.GetRequestHeaders<TestImportServiceSettings>());
+        Assert.NotNull(goldAppleSettings.GetWebLoader<TestImportServiceSettings>().AssemblyPath);
+        Assert.NotNull(goldAppleSettings.GetWebLoader<TestImportServiceSettings>().ImplementationTypeName);
     }
 }

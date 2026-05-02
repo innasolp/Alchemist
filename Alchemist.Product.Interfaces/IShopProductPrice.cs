@@ -7,8 +7,6 @@ public interface IShopProductPrice
     long ShopProductId { get; set; }
 
     double Price { get; set; }
-
-    DateTime LastUpdate { get; set; }
     
     int CurrencyId { get; set; }
 }

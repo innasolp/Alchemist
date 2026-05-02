@@ -10,7 +10,5 @@ public class ShopProductPrice:IShopProductPrice
 
     public double Price { get; set; }
 
-    public DateTime LastUpdate { get; set; }
-
     public int CurrencyId { get; set; }
 }

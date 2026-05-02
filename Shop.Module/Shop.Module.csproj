@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
+    <ProjectReference Include="..\Autofac.Module\Mediator.Module.EF.csproj" />
+    <ProjectReference Include="..\Mediator.Messages\Mediator.Messages.csproj" />
+    <ProjectReference Include="..\Shop.Infrastructure.EF\Shop.Infrastructure.EF.csproj" />
+  </ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Autofac" Version="9.0.0" />
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.4" />
+	</ItemGroup>
+
+
+</Project>

@@ -12,8 +12,6 @@ public class ShopProduct:IShopProduct
 
     public int ShopId { get; set; }
 
-    public DateTime LastUpdate { get; set; }
-
     public bool? IsActual { get; set; }
 
     public string ApiUrl { get; set; }

@@ -1,123 +1,143 @@
-﻿using Alchemist.Common;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using Alchemist.Common;
 using Alchemist.Product.Interfaces;
 using Alchemist.Import.Products.Interfaces;
-using Alchemist.Import.Shop.Interfaces;
 using Alchemist.DataService.Interfaces;
 using Alchemist.Product.Entities;
+using Alchemist.Import.Interfaces;
+using System.ComponentModel;
+using Component = Alchemist.Product.Entities.Component;
 
 namespace Alchemist.Import.Products.Data;
 
-internal class ProductDataHandler(IProductDataService alchemyServiceClient, IShopDataService shopDataService) : IProductDataHandler
+internal class ProductDataHandler(IProductDataService alchemyServiceClient, IShopDataService shopDataService) : IProductItemHandler
 {
     private readonly IProductDataService _alchemyServiceClient = alchemyServiceClient;
 
     private readonly IShopDataService _shopDataService = shopDataService;
-    public async Task<ItemProcessStatus> HandleItem(IProductItem productItem, int shopId)
+
+    public event AsyncItemHandler<IProductItem> ItemProcessed;
+
+    public async Task<ItemProcessStatus> HandleItem(IProductItem productItem, IShopModel shopModel, CancellationToken cancellationToken = default)
     {
-        var shopProduct = await _alchemyServiceClient.GetShopProductByShopAndItemId(shopId, productItem.ItemId)
-            ??
-            new ShopProduct
+        try
+        {
+            //todo
+            var shop = shopModel as IShop;
+            var shopId = shop.Id;
+
+            var shopProduct = await _alchemyServiceClient.GetShopProductByShopAndItemId(shopId, productItem.ItemId, cancellationToken)
+                ??
+                new ShopProduct
+                {
+                    ShopId = shopId,
+                    ItemId = productItem.ItemId,
+                    ApiUrl = productItem.ApiUrl,
+                    ItemUrl = productItem.Url
+                };
+
+            if (shopProduct.ProductId != 0)
             {
-                ShopId = shopId,
-                ItemId = productItem.ItemId,
-                ApiUrl = productItem.ApiUrl,
-                ItemUrl = productItem.ItemUrl,
-                LastUpdate = DateTime.Now
-            };
+                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shopId, shopProduct.Id, productItem.CategoryId, cancellationToken);
+                //todo
+                //if(!categoryResult)
+                //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
 
-        if (shopProduct.ProductId != 0)
-        {
-            var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shopId, shopProduct.Id, productItem.CategoryId);
-            //todo
-            //if(!categoryResult)
-            //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
+                var setPriceResult = await SetShopProductPriceForItemAsync(productItem, shopProduct.Id, cancellationToken);
+                //todo
+                //if (!result)
+                //    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");            
 
-            var setPriceResult = await SetShopProductPriceForItemAsync(productItem, shopProduct.Id);
-            //todo
-            //if (!result)
-            //    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");            
+                var result = !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
 
-            return !(setPriceResult & setCategoryResult) ? ItemProcessStatus.Error : ItemProcessStatus.Updated;
+                await InvokeItemProcessedAsync(productItem, shopModel, result);
+
+                return result;
+            }
+
+            var product = await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand, CancellationToken.None)
+                                ?? await _alchemyServiceClient.FindProductByName(productItem?.Name, CancellationToken.None);
+
+            if (product != null)
+            {
+                if (await _alchemyServiceClient.GetShopProductByShopAndProductId(shopId, product.Id, CancellationToken.None) != null)
+                    return ItemProcessStatus.AlreadyExists;
+            }
+            else
+                product = await CreateProductFromModelAsync(productItem, shopId);
+
+            shopProduct.ProductId = product.Id;
+            shopProduct.IsActual = true;
+
+            var newShopProduct = await _alchemyServiceClient.CreateShopProduct(shopProduct, CancellationToken.None);
+
+            if (!await SetShopProductPriceForItemAsync(productItem, newShopProduct.Id) ||
+                    !await SetShopProductCategoryIfNeedAsync(shopId, newShopProduct.Id, productItem.CategoryId))
+                return await Task.FromResult(ItemProcessStatus.Error);
+
+            //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
+            await InvokeItemProcessedAsync(productItem, shopModel, ItemProcessStatus.New);
+
+            return ItemProcessStatus.New;
         }
-
-        var product = await _alchemyServiceClient.FindProductByNameAndBrand(productItem?.Name, productItem?.Brand)
-                            ?? await _alchemyServiceClient.FindProductByName(productItem?.Name);
-
-        if (product != null)
+        catch(Exception e)
         {
-            if (await _alchemyServiceClient.GetShopProductByShopAndProductId(shopId, product.Id) != null)
-                return ItemProcessStatus.AlreadyExists;
+            await InvokeItemProcessedAsync(productItem, shopModel, ItemProcessStatus.Warning);
+
+            throw new WarningException($"Product {productItem.Url} proccessed with error.", e);
         }
-        else
-            product = await CreateProductFromModelAsync(productItem, shopId);
-
-        shopProduct.ProductId = product.Id;
-        shopProduct.IsActual = true;
-
-        var newShopProduct = await _alchemyServiceClient.CreateShopProduct(shopProduct);
-
-        if (!await SetShopProductPriceForItemAsync(productItem, newShopProduct.Id) ||
-                !await SetShopProductCategoryIfNeedAsync(shopId, newShopProduct.Id, productItem.CategoryId))
-            return await Task.FromResult(ItemProcessStatus.Error);
-
-        //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
-
-        return ItemProcessStatus.New;
     }
 
-    private async Task<bool> SetShopProductCategoryIfNeedAsync(int shopId, long shopProductId, int categoryItemId)
+    private Task InvokeItemProcessedAsync(IProductItem productItem, IShopModel shopModel, ItemProcessStatus itemProcessStatus)
     {
-        var category = await _shopDataService.GetShopCategoryByShopIdAndItemId(shopId, categoryItemId);
+        return ItemProcessed?.Invoke(this, productItem, shopModel, itemProcessStatus) ?? Task.FromResult(false);
+    }
+
+    private async Task<bool> SetShopProductCategoryIfNeedAsync(int shopId, long shopProductId, int categoryItemId, CancellationToken cancellationToken = default)
+    {
+        var category = await _shopDataService.GetShopCategoryByShopIdAndItemId(shopId, categoryItemId, cancellationToken);
         if (category == null)
             return await Task.FromResult(false);
 
-        var categoryExists = await _alchemyServiceClient.CheckShopProductCategory(shopProductId, category.Id);
+        var categoryExists = await _alchemyServiceClient.CheckShopProductCategory(shopProductId, category.Id, cancellationToken);
         if (!categoryExists)
-            await _alchemyServiceClient.AddShopProductCategory(shopProductId, category.Id);
+            await _alchemyServiceClient.AddShopProductCategory(shopProductId, category.Id, cancellationToken);
 
         return await Task.FromResult(true);
     }
 
-    private async Task<bool> SetShopProductPriceForItemAsync(IProductItem item, long shopProductId)
+    private async Task<bool> SetShopProductPriceForItemAsync(IProductItem item, long shopProductId, CancellationToken cancellationToken = default)
     {
-        var shopProductPrice = await _alchemyServiceClient.GetShopProductPrice(shopProductId);
+        var shopProductPrice = await _alchemyServiceClient.GetShopProductPrice(shopProductId, cancellationToken);
         if (shopProductPrice == null)
         {
-            var currency = await _alchemyServiceClient.GetCurrencyByName(item.Currency)
-                ?? await _alchemyServiceClient.CreateCurrency(new Currency { Name = item.Currency });
+            var currency = await _alchemyServiceClient.GetCurrencyByName(item.Currency, cancellationToken)
+                ?? await _alchemyServiceClient.CreateCurrency(new Currency { Name = item.Currency }, cancellationToken);
 
             await _alchemyServiceClient.CreateShopProductPrice(new ShopProductPrice
             {
                 ShopProductId = shopProductId,
                 Price = item.Price,
-                CurrencyId = currency.Id,
-                LastUpdate = DateTime.Now
-            });
+                CurrencyId = currency.Id
+            }, cancellationToken);
             return await Task.FromResult(true);
         }
         else
         {
             shopProductPrice.Price = item.Price;
-            shopProductPrice.LastUpdate = DateTime.Now;
-            var result = await _alchemyServiceClient.UpdateShopProductPrice(shopProductPrice);
+            var result = await _alchemyServiceClient.UpdateShopProductPrice(shopProductPrice, cancellationToken);
             return await Task.FromResult(result);
         }
     }
 
-    private async Task<IProduct> CreateProductFromModelAsync(IProductItem productItem, int shopId)
+    private async Task<IProduct> CreateProductFromModelAsync(IProductItem productItem, int shopId, CancellationToken cancellationToken = default)
     {
-        var brand = !string.IsNullOrWhiteSpace(productItem.Brand) ? await GetBrandAsync(productItem) : null;
+        var brand = !string.IsNullOrWhiteSpace(productItem.Brand) ? await GetBrandAsync(productItem, cancellationToken) : null;
 
-        var productType = await _alchemyServiceClient.FindProductTypeByName(productItem.ProductType) ??
-            await _alchemyServiceClient.CreateProductType(new ProductType { Name = productItem.ProductType });
-
-        var purposeTypes = new List<IPurposeType>();
-        foreach (var purpose in productItem.Purposes)
-        {
-            var purposeType = await _alchemyServiceClient.FindPurposeTypeByName(purpose) ??
-                await _alchemyServiceClient.CreatePurposeType(new PurposeType { Name = purpose });
-            purposeTypes.Add(purposeType);
-        }
+        var productType = await _alchemyServiceClient.FindProductTypeByName(productItem.ProductType, cancellationToken) ??
+            await _alchemyServiceClient.CreateProductType(new ProductType { Name = productItem.ProductType }, cancellationToken);
 
         var product = await _alchemyServiceClient.CreateProduct(new Product.Entities.Product
         {
@@ -127,50 +147,67 @@ internal class ProductDataHandler(IProductDataService alchemyServiceClient, ISho
             InitShopId = shopId,
             AddedTime = DateTime.UtcNow,
             Articul = productItem.Articul
-        });
+        }, CancellationToken.None);
+
+        if (productItem.Purposes.Length > 0)
+            await SetProductPurposesAsync(productItem.Purposes, product.Id, cancellationToken);
 
         if (productItem.Components != null)
-            await SetProductComponentsAsync(productItem.Components, product.Id);
+            await SetProductComponentsAsync(productItem.Components, product.Id, cancellationToken);
 
         return await Task.FromResult(product);
     }
 
-    private async Task SetProductComponentsAsync(IEnumerable<string> components, long productId)
+    private async Task SetProductComponentsAsync(IEnumerable<string> components, long productId, CancellationToken cancellationToken = default)
     {
         int componentNumber = 0;
         foreach (var itemComponent in components)
         {
-            var componentName = itemComponent.RemoveSpecialCharacters();
-            var component = await _alchemyServiceClient.FindComponentByName(componentName) ??
-                await _alchemyServiceClient.CreateComponent(new Component { Name = componentName });
+            var componentName = itemComponent.Trim().RemoveSpecialCharacters();
+            var component = await _alchemyServiceClient.FindComponentByName(componentName, cancellationToken) ??
+                await _alchemyServiceClient.CreateComponent(new Component { Name = componentName }, cancellationToken);
 
             componentNumber++;
 
-            var productComponent = _alchemyServiceClient.SetProductComponent(new ProductComponent { ProductId = productId, ComponentId = component.Id, SequalNumber = (short)componentNumber });
+            await _alchemyServiceClient.SetProductComponent(new ProductComponent { ProductId = productId, ComponentId = component.Id, SequalNumber = (short)componentNumber }, cancellationToken);
         }
     }
 
-    private async Task<IBrand?> GetBrandAsync(IProductItem shopProductModel)
+    private async Task SetProductPurposesAsync(IEnumerable<string> purposes, long productId, CancellationToken cancellationToken = default)
     {
-        var brand = await _alchemyServiceClient.FindBrandByName(shopProductModel.Brand);
+        var productPurposes = await _alchemyServiceClient.GetProductPurposes(productId, cancellationToken);
+        foreach(var purpose in purposes.Where(p=>!productPurposes.Any(pp=>pp.Name.Equals(p.Trim(), StringComparison.InvariantCultureIgnoreCase))))
+        {
+            var name = purpose.Trim().RemoveSpecialCharacters();
+
+            var newPurposeType = await _alchemyServiceClient.FindPurposeTypeByName(name, cancellationToken) ??
+                await _alchemyServiceClient.CreatePurposeType(new PurposeType { Name = name }, cancellationToken);
+
+            await _alchemyServiceClient.SetProductPurpose(new ProductPurpose { ProductId = productId, PurposeTypeId = newPurposeType.Id }, cancellationToken);
+        }
+    }
+
+    private async Task<IBrand?> GetBrandAsync(IProductItem productItem, CancellationToken cancellationToken = default)
+    {
+        var brand = await _alchemyServiceClient.FindBrandByName(productItem.Brand, cancellationToken);
         if (brand == null)
         {
-            var country = !string.IsNullOrEmpty(shopProductModel.Country) ?
-            (await _alchemyServiceClient.FindCountryByName(shopProductModel.Country)
-                ?? await _alchemyServiceClient.CreateCountry(new Country { Name = shopProductModel.Country.RemoveSpecialCharacters() }))
+            var country = !string.IsNullOrEmpty(productItem.Country) ?
+            (await _alchemyServiceClient.FindCountryByName(productItem.Country, cancellationToken)
+                ?? await _alchemyServiceClient.CreateCountry(new Country { Name = productItem.Country.Trim().RemoveSpecialCharacters() }, cancellationToken))
                 : null;
 
-            brand = await _alchemyServiceClient.CreateBrand(new Brand() { CountryId = country?.Id, Name = shopProductModel.Brand });
+            brand = await _alchemyServiceClient.CreateBrand(new Brand() { CountryId = country?.Id, Name = productItem.Brand.Trim() }, cancellationToken);
         }
 
         return brand;
     }
 
-    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, int shopId)
+    async Task<ItemProcessStatus> IItemHandler.HandleItem(object item, IShopModel shopModel, CancellationToken cancellationToken = default)
     {
         if (item is not IProductItem productItem)
             return await Task.FromResult(ItemProcessStatus.Error);
 
-        return await HandleItem(productItem, shopId);
+        return await HandleItem(productItem, shopModel, cancellationToken);
     }
 }

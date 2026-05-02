@@ -1,0 +1,35 @@
+[
+  {
+    "Name": "Worker service",
+    "Projects": [
+      {
+        "Path": "Alchemist.Product.GrpcService\\Alchemist.Product.GrpcService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.SignalR\\Alchemist.Product.SignalR.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.Background.Service\\Alchemist.Product.Import.Background.Service.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Settings.RestAPI\\Alchemist.Settings.RestAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.Product.Import.DBService\\Alchemist.Product.Import.DBService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Alchemist.BrowserService\\Alchemist.BrowserService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Shop.API\\Shop.API.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

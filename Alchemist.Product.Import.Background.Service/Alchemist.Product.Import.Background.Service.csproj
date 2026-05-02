@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <Configurations>Debug;Release</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
+    <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.12.0" />
+	<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+    <PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.5" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
+    <PackageReference Include="Serilog.HangfireConsoleContextSink" Version="1.0.0.1" />
+    <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
+    <PackageReference Include="Message.Interfaces" Version="1.0.0.4" />
+	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.9" />
+	<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.3" />
+	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+	  <PackageReference Include="FaceIT.Hangfire.Tags" Version="1.9.0" />
+	  <PackageReference Include="FaceIT.Hangfire.Tags.Redis.StackExchange" Version="1.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alchemist.BackgroundTaskQueueService\BackgroundTaskQueueService.csproj" />
+    <ProjectReference Include="..\Alchemist.BrowserService.Client\Alchemist.BrowserService.Client.csproj" />
+    <ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
+    <ProjectReference Include="..\Alchemist.Import.Settings.JsonAdapter\Alchemist.Import.Settings.JsonAdapter.csproj" />
+    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.BeautyAndHealth.ImportItemHandler\Alchemist.Product.BeautyAndHealth.ImportItemHandler.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Category.ImportItemHandler\Alchemist.Product.Category.ImportItemHandler.csproj" />
+    <ProjectReference Include="..\Alchemist.Product.Import.Background\Alchemist.Product.Import.Background.csproj" />
+    <ProjectReference Include="..\Shop.API.Client\Shop.API.Client.csproj" />
+    <ProjectReference Include="..\Alchemist.Settings.RestAPIClient\Alchemist.Settings.RestAPIClient.csproj" />
+    <ProjectReference Include="..\ShopImport.Service.Hangfire\ShopImport.Service.Hangfire.csproj" />
+    <ProjectReference Include="..\ShopImport.Service.Infrastructure.Module\ShopImport.Service.Infrastructure.Module.csproj" />
+    <ProjectReference Include="..\ShopImport.Service.Infrastructure\ShopImport.Service.Category.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="ImportSettings\Ozon.categories.requestheaders.Firefox.Standart.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>  
+
+  <!--<Target Name="CopyDIDir" AfterTargets="Build">
+    <ItemGroup>
+      <DIFiles Include="$(PkgDependencyInjection_AssemblyExtensions)\dependencies\*.dll"></DIFiles>
+    </ItemGroup>
+    <Copy SourceFiles="@(DIFiles)" DestinationFolder="$(OutDir)"></Copy>
+  </Target>-->
+
+</Project>

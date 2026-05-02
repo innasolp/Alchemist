@@ -1,39 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;debug libs</Configurations>
+    <Configurations>Debug;Release</Configurations>
+	  <InvariantGlobalization>true</InvariantGlobalization>
+	  <IncludeHttpRuleProtos>true</IncludeHttpRuleProtos>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.28.3" />
-    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
-    <PackageReference Include="Grpc.StatusProto" Version="2.67.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.67.0">
+    <PackageReference Include="GrpcExtensions.Client.Interceptors" Version="1.0.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.76.0" />
+    <PackageReference Include="Grpc.StatusProto" Version="2.76.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.76.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+	<PackageReference Include="GrpcExtensions.Message" Version="1.0.0" />
+	<PackageReference Include="Mapster" Version="7.4.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="9.0.12" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Product.DataService.Interfaces\Alchemist.DataService.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
-    <ProjectReference Include="..\Alchemist.Product.GrpcService.Extensions\Alchemist.Product.GrpcService.Extensions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Include="..\Alchemist.Product.GrpcService\Protos\alchemygrpc.proto" GrpcServices="Client">
       <Link>Protos\Alchemist.proto</Link>
     </Protobuf>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Grpc.Client.Interceptors">
-      <HintPath>..\Libs\Grpc\Client\Interceptors\Grpc.Client.Interceptors.dll</HintPath>
-    </Reference>
+	  <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\annotations.proto" GrpcServices="Client"
+			  ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
+	  <Protobuf Include="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\google\api\http.proto" GrpcServices="Client"
+				ProtoRoot="$(PkgMicrosoft_AspNetCore_Grpc_JsonTranscoding)\content\protos\" />
   </ItemGroup>
 
 </Project>

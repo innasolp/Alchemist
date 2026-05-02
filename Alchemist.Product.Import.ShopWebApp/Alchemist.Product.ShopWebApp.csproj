@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>  
+
+  <ItemGroup>
+	<!-- <ProjectReference Include="..\Alchemist.Css.Common\Alchemist.Css.Common.esproj" /> -->
+	<ProjectReference Include="..\Alchemist.DependencyInjection.Common\Alchemist.DependencyInjection.Common.csproj" />
+	<ProjectReference Include="..\Alchemist.Exceptions\Alchemist.Exceptions.csproj" />
+	<!-- <ProjectReference Include="..\Alchemist.Js.Common\Alchemist.Js.Common.esproj" /> -->
+    <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
+	<ProjectReference Include="..\Alchemist.Web.ModelBinder\Alchemist.Web.ModelBinder.csproj" />
+	<ProjectReference Include="..\Alchemist.WebApp.Api.Common\Alchemist.WebApp.Api.Common.csproj" />
+	<ProjectReference Include="..\Shop.API.Client\Shop.API.Client.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+		<PackageReference Include="DependencyInjection.AssemblyExtensions" Version="1.0.0.5" />
+		<PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
+		<PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\js\shop.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\start.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\alchemist_common\confirm.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\alchemist_common\" />
+  </ItemGroup>
+  
+
+	<Target Name="NpmLinkPackage" AfterTargets="Build" Condition="'$(SkipNpmTargets)' != 'true'">
+		<Exec Command="npm link" WorkingDirectory="$(SolutionDir)" />
+	</Target>
+	
+	<Target Name="NpmLinkLibPackageToSolution" BeforeTargets="Build">
+		<Exec Command="npm link alchemist_common alchemist_css_common" WorkingDirectory="$(SolutionDir)" />
+	</Target>
+
+
+	<Target Name="CopyNpmCssToWwwRoot" BeforeTargets="Build">
+		<ItemGroup>
+			<NpmCssFiles Include="..\node_modules\alchemist_css_common\src\*.*" />			
+		</ItemGroup>
+		<Copy SourceFiles="@(NpmCssFiles)" DestinationFolder="wwwroot/css/common/%(RecursiveDir)" />		
+	</Target>
+	
+	<Target Name="CopyNpmLibsToWwwRoot" BeforeTargets="Build">
+		<ItemGroup>
+			<NpmLibFiles Include="..\node_modules\alchemist_common\mvc\*.*" />
+			<JQueryConfirmLibFiles Include="..\node_modules\jquery-confirm\dist\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(NpmLibFiles)" DestinationFolder="wwwroot/lib/alchemist_common/%(RecursiveDir)" />
+		<Copy SourceFiles="@(JQueryConfirmLibFiles)" DestinationFolder="wwwroot/lib/jquery-confirm/dist/%(RecursiveDir)" />
+	</Target>
+</Project>

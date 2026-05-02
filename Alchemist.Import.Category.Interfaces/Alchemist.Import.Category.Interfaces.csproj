@@ -1,19 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;debug libs</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.12.19" />
+    <PackageReference Include="Import.Interfaces" Version="1.0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemist.Import.Interfaces\Alchemist.Import.Interfaces.csproj" />
-    <ProjectReference Include="..\Alchemist.Import.Shop.Interfaces\Alchemist.Import.Shop.Interfaces.csproj" />
+    <ProjectReference Include="..\Alchemist.Import\Alchemist.Import.csproj" />
   </ItemGroup>
 
 </Project>
