@@ -25,8 +25,8 @@ public class PostgresqlTestDbContainer : ITestDbContainer
         var user = builder.Username;
         var password = builder.Password;
 
-var connectionString = _postgresqlContainer.BuildConnectionString(dataBase, port, user, password);
-return connectionString.EndsWith(';') ? connectionString + "Pooling=false;" : connectionString + ";Pooling=false;";
+        var resultConnectionString = _postgresqlContainer.BuildConnectionString(dataBase, port, user, password);
+        return resultConnectionString.EndsWith(';') ? resultConnectionString + "Pooling=false;" : resultConnectionString + ";Pooling=false;";
     }
 
     public Task InitializeAsync()
