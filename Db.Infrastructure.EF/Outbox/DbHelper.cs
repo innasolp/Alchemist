@@ -49,21 +49,21 @@ internal static class DbHelper
             new { p0 = State.Confirmed.ToString(), p1 = State.Failed.ToString() });
     }
 
-    public static async Task UpdateMessageHandlerEntryAsync(this DbContext context, Guid id, string state, string? error = null)
+    public static async Task UpdateMessageHandlerEntryAsync(this DbContext context, Guid id, string state, string? error = null, CancellationToken cancellationToken = default)
     {
         const string sql = @"UPDATE message_handler SET state = @p0, processed_at = @p1, error = @p2, 
             retry_count = (case when @p2 is not null AND @p2 <> '' THEN retry_count+1 ELSE retry_count end)    
             WHERE id = @p3";
 
         await context.Database.ExecuteSqlRawAsync(sql,
-            state,
+            [state,
             DateTime.Now,
             error ?? "",
-            id
+            id], cancellationToken
         );
     }
 
-    public static async Task<IEnumerable<MessageHandlerEntry>> GetEventMessageHandlerAsync(this DbConnection connection, Guid messageId)
+    public static async Task<IEnumerable<MessageHandlerEntry>> GetEventMessageHandlersAsync(this DbConnection connection, Guid messageId)
     {
         const string sql = @"SELECT id, 
                             message_id as MessageId,  
@@ -80,29 +80,28 @@ internal static class DbHelper
     }
 
 
-    public static async Task UpdateEventStateAsync(this DbContext context, Guid id, string state)
+    public static async Task UpdateEventStateAsync(this DbContext context, Guid id, string state, CancellationToken cancellationToken = default)
     {
         string sql = "UPDATE message_entry SET state = @p0, processed_at = @p1 WHERE id = @p2";
 
         int affectedRows = await context.Database.ExecuteSqlRawAsync(sql,
-            state,
+            [state,
             DateTime.Now,
-            id
-        );
+            id], cancellationToken);
     }
 
-    public static async Task DoCleanupAsync(this DbContext context, int hoursToKeepConfirmedMessages)
+    public static async Task DoCleanupAsync(this DbContext context, int hoursToKeepConfirmedMessages, CancellationToken cancellationToken = default)
     {
         string sql = "DELETE FROM message_entry WHERE created_at < @p0 and state = 'Confirmed'";
         DateTime cutoffDateForConfirm = DateTime.Now.AddHours(-hoursToKeepConfirmedMessages);
-        int rowsDeleted = await context.Database.ExecuteSqlRawAsync(sql, cutoffDateForConfirm);
+        int rowsDeleted = await context.Database.ExecuteSqlRawAsync(sql,[ cutoffDateForConfirm], cancellationToken);
 
         sql = "DELETE FROM message_handler WHERE created_at < @p0 and state = 'Confirmed'";
         cutoffDateForConfirm = DateTime.Now.AddHours(-hoursToKeepConfirmedMessages);
-        rowsDeleted = await context.Database.ExecuteSqlRawAsync(sql, cutoffDateForConfirm);
+        rowsDeleted = await context.Database.ExecuteSqlRawAsync(sql, [cutoffDateForConfirm], cancellationToken);
     }
 
-    public static Task ConfirmEventsIfNoProcessingHandlers(this DbContext context)
+    public static Task ConfirmEventsIfNoProcessingHandlers(this DbContext context, CancellationToken cancellationToken = default)
     {
         const string sql = @"UPDATE message_entry m 
                         SET state = 'Confirmed',
@@ -114,10 +113,10 @@ internal static class DbHelper
                         WHERE m.id = m2.id 
                           AND mh.id IS NULL 
                         AND m.state = 'Processing'";
-        return context.Database.ExecuteSqlRawAsync(sql, DateTime.Now);
+        return context.Database.ExecuteSqlRawAsync(sql, [DateTime.Now], cancellationToken);
     }
 
-    public static Task CreateMessageHandlerEntryIfNotExistsAsync(this DbContext dbContext, MessageHandlerEntry messageHandlerEntry)
+    public static Task CreateMessageHandlerEntryIfNotExistsAsync(this DbContext dbContext, MessageHandlerEntry messageHandlerEntry, CancellationToken cancellationToken = default)
     {
         return dbContext.Database.ExecuteSqlRawAsync(
         @"INSERT INTO message_handler (id, message_id, handler_type) 
@@ -125,6 +124,6 @@ internal static class DbHelper
             WHERE NOT EXISTS ( 
                 SELECT 1 FROM message_handler 
                 WHERE message_id = @p1 AND handler_type = @p2);",
-        messageHandlerEntry.Id, messageHandlerEntry.MessageId, messageHandlerEntry.HandlerType);
+        [messageHandlerEntry.Id, messageHandlerEntry.MessageId, messageHandlerEntry.HandlerType], cancellationToken);
     }
 }

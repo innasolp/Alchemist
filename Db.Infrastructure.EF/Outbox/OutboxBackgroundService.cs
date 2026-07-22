@@ -49,9 +49,9 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
             using var processingTransaction = await context.Database.BeginTransactionAsync(stoppingToken);
             try
             {
-                await context.ConfirmEventsIfNoProcessingHandlers();
+                await context.ConfirmEventsIfNoProcessingHandlers(stoppingToken);
 
-                await context.DoCleanupAsync(_hoursToKeepConfirmedMessages);
+                await context.DoCleanupAsync(_hoursToKeepConfirmedMessages, stoppingToken);
 
                 await processingTransaction.CommitAsync(stoppingToken);
             }
@@ -76,12 +76,12 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
 
         var handlers = scope.ServiceProvider.GetServices(handlerType).ToList();
 
-        var messageHandlers = await dbConnection.GetEventMessageHandlerAsync(messageEntry.Id);
+        var messageHandlers = await dbConnection.GetEventMessageHandlersAsync(messageEntry.Id);
 
         if (handlers.Count > 0)
             foreach (var handler in handlers)
             {
-                var messageHandler = messageHandlers.FirstOrDefault(mh => mh.HandlerType == handler.GetType().Name);
+                var messageHandler = messageHandlers.FirstOrDefault(mh => mh.HandlerType == handler.GetType().FullName);
 
                 if (messageHandler == null || (messageHandler.State == State.Failed.ToString() && messageHandler.RetryCount < MaxHandleRetryCount))
                 {
@@ -91,13 +91,13 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
                         await dbContext.CreateMessageHandlerEntryIfNotExistsAsync(
                         new MessageHandlerEntry { Id = messageHandlerId,
                             MessageId = messageEntry.Id, 
-                            HandlerType = handler.GetType().FullName });
+                            HandlerType = handler.GetType().FullName }, cancellationToken);
 
                     await HandleMessage(messageEntry, entity, eventType, handlerType, handler, messageHandlerId, cancellationToken);
                 }
             }
         else
-            await dbContext.UpdateEventStateAsync(messageEntry.Id, State.Confirmed.ToString());
+            await dbContext.UpdateEventStateAsync(messageEntry.Id, State.Confirmed.ToString(), cancellationToken);
     }
 
     private async Task HandleMessage(MessageEntry messageEntry, object? entity, Type eventType, Type handlerType, object? handler, Guid messageHandlerId, CancellationToken cancellationToken)
@@ -119,20 +119,20 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
             await (Task)handle!;
 
             var state = handler is ICallback<string> ? State.Processing.ToString() : State.Confirmed.ToString();
-            await UpdateMessageHandlerEntryAsync(messageHandlerId, state);
+            await UpdateMessageHandlerEntryAsync(messageHandlerId, state, cancellationToken : cancellationToken);
         }
         catch (Exception ex)
         {
-            await UpdateMessageHandlerEntryAsync(messageHandlerId, State.Failed.ToString(), ex.Message);
+            await UpdateMessageHandlerEntryAsync(messageHandlerId, State.Failed.ToString(), ex.Message, cancellationToken);
         }
     }
 
-    private async Task UpdateMessageHandlerEntryAsync(Guid id, string state, string? error = null)
+    private async Task UpdateMessageHandlerEntryAsync(Guid id, string state, string? error = null, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<TDbContext>();
 
-        await context.UpdateMessageHandlerEntryAsync(id, state, error);
+        await context.UpdateMessageHandlerEntryAsync(id, state, error, cancellationToken);
     }
 
     private async Task EventHandleCallback(object? sender, CallbackAsyncEventArgs<string> e)
@@ -142,7 +142,7 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
             var state = e.Exception == null ? State.Confirmed.ToString() : State.Failed.ToString();
             await UpdateMessageHandlerEntryAsync(Guid.Parse(e.Value),
                 state,
-                e.Exception?.Message);
+                e.Exception?.Message, e.CancellationToken);
         }
         catch (Exception ex)
         {

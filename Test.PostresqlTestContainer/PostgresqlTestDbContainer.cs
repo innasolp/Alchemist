@@ -25,7 +25,8 @@ public class PostgresqlTestDbContainer : ITestDbContainer
         var user = builder.Username;
         var password = builder.Password;
 
-        return _postgresqlContainer.BuildConnectionString(dataBase, port, user, password);
+        var resultConnectionString = _postgresqlContainer.BuildConnectionString(dataBase, port, user, password);
+        return resultConnectionString.EndsWith(';') ? resultConnectionString + "Pooling=false;" : resultConnectionString + ";Pooling=false;";
     }
 
     public Task InitializeAsync()
@@ -38,6 +39,8 @@ public class PostgresqlTestDbContainer : ITestDbContainer
 
     async Task IAsyncLifetime.DisposeAsync()
     {
+        NpgsqlConnection.ClearAllPools();
+
         if (_postgresqlContainer != null)
         {
             await _postgresqlContainer.StopAsync();
