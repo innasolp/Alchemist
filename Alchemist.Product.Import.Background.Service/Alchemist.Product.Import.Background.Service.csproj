@@ -20,7 +20,7 @@
     <PackageReference Include="Serilog.HangfireConsoleContextSink" Version="1.0.0.1" />
     <PackageReference Include="Json.FileExtensions" Version="1.0.0" />
     <PackageReference Include="Message.Interfaces" Version="1.0.0.4" />
-	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.9" />
+	<PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.10" />
 	<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.3" />
 	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
 	  <PackageReference Include="FaceIT.Hangfire.Tags" Version="1.9.0" />

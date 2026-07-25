@@ -20,6 +20,7 @@ using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
 using Test.PostresqlTestContainer;
+using Testcontainers.Redis;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
@@ -40,6 +41,8 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     private readonly TestWebAppKestrelFactory<BrowserServiceProgramm> _browserServiceFactory;
     
     private readonly IMessageTestHost _importItemsHost = new RabbitMQTestHost();
+
+    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:7.4-alpine").Build();
 
     private IConfiguration? _configuration;
 
@@ -121,6 +124,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         services.SetSignalRHubTestSender(BeautyAndHealth.ImportItemHandler.ServiceKeys.ImportProductMessageSenderKey, _signalRApplicationFactory.Server, "import");
         services.SetSignalRHubTestSender(Category.ImportItemHandler.ServiceKeys.ImportCategoryMessageSenderKey, _signalRApplicationFactory.Server, "import");
         services.SetSignalRHubTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
+        services.SetSignalRHubTestAckReceiver(ShopImportWorkerKeys.AckEventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
         services.SetSignalRHubTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
     }
 
@@ -129,6 +133,8 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         await _shopAPIWebAppFactory.InitializeAsync();
         
         await _settingsAPIWebAppFactory.InitializeAsync();
+
+        await _redisContainer.StartAsync();
     }
 
     async Task IAsyncLifetime.DisposeAsync()
@@ -136,5 +142,14 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         await (_settingsAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
 
         await (_shopAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
+
+        await _redisContainer.DisposeAsync();
+    }
+
+    protected override void ConfigureApp(WebHostBuilderContext context, IConfigurationBuilder config)
+    {
+        context.Configuration["ConnectionStrings:ServicesStoreRedis"] = _redisContainer.GetConnectionString(); 
+
+        base.ConfigureApp(context, config);
     }
 }
