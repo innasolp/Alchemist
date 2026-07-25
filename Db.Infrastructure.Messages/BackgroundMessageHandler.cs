@@ -17,7 +17,7 @@ internal class BackgroundMessageHandler<T, TEvent>(IMessageSender messageSender,
         try
         {
             if (!_messageSender.IsConnected)
-                await _messageSender.Start();
+                await _messageSender.Start(cancellationToken);
 
             await _messageSender.Send(@event, eventName, cancellationToken);
 

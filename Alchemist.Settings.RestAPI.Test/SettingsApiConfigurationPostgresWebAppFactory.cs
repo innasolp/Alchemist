@@ -60,7 +60,7 @@ public class SettingsApiConfigurationPostgresWebAppFactory
     {
         if (!_signalRInjected)
         {
-            services.SetSignalRHubTestSender(_signalRApplicationFactory.Server, ["events"]);
+            services.SetSignalRHubTestAckSender(_signalRApplicationFactory.Server, ["events"]);
             _signalRInjected = true;
         }
 

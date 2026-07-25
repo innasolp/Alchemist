@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Data;
 using System.Data.Common;
 using System.Text.Json;
 
@@ -24,43 +25,57 @@ internal class OutboxBackgroundService<TDbContext>(ILogger<OutboxBackgroundServi
         {
             using var scope = _serviceScopeFactory.CreateScope();
             using var context = scope.ServiceProvider.GetRequiredService<TDbContext>();
+            
             using var connection = context.Database.GetDbConnection();
 
-
-            IEnumerable<MessageEntry> needInHandlingEvents = await connection.GetNeedForHandleEvents();
-
-            foreach (var @event in needInHandlingEvents)
+            try
             {
-                using var handleTransaction = await context.Database.BeginTransactionAsync(stoppingToken);
+                if (connection.State != ConnectionState.Open)
+                {
+                    await connection.OpenAsync(stoppingToken);
+                }
+
+                IEnumerable<MessageEntry> needInHandlingEvents = await connection.GetNeedForHandleEvents();
+
+                foreach (var @event in needInHandlingEvents)
+                {
+                    using var handleTransaction = await context.Database.BeginTransactionAsync(stoppingToken);
+                    try
+                    {
+                        await ProcessMessageAsync(scope, context, connection, @event, stoppingToken);
+                        await context.UpdateEventStateAsync(@event.Id, State.Processing.ToString(), stoppingToken);
+                        await handleTransaction.CommitAsync(stoppingToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Handling message failed");
+
+                        await handleTransaction.RollbackAsync(stoppingToken);
+                    }
+                }
+
+                using var processingTransaction = await context.Database.BeginTransactionAsync(stoppingToken);
                 try
                 {
-                    await ProcessMessageAsync(scope, context, connection, @event, stoppingToken);
-                    await context.UpdateEventStateAsync(@event.Id, State.Processing.ToString());
-                    await handleTransaction.CommitAsync(stoppingToken);
+                    await context.ConfirmEventsIfNoProcessingHandlers(stoppingToken);
+
+                    await context.DoCleanupAsync(_hoursToKeepConfirmedMessages, stoppingToken);
+
+                    await processingTransaction.CommitAsync(stoppingToken);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Handling message failed");
+                    _logger.LogError(ex, "Processing message statuses failed");
 
-                    await handleTransaction.RollbackAsync(stoppingToken);
+                    await processingTransaction.RollbackAsync(stoppingToken);
                 }
             }
-
-            using var processingTransaction = await context.Database.BeginTransactionAsync(stoppingToken);
-            try
+            catch(Exception ex)
             {
-                await context.ConfirmEventsIfNoProcessingHandlers(stoppingToken);
-
-                await context.DoCleanupAsync(_hoursToKeepConfirmedMessages, stoppingToken);
-
-                await processingTransaction.CommitAsync(stoppingToken);
+                _logger.LogError(ex, "Outbox background error");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Processing message statuses failed");
 
-                await processingTransaction.RollbackAsync(stoppingToken);
-            }
+            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
 

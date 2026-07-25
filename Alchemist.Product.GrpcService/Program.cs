@@ -2,11 +2,10 @@ using Alchemist.Common;
 using Alchemist.Log.Extensions;
 using Alchemist.Product.Data.Postgresql;
 using Alchemist.Product.GrpcService.Services;
-using Alchemist.Product.Module;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
 using Mapster;
-using Mediator.Module.EF;
+using Product.Data.Infrastructure.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -38,7 +37,7 @@ builder.Configuration.AddCustomConfigurationRule<CustomJsonConfigurationSource, 
 
 builder.Services.AddAlchemyPostgresContextFactory((sp,options) => options.UseNpgsql(builder.Configuration.GetConnectionString("DbContext2")));
 
-builder.Host.AddMediatorInfrastructure<ProductModule>();
+builder.Host.AddProductInfrastructure();
 
 builder.Services.AddGrpc(options =>
 {

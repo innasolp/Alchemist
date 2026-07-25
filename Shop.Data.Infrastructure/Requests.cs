@@ -1,6 +1,5 @@
 using Alchemist.Product.Data;
 using Db.Infrastructure;
-using System.Collections.Generic;
 
 namespace Shop.Data.Infrastructure;
 
