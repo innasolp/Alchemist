@@ -57,7 +57,7 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         await childJobStorage.CreateJobEntryAsync(new JobEntry { JobId = parentJobId,
             CreatedAt = DateTime.Now,
             Status = JobStatus.Enqueued,
-            ExecutionId = parentExecutionId });
+            ExecutionId = parentExecutionId }, cancellationToken);
 
         foreach (var childJob in childJobs)
         {
@@ -73,8 +73,7 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
 
             setJobIdAction?.Invoke(childJob, childJobId);
 
-            await childJobStorage.CreateJobEntryAsync(
-                new JobEntry { JobId = childJobId, ParentJobId = parentJobId, Status = 0, ExecutionId = childExecutionId });
+            await childJobStorage.CreateJobEntryAsync(new JobEntry { JobId = childJobId, ParentJobId = parentJobId, Status = 0, ExecutionId = childExecutionId }, cancellationToken);
         }
     }
 
@@ -104,12 +103,12 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        var parentJobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(parentExecutionId);        
+        var parentJobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(parentExecutionId, cancellationToken);        
 
         await childJobStorage.CreateJobEntryAsync(new JobEntry { JobId = jobId,
             ParentJobId = parentJobEntry?.JobId, 
             Status = JobStatus.Enqueued, 
-            ExecutionId = executionId });
+            ExecutionId = executionId }, cancellationToken);
     }
 
 
@@ -152,7 +151,7 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        var coreJobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(coreExecutionId) 
+        var coreJobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(coreExecutionId, cancellationToken)
             ?? throw new InvalidOperationException($"Job entry with id {coreExecutionId} not found.");
         
         var coreExecutor = _jobExecutorRegistry.Get(jobExecuteOptions :
@@ -164,17 +163,17 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         {
             var jobStatus = GetCurrentJobStatus(newCoreJobId);
             if(jobStatus != JobStatus.Enqueued)
-                await childJobStorage.UpdateJobEntryStateAsync(newCoreJobId, jobStatus, DateTime.Now);
+                await childJobStorage.UpdateJobEntryStateAsync(newCoreJobId, jobStatus, DateTime.Now, cancellationToken);
         }
         else
         {
-            var childJobIds = (await childJobStorage.GetJobIdsByExecutionIdsAsync(childExecutionIds)).Select(j=>j.JobId);
+            var childJobIds = (await childJobStorage.GetJobIdsByExecutionIdsAsync(childExecutionIds, cancellationToken)).Select(j=>j.JobId);
             await SetNewParentJob(coreJobEntry, childJobIds, newCoreJobId, childJobStorage);
         }
 
         if (jobExecuteOptions?.IdleTimeInSeconds > 0)
             await childJobStorage.CreateParentJobIdleSettingsAsync(new ParentJobIdleSettings
-            { JobId = newCoreJobId, IdleTimeInSeconds = jobExecuteOptions.IdleTimeInSeconds.Value });
+            { JobId = newCoreJobId, IdleTimeInSeconds = jobExecuteOptions.IdleTimeInSeconds.Value }, cancellationToken);
     }
 
     private static async Task SetNewParentJob(JobEntry currentParentJobEntry, IEnumerable<string> childJobIds, string newParentJobId, IAggregateJobStorage childJobStorage)
@@ -221,10 +220,10 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        var coreJobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(coreExecutionId) 
+        var coreJobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(coreExecutionId, cancellationToken)
             ?? throw new InvalidOperationException($"Job with execution id {coreExecutionId} not found.");
 
-        var childJobIds = (await childJobStorage.GetJobIdsByExecutionIdsAsync(childExecutionIds)).Select(j=>j.JobId);
+        var childJobIds = (await childJobStorage.GetJobIdsByExecutionIdsAsync(childExecutionIds, cancellationToken)).Select(j=>j.JobId);
 
         foreach (var jobId in childJobIds)
         {

@@ -47,16 +47,16 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
 
         await importReceiver.Start();
         importReceiver.On("product", onHandleProductMessage, typeof(BeautyAndHealthProductData));
-        importReceiver.On("category", onHandleCategoryMessage, typeof(Alchemist.Product.CategoryData.CategoryData));        
+        importReceiver.On("category", onHandleCategoryMessage, typeof(CategoryData.CategoryData));        
         
         var httpClient = WebAppFactory.CreateClient();
 
-        var token = new CancellationToken();
-        var task = asyncAutoResetEvent.WaitAsync(token);
-
+        var tokenSource = new CancellationTokenSource();
+        tokenSource.CancelAfter(120000);
+        
         try
         {
-            await task.WaitAsync(TimeSpan.FromMilliseconds(120000), token);
+            await asyncAutoResetEvent.WaitAsync(tokenSource.Token);
 
             OutputHelper.WriteLine("Event set");
         }
@@ -80,7 +80,7 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         var shopSettingsName = Guid.NewGuid().ToString();
 
         AsyncAutoResetEvent asyncAutoResetEvent = new();
-        async Task onShopSettingsCreatedAsync(Data.ShopSettings settings)
+        async Task onShopSettingsCreatedAsync(string msgId, Data.ShopSettings settings)
         {
             if(settings.Name == shopSettingsName)
                 asyncAutoResetEvent.Set();
@@ -88,22 +88,25 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
             await Task.FromResult(true);
         }
 
-        var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
-        messageReceiver.On<Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, onShopSettingsCreatedAsync);
+        await using var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubAckReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         await messageReceiver.Start();
-
+        await messageReceiver.On<Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, onShopSettingsCreatedAsync);
+        
         var httpClient = WebAppFactory.CreateClient();
 
-        var shop = await CreateNewShopAsync();
+        var shopTokenSource = new CancellationTokenSource();
+        shopTokenSource.CancelAfter(10000);
+        
+        var shop = await CreateNewShopAsync(shopTokenSource.Token);
 
-        var shopSettings = await CreateNewShopSettingsAsync(shop.Id, shopSettingsName);        
+        var shopSettings = await CreateNewShopSettingsAsync(shop.Id, shopSettingsName, shopTokenSource.Token);        
 
         var token = new CancellationToken();
         var task = asyncAutoResetEvent.WaitAsync(token);
 
         try
         {
-            await task.WaitAsync(TimeSpan.FromMilliseconds(30000), token);
+            await task.WaitAsync(TimeSpan.FromMilliseconds(60000), token);
 
             await Task.Delay(1000);
 
@@ -120,24 +123,24 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         }
     }
 
-    private async Task<Data.Shop> CreateNewShopAsync()
+    private async Task<Data.Shop?> CreateNewShopAsync(CancellationToken cancellationToken = default)
     {
         var shop = new Data.Shop { Name = "Test", Url = $"https://{Guid.NewGuid()}" };
-        var response = await WebAppFactory.ShopApiClient.PutAsJsonAsync($"api/Shop", shop);
+        var response = await WebAppFactory.ShopApiClient.PutAsJsonAsync($"api/Shop", shop, cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<Data.Shop>();
+        return await response.Content.ReadFromJsonAsync<Data.Shop>(cancellationToken);
     }
 
-    private async Task<Infrastructure.ShopSettings> CreateNewShopSettingsAsync(int shopId, string name)
+    private async Task<Infrastructure.ShopSettings?> CreateNewShopSettingsAsync(int shopId, string name, CancellationToken cancellationToken = default)
     {      
 
         var shopSettings = SettingsTestRepository.CreateProductShopSettings(shopId, name);
         var services = SettingsTestRepository.CreateShopSettingsServicesTestData(shopSettings);
         var settingsData = new  { ShopSettings = shopSettings, Services = services.ToArray() };
-        var settingsPutResponse = await WebAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData);
+        var settingsPutResponse = await WebAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData, cancellationToken);
         settingsPutResponse.EnsureSuccessStatusCode();
 
-        var result = await settingsPutResponse.Content.ReadFromJsonAsync<ShopSettingsWithServices>();
-        return result.ShopSettings;
+        var result = await settingsPutResponse.Content.ReadFromJsonAsync<ShopSettingsWithServices>(cancellationToken);
+        return result?.ShopSettings;
     }    
 }

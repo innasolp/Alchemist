@@ -13,6 +13,13 @@ public static class ImportBackgroundDependencyInjectionExtensions
         return services.AddKeyedSignalRHubMessageReceiver(signalRUrl, key);
     }
 
+    public static IServiceCollection AddShopImportDataAckReceiver(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)
+    {
+        var signalRUrl = configuration.GetSection(signalRUrlSectionName).Get<string>();
+
+        return services.AddKeyedSignalRMessageHubAcknowledgefulReceiver(signalRUrl, key);
+    }
+
     public static IServiceCollection AddSignalRMessageSender(this IServiceCollection services, IConfiguration configuration, string signalRUrlSectionName, object? key)
     {
         var signalRUrl = configuration.GetSection(signalRUrlSectionName).Get<string>();
