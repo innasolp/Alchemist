@@ -15,7 +15,9 @@ public class SetProductComponentCommandHandler(AlchemyContext context, IUnitOfWo
 
         if (existed == null)
         {
-            return await _context.Create(new ProductComponent { ComponentId = request.Entity.ComponentId , ProductId = request.Entity.ProductId } 
+            return await _context.Create(new ProductComponent { ComponentId = request.Entity.ComponentId 
+                , ProductId = request.Entity.ProductId
+                , SequalNumber = request.Entity.SequalNumber } 
             , cancellationToken);
         }
         else if (existed.SequalNumber != request.Entity.SequalNumber)

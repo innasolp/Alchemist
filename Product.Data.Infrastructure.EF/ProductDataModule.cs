@@ -29,8 +29,6 @@ public class ProductDataModule : Module
         builder.RegisterGeneric(typeof(UpdateCommandHandler<>)).As(typeof(ICommandHandler<>))
             .AsImplementedInterfaces().InstancePerLifetimeScope();
 
-        builder.RegisterGeneric(typeof(GetByIdRequestHandler<>)).As(typeof(IRequestHandler<,>)).InstancePerLifetimeScope();
-
         builder.RegisterGeneric(typeof(FindByNameRequestHandler<>)).As(typeof(IRequestHandler<,>)).InstancePerLifetimeScope();
 
         builder.RegisterAssemblyTypes(typeof(ProductDataModule).Assembly)

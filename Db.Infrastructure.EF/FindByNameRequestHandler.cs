@@ -12,7 +12,7 @@ public class FindByNameRequestHandler<T>(DbContext dbContext) : IRequestHandler<
         var formattedName = request.Name.Trim().ToUpper();
 
         //todo stringcomparision
-        var entities = await dbContext.Set<T>().Where(e => e.Name.Trim().ToUpper() == formattedName).ToListAsync();
+        var entities = await dbContext.Set<T>().Where(e => e.Name.Trim().ToUpper() == formattedName).ToListAsync(cancellationToken: cancellationToken);
 
         return entities.Count > 1
             ? throw new EntityWarningException($"multiple entities with name {request.Name}", entities.FirstOrDefault())
