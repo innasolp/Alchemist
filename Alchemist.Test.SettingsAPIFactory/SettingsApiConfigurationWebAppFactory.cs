@@ -53,7 +53,7 @@ public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawne
     {
         base.ConfigureWebHostBuilderContext(context, services);
 
-        services.SetSignalRHubTestSender(_signalRServer, ["events"]);
+        services.SetSignalRHubTestAckSender(_signalRServer, ["events"]);
 
         FixtureLoggingContext.ConfigureServices(services);
     }

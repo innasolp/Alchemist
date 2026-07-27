@@ -60,7 +60,7 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
         }
         await using var receiver = SignalRHelper.CreateTestSignalRMessageHubAckReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         await receiver.Start();
-        await receiver.On<Product.Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);       
+        await receiver.On<Product.Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);
 
         var productShopSettings = TestRepository.CreateProductShopSettings(WebAppFactory.Shops[1].Id, WebAppFactory.Shops[1].Name);
 
@@ -82,7 +82,7 @@ public class SettingsAPITest(SettingsApiConfigurationPostgresWebAppFactory webAp
 
             response.EnsureSuccessStatusCode();
 
-            cancellationTokenSource.CancelAfter(4000);
+            cancellationTokenSource.CancelAfter(10000);
 
             if (!shopSettingsCreated)
                 await autoResetEvent.WaitAsync(cancellationTokenSource.Token);

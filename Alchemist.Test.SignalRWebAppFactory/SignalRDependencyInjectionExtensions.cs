@@ -134,4 +134,9 @@ public static class SignalRDependencyInjectionExtensions
     {
         return services.SetSignalRTestReceiver(key, signalRServer, hub, (services, url, handler, key) => services.AddKeyedSignalRHubMessageReceiver(url, handler, key));
     }
+
+    public static IServiceCollection SetSignalRHubTestAckReceiver(this IServiceCollection services, object key, TestServer signalRServer, string hub)
+    {
+        return services.SetSignalRTestReceiver(key, signalRServer, hub, (services, url, handler, key) => services.AddKeyedSignalRMessageHubAcknowledgefulReceiver(url, handler, key));
+    }
 }

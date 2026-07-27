@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Data.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alchemist.Product.Data;
 

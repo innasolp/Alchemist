@@ -1,4 +1,5 @@
-﻿using Alchemist.Product.Data.Interceptors;
+﻿using Data.Extensions;
+using Data.Extensions.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
