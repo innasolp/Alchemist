@@ -205,7 +205,8 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
             ? JobStatus.Enqueued
             : state == ProcessingState.StateName
             ? JobStatus.Processing
-            : state == SucceededState.StateName ? JobStatus.Completed : JobStatus.Deleted;
+            : state == SucceededState.StateName ? JobStatus.Completed 
+            : state == DeletedState.StateName ? JobStatus.Deleted : JobStatus.Failed;
     }
 
     public async Task StopWithFailedState(string coreExecutionId, IEnumerable<string> childExecutionIds, 

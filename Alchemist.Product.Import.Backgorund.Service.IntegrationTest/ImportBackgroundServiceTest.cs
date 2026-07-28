@@ -11,7 +11,7 @@ namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
 public class ImportBackgroundServiceTestFixtureWebAppFactory : ImportBackgroundServiceWebAppFactory
 {
-    public ImportBackgroundServiceTestFixtureWebAppFactory() : base("serviceTestDb", 8050, 8051, 8200, 8201, 8302, 8303)
+    public ImportBackgroundServiceTestFixtureWebAppFactory() : base(8138, 8139, "serviceTestDb", 8050, 8051, 8200, 8201, 8302, 8303)
     {
     }
 }
