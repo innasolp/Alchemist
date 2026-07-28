@@ -4,6 +4,12 @@ namespace Hangfire.AggregateJobs;
 
 public interface IAggregateJobStorage
 {
+    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+
+    Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+
+    Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
+
     Task<IEnumerable<string>> GetChildJobIdsForProcessing(int childJobCountPerParent, int freeSlots, CancellationToken cancellationToken = default);
 
     Task CreateJobEntryAsync(JobEntry childJobEntry, CancellationToken cancellationToken = default);

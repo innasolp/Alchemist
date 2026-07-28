@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Immutable;
 
 namespace Hangfire.AggregateJobs.ChildJobStorages;
@@ -6,6 +7,57 @@ namespace Hangfire.AggregateJobs.ChildJobStorages;
 internal class EFAggregateJobStorage(AggregateJobDbContext dbContext) : IAggregateJobStorage
 {
     private readonly AggregateJobDbContext _dbContext = dbContext;
+
+    private IDbContextTransaction? _currentTransaction;
+
+    public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_currentTransaction != null) return;
+
+        _currentTransaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+    }
+
+    public virtual async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (_currentTransaction != null)
+            {
+                await _currentTransaction.CommitAsync(cancellationToken);
+
+                DisposeTransaction();
+            }
+        }
+        catch
+        {
+            await RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+        finally
+        {
+            DisposeTransaction();
+        }
+    }
+
+    public virtual async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_currentTransaction != null)
+        {
+            await _currentTransaction.RollbackAsync(cancellationToken);
+            DisposeTransaction();
+        }
+    }
+
+    public void Dispose()
+    {
+        DisposeTransaction();
+    }
+
+    private void DisposeTransaction()
+    {
+        _currentTransaction?.Dispose();
+        _currentTransaction = null;
+    }
 
     public async Task CreateJobEntryAsync(JobEntry childJobEntry, CancellationToken cancellationToken = default)
     {
