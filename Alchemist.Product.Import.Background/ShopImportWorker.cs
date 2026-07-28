@@ -44,13 +44,20 @@ public class ShopImportWorker : BackgroundService
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (!_ackEventMessageReceiver.IsConnected)
-            await _ackEventMessageReceiver.Start(cancellationToken);
+        try
+        {
+            if (!_ackEventMessageReceiver.IsConnected)
+                await _ackEventMessageReceiver.Start(cancellationToken);
 
-        await _ackEventMessageReceiver.On<Settings.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync, cancellationToken);
+            await _ackEventMessageReceiver.On<Settings.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to connect import service to ack events messaging host: {Message}", ex.Message);
+        }
 
         await base.StartAsync(cancellationToken);
-    }
+    }   
 
     private Task OnServiceStarted(ServiceStartedMessage serviceStartedMessage)
     {
@@ -242,6 +249,15 @@ public class ShopImportWorker : BackgroundService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Error stopping event message sender: {Message}", ex.Message);
+        }
+
+        try
+        {
+            await _ackEventMessageReceiver.Stop(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error stopping ack event message receiver: {Message}", ex.Message);
         }
 
         try

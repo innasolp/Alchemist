@@ -157,9 +157,14 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<Imp
 
         await (_shopAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
 
+        await _childJobDbInterceptor.DisposeAsync();
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
         await _redisContainer.DisposeAsync();
 
-        await _childJobDbInterceptor.DisposeAsync();
+        await base.DisposeAsync();
     }
 
     protected override void ConfigureApp(WebHostBuilderContext context, IConfigurationBuilder config)

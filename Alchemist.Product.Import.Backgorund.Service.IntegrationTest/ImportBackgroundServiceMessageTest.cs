@@ -13,7 +13,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
 {    
     private async Task<ImportBackgroundServiceWebAppFactory> CreateWebAppFactoryAsync(int[] ports)
     {
-        if (ports.Length < 6)
+        if (ports.Length < 8)
             throw new Exception($"No 8 ports in range");
         var webAppFactory = new ImportBackgroundServiceWebAppFactory(ports[0], ports[1],"serviceMessageTestDb", 
              ports[2], ports[3], ports[4], ports[5], ports[6], ports[7]);
