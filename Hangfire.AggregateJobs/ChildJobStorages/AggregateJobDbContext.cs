@@ -2,7 +2,7 @@
 
 namespace Hangfire.AggregateJobs.ChildJobStorages;
 
-internal class AggregateJobDbContext : DbContext
+public class AggregateJobDbContext : DbContext
 {
     public AggregateJobDbContext()
     {

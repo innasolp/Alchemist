@@ -1,6 +1,4 @@
 ﻿using Alchemist.Product.Entities;
-using Alchemist.Product.Interfaces;
-using Shop.Interfaces;
 
 namespace Alchemist.Product.BeautyAndHealth;
 

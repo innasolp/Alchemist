@@ -45,13 +45,15 @@ public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEn
     {
         builder.UseEnvironment("Testing");
 
-        builder.ConfigureAppConfiguration((context, config) =>
-        {
-            _configureAppConfiguration?.Invoke(context, config);
-        });
+        builder.ConfigureAppConfiguration(ConfigureApp);
 
         base.ConfigureWebHost(builder);
 
-        builder.ConfigureServices((context, services)=>ConfigureWebHostBuilderContext(context, services));
+        builder.ConfigureServices(ConfigureWebHostBuilderContext);
+    }
+
+    protected virtual void ConfigureApp(WebHostBuilderContext context, IConfigurationBuilder config)
+    {
+        _configureAppConfiguration?.Invoke(context, config);
     }
 }

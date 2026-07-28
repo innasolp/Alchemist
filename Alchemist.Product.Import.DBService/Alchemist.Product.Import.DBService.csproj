@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
-    <PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.8" />
+    <PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.10" />
 	  <PackageReference Include="GrpcExtensions.Client.Interceptors" Version="1.0.0" />
 	  <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
 	  <PackageReference Include="Serilog.Loggers" Version="1.0.0.4" />

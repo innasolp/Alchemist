@@ -13,10 +13,10 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
 {    
     private async Task<ImportBackgroundServiceWebAppFactory> CreateWebAppFactoryAsync(int[] ports)
     {
-        if (ports.Length < 6)
-            throw new Exception($"No 6 ports in range");
-        var webAppFactory = new ImportBackgroundServiceWebAppFactory("serviceMessageTestDb", 
-            ports[0], ports[1], ports[2], ports[3], ports[4], ports[5]);
+        if (ports.Length < 8)
+            throw new Exception($"No 8 ports in range");
+        var webAppFactory = new ImportBackgroundServiceWebAppFactory(ports[0], ports[1],"serviceMessageTestDb", 
+             ports[2], ports[3], ports[4], ports[5], ports[6], ports[7]);
 
         await webAppFactory.InitializeAsync();
 
@@ -37,7 +37,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
     [Fact]
     public async Task SendMessageServiceCreatedSuccess()
     {
-        var WebAppFactory = await CreateWebAppFactoryAsync([8052, 8053, 8202, 8203,8304,8305]);
+        var WebAppFactory = await CreateWebAppFactoryAsync([8132, 8133, 8052, 8053, 8202, 8203,8304,8305]);
 
         var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
         var serviceCreatedAutoResetEvent = new AsyncAutoResetEvent();
@@ -46,7 +46,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
 
         Func<ServiceMessage, Task> serviceCreatedAsync = async (serviceMessage) =>
         {
-            await OnServiceCreatedAsync(serviceMessage, semaphoreSlim, guids);
+            await OnServiceAsync(serviceMessage, semaphoreSlim, guids);
             serviceCreatedAutoResetEvent.Set();
         };
         messageReceiver.On(Messages.Common.Messages.ServiceCreated, serviceCreatedAsync);
@@ -77,7 +77,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             await messageReceiver.Stop();            
         }
     }
-    private async Task OnServiceCreatedAsync(ServiceMessage serviceMessage, SemaphoreSlim semaphoreSlim, BlockingCollection<Guid> guids,
+    private async Task OnServiceAsync(ServiceMessage serviceMessage, SemaphoreSlim semaphoreSlim, BlockingCollection<Guid> guids,
         CancellationToken cancellationToken = default)
     {
         await semaphoreSlim.WaitAsync(cancellationToken);
@@ -89,7 +89,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
     [Fact]
     public async Task ReceiveMessageServiceStopSuccess()
     {
-        var webAppFactory = await CreateWebAppFactoryAsync([8054, 8055, 8204, 8205, 8306, 8307]);
+        var webAppFactory = await CreateWebAppFactoryAsync([8134, 8135, 8054, 8055, 8204, 8205, 8306, 8307]);
 
         var serviceGuids = new BlockingCollection<Guid>();
         var firstServiceCreatedAutoResetEvent = new AsyncAutoResetEvent(false);
@@ -99,7 +99,7 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         async Task serviceCreatedAsync(ServiceMessage serviceMessage)
         {
-            await OnServiceCreatedAsync(serviceMessage, semaphoreSlim, serviceGuids);
+            await OnServiceAsync(serviceMessage, semaphoreSlim, serviceGuids);
             firstServiceCreatedAutoResetEvent.Set();
         }
 
@@ -156,6 +156,50 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper)
             await testMessageSender.Stop();
 
             ClearWebAppFactory(webAppFactory);
+        }
+    }
+
+    [Fact]
+    public async Task SendMessageServiceStartedSuccess()
+    {
+        var WebAppFactory = await CreateWebAppFactoryAsync([8136, 8137, 8056, 8057, 8206, 8207, 8308, 8309]);
+
+        var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
+        var serviceStartedAutoResetEvent = new AsyncAutoResetEvent();
+        var guids = new BlockingCollection<Guid>();
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
+
+        Func<ServiceMessage, Task> serviceStartedAsync = async (serviceMessage) =>
+        {
+            await OnServiceAsync(serviceMessage, semaphoreSlim, guids);
+            serviceStartedAutoResetEvent.Set();
+        };
+        messageReceiver.On(Messages.Common.Messages.ServiceStarted, serviceStartedAsync);
+        await messageReceiver.Start();
+
+        try
+        {
+            var httpClient = WebAppFactory.CreateClient();
+            OutputHelper.WriteLine("Service started.");
+
+            if (guids.Count == 0)
+            {
+                var waitServiceStartingTask = serviceStartedAutoResetEvent.WaitAsync();
+                await waitServiceStartingTask.WaitAsync(TimeSpan.FromMilliseconds(30000));
+                Assert.NotEmpty(guids);
+            }
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
+        finally
+        {
+            ClearWebAppFactory(WebAppFactory);
+            await messageReceiver.Stop();
         }
     }
 }

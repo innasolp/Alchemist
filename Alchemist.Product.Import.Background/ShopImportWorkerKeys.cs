@@ -4,6 +4,8 @@ public static class ShopImportWorkerKeys
 {
     public const string EventMessageReceiverKey = "EventMessageReceiver";
 
+    public const string AckEventMessageReceiverKey = "AckEventMessageReceiver";
+
     public const string EventMessageSenderKey = "EventMessageSender";
 
     public const string InitImportSettings = "InitImportSettings";

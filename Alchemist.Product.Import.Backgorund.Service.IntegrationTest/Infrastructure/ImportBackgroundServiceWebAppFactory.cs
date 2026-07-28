@@ -3,6 +3,7 @@ using Alchemist.Import.Settings;
 using Alchemist.Import.Settings.DataAdapter;
 using Alchemist.Product.Import.Background;
 using Alchemist.Settings.RestAPIClient;
+using Alchemist.Test.DBApiWebAppFactory.Configuration;
 using Alchemist.Test.Host.Interfaces;
 using Alchemist.Test.Log;
 using Alchemist.Test.RabbitMQ;
@@ -10,6 +11,7 @@ using Alchemist.Test.Server.Fixtures;
 using Alchemist.Test.SettingsAPIFactory;
 using Alchemist.Test.ShopApiFactory;
 using Alchemist.Test.SignalRWebAppFactory;
+using Hangfire.AggregateJobs.ChildJobStorages;
 using Import.Factory.Interfaces;
 using Message.Interfaces;
 using Microsoft.AspNetCore.Hosting;
@@ -20,10 +22,11 @@ using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
 using Test.PostresqlTestContainer;
+using Testcontainers.Redis;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBackgroundServiceProgram>, ILoggedContext, IAsyncLifetime
+public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<ImportBackgroundServiceProgram>, ILoggedContext, IAsyncLifetime
 {
     private readonly string _dataBase;
     private readonly int _shopAPIHttpPort;
@@ -41,6 +44,10 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     
     private readonly IMessageTestHost _importItemsHost = new RabbitMQTestHost();
 
+    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:7.4-alpine").Build();
+
+    private readonly DbConfigurationContainerWebAppInterceptor<AggregateJobDbContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper> _childJobDbInterceptor;
+
     private IConfiguration? _configuration;
 
     public FixtureLoggerFactoryContext FixtureLoggingContext { get; } = new FixtureLoggerFactoryContext();
@@ -57,10 +64,11 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
     public HttpClient? ShopApiClient { get; private set; }
 
-    public ImportBackgroundServiceWebAppFactory(string dataBaseSection,
+    public ImportBackgroundServiceWebAppFactory(int httpPort, int httpsPort,
+        string dataBaseSection,
         int shopAPIHttpPort, int shopAPIHttpsPort,
         int settingsAPIHttpPort, int settingsAPIHttpsPort, 
-        int browserServiceHttpPort, int browserServiceHttpsPort)
+        int browserServiceHttpPort, int browserServiceHttpsPort) : base(httpPort, httpsPort)
     {
         _shopAPIHttpPort = shopAPIHttpPort;
         _shopAPIHttpsPort = shopAPIHttpsPort;
@@ -82,6 +90,13 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
 
         _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>
             ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server);
+
+        _childJobDbInterceptor = new DbConfigurationContainerWebAppInterceptor<AggregateJobDbContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>(this,
+            "ConnectionStrings:ChildJobStoragePostgres",
+            "childjobstorage",
+            "pguser",
+            "p@ssw0rd",
+            5432);
     }
 
     public IMessageReceiver CreateImportItemReceiver()
@@ -121,6 +136,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         services.SetSignalRHubTestSender(BeautyAndHealth.ImportItemHandler.ServiceKeys.ImportProductMessageSenderKey, _signalRApplicationFactory.Server, "import");
         services.SetSignalRHubTestSender(Category.ImportItemHandler.ServiceKeys.ImportCategoryMessageSenderKey, _signalRApplicationFactory.Server, "import");
         services.SetSignalRHubTestReceiver(ShopImportWorkerKeys.EventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
+        services.SetSignalRHubTestAckReceiver(ShopImportWorkerKeys.AckEventMessageReceiverKey, _signalRApplicationFactory.Server, "events");
         services.SetSignalRHubTestSender(ShopImportWorkerKeys.EventMessageSenderKey, _signalRApplicationFactory.Server, "events");
     }
 
@@ -129,6 +145,10 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         await _shopAPIWebAppFactory.InitializeAsync();
         
         await _settingsAPIWebAppFactory.InitializeAsync();
+
+        await _redisContainer.StartAsync();
+
+        await _childJobDbInterceptor.InitializeAsync();
     }
 
     async Task IAsyncLifetime.DisposeAsync()
@@ -136,5 +156,26 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         await (_settingsAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
 
         await (_shopAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
+
+        await _childJobDbInterceptor.DisposeAsync();
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        await _redisContainer.DisposeAsync();
+
+        await base.DisposeAsync();
+    }
+
+    protected override void ConfigureApp(WebHostBuilderContext context, IConfigurationBuilder config)
+    {
+        context.Configuration["ConnectionStrings:ServicesStoreRedis"] = _redisContainer.GetConnectionString(); 
+
+        base.ConfigureApp(context, config);
+    }
+
+    public Task ResetDatabaseIfAvailableAsync()
+    {
+        return _childJobDbInterceptor.ResetDatabaseIfAvailableAsync();
     }
 }

@@ -2,7 +2,6 @@
 using Import.Factory.Interfaces;
 using Import.Interfaces;
 using Import.Service;
-using Import.Service.Infrastructure;
 using Import.Settings.Interfaces;
 using Microsoft.Extensions.Logging;
 

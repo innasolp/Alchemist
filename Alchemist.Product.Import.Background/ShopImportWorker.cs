@@ -13,6 +13,7 @@ public class ShopImportWorker : BackgroundService
 {
     private readonly ILogger<ShopImportWorker> _logger;
     private readonly IMessageReceiver _eventMessageReceiver;
+    private readonly IAcknowlegefulMessageReceiver _ackEventMessageReceiver;
     private readonly IMessageSender _eventMessageSender;
     private readonly IEnumerable<ISettingsAdapter> _initSettingsAdapters;
     private readonly IMediator _mediator;
@@ -22,16 +23,16 @@ public class ShopImportWorker : BackgroundService
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
         IMediator mediator,
         [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)] IMessageReceiver eventMessageReceiver,
+        [FromKeyedServices(ShopImportWorkerKeys.AckEventMessageReceiverKey)] IAcknowlegefulMessageReceiver ackEventMessageReceiver,
         [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)] IMessageSender eventMessageSender,
         [FromKeyedServices(ShopImportWorkerKeys.InitImportSettings)]  IEnumerable<ISettingsAdapter> initSettingsAdapters)
     {
         _logger = logger;
         _mediator = mediator;
         _eventMessageReceiver = eventMessageReceiver;
+        _ackEventMessageReceiver = ackEventMessageReceiver;
         _eventMessageSender = eventMessageSender;
         _initSettingsAdapters = initSettingsAdapters;
-
-        _eventMessageReceiver.On<Settings.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync);
 
         _eventMessageReceiver.On<ShopCategory>(Messages.Common.Messages.CategoryAdded, OnShopCategoryAdded);
 
@@ -40,6 +41,23 @@ public class ShopImportWorker : BackgroundService
         _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, OnStopServiceAsync);
         _eventMessageReceiver.On<ServiceMessage>(Messages.Common.Messages.ServiceStopped, OnServiceStoppedAsync);
     }
+
+    public override async Task StartAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (!_ackEventMessageReceiver.IsConnected)
+                await _ackEventMessageReceiver.Start(cancellationToken);
+
+            await _ackEventMessageReceiver.On<Settings.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, OnShopSettingsCreatedAsync, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to connect import service to ack events messaging host: {Message}", ex.Message);
+        }
+
+        await base.StartAsync(cancellationToken);
+    }   
 
     private Task OnServiceStarted(ServiceStartedMessage serviceStartedMessage)
     {
@@ -119,7 +137,7 @@ public class ShopImportWorker : BackgroundService
         }
     }
 
-    private async Task OnShopSettingsCreatedAsync(Settings.ShopSettings newShopSettings)
+    private async Task OnShopSettingsCreatedAsync(string msgId, Settings.ShopSettings newShopSettings)
     {
         _logger.LogInformation("Handling of settings {Name} for shop id={ShopId} started.", newShopSettings.Name, newShopSettings.ShopId);
 
@@ -231,6 +249,15 @@ public class ShopImportWorker : BackgroundService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Error stopping event message sender: {Message}", ex.Message);
+        }
+
+        try
+        {
+            await _ackEventMessageReceiver.Stop(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error stopping ack event message receiver: {Message}", ex.Message);
         }
 
         try

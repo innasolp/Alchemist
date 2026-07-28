@@ -117,6 +117,7 @@ static void AddMessages(WebApplicationBuilder builder)
 {    
     builder.Services.AddSignalRMessageSender(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageSenderKey);
     builder.Services.AddShopImportDataReceiver(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.EventMessageReceiverKey);
+    builder.Services.AddShopImportDataAckReceiver(builder.Configuration, "SignalREventsUrl", ShopImportWorkerKeys.AckEventMessageReceiverKey);
 }
 
 static void AddSettingsAdapters(WebApplicationBuilder builder)
