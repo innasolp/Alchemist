@@ -30,7 +30,7 @@ public class SettingsApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawne
     {
         _signalRServer = signalRServer;
 
-        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker>(this, 
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker>(this, this,
             connectionStringSection, 
             database, 
             user, 

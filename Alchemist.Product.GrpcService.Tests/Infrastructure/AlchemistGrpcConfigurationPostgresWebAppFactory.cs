@@ -12,7 +12,7 @@ public class AlchemistGrpcConfigurationPostgresWebAppFactory : TestWebAppKestrel
     public AlchemistGrpcConfigurationPostgresWebAppFactory(string database, int httpPort = 8070, int httpsPort = 8071) : base(httpPort, httpsPort)
     {
         _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>
-            (this, "ConnectionStrings:DbContext2", database, "postgres", "P@ssw0rd", 5432, fillTestData: FillTestData);
+            (this, this, "ConnectionStrings:DbContext2", database, "postgres", "P@ssw0rd", 5432, fillTestData: FillTestData);
     }
 
     protected static void FillTestData(AlchemyContext dbContext)

@@ -5,13 +5,13 @@ using Xunit;
 
 namespace Test.PostresqlTestContainer;
 
-public class PostgresqlTestDbContainer : ITestDbContainer
+public class PostgresqlTestDbContainer : ITestDbContainer, IAsyncDisposable
 {
     private PostgreSqlContainer? _postgresqlContainer;
 
     public void Build(string host, int port=5432, string user = "postgres", string password = "P@ssw0rd")
     {
-        _postgresqlContainer = PostgresqlTestContainerHelper.BuildPostgreSqlContainer(host, port, user, password);
+        _postgresqlContainer ??= PostgresqlTestContainerHelper.BuildPostgreSqlContainer(host, port, user, password);
     }
 
     public string BuildConnectionString(string dataBase, int port)
@@ -29,12 +29,13 @@ public class PostgresqlTestDbContainer : ITestDbContainer
         return resultConnectionString.EndsWith(';') ? resultConnectionString + "Pooling=false;" : resultConnectionString + ";Pooling=false;";
     }
 
-    public Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         if (_postgresqlContainer == null)
             throw new InvalidOperationException("PostgresqlTestContainer not built yet.");
 
-        return _postgresqlContainer.StartAsync();
+        if(_postgresqlContainer.State != DotNet.Testcontainers.Containers.TestcontainersStates.Running)
+            await _postgresqlContainer.StartAsync();
     }
 
     async Task IAsyncLifetime.DisposeAsync()
@@ -43,8 +44,15 @@ public class PostgresqlTestDbContainer : ITestDbContainer
 
         if (_postgresqlContainer != null)
         {
-            await _postgresqlContainer.StopAsync();
-            await _postgresqlContainer.DisposeAsync();
+            await _postgresqlContainer.StopAsync();            
         }       
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_postgresqlContainer != null)
+        {
+            await _postgresqlContainer.DisposeAsync();
+        }
     }
 }

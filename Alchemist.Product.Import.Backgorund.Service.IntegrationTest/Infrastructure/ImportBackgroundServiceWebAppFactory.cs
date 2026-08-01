@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
@@ -26,13 +27,16 @@ using Testcontainers.Redis;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
-public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<ImportBackgroundServiceProgram>, ILoggedContext, IAsyncLifetime
+public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBackgroundServiceProgram>, ILoggedContext, IAsyncLifetime, IWebHostConfigure
 {
     private readonly string _dataBase;
     private readonly int _shopAPIHttpPort;
     private readonly int _shopAPIHttpsPort;
     private readonly int _settingsAPIHttpPort;
     private readonly int _settingsAPIHttpsPort;
+    private readonly int _defaultRedisIndex;
+
+    private readonly PostgresqlTestDbContainer _testDbContainer;
 
     private readonly SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper> _settingsAPIWebAppFactory;
 
@@ -64,16 +68,39 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<Imp
 
     public HttpClient? ShopApiClient { get; private set; }
 
-    public ImportBackgroundServiceWebAppFactory(int httpPort, int httpsPort,
+
+    private Action<IHost>? _configureHost;
+
+    event Action<IHost> IWebHostConfigure.ConfigureHost
+    {
+        add
+        {
+            _configureHost += value;
+        }
+        remove
+        {
+            _configureHost -= value;
+        }
+    }
+
+
+    public ImportBackgroundServiceWebAppFactory(
+        PostgresqlTestDbContainer testDbContainer,
         string dataBaseSection,
         int shopAPIHttpPort, int shopAPIHttpsPort,
         int settingsAPIHttpPort, int settingsAPIHttpsPort, 
-        int browserServiceHttpPort, int browserServiceHttpsPort) : base(httpPort, httpsPort)
+        int browserServiceHttpPort, int browserServiceHttpsPort,
+        int defaultRedisIndex = 1,
+        string childjobstorage = "childjobstorage") : base()
     {
+        _testDbContainer = testDbContainer;
+
         _shopAPIHttpPort = shopAPIHttpPort;
         _shopAPIHttpsPort = shopAPIHttpsPort;
         _settingsAPIHttpPort = settingsAPIHttpPort;
         _settingsAPIHttpsPort = settingsAPIHttpsPort;
+        _defaultRedisIndex = defaultRedisIndex;
+
         var settings = new ConfigurationBuilder()
               .AddJsonFile("appsettings.json")
               .Build();
@@ -86,17 +113,20 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<Imp
         _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(browserServiceHttpPort, browserServiceHttpsPort);
 
         _shopAPIWebAppFactory = new ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer,PostgresDbRespawner, PostgresDbHelper>
-            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _shopAPIHttpPort, _shopAPIHttpsPort, _signalRApplicationFactory.Server);
+            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _shopAPIHttpPort, _shopAPIHttpsPort, _signalRApplicationFactory.Server, _testDbContainer);
 
         _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>
-            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server);
+            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server, _testDbContainer);
 
-        _childJobDbInterceptor = new DbConfigurationContainerWebAppInterceptor<AggregateJobDbContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>(this,
+        _childJobDbInterceptor = new DbConfigurationContainerWebAppInterceptor<AggregateJobDbContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>(
+            this,
+            this,
             "ConnectionStrings:ChildJobStoragePostgres",
-            "childjobstorage",
+            childjobstorage,
             "pguser",
             "p@ssw0rd",
-            5432);
+            5432,
+            _testDbContainer);
     }
 
     public IMessageReceiver CreateImportItemReceiver()
@@ -106,11 +136,38 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<Imp
             _configuration?.GetSection("RabbitMqQueueOptions:Name")?.Get<string>());
     }
 
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        Environment.SetEnvironmentVariable(
+            "ConnectionStrings__ServicesStoreRedis",
+            $"{_redisContainer.GetConnectionString()},defaultDatabase={_defaultRedisIndex}"
+        );
+
+
+        try
+        {
+            var host = base.CreateHost(builder);
+            ConfigureHost(host);
+            return host;
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("ConnectionStrings__ServicesStoreRedis", null);
+        }
+    }
+
+    protected void ConfigureHost(IHost host)
+    {
+        _configureHost?.Invoke(host);
+    }
+
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
         FixtureLoggingContext.ConfigureServices(services);
 
         _configuration = context.Configuration;
+
+        //context.Configuration["ConnectionStrings:ServicesStoreRedis"] = $"{_redisContainer.GetConnectionString()},defaultDatabase={_defaultRedisIndex}";
 
         ShopApiClient = _shopAPIWebAppFactory.CreateClient();
         services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(ShopApiClient));
@@ -158,6 +215,8 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<Imp
         await (_shopAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
 
         await _childJobDbInterceptor.DisposeAsync();
+
+        await _redisContainer.StopAsync();
     }
 
     public override async ValueTask DisposeAsync()
@@ -169,7 +228,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppKestrelFactory<Imp
 
     protected override void ConfigureApp(WebHostBuilderContext context, IConfigurationBuilder config)
     {
-        context.Configuration["ConnectionStrings:ServicesStoreRedis"] = _redisContainer.GetConnectionString(); 
+        context.Configuration["ConnectionStrings:ServicesStoreRedis"] = $"{_redisContainer.GetConnectionString()},defaultDatabase={_defaultRedisIndex}";
 
         base.ConfigureApp(context, config);
     }

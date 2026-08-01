@@ -10,14 +10,14 @@ using Xunit.Abstractions;
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
 public class ImportBackgroundServiceTestFixtureWebAppFactory : ImportBackgroundServiceWebAppFactory
-{
-    public ImportBackgroundServiceTestFixtureWebAppFactory() : base(8138, 8139, "serviceTestDb", 8050, 8051, 8200, 8201, 8302, 8303)
+{  
+    public ImportBackgroundServiceTestFixtureWebAppFactory() : base(new DbFixture().Container, "serviceTestDb", 8050, 8051, 8200, 8201, 8302, 8303)
     {
     }
 }
 
 public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgroundServiceTestFixtureWebAppFactory, ImportBackgroundServiceProgram>
-{   
+{
     private record ShopSettingsWithServices(Infrastructure.ShopSettings ShopSettings, Infrastructure.ShopSettings[] Services);
     
     public ImportBackgroundServiceTest(ImportBackgroundServiceTestFixtureWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 

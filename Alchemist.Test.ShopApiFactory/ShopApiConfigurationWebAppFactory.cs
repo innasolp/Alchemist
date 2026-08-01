@@ -37,7 +37,7 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, T
     {
         _signalRServer = signalRServer;
 
-        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker>(this,
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker>(this,this,
             connectionStringSection, 
             database,
             user, 

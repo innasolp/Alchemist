@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>, IWebHostBuilderConfigure
+public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>, IWebHostBuilderConfigure, IServices
      where TEntryPoint : class
 {
     private Action<WebHostBuilderContext, IConfigurationBuilder>? _configureAppConfiguration;
