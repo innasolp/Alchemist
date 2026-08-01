@@ -15,18 +15,18 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
 
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
-    public async Task Delete(string executionId)
+    public async Task Delete(string executionId, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        var jobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(executionId);
+        var jobEntry = await childJobStorage.GetJobEntryByExecutionIdAsync(executionId, cancellationToken);
 
         if (jobEntry == null) return;
 
         _backgroundJobClient.Delete(jobEntry.JobId);
 
-        await childJobStorage.UpdateJobEntryStateAsync(jobEntry.JobId, JobStatus.Deleted, DateTime.Now);
+        await childJobStorage.UpdateJobEntryStateAsync(jobEntry.JobId, JobStatus.Deleted, DateTime.Now, cancellationToken);
     }
 
     public async Task Enqueue<T, TJob>(TJob coreJob,
@@ -54,7 +54,10 @@ internal class JobExecuteManager(IJobExecutorRegistry jobExecutorRegistry,
         using var scope = serviceScopeFactory.CreateScope();
         var childJobStorage = scope.ServiceProvider.GetRequiredService<IAggregateJobStorage>();
 
-        await childJobStorage.BeginTransactionAsync(cancellationToken);
+        var success = await childJobStorage.BeginTransactionAsync(cancellationToken);
+
+        if (!success)
+            throw new Exception("transaction already started");
 
         var childJobIds = new List<string>();
 

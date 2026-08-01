@@ -392,7 +392,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         finally
         {
             if (jobCancellationToken?.ShutdownToken.IsCancellationRequested == true)            
-                await RemoveJobWithChildrenAsync(serviceJob);
+                await RemoveJobWithChildrenAsync(serviceJob, !cancellationToken.IsCancellationRequested ? cancellationToken : default);
             else 
                 UnsubscribeServiceFromConnectedHandler(serviceJob);
         }
@@ -417,9 +417,9 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         return (true, serviceJob);
     }
 
-    private async Task RemoveJobWithChildrenAsync(IImportServiceJob deletedServiceJob)
+    private async Task RemoveJobWithChildrenAsync(IImportServiceJob deletedServiceJob, CancellationToken cancellationToken = default)
     {
-        await _jobExecuteManager.Delete(deletedServiceJob.Id.ToString());
+        await _jobExecuteManager.Delete(deletedServiceJob.Id.ToString(), cancellationToken);
 
         UnsubscribeServiceFromConnectedHandler(deletedServiceJob);
 
@@ -428,7 +428,7 @@ internal class HangfireShopImportServiceManager(IEnumerable<IImportServiceFactor
         {
             UnsubscribeServiceFromConnectedHandler(childJob.Value);
 
-            await _jobExecuteManager.Delete(childJob.Value.Id.ToString());
+            await _jobExecuteManager.Delete(childJob.Value.Id.ToString(), cancellationToken);
         }
     }
 

@@ -1,18 +1,18 @@
 ﻿using Alchemist.Product.Entities;
+using Db.Infrastructure;
 using Import.Settings.Interfaces;
-using MediatR;
 using ShopSettings.Interfaces;
 
 namespace Import.Service.Infrastructure;
 
-public record AddImportServiceCommand(string Name, IImportSettings ImportSettings) : IRequest<Guid>;
+public record AddImportServiceCommand(string Name, IImportSettings ImportSettings) : ICommand;
 
-public record StopServiceCommand(Guid Guid) : IRequest;
+public record StopServiceCommand(Guid Guid) : ICommand;
 
-public record StartServiceCommand(Guid Guid) : IRequest;
+public record StartServiceCommand(Guid Guid) : ICommand;
 
-public record StopAllServicesCommand : IRequest;
+public record StopAllServicesCommand : ICommand;
 
-public record AddShopImportServiceFromShopSettingsCommand(IShopSettings ShopSettings) : IRequest<Guid>;
+public record AddShopImportServiceFromShopSettingsCommand(IShopSettings ShopSettings) : ICommand;
 
-public record QueueShopCategoryToServicesCommand(ShopCategory ShopCategory) : IRequest;
+public record QueueShopCategoryToServicesCommand(ShopCategory ShopCategory) : ICommand;

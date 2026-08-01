@@ -4,7 +4,7 @@ namespace Hangfire.AggregateJobs;
 
 public interface IAggregateJobStorage
 {
-    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task<bool> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
 

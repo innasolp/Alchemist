@@ -54,7 +54,8 @@ AddShopAPIService(builder, out var restApiHost);
 AddShopSettingsAPIService(builder, out var settingsAPIHost);
 
 var hangfireOptions = builder.Configuration.GetSection("HangfireJobExecuteOptions").Get<AggregateServerSettings>();
-builder.Host.AddHangfireServiceManagementInfrastructure(builder.Configuration.GetConnectionString("ServicesStoreRedis"),
+builder.Host.AddHangfireServiceManagementInfrastructureFromContext(
+    "ServicesStoreRedis",
     (config, connectionString)=>
     {
         //ClearRedisDataBase(connectionString);

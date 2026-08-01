@@ -1,14 +1,14 @@
-﻿using MediatR;
+﻿using Db.Infrastructure;
 
 namespace Import.Service.Infrastructure.Handlers;
 
 internal sealed class StopServiceCommandHandler(IServiceManager serviceRepository,
-    IPublisher publisher) 
-    : IRequestHandler<StopServiceCommand>
+    IEntityEventPublisher publisher) 
+    : ICommandHandler<StopServiceCommand>
 {
     private readonly IServiceManager _serviceRepository = serviceRepository;
 
-    private readonly IPublisher _publisher = publisher;
+    private readonly IEntityEventPublisher _publisher = publisher;
 
     public async Task Handle(StopServiceCommand request, CancellationToken cancellationToken)
     {
@@ -16,6 +16,6 @@ internal sealed class StopServiceCommandHandler(IServiceManager serviceRepositor
 
         await stopTask;
 
-        await _publisher.Publish(new ServiceStoppedEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
+        await _publisher.Publish<ServiceMessage, ServiceStoppedEvent>(new ServiceStoppedEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
     }
 }

@@ -1,9 +1,9 @@
-﻿using MediatR;
+﻿using Db.Infrastructure;
 
 namespace Import.Service.Infrastructure.Handlers;
 
 internal sealed class QueueShopCategoryToServicesCommandHandler(IShopImportServiceManager serviceRepository) :
-    IRequestHandler<QueueShopCategoryToServicesCommand>
+    ICommandHandler<QueueShopCategoryToServicesCommand>
 {
     private readonly IShopImportServiceManager _serviceRepository = serviceRepository;
 

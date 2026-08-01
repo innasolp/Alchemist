@@ -8,15 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="Import.Interfaces" Version="1.0.0.3" />
-	<PackageReference Include="MediatR" Version="14.0.0" />
 	<PackageReference Include="Message.Interfaces" Version="1.0.0.4" />
+	<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alchemist.Import.Settings.Adapter\Alchemist.Import.Settings.DataAdapter.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings\Alchemist.Import.Settings.csproj" />
     <ProjectReference Include="..\Alchemist.Product.Entities\Alchemist.Product.Entities.csproj" />
-    <ProjectReference Include="..\Mediator.Infrastructure\Mediator.Infrastructure.csproj" />
+    <ProjectReference Include="..\Db.Infrastructure\Db.Infrastructure.csproj" />
     <ProjectReference Include="..\ShopSettings.Interfaces\ShopSettings.Interfaces.csproj" />
   </ItemGroup>
 

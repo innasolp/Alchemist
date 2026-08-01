@@ -1,15 +1,15 @@
-﻿using Import.Interfaces;
-using MediatR;
+﻿using Db.Infrastructure;
+using Import.Interfaces;
 
 namespace Import.Service.Infrastructure.Handlers;
 
 internal sealed class StartServiceCommandHandler(IServiceManager serviceRepository,
-    IPublisher publisher)
-    : IRequestHandler<StartServiceCommand>
+    IEntityEventPublisher publisher)
+    : ICommandHandler<StartServiceCommand>
 {
     private readonly IServiceManager _serviceRepository = serviceRepository;
 
-    private readonly IPublisher _publisher = publisher;
+    private readonly IEntityEventPublisher _publisher = publisher;
 
     public async Task Handle(StartServiceCommand request, CancellationToken cancellationToken)
     {
@@ -33,7 +33,7 @@ internal sealed class StartServiceCommandHandler(IServiceManager serviceReposito
         {
             service.ConnectedAsync += serviceConnectedAsync;
 
-            await _publisher.Publish(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
+            await _publisher.Publish<ServiceMessage, ServiceStartingEvent>(new ServiceStartingEvent(new ServiceMessage(request.Guid, service.Name)), cancellationToken);
 
             if(!connecting && startTask != null)
                 try
@@ -57,6 +57,6 @@ internal sealed class StartServiceCommandHandler(IServiceManager serviceReposito
 
     private Task PublishConnectedEvent(Guid id, IImportService service, bool connected, CancellationToken cancellationToken)
     {
-        return _publisher.Publish(new ServiceStartedEvent(connected, new ServiceMessage(id, service.Name)), cancellationToken);
+        return _publisher.Publish<ServiceStartedMessage, ServiceStartedEvent>(new ServiceStartedEvent(connected, new ServiceStartedMessage(connected, id, service.Name)), cancellationToken);
     }
 }

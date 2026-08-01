@@ -6,7 +6,7 @@ namespace Db.Infrastructure.Messages;
 
 internal class CallbackBackgroundMessageHandler<T, TEvent> 
     : IEventHandler<T, TEvent>, ICallback<string>, IDisposable
-    where TEvent : IIdentifiedEvent<T>
+    where TEvent : class, IIdentifiedEvent<T>
 {
     private readonly IAcknowlegefulMessageSender _messageSender;
 

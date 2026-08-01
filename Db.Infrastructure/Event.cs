@@ -1,10 +1,13 @@
 ﻿namespace Db.Infrastructure;
 
-public class Event<T>(T entity, string eventName, DateTime creationDate) : IEvent<T>
+public class Event(string eventName, DateTime creationDate) : IEvent
 {
-    public T Entity => entity;
-
     public DateTime CreationDate => creationDate;
 
     public string EventName => eventName;
+}
+
+public class Event<T>(T entity, string eventName, DateTime creationDate) : Event(eventName, creationDate), IEvent<T>
+{
+    public T Entity => entity;
 }
