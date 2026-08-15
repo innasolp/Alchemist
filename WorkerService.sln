@@ -295,6 +295,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{32EB2071-3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.Extensions", "Data.Interfaces\Data.Extensions.csproj", "{3160AC2F-C25E-4DE3-B536-10A8C51CE4DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.RedisTestContainer", "Test.RedisContainer\Test.RedisTestContainer.csproj", "{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1227,6 +1229,16 @@ Global
 		{3160AC2F-C25E-4DE3-B536-10A8C51CE4DA}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
 		{3160AC2F-C25E-4DE3-B536-10A8C51CE4DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3160AC2F-C25E-4DE3-B536-10A8C51CE4DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.import_core|Any CPU.ActiveCfg = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.import_core|Any CPU.Build.0 = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.import_settings|Any CPU.ActiveCfg = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.import_settings|Any CPU.Build.0 = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.import_shops|Any CPU.ActiveCfg = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.import_shops|Any CPU.Build.0 = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1356,6 +1368,7 @@ Global
 		{56CF5A62-EB3D-4EB6-BE22-46BD6C806B87} = {4EA7101E-C105-457C-8E79-291A5291E828}
 		{32EB2071-3E47-4CBD-A2B8-95799828952B} = {4EA7101E-C105-457C-8E79-291A5291E828}
 		{3160AC2F-C25E-4DE3-B536-10A8C51CE4DA} = {17215807-0093-44F2-9884-0C13DC9E711F}
+		{E54D1DC8-1496-4AB0-9807-0F51C9F8B2C1} = {FC30B593-2D65-4A85-ABF6-20EFD0542BF3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA92390E-6053-4897-808E-B3CB61203DB1}

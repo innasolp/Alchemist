@@ -23,7 +23,7 @@ public static class AutofacExtensions
     private readonly static AggregateServerSettings defaultAggregateServerSettings =
         new() { ServerName = "DefaultServer", ProcessingQueue = "processing", WaitingQueue = "waiting" };
 
-    private static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder,
+    public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder,
         Func<HostBuilderContext, string> getHangfireConnectionString,
         Action<IGlobalConfiguration, string> configureHangfireStorage,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
@@ -34,8 +34,9 @@ public static class AutofacExtensions
         {
             services.AddSingleton<IShopImportServiceJobManager, HangfireShopImportServiceManager>();
 
-            services.AddHangfireInfrastructure(getHangfireConnectionString(context),
+            services.AddHangfireInfrastructure(context,
                 aggregateServerSettings ?? defaultAggregateServerSettings,
+                getHangfireConnectionString,
                 configureHangfireStorage,
                 childStorageOptionsAction,
                 configure);
@@ -48,7 +49,7 @@ public static class AutofacExtensions
         return hostBuilder.ConfigureContainer<ContainerBuilder>((builderContext, builder) =>
         {
             builder.RegisterAssemblyTypes(typeof(AddShopImportServiceCommandHandler).Assembly)
-            .Where(t => t.Name.EndsWith("CommandHandler"))
+            .Where(t => t.Name.EndsWith("RequestHandler") || t.Name.EndsWith("CommandHandler"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
 
@@ -76,21 +77,8 @@ public static class AutofacExtensions
         AggregateServerSettings? aggregateServerSettings = null,
         Action<IGlobalConfiguration>? configure = null)
     {
-        return hostBuilder.AddHangfireServiceManagementInfrastructure((context) => hangfireConnectionString,
-            configureHangfireStorage,
-            childStorageOptionsAction,
-            aggregateServerSettings,
-            configure);
-    }
-
-    public static IHostBuilder AddHangfireServiceManagementInfrastructureFromContext(this IHostBuilder hostBuilder,
-        string hangfireConnectionSection,
-        Action<IGlobalConfiguration, string> configureHangfireStorage,
-        Action<DbContextOptionsBuilder> childStorageOptionsAction,
-        AggregateServerSettings? aggregateServerSettings = null,
-        Action<IGlobalConfiguration>? configure = null)
-    {
-        return hostBuilder.AddHangfireServiceManagementInfrastructure((context) => context.Configuration.GetConnectionString(hangfireConnectionSection),
+        return hostBuilder.AddHangfireServiceManagementInfrastructure(
+            (context) => hangfireConnectionString,
             configureHangfireStorage,
             childStorageOptionsAction,
             aggregateServerSettings,
@@ -98,8 +86,9 @@ public static class AutofacExtensions
     }
 
     private static void AddHangfireInfrastructure(this IServiceCollection services,
-        string hangfireConnectionString,
+        HostBuilderContext context,
         AggregateServerSettings aggregateServerSettings,
+        Func<HostBuilderContext, string> getHangfireConnectionString,
         Action<IGlobalConfiguration, string> configureHangfireStorage,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
         Action<IGlobalConfiguration>? configure = null)
@@ -113,8 +102,9 @@ public static class AutofacExtensions
             config.UseFilter(new DeletedStateFilter());
         }
 
-        services.AddHangfireAggreateJobs<IHagfireServiceJobManager>(hangfireConnectionString,
+        services.AddHangfireAggreateJobs<IHagfireServiceJobManager>(context,
             aggregateServerSettings,
+            getHangfireConnectionString,
             childStorageOptionsAction,
             configureHangfireStorage,
             importConfigure

@@ -23,7 +23,7 @@ using Shop.API.Client;
 using Shop.Interfaces;
 using ShopSettings.Interfaces;
 using Test.PostresqlTestContainer;
-using Testcontainers.Redis;
+using Test.RedisTestContainer;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest.Infrastructure;
 
@@ -36,7 +36,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     private readonly int _settingsAPIHttpsPort;
     private readonly int _defaultRedisIndex;
 
-    private readonly PostgresqlTestDbContainer _testDbContainer;
+    private readonly PostgresqlTestDbContainer _postgresTestDbContainer;
+
+    private readonly RedisTestDbContainer _redisContainer;
 
     private readonly SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper> _settingsAPIWebAppFactory;
 
@@ -47,8 +49,6 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     private readonly TestWebAppKestrelFactory<BrowserServiceProgramm> _browserServiceFactory;
     
     private readonly IMessageTestHost _importItemsHost = new RabbitMQTestHost();
-
-    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:7.4-alpine").Build();
 
     private readonly DbConfigurationContainerWebAppInterceptor<AggregateJobDbContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper> _childJobDbInterceptor;
 
@@ -83,9 +83,9 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         }
     }
 
-
     public ImportBackgroundServiceWebAppFactory(
-        PostgresqlTestDbContainer testDbContainer,
+        PostgresqlTestDbContainer postgresTestDbContainer,
+        RedisTestDbContainer redisTestDbContainer,
         string dataBaseSection,
         int shopAPIHttpPort, int shopAPIHttpsPort,
         int settingsAPIHttpPort, int settingsAPIHttpsPort, 
@@ -93,7 +93,8 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         int defaultRedisIndex = 1,
         string childjobstorage = "childjobstorage") : base()
     {
-        _testDbContainer = testDbContainer;
+        _postgresTestDbContainer = postgresTestDbContainer;
+        _redisContainer = redisTestDbContainer;
 
         _shopAPIHttpPort = shopAPIHttpPort;
         _shopAPIHttpsPort = shopAPIHttpsPort;
@@ -113,10 +114,10 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         _browserServiceFactory = new TestWebAppKestrelFactory<BrowserServiceProgramm>(browserServiceHttpPort, browserServiceHttpsPort);
 
         _shopAPIWebAppFactory = new ShopApiConfigurationWebAppFactory<PostgresqlTestDbContainer,PostgresDbRespawner, PostgresDbHelper>
-            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _shopAPIHttpPort, _shopAPIHttpsPort, _signalRApplicationFactory.Server, _testDbContainer);
+            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _shopAPIHttpPort, _shopAPIHttpsPort, _signalRApplicationFactory.Server, _postgresTestDbContainer);
 
         _settingsAPIWebAppFactory = new SettingsApiConfigurationWebAppFactory<PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>
-            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server, _testDbContainer);
+            ("ConnectionStrings:DbContext2", _dataBase, 5432, "postgres", "P@ssw0rd", _settingsAPIHttpPort, _settingsAPIHttpsPort, _signalRApplicationFactory.Server, _postgresTestDbContainer);
 
         _childJobDbInterceptor = new DbConfigurationContainerWebAppInterceptor<AggregateJobDbContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>(
             this,
@@ -126,7 +127,7 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
             "pguser",
             "p@ssw0rd",
             5432,
-            _testDbContainer);
+            _postgresTestDbContainer);
     }
 
     public IMessageReceiver CreateImportItemReceiver()
@@ -136,38 +137,11 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
             _configuration?.GetSection("RabbitMqQueueOptions:Name")?.Get<string>());
     }
 
-    protected override IHost CreateHost(IHostBuilder builder)
-    {
-        Environment.SetEnvironmentVariable(
-            "ConnectionStrings__ServicesStoreRedis",
-            $"{_redisContainer.GetConnectionString()},defaultDatabase={_defaultRedisIndex}"
-        );
-
-
-        try
-        {
-            var host = base.CreateHost(builder);
-            ConfigureHost(host);
-            return host;
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("ConnectionStrings__ServicesStoreRedis", null);
-        }
-    }
-
-    protected void ConfigureHost(IHost host)
-    {
-        _configureHost?.Invoke(host);
-    }
-
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
         FixtureLoggingContext.ConfigureServices(services);
 
         _configuration = context.Configuration;
-
-        //context.Configuration["ConnectionStrings:ServicesStoreRedis"] = $"{_redisContainer.GetConnectionString()},defaultDatabase={_defaultRedisIndex}";
 
         ShopApiClient = _shopAPIWebAppFactory.CreateClient();
         services.InterceptImplementation<IShopDataService, ShopApiClient>(new ShopApiClient(ShopApiClient));
@@ -203,8 +177,6 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         
         await _settingsAPIWebAppFactory.InitializeAsync();
 
-        await _redisContainer.StartAsync();
-
         await _childJobDbInterceptor.InitializeAsync();
     }
 
@@ -215,20 +187,11 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
         await (_shopAPIWebAppFactory as IAsyncLifetime).DisposeAsync();
 
         await _childJobDbInterceptor.DisposeAsync();
-
-        await _redisContainer.StopAsync();
-    }
-
-    public override async ValueTask DisposeAsync()
-    {
-        await _redisContainer.DisposeAsync();
-
-        await base.DisposeAsync();
     }
 
     protected override void ConfigureApp(WebHostBuilderContext context, IConfigurationBuilder config)
     {
-        context.Configuration["ConnectionStrings:ServicesStoreRedis"] = $"{_redisContainer.GetConnectionString()},defaultDatabase={_defaultRedisIndex}";
+        context.Configuration["ConnectionStrings:ServicesStoreRedis"] = _redisContainer.BuildConnectionString(_defaultRedisIndex.ToString(), -1);
 
         base.ConfigureApp(context, config);
     }
@@ -236,5 +199,14 @@ public class ImportBackgroundServiceWebAppFactory : TestWebAppFactory<ImportBack
     public Task ResetDatabaseIfAvailableAsync()
     {
         return _childJobDbInterceptor.ResetDatabaseIfAvailableAsync();
+    }
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var host = base.CreateHost(builder);
+
+        _configureHost?.Invoke(host);
+
+        return host;
     }
 }

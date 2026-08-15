@@ -4,23 +4,28 @@ using Alchemist.Test.SignalRWebAppFactory;
 using Import.Service.Infrastructure;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.Concurrent;
+using Test.DbContainer.Abstractions;
+using Test.PostresqlTestContainer;
+using Test.RedisTestContainer;
 using Xunit.Abstractions;
 using ServiceMessage = Import.Service.Infrastructure.ServiceMessage;
 
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
-// 3. В самом тесте контейнер НЕ умрет до завершения всех проверок
-[Collection("DbCollection")]
-public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper, DbFixture fixture) 
+[Collection(nameof(PostgresRedisDbCollection))]
+public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper,
+    DbTestContainerFixture<PostgresqlTestDbContainer> postgresFixture,
+    DbTestContainerFixture<RedisTestDbContainer> redisFixture) 
  : LoggedContextTest(outputHelper)
 {
-    private readonly DbFixture _fixture = fixture;
+    private readonly DbTestContainerFixture<PostgresqlTestDbContainer> _postgresFixture = postgresFixture;
+    private readonly DbTestContainerFixture<RedisTestDbContainer> _redisFixture = redisFixture;
 
     private async Task<ImportBackgroundServiceWebAppFactory> CreateWebAppFactoryAsync(int redisIndex, string childjobstorage, int[] ports)
     {
         if (ports.Length < 6)
             throw new Exception($"No 6 ports in range");
-        var webAppFactory = new ImportBackgroundServiceWebAppFactory(_fixture.Container, "serviceMessageTestDb", 
+        var webAppFactory = new ImportBackgroundServiceWebAppFactory(_postgresFixture.Container, _redisFixture.Container, "serviceMessageTestDb", 
              ports[0], ports[1], ports[2], ports[3], ports[4], ports[5], redisIndex, childjobstorage);
 
         await webAppFactory.InitializeAsync();
@@ -90,6 +95,49 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper, 
         guids.TryAdd(serviceMessage.Guid);
         OutputHelper.WriteLine($"Guid {serviceMessage.Guid};Name {serviceMessage.Name}");
         semaphoreSlim.Release();
+    }
+    
+    [Fact]
+    public async Task SendMessageServiceStartedSuccess()
+    {
+        await using var webAppFactory = await CreateWebAppFactoryAsync(4, "childjobstorage_start",[8056, 8057, 8206, 8207, 8308, 8309]);
+
+        var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(webAppFactory.Services, webAppFactory.SignalRTestServer, "events");
+        var serviceStartedAutoResetEvent = new AsyncAutoResetEvent();
+        var guids = new BlockingCollection<Guid>();
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
+
+        Func<ServiceStartedMessage, Task> serviceStartedAsync = async (serviceMessage) =>
+        {
+            await OnServiceAsync(serviceMessage, semaphoreSlim, guids);
+            serviceStartedAutoResetEvent.Set();
+        };
+        messageReceiver.On(Messages.Common.Messages.ServiceStarted, serviceStartedAsync);
+        await messageReceiver.Start();
+
+        try
+        {
+            var httpClient = webAppFactory.CreateClient();
+            
+            if (guids.Count == 0)
+            {
+                var waitServiceStartingTask = serviceStartedAutoResetEvent.WaitAsync();
+                await waitServiceStartingTask.WaitAsync(TimeSpan.FromMilliseconds(120000));
+                Assert.NotEmpty(guids);
+            }
+        }
+        catch
+        {
+            OutputErrors();
+            OutputWarnings();
+
+            throw;
+        }
+        finally
+        {
+            await ClearWebAppFactoryAsync(webAppFactory);
+            await messageReceiver.Stop();
+        }
     }
 
     [Fact]
@@ -161,48 +209,5 @@ public class ImportBackgroundServiceMessageTest(ITestOutputHelper outputHelper, 
 
             await ClearWebAppFactoryAsync(webAppFactory);
         }
-    }
-
-    [Fact]
-    public async Task SendMessageServiceStartedSuccess()
-    {
-        await using var webAppFactory = await CreateWebAppFactoryAsync(4, "childjobstorage_start",[8056, 8057, 8206, 8207, 8308, 8309]);
-
-        var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubReceiver(webAppFactory.Services, webAppFactory.SignalRTestServer, "events");
-        var serviceStartedAutoResetEvent = new AsyncAutoResetEvent();
-        var guids = new BlockingCollection<Guid>();
-        var semaphoreSlim = new SemaphoreSlim(1, 1);
-
-        Func<ServiceStartedMessage, Task> serviceStartedAsync = async (serviceMessage) =>
-        {
-            await OnServiceAsync(serviceMessage, semaphoreSlim, guids);
-            serviceStartedAutoResetEvent.Set();
-        };
-        messageReceiver.On(Messages.Common.Messages.ServiceStarted, serviceStartedAsync);
-        await messageReceiver.Start();
-
-        try
-        {
-            var httpClient = webAppFactory.CreateClient();
-            
-            if (guids.Count == 0)
-            {
-                var waitServiceStartingTask = serviceStartedAutoResetEvent.WaitAsync();
-                await waitServiceStartingTask.WaitAsync(TimeSpan.FromMilliseconds(120000));
-                Assert.NotEmpty(guids);
-            }
-        }
-        catch
-        {
-            OutputErrors();
-            OutputWarnings();
-
-            throw;
-        }
-        finally
-        {
-            await ClearWebAppFactoryAsync(webAppFactory);
-            await messageReceiver.Stop();
-        }
-    }
+    }    
 }

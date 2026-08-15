@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Testcontainers" Version="4.13.0" />
-    <PackageReference Include="xunit.extensibility.core" Version="2.5.3" />
-	<PackageReference Include="Respawn" Version="7.0.0" />
+    <ProjectReference Include="..\Test.DbContainer.Abstractions\Test.DbContainer.Abstractions.csproj" />
   </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Testcontainers.Redis" Version="4.13.0" />
+	</ItemGroup>
 
 </Project>

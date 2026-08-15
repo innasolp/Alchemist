@@ -18,7 +18,7 @@ public abstract class ShopApiConfigurationWebAppFactory : TestWebAppKestrelFacto
     int httpsPort = 8051) : base(httpPort, httpsPort)
     {
         _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>
-            (this, connectionStringSection, database, "postgres", "P@ssw0rd", 5432, fillTestData : FillTestData);
+            (this, this, connectionStringSection, database, "postgres", "P@ssw0rd", 5432, fillTestData : FillTestData);
     }
 
     public Task InitializeAsync()

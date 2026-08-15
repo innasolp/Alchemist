@@ -4,25 +4,29 @@ using Hangfire.AggregateJobs.JobExecutors;
 using Hangfire.AggregateJobs.JobExecutors.Filter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Hangfire.AggregateJobs;
 
 public static class DIExtensions
 {
-    public static IServiceCollection AddHangfireAggreateJobs<T>(this IServiceCollection services, 
-        string hangfireConnectionString,
+    public static IServiceCollection AddHangfireAggreateJobs<T>(this IServiceCollection services,
+        HostBuilderContext context,
         AggregateServerSettings aggregateServerSettings,
+        Func<HostBuilderContext,string> getHangfireConnectionString,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
         Action<IGlobalConfiguration, string> configureStorage,
         Action<IGlobalConfiguration>? configure = null,
         Action<BackgroundJobServerOptions>? parentServerConfigure = null,
         Action<BackgroundJobServerOptions>? childServerConfigure = null)
     {
+        services.AddScoped<ChildTaskFilter>();
+
         services.AddHangfire((sp, config) =>
         {
-            configureStorage?.Invoke(config, hangfireConnectionString);
+            configureStorage?.Invoke(config, getHangfireConnectionString(context));
 
-            config.UseFilter(new ChildTaskFilter(sp.GetRequiredService<IServiceScopeFactory>()));
+            config.UseFilter(new ChildTaskFilter());
             config.UseFilter(new ChangeQueueFilter());
 
             configure?.Invoke(config);
