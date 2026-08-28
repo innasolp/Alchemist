@@ -18,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ShopSettings.Data.infrastructure.EF\ShopSettings.Data.infrastructure.EF.csproj" />
+		<ProjectReference Include="..\ShopSettings.Data.infrastructure.EF\ShopSettings.Data.Infrastructure.EF.csproj" />
 	</ItemGroup>
 
 

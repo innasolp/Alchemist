@@ -1,6 +1,5 @@
-﻿using Alchemist.Common;
-using MediatR;
+﻿using Db.Infrastructure.Commands;
 
 namespace Alchemist.Product.CategoryData;
 
-public record ImportShopCategoryCommand(CategoryData Category) : IRequest<ItemProcessStatus>;
+public class ImportShopCategoryCommand(CategoryData entity) : Command<CategoryData>(entity) { }

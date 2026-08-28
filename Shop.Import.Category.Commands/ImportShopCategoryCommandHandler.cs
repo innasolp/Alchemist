@@ -1,14 +1,14 @@
 ﻿using Alchemist.Common;
 using Alchemist.Product.CategoryData;
 using Alchemist.Product.Entities;
-using MediatR;
+using Db.Infrastructure;
 using Shop.Import.Common;
 using Shop.Interfaces;
 
 namespace Shop.Import.Category.Commands;
 
 public class ImportShopCategoryCommandHandler(IShopDataService shopDataService, IShopCachedRepository shopCache)
-    : IRequestHandler<ImportShopCategoryCommand, ItemProcessStatus>
+    : ICommandHandler<ImportShopCategoryCommand, ItemProcessStatus>, ICommandHandler
 {
     private readonly IShopDataService _shopDataService = shopDataService;
 
@@ -16,21 +16,21 @@ public class ImportShopCategoryCommandHandler(IShopDataService shopDataService, 
 
     public async Task<ItemProcessStatus> Handle(ImportShopCategoryCommand request, CancellationToken cancellationToken = default)
     {
-        var shop = await _shopCache.TryGetShopAsync(request.Category.ShopName, request.Category.ShopUrl, cancellationToken)
-            ?? throw new InvalidDataException($"Shop with name {request.Category.ShopName} or url {request.Category.ShopUrl} not found.");
+        var shop = await _shopCache.TryGetShopAsync(request.Entity.ShopName, request.Entity.ShopUrl, cancellationToken)
+            ?? throw new InvalidDataException($"Shop with name {request.Entity.ShopName} or url {request.Entity.ShopUrl} not found.");
        
-        var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(shop.Id, request.Category.ShopCategory.ItemId, cancellationToken);
+        var shopCategory = await _shopDataService.GetShopCategoryByShopIdAndItemId(shop.Id, request.Entity.ShopCategory.ItemId, cancellationToken);
 
         if (shopCategory == null)
         {
             try
             {
-                shopCategory = await AddShopCategoryAsync(request.Category, shop.Id, cancellationToken);
+                shopCategory = await AddShopCategoryAsync(request.Entity, shop.Id, cancellationToken);
                 return ItemProcessStatus.New;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Category {request.Category.ShopCategory.Category} proccessed with error.", ex);
+                throw new Exception($"Category {request.Entity.ShopCategory.Category} proccessed with error.", ex);
             }
         }
         else        
@@ -54,5 +54,13 @@ public class ImportShopCategoryCommandHandler(IShopDataService shopDataService, 
         };
 
         return await _shopDataService.AddShopCategory(shopCategory, cancellationToken);
+    }
+
+    Task ICommandHandler.Handle(object command, CancellationToken cancellationToken)
+    {
+        if (command is ImportShopCategoryCommand importShopCategoryCommand)
+            return Handle(importShopCategoryCommand, cancellationToken);
+
+        throw new InvalidOperationException($"Command type is not {typeof(ImportShopCategoryCommand).Name}.");
     }
 }

@@ -8,11 +8,9 @@ using Alchemist.Product.Import.DBService;
 using Alchemist.Product.Interfaces;
 using CustomConfigurationProvider;
 using CustomJsonConfigurationProvider;
-using Grpc.Core.Interceptors;
+using Db.Infrastructure.Commands;
 using Message.RabbitMQ.DependencyInjection;
 using Serilog;
-using Serilog.Configuration.Extensions;
-using Serilog.Loggers;
 using Shop.API.Client;
 using Shop.Import.Category.Commands;
 using Shop.Interfaces;
@@ -40,6 +38,8 @@ builder.Services.AddKeyedSingleton<IDictionary<string, Type>>("ImportEvents", ne
 
 builder.Host.AddShopCategoryImportInfrastructure();
 builder.Host.AddBeautyAndHealthImportInfrastructure();
+
+builder.Services.AddCommandHandlerFactory();
 
 
 AddLogging(builder.Configuration, builder.Logging, "log.property.json", $"{Utils.GetAppPath()}/Logs", restApiHost);

@@ -1,8 +1,10 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Test.DBApiWebAppFactory.Configuration;
 using Alchemist.Test.Server.Fixtures;
+using Autofac;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Test.PostresqlTestContainer;
 
 namespace Alchemist.Product.Import.DBService.Test;
@@ -13,10 +15,12 @@ public class GrpcServiceWebAppFactory : TestWebAppKestrelFactory<GrpcServiceProg
 
     public event Action<IServiceCollection>? ConfigureServices;
 
+    public event Action<ContainerBuilder>? ConfigureContainer;
+
     public GrpcServiceWebAppFactory(string database, int httpPort = 8070, int httpsPort = 8071) : base(httpPort, httpsPort)
     {
         _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>
-            (this, "ConnectionStrings:DbContext2", database, "postgres", "P@ssw0rd", 5432);
+            (this, this, "ConnectionStrings:DbContext2", database, "postgres", "P@ssw0rd", 5432);
     }
     protected override void ConfigureWebHostBuilderContext(WebHostBuilderContext context, IServiceCollection services)
     {
@@ -24,7 +28,6 @@ public class GrpcServiceWebAppFactory : TestWebAppKestrelFactory<GrpcServiceProg
 
         ConfigureServices?.Invoke(services);
     }
-
 
     public Task InitializeAsync()
     {
@@ -39,5 +42,15 @@ public class GrpcServiceWebAppFactory : TestWebAppKestrelFactory<GrpcServiceProg
     public Task ResetDatabaseIfAvailableAsync()
     {
         return _dbInterceptor.ResetDatabaseIfAvailableAsync();
+    }
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        builder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+        {
+            ConfigureContainer?.Invoke(containerBuilder);
+        });
+
+        return base.CreateHost(builder);
     }
 }

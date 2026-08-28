@@ -1,7 +1,7 @@
 ﻿using Alchemist.Common;
 using Alchemist.Product.Entities;
 using Alchemist.Product.Interfaces;
-using MediatR;
+using Db.Infrastructure;
 using Shop.Import.Common;
 using Shop.Interfaces;
 
@@ -9,7 +9,7 @@ namespace Alchemist.Product.BeautyAndHealth.Commands;
 
 public class ImportBeautyAndHealthProductCommandHandler(IProductDataService productDataService, 
     IShopDataService shopDataService,
-    IShopCachedRepository shopCache) : IRequestHandler<ImportBeautyAndHealthProductCommand, ItemProcessStatus>
+    IShopCachedRepository shopCache) : ICommandHandler<ImportBeautyAndHealthProductCommand, ItemProcessStatus>, ICommandHandler
 {
     private readonly IProductDataService _productDataService = productDataService;
 
@@ -21,24 +21,24 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
     {
         try
         {
-            var shop = await _shopCache.TryGetShopAsync(request.Product.ShopName, request.Product.ShopUrl, cancellationToken)
-            ?? throw new InvalidDataException($"Shop with name {request.Product.ShopName} or url {request.Product.ShopUrl} not found.");
+            var shop = await _shopCache.TryGetShopAsync(request.Entity.ShopName, request.Entity.ShopUrl, cancellationToken)
+            ?? throw new InvalidDataException($"Shop with name {request.Entity.ShopName} or url {request.Entity.ShopUrl} not found.");
 
-            var shopProduct = await _productDataService.GetShopProductByShopIdAndItemId(shop.Id, request.Product.ShopProduct?.ItemId ?? string.Empty, cancellationToken)
+            var shopProduct = await _productDataService.GetShopProductByShopIdAndItemId(shop.Id, request.Entity.ShopProduct?.ItemId ?? string.Empty, cancellationToken)
                 ??
                 new ShopProduct
                 {
                     ShopId = shop.Id,
-                    ItemId = request.Product.ShopProduct.ItemId,
-                    ApiUrl = request.Product.ShopProduct.ApiUrl,
-                    ItemUrl = request.Product.ShopProduct.ItemUrl
+                    ItemId = request.Entity.ShopProduct.ItemId,
+                    ApiUrl = request.Entity.ShopProduct.ApiUrl,
+                    ItemUrl = request.Entity.ShopProduct.ItemUrl
                 };
 
             if (shopProduct.ProductId != 0)
             {
-                await SetShopProductPriceForItemAsync(request.Product, shopProduct.Id, cancellationToken);
+                await SetShopProductPriceForItemAsync(request.Entity, shopProduct.Id, cancellationToken);
 
-                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shop.Id, shopProduct.Id, request.Product.ShopCategory.ItemId, cancellationToken);
+                var setCategoryResult = await SetShopProductCategoryIfNeedAsync(shop.Id, shopProduct.Id, request.Entity.ShopCategory.ItemId, cancellationToken);
                 //todo
                 //if(!categoryResult)
                 //    throw new WarningException($"Category {productItem.CategoryId} in shop {shopUrlModel.ShopName} not found. Url {productItem.ApiUrl}");
@@ -52,10 +52,10 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
                 return result;
             }
 
-            var product = !string.IsNullOrEmpty(request.Product.Brand?.Name)
-                ? await _productDataService.FindProductByNameAndBrand(request.Product.Product.Name, request.Product.Brand.Name, cancellationToken)
-                    ?? await _productDataService.FindProductByName(request.Product.Product.Name, cancellationToken)
-                : await _productDataService.FindProductByName(request.Product.Product.Name, cancellationToken);
+            var product = !string.IsNullOrEmpty(request.Entity.Brand?.Name)
+                ? await _productDataService.FindProductByNameAndBrand(request.Entity.Product.Name, request.Entity.Brand.Name, cancellationToken)
+                    ?? await _productDataService.FindProductByName(request.Entity.Product.Name, cancellationToken)
+                : await _productDataService.FindProductByName(request.Entity.Product.Name, cancellationToken);
 
             if (product != null)
             {
@@ -64,16 +64,16 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
                 
             }
             else
-                product = await CreateProductFromModelAsync(request.Product, shop.Id, cancellationToken);
+                product = await CreateProductFromModelAsync(request.Entity, shop.Id, cancellationToken);
 
             shopProduct.ProductId = product.Id;
             shopProduct.IsActual = true;
 
             var newShopProduct = await _productDataService.CreateShopProduct(shopProduct, cancellationToken);
 
-            var shopProductPrice = await SetShopProductPriceForItemAsync(request.Product, newShopProduct.Id, cancellationToken);
+            var shopProductPrice = await SetShopProductPriceForItemAsync(request.Entity, newShopProduct.Id, cancellationToken);
 
-            if (!await SetShopProductCategoryIfNeedAsync(shop.Id, newShopProduct.Id, request.Product.ShopCategory.ItemId, cancellationToken))            
+            if (!await SetShopProductCategoryIfNeedAsync(shop.Id, newShopProduct.Id, request.Entity.ShopCategory.ItemId, cancellationToken))            
                 return await Task.FromResult(ItemProcessStatus.Error);            
 
             //todo    throw new WarningException($"Price for shop product {shopProduct.Id} was not set. Url {productItem.ApiUrl}");
@@ -82,7 +82,7 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
         }
         catch (Exception e)
         {
-            throw new Exception($"Product {request.Product.ShopProduct.ItemUrl} proccessed with error.", e);
+            throw new Exception($"Product {request.Entity.ShopProduct.ItemUrl} proccessed with error.", e);
         }
     }
 
@@ -196,5 +196,13 @@ public class ImportBeautyAndHealthProductCommandHandler(IProductDataService prod
         }
 
         return brand;
+    }
+
+    Task ICommandHandler.Handle(object command, CancellationToken cancellationToken)
+    {
+        if (command is ImportBeautyAndHealthProductCommand importBeautyAndHealthCommand)
+            return Handle(importBeautyAndHealthCommand, cancellationToken);
+
+        throw new InvalidOperationException($"Command type is not {typeof(ImportBeautyAndHealthProductCommand).Name}.");
     }
 }
