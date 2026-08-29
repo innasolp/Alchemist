@@ -1,5 +1,10 @@
 ﻿namespace Db.Infrastructure;
 
+public interface ICommandHandler
+{
+    Task Handle(object command, CancellationToken cancellationToken = default);
+}
+
 public interface ICommandHandler<TCommand> 
     where TCommand : ICommand
 {

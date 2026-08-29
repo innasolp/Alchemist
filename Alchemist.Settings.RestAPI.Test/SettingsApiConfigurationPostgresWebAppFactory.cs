@@ -33,6 +33,7 @@ public class SettingsApiConfigurationPostgresWebAppFactory
         _signalRApplicationFactory.CreateClient();
 
         _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, PostgresqlTestDbContainer, PostgresDbRespawner, PostgresDbHelper>(this,
+            this,
             "ConnectionStrings:DbContext2", "test_db_settings", "postgres", "P@ssw0rd", 5432, fillTestData : FillTestData);
     }
 

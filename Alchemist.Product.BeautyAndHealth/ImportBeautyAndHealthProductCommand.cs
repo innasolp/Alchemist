@@ -1,6 +1,6 @@
-﻿using Alchemist.Common;
-using MediatR;
+﻿using Db.Infrastructure.Commands;
 
 namespace Alchemist.Product.BeautyAndHealth;
 
-public record ImportBeautyAndHealthProductCommand(BeautyAndHealthProductData Product) : IRequest<ItemProcessStatus>;
+public class ImportBeautyAndHealthProductCommand(BeautyAndHealthProductData entity) : Command<BeautyAndHealthProductData>(entity) 
+{ }

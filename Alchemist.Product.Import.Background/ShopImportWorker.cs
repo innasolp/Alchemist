@@ -188,6 +188,7 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
+            _logger.LogInformation("Starting service with guid {Guid}.", serviceGuid);
             await _startServiceCommandHandler.Handle(new StartServiceCommand(serviceGuid), cancellationToken);
         }
         catch (Exception e)
