@@ -17,11 +17,14 @@ public static class AutofacExtensions
         {
             builder.RegisterModule<ShopImportModule>();
 
-            builder.RegisterType(typeof(ImportShopCategoryCommandHandler))
-            .As(typeof(ICommandHandler<ImportShopCategoryCommand, ItemProcessStatus>))
-           .AsImplementedInterfaces().InstancePerLifetimeScope();
+            var assembly = typeof(ImportShopCategoryCommandHandler).Assembly;
 
-            builder.RegisterAssemblyTypes(typeof(ImportShopCategoryCommandHandler).Assembly)
+            builder.RegisterAssemblyTypes(assembly)
+                .AsClosedTypesOf(typeof(ICommandHandler<,>))
+                .AsImplementedInterfaces()
+                .InstancePerLifetimeScope();
+
+            builder.RegisterAssemblyTypes(assembly)
             .Where(t => t.Name.EndsWith("RequestHandler") || t.Name.EndsWith("CommandHandler"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
