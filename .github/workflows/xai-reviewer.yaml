@@ -5,11 +5,11 @@ on:
     inputs:
       agent_mode:
         type: boolean
-        default: true
+        default: false
       rg_enabled:
         description: 'ripgrep for AI-gent when agent mode enabled'
         type: boolean
-        default: true    
+        default: false
       pr_number:
         description: 'Input pull request number'
         required: true
@@ -26,11 +26,11 @@ on:
       model_name:
         description: 'Select model'
         required: true
-        default: 'qwen2.5-coder:14b'
+        default: 'qwen2.5-coder:7b'
         type: choice
         options:
-          - 'qwen2.5-coder:14b'
           - 'qwen2.5-coder:7b' 
+          - 'qwen2.5-coder:14b'
           - 'qwen2.5-coder:3b'  
       review-command:
         type: choice
