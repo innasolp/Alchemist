@@ -30,6 +30,7 @@ public abstract class DbConfigurationWebAppInterceptor<TDbContext> : IDisposable
         using var scope = host.Services.CreateScope();
         ConfigureServiceProvider(scope.ServiceProvider);
     }
+
     protected virtual void ConfigureServiceProvider(IServiceProvider serviceProvider)
     {
         using var appContext = serviceProvider.GetRequiredService<TDbContext>();

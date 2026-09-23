@@ -10,11 +10,13 @@ internal class EFAggregateJobStorage(AggregateJobDbContext dbContext) : IAggrega
 
     private IDbContextTransaction? _currentTransaction;
 
-    public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<bool> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (_currentTransaction != null) return;
+        if (_currentTransaction != null) return false;
 
         _currentTransaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        return true;
     }
 
     public virtual async Task CommitTransactionAsync(CancellationToken cancellationToken = default)

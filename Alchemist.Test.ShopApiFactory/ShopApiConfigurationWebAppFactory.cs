@@ -1,12 +1,14 @@
 ﻿using Alchemist.Product.Data;
 using Alchemist.Test.DBApiWebAppFactory.Configuration;
 using Alchemist.Test.Log;
+using Alchemist.Test.Server.Fixtures;
+using Alchemist.Test.SignalRWebAppFactory;
+using Autofac;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Alchemist.Test.SignalRWebAppFactory;
+using Microsoft.Extensions.Hosting;
 using Test.DbContainer.Abstractions;
-using Alchemist.Test.Server.Fixtures;
 using Xunit;
 
 namespace Alchemist.Test.ShopApiFactory;
@@ -25,6 +27,10 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, T
 
     private readonly List<Product.Data.Shop> _initialShops = [];
 
+    public event Action<IServiceCollection>? Configure;
+
+    public event Action<ContainerBuilder>? ConfigureContainer;
+
     public ShopApiConfigurationWebAppFactory(string connectionStringSection, string database, int dbPort, string user, string password,
     int httpPort,
     int httpsPort,
@@ -37,7 +43,7 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, T
     {
         _signalRServer = signalRServer;
 
-        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker>(this,
+        _dbInterceptor = new DbConfigurationContainerWebAppInterceptor<AlchemyContext, TTestDbContainer, TDbRespawner, TDbChecker>(this,this,
             connectionStringSection, 
             database,
             user, 
@@ -60,9 +66,21 @@ public class ShopApiConfigurationWebAppFactory<TTestDbContainer, TDbRespawner, T
     {
         base.ConfigureWebHostBuilderContext(context, services);
 
+        Configure?.Invoke(services);
+
         services.SetSignalRHubTestSender(_signalRServer, ["events"]);
 
         FixtureLoggingContext.ConfigureServices(services);
+    }
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        builder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+        {
+            ConfigureContainer?.Invoke(containerBuilder);
+        });
+
+        return base.CreateHost(builder);
     }
 
     public Task InitializeAsync()

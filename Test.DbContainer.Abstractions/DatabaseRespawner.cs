@@ -28,7 +28,11 @@ public abstract class DatabaseRespawner : IDatabaseRespawner
     protected virtual RespawnerOptions GetRespawnerOptions() => new()
     {
         DbAdapter = DbAdapter,
-        SchemasToInclude = ["public"]
+        SchemasToInclude = ["public"],
+        TablesToIgnore =
+            [
+                "__EFMigrationsHistory" 
+            ]
     };
 
     protected abstract DbConnection GetDbConnection(string connectionString);

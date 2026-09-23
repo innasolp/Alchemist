@@ -6,5 +6,5 @@ public interface ITestDbContainer : IAsyncLifetime
 {
     string BuildConnectionString(string dataBase, int port);
 
-    void Build(string host, int port, string user, string password);
+    void Build(string host, int port = 5432, string user = "postgres", string password = "P@ssw0rd");
 }

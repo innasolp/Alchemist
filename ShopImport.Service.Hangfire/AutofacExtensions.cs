@@ -1,14 +1,15 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using BackgroundTaskQueue;
+using Db.Infrastructure;
+using Db.Infrastructure.Messages;
 using Hangfire;
 using Hangfire.AggregateJobs;
 using Import.Service.Infrastructure;
 using Import.Service.Infrastructure.Handlers;
-using Mediator.Messages;
-using MediatR;
 using Message.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ShopImport.Service.Hangfire.Infrastructure;
@@ -17,57 +18,77 @@ using ShopImport.Service.Hangfire.Infrastructure.Filters;
 
 namespace ShopImport.Service.Hangfire;
 
-public static class MediatrExtensions
+public static class AutofacExtensions
 {
     private readonly static AggregateServerSettings defaultAggregateServerSettings =
         new() { ServerName = "DefaultServer", ProcessingQueue = "processing", WaitingQueue = "waiting" };
 
-    public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder, 
-        string hangfireConnectionString,
+    public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder,
+        Func<HostBuilderContext, string> getHangfireConnectionString,
         Action<IGlobalConfiguration, string> configureHangfireStorage,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
-        AggregateServerSettings? aggregateServerSettings = null, 
+        AggregateServerSettings? aggregateServerSettings = null,
         Action<IGlobalConfiguration>? configure = null)
     {
         hostBuilder.ConfigureServices((context, services) =>
         {
             services.AddSingleton<IShopImportServiceJobManager, HangfireShopImportServiceManager>();
-            services.AddMediatR(cfg =>
-            {
-                cfg.RegisterGenericHandlers = true;
 
-                cfg.RegisterServicesFromAssemblyContaining<AddShopImportServiceCommandHandler>();
-            });
-
-            services.AddHangfireInfrastructure(hangfireConnectionString, 
+            services.AddHangfireInfrastructure(context,
                 aggregateServerSettings ?? defaultAggregateServerSettings,
+                getHangfireConnectionString,
                 configureHangfireStorage,
-                childStorageOptionsAction, 
+                childStorageOptionsAction,
                 configure);
 
-            services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();            
+            services.AddSingleton<IImportServiceJobFactory, ShopImportServiceJobFactory>();
         });
 
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+
         return hostBuilder.ConfigureContainer<ContainerBuilder>((builderContext, builder) =>
         {
-            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IShopImportServiceManager)).SingleInstance();
-            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IServiceManager)).SingleInstance();
-            builder.Register(c=>c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IHagfireServiceJobManager)).SingleInstance();            
+            builder.RegisterAssemblyTypes(typeof(AddShopImportServiceCommandHandler).Assembly)
+            .Where(t => t.Name.EndsWith("RequestHandler") || t.Name.EndsWith("CommandHandler"))
+            .AsImplementedInterfaces()
+            .InstancePerLifetimeScope();
+
+            builder.Register(c => c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IShopImportServiceManager)).SingleInstance();
+            builder.Register(c => c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IServiceManager)).SingleInstance();
+            builder.Register(c => c.Resolve(typeof(IShopImportServiceJobManager))).As(typeof(IHagfireServiceJobManager)).SingleInstance();
 
             builder.Register(c => c.ResolveKeyed<IBackgroundTaskQueue>(ServiceKeys.EventBackgroundTaskQueue)).As<IBackgroundTaskQueue>();
             builder.Register(c => c.ResolveKeyed<IMessageSender>(ServiceKeys.EventMessageSenderKey)).As<IMessageSender>();
 
-            builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceCreatedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceCreatedEvent>));
-            builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStartingEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStartingEvent>));
-            builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStartedEvent, ServiceStartedMessage>)).As(typeof(INotificationHandler<ServiceStartedEvent>));
-            builder.RegisterType(typeof(BackgroundMessageEventHandler<ServiceStoppedEvent, ServiceMessage>)).As(typeof(INotificationHandler<ServiceStoppedEvent>));
+            builder.RegisterType(typeof(EntityEventPublisher)).As(typeof(IEntityEventPublisher));
+
+            builder.AddBackgroundMessageHandler<ServiceCreatedEvent, ServiceMessage>();
+            builder.AddBackgroundMessageHandler<ServiceStartingEvent, ServiceMessage>();
+            builder.AddBackgroundMessageHandler<ServiceStartedEvent, ServiceStartedMessage>();
+            builder.AddBackgroundMessageHandler<ServiceStoppedEvent, ServiceMessage>();
+
         });
     }
 
-    private static void AddHangfireInfrastructure(this IServiceCollection services,
+    public static IHostBuilder AddHangfireServiceManagementInfrastructure(this IHostBuilder hostBuilder,
         string hangfireConnectionString,
+        Action<IGlobalConfiguration, string> configureHangfireStorage,
+        Action<DbContextOptionsBuilder> childStorageOptionsAction,
+        AggregateServerSettings? aggregateServerSettings = null,
+        Action<IGlobalConfiguration>? configure = null)
+    {
+        return hostBuilder.AddHangfireServiceManagementInfrastructure(
+            (context) => hangfireConnectionString,
+            configureHangfireStorage,
+            childStorageOptionsAction,
+            aggregateServerSettings,
+            configure);
+    }
+
+    private static void AddHangfireInfrastructure(this IServiceCollection services,
+        HostBuilderContext context,
         AggregateServerSettings aggregateServerSettings,
+        Func<HostBuilderContext, string> getHangfireConnectionString,
         Action<IGlobalConfiguration, string> configureHangfireStorage,
         Action<DbContextOptionsBuilder> childStorageOptionsAction,
         Action<IGlobalConfiguration>? configure = null)
@@ -81,8 +102,9 @@ public static class MediatrExtensions
             config.UseFilter(new DeletedStateFilter());
         }
 
-        services.AddHangfireAggreateJobs<IHagfireServiceJobManager>(hangfireConnectionString,
+        services.AddHangfireAggreateJobs<IHagfireServiceJobManager>(context,
             aggregateServerSettings,
+            getHangfireConnectionString,
             childStorageOptionsAction,
             configureHangfireStorage,
             importConfigure

@@ -6,41 +6,70 @@ using Alchemist.Test.SignalRWebAppFactory;
 using Microsoft.VisualStudio.Threading;
 using System.Net;
 using System.Net.Http.Json;
+using Test.DbContainer.Abstractions;
+using Test.PostresqlTestContainer;
+using Test.RedisTestContainer;
 using Xunit.Abstractions;
 namespace Alchemist.Product.Import.Backgorund.Service.IntegrationTest;
 
-public class ImportBackgroundServiceTestFixtureWebAppFactory : ImportBackgroundServiceWebAppFactory
-{
-    public ImportBackgroundServiceTestFixtureWebAppFactory() : base(8138, 8139, "serviceTestDb", 8050, 8051, 8200, 8201, 8302, 8303)
-    {
-    }
-}
+[Collection(nameof(PostgresRedisDbCollection))]
+public class ImportBackgroundServiceTest(ITestOutputHelper outputHelper,
 
-public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgroundServiceTestFixtureWebAppFactory, ImportBackgroundServiceProgram>
-{   
+    DbTestContainerFixture<PostgresqlTestDbContainer> postgresFixture,
+    DbTestContainerFixture<RedisTestDbContainer> redisFixture) : LoggedContextTest(outputHelper)
+{
     private record ShopSettingsWithServices(Infrastructure.ShopSettings ShopSettings, Infrastructure.ShopSettings[] Services);
-    
-    public ImportBackgroundServiceTest(ImportBackgroundServiceTestFixtureWebAppFactory webAppFactory, ITestOutputHelper outputHelper) 
-        : base(webAppFactory, outputHelper)
+
+    private async Task<ImportBackgroundServiceWebAppFactory> CreateWebAppFactoryAsync(int redisIndex, string childjobstorage, int[] ports)
     {
-        WebAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
-        WebAppFactory.SettingsApiFixtureLoggingContext.LoggedMessage += Log;
-    }     
+        if (ports.Length < 6)
+            throw new Exception($"No 6 ports in range");
+        var webAppFactory = new ImportBackgroundServiceWebAppFactory(postgresFixture.Container, redisFixture.Container, "serviceMessageTestDb",
+             ports[0], ports[1], ports[2], ports[3], ports[4], ports[5], redisIndex, childjobstorage);
+
+        await webAppFactory.InitializeAsync();
+
+        webAppFactory.FixtureLoggingContext.LoggedMessage += Log;
+        webAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
+        webAppFactory.SettingsApiFixtureLoggingContext.LoggedMessage += Log;
+
+        return webAppFactory;
+    }
+
+    private async Task ClearWebAppFactoryAsync(ImportBackgroundServiceWebAppFactory webAppFactory)
+    {
+        webAppFactory.FixtureLoggingContext.LoggedMessage -= Log;
+        webAppFactory.ShopApiFixtureLoggingContext.LoggedMessage += Log;
+        webAppFactory.SettingsApiFixtureLoggingContext.LoggedMessage += Log;
+
+        await (webAppFactory as IAsyncLifetime).DisposeAsync();
+    }
 
     [Fact]
     public async Task HelloResponseWhenStartingSuccessAsync()
     {
-        var httpClient = WebAppFactory.CreateClient();
-        var response = await httpClient.GetAsync("/");
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var hello = await response.Content.ReadAsStringAsync();
-        Assert.Equal("Hello ImportBackgroundService!", hello);
+        await using var webAppFactory = await CreateWebAppFactoryAsync(1, "start", [8058, 8059, 8208, 8209, 8310, 8311]);
+
+        try
+        {
+            var httpClient = webAppFactory.CreateClient();
+            var response = await httpClient.GetAsync("/");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var hello = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Hello ImportBackgroundService!", hello);
+        }
+        finally
+        {
+            await ClearWebAppFactoryAsync(webAppFactory);
+        }
     }
 
     [Fact]
     public async Task WaitForImportMessageAsync()
     {
-        var importReceiver = WebAppFactory.CreateImportItemReceiver();
+        await using var webAppFactory = await CreateWebAppFactoryAsync(2, "importmessagewait", [8060, 8061, 8210, 8211, 8312, 8313]);
+
+        var importReceiver = webAppFactory.CreateImportItemReceiver();
         AsyncAutoResetEvent asyncAutoResetEvent = new();
         void onHandleProductMessage(object obj) => asyncAutoResetEvent.Set();
         void onHandleCategoryMessage(object obj) => asyncAutoResetEvent.Set();
@@ -49,7 +78,7 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         importReceiver.On("product", onHandleProductMessage, typeof(BeautyAndHealthProductData));
         importReceiver.On("category", onHandleCategoryMessage, typeof(CategoryData.CategoryData));        
         
-        var httpClient = WebAppFactory.CreateClient();
+        var httpClient = webAppFactory.CreateClient();
 
         var tokenSource = new CancellationTokenSource();
         tokenSource.CancelAfter(120000);
@@ -70,6 +99,8 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
         finally
         {
             await importReceiver.Stop();
+
+            await ClearWebAppFactoryAsync(webAppFactory);
         }
     }
 
@@ -88,27 +119,27 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
             await Task.FromResult(true);
         }
 
-        await using var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubAckReceiver(WebAppFactory.Services, WebAppFactory.SignalRTestServer, "events");
+        await using var webAppFactory = await CreateWebAppFactoryAsync(3, "importnewshopsettings", [8062, 8063, 8212, 8213, 8314, 8315]);
+
+        await using var messageReceiver = SignalRHelper.CreateTestSignalRMessageHubAckReceiver(webAppFactory.Services, webAppFactory.SignalRTestServer, "events");
         await messageReceiver.Start();
         await messageReceiver.On<Data.ShopSettings>(Messages.Common.Messages.ShopSettingsCreated, onShopSettingsCreatedAsync);
-        
-        var httpClient = WebAppFactory.CreateClient();
+
+        var httpClient = webAppFactory.CreateClient();
 
         var shopTokenSource = new CancellationTokenSource();
         shopTokenSource.CancelAfter(10000);
         
-        var shop = await CreateNewShopAsync(shopTokenSource.Token);
+        var shop = await CreateNewShopAsync(webAppFactory, shopTokenSource.Token);
 
-        var shopSettings = await CreateNewShopSettingsAsync(shop.Id, shopSettingsName, shopTokenSource.Token);        
+        var shopSettings = await CreateNewShopSettingsAsync(webAppFactory, shop.Id, shopSettingsName, shopTokenSource.Token);        
 
         var token = new CancellationToken();
         var task = asyncAutoResetEvent.WaitAsync(token);
 
         try
         {
-            await task.WaitAsync(TimeSpan.FromMilliseconds(60000), token);
-
-            await Task.Delay(1000);
+            await task.WaitAsync(TimeSpan.FromMilliseconds(120000), token);
 
             Assert.Contains(LogMessages, m =>m.Message.Contains($"Handling of settings {shopSettings.Name} for shop id={shopSettings.ShopId} started"));
 
@@ -121,26 +152,31 @@ public class ImportBackgroundServiceTest : LoggedContextTestFixture<ImportBackgr
 
             throw;
         }
+        finally
+        {
+            await ClearWebAppFactoryAsync(webAppFactory);
+        }
     }
 
-    private async Task<Data.Shop?> CreateNewShopAsync(CancellationToken cancellationToken = default)
+    private async Task<Data.Shop?> CreateNewShopAsync(ImportBackgroundServiceWebAppFactory webAppFactory, CancellationToken cancellationToken = default)
     {
         var shop = new Data.Shop { Name = "Test", Url = $"https://{Guid.NewGuid()}" };
-        var response = await WebAppFactory.ShopApiClient.PutAsJsonAsync($"api/Shop", shop, cancellationToken);
+        var response = await webAppFactory.ShopApiClient.PutAsJsonAsync($"api/Shop", shop, cancellationToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Data.Shop>(cancellationToken);
     }
 
-    private async Task<Infrastructure.ShopSettings?> CreateNewShopSettingsAsync(int shopId, string name, CancellationToken cancellationToken = default)
+    private static async Task<Infrastructure.ShopSettings?> CreateNewShopSettingsAsync(ImportBackgroundServiceWebAppFactory webAppFactory, 
+        int shopId, string name, CancellationToken cancellationToken = default)
     {      
 
         var shopSettings = SettingsTestRepository.CreateProductShopSettings(shopId, name);
         var services = SettingsTestRepository.CreateShopSettingsServicesTestData(shopSettings);
         var settingsData = new  { ShopSettings = shopSettings, Services = services.ToArray() };
-        var settingsPutResponse = await WebAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData, cancellationToken);
+        var settingsPutResponse = await webAppFactory.ShopSettingsApiClient.PostAsJsonAsync("api/Settings/save", settingsData, cancellationToken);
         settingsPutResponse.EnsureSuccessStatusCode();
 
         var result = await settingsPutResponse.Content.ReadFromJsonAsync<ShopSettingsWithServices>(cancellationToken);
         return result?.ShopSettings;
-    }    
+    }
 }

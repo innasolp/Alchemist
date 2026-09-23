@@ -1,5 +1,6 @@
 ﻿using Alchemist.Test.Server.Fixtures;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Test.DbContainer.Abstractions;
 
 namespace Alchemist.Test.DBApiWebAppFactory.Configuration;
@@ -11,7 +12,9 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
     where TDbRespawner : class, IDatabaseRespawner, new()
     where TDbHelper : class, IDbHelper, new()
 {
-    private readonly TTestDbContainer _testDbContainer;
+    private readonly TTestDbContainer? _localTestDbContainer = null;
+
+    private readonly TTestDbContainer? _testDbContainer = null;
 
     private readonly TDbRespawner _dbRespawner;
 
@@ -19,8 +22,13 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
 
     protected override string ConnectionStringSection { get; }
 
-    private string? _connectionString;
+    private TTestDbContainer? GetTestDbContainer()
+    {
+        return _localTestDbContainer ?? _testDbContainer;
+    }
 
+    private string? _connectionString;
+    private readonly IServices _services;
     private readonly string _database;
 
     private readonly string _user;
@@ -33,7 +41,8 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
 
     private readonly Action<TDbContext>? _fillTestData;
 
-    public DbConfigurationContainerWebAppInterceptor(IWebHostConfigure webHostConfigure, 
+    public DbConfigurationContainerWebAppInterceptor(IServices services, 
+        IWebHostConfigure webHostConfigure, 
         string connectionStringSection,
         string database,
         string user, 
@@ -44,10 +53,9 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
         TDbHelper? dbChecker = null,
         Action<TDbContext>? fillTestData = null) : base(webHostConfigure)
     {
-        _testDbContainer = testDbContainer ?? new TTestDbContainer();
         _dbRespawner = dbRespawner ?? new TDbRespawner();
         _dbHelper = dbChecker ?? new TDbHelper();
-
+        _services = services;
         ConnectionStringSection = connectionStringSection;
         _database = database;
         _user = user;
@@ -56,7 +64,13 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
         
         _fillTestData = fillTestData;
 
-        _testDbContainer.Build(_host, port, user, password);
+        if (testDbContainer == null)
+        {
+            _localTestDbContainer = new TTestDbContainer();
+            _localTestDbContainer.Build(_host, port, user, password);
+        }
+        else 
+            _testDbContainer = testDbContainer;
     }
 
     protected override string ConnectionString => _connectionString ?? "";
@@ -70,21 +84,30 @@ public class DbConfigurationContainerWebAppInterceptor<TDbContext, TTestDbContai
     {
         Dispose();
 
-        await _testDbContainer.DisposeAsync();
+        if(_localTestDbContainer != null)
+            await _localTestDbContainer.DisposeAsync();
 
         await _dbRespawner.DisposeAsync();
     }
 
     public async Task InitializeAsync()
     {
-        await _testDbContainer.InitializeAsync();
+        if (_localTestDbContainer != null)
+            await _localTestDbContainer.InitializeAsync();
 
-        var initializeConnectionString = _testDbContainer.BuildConnectionString("postgres", _port);
-        _connectionString = _testDbContainer.BuildConnectionString(_database, _port);
+        var initializeConnectionString = GetTestDbContainer()!.BuildConnectionString("postgres", _port);
+        _connectionString = GetTestDbContainer()!.BuildConnectionString(_database, _port);
 
         if (!await _dbHelper.DatabaseExistsAsync(_database, initializeConnectionString))
+        {
             await _dbHelper.CreateDatabaseAsync(_database, initializeConnectionString);
-        else 
+
+            using var scope = _services.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
+
+            await dbContext.Database.MigrateAsync();
+        }
+        else
             await _dbRespawner.InitializeAsync(_connectionString);
     }
 

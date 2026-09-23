@@ -6,7 +6,7 @@ namespace Db.Infrastructure.Messages;
 
 internal class BackgroundMessageHandler<T, TEvent>(IMessageSender messageSender, IBackgroundTaskQueue backgroundTaskQueue)
     : IEventHandler<T, TEvent>
-    where TEvent: IEvent<T>
+    where TEvent: class, IEvent<T>
 {
     private readonly IMessageSender _messageSender = messageSender;
 
@@ -21,11 +21,11 @@ internal class BackgroundMessageHandler<T, TEvent>(IMessageSender messageSender,
 
             await _messageSender.Send(@event, eventName, cancellationToken);
 
-            BackgroundMessageHandler<T, TEvent>.LogNotificationInfo(logger, eventName);
+            LogNotificationInfo(logger, eventName);
         }
         catch (Exception ex)
         {
-            BackgroundMessageHandler<T, TEvent>.LogNotificationError(logger, eventName, ex);
+            LogNotificationError(logger, eventName, ex);
         }
     }
 

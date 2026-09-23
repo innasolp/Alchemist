@@ -1,7 +1,7 @@
 using Alchemist.Import.Settings;
 using Alchemist.Product.Entities;
+using Db.Infrastructure;
 using Import.Service.Infrastructure;
-using MediatR;
 using Message.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,19 +16,29 @@ public class ShopImportWorker : BackgroundService
     private readonly IAcknowlegefulMessageReceiver _ackEventMessageReceiver;
     private readonly IMessageSender _eventMessageSender;
     private readonly IEnumerable<ISettingsAdapter> _initSettingsAdapters;
-    private readonly IMediator _mediator;
+
+    private readonly ICommandHandler<StartServiceCommand> _startServiceCommandHandler;
+    private readonly ICommandHandler<StopServiceCommand> _stopServiceCommandHandler;
+    private readonly ICommandHandler<QueueShopCategoryToServicesCommand> _queueShopCategoryToServicesCommandHandler;
+    private readonly ICommandHandler<AddShopImportServiceFromShopSettingsCommand, Guid> _addShopImportServiceFromShopSettingsCommandHandler;
+    private readonly ICommandHandler<AddImportServiceCommand, Guid> _addImportServiceCommandHandler;
+    private readonly ICommandHandler<StopAllServicesCommand> _stopAllServicesCommandHandler;
 
     private readonly SemaphoreSlim _shopCategorySemaphore = new(1, 1);
 
     public ShopImportWorker(ILogger<ShopImportWorker> logger,
-        IMediator mediator,
         [FromKeyedServices(ShopImportWorkerKeys.EventMessageReceiverKey)] IMessageReceiver eventMessageReceiver,
         [FromKeyedServices(ShopImportWorkerKeys.AckEventMessageReceiverKey)] IAcknowlegefulMessageReceiver ackEventMessageReceiver,
         [FromKeyedServices(ShopImportWorkerKeys.EventMessageSenderKey)] IMessageSender eventMessageSender,
-        [FromKeyedServices(ShopImportWorkerKeys.InitImportSettings)]  IEnumerable<ISettingsAdapter> initSettingsAdapters)
+        [FromKeyedServices(ShopImportWorkerKeys.InitImportSettings)] IEnumerable<ISettingsAdapter> initSettingsAdapters,
+        ICommandHandler<StartServiceCommand> startServiceCommandHandler,
+        ICommandHandler<StopServiceCommand> stopServiceCommandHandler,
+        ICommandHandler<QueueShopCategoryToServicesCommand> queueShopCategoryToServicesCommandHandler,
+        ICommandHandler<AddShopImportServiceFromShopSettingsCommand, Guid> addShopImportServiceFromShopSettingsCommandHandler,
+        ICommandHandler<StopAllServicesCommand> stopAllServicesCommandHandler,
+        ICommandHandler<AddImportServiceCommand, Guid> addImportServiceCommandHandler)
     {
         _logger = logger;
-        _mediator = mediator;
         _eventMessageReceiver = eventMessageReceiver;
         _ackEventMessageReceiver = ackEventMessageReceiver;
         _eventMessageSender = eventMessageSender;
@@ -40,6 +50,13 @@ public class ShopImportWorker : BackgroundService
         _eventMessageReceiver.On<ServiceStartedMessage>(Messages.Common.Messages.ServiceStarted, OnServiceStarted);
         _eventMessageReceiver.On<Guid>(Messages.Common.Messages.ServiceStop, OnStopServiceAsync);
         _eventMessageReceiver.On<ServiceMessage>(Messages.Common.Messages.ServiceStopped, OnServiceStoppedAsync);
+
+        _startServiceCommandHandler = startServiceCommandHandler;
+        _stopServiceCommandHandler = stopServiceCommandHandler;
+        _queueShopCategoryToServicesCommandHandler = queueShopCategoryToServicesCommandHandler;
+        _addShopImportServiceFromShopSettingsCommandHandler = addShopImportServiceFromShopSettingsCommandHandler;
+        _stopAllServicesCommandHandler = stopAllServicesCommandHandler;
+        _addImportServiceCommandHandler = addImportServiceCommandHandler;
     }
 
     public override async Task StartAsync(CancellationToken cancellationToken)
@@ -87,7 +104,7 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            await _mediator.Send(new StopServiceCommand(guid));
+            await _stopServiceCommandHandler.Handle(new StopServiceCommand(guid));
         }
         catch (Exception ex)
         {
@@ -101,7 +118,7 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            await _mediator.Send(new StartServiceCommand(guid), stoppingToken);
+            await _startServiceCommandHandler.Handle(new StartServiceCommand(guid), stoppingToken);
             _logger.LogInformation("Service {Guid} started.", guid);
         }
         catch (Exception e)
@@ -124,7 +141,7 @@ public class ShopImportWorker : BackgroundService
                 return;
             }
 
-            await _mediator.Send(new QueueShopCategoryToServicesCommand(shopCategory));
+            await _queueShopCategoryToServicesCommandHandler.Handle(new QueueShopCategoryToServicesCommand(shopCategory));
         }
         catch (Exception ex)
         {
@@ -143,7 +160,7 @@ public class ShopImportWorker : BackgroundService
 
         try
         {
-            var guid = await _mediator.Send(new AddShopImportServiceFromShopSettingsCommand(newShopSettings));
+            var guid = await _addShopImportServiceFromShopSettingsCommandHandler.Handle(new AddShopImportServiceFromShopSettingsCommand(newShopSettings));
 
             _logger.LogInformation("New service {Name} with id {Guid} added", newShopSettings.Name, guid);
         }
@@ -155,17 +172,28 @@ public class ShopImportWorker : BackgroundService
 
     private async Task StartNewService(string name, IShopImportSettings shopImportSettings, CancellationToken cancellationToken)
     {
+        Guid serviceGuid;
+
         try
         {
-            var guid = await _mediator.Send(new AddImportServiceCommand(name, shopImportSettings), cancellationToken);
-
-            _logger.LogInformation("Service {Name} is initialized.", name);
-
-            await _mediator.Send(new StartServiceCommand(guid), cancellationToken);
+            serviceGuid = await _addImportServiceCommandHandler.Handle(new AddImportServiceCommand(name, shopImportSettings), cancellationToken);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Couldn't start the service {Name}.", name);
+            _logger.LogError(e, "Couldn't create the service {Name}.", name);
+            return;
+        }
+
+        _logger.LogInformation("Service {Name} is initialized.", name);
+
+        try
+        {
+            _logger.LogInformation("Starting service with guid {Guid}.", serviceGuid);
+            await _startServiceCommandHandler.Handle(new StartServiceCommand(serviceGuid), cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Couldn't start the service {Name} {serviceGuid}.", name, serviceGuid);
         }
     }
 
@@ -226,7 +254,7 @@ public class ShopImportWorker : BackgroundService
     {
         try
         {
-            await _mediator.Send(new StopAllServicesCommand(), cancellationToken);
+            await _stopAllServicesCommandHandler.Handle(new StopAllServicesCommand(), cancellationToken);
         }
         catch (Exception ex)
         {

@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Alchemist.Test.Server.Fixtures;
 
-public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>, IWebHostBuilderConfigure
+public abstract class TestWebAppFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>, IWebHostBuilderConfigure, IServices
      where TEntryPoint : class
 {
     private Action<WebHostBuilderContext, IConfigurationBuilder>? _configureAppConfiguration;

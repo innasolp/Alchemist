@@ -8,11 +8,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="9.0.0" />
-		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
 		<PackageReference Include="FaceIT.Hangfire.Tags" Version="1.9.0" />
 		<PackageReference Include="Import.Factory.Interfaces" Version="1.0.0.5" />
 		<PackageReference Include="Import.Service" Version="1.0.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
 		<PackageReference Include="Polly" Version="8.6.6" />		
 	</ItemGroup>
 
@@ -20,9 +19,9 @@
     <ProjectReference Include="..\Alchemist.Import.Products.Interfaces\Alchemist.Import.Products.Interfaces.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Category\Alchemist.Import.Settings.Category.csproj" />
     <ProjectReference Include="..\Alchemist.Import.Settings.Product\Alchemist.Import.Settings.Product.csproj" />
+    <ProjectReference Include="..\Db.Infrastructure.Messages\Db.Infrastructure.Messages.csproj" />
     <ProjectReference Include="..\Hangfire.AggregateJobs\Hangfire.AggregateJobs.csproj" />
     <ProjectReference Include="..\Import.Service.Infrastructure\Import.Service.Infrastructure.csproj" />
-    <ProjectReference Include="..\Mediator.Messages\Mediator.Messages.csproj" />
   </ItemGroup>
 
 </Project>

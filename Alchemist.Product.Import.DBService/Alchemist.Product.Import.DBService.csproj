@@ -8,13 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Message.Interfaces" Version="1.0.0.3" />
     <PackageReference Include="Message.RabbitMQ.DependencyInjection" Version="1.0.0.10" />
 	  <PackageReference Include="GrpcExtensions.Client.Interceptors" Version="1.0.0" />
 	  <PackageReference Include="Serilog.ContextFileSink" Version="1.0.0.1" />
 	  <PackageReference Include="Serilog.Loggers" Version="1.0.0.4" />
 	  <PackageReference Include="CustomJsonConfigurationProvider" Version="1.0.1" />
-	  <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +20,7 @@
     <ProjectReference Include="..\Alchemist.Log.Extensions\Alchemist.Log.Extensions.csproj" />
     <ProjectReference Include="..\Alchemist.Product.BeautyAndHealth.Commands\Alchemist.Product.BeautyAndHealth.Commands.csproj" />
     <ProjectReference Include="..\Alchemist.Product.GrpcServiceClient\Alchemist.Product.GrpcServiceClient.csproj" />
+    <ProjectReference Include="..\Product.Data.Infrastructure\Product.Data.Infrastructure.csproj" />
     <ProjectReference Include="..\Shop.API.Client\Shop.API.Client.csproj" />
     <ProjectReference Include="..\Shop.Import.Category.Commands\Shop.Import.Category.Commands.csproj" />
   </ItemGroup>

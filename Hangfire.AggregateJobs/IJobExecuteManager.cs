@@ -37,5 +37,5 @@ public interface IJobExecuteManager
         AggregateServerSettings? aggregateServerSettings = null, 
         CancellationToken cancellationToken = default);
 
-    Task Delete(string executionId);
+    Task Delete(string executionId, CancellationToken cancellationToken = default);
 }
